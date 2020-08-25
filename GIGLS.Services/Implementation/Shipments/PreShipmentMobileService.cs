@@ -1262,7 +1262,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                 {
-                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOInterstateBikeDiscount, preShipment.CountryId);
+                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
                     percentage = Convert.ToDecimal(discountPercent.Value);
                 }
                 else
