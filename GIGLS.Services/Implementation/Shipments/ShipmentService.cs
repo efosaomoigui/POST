@@ -1490,7 +1490,7 @@ namespace GIGLS.Services.Implementation.Shipments
         //This is used because I don't want an Exception to be thrown when calling it
         public async Task<Shipment> GetShipmentForScan(string waybill)
         {
-            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill), "ShipmentItems");
             return shipment;
         }
 

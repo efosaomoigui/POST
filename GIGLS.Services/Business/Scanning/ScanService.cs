@@ -462,6 +462,13 @@ namespace GIGLS.Services.Business.Scanning
                 await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
             }
 
+            //For Store Shipment Arrive Final Destination
+            if(shipment.isInternalShipment && scanStatus.Equals(ShipmentScanStatus.ARF))
+            {
+                await UpdateShipmentPackageForServiceCenter(shipment);
+            }
+           
+
             //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
             await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
 
@@ -1001,6 +1008,66 @@ namespace GIGLS.Services.Business.Scanning
 
             await _uow.CompleteAsync();
             return true;
+        }
+
+        //Update Shipment Package
+        private async Task UpdateShipmentPackageForServiceCenter(Shipment newShipment)
+        {
+            var user = await _userService.GetCurrentUserId();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var currentServiceCenterId = serviceCenterIds[0];
+
+            if (newShipment.DestinationServiceCentreId != currentServiceCenterId)
+            {
+                throw new GenericException($"Shipment with waybill: {newShipment.Waybill}does not belong to your center!");
+            }
+
+            List<ShipmentPackagingTransactions> packageInflow = new List<ShipmentPackagingTransactions>();
+            List<ServiceCenterPackage> servicePackage = new List<ServiceCenterPackage>();
+
+            foreach (var shipmentItem in newShipment.ShipmentItems)
+            {
+                if (shipmentItem.ShipmentType == ShipmentType.Store)
+                {
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
+                    var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == currentServiceCenterId);
+                    
+                    if (serviceCenterPackage == null)
+                    {
+                        var newshipmentPackage = new ServiceCenterPackage
+                        {
+                            ServiceCenterId = currentServiceCenterId,
+                            ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                            InventoryOnHand = shipmentItem.Quantity,
+                            MinimunRequired = 10,
+                        };
+                        servicePackage.Add(newshipmentPackage);
+                    }
+                    else
+                    {
+                        serviceCenterPackage.InventoryOnHand += shipmentItem.Quantity;
+                    }
+                    
+
+                    var newInflow = new ShipmentPackagingTransactions
+                    {
+                        ServiceCenterId = currentServiceCenterId,
+                        ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                        Quantity = shipmentItem.Quantity,
+                        Waybill = newShipment.Waybill,
+                        UserId = user,
+                        PackageTransactionType = Core.Enums.PackageTransactionType.InflowToSC
+                    };
+                   
+                    packageInflow.Add(newInflow);
+                }
+
+            }
+
+            _uow.ShipmentPackagingTransactions.AddRange(packageInflow);
+            _uow.ServiceCenterPackage.AddRange(servicePackage);
+
+            await _uow.CompleteAsync();
         }
     }
 }
