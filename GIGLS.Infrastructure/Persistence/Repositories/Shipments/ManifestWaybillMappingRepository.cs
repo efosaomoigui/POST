@@ -1,5 +1,4 @@
 ﻿using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
