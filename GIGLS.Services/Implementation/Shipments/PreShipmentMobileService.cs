@@ -1178,7 +1178,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.CalculatedTotal = (double)(Price);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
-                var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                //var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                var discount = Math.Round(Price - (decimal)preShipment.DeliveryPrice);
                 preShipment.DiscountValue = discount;
 
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
