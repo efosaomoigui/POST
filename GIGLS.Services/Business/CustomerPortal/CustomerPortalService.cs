@@ -1681,11 +1681,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            //if (string.IsNullOrEmpty(preShipment.VehicleType))
-            //{
-            //    throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            //}
-
             if (!preShipment.PreShipmentItems.Any())
             {
                 throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");

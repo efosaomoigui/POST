@@ -1174,7 +1174,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
-                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                preShipment.CalculatedTotal = (double)(Price);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
                 var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
@@ -1185,7 +1186,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
-                decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+               // decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+                decimal grandTotal = (decimal)preShipment.DeliveryPrice + PickupValue;
 
                 //GIG Go Promo Price
                 var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
