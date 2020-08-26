@@ -18,6 +18,7 @@
         PayOutOrder = 14,
         FleetPartner = 15,
         MagayaWb = 16,
-        PreShipmentCode = 17
+        PreShipmentCode = 17,
+        SuperManifest = 18
     }
 }

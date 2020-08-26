@@ -38,5 +38,7 @@ namespace GIGLS.Core.Domain
         public int DepartureServiceCenterId { get; set; }
         public int DestinationServiceCenterId { get; set; }
 
+        public bool IsSuperManifest { get; set; }
+
     }
 }

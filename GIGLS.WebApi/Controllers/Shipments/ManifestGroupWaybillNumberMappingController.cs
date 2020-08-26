@@ -55,6 +55,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("supermanifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSuperManifestMappings = await _service.GetAllManifestSuperManifestMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = manifestSuperManifestMappings
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]
@@ -63,6 +79,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapsupermanifest")]
+        public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingSuperManifestToManifest(data.SuperManifestCode, data.ManifestCodes);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -138,6 +169,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("manifestsinsupermanifest/code/{manifest}")]
+        public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestsInSuperManifest = await _service.GetManifestsInSuperManifest(manifest);
+
+                return new ServiceResponse<List<ManifestDTO>>
+                {
+                    Object = manifestsInSuperManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("waybillsinmanifest")]
         public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInListOfManifest([FromUri]string captainId)
         {
@@ -186,6 +233,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveManifestFromSuperManifest(superManifest, manifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getmanifestforwaybill/{waybill}")]
@@ -198,6 +260,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<ManifestGroupWaybillNumberMappingDTO>
                 {
                     Object = manifestforWaybill
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getsupermanifestformanifest/{manifest}")]
+        public async Task<IServiceResponse<ManifestDTO>> GetSuperManifestForManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var supermanifestforManifest = await _service.GetSuperManifestForManifest(manifest);
+
+                return new ServiceResponse<ManifestDTO>
+                {
+                    Object = supermanifestforManifest
                 };
             });
         }

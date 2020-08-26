@@ -56,6 +56,7 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.IServices.PaymentTransactions;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -92,6 +93,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentCollectionService _collectionservice;
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -103,7 +105,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICountryService countryService, IAdminReportService adminReportService,
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
             IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            IPaymentTransactionService paymentTransactionService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -136,6 +139,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _collectionservice = collectionService;
             _logService = logService;
             _visitService = visitService;
+            _paymentTransactionService = paymentTransactionService;
             MapperConfig.Initialize();
         }
 
@@ -734,17 +738,23 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
 
+            //seperate email by comma and send message to those email
+            string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
             //customer email, customer phone, receiver email
             EcommerceMessageDTO email = new EcommerceMessageDTO
             {
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
                 CustomerCompanyName = user.Organisation,
-                EcommerceEmail = ecommerceEmail.Value,
                 BusinessNature = user.BusinessNature
             };
 
-            await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            foreach (string data in ecommerceEmails)
+            {
+                email.EcommerceEmail = data;
+                await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            }
 
             //4. return registration message to the customer
             var message = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RegistrationMessage, 1);
@@ -1011,7 +1021,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Customer aready exists!", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("Customer already exists!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -1264,7 +1274,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUser(UserDTO user)
         {
-           // bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            // bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
@@ -1445,6 +1455,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         user = user.Remove(0, 1);
                     }
+                    emailPhone = user;
+                }
+                else
+                {
                     emailPhone = user;
                 }
             }
@@ -1671,11 +1685,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            if (string.IsNullOrEmpty(preShipment.VehicleType))
-            {
-                throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            }
-
             if (!preShipment.PreShipmentItems.Any())
             {
                 throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
@@ -1684,9 +1693,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
+            if (string.IsNullOrEmpty(preShipment.VehicleType))
+            {
+                return await _preShipmentMobileService.GetPrice(preShipment);
+            }
+
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
-                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
-                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude!= null)
+                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null
+                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude != null)
             {
                 return await _preShipmentMobileService.GetPriceForBike(preShipment);
             }
@@ -1714,6 +1728,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<WalletDTO> GetWalletBalance()
         {
             return await _walletService.GetWalletBalance();
+        }
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            return await _walletService.GetWalletBalanceWithName();
         }
         public async Task<SpecialResultDTO> GetSpecialPackages()
         {
@@ -2624,7 +2642,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection)
         {
-             await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+            await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
         }
 
         public async Task<List<LogVisitReasonDTO>> GetLogVisitReasons()
@@ -2635,6 +2653,52 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
         {
             return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
+        }
+
+        public async Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments()
+        {
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var outstandingShipments = await _uow.PreShipmentMobile.GetAllOutstandingShipmentsForUser(currentUser.UserChannelCode);
+
+            return outstandingShipments;
+
+        }
+
+        public async Task<bool> PayForShipment(string waybill)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
+
+            if (invoice == null)
+            {
+                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                throw new GenericException($"Payment already made for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var wallet = await _walletService.GetWalletBalance();
+
+            if (wallet.Balance < invoice.Amount)
+            {
+                throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var transactionDTO = new PaymentTransactionDTO
+            {
+                Waybill = invoice.Waybill,
+                TransactionCode = wallet.WalletNumber,
+                PaymentType = PaymentType.Wallet,
+                FromApp = true
+            };
+            var result = await _paymentTransactionService.ProcessNewPaymentTransaction(transactionDTO);
+            return result;
         }
 
     }

@@ -33,5 +33,10 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int DestinationServiceCentreId { get; set; }
         public ServiceCentreDTO DestinationServiceCentre { get; set; }
+
+        public bool HasSuperManifest { get; set; }
+        public SuperManifestStatus SuperManifestStatus { get; set; }
+        public string SuperManifestCode { get; set; }
+        public List<string> ManifestCodes { get; set; }
     }
 }
