@@ -156,6 +156,9 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string IndentificationUrl { get; set; }
         public string DeliveryAddressImageUrl { get; set; }
+        public bool IsScheduled { get; set; }
+        public DateTime? ScheduledDate { get; set; }
+
         public string QRCode { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
