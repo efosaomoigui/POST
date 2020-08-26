@@ -1409,6 +1409,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.UpdateDeliveryNumber(detail);
         }
+        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        {
+            return await _preShipmentMobileService.UpdateDeliveryNumberNew(detail);
+        }
         public async Task<Partnerdto> GetMonthlyPartnerTransactions()
         {
             return await _preShipmentMobileService.GetMonthlyPartnerTransactions();
@@ -1681,11 +1685,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            //if (string.IsNullOrEmpty(preShipment.VehicleType))
-            //{
-            //    throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            //}
-
             if (!preShipment.PreShipmentItems.Any())
             {
                 throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");

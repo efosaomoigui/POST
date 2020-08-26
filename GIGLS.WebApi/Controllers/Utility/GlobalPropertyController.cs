@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -16,9 +17,12 @@ namespace GIGLS.WebApi.Controllers.Utility
     {
 
         private readonly IGlobalPropertyService _globalService;
-        public GlobalPropertyController(IGlobalPropertyService globalService) :base(nameof(GlobalPropertyController))
+        private readonly IUserService _userService;
+
+        public GlobalPropertyController(IGlobalPropertyService globalService, IUserService userService) :base(nameof(GlobalPropertyController))
         {
             _globalService = globalService;
+            _userService = userService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -111,6 +115,23 @@ namespace GIGLS.WebApi.Controllers.Utility
                 return new ServiceResponse<object>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{dropoffdiscount}")]
+        public async Task<IServiceResponse<decimal>> GetDropOffDiscountInGlobalProperty()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                int countryId = await _userService.GetUserActiveCountryId();
+                var global = await _globalService.GetDropOffDiscountInGlobalProperty(countryId);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = global
                 };
             });
         }

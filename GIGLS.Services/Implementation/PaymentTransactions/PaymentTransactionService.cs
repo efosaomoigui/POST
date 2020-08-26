@@ -16,6 +16,8 @@ using GIGL.GIGLS.Core.Domain;
 using System.Linq;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IMessageService;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -151,14 +153,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
-
             await _uow.CompleteAsync();
-            result = true;
+
+            //QR Code
+            var deliveryNumber = await GenerateDeliveryNumber(1, shipment.Waybill);
 
             //send sms to the customer
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
             {
-                Waybill = shipment.Waybill
+                Waybill = shipment.Waybill,
+                QRCode = deliveryNumber.Number
             };
 
             if (shipment.DepartureServiceCentreId == 309)
@@ -171,6 +175,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
 
+            result = true;
             return result;
         }
 
@@ -424,6 +429,39 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             return amountToDebit;
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            //var deliveryNumberlist = new DeliveryNumberDTO();
+
+            int maxSize = 6;
+            char[] chars = new char[62];
+            string a;
+            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                Number = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            //deliveryNumberlist.Add(deliverynumberDTO);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }
