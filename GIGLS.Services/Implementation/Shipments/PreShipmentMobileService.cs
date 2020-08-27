@@ -407,6 +407,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
+                preShipmentDTO.CustomerCode = user.UserChannelCode;
 
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 if (country == null)
@@ -502,6 +503,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.shipmentstatus = "Shipment created";
                     newPreShipment.DateCreated = DateTime.Now;
                     newPreShipment.GrandTotal = shipmentGrandTotal;
+                    newPreShipment.CustomerCode = user.UserChannelCode;
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
