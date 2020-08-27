@@ -1952,7 +1952,10 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CustomerCode = r.CustomerCode,
                                                               VehicleType = r.VehicleType,
                                                               IsScheduled = r.IsScheduled,
-                                                              ScheduledDate = r.ScheduledDate
+                                                              ScheduledDate = r.ScheduledDate,
+                                                              SenderLocality = r.SenderLocality,
+                                                              CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                                              IsApproved = r.IsApproved
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
