@@ -1,6 +1,8 @@
 ﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -144,6 +146,38 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<object>
                 {
                     Object = shipmentPackagePrice
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("packagetransactions")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>> GetShipmentPackageTransactions(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackageTransactions = await _packagePriceService.GetShipmentPackageTransactions(filterCriteria);
+
+                return new ServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>
+                {
+                    Object = shipmentPackageTransactions
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("servicecenterpackages")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCenterPackageDTO>>> GetShipmentPackageForServiceCenter()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackages = await _packagePriceService.GetShipmentPackageForServiceCenter();
+
+                return new ServiceResponse<IEnumerable<ServiceCenterPackageDTO>>
+                {
+                    Object = shipmentPackages
                 };
             });
         }

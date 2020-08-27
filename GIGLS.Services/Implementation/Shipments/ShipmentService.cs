@@ -994,20 +994,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         Quantity = shipmentItem.Quantity,
                         Waybill= newShipment.Waybill,
                         UserId = user,
+                        ReceiverServiceCenterId = newShipment.DestinationServiceCentreId,
                         PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromStore
                     };
 
-                    //Do it when they sccan 
-
-                    //var newinflow = new ShipmentPackagingTransactions
-                    //{
-                    //    ServiceCenterId = newShipment.DestinationServiceCentreId,
-                    //    ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
-                    //    Quantity = shipmentItem.Quantity,
-                    //    Waybill = newShipment.Waybill,
-                    //    UserId = user,
-                    //    PackageTransactionType = Core.Enums.PackageTransactionType.InflowToSC
-                    //};
                     packageOutflow.Add(newOutflow);
                 }
 
@@ -1168,6 +1158,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
+
+            List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
+
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 shipmentItem.SerialNumber = serialNumber;
@@ -1187,8 +1180,38 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 
                 serialNumber++;
+
+                if(shipmentItem.ShipmentPackagePriceId > 0)
+                {
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
+                    var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == shipmentDTO.DepartureServiceCentreId);
+
+                    if (serviceCenterPackage == null)
+                    {
+                        //throw error maybe
+                        throw new GenericException($"The Package {shipmentPackage.Description} is not available at your Service Center", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    else
+                    {
+                        serviceCenterPackage.InventoryOnHand -= shipmentItem.PackageQuantity;
+                    }
+
+                    var newOutflow = new ShipmentPackagingTransactions
+                    {
+                        ServiceCenterId = shipmentDTO.DepartureServiceCentreId,
+                        ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                        Quantity = shipmentItem.PackageQuantity,
+                        Waybill = shipmentDTO.Waybill,
+                        UserId = currentUserId,
+                        PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
+                    };
+                    packageoutflow.Add(newOutflow);
+
+
+                }
             }
 
+            _uow.ShipmentPackagingTransactions.AddRange(packageoutflow);
             //do not save the child objects
             newShipment.DepartureServiceCentre = null;
             newShipment.DestinationServiceCentre = null;
@@ -2826,6 +2849,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     shipment.ApproximateItemsWeight = 0;
 
+                    List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
                     // add serial numbers to the ShipmentItems
                     var serialNumber = 1;
                     foreach (var shipmentItem in shipment.ShipmentItems)
@@ -2847,7 +2871,36 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
 
                         serialNumber++;
+
+                        if (shipmentItem.ShipmentPackagePriceId > 0)
+                        {
+                            var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
+                            var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == shipment.DepartureServiceCentreId);
+
+                            if (serviceCenterPackage == null)
+                            {
+                                //throw error maybe
+                                throw new GenericException($"The Package {shipmentPackage.Description} is not available at your Service Center", $"{(int)HttpStatusCode.Forbidden}");
+                            }
+                            else
+                            {
+                                serviceCenterPackage.InventoryOnHand -= shipmentItem.PackageQuantity;
+                            }
+
+                            var newOutflow = new ShipmentPackagingTransactions
+                            {
+                                ServiceCenterId = shipment.DepartureServiceCentreId,
+                                ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                                Quantity = shipmentItem.PackageQuantity,
+                                Waybill = shipment.Waybill,
+                                UserId = shipment.UserId,
+                                PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
+                            };
+                            packageoutflow.Add(newOutflow);
+                        }
                     }
+
+                    _uow.ShipmentPackagingTransactions.AddRange(packageoutflow);
                     await CreateInvoice(shipment);
                     CreateGeneralLedger(shipment);
                     var newShipment = Mapper.Map<Shipment>(shipment);

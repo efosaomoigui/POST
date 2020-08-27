@@ -457,6 +457,8 @@
     <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
     <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
+    <Compile Include="DTO\Stores\ServiceCenterPackageDTO.cs" />
+    <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
     <Compile Include="DTO\UserLoginEmailDTO.cs" />

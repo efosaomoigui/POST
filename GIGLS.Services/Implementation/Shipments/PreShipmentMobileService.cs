@@ -2652,7 +2652,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Block Process for any cancelled shipment
                 var shipmentCancelled = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString());
-                if(shipmentCancelled != null)
+                if (shipmentCancelled != null)
                 {
                     throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -3615,7 +3615,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if(preShipment == null)
+                if (preShipment == null)
                 {
                     throw new GenericException("NULL INPUT");
                 }
@@ -3626,7 +3626,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus, $"{(int)HttpStatusCode.Forbidden}");
                 }
-                                
+
                 //delete remove item from DB
                 var preShipmentMobileItemToBeDeleted = _uow.PreShipmentItemMobile.GetAllAsQueryable()
                     .Where(x => preShipment.DeletedItems.Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
@@ -3651,7 +3651,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    preshipmentPriceDTO =  await GetPrice(preShipment);
+                    preshipmentPriceDTO = await GetPrice(preShipment);
                 }
 
                 var difference = (preshipmentmobilegrandtotal.GrandTotal - preshipmentPriceDTO.GrandTotal);
@@ -3669,7 +3669,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         foreach (var item in preShipmentMobileItemToBeUpdated)
                         {
                             var preshipmentitemmobile = preShipment.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).FirstOrDefault();
-                            if(preshipmentitemmobile != null)
+                            if (preshipmentitemmobile != null)
                             {
                                 item.Quantity = preshipmentitemmobile.Quantity;
                                 item.Value = preshipmentitemmobile.Value;
@@ -3836,7 +3836,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateCustomerWalletForCancelledShipment(string customerCode,  string waybill, decimal amount)
+        public async Task UpdateCustomerWalletForCancelledShipment(string customerCode, string waybill, decimal amount)
         {
             var user = await _userService.GetCurrentUserId();
             var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
@@ -4438,7 +4438,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 {
                                     int customerid = 0;
                                     var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                    if(companyid != null)
+                                    if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
                                     }
@@ -4495,6 +4495,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                         }).ToList()
                                     };
+
+                                    for (var i = 0; i < 1; i++)
+                                    {
+                                        MobileShipment.ShipmentItems[i].ShipmentPackagePriceId = detail.ShipmentPackagePriceId;
+                                        MobileShipment.ShipmentItems[i].PackageQuantity = detail.PackageQuantity;
+                                    }
+
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();

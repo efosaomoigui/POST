@@ -14,6 +14,8 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public int SerialNumber { get; set; }
+        public int ShipmentPackagePriceId { get; set; }
+        public int PackageQuantity { get; set; }
 
         //To handle volumetric weight
         public bool IsVolumetric { get; set; }

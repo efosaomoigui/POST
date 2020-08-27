@@ -8,6 +8,8 @@ using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO.Stores;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -189,6 +191,22 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BaseFilterCriteria filterCriteria)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            var shipmentPackageTransactions = await _uow.ShipmentPackagingTransactions.GetShipmentPackageTransactions(filterCriteria,serviceCenters);
+            return shipmentPackageTransactions;
+        }
+
+        public async Task<List<ServiceCenterPackageDTO>> GetShipmentPackageForServiceCenter()
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            var shipmentPackages = await _uow.ServiceCenterPackage.GetShipmentPackageForServiceCenter(serviceCenters);
+            return shipmentPackages;
         }
 
     }
