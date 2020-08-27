@@ -469,6 +469,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenter > 0)
             {
+                var resul = allDemurrages.ToList();
                 demurrageResults = allDemurrages.Where(s => s.ServiceCenterId == serviceCenter).ToList();
             }
 
@@ -882,7 +883,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 decimal demurrageTotal = 0;
                 foreach (var item in allprocessingordeforshipment)
                 {
-                    demurrageTotal += item.Amount;
+                    demurrageTotal += item.DemurrageAmount;
                 }
 
                 bkoc.TotalAmount = demurrageTotal;
