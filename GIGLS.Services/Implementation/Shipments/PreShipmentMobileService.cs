@@ -4799,7 +4799,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
+                //get currently login user
+                var userId = await _userService.GetCurrentUserId();
+                var userDetail = await _userService.GetUserById(userId);
+
+                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == userDetail.UserChannelCode);
                 if (partner == null)
                 {
                     var partnerDTO = new PartnerDTO
@@ -4817,6 +4821,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
                 }
+
                 foreach (var vehicle in user.VehicleType)
                 {
                     var Vehicle = new VehicleTypeDTO
@@ -4833,7 +4838,6 @@ namespace GIGLS.Services.Implementation.Shipments
             catch
             {
                 throw;
-                //throw new GenericException("Please an error occurred while updating profile.");
             }
         }
 
