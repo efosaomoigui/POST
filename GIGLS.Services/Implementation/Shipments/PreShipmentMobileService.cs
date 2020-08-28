@@ -4802,20 +4802,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get currently login user
                 var userId = await _userService.GetCurrentUserId();
                 var userDetail = await _userService.GetUserById(userId);
+                user.UserChannelCode = userDetail.UserChannelCode;
 
-                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == userDetail.UserChannelCode);
-                if (partner == null)
+                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
+                if (partner == null && userDetail.UserChannelType == UserChannelType.Employee)
                 {
                     var partnerDTO = new PartnerDTO
                     {
                         PartnerType = PartnerType.InternalDeliveryPartner,
-                        PartnerName = user.FirstName + " " + user.LastName,
-                        PartnerCode = user.UserChannelCode,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        UserId = user.Id,
+                        PartnerName = userDetail.FirstName + " " + userDetail.LastName,
+                        PartnerCode = userDetail.UserChannelCode,
+                        FirstName = userDetail.FirstName,
+                        LastName = userDetail.LastName,
+                        Email = userDetail.Email,
+                        PhoneNumber = userDetail.PhoneNumber,
+                        UserId = userId,
                         IsActivated = false,
                     };
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
