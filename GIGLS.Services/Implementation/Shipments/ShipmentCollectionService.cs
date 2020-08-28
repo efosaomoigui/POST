@@ -540,7 +540,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //check if the shipment pin corresponds to the pin for the waybill 
-            if(shipmentCollection.DeliveryNumber != null)
+            if(!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
             {
                 var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
                 if (deliveryNumber != null)
@@ -549,6 +549,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
                     }
+                }
+                else
+                {
+                    throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
 
