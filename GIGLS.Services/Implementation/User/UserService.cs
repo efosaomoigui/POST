@@ -121,7 +121,7 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-                var user = _unitOfWork.User.GetUserById(Id).Result;
+                var user = await _unitOfWork.User.GetUserById(Id);
 
             if (user == null)
             {
