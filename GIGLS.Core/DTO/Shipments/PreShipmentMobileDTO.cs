@@ -160,7 +160,6 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsScheduled { get; set; }
         public DateTime? ScheduledDate { get; set; }
 
->>>>>>>>> Temporary merge branch 2
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
