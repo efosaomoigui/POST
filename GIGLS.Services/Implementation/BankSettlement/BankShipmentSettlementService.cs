@@ -469,8 +469,8 @@ namespace GIGLS.Services.Implementation.Wallet
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenter > 0)
             {
-                var resul = allDemurrages.ToList();
-                demurrageResults = allDemurrages.Where(s => s.ServiceCenterId == serviceCenter).ToList();
+                //var resul = allDemurrages.ToList();
+                demurrageResults = allDemurrages.Where(s => s.ServiceCenterId == serviceCenter && s.Amount >0).ToList();
             }
 
             foreach (var item in demurrageResults)
@@ -512,7 +512,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         ServiceCenter = getServiceCenterCode.Name,
                         UserId = userid,
                         Status = DepositStatus.Pending
-                    }).ToList()
+                    }).Where(s => s.DemurrageAmount > 0).ToList()
                 };
             }
             if (bankDep.ShipmentAndCOD.Count > 0)
@@ -848,7 +848,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
 
                 allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
-                allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+                allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter && s.Amount>0);
 
                 //all shipments from payload JSON
                 var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
