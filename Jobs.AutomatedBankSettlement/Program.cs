@@ -30,16 +30,16 @@ namespace Jobs.AutomatedBankSettlement
                 foreach (var item in servicecenters)
                 {
                     //Shippment
-                    //string urlString1 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForShipment/ScheduledTask?type={1}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
+                    string urlString1 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForShipment/ScheduledTask?type={1}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
                     //COD 
-                   // string urlString2 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForCOD/ScheduledTask?type={2}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
+                    string urlString2 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForCOD/ScheduledTask?type={2}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
                     //Demurrage
                     string urlString3 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForDemurrage/ScheduledTask?type={3}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
 
                     //if (count >= 2) break;
-                   // var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
-                    //var o2 = ApiCaller.callVoidAPI("GET", urlString2, Console.Out);
-                    var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);  
+                    var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
+                    var o2 = ApiCaller.callVoidAPI("GET", urlString2, Console.Out);
+                    var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);
                     count++;
                 }
 

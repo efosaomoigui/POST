@@ -512,7 +512,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         ServiceCenter = getServiceCenterCode.Name,
                         UserId = userid,
                         Status = DepositStatus.Pending
-                    }).ToList()
+                    }).Where(s => s.DemurrageAmount > 0).ToList()
                 };
             }
             if (bankDep.ShipmentAndCOD.Count > 0)
