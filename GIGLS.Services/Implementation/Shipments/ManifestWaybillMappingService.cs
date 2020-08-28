@@ -75,7 +75,6 @@ namespace GIGLS.Services.Implementation.Shipments
             if (dateFilterCriteria.ServiceCentreId == 0)
             {
                 serviceIds = await _userService.GetPriviledgeServiceCenters();
-
             }
             else
             {
@@ -83,7 +82,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     dateFilterCriteria.ServiceCentreId
                 };
                 serviceIds = serviceCenterId;
-
             }
 
             var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds, dateFilterCriteria);
@@ -730,7 +728,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybillForAccounts(string waybill)
         {
             try
-            {                
+            {
                 var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
 
                 if (waybillMappingList == null)
@@ -1228,6 +1226,77 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria)
+        {
+            var resultSet = new HashSet<string>();
+            var result = new List<ManifestWaybillMappingDTO>();
+            var finalResult = new List<ManifestWaybillMappingDTO>();          
+
+            int[] serviceCenterId = new int[] { dateFilterCriteria.ServiceCentreId };
+
+            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceCenterId, dateFilterCriteria);
+
+            foreach (var item in manifestWaybillMapings)
+            {
+                if (resultSet.Add(item.ManifestCode))
+                {
+                    result.Add(item);
+                }
+            }
+
+
+            if (result.Any())
+            {
+                //Get the dispatch rider details
+                foreach (var manifest in result)
+                {
+                    var dispatchResult = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifest.ManifestCode);
+                    if (dispatchResult != null)
+                    {
+                        //get User detail
+                        var user = await _uow.User.GetUserById(dispatchResult.DriverDetail);
+
+                        if (user != null)
+                        {
+                            manifest.DispatchRider = user.FirstName + " " + user.LastName;
+                        }
+                        else
+                        {
+                            manifest.DispatchRider = dispatchResult.DriverDetail;
+                        }
+                    }
+                }
+
+                foreach (var resultManifest in result)
+                {
+                    var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == resultManifest.ManifestCode);
+                    var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+
+                    foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
+                    {
+                        manifestwaybill.ManifestDetails = resultManifest.ManifestDetails;
+                        manifestwaybill.DispatchRider = resultManifest.DispatchRider;
+
+                        //get shipment detail 
+                        manifestwaybill.Shipment = await _shipmentService.GetBasicShipmentDetail(manifestwaybill.Waybill);
+
+                        if (manifestwaybill.Shipment.IsCashOnDelivery)
+                        {
+                            //get from ShipmentCollection
+                            var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);
+                            if (shipmentCollectionObj != null)
+                            {
+                                manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
+                            }
+
+                            finalResult.Add(manifestwaybill);
+                        }
+                    }
+                }
+            }
+            return finalResult;
         }
     }
 }
