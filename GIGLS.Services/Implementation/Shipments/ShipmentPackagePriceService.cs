@@ -123,9 +123,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetCurrentUserId();
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var currentServiceCenterId = serviceCenterIds[0];
-
-                //shipmentPackagePrice.Balance += shipmentPackagePriceDto.QuantityToBeAdded;
-                //shipmentPackagePrice.InventoryReceived += shipmentPackagePriceDto.QuantityToBeAdded;
+                
                 shipmentPackagePrice.InventoryOnHand += shipmentPackagePriceDto.QuantityToBeAdded;
 
                 var newInflow = new ShipmentPackagingTransactions
