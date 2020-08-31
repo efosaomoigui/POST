@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GIGLS.CORE.DTO.Report;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -221,14 +222,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                {
                                    Code = x.Code,
-                                   Name = x.Name
+                                   Name = x.Name,
+                                 StationId = x.StationId,
+                                 StationName = x.Station.StationName
                                }).FirstOrDefault(),
                                DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                {
                                    Code = x.Code,
-                                   Name = x.Name
+                                   Name = x.Name,
+                                   StationId = x.StationId,
+                                   StationName = x.Station.StationName
                                }).FirstOrDefault(),
 
+                           };
+
+            return await Task.FromResult(manifest.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public async Task<List<ManifestDTO>> GetManifestAvailableForSuperManifest(int[] serviceCentreIds)
+        {
+
+            var manifestMapping = Context.Manifest.Where(s => s.IsDeleted == false && s.HasSuperManifest == false && s.SuperManifestStatus == Core.Enums.SuperManifestStatus.ArrivedScan).AsQueryable();
+
+            if (serviceCentreIds.Length > 0)
+            {
+                manifestMapping = manifestMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+
+            var manifest = from p in manifestMapping
+                           select new ManifestDTO
+                           {
+                               ManifestCode = p.ManifestCode,
+                               DateCreated = p.DateCreated,
+                               DateModified = p.DateModified,
+                               ManifestType = p.ManifestType,
+                               DateTime = p.DateTime,
+                               IsDispatched = p.IsDispatched,
+                               IsReceived = p.IsReceived,
+                               HasSuperManifest = p.HasSuperManifest,
+                               SuperManifestStatus = p.SuperManifestStatus,
+                               IsDeleted = p.IsDeleted,
+                               SuperManifestCode = p.SuperManifestCode,
+                               DestinationServiceCentre = Context.Dispatch.Where(c => c.ManifestNumber == p.ManifestCode).Select(x => new ServiceCentreDTO
+                               {
+                                   Code = x.Destination.StationCode,
+                                   Name = Context.ServiceCentre.Where(d => d.ServiceCentreId == x.DestinationServiceCenterId).Select(y => y.Name).FirstOrDefault(),
+                                   StationId = x.Destination.StationId,
+                                   StationName = x.Destination.StationName
+                               }).FirstOrDefault(),
                            };
 
             return await Task.FromResult(manifest.OrderByDescending(x => x.DateCreated).ToList());
