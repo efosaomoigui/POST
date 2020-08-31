@@ -20,6 +20,12 @@ namespace GIGLS.Core.DTO
         public string ReceiverName { get; set; }
         public string Waybill { get; set; }
 
+        public string CustomerCode { get; set; }
+        public string Date { get; set; }
+        public string Amount { get; set; }
+        public string Currency { get; set; }
+
+
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
     }
 }
