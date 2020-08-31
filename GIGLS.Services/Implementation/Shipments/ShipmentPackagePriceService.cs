@@ -170,6 +170,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
 
                 _uow.ShipmentPackagePrice.Add(newshipmentPackagePrice);
+                
+                await _uow.CompleteAsync();
 
                 var newInflow = new ShipmentPackagingTransactions
                 {
