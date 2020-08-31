@@ -2305,7 +2305,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
-
+                    newPreShipment.Value += shipmentItem.ItemValue;
                     serialNumber++;
                 }
                 _uow.PreShipment.Add(newPreShipment);
@@ -2387,6 +2387,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
 
+                    newPreShipment.Value += shipmentItem.ItemValue;
                     serialNumber++;
                 }
                 _uow.PreShipment.Add(newPreShipment);
@@ -2510,7 +2511,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                         preshipment.Weight = (double)preShipmentItemDTO.Weight;
                         preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
                         preshipment.SpecialPackageId = preShipmentItemDTO.SpecialPackageId;
+                        preshipment.ItemValue = preShipmentItemDTO.ItemValue;
                         existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
+                        existingPreShipment.Value += preShipmentItemDTO.ItemValue;
                     }
                 }
                 await _uow.CompleteAsync();
