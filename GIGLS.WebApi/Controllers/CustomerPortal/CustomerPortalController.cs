@@ -1970,5 +1970,47 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("outstandingpayments")]
+        public async Task<IServiceResponse<List<OutstandingPaymentsDTO>>> GetOutstandingPayments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var outstandingPayments = await _portalService.GetOutstandingPayments();
+                return new ServiceResponse<List<OutstandingPaymentsDTO>>
+                {
+                    Object = outstandingPayments
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("paymentforshipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> PayForAgilityShipmentFromApp(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.PayForShipment(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpDelete]
+        [Route("dropoffs/{tempcode}")]
+        public async Task<IServiceResponse<bool>> DeleteDropoff(string tempCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.DeleteDropOff(tempCode);
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
     }
 }

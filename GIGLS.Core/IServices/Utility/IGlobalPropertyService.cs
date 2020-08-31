@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.Utility
         Task UpdateGlobalProperty(int globalPropertyId, bool status);
         Task RemoveGlobalProperty(int globalPropertyId);
         Task<GlobalPropertyDTO> GetGlobalProperty(GlobalPropertyType globalPropertyType, int countryId);
+        Task<decimal> GetDropOffDiscountInGlobalProperty(int countryId);
     }
 }

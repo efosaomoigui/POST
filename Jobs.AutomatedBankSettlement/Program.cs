@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ApiProcessor;
 using GIGLS.Core.DTO.ServiceCentres;
-using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
 
 namespace Jobs.AutomatedBankSettlement
@@ -39,7 +35,7 @@ namespace Jobs.AutomatedBankSettlement
                     //if (count >= 2) break;
                     var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
                     var o2 = ApiCaller.callVoidAPI("GET", urlString2, Console.Out);
-                    var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);  
+                    var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);
                     count++;
                 }
 

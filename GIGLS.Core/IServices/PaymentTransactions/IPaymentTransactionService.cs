@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices.PaymentTransactions
         Task UpdatePaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction);
         Task<bool> ProcessPaymentTransaction(PaymentTransactionDTO paymentTransaction);
         Task RemovePaymentTransaction(string waybill);
+        Task<bool> ProcessNewPaymentTransaction(PaymentTransactionDTO paymentTransaction);
     }
 }

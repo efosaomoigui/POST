@@ -16,6 +16,8 @@ using GIGL.GIGLS.Core.Domain;
 using System.Linq;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IMessageService;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -100,14 +102,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var result = false;
             var returnWaybill = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew == paymentTransaction.Waybill);
 
-            if(returnWaybill != null)
+            if (returnWaybill != null)
             {
                 result = await ProcessReturnPaymentTransaction(paymentTransaction);
             }
             else
             {
                 result = await ProcessNewPaymentTransaction(paymentTransaction);
-            }           
+            }
 
             return result;
         }
@@ -121,11 +123,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-
-            if (!string.IsNullOrEmpty(paymentTransaction.UserId))
-            {
-                currentUserId = paymentTransaction.UserId;
-            }
+            paymentTransaction.UserId = currentUserId;
 
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
@@ -134,13 +132,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
-            if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
+            if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
             // create payment
-            paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 
@@ -153,17 +150,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
-            
+
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
-
             await _uow.CompleteAsync();
-            result = true;
+
+            //QR Code
+            var deliveryNumber = await GenerateDeliveryNumber(1, shipment.Waybill);
 
             //send sms to the customer
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
             {
-                Waybill = shipment.Waybill
+                Waybill = shipment.Waybill,
+                QRCode = deliveryNumber.Number
             };
 
             if (shipment.DepartureServiceCentreId == 309)
@@ -176,6 +175,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
 
+            result = true;
             return result;
         }
 
@@ -190,7 +190,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //Additions for Ecommerce customers (Max wallet negative payment limit)
             //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
-            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
+            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType && !paymentTransaction.FromApp)
             {
                 //Gets the customer wallet limit for ecommerce
                 decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
@@ -213,9 +213,27 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
-            wallet.Balance = wallet.Balance - amountToDebit;
+            if (shipment != null && paymentTransaction.FromApp == true)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Insufficient Balance in the Wallet");
+                }
+            }
 
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            wallet.Balance = wallet.Balance - amountToDebit;
+            int[] serviceCenterIds = { };
+
+            if (!paymentTransaction.FromApp)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            else
+            {
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
+            }
+            
 
             var newWalletTransaction = new WalletTransaction
             {
@@ -249,7 +267,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 invoiceEntity.Pos = invoiceEntity.Amount;
             }
         }
-        
+
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -355,7 +373,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var customerWalletLimitCategory = companyObj.CustomerCategory;
 
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
-            
+
             switch (customerWalletLimitCategory)
             {
                 case CustomerCategory.Gold:
@@ -401,16 +419,49 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //2. If the customer country !== Departure Country, Convert the payment
-            if(customerCountryId != shipment.DepartureCountryId)
+            if (customerCountryId != shipment.DepartureCountryId)
             {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
 
-                double amountToDebitDouble = (double)amountToDebit  * countryRateConversion.Rate;
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
-                amountToDebit = (decimal) Math.Round(amountToDebitDouble, 2);
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
             }
 
             return amountToDebit;
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            //var deliveryNumberlist = new DeliveryNumberDTO();
+
+            int maxSize = 6;
+            char[] chars = new char[62];
+            string a;
+            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                Number = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            //deliveryNumberlist.Add(deliverynumberDTO);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }

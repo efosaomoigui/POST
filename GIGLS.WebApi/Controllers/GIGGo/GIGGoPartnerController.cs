@@ -524,6 +524,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         }
 
         [HttpPost]
+        [Route("verifydeliverynumber")]
+        public async Task<IServiceResponse<bool>> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UpdateDeliveryNumberNew(detail);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
         [Route("updatereceiverdetails")]
         public async Task<IServiceResponse<bool>> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
         {

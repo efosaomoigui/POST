@@ -169,6 +169,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.UpdateDeliveryNumber(detail);
         }
 
+        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        {
+            return await _portalService.UpdateDeliveryNumberNew(detail);
+        }
+
         public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
         {
             return await _portalService.UpdateMobilePickupRequest(pickuprequest);

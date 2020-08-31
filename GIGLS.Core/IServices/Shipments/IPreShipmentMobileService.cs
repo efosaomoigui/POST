@@ -74,5 +74,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<LocationDTO>> GetPresentDayShipmentLocations();
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
         Task<MobilePriceDTO> GetPriceForBike(PreShipmentMobileDTO preShipment);
+        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
     }
 }

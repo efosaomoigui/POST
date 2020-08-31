@@ -422,6 +422,7 @@
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\NodeLocationDTO.cs" />
+    <Compile Include="DTO\Shipments\OutstandingPaymentsDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PickupManifestDTO.cs" />
     <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
