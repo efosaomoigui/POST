@@ -4496,11 +4496,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }).ToList()
                                     };
 
-                                    for (var i = 0; i < 1; i++)
+                                    if (detail.ShipmentPackagePriceId > 0)
                                     {
-                                        MobileShipment.ShipmentItems[i].ShipmentPackagePriceId = detail.ShipmentPackagePriceId;
-                                        MobileShipment.ShipmentItems[i].PackageQuantity = detail.PackageQuantity;
+                                        for (var i = 0; i < 1; i++)
+                                        {
+                                            MobileShipment.ShipmentItems[i].ShipmentPackagePriceId = detail.ShipmentPackagePriceId;
+                                            MobileShipment.ShipmentItems[i].PackageQuantity = detail.PackageQuantity;
+                                        }
                                     }
+
 
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 

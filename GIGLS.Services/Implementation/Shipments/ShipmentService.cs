@@ -2824,13 +2824,25 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //check if shipment already exists
-                var shipmentexists = await _uow.Shipment.GetAsync(s => s.Waybill == shipment.Waybill);
+                var shipmentexists = await _uow.Shipment.GetAsync(s => s.Waybill == shipment.Waybill, "ShipmentItems");
+                List<ShipmentPackagingTransactions> packageOutflow = new List<ShipmentPackagingTransactions>();
+               
                 if (shipmentexists != null)
                 {
                     shipmentexists.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
                     shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
+
+                    if (shipment.ShipmentItems[0].ShipmentPackagePriceId > 0)
+                    {
+                        for (var i = 0; i < 1; i++)
+                        {
+                            shipmentexists.ShipmentItems[i].ShipmentPackagePriceId = shipment.ShipmentItems[0].ShipmentPackagePriceId;
+                            shipmentexists.ShipmentItems[i].PackageQuantity = shipment.ShipmentItems[0].PackageQuantity;
+                        }
+                        packageOutflow = await UpdatePackageTransactions(shipmentexists);
+                    }
 
                     var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill);
                     if (invoice != null)
@@ -2842,6 +2854,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         GeneralLedger.CountryId = shipment.DepartureCountryId;
                     }
+                    _uow.ShipmentPackagingTransactions.AddRange(packageOutflow);
                     await _uow.CompleteAsync();
                     return true;
                 }
@@ -2849,7 +2862,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     shipment.ApproximateItemsWeight = 0;
 
-                    List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
+                    //List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
                     // add serial numbers to the ShipmentItems
                     var serialNumber = 1;
                     foreach (var shipmentItem in shipment.ShipmentItems)
@@ -2871,39 +2884,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
 
                         serialNumber++;
-
-                        if (shipmentItem.ShipmentPackagePriceId > 0)
-                        {
-                            var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
-                            var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == shipment.DepartureServiceCentreId);
-
-                            if (serviceCenterPackage == null)
-                            {
-                                //throw error maybe
-                                throw new GenericException($"The Package {shipmentPackage.Description} is not available at your Service Center", $"{(int)HttpStatusCode.Forbidden}");
-                            }
-                            else
-                            {
-                                serviceCenterPackage.InventoryOnHand -= shipmentItem.PackageQuantity;
-                            }
-
-                            var newOutflow = new ShipmentPackagingTransactions
-                            {
-                                ServiceCenterId = shipment.DepartureServiceCentreId,
-                                ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
-                                Quantity = shipmentItem.PackageQuantity,
-                                Waybill = shipment.Waybill,
-                                UserId = shipment.UserId,
-                                PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
-                            };
-                            packageoutflow.Add(newOutflow);
-                        }
+                                                
                     }
-
-                    _uow.ShipmentPackagingTransactions.AddRange(packageoutflow);
+                                        
                     await CreateInvoice(shipment);
                     CreateGeneralLedger(shipment);
                     var newShipment = Mapper.Map<Shipment>(shipment);
+                    packageOutflow = await UpdatePackageTransactions(newShipment);
+                    _uow.ShipmentPackagingTransactions.AddRange(packageOutflow);
                     _uow.Shipment.Add(newShipment);
                     return true;
                 }
@@ -3030,6 +3018,41 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return true;
+        }
+
+        private async Task<List<ShipmentPackagingTransactions>> UpdatePackageTransactions(Shipment shipment)
+        {
+            List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
+            foreach (var shipmentItem in shipment.ShipmentItems)
+            {
+                if (shipmentItem.ShipmentPackagePriceId > 0)
+                {
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
+                    var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == shipment.DepartureServiceCentreId);
+
+                    if (serviceCenterPackage == null)
+                    {
+                        //throw error maybe
+                        throw new GenericException($"The Package {shipmentPackage.Description} is not available at your Service Center", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    else
+                    {
+                        serviceCenterPackage.InventoryOnHand -= shipmentItem.PackageQuantity;
+                    }
+
+                    var newOutflow = new ShipmentPackagingTransactions
+                    {
+                        ServiceCenterId = shipment.DepartureServiceCentreId,
+                        ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                        Quantity = shipmentItem.PackageQuantity,
+                        Waybill = shipment.Waybill,
+                        UserId = shipment.UserId,
+                        PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
+                    };
+                    packageoutflow.Add(newOutflow);
+                }
+            }
+            return packageoutflow;
         }
     }
 }
