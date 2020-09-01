@@ -335,7 +335,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getbankOrderprocessingcodebyDate")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -350,7 +350,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getbankOrderprocessingcodebyByServiceCenter")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> getbankOrderprocessingcodebyByServiceCenter(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> getbankOrderprocessingcodebyByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
         {       
             return await HandleApiOperationAsync(async () =>
             {
@@ -365,7 +365,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getregionalbankOrderprocessingcodebyDate")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
