@@ -193,7 +193,8 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CustomerName = newCompany.Name,
                     ToEmail = newCompany.Email,
-                    Body = newCompany.Password                    
+                    To = newCompany.Email,
+                    Body = password
                 };
                 await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
