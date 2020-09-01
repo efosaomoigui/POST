@@ -737,7 +737,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendEcommerceRegistrationNotificationAsync(messageDTO);
-                    await LogEmailMessage(messageDTO, result);
+                    //await LogEmailMessage(messageDTO, result);
                 }
             }
             catch (Exception ex)
