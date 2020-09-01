@@ -19,6 +19,7 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
         public async Task<string> SendEcommerceRegistrationNotificationAsync(MessageDTO message)
         {
             string result = "";

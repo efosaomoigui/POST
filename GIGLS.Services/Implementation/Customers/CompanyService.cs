@@ -17,6 +17,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -180,13 +181,21 @@ namespace GIGLS.Services.Implementation.Customers
                 });
 
                 //send login detail to the customer
-                var passwordMessage = new PasswordMessageDTO()
+                //var passwordMessage = new PasswordMessageDTO()
+                //{
+                //    Password = password,
+                //    UserEmail = newCompany.Email,
+                //    CustomerCode = newCompany.CustomerCode
+                //};
+
+                var message = new MessageDTO()
                 {
-                    Password = password,
-                    UserEmail = newCompany.Email,
-                    CustomerCode = newCompany.CustomerCode
+                    CustomerCode = newCompany.CustomerCode,
+                    CustomerName = newCompany.Name,
+                    ToEmail = newCompany.Email,
+                    Body = newCompany.Password                    
                 };
-                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
                 //send mail to ecommerce team
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
@@ -196,8 +205,10 @@ namespace GIGLS.Services.Implementation.Customers
 
                 foreach (string data in ecommerceEmails)
                 {
-                    passwordMessage.UserEmail = data;
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                    message.ToEmail = data;
+                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+                    //passwordMessage.UserEmail = data;
+                    //await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
                 }
 
                 return Mapper.Map<CompanyDTO>(newCompany);
