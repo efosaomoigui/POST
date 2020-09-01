@@ -107,7 +107,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update the Receiver Details for returned shipments
                 await UpdateReceiverDetailsReturnedShipment(shipment);
-                
+
+
+                //for international shipment
+                if (shipment.Waybill.Contains("AWR"))
+                {
+                    shipment.Waybill = shipment.Waybill + "R";
+                }
+
                 //Create new shipment
                 var newShipment = await _shipmentService.AddShipment(shipment);
                 
