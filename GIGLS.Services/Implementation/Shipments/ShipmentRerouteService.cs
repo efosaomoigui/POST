@@ -105,8 +105,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 originalShipment.Total = shipmentDTO.Total;
                 originalShipment.GrandTotal = shipmentDTO.GrandTotal;
 
-                //5.5 Create new shipment
-                var newShipment = await _shipmentService.AddShipment(originalShipment);
+                //for international shipment
+                if (shipmentDTO.Waybill.Contains("AWR"))
+                {
+                    originalShipment.Waybill = shipmentDTO.Waybill + "R";
+                }
+
+                 //5.5 Create new shipment
+                 var newShipment = await _shipmentService.AddShipment(originalShipment);
 
                 ////6. create new shipment reroute
                 var user = await _userService.GetCurrentUserId();
