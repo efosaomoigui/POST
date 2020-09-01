@@ -7,9 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.CORE.DTO.Report;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -232,8 +230,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    Name = x.Name,
                                    StationId = x.StationId,
                                    StationName = x.Station.StationName
-                               }).FirstOrDefault(),
-
+                               }).FirstOrDefault()
                            };
 
             return await Task.FromResult(manifest.OrderByDescending(x => x.DateCreated).ToList());
@@ -241,15 +238,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         public async Task<List<ManifestDTO>> GetManifestAvailableForSuperManifest(int[] serviceCentreIds)
         {
-
-            var manifestMapping = Context.Manifest.Where(s => s.IsDeleted == false && s.HasSuperManifest == false && s.SuperManifestStatus == Core.Enums.SuperManifestStatus.ArrivedScan).AsQueryable();
+            var manifestMapping = Context.Manifest.Where(s => s.HasSuperManifest == false && s.SuperManifestStatus == Core.Enums.SuperManifestStatus.ArrivedScan).AsQueryable();
 
             if (serviceCentreIds.Length > 0)
             {
                 manifestMapping = manifestMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
-            var manifest = from p in manifestMapping
+            var manifest = (from p in manifestMapping
                            select new ManifestDTO
                            {
                                ManifestCode = p.ManifestCode,
@@ -270,7 +266,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    StationId = x.Destination.StationId,
                                    StationName = x.Destination.StationName
                                }).FirstOrDefault(),
-                           };
+                           }).ToList();
 
             return await Task.FromResult(manifest.OrderByDescending(x => x.DateCreated).ToList());
         }

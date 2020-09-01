@@ -341,6 +341,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
                 
+                //optimise these 3 line of code. you can't fetch all the data into memory when you only need to check for boolean value
                 var dispatchList = _uow.Dispatch.GetAllAsQueryable().Where(x => manifestByScList.Contains(x.ManifestNumber));
                 var destinationList = dispatchList.Select(x => x.DestinationId).ToList();
                 var allAreSame = destinationList.All(x => x == destinationList.First());
