@@ -19,7 +19,27 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
-               
+
+        public async Task<string> SendEcommerceRegistrationNotificationAsync(MessageDTO message)
+        {
+            string result = "";
+            if (message.ToEmail != null)
+            {
+                result = await ConfigEcommerceRegistrationMessage(message);
+            }
+            return result;
+        }
+
+        public async Task<string> SendPaymentNotificationAsync(MessageDTO message)
+        {
+            string result = "";
+            if (message.ToEmail != null)
+            {
+                result = await ConfigPaymentNotificationMessage(message);
+            }
+            return result;
+        }
+
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
@@ -50,35 +70,80 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
-        // Use NuGet to install SendGrid (Basic C# client lib) 
-        //private async Task ConfigSendGridasync(IdentityMessage message)
-        //{
-        //    var myMessage = new SendGridMessage();
+        private async Task<string> ConfigEcommerceRegistrationMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:EcommerceRegistrationTemplate"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
-        //    myMessage.AddTo(message.Destination);
-        //    myMessage.From = new SendGrid.Helpers.Mail.EmailAddress("taiseer@gigls.net", "Efe Omoigui");
-        //    myMessage.Subject = message.Subject;
-        //    myMessage.PlainTextContent = message.Body;
-        //    myMessage.HtmlContent = message.Body;
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
 
-        //    var credentials = new NetworkCredential(ConfigurationManager.AppSettings["emailService:Account"],
-        //                                            ConfigurationManager.AppSettings["emailService:Password"]);
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
 
-        //    // Create a Web transport for sending email.
-        //    var transportWeb = new SendGrid.Web(credentials);
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Subject", message.Subject },
+                { "TPL_CustomerName", message.CustomerName },
+                { "TPL_CustomerCode", message.CustomerCode },
+                { "TPL_CustomerEmail", message.To },
+                { "TPL_Password", message.Body }
+            });
 
-        //    //Send the email.
-        //    if (transportWeb != null)
-        //    {
-        //        await transportWeb.DeliverAsync(myMessage);
-        //    }
-        //    else
-        //    {
-        //        Trace.TraceError("Failed to create Web transport.");
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
 
-        //    }
+        private async Task<string> ConfigPaymentNotificationMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:PaymentNotificationTemplate"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
-        //    await Task.FromResult(0);
-        //}
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Wallet Notification";
+            }
+
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Subject", message.Subject },
+                { "TPL_CustomerEmail", message.To },
+                { "TPL_CustomerName", message.CustomerName },
+                { "TPL_Date", message.Date },
+                { "TPL_Amount", message.Amount },
+                { "TPL_Currency", message.Currency },
+                { "TPL_Balance", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
     }
 }

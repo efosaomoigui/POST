@@ -729,6 +729,23 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
+        public async Task SendEcommerceRegistrationNotificationAsync(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEcommerceRegistrationNotificationAsync(messageDTO);
+                    //await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
         private async Task<bool> PrepareGenericMessageFinalBody(MessageDTO messageDTO, object obj)
         {
             bool verifySendEmail = true;
