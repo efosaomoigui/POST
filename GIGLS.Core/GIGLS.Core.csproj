@@ -393,6 +393,7 @@
     <Compile Include="DTO\PreShipmentSummaryDTO.cs" />
     <Compile Include="DTO\ReferrerCodeDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
+    <Compile Include="DTO\Report\BankDepositFilterCriteria.cs" />
     <Compile Include="DTO\Report\DateFilterCriteria.cs" />
     <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
     <Compile Include="DTO\Report\DashboardFilterCriteria.cs" />

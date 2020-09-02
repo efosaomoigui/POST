@@ -19,6 +19,7 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
         public async Task<string> SendEcommerceRegistrationNotificationAsync(MessageDTO message)
         {
             string result = "";
@@ -78,11 +79,15 @@ namespace GIGLS.Messaging.MessageService
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
             myMessage.AddTo(message.ToEmail, message.CustomerName);
             myMessage.From = new EmailAddress(fromEmail, fromName);
-            myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
             myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
 
             var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
             var client = new SendGridClient(apiKey);
@@ -109,6 +114,11 @@ namespace GIGLS.Messaging.MessageService
             };
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Wallet Notification";
+            }
 
             myMessage.AddTo(message.ToEmail, message.CustomerName);
             myMessage.From = new EmailAddress(fromEmail, fromName);

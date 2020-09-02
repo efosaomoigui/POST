@@ -1710,15 +1710,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Get manifest not yet added to super manifest for the login user
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
+                //var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
 
-                if (serviceCenters.Length > 0)
-                {
-                    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
-                }
+                //if (serviceCenters.Length > 0)
+                //{
+                //    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                //}
 
-                var manifestByScList = manifestBySc.ToList();
-                var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+                //var manifestByScList = manifestBySc.ToList();
+                //var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+
+                var resultDTO = await _uow.ManifestGroupWaybillNumberMapping.GetManifestAvailableForSuperManifest(serviceCenters);
+
 
                 var finalResult = result.Union(resultDTO).OrderByDescending(x => x.DateModified).ToList();
 
