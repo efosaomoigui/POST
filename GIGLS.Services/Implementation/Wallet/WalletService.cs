@@ -94,6 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (companyDTO != null)
                 {
                     walletDTO.CustomerName = companyDTO.Name;
+                    walletDTO.CustomerEmail = companyDTO.Email;
                     walletDTO.Country = companyDTO.Country;
                     walletDTO.UserActiveCountryId = companyDTO.UserActiveCountryId;
                 }
@@ -104,6 +105,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (partnerDTO != null)
                 {
                     walletDTO.CustomerName = partnerDTO.PartnerName;
+                    walletDTO.CustomerEmail = partnerDTO.Email;
                     walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                     walletDTO.Country = partnerDTO.Country;
                 }
@@ -117,6 +119,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
                     walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
                     walletDTO.Country = individualCustomerDTO.Country;
+                    walletDTO.CustomerEmail = individualCustomerDTO.Email;
                 }
             }
 

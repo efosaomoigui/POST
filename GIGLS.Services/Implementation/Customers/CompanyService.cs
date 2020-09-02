@@ -14,7 +14,6 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
@@ -180,14 +179,6 @@ namespace GIGLS.Services.Implementation.Customers
                     CompanyType = companyType
                 });
 
-                //send login detail to the customer
-                //var passwordMessage = new PasswordMessageDTO()
-                //{
-                //    Password = password,
-                //    UserEmail = newCompany.Email,
-                //    CustomerCode = newCompany.CustomerCode
-                //};
-
                 var message = new MessageDTO()
                 {
                     CustomerCode = newCompany.CustomerCode,
@@ -199,17 +190,18 @@ namespace GIGLS.Services.Implementation.Customers
                 await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
                 //send mail to ecommerce team
-                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+                var ecommerceEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.EcommerceEmail.ToString() && s.CountryId == 1);
 
-                //seperate email by comma and send message to those email
-                string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
-
-                foreach (string data in ecommerceEmails)
+                if (ecommerceEmail != null)
                 {
-                    message.ToEmail = data;
-                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
-                    //passwordMessage.UserEmail = data;
-                    //await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                    //seperate email by comma and send message to those email
+                    string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
+                    foreach (string data in ecommerceEmails)
+                    {
+                        message.ToEmail = data;
+                        await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+                    }
                 }
 
                 return Mapper.Map<CompanyDTO>(newCompany);

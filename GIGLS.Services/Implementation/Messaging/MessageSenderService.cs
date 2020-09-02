@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
@@ -737,7 +736,22 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendEcommerceRegistrationNotificationAsync(messageDTO);
-                    //await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        public async Task SendPaymentNotificationAsync(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendPaymentNotificationAsync(messageDTO);
                 }
             }
             catch (Exception ex)
