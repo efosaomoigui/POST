@@ -159,6 +159,7 @@ namespace GIGLS.Services.Implementation.Fleets
                         newDispatch.ServiceCentreId = userServiceCentreId;
                         newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
                         newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+                        newDispatch.IsSuperManifest = false;
                         data.Add(newDispatch);
                         //_uow.Dispatch.Add(newDispatch);
                     }
