@@ -121,7 +121,7 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-                var user = _unitOfWork.User.GetUserById(Id).Result;
+                var user = await _unitOfWork.User.GetUserById(Id);
 
             if (user == null)
             {
@@ -627,9 +627,9 @@ namespace GIGLS.Services.Implementation.User
             // get current user
             try
             {
-                var currentUserId = GetCurrentUserId().Result;
-                var currentUser = GetUserById(currentUserId).Result;
-                var userClaims = GetClaimsAsync(currentUserId).Result;
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var userClaims = await GetClaimsAsync(currentUserId);
 
                 //currentUser.ServiceCentres
 
@@ -1378,8 +1378,8 @@ namespace GIGLS.Services.Implementation.User
             int[] serviceCenterIds = { };
             try
             {
-                var currentUser = GetUserById(currentUserId).Result;
-                IList<Claim> userClaims = GetClaimsAsync(currentUserId).Result;
+                var currentUser = await GetUserById(currentUserId);
+                IList<Claim> userClaims = await GetClaimsAsync(currentUserId);
                 
                 string[] claimValue = null;
                 foreach (var claim in userClaims)
