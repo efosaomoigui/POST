@@ -23,7 +23,7 @@ namespace GIGLS.Messaging.MessageService
         public async Task<string> SendEcommerceRegistrationNotificationAsync(MessageDTO message)
         {
             string result = "";
-            if (message.ToEmail != null)
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
             {
                 result = await ConfigEcommerceRegistrationMessage(message);
             }
@@ -33,7 +33,7 @@ namespace GIGLS.Messaging.MessageService
         public async Task<string> SendPaymentNotificationAsync(MessageDTO message)
         {
             string result = "";
-            if (message.ToEmail != null)
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
             {
                 result = await ConfigPaymentNotificationMessage(message);
             }

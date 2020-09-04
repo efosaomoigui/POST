@@ -11,5 +11,6 @@ namespace GIGLS.Core.IMessageService
         Task SendGenericEmailMessage(MessageType messageType, object obj);
         Task SendVoiceMessageAsync(string userId);
         Task SendEcommerceRegistrationNotificationAsync(MessageDTO messageDTO);
+        Task SendPaymentNotificationAsync(MessageDTO messageDTO);
     }
 }
