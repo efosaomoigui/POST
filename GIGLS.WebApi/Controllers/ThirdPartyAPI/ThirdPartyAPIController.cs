@@ -600,5 +600,25 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        /// <summary>
+        /// This api is used to get the active lgas for GiG Go shipments 
+        /// </summary>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getactivelgas")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetActiveLGAs();
+
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

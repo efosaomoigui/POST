@@ -29,5 +29,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         //pickuprequests
         Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria);
 
+        //Get Active LGAs
+        Task<IEnumerable<LGADTO>> GetActiveLGAs();
+
     }
 }
