@@ -63,6 +63,7 @@
         AccountMonitoringEmails,
         GIGGOPartnerEmail,
         EcommerceGIGGOIntraStateBikeDiscount,
-        GIGGODropOffDiscount
+        GIGGODropOffDiscount,
+        ChairmanEmail
     }
 }

@@ -172,7 +172,6 @@ namespace GIGLS.Services.Implementation.Utility
             }
         }
 
-
         public async Task<decimal> GetDropOffDiscountInGlobalProperty(int countryId)
         {
             try

@@ -45,7 +45,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
 
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByServiceCenter(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria, ServiceCentreDTO[] sc)  
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria, ServiceCentreDTO[] sc)  
         {
             //get startDate and endDate
             var queryDate = dateFilterCriteria.getStartDateAndEndDate();
@@ -77,7 +77,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         }
 
         //gets the deposits for the date range
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
         {
             //get startDate and endDate
             var queryDate = dateFilterCriteria.getStartDateAndEndDate();
@@ -110,7 +110,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         }
 
         //gets the regional deposits for the date range
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria, int[] serviceCenters)
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria, int[] serviceCenters)
         {
             //get startDate and endDate
             var queryDate = dateFilterCriteria.getStartDateAndEndDate();
