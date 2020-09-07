@@ -10,6 +10,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -137,8 +138,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.ShipmentPackagingTransactions.Add(newInflow);
                 await _uow.CompleteAsync();
-
-
             }
             catch (Exception)
             {
@@ -193,7 +192,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BaseFilterCriteria filterCriteria)
+        public async Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BankDepositFilterCriteria filterCriteria)
         {
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -153,7 +154,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("packagetransactions")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>> GetShipmentPackageTransactions(BaseFilterCriteria filterCriteria)
+        public async Task<IServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>> GetShipmentPackageTransactions(BankDepositFilterCriteria filterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {

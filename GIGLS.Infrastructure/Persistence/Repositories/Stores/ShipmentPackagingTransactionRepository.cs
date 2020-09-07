@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IRepositories.Stores;
 using GIGLS.CORE.DTO.Report;
@@ -20,7 +21,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Stores
             _context = context;
         }
 
-        public Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BaseFilterCriteria filterCriteria, int[] serviceCenterIds)
+        public Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BankDepositFilterCriteria filterCriteria, int[] serviceCenterIds)
         {
             try
             {
@@ -28,12 +29,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Stores
                 var queryDate = filterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
-
-                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
-                {
-                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-30);
-                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
-                }
 
                 var packages = _context.ShipmentPackagingTransactions.Where(c => serviceCenterIds.Contains(c.ServiceCenterId) && c.DateCreated >= startDate && c.DateCreated < endDate);
 
