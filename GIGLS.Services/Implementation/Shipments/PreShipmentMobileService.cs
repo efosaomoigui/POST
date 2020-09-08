@@ -1055,6 +1055,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
+                var userId = await _userService.GetCurrentUserId();
+                preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
@@ -1103,6 +1105,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (preShipmentItem.Quantity == 0)
                     {
                         throw new GenericException("Item Quantity cannot be zero");
+                    }
+
+                    if (preShipmentItem.SpecialPackageId == null)
+                    {
+                        preShipmentItem.SpecialPackageId = 0;
                     }
 
                     var PriceDTO = new PricingDTO
