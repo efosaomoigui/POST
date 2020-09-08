@@ -126,6 +126,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentServiceCenterId = serviceCenterIds[0];
                 
                 shipmentPackagePrice.InventoryOnHand += shipmentPackagePriceDto.QuantityToBeAdded;
+                shipmentPackagePrice.MinimunRequired = shipmentPackagePriceDto.MinimunRequired;
 
                 var newInflow = new ShipmentPackagingTransactions
                 {

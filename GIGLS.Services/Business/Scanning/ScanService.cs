@@ -1143,7 +1143,7 @@ namespace GIGLS.Services.Business.Scanning
                 {
                     //use ShipmentPackagePriceId in the item table to handle this instead for description
                     //use it when creating the shipment
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
                     var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == currentServiceCenterId);
                     
                     if (serviceCenterPackage == null)

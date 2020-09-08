@@ -141,5 +141,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Drop Off
         public string TempCode { get; set; }
+
+        public List<int> PackageOptionIds { get; set; } = new List<int>();
     }
 }

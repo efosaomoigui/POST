@@ -4606,6 +4606,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ShipmentPickupPrice = pickupprice,
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
+                                        PackageOptionIds = detail.PackageOptionIds,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -4617,16 +4618,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                         }).ToList()
                                     };
-
-                                    if (detail.ShipmentPackagePriceId > 0)
-                                    {
-                                        for (var i = 0; i < 1; i++)
-                                        {
-                                            MobileShipment.ShipmentItems[i].ShipmentPackagePriceId = detail.ShipmentPackagePriceId;
-                                            MobileShipment.ShipmentItems[i].PackageQuantity = detail.PackageQuantity;
-                                        }
-                                    }
-
 
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 

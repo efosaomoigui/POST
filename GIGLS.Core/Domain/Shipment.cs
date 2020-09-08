@@ -154,8 +154,6 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsFromMobile { get; set; }
 
         public bool isInternalShipment { get; set; }
-
-        public int ShipmentPackageId { get; set; }
-        public int ShipmentPackageQuantity { get; set; }
+               
     }
 }
