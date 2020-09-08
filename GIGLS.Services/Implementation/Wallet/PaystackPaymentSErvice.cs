@@ -19,6 +19,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Collections.Generic;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO;
+using GIGLS.Core.IServices.Utility;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -28,14 +33,19 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
+        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
+            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
+            _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -115,7 +125,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (walletDto != null)
                     {
                         //use customer code to get customer id
-                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                      var  user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
                             customerId = user.Id;
@@ -131,6 +141,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
                 }
 
                 //3. update the wallet payment log
@@ -141,7 +153,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
-
                 result = true;
             }
 
@@ -201,7 +212,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //a. update the wallet for the customer
                     string customerId = null;  //set customer id to null
@@ -229,6 +240,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
                 }
 
                 //3. update the wallet payment log
@@ -487,6 +500,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
                 }
 
                 //3. update the wallet payment log
@@ -649,6 +664,47 @@ namespace GIGLS.Services.Implementation.Wallet
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
+                var walletBalance = await _uow.Wallet.GetAsync(x => x.WalletId == walletDto.WalletId);
+
+                if (walletBalance != null)
+                {
+                    var message = new MessageDTO()
+                    {
+                        CustomerCode = walletDto.CustomerCode,
+                        CustomerName = walletDto.CustomerName,
+                        ToEmail = walletDto.CustomerEmail,
+                        To = walletDto.CustomerEmail,
+                        Currency = walletDto.Country.CurrencySymbol,
+                        Body = walletBalance.Balance.ToString("N"),
+                        Amount = paymentLog.Amount.ToString("N"),
+                        Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                    };
+
+                    //send mail to customer
+                    await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                    //send a copy to chairman
+                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                    if(chairmanEmail != null)
+                    {
+                        //seperate email by comma and send message to those email
+                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                        foreach (string email in chairmanEmails)
+                        {
+                            message.ToEmail = email;
+                            await _messageSenderService.SendPaymentNotificationAsync(message);
+                        }
+                    }
+                }
             }
         }
     }
