@@ -2920,7 +2920,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipment.PackageOptionIds.Any())
                     {
                         var numOfPackages = shipment.PackageOptionIds.Count;
-                        var numOfShipmentItems = shipmentexists.ShipmentItems.Count;
+                        var numOfShipmentItems = newShipment.ShipmentItems.Count;
 
                         if (numOfPackages > numOfShipmentItems)
                         {
