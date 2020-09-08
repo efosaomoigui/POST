@@ -4819,22 +4819,47 @@ namespace GIGLS.Services.Implementation.Shipments
                         Email = userDetail.Email,
                         PhoneNumber = userDetail.PhoneNumber,
                         UserId = userId,
-                        IsActivated = false,
+                        IsActivated = false
                     };
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+
+                    if (user.VehicleType.Any())
+                    {
+                        FinalPartner.VehicleType = user.VehicleType[0];
+                    }
                     _uow.Partner.Add(FinalPartner);
                 }
+                else
+                {
+                    if (partner != null)
+                    {
+                        if (user.VehicleType.Any())
+                        {
+                            partner.VehicleType = user.VehicleType[0];
+                        }
+                    }
+                }
+
+                //Get all the vehicle Type in the system for the user
+                var vehicleTypeList = await _uow.VehicleType.FindAsync(x => x.Partnercode == user.UserChannelCode);
+                var vehicleTypeArray = vehicleTypeList.Select(x => x.Vehicletype).ToList();
+
+                List<VehicleType> newVehicleTypes = new List<VehicleType>();
 
                 foreach (var vehicle in user.VehicleType)
                 {
-                    var Vehicle = new VehicleTypeDTO
+                    if (!vehicleTypeArray.Contains(vehicle))
                     {
-                        Vehicletype = vehicle.ToUpper(),
-                        Partnercode = user.UserChannelCode
-                    };
-                    var vehicletype = Mapper.Map<VehicleType>(Vehicle);
-                    _uow.VehicleType.Add(vehicletype);
+                        var vehicleData = new VehicleType
+                        {
+                            Vehicletype = vehicle.ToUpper(),
+                            Partnercode = user.UserChannelCode
+                        };
+                        newVehicleTypes.Add(vehicleData);
+                    }
                 }
+
+                _uow.VehicleType.AddRange(newVehicleTypes);
                 await _uow.CompleteAsync();
                 return true;
             }
