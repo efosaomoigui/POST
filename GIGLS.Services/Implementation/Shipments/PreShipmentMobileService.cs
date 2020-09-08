@@ -4819,25 +4819,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         Email = userDetail.Email,
                         PhoneNumber = userDetail.PhoneNumber,
                         UserId = userId,
-                        IsActivated = false
+                        IsActivated = false,
                     };
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
-
-                    if (user.VehicleType.Any())
-                    {
-                        FinalPartner.VehicleType = user.VehicleType[0];
-                    }
                     _uow.Partner.Add(FinalPartner);
-                }
-                else
-                {
-                    if (partner != null)
-                    {
-                        if (user.VehicleType.Any())
-                        {
-                            partner.VehicleType = user.VehicleType[0];
-                        }
-                    }
                 }
 
                 //Get all the vehicle Type in the system for the user
@@ -4858,7 +4843,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         newVehicleTypes.Add(vehicleData);
                     }
                 }
-
                 _uow.VehicleType.AddRange(newVehicleTypes);
                 await _uow.CompleteAsync();
                 return true;
