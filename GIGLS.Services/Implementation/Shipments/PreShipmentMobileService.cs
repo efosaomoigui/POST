@@ -1055,6 +1055,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
+                var userId = await _userService.GetCurrentUserId();
+                preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
@@ -1103,6 +1105,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (preShipmentItem.Quantity == 0)
                     {
                         throw new GenericException("Item Quantity cannot be zero");
+                    }
+
+                    if (preShipmentItem.SpecialPackageId == null)
+                    {
+                        preShipmentItem.SpecialPackageId = 0;
                     }
 
                     var PriceDTO = new PricingDTO
@@ -4159,16 +4166,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (deliveryNumber == null)
                 {
                     await UpdateDeliveryNumber(detail);
-                    //throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else if (deliveryNumber.Number.ToLower() != detail.DeliveryNumber.ToLower())
                 {
                     throw new GenericException($"This PIN {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
                 }
-                //else if (deliveryNumber.IsUsed)
-                //{
-                //    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
-                //}
                 else
                 {
                     var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
