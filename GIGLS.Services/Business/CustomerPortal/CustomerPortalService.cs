@@ -1807,6 +1807,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+        public async Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations()
+        {
+            try
+            {
+                return await _uow.HomeDeliveryLocation.GetActiveHomeDeliveryLocations();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<AdminReportDTO> WebsiteData()
         {
