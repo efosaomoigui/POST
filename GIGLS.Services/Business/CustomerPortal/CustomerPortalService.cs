@@ -97,6 +97,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IFlutterwavePaymentService _flutterwavePaymentService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -105,11 +106,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
-            ICountryService countryService, IAdminReportService adminReportService,
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService, IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
+            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
+            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,           
+            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -145,6 +146,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _logService = logService;
             _visitService = visitService;
             _paymentTransactionService = paymentTransactionService;
+            _flutterwavePaymentService = flutterwavePaymentService;
             MapperConfig.Initialize();
         }
 
@@ -188,8 +190,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await Task.FromResult(invoicesDto);
         }
-        //my own
-
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
@@ -269,6 +269,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     result = await VerifyAndValidateUSSDPayment(referenceCode);
                 }
+                else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                {
+                    result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                }
                 else
                 {
                     result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -289,6 +293,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             PaymentResponse response = new PaymentResponse();
 
             var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateFlutterWavePayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(referenceCode);
 
             response.Result = result.Status;
             response.Status = result.data.Status;
