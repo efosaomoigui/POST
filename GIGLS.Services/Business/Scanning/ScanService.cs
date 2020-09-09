@@ -1131,7 +1131,7 @@ namespace GIGLS.Services.Business.Scanning
 
             if (newShipment.DestinationServiceCentreId != currentServiceCenterId)
             {
-                throw new GenericException($"Shipment with waybill: {newShipment.Waybill}does not belong to your center!");
+                throw new GenericException($"Shipment with waybill: {newShipment.Waybill} does not belong to your center!");
             }
 
             List<ShipmentPackagingTransactions> packageInflow = new List<ShipmentPackagingTransactions>();
@@ -1162,7 +1162,6 @@ namespace GIGLS.Services.Business.Scanning
                         serviceCenterPackage.InventoryOnHand += shipmentItem.Quantity;
                     }
                     
-
                     var newInflow = new ShipmentPackagingTransactions
                     {
                         ServiceCenterId = currentServiceCenterId,
@@ -1170,7 +1169,7 @@ namespace GIGLS.Services.Business.Scanning
                         Quantity = shipmentItem.Quantity,
                         Waybill = newShipment.Waybill,
                         UserId = user,
-                        PackageTransactionType = PackageTransactionType.InflowToSC
+                        PackageTransactionType = PackageTransactionType.InflowToServiceCentre
                     };
                    
                     packageInflow.Add(newInflow);

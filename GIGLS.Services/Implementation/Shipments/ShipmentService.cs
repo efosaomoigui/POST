@@ -1193,7 +1193,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Quantity = 1,
                         Waybill = shipmentDTO.Waybill,
                         UserId = currentUserId,
-                        PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
+                        PackageTransactionType = PackageTransactionType.OutflowFromServiceCentre
                     };
                     packageoutflow.Add(newOutflow);
                 }
@@ -1203,7 +1203,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 newShipment.ShipmentItems[i].ShipmentPackagePriceId = shipmentDTO.PackageOptionIds[i];
                 newShipment.ShipmentItems[i].PackageQuantity = 1;
-
             }
 
             foreach (var shipmentItem in newShipment.ShipmentItems)
@@ -3091,7 +3090,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Quantity = 1,
                     Waybill = shipment.Waybill,
                     UserId = shipment.UserId,
-                    PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromSC
+                    PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromServiceCentre
                 };
                 packageoutflow.Add(newOutflow);
             }
