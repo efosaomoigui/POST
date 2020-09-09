@@ -4827,16 +4827,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Partner.Add(FinalPartner);
                 }
 
+                //Get all the vehicle Type in the system for the user
+                var vehicleTypeList = await _uow.VehicleType.FindAsync(x => x.Partnercode == user.UserChannelCode);
+                var vehicleTypeArray = vehicleTypeList.Select(x => x.Vehicletype).ToList();
+
+                List<VehicleType> newVehicleTypes = new List<VehicleType>();
+
                 foreach (var vehicle in user.VehicleType)
                 {
-                    var Vehicle = new VehicleTypeDTO
+                    if (!vehicleTypeArray.Contains(vehicle))
                     {
-                        Vehicletype = vehicle.ToUpper(),
-                        Partnercode = user.UserChannelCode
-                    };
-                    var vehicletype = Mapper.Map<VehicleType>(Vehicle);
-                    _uow.VehicleType.Add(vehicletype);
+                        var vehicleData = new VehicleType
+                        {
+                            Vehicletype = vehicle.ToUpper(),
+                            Partnercode = user.UserChannelCode
+                        };
+                        newVehicleTypes.Add(vehicleData);
+                    }
                 }
+                _uow.VehicleType.AddRange(newVehicleTypes);
                 await _uow.CompleteAsync();
                 return true;
             }

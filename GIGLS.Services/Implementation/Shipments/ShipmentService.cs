@@ -1134,6 +1134,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentDTO.Waybill.Contains("AWR"))
                 {
                     //Do nothing
+                    shipmentDTO.isInternalShipment = false;
                 }
                 else
                 {
