@@ -62,6 +62,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.CheckDetailsForCustomerPortal(user);
         }
 
+        public async Task<IEnumerable<LGADTO>> GetActiveLGAs()
+        {
+            return await _portalService.GetActiveLGAs();
+        }
+
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{

@@ -18,6 +18,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -439,6 +440,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 transitWaybill.IsTransitCompleted = true;
             }
 
+            if(shipmentCollectionDto.DeliveryNumber != null)
+            {
+                //update delivery number
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollectionDto.Waybill);
+                if(deliveryNumber != null)
+                {
+                    deliveryNumber.IsUsed = true;
+                    deliveryNumber.UserId = shipmentCollectionDto.UserId;
+                }
+                
+            }
+            
+
             await _uow.CompleteAsync();
         }
 
@@ -523,6 +537,23 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentReroute != null)
             {
                 throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Reroute");
+            }
+
+            //check if the shipment pin corresponds to the pin for the waybill 
+            if(!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
+            {
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+                if (deliveryNumber != null)
+                {
+                    if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                    {
+                        throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                }
             }
 
             await UpdateShipmentCollection(shipmentCollection);

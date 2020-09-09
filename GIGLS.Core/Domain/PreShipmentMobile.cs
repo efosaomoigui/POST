@@ -157,5 +157,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(500)]
         public string DeliveryAddressImageUrl { get; set; }
+
+        public bool IsScheduled { get; set; }
+        public DateTime? ScheduledDate { get; set; }
     }
 }

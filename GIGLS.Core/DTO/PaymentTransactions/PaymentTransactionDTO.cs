@@ -11,5 +11,6 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public PaymentStatus PaymentStatus { get; set; }
         public PaymentType PaymentType { get; set; }
         public string UserId { get; set; }
+        public bool FromApp { get; set; }
     }
 }

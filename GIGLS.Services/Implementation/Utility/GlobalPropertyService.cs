@@ -17,6 +17,7 @@ namespace GIGLS.Services.Implementation.Utility
     public class GlobalPropertyService : IGlobalPropertyService
     {
         private readonly IUnitOfWork _uow;
+
         public GlobalPropertyService(IUnitOfWork uow)
         {
             _uow = uow;
@@ -164,6 +165,20 @@ namespace GIGLS.Services.Implementation.Utility
                 }
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
                 return await Task.FromResult(globalDTo);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetDropOffDiscountInGlobalProperty(int countryId)
+        {
+            try
+            {
+                var discountPercent = await GetGlobalProperty(GlobalPropertyType.GIGGODropOffDiscount, countryId);
+                decimal discount = Convert.ToDecimal(discountPercent.Value);
+                return discount;
             }
             catch (Exception)
             {

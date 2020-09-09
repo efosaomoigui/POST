@@ -98,7 +98,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
 
                 Manifest manifestObj = null;
-                List<Manifest> manifestObjs = null;
+                List<Manifest> manifestObjs = new List<Manifest>();
                 // update manifest
 
                 if (dispatchDTO.IsSuperManifest)

@@ -36,5 +36,6 @@ namespace GIGLS.Core.DTO.Shipments
         public List<PreShipmentItemDTO> PreShipmentItems { get; set; }
         public bool IsProcessed { get; set; }
         public bool IsAgent { get; set; }
+        public bool IsActive { get; set; }
     }
 }

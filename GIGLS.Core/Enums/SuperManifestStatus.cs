@@ -11,6 +11,7 @@ namespace GIGLS.Core.Enums
         Pending,
         ArrivedScan,
         AssignedSuperManifest,
-        Dispatched
+        Dispatched, 
+        RegularProcess
     }
 }

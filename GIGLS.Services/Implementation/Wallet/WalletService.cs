@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
@@ -93,6 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (companyDTO != null)
                 {
                     walletDTO.CustomerName = companyDTO.Name;
+                    walletDTO.CustomerEmail = companyDTO.Email;
                     walletDTO.Country = companyDTO.Country;
                     walletDTO.UserActiveCountryId = companyDTO.UserActiveCountryId;
                 }
@@ -103,6 +105,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (partnerDTO != null)
                 {
                     walletDTO.CustomerName = partnerDTO.PartnerName;
+                    walletDTO.CustomerEmail = partnerDTO.Email;
                     walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                     walletDTO.Country = partnerDTO.Country;
                 }
@@ -116,6 +119,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
                     walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
                     walletDTO.Country = individualCustomerDTO.Country;
+                    walletDTO.CustomerEmail = individualCustomerDTO.Email;
                 }
             }
 
@@ -492,6 +496,33 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            return walletDTO;
+        }
+
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+            walletDTO.Country = Mapper.Map<CountryDTO>(country);
+
+            if (wallet.CompanyType == CustomerType.IndividualCustomer.ToString())
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.CustomerName = customer.FirstName + " " + customer.LastName;
+            }
+            else
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.CustomerName = customer.Name;
+            }
             return walletDTO;
         }
 

@@ -39,7 +39,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var dropOffs = _context.PreShipment.AsQueryable().Where(x => x.SenderUserId == currentUserId);
+            var dropOffs = _context.PreShipment.AsQueryable().Where(x => x.SenderUserId == currentUserId && x.IsActive == true);
 
             if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
             {
@@ -83,7 +83,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             Quantity = x.Quantity,
                                                                             SpecialPackageId = x.SpecialPackageId,
                                                                             PreShipmentId = x.PreShipmentId,
-                                                                            PreShipmentItemId = x.PreShipmentItemId
+                                                                            PreShipmentItemId = x.PreShipmentItemId,
+                                                                            ItemValue = x.ItemValue
                                                                         }).ToList()
                                                 }).ToList();
 

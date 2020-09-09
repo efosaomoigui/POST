@@ -58,6 +58,7 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.IServices.PaymentTransactions;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -96,6 +97,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentCollectionService _collectionservice;
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -108,6 +110,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
+            ICountryService countryService, IAdminReportService adminReportService,
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            IPaymentTransactionService paymentTransactionService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -142,6 +149,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _collectionservice = collectionService;
             _logService = logService;
             _visitService = visitService;
+            _paymentTransactionService = paymentTransactionService;
             MapperConfig.Initialize();
         }
 
@@ -1327,7 +1335,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUser(UserDTO user)
         {
-           // bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            // bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
@@ -1461,6 +1469,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
         {
             return await _preShipmentMobileService.UpdateDeliveryNumber(detail);
+        }
+        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        {
+            return await _preShipmentMobileService.UpdateDeliveryNumberNew(detail);
         }
         public async Task<Partnerdto> GetMonthlyPartnerTransactions()
         {
@@ -1734,11 +1746,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            //if (string.IsNullOrEmpty(preShipment.VehicleType))
-            //{
-            //    throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            //}
-
             if (!preShipment.PreShipmentItems.Any())
             {
                 throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
@@ -1753,8 +1760,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
-                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
-                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude!= null)
+                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null
+                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude != null)
             {
                 return await _preShipmentMobileService.GetPriceForBike(preShipment);
             }
@@ -1782,6 +1789,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<WalletDTO> GetWalletBalance()
         {
             return await _walletService.GetWalletBalance();
+        }
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            return await _walletService.GetWalletBalanceWithName();
         }
         public async Task<SpecialResultDTO> GetSpecialPackages()
         {
@@ -2329,6 +2340,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 newPreShipment.TempCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode); ;
                 newPreShipment.ApproximateItemsWeight = 0;
                 newPreShipment.IsProcessed = false;
+                newPreShipment.IsActive = true;
 
                 // add serial numbers to the ShipmentItems
                 var serialNumber = 1;
@@ -2354,7 +2366,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
-
+                    newPreShipment.Value += shipmentItem.ItemValue;
                     serialNumber++;
                 }
                 _uow.PreShipment.Add(newPreShipment);
@@ -2436,6 +2448,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
 
+                    newPreShipment.Value += shipmentItem.ItemValue;
                     serialNumber++;
                 }
                 _uow.PreShipment.Add(newPreShipment);
@@ -2559,7 +2572,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                         preshipment.Weight = (double)preShipmentItemDTO.Weight;
                         preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
                         preshipment.SpecialPackageId = preShipmentItemDTO.SpecialPackageId;
+                        preshipment.ItemValue = preShipmentItemDTO.ItemValue;
                         existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
+                        existingPreShipment.Value += preShipmentItemDTO.ItemValue;
                     }
                 }
                 await _uow.CompleteAsync();
@@ -2600,7 +2615,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode, "PreShipmentItems");
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.IsActive == true, "PreShipmentItems");
                 if (preShipment != null)
                 {
                     PreShipmentDTO dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
@@ -2692,7 +2707,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection)
         {
-             await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+            await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
         }
 
         public async Task<List<LogVisitReasonDTO>> GetLogVisitReasons()
@@ -2703,6 +2718,75 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
         {
             return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
+        }
+
+        public async Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments()
+        {
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var outstandingShipments = await _uow.PreShipmentMobile.GetAllOutstandingShipmentsForUser(currentUser.UserChannelCode);
+
+            return outstandingShipments;
+
+        }
+
+        public async Task<bool> PayForShipment(string waybill)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
+
+            if (invoice == null)
+            {
+                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                throw new GenericException($"Payment already made for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var wallet = await _walletService.GetWalletBalance();
+
+            if (wallet.Balance < invoice.Amount)
+            {
+                throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var transactionDTO = new PaymentTransactionDTO
+            {
+                Waybill = invoice.Waybill,
+                TransactionCode = wallet.WalletNumber,
+                PaymentType = PaymentType.Wallet,
+                FromApp = true
+            };
+            var result = await _paymentTransactionService.ProcessNewPaymentTransaction(transactionDTO);
+            return result;
+        }
+
+        public async Task<bool> DeleteDropOff(string tempCode)
+        {
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+
+                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.SenderUserId == currentUserId);
+
+                if (dropoff == null)
+                {
+                    throw new GenericException("Drop off Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                dropoff.IsActive = false;
+
+                await _uow.CompleteAsync();
+                return true; 
+            }
+            catch
+            {
+                throw;
+            }
         }
 
     }

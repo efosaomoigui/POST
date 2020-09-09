@@ -374,5 +374,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("deliverywaybillinmanifestbydate")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetAllCODShipmentOnDeliveryManifestl(dateFilterCriteria);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings
+                };
+            });
+        }
     }
 }

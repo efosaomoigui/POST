@@ -165,5 +165,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
         Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
         Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
+        Task<WalletDTO> GetWalletBalanceWithName();
+        Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
+        Task<bool> PayForShipment(string waybill);
+        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<bool> DeleteDropOff(string waybill);
     }
 }

@@ -1,7 +1,9 @@
-﻿using GIGLS.Core.Domain.BankSettlement;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
@@ -44,12 +46,13 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task<List<CodPayOutList>> GetPaidOutCODLists();
         Task<List<CodPayOutList>> GetPaidOutCODListsByCustomer(string customercode);
 
-        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria);
         Task<IEnumerable<BankDTO>> GetBanks();
-        Task<List<BankProcessingOrderCodesDTO>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<List<BankProcessingOrderCodesDTO>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria);
         Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCode_ScheduleTask(BankProcessingOrderCodesDTO bkoc);
         Task<Object> GetBankProcessingOrderForShipment_ScheduleTask(int serviceCenterId, DepositType type);
-        Task<object> GetBankProcessingOrderForCOD_ScheduledTask(DepositType type, int ServiceCenterId);
+        Task<object> GetBankProcessingOrderForCOD_ScheduledTask(DepositType type, int ServiceCenterId); 
         Task<object> GetBankProcessingOrderForDemurrage_ScheduleTask(DepositType type, int servicecenterId);
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria);
     }
 }
