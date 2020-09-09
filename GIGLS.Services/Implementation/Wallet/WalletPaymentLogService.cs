@@ -25,13 +25,15 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly IUssdService _ussdService;
 
-        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
+        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IFlutterwavePaymentService flutterwavePaymentService)
         {
             _userService = userService;
             _paystackPaymentService = paystackPaymentService;
             _ussdService = ussdService;
+            _flutterwavePaymentService = flutterwavePaymentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -286,6 +288,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     result = await VerifyAndValidateUSSDPayment(referenceCode);
                 }
+                else if(paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                {
+                    result = await VerifyAndValidateFlutterWavePayment(paymentLog.Reference);
+                }
                 else
                 {
                     result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -306,6 +312,18 @@ namespace GIGLS.Services.Implementation.Wallet
             PaymentResponse response = new PaymentResponse();
 
             var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateFlutterWavePayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(referenceCode);
 
             response.Result = result.Status;
             response.Status = result.data.Status;
