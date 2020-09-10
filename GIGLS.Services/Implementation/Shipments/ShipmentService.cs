@@ -2852,6 +2852,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
+                    shipmentexists.PickupOptions = shipment.PickupOptions;
 
                     if (shipment.PackageOptionIds.Any())
                     {

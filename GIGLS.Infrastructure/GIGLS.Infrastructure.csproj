@@ -180,6 +180,7 @@
     <Compile Include="Persistence\Repositories\Repository.cs" />
     <Compile Include="Persistence\Repositories\RiderDeliveryRepository.cs" />
     <Compile Include="Persistence\Repositories\RouteRepository.cs" />
+    <Compile Include="Persistence\Repositories\ServiceCentres\HomeDeliveryLocationRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\LGARepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionServiceCentreMappingRepository.cs" />

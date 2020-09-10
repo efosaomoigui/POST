@@ -193,6 +193,7 @@ namespace GIGLS.Core
         //Route Section
         IRouteRepository Routes { get; set; }
 
+        IHomeDeliveryLocationRepository HomeDeliveryLocation { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
