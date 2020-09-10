@@ -1,4 +1,6 @@
-﻿namespace GIGLS.Core.DTO.OnlinePayment
+﻿using System.Collections.Generic;
+
+namespace GIGLS.Core.DTO.OnlinePayment
 {
     public class PaystackWebhookDTO
     {
@@ -47,6 +49,16 @@
         public FlutterResponseData data { get; set; }
     }
 
+    public class FlutterTransactionWebhookDTO
+    {
+        public FlutterTransactionWebhookDTO()
+        {
+            data = new List<FlutterResponseData>();
+        }
+        public string Status { get; set; }
+        public List<FlutterResponseData> data { get; set; }
+    }
+
     public class FlutterResponseData
     {
         public FlutterResponseData()
@@ -54,7 +66,9 @@
             validateInstructions = new ValidateInstructions();
         }
         public string Status { get; set; }
+        public int Id { get; set; }
         public string TXRef { get; set; }
+        public string TX_Ref { get; set; }
         public decimal Amount { get; set; }
         public string ChargeResponseMessage { get; set; }
         public string ChargeResponseCode { get; set; }
@@ -64,7 +78,6 @@
         public string Acctvalrespcode { get; set; }
         public string Acctvalrespmsg { get; set; }
         public string ChargeCode { get; set; }
-
         public ValidateInstructions validateInstructions { get; set; }
     }
 

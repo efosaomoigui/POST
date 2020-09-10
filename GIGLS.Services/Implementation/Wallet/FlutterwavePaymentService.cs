@@ -76,6 +76,84 @@ namespace GIGLS.Services.Implementation.Wallet
                 SECKEY = secretKey
             };
 
+            //https://api.flutterwave.com/v3/transactions/123456/verify
+
+            int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
+
+            string verifyUrl = "https://api.flutterwave.com/v3/transactions/" + transactionId + "/verify";
+            //string verifyUrl = "https://api.flutterwave.com/v3/transactions/1525582/verify";
+            string authorization = "Bearer " + secretKey;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("Authorization", authorization);
+
+                var json = JsonConvert.SerializeObject(obj);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.GetAsync(verifyUrl);
+                string responseResult = await response.Content.ReadAsStringAsync();
+
+                result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
+            }
+
+            return result;
+        }
+
+        private async Task<int> GetTransactionPaymentIdUsingRefCode(string reference)
+        {
+            int id = 0;
+            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
+            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            //string verifyUrl = "https://api.flutterwave.com/v3/transactions/" + reference + "/verify";
+            // https://api.flutterwave.com/v3/transactions?tx_ref={{your_tx_ref}}
+
+            string verifyUrl = flutterSandBox + "transactions?tx_ref=" + reference;
+            string authorization = "Bearer " + secretKey;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("Authorization", authorization);
+
+                var response = await client.GetAsync(verifyUrl);
+                string responseResult = await response.Content.ReadAsStringAsync();
+
+                var result = JsonConvert.DeserializeObject<FlutterTransactionWebhookDTO>(responseResult);
+
+                if (result.Status.Equals("success"))
+                {
+                    if(result.data.Count > 0)
+                    {
+                        id = result.data[0].Id;
+                    }
+                }
+            }
+
+            return id;
+        }
+
+        private async Task<FlutterWebhookDTO> VerifyPaymentV2(string reference)
+        {
+            FlutterWebhookDTO result = new FlutterWebhookDTO();
+
+            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
+            string flutterVerify = flutterSandBox + ConfigurationManager.AppSettings["FlutterVerify"];
+            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            var obj = new
+            {
+                txref = reference,
+                SECKEY = secretKey
+            };
+
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -166,17 +244,22 @@ namespace GIGLS.Services.Implementation.Wallet
             bool result = false;
 
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(webhook.data.TXRef);
+            var verifyResult = await VerifyPayment(webhook.data.TX_Ref);
 
             if (verifyResult.Status.Equals("success"))
             {
                 if (verifyResult.data != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == webhook.data.TXRef);
+                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == verifyResult.data.TX_Ref);
 
                     if (paymentLog == null)
                         return result;
+
+                    if(verifyResult.data.Status != null)
+                    {
+                        verifyResult.data.Status = verifyResult.data.Status.ToLower();
+                    }
 
                     //2. if the payment successful
                     if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
