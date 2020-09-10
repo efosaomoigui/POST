@@ -1153,7 +1153,7 @@ namespace GIGLS.Services.Business.Scanning
                             ServiceCenterId = currentServiceCenterId,
                             ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
                             InventoryOnHand = shipmentItem.Quantity,
-                            MinimunRequired = 10,
+                            MinimunRequired = 1,
                         };
                         servicePackage.Add(newshipmentPackage);
                     }

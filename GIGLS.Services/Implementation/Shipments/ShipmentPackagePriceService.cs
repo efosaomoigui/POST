@@ -151,7 +151,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var package = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description.ToLower().Trim() == shipmentPackagePriceDto.Description.ToLower().Trim());
+                var package = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description.ToLower().Trim() == shipmentPackagePriceDto.Description.ToLower().Trim() && x.CountryId == shipmentPackagePriceDto.CountryId);
                 if (package != null)
                 {
                     throw new GenericException("Package information already exists");
