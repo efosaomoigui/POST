@@ -4613,6 +4613,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ShipmentPickupPrice = pickupprice,
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
+                                        PackageOptionIds = detail.PackageOptionIds,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -4624,6 +4625,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                         }).ToList()
                                     };
+
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();

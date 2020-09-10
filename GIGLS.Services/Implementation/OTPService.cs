@@ -291,11 +291,11 @@ namespace GIGLS.Services.Implementation
                 if (VehicleType != null)
                 {
                     registerUser.VehicleLicenseExpiryDate = VehicleType.VehicleLicenseExpiryDate;
-                    var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
 
                     if (VehicleType.VehicleType != null)
                     {
-                        var vehicleTypeArray = vehicle.Select(x => x.Vehicletype).ToList();
+                        var vehicleList = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
+                        var vehicleTypeArray = vehicleList.Select(x => x.Vehicletype).ToList();
 
                         if (!vehicleTypeArray.Contains(VehicleType.VehicleType))
                         {
@@ -311,6 +311,7 @@ namespace GIGLS.Services.Implementation
                         }
                     }
 
+                    var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
                     if (vehicle.Any())
                     {
                         registerUser.VehicleDetails = new List<VehicleTypeDTO>();

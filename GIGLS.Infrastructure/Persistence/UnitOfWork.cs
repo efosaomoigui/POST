@@ -474,6 +474,12 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IRouteRepository Routes { get; set; }
 
+        [Inject]
+        public IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
+
+        [Inject]
+        public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
