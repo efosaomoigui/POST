@@ -1165,7 +1165,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (numOfPackages > numOfShipmentItems)
             {
-                throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.Forbidden}");
+                throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.BadRequest}");
             }
 
             if (shipmentDTO.PackageOptionIds.Any())
@@ -2832,7 +2832,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         if (numOfPackages > numOfShipmentItems)
                         {
-                            throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.BadRequest}");
                         }
 
                         for (var i = 0; i < numOfPackages; i++)
@@ -2900,7 +2900,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         if (numOfPackages > numOfShipmentItems)
                         {
-                            throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("Number of Packages should not be more then Shipment Items!", $"{(int)HttpStatusCode.BadRequest}");
                         }
 
                         for (var i = 0; i < numOfPackages; i++)
