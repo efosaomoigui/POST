@@ -279,6 +279,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<MobileGroupCodeWaybillMapping> MobileGroupCodeWaybillMapping { get; set; }
         public DbSet<PartnerPayout> PartnerPayout { get; set; }
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
+        public DbSet<HomeDeliveryLocation> HomeDeliveryLocation { get; set; }
 
         #endregion
 

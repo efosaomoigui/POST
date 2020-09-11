@@ -2750,6 +2750,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
+                    shipmentexists.PickupOptions = shipment.PickupOptions;
 
                     var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill);
                     if (invoice != null)
