@@ -1055,6 +1055,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
+                var userId = await _userService.GetCurrentUserId();
+                preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
@@ -1103,6 +1105,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (preShipmentItem.Quantity == 0)
                     {
                         throw new GenericException("Item Quantity cannot be zero");
+                    }
+
+                    if (preShipmentItem.SpecialPackageId == null)
+                    {
+                        preShipmentItem.SpecialPackageId = 0;
                     }
 
                     var PriceDTO = new PricingDTO
@@ -4159,16 +4166,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (deliveryNumber == null)
                 {
                     await UpdateDeliveryNumber(detail);
-                    //throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else if (deliveryNumber.Number.ToLower() != detail.DeliveryNumber.ToLower())
                 {
                     throw new GenericException($"This PIN {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
                 }
-                //else if (deliveryNumber.IsUsed)
-                //{
-                //    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
-                //}
                 else
                 {
                     var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
@@ -4799,41 +4801,55 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //get currently login user
+                var userId = await _userService.GetCurrentUserId();
+                var userDetail = await _userService.GetUserById(userId);
+                user.UserChannelCode = userDetail.UserChannelCode;
+
                 var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
-                if (partner == null)
+                if (partner == null && userDetail.UserChannelType == UserChannelType.Employee)
                 {
                     var partnerDTO = new PartnerDTO
                     {
                         PartnerType = PartnerType.InternalDeliveryPartner,
-                        PartnerName = user.FirstName + " " + user.LastName,
-                        PartnerCode = user.UserChannelCode,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        UserId = user.Id,
+                        PartnerName = userDetail.FirstName + " " + userDetail.LastName,
+                        PartnerCode = userDetail.UserChannelCode,
+                        FirstName = userDetail.FirstName,
+                        LastName = userDetail.LastName,
+                        Email = userDetail.Email,
+                        PhoneNumber = userDetail.PhoneNumber,
+                        UserId = userId,
                         IsActivated = false,
                     };
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
                 }
+
+                //Get all the vehicle Type in the system for the user
+                var vehicleTypeList = await _uow.VehicleType.FindAsync(x => x.Partnercode == user.UserChannelCode);
+                var vehicleTypeArray = vehicleTypeList.Select(x => x.Vehicletype).ToList();
+
+                List<VehicleType> newVehicleTypes = new List<VehicleType>();
+
                 foreach (var vehicle in user.VehicleType)
                 {
-                    var Vehicle = new VehicleTypeDTO
+                    if (!vehicleTypeArray.Contains(vehicle))
                     {
-                        Vehicletype = vehicle.ToUpper(),
-                        Partnercode = user.UserChannelCode
-                    };
-                    var vehicletype = Mapper.Map<VehicleType>(Vehicle);
-                    _uow.VehicleType.Add(vehicletype);
+                        var vehicleData = new VehicleType
+                        {
+                            Vehicletype = vehicle.ToUpper(),
+                            Partnercode = user.UserChannelCode
+                        };
+                        newVehicleTypes.Add(vehicleData);
+                    }
                 }
+                _uow.VehicleType.AddRange(newVehicleTypes);
                 await _uow.CompleteAsync();
                 return true;
             }
             catch
             {
                 throw;
-                //throw new GenericException("Please an error occurred while updating profile.");
             }
         }
 
