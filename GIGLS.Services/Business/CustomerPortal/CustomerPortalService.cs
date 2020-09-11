@@ -1414,6 +1414,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             return userActiveCountry;
         }
 
+        public async Task<object> GetUserCountryCode(UserDTO user)
+        {
+            var userCountry = await GetUserActiveCountry(user);
+
+            string countryCode = userCountry.CurrencyCode.Length <= 2 ? userCountry.CurrencyCode : userCountry.CurrencyCode.Substring(0, 2);
+
+            return new { CountryCode = countryCode, CurrencyCode = userCountry.CurrencyCode, CountryId = userCountry.CountryId };
+        }
+
         public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
         {
             return await _preShipmentMobileService.GetHaulagePrice(haulagePricingDto);
