@@ -471,6 +471,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IEcommerceAgreementRepository EcommerceAgreement { get; set; }
 
         [Inject]
+        public IHomeDeliveryLocationRepository HomeDeliveryLocation { get; set; }
+
+        [Inject]
         public IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
 
         [Inject]

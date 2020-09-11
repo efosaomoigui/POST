@@ -340,8 +340,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
-
                 
+                //optimise these 3 line of code. you can't fetch all the data into memory when you only need to check for boolean value
+                var dispatchList = _uow.Dispatch.GetAllAsQueryable().Where(x => manifestByScList.Contains(x.ManifestNumber)).Select(x => x.DestinationId).ToList();
+                var allAreSame = dispatchList.All(x => x == dispatchList.First());
+
+                if(allAreSame == false)
+                {
+                    throw new GenericException($"Error: Manifest belong to different Stations. ");
+                }
+
+
                 int manifestByScListCount = manifestByScList.Count; 
                 if (manifestByScListCount == 0)
                 {

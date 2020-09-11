@@ -4600,7 +4600,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DepartureServiceCentreId = detail.SenderServiceCentreId,
                                         CustomerId = customerid,
                                         UserId = user,
-                                        PickupOptions = PickupOptions.HOMEDELIVERY,
+                                        PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                                         ApproximateItemsWeight = 0.00,
