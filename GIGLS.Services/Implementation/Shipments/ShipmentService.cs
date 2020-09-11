@@ -1160,9 +1160,6 @@ namespace GIGLS.Services.Implementation.Shipments
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
 
-            List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
-            List<ServiceCenterPackage> servicePackage = new List<ServiceCenterPackage>();
-
             var numOfPackages = shipmentDTO.PackageOptionIds.Count;
             var numOfShipmentItems = newShipment.ShipmentItems.Count;
 
@@ -1173,38 +1170,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentDTO.PackageOptionIds.Any())
             {
-                foreach (var packageId in shipmentDTO.PackageOptionIds)
-                {
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == packageId);
-                    var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == shipmentDTO.DepartureServiceCentreId);
-
-                    if (serviceCenterPackage == null)
-                    {
-                        var newshipmentPackage = new ServiceCenterPackage
-                        {
-                            ServiceCenterId = shipmentDTO.DepartureServiceCentreId,
-                            ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
-                            InventoryOnHand = 0,
-                            MinimunRequired = 0,
-                        };
-                        servicePackage.Add(newshipmentPackage);
-                    }
-                    else
-                    {
-                        serviceCenterPackage.InventoryOnHand -= 1;
-                    }
-
-                    var newOutflow = new ShipmentPackagingTransactions
-                    {
-                        ServiceCenterId = shipmentDTO.DepartureServiceCentreId,
-                        ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
-                        Quantity = 1,
-                        Waybill = shipmentDTO.Waybill,
-                        UserId = currentUserId,
-                        PackageTransactionType = PackageTransactionType.OutflowFromServiceCentre
-                    };
-                    packageoutflow.Add(newOutflow);
-                }
+               
+                await UpdatePackageTransactions(shipmentDTO);
             }
 
             for (var i = 0; i < numOfPackages; i++)
@@ -1233,9 +1200,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 serialNumber++;
             }
 
-
-            _uow.ShipmentPackagingTransactions.AddRange(packageoutflow);
-            _uow.ServiceCenterPackage.AddRange(servicePackage);
             //do not save the child objects
             newShipment.DepartureServiceCentre = null;
             newShipment.DestinationServiceCentre = null;
