@@ -96,6 +96,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> GetMagayaWayBillNumber();
         EntityList GetEntityObect();
         Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
+        Task<string> SetEntityIntl(CustomerDTO custDTo);
     }
 
 

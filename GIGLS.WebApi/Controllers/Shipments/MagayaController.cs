@@ -13,6 +13,7 @@ using System.Web.Http.ModelBinding;
 using Newtonsoft.Json.Linq;
 using GIGLS.WebApi.Models;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -99,6 +100,31 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entitydto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("AddEntityInternational")]
+        public async Task<IServiceResponse<string>> AddEntityInternational(CustomerDTO custDTo)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var SetCustomerResult = _service.SetEntityIntl(custDTo);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<string>()
+                {
+                    Object = SetCustomerResult.Result
+                };
+            });
+        }
+
 
         /// <summary>
         /// 

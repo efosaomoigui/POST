@@ -94,6 +94,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IMagayaService _magayaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -106,7 +107,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
             IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService)
+            IPaymentTransactionService paymentTransactionService, IMagayaService magayaService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -140,6 +141,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _logService = logService;
             _visitService = visitService;
             _paymentTransactionService = paymentTransactionService;
+            _magayaService = magayaService;
             MapperConfig.Initialize();
         }
 

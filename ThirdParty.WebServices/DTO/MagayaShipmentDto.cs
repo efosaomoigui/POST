@@ -1817,7 +1817,8 @@ namespace ThirdParty.WebServices.Magaya.DTO
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlArrayItemAttribute("Custom", IsNullable = false)]
+        //[System.Xml.Serialization.XmlArrayItemAttribute("Custom", IsNullable = false)]
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
         public CustomType[] Customs
         {
             get

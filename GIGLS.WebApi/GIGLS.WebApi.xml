@@ -52,6 +52,13 @@
             <param name="entitydto"></param>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddEntityInternational(GIGLS.Core.DTO.Customers.CustomerDTO)">
+            <summary>
+            
+            </summary>
+            <param name="entitydto"></param>
+            <returns></returns>
+        </member>
         <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetEntities(System.String)">
             <summary>
             
