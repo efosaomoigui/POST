@@ -2252,7 +2252,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 else
                 {
                     //Get the customer name
-                    if (user.UserChannelType == UserChannelType.Ecommerce)
+                    if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.Corporate)
                     {
                         var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
 
@@ -2493,8 +2493,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.Value = existingPreShipment.Value;
                 existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
                 existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
-                existingPreShipment.SenderName = preShipmentDTO.SenderName;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
+
+                if (existingPreShipment.IsAgent)
+                {
+                    existingPreShipment.SenderName = preShipmentDTO.SenderName;
+                }
 
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)

@@ -169,5 +169,11 @@
             <param name="waybillNumber"></param>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetActiveLGAs">
+            <summary>
+            This api is used to get the active lgas for GiG Go shipments 
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

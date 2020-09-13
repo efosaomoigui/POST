@@ -212,7 +212,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //a. update the wallet for the customer
                     string customerId = null;  //set customer id to null
