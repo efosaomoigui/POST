@@ -593,13 +593,13 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
 
-                var DispatchName = _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
+                var DispatchName = await _uow.User.GetUserById(manifestDTO.DispatchedBy);
                 if (DispatchName != null)
                 {
                     manifestDTO.DispatchedBy = DispatchName.FirstName + " " + DispatchName.LastName;
                 }
 
-                var RecieverName = _uow.User.GetUserById(manifestDTO.ReceiverBy).Result;
+                var RecieverName = await _uow.User.GetUserById(manifestDTO.ReceiverBy);
                 if (RecieverName != null)
                 {
                     manifestDTO.ReceiverBy = RecieverName.FirstName + " " + RecieverName.LastName;

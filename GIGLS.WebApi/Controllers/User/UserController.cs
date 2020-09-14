@@ -597,7 +597,7 @@ namespace GIGLS.WebApi.Controllers.User
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
