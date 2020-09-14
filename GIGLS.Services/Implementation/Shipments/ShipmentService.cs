@@ -1082,6 +1082,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentDTO.Waybill.Contains("AWR"))
                 {
                     //Do nothing
+                    shipmentDTO.isInternalShipment = false;
                 }
                 else
                 {
@@ -1710,15 +1711,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Get manifest not yet added to super manifest for the login user
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
+                //var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
 
-                if (serviceCenters.Length > 0)
-                {
-                    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
-                }
+                //if (serviceCenters.Length > 0)
+                //{
+                //    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                //}
 
-                var manifestByScList = manifestBySc.ToList();
-                var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+                //var manifestByScList = manifestBySc.ToList();
+                //var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+
+                var resultDTO = await _uow.ManifestGroupWaybillNumberMapping.GetManifestAvailableForSuperManifest(serviceCenters);
+
 
                 var finalResult = result.Union(resultDTO).OrderByDescending(x => x.DateModified).ToList();
 
@@ -2715,7 +2719,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 string[] warehouseServiceCentres = { };
                 // filter by global property for warehouse service centre
-                var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre, userActiveCountryId).Result;
+                var warehouseServiceCentreObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre, userActiveCountryId);
                 if (warehouseServiceCentreObj != null)
                 {
                     var warehouseServiceCentre = warehouseServiceCentreObj.Value;
@@ -2746,6 +2750,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
+                    shipmentexists.PickupOptions = shipment.PickupOptions;
 
                     var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill);
                     if (invoice != null)
