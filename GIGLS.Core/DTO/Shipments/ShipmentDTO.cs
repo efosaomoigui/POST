@@ -71,7 +71,6 @@ namespace GIGLS.Core.DTO.Shipments
         //General Details comes with role user
         public string UserId { get; set; }
 
-        //
         public List<CustomerDTO> Customer { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
 
@@ -197,6 +196,12 @@ namespace GIGLS.Core.DTO.Shipments
 
         //General Details comes with role user
         public string UserId { get; set; }
+        public List<CustomerDTO> Customer { get; set; }
+        public CustomerDTO CustomerDetails { get; set; }
+        public string CustomerType { get; set; }
+        public int CustomerId { get; set; }
+        public string CompanyType { get; set; }
+        public string CustomerCode { get; set; }
 
         public bool IsdeclaredVal { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; }

@@ -95,6 +95,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto) 
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return _uow.IntlShipmentRequest.GetIntlTransactionShipmentRequest(filterOptionsDto, serviceCenters); 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try

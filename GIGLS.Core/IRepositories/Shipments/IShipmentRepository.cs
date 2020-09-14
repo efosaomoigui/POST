@@ -27,6 +27,7 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
     {
         Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+        Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
 
     }
 }

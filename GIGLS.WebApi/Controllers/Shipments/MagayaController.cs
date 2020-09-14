@@ -154,6 +154,30 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startwithstring"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetIntltransactionRequest")]
+        public async Task<IServiceResponse<EntityList>> GetIntltransactionRequest(string startwithstring) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetEntities(access_key, startwithstring);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<EntityList>()
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpGet]
         [Route("GetEntitiesObject")]
         public async Task<IServiceResponse<EntityList>> GetEntitiesObject()
