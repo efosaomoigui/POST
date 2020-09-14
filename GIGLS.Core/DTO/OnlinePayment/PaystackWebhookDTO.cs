@@ -67,7 +67,6 @@ namespace GIGLS.Core.DTO.OnlinePayment
         }
         public string Status { get; set; }
         public int Id { get; set; }
-        public string TXRef { get; set; }
         public string TX_Ref { get; set; }
         public decimal Amount { get; set; }
         public string ChargeResponseMessage { get; set; }
@@ -78,6 +77,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Acctvalrespcode { get; set; }
         public string Acctvalrespmsg { get; set; }
         public string ChargeCode { get; set; }
+        public string Processor_Response { get; set; }
         public ValidateInstructions validateInstructions { get; set; }
     }
 

@@ -38,15 +38,15 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task VerifyAndValidatePayment(FlutterWebhookDTO webhook)
         {
-            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.data.TXRef);
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.data.TX_Ref);
 
             if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                await ProcessPaymentForWaybill(webhook);
+                await ProcessPaymentForWaybill(webhook.data.TX_Ref);
             }
             else
             {
-                await ProcessPaymentForWallet(webhook);
+                await ProcessPaymentForWallet(webhook.data.TX_Ref);
             }
         }
 
@@ -65,24 +65,12 @@ namespace GIGLS.Services.Implementation.Wallet
             FlutterWebhookDTO result = new FlutterWebhookDTO();
 
             string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-            string flutterVerify = flutterSandBox + ConfigurationManager.AppSettings["FlutterVerify"];
             string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
-
+            string authorization = "Bearer " + secretKey;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
-            var obj = new
-            {
-                txref = reference,
-                SECKEY = secretKey
-            };
-
-            //https://api.flutterwave.com/v3/transactions/123456/verify
-
             int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
-
-            string verifyUrl = "https://api.flutterwave.com/v3/transactions/" + transactionId + "/verify";
-            //string verifyUrl = "https://api.flutterwave.com/v3/transactions/1525582/verify";
-            string authorization = "Bearer " + secretKey;
+            string verifyUrl = flutterSandBox + "transactions/" + transactionId + "/verify";
 
             using (var client = new HttpClient())
             {
@@ -90,8 +78,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("Authorization", authorization);
 
-                var json = JsonConvert.SerializeObject(obj);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await client.GetAsync(verifyUrl);
                 string responseResult = await response.Content.ReadAsStringAsync();
 
@@ -108,9 +94,6 @@ namespace GIGLS.Services.Implementation.Wallet
             string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-            //string verifyUrl = "https://api.flutterwave.com/v3/transactions/" + reference + "/verify";
-            // https://api.flutterwave.com/v3/transactions?tx_ref={{your_tx_ref}}
 
             string verifyUrl = flutterSandBox + "transactions?tx_ref=" + reference;
             string authorization = "Bearer " + secretKey;
@@ -175,14 +158,14 @@ namespace GIGLS.Services.Implementation.Wallet
             bool result = false;
 
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(webhook.data.TXRef);
+            var verifyResult = await VerifyPayment(webhook.data.TX_Ref);
 
             if (verifyResult.Status.Equals("success"))
             {
                 if (verifyResult.data != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == webhook.data.TXRef);
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == webhook.data.TX_Ref);
 
                     if (paymentLog == null)
                         return result;
@@ -239,19 +222,65 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        private async Task<bool> ProcessPaymentForWallet(FlutterWebhookDTO webhook)
+        private async Task<FlutterWebhookDTO> ProcessPaymentForWaybill(string referenceCode)
         {
-            bool result = false;
-
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(webhook.data.TX_Ref);
+            var verifyResult = await VerifyPayment(referenceCode);
 
             if (verifyResult.Status.Equals("success"))
             {
                 if (verifyResult.data != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == verifyResult.data.TX_Ref);
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                    if (paymentLog == null)
+                        return verifyResult;
+
+                    //2. if the payment successful
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                    {
+                        //3. Process payment for the waybill if successful
+                        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                        {
+                            Waybill = paymentLog.Waybill,
+                            PaymentType = PaymentType.Online,
+                            TransactionCode = paymentLog.Reference,
+                            UserId = paymentLog.UserId
+                        };
+
+                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                        if (processWaybillPayment)
+                        {
+                            //2. Update waybill Payment log
+                            paymentLog.IsPaymentSuccessful = true;
+                            paymentLog.IsWaybillSettled = true;
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = verifyResult.data.Status;
+                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    await _uow.CompleteAsync();
+                }
+            }
+
+            return verifyResult;
+        }
+
+        private async Task<bool> ProcessPaymentForWalletOld(string reference)
+        {
+            bool result = false;
+
+            //1. verify the payment 
+            var verifyResult = await VerifyPayment(reference);
+
+            if (verifyResult.Status.Equals("success"))
+            {
+                if (verifyResult.data != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == reference);
 
                     if (paymentLog == null)
                         return result;
@@ -299,25 +328,77 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
-
-                    if (verifyResult.data.validateInstructions.Instruction != null)
-                    {
-                        paymentLog.TransactionResponse = verifyResult.data.validateInstructions.Instruction;
-                    }
-                    else if(verifyResult.data.ChargeMessage != null)
-                    {
-                        paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
-                    }
-                    else
-                    {
-                        paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
-                    }
-
+                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
                     await _uow.CompleteAsync();
                     result = true;
                 }
             }
             return result;
+        }
+
+        private async Task<FlutterWebhookDTO> ProcessPaymentForWallet(string reference)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyPayment(reference);
+
+            if (verifyResult.Status.Equals("success"))
+            {
+                if (verifyResult.data != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == reference);
+
+                    if (paymentLog == null)
+                        return verifyResult;
+
+                    if (verifyResult.data.Status != null)
+                    {
+                        verifyResult.data.Status = verifyResult.data.Status.ToLower();
+                    }
+
+                    //2. if the payment successful
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                    {
+                        //a. update the wallet for the customer
+                        string customerId = null;  //set customer id to null
+
+                        //get wallet detail to get customer code
+                        var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                        if (walletDto != null)
+                        {
+                            //use customer code to get customer id
+                            var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                            if (user != null)
+                                customerId = user.Id;
+                        }
+
+                        //update the wallet
+                        await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                        {
+                            WalletId = paymentLog.WalletId,
+                            Amount = verifyResult.data.Amount,
+                            CreditDebitType = CreditDebitType.Credit,
+                            Description = "Funding made through online payment",
+                            PaymentType = PaymentType.Online,
+                            PaymentTypeReference = paymentLog.Reference,
+                            UserId = customerId
+                        }, false);
+                    }
+
+                    //3. update the wallet payment log
+                    if (verifyResult.data.Status.Equals("successful"))
+                    {
+                        paymentLog.IsWalletCredited = true;
+                    }
+
+                    paymentLog.TransactionStatus = verifyResult.data.Status;
+                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    await _uow.CompleteAsync();
+                }
+            }
+            return verifyResult;
         }
 
         //Generate security for webhook
@@ -357,17 +438,17 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
         {
-            var webhook = await VerifyPayment(reference);
+            FlutterWebhookDTO webhook = new FlutterWebhookDTO();
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
 
             if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                await ProcessPaymentForWaybill(webhook);
+               webhook = await ProcessPaymentForWaybill(reference);
             }
             else
             {
-                await ProcessPaymentForWallet(webhook);
+                webhook = await ProcessPaymentForWallet(reference);
             }
 
             return ManageReturnResponse(webhook);
@@ -501,38 +582,40 @@ namespace GIGLS.Services.Implementation.Wallet
             if (flutterResponse.data != null)
             {
                 response.data.Status = flutterResponse.data.Status;
+                response.data.Message = flutterResponse.data.Processor_Response;
+                response.data.Gateway_Response = flutterResponse.data.Processor_Response;
 
-                if (flutterResponse.data.validateInstructions.Instruction != null)
-                {
-                    response.data.Message = flutterResponse.data.validateInstructions.Instruction;
-                    response.data.Gateway_Response = flutterResponse.data.validateInstructions.Instruction;
-                }
-                else if (flutterResponse.data.ChargeMessage != null)
-                {
-                    response.data.Message = flutterResponse.data.ChargeMessage;
-                    response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
-                    response.Message = flutterResponse.data.ChargeMessage;
-                    if (!flutterResponse.data.Status.Equals("successful"))
-                    {
-                        response.Status = false;
-                    }
-                }
-                else
-                {
-                    response.data.Message = flutterResponse.data.ChargeResponseMessage;
-                    response.data.Gateway_Response = flutterResponse.data.ChargeResponseMessage;
-                }
+                //if (flutterResponse.data.validateInstructions.Instruction != null)
+                //{
+                //    response.data.Message = flutterResponse.data.validateInstructions.Instruction;
+                //    response.data.Gateway_Response = flutterResponse.data.validateInstructions.Instruction;
+                //}
+                //else if (flutterResponse.data.ChargeMessage != null)
+                //{
+                //    response.data.Message = flutterResponse.data.ChargeMessage;
+                //    response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
+                //    response.Message = flutterResponse.data.ChargeMessage;
+                //    if (!flutterResponse.data.Status.Equals("successful"))
+                //    {
+                //        response.Status = false;
+                //    }
+                //}
+                //else
+                //{
+                //    response.data.Message = flutterResponse.data.ChargeResponseMessage;
+                //    response.data.Gateway_Response = flutterResponse.data.ChargeResponseMessage;
+                //}
 
-                if(flutterResponse.data.ChargeCode != null)
-                {
-                    if (flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
-                    {
-                        response.data.Message = flutterResponse.data.ChargeMessage;
-                        response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
-                        response.Message = flutterResponse.data.ChargeMessage;
-                        response.Status = true;
-                    }
-                }
+                //if(flutterResponse.data.ChargeCode != null)
+                //{
+                //    if (flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
+                //    {
+                //        response.data.Message = flutterResponse.data.ChargeMessage;
+                //        response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
+                //        response.Message = flutterResponse.data.ChargeMessage;
+                //        response.Status = true;
+                //    }
+                //}
             }
             else
             {

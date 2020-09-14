@@ -170,7 +170,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
         Task<bool> PayForShipment(string waybill);
         Task<bool> DeleteDropOff(string waybill);
-        Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations();
         Task<object> GetUserCountryCode(UserDTO user);
+        Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations();
     }
 }
