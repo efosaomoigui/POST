@@ -19,12 +19,10 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletPaymentLogController : BaseWebApiController
     {
         private readonly IWalletPaymentLogService _walletPaymentLogService;
-        //private readonly IPaystackPaymentService _paymentService;
 
         public WalletPaymentLogController(IWalletPaymentLogService walletPaymentLogService) : base(nameof(WalletPaymentLogController))
         {
             _walletPaymentLogService = walletPaymentLogService;
-            //_paymentService = paymentService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -113,7 +111,6 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
                 var result = await _walletPaymentLogService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
@@ -152,7 +149,6 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
-
 
     }
 }
