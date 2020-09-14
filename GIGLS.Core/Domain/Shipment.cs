@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
+
     public class Shipment : BaseDomain, IAuditable
     {
 
@@ -155,4 +156,95 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool isInternalShipment { get; set; }
     }
+
+    public class IntlShipmentRequest : BaseDomain, IAuditable
+    { 
+        //Shipment Information
+        [Key]
+        public int ShipmentId { get; set; }
+
+        [MaxLength(100), MinLength(5)]
+        [Index(IsUnique = true)]
+        public string RequestNumber { get; set; } 
+
+        //Senders' Information
+        public decimal Value { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; }
+
+        //Receivers Information
+        public int DepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre DepartureServiceCentre { get; set; }
+
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentre DestinationServiceCentre { get; set; }
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+
+        [MaxLength(200)]
+        public string ReceiverName { get; set; }
+
+        [MaxLength(100)]
+        public string ReceiverPhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        public string ReceiverEmail { get; set; }
+
+        [MaxLength(500)]
+        public string ReceiverAddress { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverCity { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverState { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverCountry { get; set; }
+
+        //Delivery Options
+        public int DeliveryOptionId { get; set; }
+
+        public virtual DeliveryOption DeliveryOption { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
+        //Shipment Items
+        public virtual List<IntlShipmentRequestItem> ShipmentRequestItems { get; set; }  
+        public double ApproximateItemsWeight { get; set; }
+
+        public decimal GrandTotal { get; set; }
+
+        //General Details comes with role user
+        [MaxLength(128)]
+        public string UserId { get; set; }
+
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; }
+
+        //discount information
+        public decimal? Total { get; set; }
+
+        //payment method
+        [MaxLength(20)]
+        public string PaymentMethod { get; set; }
+
+        public bool IsInternational { get; set; }
+
+        [MaxLength(500)]
+        public string Description { get; set; }
+
+        public DepositStatus DepositStatus { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        [MaxLength(500)]
+        public string SenderAddress { get; set; }
+
+        [MaxLength(50)]
+        public string SenderState { get; set; }
+
+        public bool IsProcessed { get; set; }
+    } 
+
 }

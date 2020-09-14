@@ -23,4 +23,10 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
     }
+
+    public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
+    {
+        Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+
+    }
 }

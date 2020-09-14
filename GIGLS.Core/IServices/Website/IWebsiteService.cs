@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Shipments;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Website
@@ -11,6 +12,7 @@ namespace GIGLS.Core.IServices.Website
         Task<bool> SendGIGGoIssuesMail(AppMessageDTO obj);
         Task<object> AddEcommerceAgreement(EcommerceAgreementDTO ecommerceAgreementDTO);
         Task<object> AddIntlCustomer(CustomerDTO customerDTO);
+        Task<IntlShipmentRequestDTO> AddIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
     }
     
 }

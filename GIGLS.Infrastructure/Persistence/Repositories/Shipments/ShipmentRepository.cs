@@ -980,4 +980,90 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
     }
+
+    public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
+    {
+        private GIGLSContext _context;
+        public IntlShipmentRequestRepository(GIGLSContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public Task<List<IntlShipmentRequestDTO>> GetShipments(int[] serviceCentreIds)
+        {
+            var shipmentRequest = _context.IntlShipmentRequest.AsQueryable(); 
+            if (serviceCentreIds.Length > 0)
+            {
+                shipmentRequest = _context.IntlShipmentRequest.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+
+            //filter by cancelled shipments
+            //shipmentRequest = shipmentRequest.Where(s => s.IsCancelled == false); 
+
+
+            List<IntlShipmentRequestDTO> IntlShipmentRequestDTO = (from r in shipmentRequest
+                                                                   select new IntlShipmentRequestDTO()
+                                             {
+                                                 ShipmentId = r.ShipmentId,
+                                                 RequestNumber = r.RequestNumber,
+                                                 //ActualReceiverName = r.ActualReceiverName,
+                                                 //ActualreceiverPhone = r.ActualreceiverPhone,
+                                                 //Comments = r.Comments,
+                                                 DateCreated = r.DateCreated,
+                                                 DateModified = r.DateModified,
+                                                 DeliveryOptionId = r.DeliveryOptionId,
+                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 {
+                                                     Code = r.DeliveryOption.Code,
+                                                     Description = r.DeliveryOption.Description
+                                                 },
+                                                 DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+                                                 DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+
+                                                 //GroupWaybill = r.GroupWaybill,
+                                                 //IdentificationType = r.IdentificationType,
+                                                 //IndentificationUrl = r.IndentificationUrl,
+                                                 //IsDomestic = r.IsDomestic,
+                                                 PaymentStatus = r.PaymentStatus,
+                                                 ReceiverAddress = r.ReceiverAddress,
+                                                 ReceiverCity = r.ReceiverCity,
+                                                 ReceiverCountry = r.ReceiverCountry,
+                                                 ReceiverEmail = r.ReceiverEmail,
+                                                 ReceiverName = r.ReceiverName,
+                                                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                 ReceiverState = r.ReceiverState,
+
+                                                 UserId = r.UserId,
+                                                 Value = r.Value,
+                                                 GrandTotal = r.GrandTotal,
+
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight,
+
+                                                 //DepartureTerminalName = r.DepartureTerminal.Name,
+                                                 //DestinationTerminalName = r.DestinationTerminal.Name       
+                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
+                                             }).ToList();
+
+
+            return Task.FromResult(IntlShipmentRequestDTO.ToList()); 
+        }
+
+        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

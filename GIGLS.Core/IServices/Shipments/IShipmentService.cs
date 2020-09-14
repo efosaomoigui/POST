@@ -97,6 +97,7 @@ namespace GIGLS.Core.IServices.Shipments
         EntityList GetEntityObect();
         Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
         Task<string> SetEntityIntl(CustomerDTO custDTo);
+        Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
     }
 
 

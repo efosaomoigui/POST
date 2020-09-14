@@ -20,6 +20,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Generic;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Website
 {
@@ -147,7 +148,6 @@ namespace GIGLS.Services.Implementation.Website
                 {
                     natureOfBusiness = string.Join(",", ecommerceAgreementDTO.NatureOfBusiness);
                 }
-
 
                 //Check if it is in Pending Requests 
                 if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail == ecommerceAgreementDTO.BusinessEmail))
@@ -378,6 +378,18 @@ namespace GIGLS.Services.Implementation.Website
                 var result = new object();
                 return await Task.FromResult(result);
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IntlShipmentRequestDTO> AddIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
+        {
+            try
+            {
+                var addResult = await _magayaService.CreateIntlShipmentRequest(shipmentDTO); 
+                return addResult;
             }
             catch (Exception)
             {

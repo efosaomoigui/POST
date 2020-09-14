@@ -1111,7 +1111,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 shipmentItem.SerialNumber = serialNumber;
 
-                //sum item weight
+                //sum item weight 
                 //check for volumetric weight
                 if (shipmentItem.IsVolumetric)
                 {
