@@ -407,7 +407,6 @@
     <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
     <Compile Include="DTO\Routes\CreateRouteDto.cs" />
     <Compile Include="DTO\Routes\RouteDto.cs" />
-    <Compile Include="DTO\ServiceCentres\HomeDeliveryLocationDTO.cs" />
     <Compile Include="DTO\ServiceCentres\LGADTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
@@ -645,7 +644,6 @@
     <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
     <Compile Include="IRepositories\Routes\IRouteRepository.cs" />
-    <Compile Include="IRepositories\ServiceCentres\IHomeDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
@@ -796,7 +794,6 @@
     <Compile Include="IServices\Report\IAdminReportService.cs" />
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
     <Compile Include="IServices\RouteServices\IRouteService.cs" />
-    <Compile Include="IServices\ServiceCentres\IHomeDeliveryLocationService.cs" />
     <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />

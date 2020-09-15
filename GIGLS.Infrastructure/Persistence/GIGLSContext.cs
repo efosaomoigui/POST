@@ -287,8 +287,6 @@ namespace GIGLS.Infrastructure.Persistence
         //routes
         public DbSet<Route> Routes { get; }
 
-        public DbSet<HomeDeliveryLocation> HomeDeliveryLocation { get; set; }
-
         #endregion
 
 

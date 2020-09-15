@@ -67,11 +67,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetActiveLGAs();
         }
 
-        public async Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
-        {
-            return await _portalService.GetActiveHomeDeliveryLocations();
-        }
-
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{

@@ -620,21 +620,5 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("activehomedeliverylocations")]
-        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveHomeDeliveryLocations()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.GetActiveHomeDeliveryLocations();
-
-                return new ServiceResponse<IEnumerable<LGADTO>>
-                {
-                    Object = result
-                };
-            });
-        }
     }
 }
