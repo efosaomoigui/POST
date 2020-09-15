@@ -67,7 +67,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetActiveLGAs();
         }
 
-        public async Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations()
+        public async Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
         {
             return await _portalService.GetActiveHomeDeliveryLocations();
         }

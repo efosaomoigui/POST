@@ -26,12 +26,19 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
-                var lga = await _uow.LGA.GetAsync(x => x.LGAName.ToLower() == lgaDto.LGAName.ToLower() && x.LGAState.ToLower() == lgaDto.LGAState.ToLower());
+                var state = await _uow.State.GetAsync(lgaDto.StateId);
+                if (state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+
+                var lga = await _uow.LGA.GetAsync(x => x.LGAName.ToLower() == lgaDto.LGAName.ToLower() && x.StateId == lgaDto.StateId);
 
                 if(lga != null)
                 {
                     throw new GenericException("LGA Information already exists");
                 }
+                lgaDto.LGAState = state.StateName;
                 var newlga = Mapper.Map<LGA>(lgaDto);
                 _uow.LGA.Add(newlga);
                 await _uow.CompleteAsync();
@@ -72,8 +79,14 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             {
                 var lga = await _uow.LGA.GetAsync(lgaId);
 
+                var state = await _uow.State.GetAsync(lgaDto.StateId);
+                if (state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+
                 //To check if the update already exists
-                var lgas = await _uow.LGA.ExistAsync(c =>c.LGAName.ToLower() == lgaDto.LGAName.ToLower() && c.LGAState.ToLower() == lgaDto.LGAState.ToLower());
+                var lgas = await _uow.LGA.ExistAsync(c =>c.LGAName.ToLower() == lgaDto.LGAName.ToLower() && c.StateId == lgaDto.StateId);
                 if (lga == null || lgaDto.LGAId != lgaId)
                 {
                     throw new GenericException("LGA Information does not exist");
@@ -83,8 +96,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     throw new GenericException("LGA Information already exists");
                 }
                 lga.LGAName = lgaDto.LGAName;
-                lga.LGAState = lgaDto.LGAState;
+                lga.LGAState = state.StateName;
+                lga.StateId = state.StateId;
                 lga.Status = lgaDto.Status;
+                
                 _uow.Complete();
 
             }
@@ -134,6 +149,36 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             try
             {
                 return await _uow.LGA.GetActiveLGAs();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateHomeDeliveryLocation(int lgaId, bool status)
+        {
+            try
+            {
+                var location = await _uow.LGA.GetAsync(lgaId);
+                if (location == null)
+                {
+                    throw new GenericException("LGA Information does not exist");
+                }
+                location.HomeDeliveryStatus = status;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
+        {
+            try
+            {
+                return await _uow.LGA.GetActiveHomeDeliveryLocations();
             }
             catch (Exception)
             {

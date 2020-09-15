@@ -13,6 +13,10 @@ namespace GIGLS.Core.Domain
         public string LGAState { get; set; }
 
         public bool Status { get; set; }
-       
+
+        public int StateId { get; set; }
+
+        public bool HomeDeliveryStatus { get; set; }
+
     }
 }
