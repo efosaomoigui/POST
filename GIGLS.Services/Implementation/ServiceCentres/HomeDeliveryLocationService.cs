@@ -25,12 +25,18 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
-                var location = await _uow.HomeDeliveryLocation.GetAsync(x => x.LGAName.ToLower() == homeDeliveryLocationDTO.LGAName.ToLower() && x.LGAState.ToLower() == homeDeliveryLocationDTO.LGAState.ToLower());
+                var state = await _uow.State.GetAsync(homeDeliveryLocationDTO.StateId);
+                if(state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+                var location = await _uow.HomeDeliveryLocation.GetAsync(x => x.LGAName.ToLower() == homeDeliveryLocationDTO.LGAName.ToLower() && x.StateId == state.StateId);
 
                 if (location != null)
                 {
                     throw new GenericException("Location Information already exists");
                 }
+                homeDeliveryLocationDTO.LGAState = state.StateName;
                 var newlocation = Mapper.Map<HomeDeliveryLocation>(homeDeliveryLocationDTO);
                 _uow.HomeDeliveryLocation.Add(newlocation);
                 await _uow.CompleteAsync();
@@ -73,8 +79,14 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             {
                 var location = await _uow.HomeDeliveryLocation.GetAsync(locationId);
 
+                var state = await _uow.State.GetAsync(homeDeliveryLocationDTO.StateId);
+                if (state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+
                 //To check if the update already exists
-                var locationExist = await _uow.HomeDeliveryLocation.ExistAsync(c => c.LGAName.ToLower() == homeDeliveryLocationDTO.LGAName.ToLower() && c.LGAState.ToLower() == homeDeliveryLocationDTO.LGAState.ToLower());
+                var locationExist = await _uow.HomeDeliveryLocation.ExistAsync(c => c.LGAName.ToLower() == homeDeliveryLocationDTO.LGAName.ToLower() && c.StateId == state.StateId);
                 if (location == null || homeDeliveryLocationDTO.HomeDeliveryLocationId != locationId)
                 {
                     throw new GenericException("Location Information does not exist");
@@ -84,7 +96,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     throw new GenericException("Location Information already exists");
                 }
                 location.LGAName = homeDeliveryLocationDTO.LGAName;
-                location.LGAState = homeDeliveryLocationDTO.LGAState;
+                location.LGAState = state.StateName;
+                location.StateId = state.StateId;
                 location.Status = homeDeliveryLocationDTO.Status;
                 _uow.Complete();
 
