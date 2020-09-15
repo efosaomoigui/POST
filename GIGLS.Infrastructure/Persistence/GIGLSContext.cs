@@ -81,6 +81,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ManifestGroupWaybillNumberMapping> ManifestGroupWaybillNumberMapping { get; set; }
 
         public DbSet<Shipment> Shipment { get; set; }
+        public DbSet<IntlShipmentRequest> IntlShipmentRequest { get; set; }
+        public DbSet<IntlShipmentRequestItem> IntlShipmentRequestItem { get; set; }  
         public DbSet<MagayaShipmentAgility> MagayaShipment { get; set; }
         public DbSet<ShipmentItem> ShipmentItem { get; set; }
         public DbSet<MagayaShipmentItem> MagayaShipmentItem { get; set; }
@@ -148,7 +150,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<LogEntry> LogEntry { get; set; }
 
         // Partnership
-        public DbSet<IdentificationType> IdentificationTypes { get; set; }
         public DbSet<PartnerApplication> PartnerApplications { get; set; }
 
         // Wallet

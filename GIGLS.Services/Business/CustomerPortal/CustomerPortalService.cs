@@ -98,6 +98,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly IMagayaService _magayaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -111,6 +112,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,           
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService)
+            ICountryService countryService, IAdminReportService adminReportService,
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            IPaymentTransactionService paymentTransactionService, IMagayaService magayaService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -147,6 +153,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _visitService = visitService;
             _paymentTransactionService = paymentTransactionService;
             _flutterwavePaymentService = flutterwavePaymentService;
+            _magayaService = magayaService;
             MapperConfig.Initialize();
         }
 

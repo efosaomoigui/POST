@@ -75,6 +75,11 @@ namespace GIGLS.Services.Implementation.Utility
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
                 }
 
+                if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = "REQ-" + ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + numberStr;
+                }
+
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 

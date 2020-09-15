@@ -76,7 +76,13 @@ namespace GIGLS.Infrastructure.Persistence
         public IShipmentItemRepository ShipmentPackage { get; set; }
 
         [Inject]
+        public IIntlShipmentRequestRepository IntlShipmentRequest { get; set; }
+
+        [Inject]
         public IShipmentRepository Shipment { get; set; }
+
+        [Inject]
+        public IIntlShipmentRequestItemRepository IntlShipmentRequestItem { get; set; }  
 
         [Inject]
         public IMagayaShipmentRepository MagayaShipment { get; set; } 

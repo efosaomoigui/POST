@@ -47,6 +47,8 @@ namespace GIGLS.Core
         IManifestGroupWaybillNumberMappingRepository ManifestGroupWaybillNumberMapping { get; set; }
         IShipmentItemRepository ShipmentPackage { get; set; }
         IMagayaShipmentItemRepository MagayaShipmentItem { get; set; } 
+        IIntlShipmentRequestRepository IntlShipmentRequest { get; set; }
+        IIntlShipmentRequestItemRepository IntlShipmentRequestItem { get; set; } 
         IShipmentRepository Shipment { get; set; }
         IMagayaShipmentRepository MagayaShipment { get; set; }
         IShipmentTrackingRepository ShipmentTracking { get; set; }

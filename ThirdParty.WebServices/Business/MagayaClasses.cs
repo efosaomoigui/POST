@@ -4438,7 +4438,8 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlArrayItemAttribute("Custom", IsNullable = false)]
+        //[System.Xml.Serialization.XmlArrayItemAttribute("Custom", IsNullable = false)]
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
         public CustomType[] Customs
         {
             get
