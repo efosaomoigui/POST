@@ -149,7 +149,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<LogEntry> LogEntry { get; set; }
 
         // Partnership
-        public DbSet<IdentificationType> IdentificationTypes { get; set; }
         public DbSet<PartnerApplication> PartnerApplications { get; set; }
 
         // Wallet

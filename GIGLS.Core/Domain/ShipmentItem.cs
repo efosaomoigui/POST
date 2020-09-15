@@ -28,7 +28,8 @@ namespace GIGL.GIGLS.Core.Domain
 
     public class IntlShipmentRequestItem : BaseDomain 
     {
-        public int ShipmentItemId { get; set; }
+
+        public int IntlShipmentRequestItemId { get; set; } 
         public string Description { get; set; }
         public string Description_s { get; set; }
         public ShipmentType ShipmentType { get; set; }
@@ -36,7 +37,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string Nature { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public int SerialNumber { get; set; }
+        public int SerialNumber { get; set; } 
 
         //To handle volumetric weight
         public bool IsVolumetric { get; set; }
@@ -45,7 +46,7 @@ namespace GIGL.GIGLS.Core.Domain
         public double Height { get; set; }
 
         //Foreign key information
-        public int ShipmentId { get; set; }
-        public virtual Shipment Shipment { get; set; }
+        public int IntlShipmentRequestId { get; set; } 
+        public virtual IntlShipmentRequest Shipment { get; set; }
     }
 }

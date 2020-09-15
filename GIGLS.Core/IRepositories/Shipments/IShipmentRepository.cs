@@ -22,12 +22,12 @@ namespace GIGLS.Core.IRepositories.Shipments
         IQueryable<Shipment> ShipmentsAsQueryable();
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
     {
-        Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
-        Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
-
+        Task<List<IntlShipmentRequestDTO>> GetShipments(int[] serviceCentreIds);
+        Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
     }
 }

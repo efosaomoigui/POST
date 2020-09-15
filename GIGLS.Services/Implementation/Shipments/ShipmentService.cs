@@ -95,7 +95,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto) 
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto) 
         {
             try
             {

@@ -797,6 +797,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return errval;
         }
 
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
+        }
+
         public EntityList GetEntityObect()
         {
             Entity[] items = new Entity[1];
@@ -880,7 +886,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
             return errval;
         }
-
 
         //Get Magaya mode of transportation
         public List<ModeOfTransportation> GetModesOfTransportation()

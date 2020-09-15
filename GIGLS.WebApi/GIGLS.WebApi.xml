@@ -66,6 +66,13 @@
             <param name="startwithstring"></param>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetIntltransactionRequest(GIGLS.CORE.DTO.Shipments.FilterOptionsDto)">
+            <summary>
+            
+            </summary>
+            <param name="startwithstring"></param>
+            <returns></returns>
+        </member>
         <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetModeOfTransportation">
             <summary>
             

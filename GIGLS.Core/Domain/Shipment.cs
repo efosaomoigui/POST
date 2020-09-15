@@ -161,7 +161,7 @@ namespace GIGL.GIGLS.Core.Domain
     { 
         //Shipment Information
         [Key]
-        public int ShipmentId { get; set; }
+        public int IntlShipmentRequestId { get; set; } 
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
@@ -233,6 +233,10 @@ namespace GIGL.GIGLS.Core.Domain
         public string PaymentMethod { get; set; }
 
         public bool IsInternational { get; set; }
+        public string ItemName { get; set; }
+        public string ItemUrl { get; set; }
+        public string ItemTrackId { get; set; }
+        public int ItemQuantity { get; set; } 
 
         [MaxLength(500)]
         public string Description { get; set; }

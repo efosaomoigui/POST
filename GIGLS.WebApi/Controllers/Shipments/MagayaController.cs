@@ -14,6 +14,9 @@ using Newtonsoft.Json.Linq;
 using GIGLS.WebApi.Models;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.CORE.DTO.Shipments;
+using System;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -162,18 +165,18 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<EntityList>> GetIntltransactionRequest(string startwithstring) 
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest(FilterOptionsDto filterOptionsDto) 
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.GetEntities(access_key, startwithstring);
+                var result = _service.getIntlShipmentRequests(filterOptionsDto);
 
                 //3. Pass the return to the view or caller
-                return new ServiceResponse<EntityList>()
+                return new ServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>()
                 {
-                    Object = result
+                    Object = result.Result
                 };
             });
         }

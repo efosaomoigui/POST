@@ -229,7 +229,6 @@
     <Compile Include="Domain\ManifestGroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Message.cs" />
     <Compile Include="Domain\NumberGeneratorMonitor.cs" />
-    <Compile Include="Domain\Partnership\IdentificationType.cs" />
     <Compile Include="Domain\Partnership\Partner.cs" />
     <Compile Include="Domain\Partnership\PartnerApplication.cs" />
     <Compile Include="Domain\PaymentPartialTransaction.cs" />
