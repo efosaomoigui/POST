@@ -159,7 +159,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //get startDate and endDate
                 var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
@@ -876,7 +876,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -1100,7 +1100,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");

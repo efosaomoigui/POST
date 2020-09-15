@@ -12,6 +12,8 @@ namespace GIGLS.Core.Domain
         [MaxLength(100)]
         public string LGAState { get; set; }
 
+        public int StateId { get; set; }
+
         public bool Status { get; set; }
     }
 }

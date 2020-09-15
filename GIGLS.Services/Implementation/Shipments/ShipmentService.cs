@@ -2719,7 +2719,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 string[] warehouseServiceCentres = { };
                 // filter by global property for warehouse service centre
-                var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre, userActiveCountryId).Result;
+                var warehouseServiceCentreObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre, userActiveCountryId);
                 if (warehouseServiceCentreObj != null)
                 {
                     var warehouseServiceCentre = warehouseServiceCentreObj.Value;
