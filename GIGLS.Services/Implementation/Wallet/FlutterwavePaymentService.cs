@@ -69,7 +69,8 @@ namespace GIGLS.Services.Implementation.Wallet
             string authorization = "Bearer " + secretKey;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
-            int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
+            //int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
+            int transactionId = await GetTransactionPaymentIdUsingRefCodeV2(reference);
             string verifyUrl = flutterSandBox + "transactions/" + transactionId + "/verify";
 
             using (var client = new HttpClient())
@@ -80,7 +81,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 var response = await client.GetAsync(verifyUrl);
                 string responseResult = await response.Content.ReadAsStringAsync();
-
                 result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
             }
 
@@ -114,6 +114,42 @@ namespace GIGLS.Services.Implementation.Wallet
                     if(result.data.Count > 0)
                     {
                         id = result.data[0].Id;
+                    }
+                }
+            }
+
+            return id;
+        }
+
+        private async Task<int> GetTransactionPaymentIdUsingRefCodeV2(string reference)
+        {
+            int id = 0;
+            string verifyUrl = ConfigurationManager.AppSettings["FlutterVerifyV2"];
+            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            var obj = new
+            {
+                txref = reference,
+                SECKEY = secretKey
+            };
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var json = JsonConvert.SerializeObject(obj);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(verifyUrl, data);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
+
+                if (result.Status.Equals("success"))
+                {
+                    if (result.data != null)
+                    {
+                        id = result.data.TxId;
                     }
                 }
             }
