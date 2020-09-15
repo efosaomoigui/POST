@@ -338,7 +338,6 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
-    <Compile Include="Controllers\ServiceCentres\HomeDeliveryLocationController.cs" />
     <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
     <Compile Include="Controllers\Routes\RouteController.cs" />
     <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />

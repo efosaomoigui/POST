@@ -180,7 +180,6 @@
     <Compile Include="Domain\GeneralLedger.cs" />
     <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
-    <Compile Include="Domain\HomeDeliveryLocation.cs" />
     <Compile Include="Domain\MobileGroupCodeWaybillMapping.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
