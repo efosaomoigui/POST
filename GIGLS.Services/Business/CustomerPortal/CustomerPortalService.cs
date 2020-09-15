@@ -1846,38 +1846,55 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.IndividualCustomer)
                 {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
-                    user.UserChannelCode = customerCode;
-                    var customer = new IndividualCustomer
+                    var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(user.PhoneNumber));
+                    if (emailcustomerdetails != null)
                     {
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        CustomerCode = customerCode,
-                        PictureUrl = user.PictureUrl,
-                        IsRegisteredFromMobile = true,
-                        UserActiveCountryId = user.UserActiveCountryId
-                    };
+                        emailcustomerdetails.IsRegisteredFromMobile = true;
+                        emailcustomerdetails.Email = user.Email;
+                        emailcustomerdetails.Password = user.Password;
+                        emailcustomerdetails.PhoneNumber = user.PhoneNumber;
+                        emailcustomerdetails.FirstName = user.FirstName;
+                        emailcustomerdetails.LastName = user.LastName;
+                        emailcustomerdetails.UserActiveCountryId = user.UserActiveCountryId;
 
-                    //update : we need to check if the customer exists before adding 
-                    _uow.IndividualCustomer.Add(customer);
-
-                    // add customer to user's table.
-                    User = await CreateNewuser(user);
-
-                    await _uow.CompleteAsync();
-
-                    // add customer to a wallet
-                    await _walletService.AddWallet(new WalletDTO
+                        // add customer to user's table.
+                        user.UserChannelCode = emailcustomerdetails.CustomerCode;
+                        User = await CreateNewuser(user);
+                        await _uow.CompleteAsync();
+                    }
+                    else
                     {
-                        CustomerId = customer.IndividualCustomerId,
-                        CustomerType = CustomerType.IndividualCustomer,
-                        CustomerCode = customer.CustomerCode,
-                        CompanyType = CustomerType.IndividualCustomer.ToString()
-                    });
+                        var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
+                        user.UserChannelCode = customerCode;
+                        var customer = new IndividualCustomer
+                        {
+                            Email = user.Email,
+                            PhoneNumber = user.PhoneNumber,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            CustomerCode = customerCode,
+                            PictureUrl = user.PictureUrl,
+                            IsRegisteredFromMobile = true,
+                            UserActiveCountryId = user.UserActiveCountryId
+                        };
 
-                    //return user;
+                        //update : we need to check if the customer exists before adding 
+                        _uow.IndividualCustomer.Add(customer);
+
+                        // add customer to user's table.
+                        User = await CreateNewuser(user);
+
+                        await _uow.CompleteAsync();
+
+                        // add customer to a wallet
+                        await _walletService.AddWallet(new WalletDTO
+                        {
+                            CustomerId = customer.IndividualCustomerId,
+                            CustomerType = CustomerType.IndividualCustomer,
+                            CustomerCode = customer.CustomerCode,
+                            CompanyType = CustomerType.IndividualCustomer.ToString()
+                        });
+                    }
                 }
 
                 if (user.UserChannelType == UserChannelType.Ecommerce)

@@ -340,8 +340,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
-
                 
+                //optimise these 3 line of code. you can't fetch all the data into memory when you only need to check for boolean value
+                var dispatchList = _uow.Dispatch.GetAllAsQueryable().Where(x => manifestByScList.Contains(x.ManifestNumber)).Select(x => x.DestinationId).ToList();
+                var allAreSame = dispatchList.All(x => x == dispatchList.First());
+
+                if(allAreSame == false)
+                {
+                    throw new GenericException($"Error: Manifest belong to different Stations. ");
+                }
+
+
                 int manifestByScListCount = manifestByScList.Count; 
                 if (manifestByScListCount == 0)
                 {
@@ -584,13 +593,13 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
 
-                var DispatchName = _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
+                var DispatchName = await _uow.User.GetUserById(manifestDTO.DispatchedBy);
                 if (DispatchName != null)
                 {
                     manifestDTO.DispatchedBy = DispatchName.FirstName + " " + DispatchName.LastName;
                 }
 
-                var RecieverName = _uow.User.GetUserById(manifestDTO.ReceiverBy).Result;
+                var RecieverName = await _uow.User.GetUserById(manifestDTO.ReceiverBy);
                 if (RecieverName != null)
                 {
                     manifestDTO.ReceiverBy = RecieverName.FirstName + " " + RecieverName.LastName;

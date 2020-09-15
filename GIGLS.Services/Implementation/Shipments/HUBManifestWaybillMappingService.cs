@@ -80,7 +80,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //set the departure and destination hub
-            var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+            var allServiceCentres = await _uow.ServiceCentre.GetServiceCentres();
             foreach (var manifestItem in result)
             {
                 manifestItem.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestItem.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
@@ -540,7 +540,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestcode);
 
                 //needed to set the departure and destination hub
-                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                var allServiceCentres = await _uow.ServiceCentre.GetServiceCentres();
                 //set the departure and destination hub
                 manifestDTO.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DepartureServiceCentreId).FirstOrDefault();
                 manifestDTO.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DestinationServiceCentreId).FirstOrDefault();
@@ -766,7 +766,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //set the departure and destination hub
-                    var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                    var allServiceCentres = await _uow.ServiceCentre.GetServiceCentres();
                     waybillMapping.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
                     waybillMapping.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
 
@@ -806,7 +806,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //set the departure and destination hub
-                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                var allServiceCentres = await _uow.ServiceCentre.GetServiceCentres();
                 activeManifestDto.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
                 activeManifestDto.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
 
