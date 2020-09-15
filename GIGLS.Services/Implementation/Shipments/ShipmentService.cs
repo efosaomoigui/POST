@@ -978,7 +978,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (shipmentItem.ShipmentType == ShipmentType.Store)
                 {
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
+                    if (shipmentItem.Quantity <= 0)
+                    {
+                        throw new GenericException($"The quantity {shipmentItem.Quantity} for {shipmentPackage.Description} is invalid ", $"{(int)HttpStatusCode.Forbidden}");
+                    }
                     if (shipmentPackage.InventoryOnHand < shipmentItem.Quantity)
                     {
                         throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.InventoryOnHand} currently in store", $"{(int)HttpStatusCode.Forbidden}");
