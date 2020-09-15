@@ -140,5 +140,25 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<IEnumerable<LGADTO>> GetLGAByState(string stateName)
+        {
+            var lgas = new List<LGADTO>();
+            try
+            {
+               var items = _uow.LGA.GetAll().Where(x => x.LGAState.ToLower() == stateName.ToLower()).ToList();
+                if (items.Any())
+                {
+                    lgas = (Mapper.Map<List<LGADTO>>(items));
+                }
+                return lgas;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

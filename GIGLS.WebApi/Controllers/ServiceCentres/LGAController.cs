@@ -127,5 +127,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("homedeliverybystate/{stateName}")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetHomeDeliveryLocationByState(string stateName)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _lgaService.GetLGAByState(stateName);
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = locations
+
+                };
+            });
+        }
     }
 }

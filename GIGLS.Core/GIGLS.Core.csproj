@@ -402,6 +402,7 @@
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\StateWithHomeDeliveryDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
     <Compile Include="DTO\ShipmentScan\MobileScanStatusDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
