@@ -67,6 +67,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         }
         public string Status { get; set; }
         public int Id { get; set; }
+        public int TxId { get; set; }
         public string TX_Ref { get; set; }
         public decimal Amount { get; set; }
         public string ChargeResponseMessage { get; set; }
