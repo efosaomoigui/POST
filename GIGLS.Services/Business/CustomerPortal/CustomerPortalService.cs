@@ -2770,9 +2770,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
         {
-            var activeStations = new List<StationDTO>();
-            activeStations = await _uow.Station.GetStationsByCountry(countryId);
-            return activeStations.AsEnumerable();
+            return await _uow.Station.GetStationsByCountry(countryId);
         }
     }
 }

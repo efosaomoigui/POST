@@ -177,7 +177,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var stationDto = from s in stations
                                  join st in Context.State on s.StateId equals st.StateId
                                  join c in Context.Country on st.CountryId equals c.CountryId
-                                 where st.CountryId == countryId
+                                 where st.CountryId == countryId && c.IsActive == true
                                  select new StationDTO
                                  {
                                      StationId = s.StationId,
