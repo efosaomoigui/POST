@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -37,6 +38,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IShipmentService _shipmentService;
         private readonly IServiceCentreService _centreService;
         private readonly IStationService _stationService;
+        private readonly IIndividualCustomerService _individualCustomerService;
 
         public MagayaService(
             INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -44,7 +46,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IUserService userService,
             IShipmentService shipmentService,
             IServiceCentreService centreService,
-            IStationService stationService)
+            IStationService stationService, IIndividualCustomerService individualCustomerController) 
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -53,6 +55,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _userService = userService;
             _centreService = centreService;
             _stationService = _stationService;
+            _individualCustomerService = individualCustomerController;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -552,47 +555,25 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO) 
         {
-            //await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
-            var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            //Get SuperCentre for Home Delivery
-            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
-            {
-                //also check that the destination is not a hub
-                if (destinationSC.IsHUB != true)
-                {
-                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
-                }
-            }
+            var station = await _stationService.GetStationById(shipmentDTO.StationId);
+            var customer = await _individualCustomerService.GetCustomerById(shipmentDTO.CustomerId);
 
-            // get deliveryOptionIds and set the first value in shipment
-            //var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
-            //if (deliveryOptionIds.Any())
-            //{
-            //    shipmentDTO.DeliveryOptionId = deliveryOptionIds[0];
-            //}
-
-            // get the current user info
+            //get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-
-            shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
 
-            var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
+            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
 
-            if (shipmentDTO.RequestNumber == null)
+            if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
             {
-                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, departureServiceCentre.Code);
+                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
             }
 
             var newShipment = Mapper.Map<IntlShipmentRequest>(shipmentDTO);
-
             newShipment.ApproximateItemsWeight = 0;
 
-            // add serial numbers to the ShipmentItems
             var serialNumber = 1;
             foreach (var shipmentItem in newShipment.ShipmentRequestItems)
             {
@@ -604,7 +585,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
                     double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
-
                     newShipment.ApproximateItemsWeight += Weight;
                 }
                 else
@@ -616,25 +596,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
 
             //do not save the child objects
-            newShipment.DepartureServiceCentre = null;
+            newShipment.UserId = shipmentDTO.UserId;
+            newShipment.CustomerType = shipmentDTO.CustomerType;
+            newShipment.CustomerId = customer.IndividualCustomerId;
+            newShipment.CustomerCountryId = customer.UserActiveCountryId;
+            newShipment.CustomerAddress = customer.Address;
+            newShipment.CustomerEmail = customer.Email;
+            newShipment.CustomerPhoneNumber = customer.PhoneNumber;
+            newShipment.CustomerCity = customer.City;
+            newShipment.CustomerState = customer.State;
+
+            ////Destination
             newShipment.DestinationServiceCentre = null;
-            newShipment.DeliveryOption = null;
-
-            ////--start--///Set the DepartureCountryId and DestinationCountryId
-            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
-            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
-
-            newShipment.DepartureCountryId = departureCountry.CountryId;
-            newShipment.DestinationCountryId = destinationCountry.CountryId;
-            //newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
-            ////--end--///Set the DepartureCountryId and DestinationCountryId
+            var destinationCountry = shipmentDTO.ReceiverCity;
 
             _uow.IntlShipmentRequest.Add(newShipment);
 
             //set before returning
-            shipmentDTO.DepartureCountryId = departureCountry.CountryId;
-            shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
-
+            shipmentDTO.ReceiverCountry = station.Country;
             return shipmentDTO;
         }
 

@@ -17,13 +17,16 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using GIGLS.Core.DTO.Shipments;
+using System.EnterpriseServices;
+using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    //[Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     /// <summary>
     /// 
     /// </summary>
+    //[AllowAnonymous]
     [RoutePrefix("api/shipment/magaya")]
     public class MagayaController : BaseWebApiController
     {
@@ -163,14 +166,17 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// </summary>
         /// <param name="startwithstring"></param>
         /// <returns></returns>
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest(FilterOptionsDto filterOptionsDto) 
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto) 
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
             return await HandleApiOperationAsync(async () =>
             {
-
-                //3. Call the Magaya SetTransaction Method from MagayaService
                 var result = _service.getIntlShipmentRequests(filterOptionsDto);
 
                 //3. Pass the return to the view or caller

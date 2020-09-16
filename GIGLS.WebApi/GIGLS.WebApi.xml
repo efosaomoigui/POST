@@ -26,11 +26,6 @@
             </summary>
             <param name="kernel">The kernel.</param>
         </member>
-        <member name="T:GIGLS.WebApi.Controllers.Shipments.MagayaController">
-            <summary>
-            
-            </summary>
-        </member>
         <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.#ctor(GIGLS.Core.IServices.Shipments.IMagayaService,GIGLS.Core.IServices.User.IUserService)">
             <summary>
             

@@ -434,7 +434,7 @@ namespace GIGLS.Services.Implementation.Website
                                 if (user != null)
                                 {
                                     user.IdentificationType = customerDTO.IdentificationType;
-                                    user.IdentifictionNumber = customerDTO.IdentifictionNumber;
+                                    user.IdentificationNumber = customerDTO.IdentifictionNumber;
                                     user.IdentificationImage = postedFile.FileName;
                                     user.IsInternational = true;
 
