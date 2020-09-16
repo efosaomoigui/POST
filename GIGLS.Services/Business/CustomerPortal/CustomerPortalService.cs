@@ -1351,6 +1351,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return _countryService.GetUpdatedCountries();
         }
+
+        public async Task<IEnumerable<NewCountryDTO>> GetActiveCountries()
+        {
+            var result = new List<NewCountryDTO>();
+            var activeCountries = await _countryService.GetActiveCountries();
+            result = Mapper.Map<IEnumerable<NewCountryDTO>>(activeCountries).ToList();
+            return result.AsEnumerable();
+        }
+
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
             return await _preShipmentMobileService.ApproveShipment(detail);
@@ -2760,5 +2769,24 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
+        {
+            var activeStations = new List<StationDTO>();
+            var countryInfo = _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (countryInfo == null)
+            {
+                throw new GenericException("Country no longer exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var stateIds = _uow.State.GetAll().Where(x => x.CountryId == countryId).Select(x => x.StateId).ToList();
+            if (stateIds.Any())
+            {
+                var stations =  _uow.Station.GetAll().Where(x => stateIds.Contains(x.StateId)).ToList();
+                if (stations.Any())
+                {
+                    activeStations.AddRange(Mapper.Map<IEnumerable<StationDTO>>(stations));
+                }
+            }
+            return activeStations.AsEnumerable();
+        }
     }
 }
