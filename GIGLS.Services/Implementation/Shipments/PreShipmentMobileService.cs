@@ -421,6 +421,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                 if (customer != null)
                 {
+                    //If the account is not active, block the customer from creating shipment
+                    if(customer.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
                     if (customer.IsEligible != true)
                     {
                         preShipmentDTO.IsEligible = false;
