@@ -17,5 +17,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task DeleteLGA(int lgaId);
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
         Task<IEnumerable<LGADTO>> GetLGAByState(string stateName);
+        Task UpdateHomeDeliveryLocation(int lgaId, bool status);
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
     }
 }
