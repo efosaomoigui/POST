@@ -18,6 +18,7 @@
         OnwardProcessing,
         Processing,
         TimedOut,
-        Missed
+        Missed,
+        Reassigned
     }
 }

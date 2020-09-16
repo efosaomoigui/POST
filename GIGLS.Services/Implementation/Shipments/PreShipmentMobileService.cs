@@ -5480,5 +5480,71 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);
         }
+
+        //method called after no action is done on a shipment with status 'Assigned for Pickup' after 90 minutes  
+        public async Task<bool> SwitchRider(PartnerReAssignmentDTO request)
+        {
+            try
+            {
+                var currentPartnerData = await _uow.Partner.GetAsync(x => x.UserId == request.CurrentPartnerId);
+                if (currentPartnerData == null)
+                {
+                    throw new GenericException("Current Partner does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var newPartnerData = await _uow.Partner.GetAsync(x => x.UserId == request.NewPartnerId);
+                if (newPartnerData == null)
+                {
+                    throw new GenericException("New Partner does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var waybillData = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == request.Waybill);
+                if (waybillData == null)
+                {
+                    throw new GenericException("Waybill does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (waybillData.shipmentstatus != "Assigned for Pickup")
+                {
+                    throw new GenericException("Riders can not be switched at this point", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                var formerpickup = await _uow.MobilePickUpRequests.GetAsync(x => x.UserId == request.CurrentPartnerId && x.Waybill == request.Waybill);
+
+                if (formerpickup == null)
+                {
+                    throw new GenericException($"Partner {currentPartnerData.PartnerName} is not currently assigned to this {request.Waybill}", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString())
+                {
+                    throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                formerpickup.Status = MobilePickUpRequestStatus.Reassigned.ToString();
+
+                var pickuprequest = new MobilePickUpRequestsDTO()
+                {
+                    Status = MobilePickUpRequestStatus.Accepted.ToString(),
+                    UserId = request.NewPartnerId,
+                    Waybill = request.Waybill,
+                };
+
+                waybillData.TimeAssigned = DateTime.Now;
+                await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
+
+                //Update Activity Status
+                await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                await UpdateActivityStatus(request.CurrentPartnerId, ActivityStatus.OffDelivery);
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+
+
+        }
     }
 }
