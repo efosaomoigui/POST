@@ -26,11 +26,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
-                var state = await _uow.State.GetAsync(lgaDto.StateId);
-                if (state == null)
-                {
-                    throw new GenericException("State does not exist");
-                }
+                var state = await GetState(lgaDto.StateId);
 
                 var lga = await _uow.LGA.GetAsync(x => x.LGAName.ToLower() == lgaDto.LGAName.ToLower() && x.StateId == lgaDto.StateId);
 
@@ -49,6 +45,26 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+
+        private async Task<State> GetState(int stateId)
+        {
+            try
+            {
+                var state = await _uow.State.GetAsync(stateId);
+                if (state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+
+                return state;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<LGADTO> GetLGAById(int lgaId)
         {
             try
@@ -77,13 +93,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
+                var state = await GetState(lgaDto.StateId);
                 var lga = await _uow.LGA.GetAsync(lgaId);
-
-                var state = await _uow.State.GetAsync(lgaDto.StateId);
-                if (state == null)
-                {
-                    throw new GenericException("State does not exist");
-                }
 
                 //To check if the update already exists
                 var lgas = await _uow.LGA.ExistAsync(c => c.LGAName.ToLower() == lgaDto.LGAName.ToLower() && c.StateId == lgaDto.StateId);
@@ -155,9 +166,6 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
-
-
-
 
         public async Task UpdateHomeDeliveryLocation(int lgaId, bool status)
         {
