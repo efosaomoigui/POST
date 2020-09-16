@@ -78,6 +78,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
+                TransactionDTO.CustomerId = customer.IndividualCustomerId;
                 var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
                 return new ServiceResponse<object>
                 {
