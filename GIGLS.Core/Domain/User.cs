@@ -48,7 +48,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool IsInternational { get; set; }
         public IdentificationType IdentificationType { get; set; }
-        public string IdentifictionNumber { get; set; }
         public string IdentificationImage { get; set; }
         public string IdentificationNumber { get; set; }
 
