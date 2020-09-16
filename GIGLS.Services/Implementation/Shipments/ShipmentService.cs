@@ -888,8 +888,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoiceForPaymentWaiver(shipmentDTO);
                 CreateGeneralLedgerForPaymentWaiverShipment(shipmentDTO);
 
-                await UpdateShipmentPackage(newShipment);
-
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
@@ -993,7 +991,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (shipmentItem.ShipmentType == ShipmentType.Store)
                 {
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
+                    if (shipmentItem.Quantity <= 0)
+                    {
+                        throw new GenericException($"The quantity {shipmentItem.Quantity} for {shipmentPackage.Description} is invalid ", $"{(int)HttpStatusCode.Forbidden}");
+                    }
                     if (shipmentPackage.InventoryOnHand < shipmentItem.Quantity)
                     {
                         throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.InventoryOnHand} currently in store", $"{(int)HttpStatusCode.Forbidden}");
@@ -1017,8 +1019,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             _uow.ShipmentPackagingTransactions.AddRange(packageOutflow);
-
-            await _uow.CompleteAsync();
         }
 
         // Convert an object to a byte array
@@ -1306,6 +1306,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             shipmentDTO.Waybill = waybill;
 
+            await UpdateShipmentPackage(shipmentDTO);
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
@@ -3054,7 +3055,6 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-        //private async Task<List<ShipmentPackagingTransactions>> UpdatePackageTransactions(ShipmentDTO shipment)
         private async Task UpdatePackageTransactions(ShipmentDTO shipment)
         {
             List<ShipmentPackagingTransactions> packageoutflow = new List<ShipmentPackagingTransactions>();
