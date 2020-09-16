@@ -2859,22 +2859,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
         {
-            var activeStations = new List<StationDTO>();
-            var countryInfo = _uow.Country.GetAsync(x => x.CountryId == countryId && x.IsActive == true);
-            if (countryInfo == null)
-            {
-                throw new GenericException("Country no longer exist", $"{(int)HttpStatusCode.NotFound}");
-            }
-            var stateIds = _uow.State.GetAll().Where(x => x.CountryId == countryId).Select(x => x.StateId).ToList();
-            if (stateIds.Any())
-            {
-                var stations =  _uow.Station.GetAll().Where(x => stateIds.Contains(x.StateId)).ToList();
-                if (stations.Any())
-                {
-                    activeStations.AddRange(Mapper.Map<IEnumerable<StationDTO>>(stations));
-                }
-            }
-            return activeStations.AsEnumerable();
+            return await _uow.Station.GetStationsByCountry(countryId);
         }
     }
 }
