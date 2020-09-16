@@ -2051,5 +2051,37 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getactivecountries")]
+        public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries = await _portalService.GetActiveCountries();
+                return new ServiceResponse<List<NewCountryDTO>>
+                {
+                    Object = countries.ToList()
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getstationsbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StationDTO>>> GetStationsByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetStationsByCountry(countryId);
+                return new ServiceResponse<List<StationDTO>>
+                {
+                    Object = stations.ToList()
+                };
+            });
+        }
+
+
     }
 }
