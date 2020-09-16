@@ -1354,10 +1354,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<NewCountryDTO>> GetActiveCountries()
         {
-            var result = new List<NewCountryDTO>();
             var activeCountries = await _countryService.GetActiveCountries();
-            result = Mapper.Map<IEnumerable<NewCountryDTO>>(activeCountries).ToList();
-            return result.AsEnumerable();
+            var result = Mapper.Map<IEnumerable<NewCountryDTO>>(activeCountries);
+            return result;
         }
 
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
@@ -2772,7 +2771,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
         {
             var activeStations = new List<StationDTO>();
-            var countryInfo = _uow.Country.GetAsync(x => x.CountryId == countryId);
+            var countryInfo = _uow.Country.GetAsync(x => x.CountryId == countryId && x.IsActive == true);
             if (countryInfo == null)
             {
                 throw new GenericException("Country no longer exist", $"{(int)HttpStatusCode.NotFound}");
