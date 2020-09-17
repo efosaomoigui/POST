@@ -2298,6 +2298,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                         if (customer != null)
                         {
+                            //If the account is not active, block the customer from creating shipment
+                            if (customer.CompanyStatus != CompanyStatus.Active)
+                            {
+                                throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                            }
+
                             preShipmentDTO.SenderName = customer.Name;
                             preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
                         }
