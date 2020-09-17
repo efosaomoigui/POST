@@ -5519,7 +5519,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
                 }
-                formerpickup.Status = MobilePickUpRequestStatus.Reassigned.ToString();
+                formerpickup.Status = MobilePickUpRequestStatus.Moved.ToString();
 
                 var pickuprequest = new MobilePickUpRequestsDTO()
                 {

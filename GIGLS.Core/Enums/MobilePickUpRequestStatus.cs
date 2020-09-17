@@ -19,6 +19,6 @@
         Processing,
         TimedOut,
         Missed,
-        Reassigned
+        Moved
     }
 }
