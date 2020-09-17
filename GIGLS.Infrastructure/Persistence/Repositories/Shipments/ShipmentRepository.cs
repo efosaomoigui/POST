@@ -1153,7 +1153,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var shipmentRequest = _context.IntlShipmentRequest.AsQueryable();
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipmentRequest = _context.IntlShipmentRequest.Where(s => s.IsProcessed == true);
+                    shipmentRequest = _context.IntlShipmentRequest.Where(s => s.IsProcessed == false);
                 }
 
                 var count = 0;
@@ -1169,8 +1169,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               {
                                                   IntlShipmentRequestId = r.IntlShipmentRequestId,
                                                   RequestNumber = r.RequestNumber,
+                                                  CustomerFirstName = r.CustomerFirstName,
+                                                  CustomerLastName = r.CustomerLastName,
                                                   CustomerId = r.CustomerId,
                                                   CustomerType = r.CustomerType,
+                                                  CustomerCountryId = r.CustomerCountryId,
+                                                  CustomerAddress = r.CustomerAddress,
+                                                  CustomerEmail = r.CustomerEmail,
+                                                  CustomerPhoneNumber = r.CustomerPhoneNumber,
+                                                  CustomerCity = r.CustomerCity,
+                                                  CustomerState = r.CustomerState,
                                                   DateCreated = r.DateCreated,
                                                   DateModified = r.DateModified,
                                                   DeliveryOptionId = r.DeliveryOptionId,
