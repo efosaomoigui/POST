@@ -169,5 +169,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations();
         Task<IEnumerable<NewCountryDTO>> GetActiveCountries();
         Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
+        Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
     }
 }

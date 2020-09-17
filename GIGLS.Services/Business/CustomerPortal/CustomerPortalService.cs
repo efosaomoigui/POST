@@ -2774,5 +2774,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.Station.GetStationsByCountry(countryId);
         }
+
+        public async Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+            user.IdentificationImage = intlUserProfiler.IdentificationImage;
+            user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
+            user.IsInternational = true;
+            user.IdentificationType = intlUserProfiler.IdentificationType;
+             await _uow.User.UpdateUser(currentUserId, user);
+            return true;
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+        }
+
+
     }
 }
