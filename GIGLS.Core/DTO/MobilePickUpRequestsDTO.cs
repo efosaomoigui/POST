@@ -40,4 +40,11 @@ namespace GIGLS.Core.DTO
 
 
     }
+
+    public class PartnerReAssignmentDTO
+    {
+        public string CurrentPartnerId { get; set; }
+        public string Waybill { get; set; }
+    }
+
 }
