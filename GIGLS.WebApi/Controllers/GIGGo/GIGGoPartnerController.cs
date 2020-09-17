@@ -653,20 +653,6 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-
-        [HttpPost]
-        [Route("switchpartner")]
-        public async Task<IServiceResponse<object>> SwitchPartner(PartnerReAssignmentDTO request)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var flag = await _portalService.SwitchRider(request);
-
-                return new ServiceResponse<object>
-                {
-                    Object = flag
-                };
-            });
-        }
+       
     }
 }

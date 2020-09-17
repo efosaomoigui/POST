@@ -1745,9 +1745,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.AddMobilePickupRequest(pickuprequest);
         }
-        public async Task<bool> SwitchRider(PartnerReAssignmentDTO request)
+        public async Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request)
         {
-            return await _preShipmentMobileService.SwitchRider(request);
+            return await _preShipmentMobileService.ChangeShipmentOwnershipForPartner(request);
         }
 
         public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
