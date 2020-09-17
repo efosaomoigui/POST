@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -145,6 +146,7 @@ namespace GIGLS.Core.DTO.Shipments
     public class IntlShipmentRequestDTO : BaseDomainDTO 
     {
         //Shipment Information ==============================================
+        public int IntlShipmentRequestId { get; set; } 
         public string RequestNumber { get; set; }
 
         //General Details comes with role user ==============================
@@ -162,8 +164,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverCity { get; set; }
-
         public string ReceiverCountry { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public int DestinationCountryId { get; set; }
 
         //Delivery Options =====================================================
         public int DeliveryOptionId { get; set; }

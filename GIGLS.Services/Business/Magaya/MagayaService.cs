@@ -54,7 +54,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _shipmentService = shipmentService;
             _userService = userService;
             _centreService = centreService;
-            _stationService = _stationService;
+            _stationService = stationService;
             _individualCustomerService = individualCustomerController;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
