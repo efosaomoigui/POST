@@ -195,5 +195,33 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
+        public Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            try
+            {
+                var svrcentres = Context.ServiceCentre;
+                var svrcentreDto = from s in svrcentres
+                                 join st in Context.Station on s.StationId equals st.StationId
+                                 where s.StationId == stationId && s.IsActive == true
+                                 select new ServiceCentreDTO
+                                 {
+                                     StationId = s.StationId,
+                                     Name = s.Name,
+                                     Address = s.Address,
+                                     City = s.City,
+                                     Code = s.Code
+                                 };
+                return Task.FromResult(svrcentreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+
+
     }
 }

@@ -472,6 +472,7 @@
     <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
+    <Compile Include="DTO\User\IntertnationalUserProfilerDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />

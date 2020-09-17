@@ -173,5 +173,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> GetUserCountryCode(UserDTO user);
         Task<IEnumerable<NewCountryDTO>> GetActiveCountries();
         Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
+        Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
     }
 }

@@ -39,6 +39,7 @@ using GIGLS.Core.DTO.Fleets;
 using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -2080,6 +2081,43 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     Object = stations.ToList()
                 };
             });
+        }
+        [AllowAnonymous]
+        [HttpPut]
+        [Route("profileinternationaluser")]
+        public async Task<IServiceResponse<bool>> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            return await HandleApiOperationAsync(async () => {
+                await _portalService.ProfileInternationalUser(intlUserProfiler);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecentresbystation/{stationId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetServiceCentresByStation(stationId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("identificationtypes")]
+        public IHttpActionResult GetIdentificationTypes()
+        {
+            var types = EnumExtensions.GetValues<IdentificationType>();
+            types.RemoveAt(3);
+            return Ok(types);
         }
 
 
