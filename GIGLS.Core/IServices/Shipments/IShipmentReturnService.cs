@@ -8,7 +8,7 @@ namespace GIGLS.CORE.IServices.Shipments
     public interface IShipmentReturnService : IServiceDependencyMarker
     {
         Task<IEnumerable<ShipmentReturnDTO>> GetShipmentReturns();
-        System.Tuple<Task<List<ShipmentReturnDTO>>, int> GetShipmentReturns(FilterOptionsDto filterOptionsDto);
+        Task<System.Tuple<List<ShipmentReturnDTO>, int>> GetShipmentReturns(FilterOptionsDto filterOptionsDto);
         Task<ShipmentReturnDTO> GetShipmentReturnById(string waybill);
         Task AddShipmentReturn(ShipmentReturnDTO shipmentReturn);
         Task<string> AddShipmentReturn(string waybill);
