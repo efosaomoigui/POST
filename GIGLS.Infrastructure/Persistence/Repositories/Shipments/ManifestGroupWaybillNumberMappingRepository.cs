@@ -224,7 +224,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                  StationId = x.StationId,
                                  StationName = x.Station.StationName
                                }).FirstOrDefault(),
-                               DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                               DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                {
                                    Code = x.Code,
                                    Name = x.Name,

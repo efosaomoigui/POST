@@ -157,6 +157,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     manifest.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
                 }
 
+                return manifestDTOs;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //To get manifests attached to Super Manifest and some group waybill information
+        public async Task<List<ManifestDTO>> GetManifestsInSuperManifestDetails(string superManifestCode)
+        {
+            try
+            {
+                
+                var manifestCodeList = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestCode == superManifestCode).Select(x => x.ManifestCode).Distinct().ToList();
+
+                var manifestDTOs = await _uow.Manifest.GetManifestsInSuperManifest(manifestCodeList);
 
                 return manifestDTOs;
             }
