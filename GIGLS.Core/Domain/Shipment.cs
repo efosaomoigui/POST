@@ -159,7 +159,7 @@ namespace GIGL.GIGLS.Core.Domain
 
     public class IntlShipmentRequest : BaseDomain, IAuditable
     { 
-        //Shipment Information ==============================================
+        //Shipment Information 
         [Key]
         public int IntlShipmentRequestId { get; set; } 
 
@@ -167,7 +167,7 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string RequestNumber { get; set; }
 
-        //General Details comes with role user ==============================
+        //General Details comes with role user 
         [MaxLength(128)]
         public string UserId { get; set; }
         public string CustomerType { get; set; }
@@ -185,7 +185,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //public PaymentStatus PaymentStatus { get; set; }
 
-        //Receivers Information===============================================
+        //Receivers Information
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentre DestinationServiceCentre { get; set; }
         public int DestinationCountryId { get; set; }
@@ -211,13 +211,13 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(50)]
         public string ReceiverCountry { get; set; }
 
-        //Delivery Options =====================================================
+        //Delivery Options 
         public int DeliveryOptionId { get; set; }
 
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
 
-        //Shipment Items ======================================================
+        //Shipment Items
         public virtual List<IntlShipmentRequestItem> ShipmentRequestItems { get; set; }  
         public double ApproximateItemsWeight { get; set; }
 
@@ -226,7 +226,7 @@ namespace GIGL.GIGLS.Core.Domain
         //discount information
         public decimal? Total { get; set; }
 
-        //payment method =======================================================
+        //payment method 
         [MaxLength(20)]
         public string PaymentMethod { get; set; }
 

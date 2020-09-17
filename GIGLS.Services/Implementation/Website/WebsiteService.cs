@@ -282,13 +282,13 @@ namespace GIGLS.Services.Implementation.Website
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
-                    Department = customerDTO.CompanyType.ToString(),
+                    Department = CustomerType.IndividualCustomer.ToString(),
                     DateCreated = DateTime.Now,
-                    Designation = customerDTO.CompanyType.ToString(),
+                    Designation = CustomerType.IndividualCustomer.ToString(),
                     Email = customerDTO.Email,
-                    FirstName = customerDTO.Name,
-                    LastName = customerDTO.Name,
-                    Organisation = customerDTO.CompanyType.ToString(),
+                    FirstName = customerDTO.FirstName,
+                    LastName = customerDTO.LastName,
+                    Organisation = CustomerType.IndividualCustomer.ToString(),
                     Password = password,
                     PhoneNumber = customerDTO.PhoneNumber,
                     UserType = UserType.Regular,
@@ -323,8 +323,8 @@ namespace GIGLS.Services.Implementation.Website
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.USER_LOGIN, message);
                 var customer = await _uow.IndividualCustomer.GetIndividualCustomers(customerDTO.PhoneNumber);
-                
-                return Mapper.Map<IndividualCustomerDTO>(customer);
+                var customerResult = customer.FirstOrDefault(); 
+                return customerResult;
             }
             catch (Exception)
             {
@@ -370,10 +370,10 @@ namespace GIGLS.Services.Implementation.Website
                 var CustomerDetails = await AddUserForInternationalCustomer(customerDTO); 
 
                 //update user based on isInternationShipper flag
-                if (customerDTO.IsInternational)
-                {
-                    await UploadImageForCustomer(customerDTO);
-                }
+                //if (customerDTO.IsInternational)
+                //{
+                //    await UploadImageForCustomer(customerDTO);
+                //}
 
                 var result = new object();
                 return await Task.FromResult(result);
