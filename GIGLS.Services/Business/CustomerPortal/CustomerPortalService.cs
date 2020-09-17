@@ -1906,6 +1906,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
+
                 return await _uow.LGA.GetActiveHomeDeliveryLocations();
             }
             catch (Exception)
