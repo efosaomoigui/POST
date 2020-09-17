@@ -113,7 +113,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(shipmentDto.ToList());
         }
 
-        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        public async Task<Tuple<List<ShipmentDTO>, int>> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             try
             {
@@ -224,7 +224,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                     count = shipmentDto.Count();
 
-                    return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
+                    return new Tuple<List<ShipmentDTO>, int>(shipmentDto, count);
                 }
 
                 shipmentDto = (from r in shipment
@@ -326,7 +326,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 count = shipmentDto.Count();
-                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
+                return new Tuple<List<ShipmentDTO>, int>(shipmentDto, count);
             }
             catch (Exception)
             {
@@ -334,7 +334,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-        public Tuple<Task<List<ShipmentDTO>>, int> GetDestinationShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        public async Task<Tuple<List<ShipmentDTO>, int>> GetDestinationShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             try
             {
@@ -439,7 +439,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
 
-                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+                return new Tuple<List<ShipmentDTO>, int>(shipmentDto.ToList(), count);
             }
             catch (Exception)
             {
@@ -448,7 +448,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         }
         
         //Get Shipment Detail for list of waybills and filter it by service centre
-        public Tuple<Task<List<ShipmentDTO>>, int> GetShipmentDetailByWaybills(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds, List<string> waybills)
+        public async Task<Tuple<List<ShipmentDTO>, int>> GetShipmentDetailByWaybills(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds, List<string> waybills)
         {
             try
             {
@@ -559,7 +559,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
 
-                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+                return new Tuple<List<ShipmentDTO>, int>(shipmentDto.ToList(), count);
             }
             catch (Exception)
             {
