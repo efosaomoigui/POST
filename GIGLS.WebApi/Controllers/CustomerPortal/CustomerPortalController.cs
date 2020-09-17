@@ -1721,6 +1721,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpGet]
+        [Route("activehomedeliverylocations")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveHomeDeliveryLocations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _portalService.GetActiveHomeDeliveryLocations();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = locations
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
         [Route("websiteData")]
         public async Task<IServiceResponse<AdminReportDTO>> GetWebsiteData()
         {
