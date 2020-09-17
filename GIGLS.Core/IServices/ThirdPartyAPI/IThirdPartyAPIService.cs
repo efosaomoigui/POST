@@ -32,5 +32,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         //Get Active LGAs
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
 
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
+
     }
 }
