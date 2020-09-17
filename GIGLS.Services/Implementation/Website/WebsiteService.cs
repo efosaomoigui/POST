@@ -7,6 +7,10 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Website;
 using GIGLS.Infrastructure;
@@ -14,6 +18,9 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
+using System.Collections.Generic;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Website
 {
@@ -23,13 +30,24 @@ namespace GIGLS.Services.Implementation.Website
         private readonly IUnitOfWork _uow;
         private readonly ICompanyService _companyService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly ICustomerService _customerService;
+        private readonly IMagayaService _magayaService;
+        private readonly IUserService _userService;
+        private readonly IWalletService _walletService;
+        private readonly IPasswordGenerator _passwordGenerator;
 
-        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow, ICompanyService companyService, IGlobalPropertyService globalPropertyService)
+        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow, ICompanyService companyService, IGlobalPropertyService globalPropertyService,
+            ICustomerService customerService, IMagayaService magayaService, IUserService userService, IWalletService walletService, IPasswordGenerator passwordGenerator)
         {
             _messageSenderService = messageSenderService;
             _uow = uow;
             _companyService = companyService;
             _globalPropertyService = globalPropertyService;
+            _customerService = customerService;
+            _magayaService = magayaService;
+            _userService = userService;
+            _walletService = walletService;
+            _passwordGenerator = passwordGenerator;
         }
 
         public async Task<bool> SendSchedulePickupMail(WebsiteMessageDTO obj)
@@ -131,7 +149,6 @@ namespace GIGLS.Services.Implementation.Website
                     natureOfBusiness = string.Join(",", ecommerceAgreementDTO.NatureOfBusiness);
                 }
 
-
                 //Check if it is in Pending Requests 
                 if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail == ecommerceAgreementDTO.BusinessEmail))
                 {
@@ -147,7 +164,7 @@ namespace GIGLS.Services.Implementation.Website
                 }
 
                 //Check if it is already an E-commerce Customer
-                if (await _uow.Company.ExistAsync(c => c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail || c.Name.ToLower() == ecommerceAgreementDTO.BusinessOwnerName.Trim().ToLower()) )
+                if (await _uow.Company.ExistAsync(c => c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail || c.Name.ToLower() == ecommerceAgreementDTO.BusinessOwnerName.Trim().ToLower()))
                 {
                     throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail} or {ecommerceAgreementDTO.BusinessOwnerName} already exists as Ecommerce Customer", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -160,7 +177,7 @@ namespace GIGLS.Services.Implementation.Website
 
                 //Check if the state is valid
                 var state = await _uow.State.GetAsync(x => x.StateName.ToLower() == ecommerceAgreementDTO.State.ToLower());
-                if(state == null)
+                if (state == null)
                 {
                     throw new GenericException("Invalid State Name", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -216,6 +233,228 @@ namespace GIGLS.Services.Implementation.Website
             {
                 throw;
             }
+        }
+
+        public async Task<IndividualCustomerDTO> AddUserForInternationalCustomer(CustomerDTO customerDTO) 
+        {
+            try
+            {
+                //block the registration for existing User
+                var EmailUser = await _uow.User.GetUserByEmail(customerDTO.Email);
+
+                if (EmailUser != null)
+                {
+                    throw new GenericException($"Email already exist");
+                }
+
+                //check if registration is from Giglgo
+                if (customerDTO.IsFromMobile == true)
+                {
+                    //customerDTO.IsRegisteredFromMobile = true;
+                }
+
+                //update the customer update to have country code added to it
+                if (customerDTO.PhoneNumber.StartsWith("0"))
+                {
+                    customerDTO.PhoneNumber = await _companyService.AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                }
+
+                var password = "";
+                if (customerDTO.Password == null)
+                {
+                    password = await _passwordGenerator.Generate();
+                }
+                else
+                {
+                    password = customerDTO.Password;
+                }
+
+                //check phone number existence
+                var PhoneUser = await _uow.User.GetUserByPhoneNumber(customerDTO.PhoneNumber);
+
+                if (PhoneUser != null)
+                {
+                    throw new GenericException($"Phone Number already exist");
+                }
+
+                var userChannelType = UserChannelType.IndividualCustomer;
+
+                var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                {
+                    ConfirmPassword = password,
+                    Department = customerDTO.CompanyType.ToString(),
+                    DateCreated = DateTime.Now,
+                    Designation = customerDTO.CompanyType.ToString(),
+                    Email = customerDTO.Email,
+                    FirstName = customerDTO.Name,
+                    LastName = customerDTO.Name,
+                    Organisation = customerDTO.CompanyType.ToString(),
+                    Password = password,
+                    PhoneNumber = customerDTO.PhoneNumber,
+                    UserType = UserType.Regular,
+                    Username = customerDTO.Email,
+                    UserChannelCode = customerDTO.CustomerCode,
+                    UserChannelPassword = password,
+                    UserChannelType = userChannelType,
+                    PasswordExpireDate = DateTime.Now,
+                    UserActiveCountryId = customerDTO.UserActiveCountryId,
+                    IsActive = true
+                });
+
+                //complete
+                _uow.Complete();
+
+                // add customer to a wallet
+                await _walletService.AddWallet(new WalletDTO
+                {
+                    CustomerId = customerDTO.CompanyId,
+                    CustomerType = CustomerType.IndividualCustomer,
+                    CustomerCode = customerDTO.CustomerCode
+                });
+
+                var message = new MessageDTO()
+                {
+                    CustomerCode = customerDTO.CustomerCode,
+                    CustomerName = customerDTO.Name,
+                    ToEmail = customerDTO.Email,
+                    To = customerDTO.Email,
+                    Body = password
+                };
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.USER_LOGIN, message);
+                var customer = await _uow.IndividualCustomer.GetIndividualCustomers(customerDTO.PhoneNumber);
+                
+                return Mapper.Map<IndividualCustomerDTO>(customer);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> AddIntlCustomer(CustomerDTO customerDTO)
+        {
+            try
+            {
+                //Check if the state is valid
+                var state = await _uow.State.GetAsync(x => x.StateName.ToLower() == customerDTO.State.ToLower());
+                if (state == null)
+                {
+                    throw new GenericException("Invalid State Name", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //update the customer phone number to have country code added to it
+                if (customerDTO.PhoneNumber.StartsWith("0"))
+                {
+                    customerDTO.PhoneNumber = await _companyService.AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, state.CountryId);
+                }
+
+                //check phone number existence 
+                var PhoneUser = await _uow.User.GetUserByPhoneNumber(customerDTO.PhoneNumber);
+
+                if (PhoneUser != null)
+                {
+                    throw new GenericException($"{customerDTO.PhoneNumber} already exists", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //Create customer in Agility
+                var customerCreationResult = await _customerService.CreateCustomerIntl(customerDTO);
+
+                //Create Customer in Magaya
+                if (customerCreationResult != null)
+                {
+                    var MagayacustomerCreationResult = await _magayaService.SetEntityIntl(customerDTO);
+                }
+
+                //Create User login details
+                var CustomerDetails = await AddUserForInternationalCustomer(customerDTO); 
+
+                //update user based on isInternationShipper flag
+                if (customerDTO.IsInternational)
+                {
+                    await UploadImageForCustomer(customerDTO);
+                }
+
+                var result = new object();
+                return await Task.FromResult(result);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IntlShipmentRequestDTO> AddIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
+        {
+            try
+            {
+                var addResult = await _magayaService.CreateIntlShipmentRequest(shipmentDTO); 
+                return addResult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //this method returns int as follows 0. successfull 1. type not allowed 2. size not allowed
+        public async Task<int> UploadImageForCustomer(CustomerDTO customerDTO)
+        {
+            string message = string.Empty;
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+
+                foreach (string file in httpRequest.Files)
+                {
+                    var postedFile = httpRequest.Files[file];
+
+                    if (postedFile != null && postedFile.ContentLength > 0)
+                    {
+                        int MaxContentLength = 1024 * 1024 * 1; //Size = 1 MB
+
+                        IList<string> AllowedFileExtensions = new List<string> { ".jpg", ".gif", ".png", ".pdf" };
+                        var ext = postedFile.FileName.Substring(postedFile.FileName.LastIndexOf('.'));
+                        var extension = ext.ToLower();
+
+                        if (!AllowedFileExtensions.Contains(extension))
+                        {
+                            throw new GenericException($"{postedFile.FileName} is not allowed");
+                        }
+                        else if (postedFile.ContentLength > MaxContentLength)
+                        {
+                            throw new GenericException($"Image size is too Large allowed");
+                        }
+                        else 
+                        {
+                            //update user based on isInternationShipper flag
+                            if (customerDTO.IsInternational)
+                            {
+                                var user = await _uow.User.GetUserByEmail(customerDTO.Email);
+                                if (user != null)
+                                {
+                                    user.IdentificationType = customerDTO.IdentificationType;
+                                    user.IdentificationNumber = customerDTO.IdentifictionNumber;
+                                    user.IdentificationImage = postedFile.FileName;
+                                    user.IsInternational = true;
+
+                                    await _uow.User.UpdateUser(user.Id, user);
+
+                                    var filePath = HttpContext.Current.Server.MapPath("~/UserDocuments/" + customerDTO.Email + extension);
+                                    postedFile.SaveAs(filePath);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //do nothing
+            }
+
+            return 0;
         }
     }
 }

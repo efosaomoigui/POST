@@ -19,6 +19,7 @@
         FleetPartner = 15,
         MagayaWb = 16,
         PreShipmentCode = 17,
-        SuperManifest = 18
+        SuperManifest = 18,
+        RequestNumber = 19, 
     }
 }

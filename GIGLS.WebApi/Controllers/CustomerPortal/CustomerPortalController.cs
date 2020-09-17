@@ -38,6 +38,7 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
 using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -47,11 +48,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     {
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
+        private readonly IMagayaService _magayaService;
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
             _paymentService = paymentService;
+            _magayaService = magayaService;
         }
 
         [HttpPost]
@@ -65,6 +68,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<InvoiceViewDTO>>
                 {
                     Object = invoices
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("AddIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
+                TransactionDTO.CustomerId = customer.IndividualCustomerId;
+                var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
                 };
             });
         }

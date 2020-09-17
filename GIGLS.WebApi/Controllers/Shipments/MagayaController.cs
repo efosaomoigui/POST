@@ -13,13 +13,20 @@ using System.Web.Http.ModelBinding;
 using Newtonsoft.Json.Linq;
 using GIGLS.WebApi.Models;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.CORE.DTO.Shipments;
+using System;
+using GIGLS.Core.DTO.Shipments;
+using System.EnterpriseServices;
+using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    //[Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     /// <summary>
     /// 
     /// </summary>
+    //[AllowAnonymous]
     [RoutePrefix("api/shipment/magaya")]
     public class MagayaController : BaseWebApiController
     {
@@ -100,6 +107,31 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entitydto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("AddEntityInternational")]
+        public async Task<IServiceResponse<string>> AddEntityInternational(CustomerDTO custDTo)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var SetCustomerResult = _service.SetEntityIntl(custDTo);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<string>()
+                {
+                    Object = SetCustomerResult.Result
+                };
+            });
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -124,6 +156,33 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<EntityList>()
                 {
                     Object = result
+                };
+            });
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startwithstring"></param>
+        /// <returns></returns>
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetIntltransactionRequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto) 
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.getIntlShipmentRequests(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>()
+                {
+                    Object = result.Result
                 };
             });
         }

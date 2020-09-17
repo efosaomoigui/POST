@@ -127,6 +127,95 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+        public async Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO) 
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerType.Company.Equals(customerDTO.CustomerType))
+                {
+                    int companyId = 0;
+
+                    var companyByCode = await _uow.Company.GetAsync(x => x.CustomerCode == customerDTO.CustomerCode);
+
+                    if (companyByCode == null)
+                    {
+                        var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                        || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+
+                        foreach (var item in CompanyByName)
+                        {
+                            companyId = item.CompanyId;
+                        }
+                    }
+                    else
+                    {
+                        companyId = companyByCode.CompanyId;
+                    }
+
+                    if (companyId > 0)
+                    {
+                        customerDTO.CompanyId = companyId;
+                        var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
+                        //await _companyService.UpdateCompany(companyId, companyDTO);
+                    }
+                    else
+                    {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
+                        // create new
+                        var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
+                        var createdCustomer = await _companyService.AddCompany(companyDTO);
+                        customerDTO = Mapper.Map<CustomerDTO>(companyDTO);
+                        customerDTO.CompanyId = createdCustomer.CompanyId;
+                    }
+                }
+
+                // handle IndividualCustomers
+                if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
+                {
+                    int individualCustomerId = 0;
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.
+                        GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
+
+                    if (individualCustomerByPhone != null)
+                    {
+                        individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
+                    }
+
+                    if (individualCustomerId > 0)
+                    {
+                        // update
+                        customerDTO.IndividualCustomerId = individualCustomerId;
+                        var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+                        await _individualCustomerService.UpdateCustomer(individualCustomerId, individualCustomerDTO);
+                    }
+                    else
+                    {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
+                        // create new
+                        var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+                        var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
+                        customerDTO.IndividualCustomerId = createdCustomer.IndividualCustomerId;
+                        customerDTO.CustomerCode = createdCustomer.CustomerCode;
+                    }
+                }
+
+                return customerDTO;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         //Get Store Keeper as Corporate Customer
         public async Task<CustomerDTO> GetGIGLCorporateAccount()
         {

@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -37,6 +38,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IShipmentService _shipmentService;
         private readonly IServiceCentreService _centreService;
         private readonly IStationService _stationService;
+        private readonly IIndividualCustomerService _individualCustomerService;
 
         public MagayaService(
             INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -44,7 +46,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IUserService userService,
             IShipmentService shipmentService,
             IServiceCentreService centreService,
-            IStationService stationService)
+            IStationService stationService, IIndividualCustomerService individualCustomerController) 
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -53,6 +55,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _userService = userService;
             _centreService = centreService;
             _stationService = _stationService;
+            _individualCustomerService = individualCustomerController;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -380,6 +383,29 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             };
             return ShipmentItems;
         }
+
+        public List<IntlShipmentRequestItemDTO> getIntlShipmentItems(IntlShipmentRequestDTO intlShipmentDTO)  
+        {
+            var ShipmentItems = new List<IntlShipmentRequestItemDTO>();
+
+            for (int i = 0; i < intlShipmentDTO.ShipmentRequestItems.Count; i++)
+            {
+                ShipmentItems.Add(
+                        new IntlShipmentRequestItemDTO()
+                        {
+                            Description = intlShipmentDTO.ShipmentRequestItems[i].Description,
+                            ShipmentType = ShipmentType.Regular,
+                            Weight = intlShipmentDTO.ShipmentRequestItems[i].Weight,
+                            Nature = "Normal",
+                            Length = intlShipmentDTO.ShipmentRequestItems[i].Length,
+                            Width = intlShipmentDTO.ShipmentRequestItems[i].Width,
+                            Height = intlShipmentDTO.ShipmentRequestItems[i].Height
+                        }
+                    );
+            };
+            return ShipmentItems;
+        }
+
         public CustomerDTO tetCustomerDetails(WarehouseReceipt magayaShipmentDTO)
         {
             CustomerDTO cd = new CustomerDTO();
@@ -527,6 +553,70 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
+        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO) 
+        {
+
+            var station = await _stationService.GetStationById(shipmentDTO.StationId);
+            var customer = await _individualCustomerService.GetCustomerById(shipmentDTO.CustomerId);
+
+            //get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            shipmentDTO.UserId = currentUserId;
+
+            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
+
+            if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
+            {
+                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
+                shipmentDTO.RequestNumber = RequestNumber;
+            }
+
+            var newShipment = Mapper.Map<IntlShipmentRequest>(shipmentDTO);
+            newShipment.ApproximateItemsWeight = 0;
+
+            var serialNumber = 1;
+            foreach (var shipmentItem in newShipment.ShipmentRequestItems)
+            {
+                shipmentItem.SerialNumber = serialNumber;
+
+                //sum item weight
+                //check for volumetric weight
+                if (shipmentItem.IsVolumetric)
+                {
+                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+                    newShipment.ApproximateItemsWeight += Weight;
+                }
+                else
+                {
+                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                }
+
+                serialNumber++;
+            }
+
+            //do not save the child objects
+            newShipment.UserId = shipmentDTO.UserId;
+            newShipment.CustomerType = shipmentDTO.CustomerType;
+            newShipment.CustomerId = customer.IndividualCustomerId;
+            newShipment.CustomerCountryId = customer.UserActiveCountryId;
+            newShipment.CustomerAddress = customer.Address;
+            newShipment.CustomerEmail = customer.Email;
+            newShipment.CustomerPhoneNumber = customer.PhoneNumber;
+            newShipment.CustomerCity = customer.City;
+            newShipment.CustomerState = customer.State;
+
+            ////Destination
+            newShipment.DestinationServiceCentre = null;
+            var destinationCountry = shipmentDTO.ReceiverCity;
+
+            _uow.IntlShipmentRequest.Add(newShipment);
+
+            //set before returning
+            shipmentDTO.ReceiverCountry = station.Country;
+            return shipmentDTO;
+        }
+
         public async Task<string> GetMagayaWayBillNumber()
         {
             var mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
@@ -571,6 +661,87 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         }
 
+        public Task<string> SetEntityIntl(CustomerDTO custDTo)
+        {
+            int access_key;
+
+            //1. Call the open connection to get the session key
+            var openconn = OpenConnection(out access_key);
+
+            var entitydto = new EntityDto();
+            entitydto.Name = custDTo?.FirstName + " " + custDTo.LastName;
+            entitydto.Type = EntityDesc.Client;
+            entitydto.CreatedOn = DateTime.Now;
+
+            entitydto.Address = new Address();
+            entitydto.Address.Street = new string[2];
+
+            entitydto.Address.Street[0] = custDTo.Address;
+            entitydto.Address.City = custDTo.City;
+            entitydto.Address.State = custDTo.State;
+            entitydto.Address.ZipCode = "";
+
+            entitydto.Address.Country = new Country();
+            entitydto.Address.Country.Code = custDTo.Country?.CountryCode;
+            entitydto.Address.Country.Value = custDTo.Country?.CountryName;
+
+            entitydto.Address.ContactName = custDTo.FirstName + " " + custDTo.LastName;
+            entitydto.Address.ContactPhone = custDTo.PhoneNumber;
+            entitydto.Address.ContactEmail = custDTo.Email;
+
+            entitydto.BillingAddress = new Address();
+            entitydto.BillingAddress.Street = new string[2];
+
+            entitydto.BillingAddress.ContactName = custDTo.FirstName + " " + custDTo.LastName;
+            entitydto.BillingAddress.ContactPhone = custDTo.PhoneNumber;
+            entitydto.BillingAddress.ContactEmail = custDTo.Email;
+
+            entitydto.Email = custDTo.Email;
+            entitydto.Phone = custDTo.Email;
+            entitydto.GUID = Guid.NewGuid().ToString();
+
+            entitydto.CreatedOn = DateTime.Now;
+            entitydto.Customs = null;
+            entitydto.Division = null;
+            entitydto.AgentInfo = null;
+            entitydto.CarrierInfo = null;
+
+
+            //2. initialize type of shipment and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            var errval = string.Empty;
+
+            //4. initialize the serializer object
+            Serializer sr = new Serializer();
+
+            //5. serialize object to xml from class warehousereceipt
+            var xmlobject = Mapper.Map<Entity>(entitydto);
+            var customer = new CustomerDTO();
+
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //serialize to xml for the magaya request
+                entity_xml = sr.Serialize<Entity>(xmlobject);
+
+                //Add customer in Magaya
+                string error_code = "";
+                result = cs.SetEntity(access_key, flags, entity_xml, out error_code);
+
+                //result = api_session_error.no_error;                
+                errval = error_code;
+            }
+            catch (Exception ex)
+            {
+                errval = ex.Message;
+            }
+            return Task.FromResult(errval);
+        }
+
         public string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO)
         {
             //2. initialize type of shipment and flag
@@ -603,6 +774,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
 
             return errval;
+        }
+
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
         }
 
         public EntityList GetEntityObect()
@@ -688,7 +865,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
             return errval;
         }
-
 
         //Get Magaya mode of transportation
         public List<ModeOfTransportation> GetModesOfTransportation()

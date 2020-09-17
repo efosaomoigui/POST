@@ -188,6 +188,72 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("AddIntlCustomer")]
+        public async Task<IServiceResponse<object>> AddIntlCustomer(CustomerDTO customerDTO) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.EncryptWebsiteKey();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        result = await _websiteService.AddIntlCustomer(customerDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+        [HttpPost]
+        [Route("AddIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.EncryptWebsiteKey();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        result = await _websiteService.AddIntlShipmentRequest(TransactionDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
         //Login for GIGGO App
         [HttpPost]
         [Route("login")]

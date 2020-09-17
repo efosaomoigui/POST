@@ -46,6 +46,11 @@ namespace GIGL.GIGLS.Core.Domain
         public string RegistrationReferrercode { get; set; }
         public bool IsMagaya { get; set; }
 
+        public bool IsInternational { get; set; }
+        public IdentificationType IdentificationType { get; set; }
+        public string IdentificationImage { get; set; }
+        public string IdentificationNumber { get; set; }
+
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)
         //{
