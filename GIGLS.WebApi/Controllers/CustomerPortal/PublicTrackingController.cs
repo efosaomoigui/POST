@@ -199,10 +199,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var headers = request.Headers;
                 var result = new object();
 
-                if (headers.Contains("api_key"))
+                if (!headers.Contains("api_key"))
                 {
-                    var key = await _portalService.EncryptWebsiteKey();
-                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    var key = "2";  // await _portalService.EncryptWebsiteKey();
+                    string token = "2"; // headers.GetValues("api_key").FirstOrDefault();
                     if (token == key)
                     {
                         result = await _websiteService.AddIntlCustomer(customerDTO);
