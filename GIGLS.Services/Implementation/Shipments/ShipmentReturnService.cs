@@ -242,13 +242,13 @@ namespace GIGLS.Services.Implementation.Shipments
             //return Task.FromResult(shipmentReturnsDto);
         }
 
-        public Tuple<Task<List<ShipmentReturnDTO>>, int> GetShipmentReturns(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentReturnDTO>, int>> GetShipmentReturns(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;        
-                var shipmentReturns = _uow.ShipmentReturn.FindAsync(s => serviceCenters.Contains(s.ServiceCentreId)).Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();        
+                var shipmentReturns = await _uow.ShipmentReturn.FindAsync(s => serviceCenters.Contains(s.ServiceCentreId));
                 var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
                 shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated);
 
@@ -286,8 +286,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentReturnsDto = shipmentReturnsDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentReturnDTO>>, int>(Task.FromResult(shipmentReturnsDto.ToList()), count);
-
+                return new Tuple<List<ShipmentReturnDTO>, int>(shipmentReturnsDto.ToList(), count);
             }
             catch (Exception)
             {
