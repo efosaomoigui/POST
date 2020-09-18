@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
     public interface ILGARepository : IRepository<LGA>
     {
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
     }
 }

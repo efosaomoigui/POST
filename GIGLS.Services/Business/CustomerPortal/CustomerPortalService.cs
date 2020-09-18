@@ -1811,11 +1811,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
-        public async Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations()
+        public async Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
         {
             try
             {
-                return await _uow.HomeDeliveryLocation.GetActiveHomeDeliveryLocations();
+                return await _uow.LGA.GetActiveHomeDeliveryLocations();
             }
             catch (Exception)
             {
