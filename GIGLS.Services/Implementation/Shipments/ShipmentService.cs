@@ -82,12 +82,12 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentDTO>, int>> GetShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-                return _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters);
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                return await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters);
             }
             catch (Exception)
             {
