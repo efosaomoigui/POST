@@ -171,6 +171,8 @@ namespace GIGL.GIGLS.Core.Domain
         //General Details comes with role user 
         [MaxLength(128)]
         public string UserId { get; set; }
+        public string CustomerFirstName { get; set; } 
+        public string CustomerLastName { get; set; } 
         public string CustomerType { get; set; }
         public int CustomerId { get; set; }
         public int CustomerCountryId { get; set; }

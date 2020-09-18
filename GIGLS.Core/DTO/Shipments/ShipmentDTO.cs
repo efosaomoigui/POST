@@ -153,8 +153,16 @@ namespace GIGLS.Core.DTO.Shipments
 
         //General Details comes with role user ==============================
         public string UserId { get; set; }
+        public string CustomerFirstName { get; set; }
+        public string CustomerLastName { get; set; }
         public string CustomerType { get; set; }
         public int CustomerId { get; set; }
+        public int CustomerCountryId { get; set; }
+        public string CustomerAddress { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhoneNumber { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerState { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }

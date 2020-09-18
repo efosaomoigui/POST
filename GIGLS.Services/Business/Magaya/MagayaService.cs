@@ -571,15 +571,18 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.RequestNumber = RequestNumber;
             }
 
-            var newShipment = Mapper.Map<IntlShipmentRequest>(shipmentDTO);
+            var newShipment = await mapIntlShipmentRequest(shipmentDTO);
             newShipment.ApproximateItemsWeight = 0;
+            newShipment.ReceiverCountry = station.Country;
+            newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
+            newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
+            newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
 
             var serialNumber = 1;
             foreach (var shipmentItem in newShipment.ShipmentRequestItems)
             {
                 shipmentItem.SerialNumber = serialNumber;
 
-                //sum item weight
                 //check for volumetric weight
                 if (shipmentItem.IsVolumetric)
                 {
@@ -595,26 +598,68 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 serialNumber++;
             }
 
-            //do not save the child objects
-            newShipment.UserId = shipmentDTO.UserId;
-            newShipment.CustomerType = shipmentDTO.CustomerType;
-            newShipment.CustomerId = customer.IndividualCustomerId;
-            newShipment.CustomerCountryId = customer.UserActiveCountryId;
-            newShipment.CustomerAddress = customer.Address;
-            newShipment.CustomerEmail = customer.Email;
-            newShipment.CustomerPhoneNumber = customer.PhoneNumber;
-            newShipment.CustomerCity = customer.City;
-            newShipment.CustomerState = customer.State;
-
-            ////Destination
-            newShipment.DestinationServiceCentre = null;
-            var destinationCountry = shipmentDTO.ReceiverCity;
-
-            _uow.IntlShipmentRequest.Add(newShipment);
-
-            //set before returning
-            shipmentDTO.ReceiverCountry = station.Country;
+            _uow.IntlShipmentRequest.Add(newShipment); 
+            await _uow.CompleteAsync();
             return shipmentDTO;
+        }
+
+        public async Task<IntlShipmentRequest> mapIntlShipmentRequest(IntlShipmentRequestDTO r) 
+        {
+            var serviceCenters = await _uow.ServiceCentre.GetServiceCentresByStationId(r.StationId);
+            var sc = serviceCenters.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentre()
+            {
+                Code = x.Code,
+                Name = x.Name
+            }).FirstOrDefault();
+
+            IntlShipmentRequest varEntity = new IntlShipmentRequest()
+            {
+                IntlShipmentRequestId = r.IntlShipmentRequestId,
+                RequestNumber = r.RequestNumber,
+                CustomerFirstName = r.CustomerFirstName,
+                CustomerLastName = r.CustomerLastName,
+                CustomerId = r.CustomerId,
+                CustomerType = r.CustomerType,
+                CustomerCountryId = r.CustomerCountryId,
+                CustomerAddress = r.CustomerAddress,
+                CustomerEmail = r.CustomerEmail,
+                CustomerPhoneNumber = r.CustomerPhoneNumber,
+                CustomerCity = r.CustomerCity,
+                CustomerState = r.CustomerState,
+                DeliveryOptionId = r.DeliveryOptionId,
+                DestinationServiceCentreId = r.DestinationServiceCentreId,
+                DestinationServiceCentre = sc,
+                ReceiverAddress = r.ReceiverAddress,
+                ReceiverCity = r.ReceiverCity,
+                ReceiverCountry = r.ReceiverCountry,
+                ReceiverEmail = r.ReceiverEmail,
+                ReceiverName = r.ReceiverName,
+                ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                UserId = r.UserId,
+                Value = r.Value,
+                GrandTotal = r.GrandTotal,
+                SenderAddress = r.SenderAddress,
+                SenderState = r.SenderState,
+                ApproximateItemsWeight = r.ApproximateItemsWeight,
+                DestinationCountryId = r.DestinationCountryId,
+                ShipmentRequestItems = r.ShipmentRequestItems.Select(c=> new IntlShipmentRequestItem()
+                {
+                    Description = c.Description,
+                    Description_s = c.Description_s,
+                    ShipmentType = c.ShipmentType,
+                    Weight = c.Weight,
+                    Nature = c.Nature,
+                    Price = c.Price,
+                    Quantity = c.Quantity,
+                    SerialNumber = c.SerialNumber,
+                    IsVolumetric = c.IsVolumetric,
+                    Length = c.Length,
+                    Width = c.Width,
+                    Height = c.Height
+                }).ToList()
+            };
+
+            return varEntity;
         }
 
         public async Task<string> GetMagayaWayBillNumber()
