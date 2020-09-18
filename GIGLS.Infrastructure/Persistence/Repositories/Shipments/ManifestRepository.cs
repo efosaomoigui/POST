@@ -82,5 +82,52 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
+
+        public Task<List<ManifestDTO>> GetManifestsInSuperManifest(List<string> manifestCodes)
+        {
+            try
+            {
+                var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => manifestCodes.Contains(s.ManifestCode));
+
+                var manifestDto = from mgw in manifestGroupwaybillMapping
+                                  join p in _context.Manifest on mgw.ManifestCode equals p.ManifestCode
+                                  join s in _context.GroupWaybillNumberMapping on mgw.GroupWaybillNumber equals s.GroupWaybillNumber
+                                  where p.SuperManifestStatus == Core.Enums.SuperManifestStatus.AssignedSuperManifest
+                                  select new ManifestDTO
+                                  {
+                                      ManifestCode = p.ManifestCode,
+                                      DateCreated = p.DateCreated,
+                                      DateModified = p.DateModified,
+                                      ManifestType = p.ManifestType,
+                                      DateTime = p.DateTime,
+                                      IsDispatched = p.IsDispatched,
+                                      IsReceived = p.IsReceived,
+                                      HasSuperManifest = p.HasSuperManifest,
+                                      SuperManifestStatus = p.SuperManifestStatus,
+                                      IsDeleted = p.IsDeleted,
+                                      SuperManifestCode = p.SuperManifestCode,
+                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                      {
+                                          Code = x.Code,
+                                          Name = x.Name,
+                                          StationId = x.StationId,
+                                          StationName = x.Station.StationName
+                                      }).FirstOrDefault(),
+                                      DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                      {
+                                          Code = x.Code,
+                                          Name = x.Name,
+                                          StationId = x.StationId,
+                                          StationName = x.Station.StationName
+                                      }).FirstOrDefault()
+                                  };
+
+                return Task.FromResult(manifestDto.OrderByDescending(x => x.DateModified).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
