@@ -131,6 +131,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("internationalShipmentRequest/{requestNumber}")]
+        public async Task<IServiceResponse<IntlShipmentRequestDTO>> GetShipment(string requestNumber) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetShipmentRequest(requestNumber);
+                return new ServiceResponse<IntlShipmentRequestDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
 
         /// <summary>
         /// 

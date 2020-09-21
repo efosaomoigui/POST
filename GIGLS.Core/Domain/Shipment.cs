@@ -214,7 +214,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string ReceiverCountry { get; set; }
 
         //Delivery Options 
-        public int DeliveryOptionId { get; set; }
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
 
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }

@@ -28,10 +28,11 @@ namespace GIGL.GIGLS.Core.Domain
 
     public class IntlShipmentRequestItem : BaseDomain 
     {
-
         public int IntlShipmentRequestItemId { get; set; } 
         public string Description { get; set; }
-        public string Description_s { get; set; }
+        public string ItemName { get; set; } 
+        public string TrackingId{ get; set; }  
+        public string storeName{ get; set; }  
         public ShipmentType ShipmentType { get; set; }
         public double Weight { get; set; }
         public string Nature { get; set; }
