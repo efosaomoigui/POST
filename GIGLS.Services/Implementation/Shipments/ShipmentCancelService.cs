@@ -103,6 +103,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
             _uow.ShipmentCancel.Add(newCancel);
 
+            //get the payment status of the shipment
+            var getPaidInvoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill && s.PaymentStatus == PaymentStatus.Paid);
+
             //cancel shipment from the shipment service
             var boolResult = await _shipmentService.CancelShipment(shipment.Waybill);
 
@@ -110,27 +113,31 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 await _uow.CompleteAsync();
 
-                string customertype = shipment.CustomerType;
-
-                //get CustomerDetails
-                if (customertype.Contains("Individual"))
+                //send message if payment has been done on the waybill
+                if (getPaidInvoice != null)
                 {
-                    customertype = CustomerType.IndividualCustomer.ToString();
-                }
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), customertype);                
-                var customer = await _shipmentService.GetCustomer(shipment.CustomerId, customerType);
+                    string customertype = shipment.CustomerType;
 
-                var cancelMessage = new ShipmentCancelMessageDTO
-                {
-                    Reason = cancelReason,
-                    WaybillNumber = shipment.Waybill,
-                    SenderEmail = customer.Email,
-                    SenderPhoneNumber = customer.PhoneNumber,
-                    SenderName = customer.CustomerName
-                };
+                    //get CustomerDetails
+                    if (customertype.Contains("Individual"))
+                    {
+                        customertype = CustomerType.IndividualCustomer.ToString();
+                    }
+                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), customertype);
+                    var customer = await _shipmentService.GetCustomer(shipment.CustomerId, customerType);
 
-                //send message
-                await _messageSenderService.SendMessage(MessageType.SSC, EmailSmsType.All, cancelMessage);
+                    var cancelMessage = new ShipmentCancelMessageDTO
+                    {
+                        Reason = cancelReason,
+                        WaybillNumber = shipment.Waybill,
+                        SenderEmail = customer.Email,
+                        SenderPhoneNumber = customer.PhoneNumber,
+                        SenderName = customer.CustomerName
+                    };
+
+                    //send message
+                    await _messageSenderService.SendMessage(MessageType.SSC, EmailSmsType.All, cancelMessage);
+                }               
             }
             return new { waybill = newCancel.Waybill };
         }
