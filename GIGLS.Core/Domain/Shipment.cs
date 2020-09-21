@@ -159,7 +159,7 @@ namespace GIGL.GIGLS.Core.Domain
 
     public class IntlShipmentRequest : BaseDomain, IAuditable
     { 
-        //Shipment Information ==============================================
+        //Shipment Information 
         [Key]
         public int IntlShipmentRequestId { get; set; } 
 
@@ -167,25 +167,43 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string RequestNumber { get; set; }
 
-        //General Details comes with role user ==============================
+        //General Details comes with role user 
         [MaxLength(128)]
         public string UserId { get; set; }
+        
+        [MaxLength(50)]
+        public string CustomerFirstName { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerLastName { get; set; }
+
+        [MaxLength(50)]
         public string CustomerType { get; set; }
+
         public int CustomerId { get; set; }
         public int CustomerCountryId { get; set; }
-        public string CustomerAddress { get; set; }
-        public string CustomerEmail { get; set; }
-        public string CustomerPhoneNumber { get; set; }
-        public string CustomerCity { get; set; }
-        public string CustomerState { get; set; }
 
+        [MaxLength(500)]
+        public string CustomerAddress { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerEmail { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerPhoneNumber { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerCity { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerState { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
 
         //public PaymentStatus PaymentStatus { get; set; }
 
-        //Receivers Information===============================================
+        //Receivers Information
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentre DestinationServiceCentre { get; set; }
         public int DestinationCountryId { get; set; }
@@ -211,13 +229,15 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(50)]
         public string ReceiverCountry { get; set; }
 
-        //Delivery Options =====================================================
-        public int DeliveryOptionId { get; set; }
+        //Delivery Options 
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
 
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
 
-        //Shipment Items ======================================================
+        //Shipment Items
         public virtual List<IntlShipmentRequestItem> ShipmentRequestItems { get; set; }  
         public double ApproximateItemsWeight { get; set; }
 
@@ -226,7 +246,7 @@ namespace GIGL.GIGLS.Core.Domain
         //discount information
         public decimal? Total { get; set; }
 
-        //payment method =======================================================
+        //payment method 
         [MaxLength(20)]
         public string PaymentMethod { get; set; }
 

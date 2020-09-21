@@ -99,6 +99,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> SetEntityIntl(CustomerDTO custDTo);
         Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
         Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
     }
 
 

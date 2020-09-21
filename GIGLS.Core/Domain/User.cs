@@ -3,6 +3,7 @@ using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -49,6 +50,8 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsInternational { get; set; }
         public IdentificationType IdentificationType { get; set; }
         public string IdentificationImage { get; set; }
+
+        [MaxLength(100)]
         public string IdentificationNumber { get; set; }
 
 
