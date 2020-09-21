@@ -72,20 +72,6 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        //public Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        //{
-        //    try
-        //    {
-        //        var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-        //        return _uow.PreShipment.GetPreShipments(filterOptionsDto);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
-
         public async Task DeletePreShipment(int preShipmentId)
         {
             try

@@ -15,9 +15,6 @@ using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
-using System.Web.Http.Results;
-using System.Configuration;
-using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -71,10 +68,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
             return await HandleApiOperationAsync(async () =>
             {
-                var shipments = _service.GetShipments(filterOptionsDto);
+                var shipments = await _service.GetShipments(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentDTO>>
                 {
-                    Object = await shipments.Item1,
+                    Object = shipments.Item1,
                     Total = shipments.Item2
                 };
             });

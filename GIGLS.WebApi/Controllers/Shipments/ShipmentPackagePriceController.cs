@@ -1,6 +1,9 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -112,6 +115,70 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>
                 {
                     Object = shipmentPackagePrices
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("packagetopup/{shipmentPackagePriceId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentPackageQuantity(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _packagePriceService.UpdateShipmentPackageQuantity(shipmentPackagePriceId, shipmentPackagePriceDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("addpackage")]
+        public async Task<IServiceResponse<object>> AddShipmentPackage(ShipmentPackagePriceDTO shipmentPackagePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackagePrice = await _packagePriceService.AddShipmentPackage(shipmentPackagePriceDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = shipmentPackagePrice
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("packagetransactions")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>> GetShipmentPackageTransactions(BankDepositFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackageTransactions = await _packagePriceService.GetShipmentPackageTransactions(filterCriteria);
+
+                return new ServiceResponse<IEnumerable<ShipmentPackagingTransactionsDTO>>
+                {
+                    Object = shipmentPackageTransactions
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("servicecenterpackages")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCenterPackageDTO>>> GetShipmentPackageForServiceCenter()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackages = await _packagePriceService.GetShipmentPackageForServiceCenter();
+
+                return new ServiceResponse<IEnumerable<ServiceCenterPackageDTO>>
+                {
+                    Object = shipmentPackages
                 };
             });
         }

@@ -329,7 +329,6 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
-    <Compile Include="Controllers\ServiceCentres\HomeDeliveryLocationController.cs" />
     <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
     <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />

@@ -33,7 +33,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _portalService.AddMobilePickupRequest(pickuprequest);
         }
-
+        
         public async Task<object> AddRatings(MobileRatingDTO rating)
         {
             return await _portalService.AddRatings(rating);

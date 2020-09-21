@@ -25,5 +25,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IEnumerable<ManifestDTO>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria);
         Task<List<ManifestDTO>> GetManifestsInSuperManifest(string superManifestCode);
         Task<ManifestDTO> GetSuperManifestForManifest(string manifest);
+        Task<List<ManifestDTO>> GetManifestsInSuperManifestDetails(string superManifestCode);
     }
 }
