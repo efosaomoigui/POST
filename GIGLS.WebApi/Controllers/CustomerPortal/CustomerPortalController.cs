@@ -2078,7 +2078,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        [AllowAnonymous]
+
         [HttpPut]
         [Route("profileinternationaluser")]
         public async Task<IServiceResponse<bool>> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
