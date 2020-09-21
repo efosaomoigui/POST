@@ -171,17 +171,33 @@ namespace GIGL.GIGLS.Core.Domain
         //General Details comes with role user 
         [MaxLength(128)]
         public string UserId { get; set; }
-        public string CustomerFirstName { get; set; } 
-        public string CustomerLastName { get; set; } 
+        
+        [MaxLength(50)]
+        public string CustomerFirstName { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerLastName { get; set; }
+
+        [MaxLength(50)]
         public string CustomerType { get; set; }
+
         public int CustomerId { get; set; }
         public int CustomerCountryId { get; set; }
-        public string CustomerAddress { get; set; }
-        public string CustomerEmail { get; set; }
-        public string CustomerPhoneNumber { get; set; }
-        public string CustomerCity { get; set; }
-        public string CustomerState { get; set; }
 
+        [MaxLength(500)]
+        public string CustomerAddress { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerEmail { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerPhoneNumber { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerCity { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerState { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -215,7 +231,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string ReceiverCountry { get; set; }
 
         //Delivery Options 
-        public int DeliveryOptionId { get; set; }
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
 
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }

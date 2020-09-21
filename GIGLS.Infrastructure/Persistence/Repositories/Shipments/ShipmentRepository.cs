@@ -1030,7 +1030,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   CustomerState = r.CustomerState,
                                                   DateCreated = r.DateCreated,
                                                   DateModified = r.DateModified,
-                                                  DeliveryOptionId = r.DeliveryOptionId,
+                                                  PickupOptions = r.PickupOptions,
                                                   DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                   DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                   {
@@ -1043,6 +1043,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   ReceiverEmail = r.ReceiverEmail,
                                                   ReceiverName = r.ReceiverName,
                                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                  ReceiverState = r.ReceiverState,
                                                   UserId = r.UserId,
                                                   Value = r.Value,
                                                   GrandTotal = r.GrandTotal,
@@ -1068,7 +1069,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               CustomerType = r.CustomerType,
                                               DateCreated = r.DateCreated,
                                               DateModified = r.DateModified,
-                                              DeliveryOptionId = r.DeliveryOptionId,
+                                              PickupOptions = r.PickupOptions,
                                               DestinationServiceCentreId = r.DestinationServiceCentreId,
                                               DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                               {
@@ -1145,7 +1146,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                        CustomerType = r.CustomerType,
                                                                        DateCreated = r.DateCreated,
                                                                        DateModified = r.DateModified,
-                                                                       DeliveryOptionId = r.DeliveryOptionId,
+                                                                       PickupOptions = r.PickupOptions,
                                                                        DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                                        DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                                        {

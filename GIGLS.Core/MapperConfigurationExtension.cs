@@ -120,6 +120,12 @@ namespace GIGLS.Core
                 config.CreateMap<Shipment, ShipmentDTO>();
                 config.CreateMap<ShipmentDTO, Shipment>();
 
+                config.CreateMap<IntlShipmentRequest, IntlShipmentRequestDTO>();
+                config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequest>();
+
+                config.CreateMap<IntlShipmentRequestItem, IntlShipmentRequestItemDTO>();
+                config.CreateMap<IntlShipmentRequestItemDTO, IntlShipmentRequestItem>();
+
                 config.CreateMap<WaybillNumber, WaybillNumberDTO>();
                 config.CreateMap<WaybillNumberDTO, WaybillNumber>();
 

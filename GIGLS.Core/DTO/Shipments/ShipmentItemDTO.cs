@@ -32,7 +32,9 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public int ShipmentItemId { get; set; }
         public string Description { get; set; }
-        public string Description_s { get; set; }
+        public string ItemName { get; set; }
+        public string TrackingId { get; set; }
+        public string storeName { get; set; }
         public ShipmentType ShipmentType { get; set; }
         public double Weight { get; set; }
         public string Nature { get; set; }
@@ -47,7 +49,6 @@ namespace GIGLS.Core.DTO.Shipments
         public double Height { get; set; }
 
         //Foreign key information
-        public int ShipmentId { get; set; }
-        public virtual ShipmentDTO Shipment { get; set; }
+        public int IntlShipmentRequestItemId { get; set; } 
     }
 }

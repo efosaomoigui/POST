@@ -12,11 +12,13 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.Threading.Tasks;
 //using ThirdParty.WebServices;
@@ -571,8 +573,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.RequestNumber = RequestNumber;
             }
 
-            var newShipment = await mapIntlShipmentRequest(shipmentDTO);
-            newShipment.ApproximateItemsWeight = 0;
+            var newShipment = await MapIntlShipmentRequest(shipmentDTO);
             newShipment.ReceiverCountry = station.Country;
             newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
             newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
@@ -589,6 +590,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
                     double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                     newShipment.ApproximateItemsWeight += Weight;
+                    newShipment.GrandTotal += shipmentItem.Price;
                 }
                 else
                 {
@@ -603,7 +605,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return shipmentDTO;
         }
 
-        public async Task<IntlShipmentRequest> mapIntlShipmentRequest(IntlShipmentRequestDTO r) 
+        public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)  
         {
             var serviceCenters = await _uow.ServiceCentre.GetServiceCentresByStationId(r.StationId);
             var sc = serviceCenters.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentre()
@@ -626,11 +628,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 CustomerPhoneNumber = r.CustomerPhoneNumber,
                 CustomerCity = r.CustomerCity,
                 CustomerState = r.CustomerState,
-                DeliveryOptionId = r.DeliveryOptionId,
+                PickupOptions = r.PickupOptions,
                 DestinationServiceCentreId = r.DestinationServiceCentreId,
                 DestinationServiceCentre = sc,
                 ReceiverAddress = r.ReceiverAddress,
                 ReceiverCity = r.ReceiverCity,
+                ReceiverState = r.ReceiverState,
                 ReceiverCountry = r.ReceiverCountry,
                 ReceiverEmail = r.ReceiverEmail,
                 ReceiverName = r.ReceiverName,
@@ -645,7 +648,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c=> new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
-                    Description_s = c.Description_s,
+                    storeName = c.storeName,
+                    TrackingId = c.TrackingId,
+                    ItemName = c.ItemName,
                     ShipmentType = c.ShipmentType,
                     Weight = c.Weight,
                     Nature = c.Nature,
@@ -826,6 +831,62 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
             return result;
         }
+
+        public async Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber) 
+        {
+            try
+            {
+                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber.Equals(requestNumber));
+
+                if (shipment == null)
+                {
+                    throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId)
+        {
+            try
+            {
+                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.IntlShipmentRequestId == shipmentRequestId, "ShipmentRequestItems");
+                if (shipment == null)
+                {
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+
+                // get ServiceCentre
+                var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
+                shipmentDto.DestinationServiceCentre = destinationServiceCentre;
+
+                //get CustomerDetails
+                if (shipmentDto.CustomerType.Contains("Individual"))
+                {
+                    shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+
+                //Set the Senders AAddress for the Shipment in the CustomerDetails
+                shipmentDto.CustomerAddress = shipmentDto.SenderAddress;
+                shipmentDto.CustomerState = shipmentDto.SenderState;
+
+                return shipmentDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public EntityList GetEntityObect()
         {
