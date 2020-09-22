@@ -185,7 +185,8 @@ namespace GIGLS.Core
         IMobileGroupCodeWaybillMappingRepository MobileGroupCodeWaybillMapping { get; set; }
         IPartnerPayoutRepository PartnerPayout { get; set; }
         IEcommerceAgreementRepository EcommerceAgreement { get; set; }
-        IHomeDeliveryLocationRepository HomeDeliveryLocation { get; set; }
+        IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
+        IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

@@ -518,7 +518,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-        private async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
+        public async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
         {
             List<UserDTO> filteredRegionalManagers = new List<UserDTO>();
 

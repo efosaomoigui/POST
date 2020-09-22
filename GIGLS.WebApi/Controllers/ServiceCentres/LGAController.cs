@@ -127,5 +127,54 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{lgaId:int}/homedeliverystatus/{status}")]
+        public async Task<IServiceResponse<object>> UpdateHomeDeliveryStatus(int lgaId, bool status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _lgaService.UpdateHomeDeliveryLocation(lgaId, status);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("activehomedeliverylocations")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveHomeDeliveryLocations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _lgaService.GetActiveHomeDeliveryLocations();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = locations
+
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("homedeliverybystate/{stateId}")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetHomeDeliveryLocationByState(int stateId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _lgaService.GetLGAByState(stateId);
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = locations
+
+                };
+            });
+        }
+
     }
 }

@@ -179,7 +179,6 @@
     <Compile Include="Persistence\Repositories\ReferrerCodeRepository.cs" />
     <Compile Include="Persistence\Repositories\Repository.cs" />
     <Compile Include="Persistence\Repositories\RiderDeliveryRepository.cs" />
-    <Compile Include="Persistence\Repositories\ServiceCentres\HomeDeliveryLocationRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\LGARepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionServiceCentreMappingRepository.cs" />
@@ -228,6 +227,8 @@
     <Compile Include="Persistence\Repositories\Stocks\StockRequestPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockSupplyDetailsRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ShipmentPackagingTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ServiceCenterPackageRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
     <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />

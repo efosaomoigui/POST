@@ -121,7 +121,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    SenderAddress = r.SenderAddress,
                                    shipmentstatus = r.shipmentstatus,
                                    GrandTotal = r.GrandTotal,
-                                   CurrencySymbol = co.CurrencySymbol
+                                   CurrencySymbol = co.CurrencySymbol,
+                                   PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
+                                      .Select(y => new PreShipmentItemMobileDTO
+                                      {
+                                          PreShipmentItemMobileId = y.PreShipmentItemMobileId,
+                                          Description = y.Description
+                                      }).ToList()
                                });
 
             return shipmentDto;
@@ -145,7 +151,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    shipmentstatus = "Shipment",
                                    CurrencySymbol = co.CurrencySymbol,
                                    CustomerType = r.CustomerType,
-                                   CustomerId = r.CustomerId
+                                   CustomerId = r.CustomerId,
+                                   PreShipmentItems = _context.ShipmentItem.Where(d => d.ShipmentId == r.ShipmentId)
+                                      .Select(y => new PreShipmentItemMobileDTO
+                                      {
+                                          PreShipmentItemMobileId = y.ShipmentItemId,
+                                          Description = y.Description
+                                      }).ToList()
                                });
 
             return shipmentDto;

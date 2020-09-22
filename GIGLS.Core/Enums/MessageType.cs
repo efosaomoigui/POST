@@ -50,6 +50,7 @@
         DLD,  //DELAYED DELIVERY	
         MMCS, //Message for Multiple Mobile Create Shipment
         ARFS, // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
-        DBDO // When discrepancy has been identified during confirmation of bank deposit
+        DBDO, // When discrepancy has been identified during confirmation of bank deposit
+        SRMEmail // Message for Regional Managers when Store Keeper sends shipment to their region
     } 
 }

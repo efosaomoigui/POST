@@ -10,14 +10,12 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -65,17 +63,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
 
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -238,11 +225,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //1. get the current service user
-                //var user = await _userService.retUser();
                 bkoc.UserId = bkoc.UserId;
-                //bkoc.FullName = user.FirstName + " " + user.LastName;
-                bkoc.FullName = "Task" + " Scheduler";
-                var userActiveCountryId = 1; //76
+                bkoc.FullName = "Task Scheduler";
+                var userActiveCountryId = 1; 
 
                 //3. Get Bank Deposit Module StartDate
                 var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
@@ -261,7 +246,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     //all shipments from payload JSON
                     var allShipmentsVals = bkoc.ShipmentAndCOD;
-                    var result = allShipmentsVals.Select(s => s.Waybill);// new InvoiceViewDTO()
+                    var result = allShipmentsVals.Select(s => s.Waybill);
 
                     //--------------------------Validation Section -------------------------------------------//
                     var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
@@ -286,7 +271,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         Status = DepositStatus.Pending
                     });
 
-                    //throw new GenericException("ion");
                     var arrWaybills = allShipmentsVals.Select(x => x.Waybill).ToArray();
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     bankordercodes.TotalAmount = bkoc.TotalAmount;
@@ -297,11 +281,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     var nonDepsitedValue = _uow.Shipment.GetAll().Where(x => arrWaybills.Contains(x.Waybill)).ToList();
                     var nonDepsitedValueunprocessed = nonDepsitedValue.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate).ToList();
                     nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
-
                 }
                 else if (bkoc.DepositType == DepositType.COD)
                 {
-
                     var serviceCenters = bkoc.ServiceCenter;
 
                     //--------------------------Validation Section -------------------------------------------//
@@ -310,7 +292,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     var resultVals = allprocessingordeforshipment.Select(s => s.Waybill);
 
                     //--------------------------Validation Section -------------------------------------------//
-
                     var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && resultVals.Contains(s.Waybill));
 
                     if (allprocessingordeforcods.Any())
@@ -319,7 +300,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     //--------------------------Validation Section -------------------------------------------//
-
                     var bankorderforshipmentandcod = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
                         Waybill = s.Waybill,
@@ -345,7 +325,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         codTotal += item.CODAmount;
                     }
-
 
                     bkoc.TotalAmount = codTotal;
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
@@ -469,7 +448,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenter > 0)
             {
-                //var resul = allDemurrages.ToList();
                 demurrageResults = allDemurrages.Where(s => s.ServiceCenterId == serviceCenter && s.Amount >0).ToList();
             }
 
@@ -515,14 +493,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     }).Where(s => s.DemurrageAmount > 0).ToList()
                 };
             }
-            if (bankDep.ShipmentAndCOD.Count > 0)
+            if (bankDep.ShipmentAndCOD.Any())
             {
                 await AddBankProcessingOrderCodeDemurrageOnly_ScheduleTask(bankDep);
             }
             return Task.FromResult(0);
-
-            //var comboresult = Tuple.Create(refcode, cashdemurrage, total);
-            //return await Task.FromResult(comboresult);
         }
 
         //New bank processing order for Demurrage
@@ -618,7 +593,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 };
             }
 
-            if (bankDep.ShipmentAndCOD.Count > 0)
+            if (bankDep.ShipmentAndCOD.Any())
             {
                 await AddBankProcessingOrderCode_ScheduleTask(bankDep);
             }
@@ -717,7 +692,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     item.Amount = item.CODAmount;
                 }
             }
-
             else if (type == DepositType.Demurrage)
             {
                 foreach (var item in bankedShipments)
@@ -813,7 +787,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 total += item.GrandTotal;
             }
 
-            //return total;
             var comboresult = Tuple.Create(total, cashShipments);
             return await Task.FromResult(comboresult);
         }
@@ -846,7 +819,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 //1. get data from Demurrage register account as queryable from DemurrageRegisterAccount table
                 var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
-
                 allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
                 allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter && s.Amount>0);
 
@@ -893,7 +865,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 _uow.BankProcessingOrderCodes.Add(bankordercodes);
                 _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
-
                 await _uow.CompleteAsync();
 
                 return new BankProcessingOrderCodesDTO()
@@ -1428,10 +1399,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 bankorder.Status = bankrefcode.Status;
                 bankorder.BankName = bankrefcode.BankName;
                 bankorder.DateAndTimeOfDeposit = DateTime.Now;
-
                 await _uow.CompleteAsync();
             }
-
         }
 
         public async Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode)
@@ -1461,7 +1430,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             allDemurragesResult.ForEach(a => a.DepositStatus = DepositStatus.Verified);
             bankorder.Status = bankrefcode.Status;
-
             await _uow.CompleteAsync();
         }
 
@@ -1492,7 +1460,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             allCODsResult.ForEach(a => a.DepositStatus = DepositStatus.Verified);
             bankorder.Status = bankrefcode.Status;
-
             await _uow.CompleteAsync();
         }
 
@@ -1582,6 +1549,5 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return _bankService.GetBanks();
         }
-
     }
 }

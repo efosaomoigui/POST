@@ -171,6 +171,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
         Task<bool> DeleteDropOff(string waybill);
         Task<object> GetUserCountryCode(UserDTO user);
-        Task<IEnumerable<HomeDeliveryLocationDTO>> GetActiveHomeDeliveryLocations();
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
+        Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
     }
 }
