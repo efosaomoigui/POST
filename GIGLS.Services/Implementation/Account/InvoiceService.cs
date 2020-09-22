@@ -342,6 +342,11 @@ namespace GIGLS.Services.Implementation.Account
             var country = await _uow.Country.GetAsync(invoice.CountryId);
             invoiceDTO.Country = Mapper.Map<CountryDTO>(country);
 
+            //get high value amount
+            var highValue = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HighValueShipment, 1);
+            decimal highValueAmount = Convert.ToDecimal(highValue?.Value) * country.CurrencyRatio;
+            invoiceDTO.HighValueAmount = highValueAmount;
+
             return invoiceDTO;
         }
 
