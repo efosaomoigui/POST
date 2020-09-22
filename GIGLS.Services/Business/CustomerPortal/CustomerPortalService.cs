@@ -98,6 +98,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly IMagayaService _magayaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -111,6 +112,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,           
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService)
+            ICountryService countryService, IAdminReportService adminReportService,
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            IPaymentTransactionService paymentTransactionService, IMagayaService magayaService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -147,6 +153,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _visitService = visitService;
             _paymentTransactionService = paymentTransactionService;
             _flutterwavePaymentService = flutterwavePaymentService;
+            _magayaService = magayaService;
             MapperConfig.Initialize();
         }
 
@@ -1432,6 +1439,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return _countryService.GetUpdatedCountries();
         }
+
+        public async Task<IEnumerable<NewCountryDTO>> GetActiveCountries()
+        {
+            var activeCountries = await _countryService.GetActiveCountries();
+            var result = Mapper.Map<IEnumerable<NewCountryDTO>>(activeCountries);
+            return result;
+        }
+
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
             return await _preShipmentMobileService.ApproveShipment(detail);
@@ -2850,6 +2865,34 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
+        public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
+        {
+            return await _uow.Station.GetStationsByCountry(countryId);
+        }
+
+        public async Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+            user.IdentificationImage = intlUserProfiler.IdentificationImage;
+            user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
+            user.IsInternational = true;
+            user.IdentificationType = intlUserProfiler.IdentificationType;
+             await _uow.User.UpdateUser(currentUserId, user);
+            return true;
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+        }
+
 
     }
 }

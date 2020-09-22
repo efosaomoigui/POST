@@ -74,7 +74,6 @@ namespace GIGLS.Services.Implementation
             var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true);
             return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
         }
-
         public async Task<CountryDTO> GetCountryById(int countryId)
         {
             try

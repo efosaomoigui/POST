@@ -30,7 +30,6 @@ namespace GIGLS.Core.Domain.Partnership
 
         // FK
         public int? IdentificationTypeId { get; set; }
-        public virtual IdentificationType IdentificationType { get; set; }
 
         [MaxLength(128)]
         public string ApproverId { get; set; }
