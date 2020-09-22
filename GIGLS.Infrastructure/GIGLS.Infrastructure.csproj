@@ -227,6 +227,8 @@
     <Compile Include="Persistence\Repositories\Stocks\StockRequestPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockSupplyDetailsRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ShipmentPackagingTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ServiceCenterPackageRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
     <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />

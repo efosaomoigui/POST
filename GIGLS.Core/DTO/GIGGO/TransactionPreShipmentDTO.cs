@@ -1,4 +1,5 @@
 ﻿using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -14,5 +15,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
         public string PartnerImageUrl { get; set; }
+        public List<PreShipmentItemMobileDTO> PreShipmentItems { get; set; } = null;
     }
 }

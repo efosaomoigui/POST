@@ -421,6 +421,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                 if (customer != null)
                 {
+                    //If the account is not active, block the customer from creating shipment
+                    if (customer.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
                     if (customer.IsEligible != true)
                     {
                         preShipmentDTO.IsEligible = false;
@@ -1202,7 +1208,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
-               // decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+                // decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
                 decimal grandTotal = (decimal)preShipment.DeliveryPrice + PickupValue;
 
                 //GIG Go Promo Price
@@ -4618,6 +4624,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ShipmentPickupPrice = pickupprice,
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
+                                        PackageOptionIds = detail.PackageOptionIds,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -4629,6 +4636,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                         }).ToList()
                                     };
+
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
@@ -5484,6 +5492,65 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.DeliveryNumber.Add(number);
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);
+        }
+
+        //method called after no action is done on a shipment with status 'Assigned for Pickup' after 90 minutes  
+        public async Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request)
+        {
+            try
+            {
+                var currentPartnerData = await _uow.Partner.GetAsync(x => x.UserId == request.CurrentPartnerId);
+                if (currentPartnerData == null)
+                {
+                    throw new GenericException("Current Partner does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var waybillData = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == request.Waybill);
+                if (waybillData == null)
+                {
+                    throw new GenericException("Waybill does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (waybillData.shipmentstatus != "Assigned for Pickup")
+                {
+                    throw new GenericException("Riders can not be switched at this point", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                var formerpickup = await _uow.MobilePickUpRequests.GetAsync(x => x.UserId == request.CurrentPartnerId && x.Waybill == request.Waybill);
+
+                if (formerpickup == null)
+                {
+                    throw new GenericException($"Partner {currentPartnerData.PartnerName} is not currently assigned to this {request.Waybill}", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString())
+                {
+                    throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                formerpickup.Status = MobilePickUpRequestStatus.Moved.ToString();
+                waybillData.shipmentstatus = "Shipment created";
+
+                string scanStatus = ShipmentScanStatus.DLP.ToString();
+                await _mobiletrackingservice.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                {
+                    DateTime = DateTime.Now,
+                    Status = scanStatus,
+                    Waybill = request.Waybill,
+                    User = request.CurrentPartnerId
+                }, ShipmentScanStatus.DLP);
+
+                //Update Activity Status
+                await UpdateActivityStatus(request.CurrentPartnerId, ActivityStatus.OffDelivery);
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+
+
         }
     }
 }

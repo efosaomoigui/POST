@@ -1690,7 +1690,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<IEnumerable<LGADTO>>
                 {
                     Object = locations
-
                 };
             });
         }

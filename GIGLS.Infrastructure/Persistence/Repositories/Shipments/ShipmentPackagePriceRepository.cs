@@ -32,6 +32,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                      Price = p.Price,
                                      Description = p.Description,
                                      CountryId = p.CountryId,
+                                     MinimunRequired = p.MinimunRequired,
+                                     InventoryOnHand = p.InventoryOnHand,
                                      Country = new CountryDTO
                                      {
                                          CountryId = c.CountryId,
@@ -63,6 +65,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                     ShipmentPackagePriceId = p.ShipmentPackagePriceId,
                                     Price = p.Price,
                                     Description = p.Description,
+                                    InventoryOnHand = p.InventoryOnHand,
+                                    MinimunRequired = p.MinimunRequired,
                                     CountryId = p.CountryId,
                                     Country = new CountryDTO
                                     {

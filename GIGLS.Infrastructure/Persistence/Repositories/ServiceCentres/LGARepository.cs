@@ -44,6 +44,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
             catch (Exception)
             {
+
                 throw;
             }
         }

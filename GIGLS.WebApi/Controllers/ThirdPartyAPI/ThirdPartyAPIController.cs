@@ -629,7 +629,6 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _thirdPartyAPIService.GetActiveHomeDeliveryLocations();
-
                 return new ServiceResponse<IEnumerable<LGADTO>>
                 {
                     Object = result

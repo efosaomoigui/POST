@@ -210,6 +210,7 @@
     <Compile Include="Domain\RegionServiceCentreMapping.cs" />
     <Compile Include="Domain\RiderDelivery.cs" />
     <Compile Include="Domain\MagayaShipmentAgility.cs" />
+    <Compile Include="Domain\ServiceCenterPackage.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentHash.cs" />
@@ -240,6 +241,7 @@
     <Compile Include="Domain\ShipmentCancel.cs" />
     <Compile Include="Domain\ShipmentCollection.cs" />
     <Compile Include="Domain\ShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentPackagingTransactions.cs" />
     <Compile Include="Domain\ShipmentReroute.cs" />
     <Compile Include="Domain\ShipmentReturn.cs" />
     <Compile Include="Domain\ShipmentScan\MobileScanStatus.cs" />
@@ -457,6 +459,8 @@
     <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
     <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
+    <Compile Include="DTO\Stores\ServiceCenterPackageDTO.cs" />
+    <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
     <Compile Include="DTO\UserLoginEmailDTO.cs" />
@@ -525,6 +529,7 @@
     <Compile Include="Enums\ModificationType.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\OverdueShipmentStatus.cs" />
+    <Compile Include="Enums\PackageTransactionType.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
     <Compile Include="Enums\PaymentServiceType.cs" />
@@ -674,6 +679,8 @@
     <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />
+    <Compile Include="IRepositories\Stores\IShipmentPackagingTransactionsRepository.cs" />
+    <Compile Include="IRepositories\Stores\IServiceCenterPackageRepository.cs" />
     <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
     <Compile Include="IRepositories\User\IUserRepository.cs" />
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
