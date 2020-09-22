@@ -1422,7 +1422,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             string countryCode = userCountry.CurrencyCode.Length <= 2 ? userCountry.CurrencyCode : userCountry.CurrencyCode.Substring(0, 2);
 
-            return new { CountryCode = countryCode, CurrencyCode = userCountry.CurrencyCode, CountryId = userCountry.CountryId };
+            return new { CountryCode = countryCode, CurrencyCode = userCountry.CurrencyCode, CountryId = userCountry.CountryId, CurrencySymbol = userCountry.CurrencySymbol };
         }
 
         public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
