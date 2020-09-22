@@ -165,7 +165,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
 
-
         //Senders' Information
         public decimal Value { get; set; }
 
