@@ -48,7 +48,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IUserService userService,
             IShipmentService shipmentService,
             IServiceCentreService centreService,
-            IStationService stationService, IIndividualCustomerService individualCustomerController) 
+            IStationService stationService, IIndividualCustomerService individualCustomerController)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -280,7 +280,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     ChargeableWeight = new WeightValue()
                     {
                         Unit = WeightUnitType.lb,
-                        Value = (totalWeight > totalVolumeWeight)? totalWeight: totalVolumeWeight
+                        Value = (totalWeight > totalVolumeWeight) ? totalWeight : totalVolumeWeight
                     },
                     UseGrossWeight = false,
                     Flags = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags,
@@ -373,7 +373,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ShipmentItems.Add(
                         new ShipmentItemDTO()
                         {
-                            Description = magayaShipmentDTO.Items[i].Description, 
+                            Description = magayaShipmentDTO.Items[i].Description,
                             ShipmentType = ShipmentType.Regular,
                             Weight = magayaShipmentDTO.TotalWeight.Value,
                             Nature = "Normal",
@@ -386,7 +386,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return ShipmentItems;
         }
 
-        public List<IntlShipmentRequestItemDTO> getIntlShipmentItems(IntlShipmentRequestDTO intlShipmentDTO)  
+        public List<IntlShipmentRequestItemDTO> getIntlShipmentItems(IntlShipmentRequestDTO intlShipmentDTO)
         {
             var ShipmentItems = new List<IntlShipmentRequestItemDTO>();
 
@@ -411,8 +411,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public CustomerDTO tetCustomerDetails(WarehouseReceipt magayaShipmentDTO)
         {
             CustomerDTO cd = new CustomerDTO();
-            cd.FirstName = magayaShipmentDTO.ShipperName.Split(' ')[0];
-            cd.LastName = magayaShipmentDTO.ShipperName.Split(' ')[1];
+            var bolVal = magayaShipmentDTO?.ShipperName.Split(' ');
+            cd.FirstName = bolVal[0];
+            cd.LastName = (bolVal.Length > 1) ? bolVal[1] : bolVal[0];
             cd.Email = magayaShipmentDTO.ShipperAddress.ContactEmail;
             cd.Address = magayaShipmentDTO.ShipperAddress.Street[0];
             cd.PhoneNumber = magayaShipmentDTO.ShipperAddress.ContactPhone;
@@ -420,11 +421,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             cd.State = magayaShipmentDTO.ShipperAddress.State;
             cd.CustomerType = CustomerType.IndividualCustomer;
 
-            cd.Country = new CountryDTO()
+            if (magayaShipmentDTO.ShipperAddress.Country != null)
             {
-                CountryName = magayaShipmentDTO.ShipperAddress.Country.Value,
-                CountryCode = magayaShipmentDTO.ShipperAddress.Country.Code,
-            };
+                cd.Country = new CountryDTO()
+                {
+                    CountryName = magayaShipmentDTO.ShipperAddress.Country.Value,
+                    CountryCode = magayaShipmentDTO.ShipperAddress.Country.Code,
+                };
+            }
+
             return cd;
         }
 
@@ -472,7 +477,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //Receivers Details
                 shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeName;
                 shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.Consignee.Phone;
-                shipmentDTO.ReceiverEmail = (magayaShipmentDTO.Consignee.Email != " ") ? magayaShipmentDTO.Consignee.Email: magayaShipmentDTO.ConsigneeAddress.ContactEmail;
+                shipmentDTO.ReceiverEmail = (magayaShipmentDTO.Consignee.Email != " ") ? magayaShipmentDTO.Consignee.Email : magayaShipmentDTO.ConsigneeAddress.ContactEmail;
                 shipmentDTO.ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0];
                 shipmentDTO.ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City;
                 shipmentDTO.ReceiverState = magayaShipmentDTO.ConsigneeAddress.State;
@@ -551,11 +556,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
             catch (Exception ex)
             {
-                throw; 
+                throw;
             }
         }
 
-        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO) 
+        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
         {
 
             var station = await _stationService.GetStationById(shipmentDTO.StationId);
@@ -600,12 +605,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 serialNumber++;
             }
 
-            _uow.IntlShipmentRequest.Add(newShipment); 
+            _uow.IntlShipmentRequest.Add(newShipment);
             await _uow.CompleteAsync();
             return shipmentDTO;
         }
 
-        public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)  
+        public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)
         {
             var serviceCenters = await _uow.ServiceCentre.GetServiceCentresByStationId(r.StationId);
             var sc = serviceCenters.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentre()
@@ -645,7 +650,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 SenderState = r.SenderState,
                 ApproximateItemsWeight = r.ApproximateItemsWeight,
                 DestinationCountryId = r.DestinationCountryId,
-                ShipmentRequestItems = r.ShipmentRequestItems.Select(c=> new IntlShipmentRequestItem()
+                ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
                     storeName = c.storeName,
@@ -832,7 +837,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return result;
         }
 
-        public async Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber) 
+        public async Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber)
         {
             try
             {
@@ -1040,7 +1045,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
         //Get Magaya ports called routes in Agility
-        public async Task<List<ServiceCentreDTO>> GetDestinationServiceCenters()  
+        public async Task<List<ServiceCentreDTO>> GetDestinationServiceCenters()
         {
             var result = await _centreService.GetServiceCentres();
             return result.ToList();
