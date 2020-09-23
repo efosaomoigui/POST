@@ -64,7 +64,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentDTO> GetTempShipment(string code);
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre();
-
+        Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
@@ -96,6 +96,12 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> GetMagayaWayBillNumber();
         EntityList GetEntityObect();
         Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
+        Task<string> SetEntityIntl(CustomerDTO custDTo);
+        Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
+        Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
     }
 
 

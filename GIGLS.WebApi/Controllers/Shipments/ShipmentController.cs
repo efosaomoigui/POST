@@ -66,7 +66,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
 
-
             return await HandleApiOperationAsync(async () =>
             {
                 var shipments = await _service.GetShipments(filterOptionsDto);
@@ -74,6 +73,25 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 {
                     Object = shipments.Item1,
                     Total = shipments.Item2
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetIntltransactionRequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlTransactionShipments(filterOptionsDto);
+
+                return new ServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>()
+                {
+                    Object = result.Result
                 };
             });
         }

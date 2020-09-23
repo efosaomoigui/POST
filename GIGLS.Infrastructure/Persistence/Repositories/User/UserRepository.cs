@@ -123,7 +123,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             {
                 return await _userManager.CreateAsync(user, password);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

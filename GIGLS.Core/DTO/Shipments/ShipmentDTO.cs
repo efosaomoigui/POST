@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -71,7 +72,6 @@ namespace GIGLS.Core.DTO.Shipments
         //General Details comes with role user
         public string UserId { get; set; }
 
-        //
         public List<CustomerDTO> Customer { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
 
@@ -143,5 +143,80 @@ namespace GIGLS.Core.DTO.Shipments
         public string TempCode { get; set; }
 
         public List<int> PackageOptionIds { get; set; } = new List<int>();
+    }
+
+    public class IntlShipmentRequestDTO : BaseDomainDTO 
+    {
+        //Shipment Information 
+        public int IntlShipmentRequestId { get; set; }
+
+        public string RequestNumber { get; set; }
+
+        //General Details comes with role user 
+        public string UserId { get; set; }
+        public string CustomerFirstName { get; set; }
+        public string CustomerLastName { get; set; }
+        public string CustomerType { get; set; }
+        public int CustomerId { get; set; }
+        public int CustomerCountryId { get; set; }
+        public string CustomerAddress { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhoneNumber { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerState { get; set; }
+
+
+        //Senders' Information
+        public decimal Value { get; set; }
+
+        //public PaymentStatus PaymentStatus { get; set; }
+
+        //Receivers Information
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public int DestinationCountryId { get; set; }
+
+        public string ReceiverName { get; set; }
+
+        public string ReceiverPhoneNumber { get; set; }
+
+        public string ReceiverEmail { get; set; }
+
+        public string ReceiverAddress { get; set; }
+
+        public string ReceiverCity { get; set; }
+
+        public string ReceiverState { get; set; }
+
+        public string ReceiverCountry { get; set; }
+
+        //Delivery Options 
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
+        //Shipment Items
+        public virtual List<IntlShipmentRequestItemDTO> ShipmentRequestItems { get; set; }
+        public double ApproximateItemsWeight { get; set; }
+
+        public decimal GrandTotal { get; set; }
+
+        //discount information
+        public decimal? Total { get; set; }
+
+        //payment method 
+        public string PaymentMethod { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+
+        public string SenderState { get; set; }
+
+        public int StationId { get; set; }
+
+        //public bool IsProcessed { get; set; } 
     }
 }

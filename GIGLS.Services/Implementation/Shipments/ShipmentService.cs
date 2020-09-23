@@ -96,6 +96,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto) 
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return _uow.IntlShipmentRequest.GetIntlTransactionShipmentRequest(filterOptionsDto, serviceCenters); 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -762,6 +775,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
+                //Block account that has been suspended/pending from create shipment
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    if (customerId.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"{customerId.Name} account has been {customerId.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
@@ -784,22 +806,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-
-                //send message
-                //var smsData = new ShipmentTrackingDTO
-                //{
-                //    Waybill = newShipment.Waybill
-                //};
-
-                //if (newShipment.DepartureServiceCentreId == 309)
-                //{
-                //    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
-                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
-                //}
-                //else
-                //{
-                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
-                //}
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
@@ -1062,6 +1068,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (CustomerType.Company.ToString() == customerType)
             {
                 var company = await _uow.Company.GetAsync(s => s.CompanyId == shipmentDTO.CustomerId);
+                createdObject.CompanyStatus = company.CompanyStatus;
                 if (company.CompanyType == CompanyType.Corporate)
                 {
                     shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
@@ -1184,7 +1191,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 shipmentItem.SerialNumber = serialNumber;
 
-                //sum item weight
+                //sum item weight 
                 //check for volumetric weight
                 if (shipmentItem.IsVolumetric)
                 {
