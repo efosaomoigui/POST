@@ -4579,7 +4579,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                     if(preshipmentmobile.IsHomeDelivery == false && preshipmentmobile.DestinationServiceCenterId > 0)
                                     {
-                                        detail.ReceiverServiceCentreId = (int)preshipmentmobile.DestinationServiceCenterId;
+                                        detail.ReceiverServiceCentreId = preshipmentmobile.DestinationServiceCenterId;
                                     }
 
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
