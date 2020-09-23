@@ -4576,12 +4576,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     {
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
-
-                                    if(preshipmentmobile.IsHomeDelivery == false && preshipmentmobile.DestinationServiceCenterId > 0)
-                                    {
-                                        detail.ReceiverServiceCentreId = preshipmentmobile.DestinationServiceCenterId;
-                                    }
-
+                                    
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();
