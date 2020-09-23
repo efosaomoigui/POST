@@ -2710,8 +2710,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         decimal amountToCredit = invoice.Amount;
                         amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
-                        wallet.Balance = wallet.Balance + amountToCredit;
-
                         //2.4.2 Update customers wallet's Transaction (credit)
                         var newWalletTransaction = new WalletTransaction
                         {
@@ -2725,6 +2723,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             Waybill = waybill,
                             Description = "Credit for Shipment Cancellation"
                         };
+                        if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+                        {
+                            newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+                        }
+                        else
+                        {
+                            newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+                        }
+
+                        wallet.Balance = wallet.Balance + amountToCredit;
                         _uow.WalletTransaction.Add(newWalletTransaction);
                     }
                 }
