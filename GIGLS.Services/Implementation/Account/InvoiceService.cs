@@ -343,7 +343,7 @@ namespace GIGLS.Services.Implementation.Account
             invoiceDTO.Country = Mapper.Map<CountryDTO>(country);
 
             //get high value amount
-            var highValue = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HighValueShipment, 1);
+            var highValue = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HighValueShipment, invoice.CountryId);
             decimal highValueAmount = Convert.ToDecimal(highValue?.Value) * country.CurrencyRatio;
             invoiceDTO.HighValueAmount = highValueAmount;
 
