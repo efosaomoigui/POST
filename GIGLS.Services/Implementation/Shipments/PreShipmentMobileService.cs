@@ -4603,7 +4603,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     {
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
-
+                                    
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();
