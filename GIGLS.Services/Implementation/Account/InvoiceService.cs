@@ -344,7 +344,7 @@ namespace GIGLS.Services.Implementation.Account
 
             //get high value amount
             var highValue = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HighValueShipment, invoice.CountryId);
-            decimal highValueAmount = Convert.ToDecimal(highValue?.Value) * country.CurrencyRatio;
+            decimal highValueAmount = Convert.ToDecimal(highValue?.Value);
             invoiceDTO.HighValueAmount = highValueAmount;
 
             return invoiceDTO;
