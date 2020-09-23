@@ -323,7 +323,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(x => x.StationId == stationId);
+                var centres = _context.ServiceCentre.Where(x => x.StationId == stationId).ToList();
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 select new ServiceCentreDTO

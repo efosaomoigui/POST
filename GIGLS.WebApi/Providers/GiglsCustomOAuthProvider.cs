@@ -141,7 +141,8 @@ namespace GIGLS.WebApi.Providers
                     { "Organisation", user.Organisation},
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
-                    { "IsMagaya", user.IsMagaya.ToString()}
+                    { "IsMagaya", user.IsMagaya.ToString()},
+                    { "IsInternational", user.IsInternational.ToString()}
                 };
 
                 //get claims for the user

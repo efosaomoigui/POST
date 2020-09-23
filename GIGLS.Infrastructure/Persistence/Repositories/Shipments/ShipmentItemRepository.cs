@@ -13,4 +13,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
     }
+
+    public class IntlShipmentRequestItemRepository : Repository<IntlShipmentRequestItem, GIGLSContext>, IIntlShipmentRequestItemRepository 
+    {
+        private GIGLSContext _context;
+        public IntlShipmentRequestItemRepository(GIGLSContext context) : base(context) 
+        {
+            _context = context;
+        }
+    }
 }

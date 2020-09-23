@@ -38,6 +38,8 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
 using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -47,11 +49,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     {
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
+        private readonly IMagayaService _magayaService;
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
             _paymentService = paymentService;
+            _magayaService = magayaService;
         }
 
         [HttpPost]
@@ -65,6 +69,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<InvoiceViewDTO>>
                 {
                     Object = invoices
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("AddIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
+                TransactionDTO.CustomerId = customer.IndividualCustomerId;
+                var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
                 };
             });
         }
@@ -2026,6 +2046,75 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getactivecountries")]
+        public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries = await _portalService.GetActiveCountries();
+                return new ServiceResponse<List<NewCountryDTO>>
+                {
+                    Object = countries.ToList()
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getstationsbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StationDTO>>> GetStationsByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetStationsByCountry(countryId);
+                return new ServiceResponse<List<StationDTO>>
+                {
+                    Object = stations.ToList()
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("profileinternationaluser")]
+        public async Task<IServiceResponse<bool>> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            return await HandleApiOperationAsync(async () => {
+                await _portalService.ProfileInternationalUser(intlUserProfiler);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecentresbystation/{stationId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetServiceCentresByStation(stationId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("identificationtypes")]
+        public IHttpActionResult GetIdentificationTypes()
+        {
+            var types = EnumExtensions.GetValues<IdentificationType>();
+            types.RemoveAt(3);
+            return Ok(types);
+        }
+
 
     }
 }
