@@ -1844,6 +1844,38 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest()
+        {
+            try
+            {
+                // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                //var groupwaybills = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
+
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending);
+
+                if (serviceCenters.Length > 0)
+                {
+                    manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //Filter the service centre details using the destination of the waybill
+                var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
+                var result = allServiceCenters.Where(s => manifests.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+
+                //Fetch all Service Centre including their Station Detail into Memory
+                var allServiceCenterDTOs = await _centreService.GetServiceCentres();
+
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
+
+                return unmappedGroupServiceCentres.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
         {
             // use currentUser login servicecentre
