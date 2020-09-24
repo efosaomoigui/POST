@@ -129,6 +129,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
+                    manifestEntity.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId;
 
                     if (dispatchDTO.IsSuperManifest)
                     {
@@ -177,8 +178,6 @@ namespace GIGLS.Services.Implementation.Fleets
                     
                 }
                 
-
-
                 ////--start--///Set the DepartureCountryId
                 int countryIdFromServiceCentreId = 0;
                 try
