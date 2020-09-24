@@ -375,23 +375,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Super Manifest
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var unmappedManifests = await _shipmentService.GetUnmappedManifestListForServiceCentre();
-                return new ServiceResponse<IEnumerable<ManifestDTO>>
-                {
-                    Object = unmappedManifests,
-                    Total = unmappedManifests.Count
-                };
-            });
-        }
-
+        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]
