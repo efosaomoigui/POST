@@ -2114,7 +2114,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             types.RemoveAt(3);
             return Ok(types);
         }
-        [AllowAnonymous]
+        
         [HttpGet]
         [Route("servicecentresbycountry/{countryId}")]
         public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
