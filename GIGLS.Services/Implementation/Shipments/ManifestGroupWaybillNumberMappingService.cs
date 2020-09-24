@@ -170,12 +170,39 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                
-                var manifestCodeList = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestCode == superManifestCode).Select(x => x.ManifestCode).Distinct().ToList();
+                var manifests = await _uow.Manifest.FindAsync(x => x.SuperManifestCode == superManifestCode);
 
-                var manifestDTOs = await _uow.Manifest.GetManifestsInSuperManifest(manifestCodeList);
+                //add to list
+                var resultSet = new HashSet<string>();
+                List<ManifestDTO> resultList = new List<ManifestDTO>();
+                foreach (var manifest in manifests)
+                {
+                    var manifestData = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest.ManifestCode);
 
-                return manifestDTOs;
+                    if (manifestData == null)
+                    {
+                        throw new GenericException("Manifest information does not exist");
+                    }
+
+                    var manifestDataDTO = Mapper.Map<ManifestDTO>(manifestData);
+
+                    //set departure and destination service centres
+                    var dept = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifestData.DepartureServiceCentreId, "Station");
+                    var dest = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifestData.DestinationServiceCentreId, "Station");
+
+                    var deptDTO = Mapper.Map<ServiceCentreDTO>(dept);
+                    var destDTO = Mapper.Map<ServiceCentreDTO>(dest);
+
+                    manifestDataDTO.DepartureServiceCentre = deptDTO;
+                    manifestDataDTO.DestinationServiceCentre = destDTO;
+
+                    if (resultSet.Add(manifestData.ManifestCode))
+                    {
+                        resultList.Add(manifestDataDTO);
+                    }
+                }
+
+                return resultList;
             }
             catch (Exception)
             {
