@@ -1531,7 +1531,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             string emailPhone = "";
 
-            //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
@@ -2888,6 +2887,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
         }
 
-
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
+        }
     }
 }
