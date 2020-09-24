@@ -47,7 +47,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.DateOfEntry = DateTime.Now;
-
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
             return new { id = newWalletTransaction.WalletTransactionId };
