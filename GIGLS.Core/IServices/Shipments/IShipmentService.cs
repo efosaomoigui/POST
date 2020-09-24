@@ -63,8 +63,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
         Task<PreShipmentDTO> GetTempShipment(string code);
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
-        Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre();
         Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
+        Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(FilterOptionsDto filterOptionsDto);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
