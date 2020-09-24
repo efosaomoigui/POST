@@ -216,6 +216,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int StationId { get; set; }
 
-        //public bool IsProcessed { get; set; } 
+        public bool IsProcessed { get; set; }
     }
 }

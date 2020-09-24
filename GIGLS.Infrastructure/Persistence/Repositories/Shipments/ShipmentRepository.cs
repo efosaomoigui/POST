@@ -1051,8 +1051,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   SenderState = r.SenderState,
                                                   ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                   DestinationCountryId = r.DestinationCountryId,
+                                                  IsProcessed = r.IsProcessed
 
-                                              }).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+                                              }).Where(b => b.IsProcessed ==false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentRequestDTO.Count();
                     var retVal = new Tuple<List<IntlShipmentRequestDTO>, int>(intlShipmentRequestDTO, count);
@@ -1089,8 +1090,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               SenderState = r.SenderState,
                                               ApproximateItemsWeight = r.ApproximateItemsWeight,
                                               DestinationCountryId = r.DestinationCountryId,
+                                              IsProcessed = r.IsProcessed
 
-                                          }).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
+                                          }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
 
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))

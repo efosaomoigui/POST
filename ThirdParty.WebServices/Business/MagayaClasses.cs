@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using ThirdParty.WebServices.Business;
 
 namespace ThirdParty.WebServices.Magaya.Business.New
 {
@@ -28279,12 +28280,12 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     [System.Xml.Serialization.XmlRootAttribute("TheWarehouseReceiptCombo", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
     public partial class TheWarehouseReceiptCombo 
     { 
-
         private WarehouseReceipt warehouseReceipt;
         private string actualAmountCollected;
         private string expectedAmountToCollect;
         private string magayaPaymentOption;
         private string magayaPaymentType;
+        private IntlShipmentRequestDTO intlShipmentRequest;
 
         private int serviceCenterId;
 
@@ -28358,6 +28359,19 @@ namespace ThirdParty.WebServices.Magaya.Business.New
             set 
             { 
                 magayaPaymentType = value; 
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("IntlShipmentRequest")]
+        public IntlShipmentRequestDTO IntlShipmentRequest
+        {
+            get
+            {
+                return intlShipmentRequest;
+            }
+            set
+            {
+                intlShipmentRequest = value;
             }
         }
     }

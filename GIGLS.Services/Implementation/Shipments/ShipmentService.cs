@@ -1177,7 +1177,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentDTO.PackageOptionIds.Any())
             {
-               
                 await UpdatePackageTransactions(shipmentDTO);
             }
 

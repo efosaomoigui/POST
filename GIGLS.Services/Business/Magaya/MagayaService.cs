@@ -349,6 +349,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
                     await _shipmentService.AddShipment(shipmentDto);
+
+                    if (mDto?.IntlShipmentRequest.RequestNumber.Length > 0 )
+                    {
+                        var request = await _uow.IntlShipmentRequest.GetAsync(s => s.RequestNumber == mDto.IntlShipmentRequest.RequestNumber);
+                        request.IsProcessed = true;
+                        await _uow.CompleteAsync();
+                    }
                 }
                 else
                 {
