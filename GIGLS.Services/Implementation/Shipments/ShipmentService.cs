@@ -1780,8 +1780,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //Get Groupwaybill not yet manifest for the login user
-                //var groupedWaybillsBySc = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
                 var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending);
 
                 if (serviceCenters.Length > 0)
