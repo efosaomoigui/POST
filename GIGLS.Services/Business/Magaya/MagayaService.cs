@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -43,7 +44,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IServiceCentreService _centreService;
         private readonly IStationService _stationService;
         private readonly IIndividualCustomerService _individualCustomerService;
-        private readonly IMessageSenderService _messageSenderService;  
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly ICustomerService _customerService;
+
 
         public MagayaService(
             INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -52,7 +55,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IShipmentService shipmentService,
             IServiceCentreService centreService,
             IStationService stationService, IIndividualCustomerService individualCustomerController,
-            IMessageSenderService messageSenderService)
+            IMessageSenderService messageSenderService,
+            ICustomerService customerService)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -63,6 +67,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _stationService = stationService;
             _individualCustomerService = individualCustomerController;
             _messageSenderService = messageSenderService;
+            _customerService = customerService;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -581,7 +586,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
+        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequestOld(IntlShipmentRequestDTO shipmentDTO)
         {
 
             var station = await _stationService.GetStationById(shipmentDTO.StationId);
@@ -591,6 +596,78 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             var currentUserId = await _userService.GetCurrentUserId();
             shipmentDTO.UserId = currentUserId;
 
+            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
+
+            if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
+            {
+                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
+                shipmentDTO.RequestNumber = RequestNumber;
+            }
+
+            var newShipment = await MapIntlShipmentRequest(shipmentDTO);
+            newShipment.ReceiverCountry = station.Country;
+            newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
+            newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
+            newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+
+            var serialNumber = 1;
+            foreach (var shipmentItem in newShipment.ShipmentRequestItems)
+            {
+                shipmentItem.SerialNumber = serialNumber;
+
+                //check for volumetric weight
+                if (shipmentItem.IsVolumetric)
+                {
+                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+                    newShipment.ApproximateItemsWeight += Weight;
+                    newShipment.GrandTotal += shipmentItem.Price;
+                }
+                else
+                {
+                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                }
+
+                serialNumber++;
+            }
+
+            _uow.IntlShipmentRequest.Add(newShipment);
+            await _uow.CompleteAsync();
+            return shipmentDTO;
+        }
+
+        public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
+        {
+            //get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+
+            if(customer.CustomerType == CustomerType.Company)
+            {
+                shipmentDTO.CustomerId = customer.CompanyId;
+                shipmentDTO.CustomerFirstName = customer.Name;
+                shipmentDTO.CustomerLastName = customer.Name;
+                shipmentDTO.CustomerEmail = customer.Email;
+                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                shipmentDTO.CustomerAddress = customer.Address;
+                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+            }
+            else
+            {
+                shipmentDTO.CustomerId = customer.IndividualCustomerId;
+                shipmentDTO.CustomerFirstName = customer.FirstName;
+                shipmentDTO.CustomerLastName = customer.LastName;
+                shipmentDTO.CustomerEmail = customer.Email;
+                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                shipmentDTO.CustomerAddress = customer.Address;
+                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+            }
+
+            shipmentDTO.UserId = currentUserId;
+            shipmentDTO.CustomerType = customer.CustomerType.ToString();
+            
+            var station = await _stationService.GetStationById(shipmentDTO.StationId);
             var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
 
             if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))

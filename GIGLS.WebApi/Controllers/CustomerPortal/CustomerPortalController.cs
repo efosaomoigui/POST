@@ -73,14 +73,28 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        //[HttpPost]
+        //[Route("AddIntlShipmentTransactions")]
+        //public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
+        //        TransactionDTO.CustomerId = customer.IndividualCustomerId;
+        //        var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
+
         [HttpPost]
         [Route("AddIntlShipmentTransactions")]
         public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
-                TransactionDTO.CustomerId = customer.IndividualCustomerId;
                 var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
                 return new ServiceResponse<object>
                 {
