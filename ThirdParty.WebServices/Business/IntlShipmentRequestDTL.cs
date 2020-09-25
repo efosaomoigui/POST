@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThirdParty.WebServices.Business
 {
-    public class IntlShipmentRequestDTO 
+    public class IntlShipmentRequestDTL 
     {
         //Shipment Information 
         public int IntlShipmentRequestId { get; set; }
@@ -33,7 +33,7 @@ namespace ThirdParty.WebServices.Business
 
         //Receivers Information
         public int DestinationServiceCentreId { get; set; }
-        public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public virtual ServiceCentreDTL DestinationServiceCentre { get; set; }
         public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }
@@ -80,9 +80,9 @@ namespace ThirdParty.WebServices.Business
         //public bool IsProcessed { get; set; } 
     }
 
-    public class ServiceCentreDTO 
+    public class ServiceCentreDTL 
     {
-        public ServiceCentreDTO()
+        public ServiceCentreDTL()
         {
             Users = new List<Object>();
             Shipments = new List<Object>();
