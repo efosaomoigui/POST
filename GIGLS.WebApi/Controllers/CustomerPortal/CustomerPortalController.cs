@@ -2090,7 +2090,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        [AllowAnonymous]
+       
         [HttpPost]
         [Route("getshipments")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
