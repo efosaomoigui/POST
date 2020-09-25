@@ -5,4 +5,12 @@
         Regular,
         System        
     }
+
+    public enum IdentificationType 
+    {
+        DriversLicense,
+        InternationalPassport,
+        NationalIdentificationNumber,
+        Others
+    }
 }

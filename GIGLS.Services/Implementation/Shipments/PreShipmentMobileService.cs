@@ -529,7 +529,16 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = PaymentType.Online,
                         UserId = newPreShipment.UserId
                     };
-
+                   
+                    if (transaction.CreditDebitType == CreditDebitType.Credit)
+                    {
+                        transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
+                    }
+                    else
+                    {
+                        transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
+                    }
+                
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
 
@@ -693,6 +702,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
                         UserId = newPreShipment.UserId
                     };
+
+                    if (transaction.CreditDebitType == CreditDebitType.Credit)
+                    {
+                        transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
+                    }
+                    else
+                    {
+                        transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
+                    }
 
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
@@ -3935,6 +3953,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 PaymentType = PaymentType.Online,
                 UserId = user
             };
+            //get the balance after transaction
+            if (transaction.CreditDebitType == CreditDebitType.Credit)
+            {
+                transaction.BalanceAfterTransaction = updatedwallet.Balance + transaction.Amount;
+            }
+            else
+            {
+                transaction.BalanceAfterTransaction = updatedwallet.Balance - transaction.Amount;
+            }
             var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
             //Compute wallete transactions for the customer and update the wallet
@@ -4576,7 +4603,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     {
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
-
+                                    
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();

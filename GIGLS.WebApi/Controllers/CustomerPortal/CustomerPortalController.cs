@@ -38,6 +38,8 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
 using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -47,11 +49,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     {
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
+        private readonly IMagayaService _magayaService;
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
             _paymentService = paymentService;
+            _magayaService = magayaService;
         }
 
         [HttpPost]
@@ -65,6 +69,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<InvoiceViewDTO>>
                 {
                     Object = invoices
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("AddIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
+                TransactionDTO.CustomerId = customer.IndividualCustomerId;
+                var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
                 };
             });
         }
@@ -99,36 +119,50 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [HttpPost]
-        [Route("paywithpaystack")]
-        public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        [Route("initiatepaymentusingussd")]
+        public async Task<IServiceResponse<USSDResponse>> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var walletPaymentLog = await _portalService.InitiatePaymentUsingUSSD(walletPaymentLogDTO);
 
-                //Add wallet payment log
-                var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
-
-                //initialize the secret key from paystack
-                var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
-
-                //Call the paystack class implementation to do the payment
-                var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
-                var updateresult = new object();
-
-                if (result)
+                return new ServiceResponse<USSDResponse>
                 {
-                    paymentinfo.TransactionStatus = "Success";
-                    updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
-                }
-
-                return new ServiceResponse<object>
-                {
-                    Object = updateresult
+                    Object = walletPaymentLog
                 };
             });
         }
+
+        //[HttpPost]
+        //[Route("paywithpaystack")]
+        //public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+
+        //        //Add wallet payment log
+        //        var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
+
+        //        //initialize the secret key from paystack
+        //        var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
+
+        //        //Call the paystack class implementation to do the payment
+        //        var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
+        //        var updateresult = new object();
+
+        //        if (result)
+        //        {
+        //            paymentinfo.TransactionStatus = "Success";
+        //            updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
+        //        }
+
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = updateresult
+        //        };
+        //    });
+        //}
 
 
         [HttpGet]
@@ -137,9 +171,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
+                //var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
+                var result = await _portalService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("gatewaycode")]
+        public async Task<IServiceResponse<GatewayCodeResponse>> GetGatewayCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetGatewayCode();
+                return new ServiceResponse<GatewayCodeResponse>
                 {
                     Object = result
                 };
@@ -867,6 +916,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             var responseJson = await responseMessage.Content.ReadAsStringAsync();
                             var jObject = JObject.Parse(responseJson);
 
+                            //Get country detail
+                            var country = await _portalService.GetUserCountryCode(user);
+                            var countryJson = JObject.FromObject(country);
+
+                            //jObject.Add(countryJson);
+                            jObject.Add(new JProperty("Country", countryJson));
+
                             getTokenResponse = jObject.GetValue("access_token").ToString();
                             return new ServiceResponse<JObject>
                             {
@@ -1104,22 +1160,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = PreshipMentMobile,
-                };
-            });
-        }
-
-        //Should be discard 
-        [HttpGet]
-        [Route("verifypaystackpayment/{reference}/{UserId}")]
-        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyMobilePayment(string reference, string UserId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletPaymentLog = await _paymentService.VerifyPaymentMobile(reference, UserId);
-                return new ServiceResponse<PaystackWebhookDTO>
-                {
-
-                    Object = walletPaymentLog
                 };
             });
         }
@@ -2075,6 +2115,89 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getactivecountries")]
+        public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries = await _portalService.GetActiveCountries();
+                return new ServiceResponse<List<NewCountryDTO>>
+                {
+                    Object = countries.ToList()
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getstationsbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StationDTO>>> GetStationsByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetStationsByCountry(countryId);
+                return new ServiceResponse<List<StationDTO>>
+                {
+                    Object = stations.ToList()
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("profileinternationaluser")]
+        public async Task<IServiceResponse<bool>> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            return await HandleApiOperationAsync(async () => {
+                await _portalService.ProfileInternationalUser(intlUserProfiler);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecentresbystation/{stationId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetServiceCentresByStation(stationId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("identificationtypes")]
+        public IHttpActionResult GetIdentificationTypes()
+        {
+            var types = EnumExtensions.GetValues<IdentificationType>();
+            types.RemoveAt(3);
+            return Ok(types);
+        }
+        
+        [HttpGet]
+        [Route("servicecentresbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
 
     }
 }

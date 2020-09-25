@@ -23,6 +23,9 @@ namespace GIGLS.Core.DTO.Wallet
 
         public OnlinePaymentType OnlinePaymentType { get; set; }
         public int PaymentCountryId { get; set; }
+        public string PhoneNumber { get; set; }
+        public string ExternalReference { get; set; }
+        public string GatewayCode { get; set; }
     }
 
 }

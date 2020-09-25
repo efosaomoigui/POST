@@ -52,6 +52,7 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -87,6 +88,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
         private readonly IDispatchService _dispatchService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IUssdService _ussdService;
         private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
         private readonly IScanStatusService _scanStatusService;
         private readonly IScanService _scanService;
@@ -94,6 +97,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly IMagayaService _magayaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -102,11 +107,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
-            ICountryService countryService, IAdminReportService adminReportService,
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService)
+            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
+            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,           
+            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -133,6 +138,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             _dispatchService = dispatchService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
+            _paystackPaymentService = paystackPaymentService;
+            _ussdService = ussdService;
             _domesticroutezonemapservice = domesticRouteZoneMapService;
             _scanStatusService = scanStatusService;
             _scanService = scanService;
@@ -140,6 +147,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _logService = logService;
             _visitService = visitService;
             _paymentTransactionService = paymentTransactionService;
+            _flutterwavePaymentService = flutterwavePaymentService;
+            _magayaService = magayaService;
             MapperConfig.Initialize();
         }
 
@@ -183,8 +192,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await Task.FromResult(invoicesDto);
         }
-        //my own
-
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
@@ -194,6 +201,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
+        public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.InitiatePaymentUsingUSSD(walletPaymentLogDto);
             return walletPaymentLog;
         }
 
@@ -243,6 +256,68 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
+        }
+
+        public async Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if (paymentLog != null)
+            {
+                if(paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    result = await VerifyAndValidateUSSDPayment(referenceCode);
+                }
+                else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                {
+                    result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                }
+                else
+                {
+                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+            }
+
+            return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateUSSDPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+
+            var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateFlutterWavePayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            return await _ussdService.GetGatewayCode();
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
@@ -785,7 +860,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return userDTO;
         }
-
 
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {
@@ -1342,6 +1416,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             return userActiveCountry;
         }
 
+        public async Task<object> GetUserCountryCode(UserDTO user)
+        {
+            var userCountry = await GetUserActiveCountry(user);
+
+            string countryCode = userCountry.CurrencyCode.Length <= 2 ? userCountry.CurrencyCode : userCountry.CurrencyCode.Substring(0, 2);
+
+            return new { CountryCode = countryCode, CurrencyCode = userCountry.CurrencyCode, CountryId = userCountry.CountryId, CurrencySymbol = userCountry.CurrencySymbol };
+        }
+
         public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
         {
             return await _preShipmentMobileService.GetHaulagePrice(haulagePricingDto);
@@ -1351,6 +1434,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return _countryService.GetUpdatedCountries();
         }
+
+        public async Task<IEnumerable<NewCountryDTO>> GetActiveCountries()
+        {
+            var activeCountries = await _countryService.GetActiveCountries();
+            var result = Mapper.Map<IEnumerable<NewCountryDTO>>(activeCountries);
+            return result;
+        }
+
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
             return await _preShipmentMobileService.ApproveShipment(detail);
@@ -1440,7 +1531,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             string emailPhone = "";
 
-            //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
@@ -2795,5 +2885,36 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.GetPreShipmentsAndShipmentsPaginated(page,pageSize,startDate,endDate);
         }
 
+        public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
+        {
+            return await _uow.Station.GetStationsByCountry(countryId);
+        }
+
+        public async Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+            user.IdentificationImage = intlUserProfiler.IdentificationImage;
+            user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
+            user.IsInternational = true;
+            user.IdentificationType = intlUserProfiler.IdentificationType;
+             await _uow.User.UpdateUser(currentUserId, user);
+            return true;
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
+        }
     }
 }

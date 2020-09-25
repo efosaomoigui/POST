@@ -96,6 +96,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto) 
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return _uow.IntlShipmentRequest.GetIntlTransactionShipmentRequest(filterOptionsDto, serviceCenters); 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -762,6 +775,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
+                //Block account that has been suspended/pending from create shipment
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    if (customerId.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"{customerId.Name} account has been {customerId.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
@@ -784,22 +806,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-
-                //send message
-                //var smsData = new ShipmentTrackingDTO
-                //{
-                //    Waybill = newShipment.Waybill
-                //};
-
-                //if (newShipment.DepartureServiceCentreId == 309)
-                //{
-                //    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
-                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
-                //}
-                //else
-                //{
-                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
-                //}
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
@@ -1062,6 +1068,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (CustomerType.Company.ToString() == customerType)
             {
                 var company = await _uow.Company.GetAsync(s => s.CompanyId == shipmentDTO.CustomerId);
+                createdObject.CompanyStatus = company.CompanyStatus;
                 if (company.CompanyType == CompanyType.Corporate)
                 {
                     shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
@@ -1184,7 +1191,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 shipmentItem.SerialNumber = serialNumber;
 
-                //sum item weight
+                //sum item weight 
                 //check for volumetric weight
                 if (shipmentItem.IsVolumetric)
                 {
@@ -1766,40 +1773,43 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre()
+        //Super Manifest
+        public async Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //get all manifest owned by that service center
-                var manifestGroupWaybillMapingsDTO = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappingsForSuperManifest(serviceCenters);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending);
 
-                //group the result by manifest                
-                var resultGroup = manifestGroupWaybillMapingsDTO.GroupBy(x => x.ManifestCode).ToList();
-                var result = new List<ManifestDTO>();
-                foreach (var resultGrp in resultGroup)
+                if (serviceCenters.Length > 0)
                 {
-                    result.Add(resultGrp.FirstOrDefault());
+                    manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
-                //Get manifest not yet added to super manifest for the login user
-                //var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
+                //Filter it by the destination service centre send from filter option
+                var filter = filterOptionsDto.filter;
+                int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
+                if (!string.IsNullOrEmpty(filter) && filterValue > 0 && filterValue != 99999)
+                {
+                    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
+                }
 
-                //if (serviceCenters.Length > 0)
-                //{
-                //    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
-                //}
+                var result = manifests.ToList();
 
-                //var manifestByScList = manifestBySc.ToList();
-                //var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+                var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
 
-                var resultDTO = await _uow.ManifestGroupWaybillNumberMapping.GetManifestAvailableForSuperManifest(serviceCenters);
+                if(filterValue != 99999)
+                {
+                    var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+                    var destinationServiceCentreDTO = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
 
-
-                var finalResult = result.Union(resultDTO).OrderByDescending(x => x.DateModified).ToList();
-
-                return finalResult;
+                    foreach (var item in resultDTO)
+                    {
+                        item.DestinationServiceCentre = destinationServiceCentreDTO;
+                    }
+                }
+                return resultDTO;
             }
             catch (Exception)
             {
@@ -1830,6 +1840,52 @@ namespace GIGLS.Services.Implementation.Shipments
                 var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
                 return unmappedGroupServiceCentres.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //For Super Manifest
+        public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest()
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending);
+                
+                if (serviceCenters.Length > 0)
+                {
+                    manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //Filter the service centre details using the destination of the waybill
+                var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
+                var result = allServiceCenters.Where(s => manifests.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+
+                var resultWithoutDest = allServiceCenters.Where(s => manifests.Any(x => x.DestinationServiceCentreId == 0)).Select(p => p.ServiceCentreId).ToList();
+                
+                //Fetch all Service Centre including their Station Detail into Memory
+                var allServiceCenterDTOs = await _centreService.GetServiceCentres();
+
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId)).ToList();
+
+                if (resultWithoutDest.Any())
+                {
+                    var virtualServiceCentreDTO = new ServiceCentreDTO
+                    {
+                        Name = "Others",
+                        ServiceCentreId = 99999,
+                        StationName = "Others"
+                    };
+
+                    //add it to the last element
+                    unmappedGroupServiceCentres.Add(virtualServiceCentreDTO);
+                }
+
+                return unmappedGroupServiceCentres;
             }
             catch (Exception)
             {
@@ -2703,8 +2759,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         decimal amountToCredit = invoice.Amount;
                         amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
-                        wallet.Balance = wallet.Balance + amountToCredit;
-
                         //2.4.2 Update customers wallet's Transaction (credit)
                         var newWalletTransaction = new WalletTransaction
                         {
@@ -2718,6 +2772,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             Waybill = waybill,
                             Description = "Credit for Shipment Cancellation"
                         };
+                        if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+                        {
+                            newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+                        }
+                        else
+                        {
+                            newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+                        }
+
+                        wallet.Balance = wallet.Balance + amountToCredit;
                         _uow.WalletTransaction.Add(newWalletTransaction);
                     }
                 }

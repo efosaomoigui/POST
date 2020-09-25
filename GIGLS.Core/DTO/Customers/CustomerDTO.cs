@@ -58,5 +58,13 @@ namespace GIGLS.Core.DTO.Customers
         public int UserActiveCountryId { get; set; }
         public bool IsFromMobile { get; set; }
         public CountryDTO Country { get; set; }
+
+        //Update for user table
+        public bool IsInternational { get; set; }
+        public IdentificationType IdentificationType { get; set; }
+        public string IdentifictionNumber { get; set; }
+        public string IdentificationImage { get; set; } 
+        public string IdentificationNumber { get; set; }  
+
     }
 }
