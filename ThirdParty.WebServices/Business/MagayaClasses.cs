@@ -28285,7 +28285,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private string expectedAmountToCollect;
         private string magayaPaymentOption;
         private string magayaPaymentType;
-        private IntlShipmentRequestDTO intlShipmentRequest;
+        private IntlShipmentRequestDTL intlShipmentRequest;
 
         private int serviceCenterId;
 
@@ -28363,7 +28363,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         [System.Xml.Serialization.XmlElementAttribute("IntlShipmentRequest")]
-        public IntlShipmentRequestDTO IntlShipmentRequest
+        public IntlShipmentRequestDTL IntlShipmentRequest
         {
             get
             {
