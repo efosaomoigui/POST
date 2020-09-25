@@ -64,6 +64,7 @@
         GIGGOPartnerEmail,
         EcommerceGIGGOIntraStateBikeDiscount,
         GIGGODropOffDiscount,
-        ChairmanEmail
+        ChairmanEmail,
+        HighValueShipment
     }
 }

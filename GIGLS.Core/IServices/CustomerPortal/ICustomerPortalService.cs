@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
@@ -56,6 +57,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IdentityResult> ChangePassword(ChangePasswordDTO passwordDTO);
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
+        Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
         //Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
@@ -155,6 +157,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
+        Task<GatewayCodeResponse> GetGatewayCode();
         Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
         Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
@@ -170,7 +174,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
         Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler);
         Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
+        Task<object> GetUserCountryCode(UserDTO user);
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+        Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
     }
 }

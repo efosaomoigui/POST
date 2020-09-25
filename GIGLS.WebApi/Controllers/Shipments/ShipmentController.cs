@@ -343,19 +343,18 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        //super manifest
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
+        [Route("unmappedmanifestforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre();
+                var unmappedManifests = await _service.GetUnmappedManifestForServiceCentre(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ManifestDTO>>
                 {
-                    Object = unmappedManifest,
-                    Total = unmappedManifest.Count
+                    Object = unmappedManifests,
+                    Total = unmappedManifests.Count
                 };
             });
         }
@@ -368,6 +367,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var centres = await _service.GetUnmappedManifestServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestservicecentreforsupermanifest")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedManifestServiceCentresForSuperManifest()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetUnmappedManifestServiceCentresForSuperManifest();
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
