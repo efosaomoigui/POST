@@ -6,6 +6,8 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -41,6 +43,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IServiceCentreService _centreService;
         private readonly IStationService _stationService;
         private readonly IIndividualCustomerService _individualCustomerService;
+        private readonly IMessageSenderService _messageSenderService;  
 
         public MagayaService(
             INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -48,7 +51,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IUserService userService,
             IShipmentService shipmentService,
             IServiceCentreService centreService,
-            IStationService stationService, IIndividualCustomerService individualCustomerController)
+            IStationService stationService, IIndividualCustomerService individualCustomerController,
+            IMessageSenderService messageSenderService)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -58,6 +62,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _centreService = centreService;
             _stationService = stationService;
             _individualCustomerService = individualCustomerController;
+            _messageSenderService = messageSenderService;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -350,11 +355,20 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
                     await _shipmentService.AddShipment(shipmentDto);
 
-                    if (mDto?.IntlShipmentRequest.RequestNumber.Length > 0 )
+                    if (mDto.MagayaPaymentOption == "Collect")
+                    {
+                        // send email message for payment notification
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
+                    }
+
+                    if (mDto.IntlShipmentRequest != null )
                     {
                         var request = await _uow.IntlShipmentRequest.GetAsync(s => s.RequestNumber == mDto.IntlShipmentRequest.RequestNumber);
-                        request.IsProcessed = true;
-                        await _uow.CompleteAsync();
+                        if (request != null)
+                        {
+                            request.IsProcessed = true;
+                            await _uow.CompleteAsync();
+                        }
                     }
                 }
                 else
@@ -471,7 +485,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.Waybill = magayaShipmentDTO.Number;
                 shipmentDTO.Value = 0;
                 shipmentDTO.DeliveryTime = DateTime.Now;
-                shipmentDTO.PaymentStatus = PaymentStatus.Paid;
+                shipmentDTO.PaymentStatus = (mDto.MagayaPaymentOption =="Collect" ) ? PaymentStatus.Pending : PaymentStatus.Paid;
                 shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
                 shipmentDTO.CustomerCode = "";
 
