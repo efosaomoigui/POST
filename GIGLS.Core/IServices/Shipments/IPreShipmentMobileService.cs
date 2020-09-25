@@ -76,5 +76,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MobilePriceDTO> GetPriceForBike(PreShipmentMobileDTO preShipment);
         Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(int page, int pageSize, string startDate, string endDate);
     }
 }

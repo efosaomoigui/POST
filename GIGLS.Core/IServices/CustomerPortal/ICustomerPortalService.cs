@@ -168,5 +168,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> DeleteDropOff(string waybill);
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(int page = 1, int pageSize = 0, string startDate = null, string endDate = null);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(int page, int pageSize, string startDate, string endDate);
     }
 }

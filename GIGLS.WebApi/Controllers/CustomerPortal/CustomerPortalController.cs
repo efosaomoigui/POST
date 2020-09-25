@@ -2026,6 +2026,55 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpPost]
+        [Route("getwallettransactions")]
+        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            if (shipmentAndPreShipmentParamDTO == null)
+            {
+                throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var startDate = String.Empty;
+            var endDate = String.Empty;
+            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+            {
+                startDate = shipmentAndPreShipmentParamDTO.StartDate.ToString();
+                endDate = shipmentAndPreShipmentParamDTO.EndDate.ToString();
+            }
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, startDate, endDate);
+                return new ServiceResponse<WalletTransactionSummaryDTO>
+                {
+                    Object = Transactionhistory
+                };
+            });
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("getshipments")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            if (shipmentAndPreShipmentParamDTO == null)
+            {
+                throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var startDate = String.Empty;
+            var endDate = String.Empty;
+            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+            {
+                startDate = shipmentAndPreShipmentParamDTO.StartDate.ToString();
+                endDate = shipmentAndPreShipmentParamDTO.EndDate.ToString();
+            }
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize,startDate,endDate);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipmenthistory
+                };
+            });
+        }
 
     }
 }

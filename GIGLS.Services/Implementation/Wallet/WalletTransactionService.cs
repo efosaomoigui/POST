@@ -394,5 +394,136 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return await GetWalletTransactionByWalletIdForMobile(customer, filterCriteria);
         }
+
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobilePaginated(int page = 1, int pageSize = 0, string startDate = null, string endDate = null)
+        {
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+            int totalCount;
+            var walletTransactionDTOList = new List<WalletTransactionDTO>();
+            var walletTransactions = new List<WalletTransaction>();
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            if (!String.IsNullOrEmpty(startDate) && !String.IsNullOrEmpty(endDate))
+            {
+                //convert to date
+                DateTime start = Convert.ToDateTime(startDate);
+                DateTime end = Convert.ToDateTime(endDate);
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId && s.DateCreated >= start && s.DateCreated <= end).SelectPage(page, pageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+            else
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId).SelectPage(page, pageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+
+            if (walletTransactions.Any())
+            {
+                 walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(x => x.DateCreated));
+
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = walletTransactionDTOList,
+                    CurrencyCode = country.CurrencyCode,
+                    CurrencySymbol = country.CurrencySymbol,
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                    WalletId = wallet.WalletId
+                };
+            }
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
+            };
+        }
+
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(int page = 1, int pageSize = 0, string startDate = null,string endDate = null)
+        {
+            return await GetWalletTransactionByWalletIdForMobilePaginated(page,pageSize,startDate,endDate);
+        }
+
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(int page = 1, int pageSize = 0, string startDate = null, string endDate = null)
+        {
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+            int totalCount;
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            var walletTransactions =  _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId).SelectPage(page,pageSize, out totalCount);
+            if (!walletTransactions.Any())
+            {
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = new List<WalletTransactionDTO>(),
+                    CurrencyCode = country.CurrencyCode,
+                    CurrencySymbol = country.CurrencySymbol,
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                    WalletId = wallet.WalletId
+                };
+            }
+
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
+            };
+        }
     }
 }
