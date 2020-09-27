@@ -5581,8 +5581,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 int totalCount;
                 var currentUser = await _userService.GetCurrentUserId();
-                //var user = await _uow.User.GetUserById(currentUser);
-                var user = await _uow.User.GetUserById("62bcccbb-887a-48f2-baca-fcceba2b5fab");
+                var user = await _uow.User.GetUserById(currentUser);
                 var mobileShipments = new List<PreShipmentMobile>();
                 if (!String.IsNullOrEmpty(startDate) && !String.IsNullOrEmpty(endDate))
                 {
