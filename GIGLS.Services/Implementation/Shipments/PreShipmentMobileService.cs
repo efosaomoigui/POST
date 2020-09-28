@@ -5575,7 +5575,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(int page = 1, int pageSize = 0, string startDate= null, string endDate = null)
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
             try
             {
@@ -5583,16 +5583,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
                 var mobileShipments = new List<PreShipmentMobile>();
-                if (!String.IsNullOrEmpty(startDate) && !String.IsNullOrEmpty(endDate))
+                if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
                 {
-                    //convert to date
-                    DateTime start = Convert.ToDateTime(startDate);
-                    DateTime end = Convert.ToDateTime(endDate);
-                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.DateCreated >= start && x.DateCreated <= end).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(page, pageSize, out totalCount).ToList();
+                    shipmentAndPreShipmentParamDTO.PageSize = 20;
+                }
+                if (shipmentAndPreShipmentParamDTO.Page <= 0)
+                {
+                    shipmentAndPreShipmentParamDTO.Page = 1;
+                }
+                if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+                {
+                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && x.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
                 }
                 else
                 {
-                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(page, pageSize, out totalCount).ToList();
+                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
                 }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in mobileShipments
@@ -5641,7 +5646,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                                   FormattedAddress = r.ReceiverLocation.FormattedAddress
                                                               }
                                                           }).OrderByDescending(x => x.DateCreated).ToList();
-                var agilityShipment = await GetPreShipmentForEcommercePaginated(user.UserChannelCode,page,pageSize,startDate,endDate);
+                var agilityShipment = await GetPreShipmentForEcommercePaginated(shipmentAndPreShipmentParamDTO, user.UserChannelCode);
 
                 //added agility shipment to Giglgo list of shipments.
                 foreach (var shipment in shipmentDto)
@@ -5691,22 +5696,27 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommercePaginated(string userChannelCode, int page = 1, int pageSize = 0, string startDate = null, string endDate = null)
+         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommercePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO, string userChannelCode)
         {
             try
             {
                 int totalCount;
                 var shipmentList = new List<Shipment>();
-                if (!String.IsNullOrEmpty(startDate) && !String.IsNullOrEmpty(endDate))
+                if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
                 {
-                    //convert to date
-                    DateTime start = Convert.ToDateTime(startDate);
-                    DateTime end = Convert.ToDateTime(endDate);
-                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false && x.DateCreated >= start && x.DateCreated <= end).SelectPage(page, pageSize, out totalCount).ToList();
+                    shipmentAndPreShipmentParamDTO.PageSize = 20;
+                }
+                if (shipmentAndPreShipmentParamDTO.Page <= 0)
+                {
+                    shipmentAndPreShipmentParamDTO.Page = 1;
+                }
+                if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+                {
+                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false && x.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && x.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
                 }
                 else
                 {
-                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false).SelectPage(page, pageSize, out totalCount).ToList();
+                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
                 }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipmentList

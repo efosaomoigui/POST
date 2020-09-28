@@ -177,8 +177,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> GetUserCountryCode(UserDTO user);
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
-        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(int page = 1, int pageSize = 0, string startDate = null, string endDate = null);
-        Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(int page, int pageSize, string startDate, string endDate);
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
     }
 }

@@ -2066,6 +2066,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+       
         [HttpPost]
         [Route("getwallettransactions")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -2074,24 +2075,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
             }
-            var startDate = String.Empty;
-            var endDate = String.Empty;
-            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
-            {
-                startDate = shipmentAndPreShipmentParamDTO.StartDate.ToString();
-                endDate = shipmentAndPreShipmentParamDTO.EndDate.ToString();
-            }
-            if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
-            {
-                shipmentAndPreShipmentParamDTO.PageSize = 20;
-            }
-            if (shipmentAndPreShipmentParamDTO.Page <= 0)
-            {
-                shipmentAndPreShipmentParamDTO.Page = 1;
-            }
             return await HandleApiOperationAsync(async () =>
             {
-                var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, startDate, endDate);
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
                     Object = Transactionhistory
@@ -2099,7 +2085,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
        
-        [AllowAnonymous]
         [HttpPost]
         [Route("getshipments")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -2108,24 +2093,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
             }
-            var startDate = String.Empty;
-            var endDate = String.Empty;
-            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
-            {
-                startDate = shipmentAndPreShipmentParamDTO.StartDate.ToString();
-                endDate = shipmentAndPreShipmentParamDTO.EndDate.ToString();
-            }
-            if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
-            {
-                shipmentAndPreShipmentParamDTO.PageSize = 20;
-            }
-            if (shipmentAndPreShipmentParamDTO.Page <= 0)
-            {
-                shipmentAndPreShipmentParamDTO.Page = 1;
-            }
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize,startDate,endDate);
+                var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = shipmenthistory

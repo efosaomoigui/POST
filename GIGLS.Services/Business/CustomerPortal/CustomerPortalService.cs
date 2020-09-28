@@ -2860,7 +2860,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(int page = 1, int pageSize = 0, string startDate = null, string endDate = null)
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
@@ -2877,12 +2877,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
 
-            return await _iWalletTransactionService.GetWalletTransactionsForMobilePaginated(page,pageSize,startDate,endDate);
+            return await _iWalletTransactionService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(int page = 1, int pageSize = 0, string startDate = null, string endDate = null)
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
-            return await _preShipmentMobileService.GetPreShipmentsAndShipmentsPaginated(page,pageSize,startDate,endDate);
+            return await _preShipmentMobileService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
         }
 
         public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
