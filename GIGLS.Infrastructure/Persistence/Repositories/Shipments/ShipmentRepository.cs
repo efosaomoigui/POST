@@ -994,12 +994,247 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        {
+            try
+            {
+                //filter by service center
+                //var shipmentRequest = _context.IntlShipmentRequest.AsQueryable();
+
+                var shipmentRequest = _context.IntlShipmentRequest
+                    .Join(
+                        _context.IntlShipmentRequestItem,
+                        a => a.IntlShipmentRequestId,
+                        b => b.IntlShipmentRequestId,
+                        (a, b) => new
+                        {
+                            IntlShipmentRequestId = a.IntlShipmentRequestId,
+                            RequestNumber = a.RequestNumber,
+                            CustomerFirstName = a.CustomerFirstName,
+                            CustomerLastName = a.CustomerLastName,
+                            CustomerId = a.CustomerId,
+                            CustomerType = a.CustomerType,
+                            CustomerCountryId = a.CustomerCountryId,
+                            CustomerAddress = a.CustomerAddress,
+                            CustomerEmail = a.CustomerEmail,
+                            CustomerPhoneNumber = a.CustomerPhoneNumber,
+                            CustomerCity = a.CustomerCity,
+                            CustomerState = a.CustomerState,
+                            DateCreated = a.DateCreated,
+                            DateModified = a.DateModified,
+                            PickupOptions = a.PickupOptions,
+                            DestinationServiceCentreId = a.DestinationServiceCentreId,
+                            DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == a.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                            {
+                                Code = x.Code, 
+                                Name = x.Name
+                            }).FirstOrDefault(),
+                            IntlShipmentRequestItemId = b.IntlShipmentRequestItemId,
+                            Description = b.Description,
+                            ItemName = b.ItemName,
+                            TrackingId = b.TrackingId,
+                            storeName = b.storeName,
+                            ShipmentType = b.ShipmentType,
+                            Weight = b.Weight,
+                            Nature = b.Nature,
+                            Price = b.Price,
+                            Quantity = b.Quantity,
+                            SerialNumber = b.SerialNumber,
+                            IsVolumetric = b.IsVolumetric,
+                            Length = b.Length,
+                            Width = b.Width,
+                            Height = b.Height,
+                            ReceiverAddress = a.ReceiverAddress,
+                            ReceiverCity = a.ReceiverCity,
+                            ReceiverCountry = a.ReceiverCountry,
+                            ReceiverEmail = a.ReceiverEmail,
+                            ReceiverName = a.ReceiverName,
+                            ReceiverPhoneNumber = a.ReceiverPhoneNumber,
+                            ReceiverState = a.ReceiverState,
+                            UserId = a.UserId,
+                            Value = a.Value,
+                            GrandTotal = a.GrandTotal,
+                            SenderAddress = a.SenderAddress,
+                            SenderState = a.SenderState,
+                            ApproximateItemsWeight = a.ApproximateItemsWeight,
+                            DestinationCountryId = a.DestinationCountryId,
+                            IsProcessed = a.IsProcessed
+
+                        }
+                    ).Where(a => a.IsProcessed == false).ToList(); 
+
+
+                var count = 0;
+                List<IntlShipmentDTO> intlShipmentDTO = new List<IntlShipmentDTO>();
+
+                //filter
+                var filter = filterOptionsDto.filter;
+                var filterValue = filterOptionsDto.filterValue;
+                if (string.IsNullOrEmpty(filter) || string.IsNullOrEmpty(filterValue))
+                {
+                    intlShipmentDTO = (from a in shipmentRequest
+                                              select new IntlShipmentDTO()
+                                              {
+                                                  IntlShipmentRequestId = a.IntlShipmentRequestId,
+                                                  RequestNumber = a.RequestNumber,
+                                                  CustomerFirstName = a.CustomerFirstName,
+                                                  CustomerLastName = a.CustomerLastName,
+                                                  CustomerId = a.CustomerId,
+                                                  CustomerType = a.CustomerType,
+                                                  CustomerCountryId = a.CustomerCountryId,
+                                                  CustomerAddress = a.CustomerAddress,
+                                                  CustomerEmail = a.CustomerEmail,
+                                                  CustomerPhoneNumber = a.CustomerPhoneNumber,
+                                                  CustomerCity = a.CustomerCity,
+                                                  CustomerState = a.CustomerState,
+                                                  DateCreated = a.DateCreated,
+                                                  DateModified = a.DateModified,
+                                                  PickupOptions = a.PickupOptions,
+                                                  DestinationServiceCentreId = a.DestinationServiceCentreId,
+                                                  DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == a.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                  {
+                                                      Code = x.Code,
+                                                      Name = x.Name
+                                                  }).FirstOrDefault(),
+                                                  IntlShipmentRequestItemId = a.IntlShipmentRequestItemId,
+                                                  Description = a.Description,
+                                                  ItemName = a.ItemName,
+                                                  TrackingId = a.TrackingId,
+                                                  storeName = a.storeName,
+                                                  ShipmentType = a.ShipmentType,
+                                                  Weight = a.Weight,
+                                                  Nature = a.Nature,
+                                                  Price = a.Price,
+                                                  Quantity = a.Quantity,
+                                                  SerialNumber = a.SerialNumber,
+                                                  IsVolumetric = a.IsVolumetric,
+                                                  Length = a.Length,
+                                                  Width = a.Width,
+                                                  Height = a.Height,
+                                                  ReceiverAddress = a.ReceiverAddress,
+                                                  ReceiverCity = a.ReceiverCity,
+                                                  ReceiverCountry = a.ReceiverCountry,
+                                                  ReceiverEmail = a.ReceiverEmail,
+                                                  ReceiverName = a.ReceiverName,
+                                                  ReceiverPhoneNumber = a.ReceiverPhoneNumber,
+                                                  ReceiverState = a.ReceiverState,
+                                                  UserId = a.UserId,
+                                                  Value = a.Value,
+                                                  GrandTotal = a.GrandTotal,
+                                                  SenderAddress = a.SenderAddress,
+                                                  SenderState = a.SenderState,
+                                                  ApproximateItemsWeight = a.ApproximateItemsWeight,
+                                                  DestinationCountryId = a.DestinationCountryId,
+                                                  IsProcessed = a.IsProcessed
+
+                                              }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+
+                    count = intlShipmentDTO.Count();
+                    var retVal = new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
+
+                    return Task.FromResult(retVal);
+                }
+
+                intlShipmentDTO = (from a in shipmentRequest
+                                          select new IntlShipmentDTO()
+                                          {
+                                              IntlShipmentRequestId = a.IntlShipmentRequestId,
+                                              RequestNumber = a.RequestNumber,
+                                              CustomerFirstName = a.CustomerFirstName, 
+                                              CustomerLastName = a.CustomerLastName,
+                                              CustomerId = a.CustomerId,
+                                              CustomerType = a.CustomerType,
+                                              CustomerCountryId = a.CustomerCountryId,
+                                              CustomerAddress = a.CustomerAddress,
+                                              CustomerEmail = a.CustomerEmail,
+                                              CustomerPhoneNumber = a.CustomerPhoneNumber,
+                                              CustomerCity = a.CustomerCity,
+                                              CustomerState = a.CustomerState,
+                                              DateCreated = a.DateCreated,
+                                              DateModified = a.DateModified,
+                                              PickupOptions = a.PickupOptions,
+                                              DestinationServiceCentreId = a.DestinationServiceCentreId,
+                                              DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == a.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                              {
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault(),
+                                              IntlShipmentRequestItemId = a.IntlShipmentRequestItemId,
+                                              Description = a.Description,
+                                              ItemName = a.ItemName,
+                                              TrackingId = a.TrackingId,
+                                              storeName = a.storeName,
+                                              ShipmentType = a.ShipmentType,
+                                              Weight = a.Weight,
+                                              Nature = a.Nature,
+                                              Price = a.Price,
+                                              Quantity = a.Quantity,
+                                              SerialNumber = a.SerialNumber,
+                                              IsVolumetric = a.IsVolumetric,
+                                              Length = a.Length,
+                                              Width = a.Width,
+                                              Height = a.Height,
+                                              ReceiverAddress = a.ReceiverAddress,
+                                              ReceiverCity = a.ReceiverCity,
+                                              ReceiverCountry = a.ReceiverCountry,
+                                              ReceiverEmail = a.ReceiverEmail,
+                                              ReceiverName = a.ReceiverName,
+                                              ReceiverPhoneNumber = a.ReceiverPhoneNumber,
+                                              ReceiverState = a.ReceiverState,
+                                              UserId = a.UserId,
+                                              Value = a.Value,
+                                              GrandTotal = a.GrandTotal,
+                                              SenderAddress = a.SenderAddress,
+                                              SenderState = a.SenderState,
+                                              ApproximateItemsWeight = a.ApproximateItemsWeight,
+                                              DestinationCountryId = a.DestinationCountryId,
+                                              IsProcessed = a.IsProcessed
+
+                                          }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
+
+                //filter
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                {
+                    intlShipmentDTO = intlShipmentDTO.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                }
+
+                //sort
+                var sortorder = filterOptionsDto.sortorder;
+                var sortvalue = filterOptionsDto.sortvalue;
+
+                if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                {
+                    System.Reflection.PropertyInfo prop = typeof(Shipment).GetProperty(sortvalue);
+
+                    if (sortorder == "0")
+                    {
+                        intlShipmentDTO = intlShipmentDTO.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                    else
+                    {
+                        intlShipmentDTO = intlShipmentDTO.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                }
+
+                intlShipmentDTO = intlShipmentDTO.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                count = intlShipmentDTO.Count();
+                var retValue = new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
+                return Task.FromResult(retValue);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipmentRequest2(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             try
             {
                 //filter by service center
                 var shipmentRequest = _context.IntlShipmentRequest.AsQueryable();
+                //var shipment = _context.IntlShipmentRequest.Where(x => x.IntlShipmentRequestId == shipmentRequestId, "ShipmentRequestItems");
+
                 if (serviceCentreIds.Length > 0)
                 {
                     shipmentRequest = _context.IntlShipmentRequest.Where(s => s.IsProcessed == false);
@@ -1037,6 +1272,24 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       Code = x.Code,
                                                       Name = x.Name
                                                   }).FirstOrDefault(),
+                                                  ShipmentRequestItems = Context.IntlShipmentRequestItem.Where(s => s.IntlShipmentRequestId == r.IntlShipmentRequestId).Select(x => new IntlShipmentRequestItemDTO
+                                                  {
+                                                      Description = x.Description,
+                                                      ItemName = x.ItemName,
+                                                      TrackingId = x.TrackingId,
+                                                      storeName = x.storeName,
+                                                      ShipmentType = x.ShipmentType,
+                                                      Weight = x.Weight,
+                                                      Nature = x.Nature,
+                                                      Price = x.Price,
+                                                      Quantity = x.Quantity,
+                                                      SerialNumber = x.SerialNumber,
+                                                      IsVolumetric = x.IsVolumetric,
+                                                      Length = x.Length,
+                                                      Width = x.Width,
+                                                      Height = x.Height
+
+                                                  }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
                                                   ReceiverCity = r.ReceiverCity,
                                                   ReceiverCountry = r.ReceiverCountry,
@@ -1053,7 +1306,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   DestinationCountryId = r.DestinationCountryId,
                                                   IsProcessed = r.IsProcessed
 
-                                              }).Where(b => b.IsProcessed ==false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+                                              }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentRequestDTO.Count();
                     var retVal = new Tuple<List<IntlShipmentRequestDTO>, int>(intlShipmentRequestDTO, count);

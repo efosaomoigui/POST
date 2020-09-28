@@ -80,7 +80,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto)
         {
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
@@ -89,7 +89,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
                 var result = _service.GetIntlTransactionShipments(filterOptionsDto);
 
-                return new ServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>()
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
                     Object = result.Result
                 };

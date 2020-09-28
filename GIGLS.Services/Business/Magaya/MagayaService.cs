@@ -366,7 +366,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
                     }
 
-                    if (mDto.IntlShipmentRequest != null )
+                    if (mDto.IntlShipmentRequest != null)
                     {
                         var request = await _uow.IntlShipmentRequest.GetAsync(s => s.RequestNumber == mDto.IntlShipmentRequest.RequestNumber);
                         if (request != null)
@@ -490,7 +490,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.Waybill = magayaShipmentDTO.Number;
                 shipmentDTO.Value = 0;
                 shipmentDTO.DeliveryTime = DateTime.Now;
-                shipmentDTO.PaymentStatus = (mDto.MagayaPaymentOption =="Collect" ) ? PaymentStatus.Pending : PaymentStatus.Paid;
+                shipmentDTO.PaymentStatus = (mDto.MagayaPaymentOption == "Collect") ? PaymentStatus.Pending : PaymentStatus.Paid;
                 shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
                 shipmentDTO.CustomerCode = "";
 
@@ -643,7 +643,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             var user = await _userService.GetUserById(currentUserId);
             var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
 
-            if(customer.CustomerType == CustomerType.Company)
+            if (customer.CustomerType == CustomerType.Company)
             {
                 shipmentDTO.CustomerId = customer.CompanyId;
                 shipmentDTO.CustomerFirstName = customer.Name;
@@ -652,6 +652,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
                 shipmentDTO.CustomerAddress = customer.Address;
                 shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                shipmentDTO.CustomerCity = customer.City;
+                shipmentDTO.CustomerState = customer.State;
             }
             else
             {
@@ -662,19 +664,21 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
                 shipmentDTO.CustomerAddress = customer.Address;
                 shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                shipmentDTO.CustomerCity = customer.City;
+                shipmentDTO.CustomerState = customer.State;
             }
 
             shipmentDTO.UserId = currentUserId;
             shipmentDTO.CustomerType = customer.CustomerType.ToString();
-            
+
             var station = await _stationService.GetStationById(shipmentDTO.StationId);
             var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
 
-            if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
-            {
-                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
-                shipmentDTO.RequestNumber = RequestNumber;
-            }
+            //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
+            //{
+            var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
+            shipmentDTO.RequestNumber = RequestNumber;
+            //}
 
             var newShipment = await MapIntlShipmentRequest(shipmentDTO);
             newShipment.ReceiverCountry = station.Country;
@@ -929,9 +933,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return errval;
         }
 
-        public Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
+        public Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
         {
-            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto); 
             return result;
         }
 
