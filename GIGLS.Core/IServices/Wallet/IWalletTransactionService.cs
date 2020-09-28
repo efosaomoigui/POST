@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Report;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Report;
@@ -19,5 +20,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
         Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionsByDate(ShipmentCollectionFilterCriteria dateFilter);
         Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
     }
 }

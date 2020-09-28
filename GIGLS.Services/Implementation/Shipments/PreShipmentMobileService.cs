@@ -5574,5 +5574,247 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
         }
+
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            try
+            {
+                //set default values if payload is null
+                if (shipmentAndPreShipmentParamDTO == null)
+                {
+                    shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                    {
+                        Page = 1,
+                        PageSize = 20,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+                int totalCount;
+                var currentUser = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(currentUser);
+                var mobileShipments = new List<PreShipmentMobile>();
+                if (shipmentAndPreShipmentParamDTO.PageSize < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.PageSize = 20;
+                }
+                if (shipmentAndPreShipmentParamDTO.Page < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.Page = 1;
+                }
+                if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+                {
+                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && x.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    mobileShipments = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode).Include(x => x.PreShipmentItems).Include(x => x.SenderLocation).Include(x => x.ReceiverLocation).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+
+                List<PreShipmentMobileDTO> shipmentDto = (from r in mobileShipments
+                                                          select new PreShipmentMobileDTO()
+                                                          {
+                                                              PreShipmentMobileId = r.PreShipmentMobileId,
+                                                              Waybill = r.Waybill,
+                                                              ActualDateOfArrival = r.ActualDateOfArrival,
+                                                              DateCreated = r.DateCreated,
+                                                              DateModified = r.DateModified,
+                                                              ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                              ReceiverAddress = r.ReceiverAddress,
+                                                              SenderAddress = r.SenderAddress,
+                                                              SenderPhoneNumber = r.SenderPhoneNumber,
+                                                              ReceiverCountry = r.ReceiverCountry,
+                                                              SenderStationId = r.SenderStationId,
+                                                              ReceiverStationId = r.ReceiverStationId,
+                                                              ReceiverEmail = r.ReceiverEmail,
+                                                              ReceiverName = r.ReceiverName,
+                                                              ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                              ReceiverState = r.ReceiverState,
+                                                              SenderName = r.SenderName,
+                                                              UserId = r.UserId,
+                                                              Value = r.Value,
+                                                              shipmentstatus = r.shipmentstatus,
+                                                              GrandTotal = r.GrandTotal,
+                                                              DeliveryPrice = r.DeliveryPrice,
+                                                              CalculatedTotal = r.CalculatedTotal,
+                                                              CustomerCode = r.CustomerCode,
+                                                              VehicleType = r.VehicleType,
+                                                              InputtedSenderAddress = r.InputtedSenderAddress,
+                                                              InputtedReceiverAddress = r.InputtedReceiverAddress,
+                                                              SenderLocality = r.SenderLocality,
+                                                              ReceiverLocation = new LocationDTO
+                                                              {
+                                                                  Longitude = r.ReceiverLocation.Longitude,
+                                                                  Latitude = r.ReceiverLocation.Latitude,
+                                                                  Name = r.ReceiverLocation.Name,
+                                                                  FormattedAddress = r.ReceiverLocation.FormattedAddress
+                                                              },
+                                                              SenderLocation = new LocationDTO
+                                                              {
+                                                                  Longitude = r.SenderLocation.Longitude,
+                                                                  Latitude = r.SenderLocation.Latitude,
+                                                                  Name = r.ReceiverLocation.Name,
+                                                                  FormattedAddress = r.ReceiverLocation.FormattedAddress
+                                                              }
+                                                          }).OrderByDescending(x => x.DateCreated).ToList();
+                var agilityShipment = await GetPreShipmentForEcommercePaginated(shipmentAndPreShipmentParamDTO, user.UserChannelCode);
+
+                //get all waybills in shipmentlist
+                var arrWaybills = shipmentDto.Select(x => x.Waybill).ToArray();
+                var partnerMoblieRequests = await _uow.MobilePickUpRequests.FindAsync(r => arrWaybills.Contains(r.Waybill) && r.Status == MobilePickUpRequestStatus.Delivered.ToString());
+
+                //partner information using id
+                var partnerIds = partnerMoblieRequests.Select(x => x.UserId).ToArray();
+                var partnerInfo = await _uow.User.GetUsers(partnerIds);
+
+                //get all ratings for all waybill in the shipment list
+                var ratings = await _uow.MobileRating.FindAsync(r => arrWaybills.Contains(r.Waybill));
+
+                //get all stationids in the shipment list
+                var stationIds = shipmentDto.Select(x => x.SenderStationId).ToArray();
+                var stations = await _uow.Country.GetCountryByStationId(stationIds);
+
+                //added agility shipment to Giglgo list of shipments.
+                foreach (var shipment in shipmentDto)
+                {
+                    if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
+                    {
+                        var s = agilityShipment.Where(x => x.Waybill == shipment.Waybill).FirstOrDefault();
+                        agilityShipment.Remove(s);
+                    }
+
+                    var partner = partnerMoblieRequests.Where(r => r.Waybill == shipment.Waybill).FirstOrDefault();
+                    if (partner != null)
+                    {
+                        var partneruser = partnerInfo.Where(x => x.Id == partner.UserId).FirstOrDefault();
+                        if (partneruser != null)
+                        {
+                            shipment.PartnerFirstName = partneruser.FirstName;
+                            shipment.PartnerLastName = partneruser.LastName;
+                            shipment.PartnerImageUrl = partneruser.PictureUrl;
+                        }
+                    }
+
+                    shipment.IsRated = false;
+
+                    var rating = ratings.Where(j => j.Waybill == shipment.Waybill).FirstOrDefault();
+                    if (rating != null)
+                    {
+                        shipment.IsRated = rating.IsRatedByCustomer;
+                    }
+
+                    var country = stations.Where(x => x.StationId == shipment.SenderStationId).FirstOrDefault();
+                    if (country != null)
+                    {
+                        shipment.CurrencyCode = country.CurrencyCode;
+                        shipment.CurrencySymbol = country.CurrencySymbol;
+                    }
+                }
+
+                var newlist = shipmentDto.Union(agilityShipment);
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(shipmentAndPreShipmentParamDTO.PageSize).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommercePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO, string userChannelCode)
+        {
+            try
+            {
+                //set default values if payload is null
+                if (shipmentAndPreShipmentParamDTO == null)
+                {
+                    shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                    {
+                        Page = 1,
+                        PageSize = 20,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+                int totalCount;
+                var shipmentList = new List<Shipment>();
+                if (shipmentAndPreShipmentParamDTO.PageSize < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.PageSize = 20;
+                }
+                if (shipmentAndPreShipmentParamDTO.Page < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.Page = 1;
+                }
+                if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+                {
+                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false && x.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && x.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    shipmentList = _uow.Shipment.Query(x => x.CustomerCode == userChannelCode && x.IsCancelled == false).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+
+                List<PreShipmentMobileDTO> shipmentDto = (from r in shipmentList
+                                                          select new PreShipmentMobileDTO()
+                                                          {
+                                                              PreShipmentMobileId = r.ShipmentId,
+                                                              Waybill = r.Waybill,
+                                                              ActualDateOfArrival = r.ActualDateOfArrival,
+                                                              DateCreated = r.DateCreated,
+                                                              DateModified = r.DateModified,
+                                                              ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                              ReceiverAddress = r.ReceiverAddress,
+                                                              SenderAddress = r.SenderAddress,
+                                                              ReceiverCountry = r.ReceiverCountry,
+                                                              ReceiverEmail = r.ReceiverEmail,
+                                                              ReceiverName = r.ReceiverName,
+                                                              ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                              ReceiverState = r.ReceiverState,
+                                                              UserId = r.UserId,
+                                                              Value = r.Value,
+                                                              GrandTotal = r.GrandTotal,
+                                                              CustomerCode = r.CustomerCode,
+                                                              DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                              shipmentstatus = r.ShipmentScanStatus.ToString(),
+                                                              CustomerId = r.CustomerId,
+                                                              CustomerType = r.CustomerType,
+                                                              CountryId = r.DepartureCountryId
+                                                          }).OrderByDescending(x => x.DateCreated).ToList();
+
+                //get all stationids in the shipment list
+                var countryIds = shipmentDto.Select(x => x.CountryId).ToArray();
+                var countryInfo = await _uow.Country.GetCountries(countryIds);
+
+                foreach (var shipments in shipmentDto)
+                {
+                    var country = countryInfo.Where(x => x.CountryId == shipments.CountryId).FirstOrDefault();
+
+                    if (country != null)
+                    {
+                        shipments.CurrencyCode = country.CurrencyCode;
+                        shipments.CurrencySymbol = country.CurrencySymbol;
+                    }
+
+                    if (shipments.CustomerType == "Individual")
+                    {
+                        shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    }
+
+                    if (shipments.SenderAddress == null)
+                    {
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
+                        var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
+                        shipments.SenderAddress = CustomerDetails.Address;
+                        shipments.SenderName = CustomerDetails.Name;
+                    }
+                }
+
+                return await Task.FromResult(shipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
