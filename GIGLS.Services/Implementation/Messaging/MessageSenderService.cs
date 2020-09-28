@@ -957,7 +957,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = emailMessageDTO.EcommerceEmail;
             }
 
-            //4. obj is BankDepositMessageDTO
+            //6. obj is BankDepositMessageDTO
             if (obj is BankDepositMessageDTO)
             {
                 var strArray = new string[]
@@ -978,6 +978,48 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
                 messageDTO.ToEmail = bankDepositMessageDTO.Email;
+            }
+
+            //7. obj is IntlShipmentRequestDTO
+            if (obj is ShipmentDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Customer Name",
+                    "Reciever Name",
+                    "Waybill"
+                };
+
+                var intlDTO = (ShipmentDTO)obj;
+
+                //get CustomerDetails (
+                if (intlDTO.CustomerType.Contains("Individual"))
+                {
+                    intlDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), intlDTO.CustomerType);
+                var customerObj = await GetCustomer(intlDTO.CustomerId, customerType);
+
+                //A. map the array
+                strArray[0] = customerObj.CustomerName;
+                strArray[2] = intlDTO.ReceiverName;
+                strArray[2] = intlDTO.Waybill;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = intlDTO.CustomerDetails.PhoneNumber;
+                messageDTO.ToEmail = intlDTO.CustomerDetails.Email;
             }
 
             return await Task.FromResult(verifySendEmail);

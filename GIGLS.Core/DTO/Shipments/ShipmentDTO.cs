@@ -165,7 +165,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
 
-
         //Senders' Information
         public decimal Value { get; set; }
 
@@ -217,6 +216,84 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int StationId { get; set; }
 
-        //public bool IsProcessed { get; set; } 
+        public bool IsProcessed { get; set; }
+    }
+
+    public class IntlShipmentDTO : BaseDomainDTO
+    {
+        public int IntlShipmentRequestId { get; set; }
+
+        public string RequestNumber { get; set; }
+
+        //General Details comes with role user 
+        public string UserId { get; set; }
+        public string CustomerFirstName { get; set; }
+        public string CustomerLastName { get; set; }
+        public string CustomerType { get; set; }
+        public int CustomerId { get; set; }
+        public int CustomerCountryId { get; set; }
+        public string CustomerAddress { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhoneNumber { get; set; }
+        public string CustomerCity { get; set; }
+        public string CustomerState { get; set; }
+        public decimal Value { get; set; }
+        //public PaymentStatus PaymentStatus { get; set; }
+        //Receivers Information
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public int DestinationCountryId { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverCity { get; set; }
+        public string ReceiverState { get; set; }
+        public string ReceiverCountry { get; set; }
+
+        //Delivery Options 
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
+        //Shipment Items
+        public double ApproximateItemsWeight { get; set; }
+
+        public decimal GrandTotal { get; set; }
+
+        //discount information
+        public decimal? Total { get; set; }
+
+        //payment method 
+        public string PaymentMethod { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+
+        public string SenderState { get; set; }
+
+        public int StationId { get; set; }
+
+        public bool IsProcessed { get; set; }
+        public int IntlShipmentRequestItemId { get; set; }
+        public string Description { get; set; }
+        public string ItemName { get; set; }
+        public string TrackingId { get; set; }
+        public string storeName { get; set; }
+        public ShipmentType ShipmentType { get; set; }
+        public double Weight { get; set; }
+        public string Nature { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public int SerialNumber { get; set; }
+
+        //To handle volumetric weight
+        public bool IsVolumetric { get; set; }
+        public double Length { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
     }
 }

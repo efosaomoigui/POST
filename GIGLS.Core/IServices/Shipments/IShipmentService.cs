@@ -64,7 +64,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
         Task<PreShipmentDTO> GetTempShipment(string code);
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
-        Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
         Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
     }
@@ -100,7 +100,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
         Task<string> SetEntityIntl(CustomerDTO custDTo);
         Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
-        Task<Tuple<List<IntlShipmentRequestDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
 
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
