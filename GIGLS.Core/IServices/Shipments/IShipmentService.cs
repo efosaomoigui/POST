@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
@@ -65,7 +66,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<Tuple<List<IntlShipmentRequestDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
-        Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(FilterOptionsDto filterOptionsDto);
+        Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

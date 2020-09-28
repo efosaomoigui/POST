@@ -6,6 +6,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
@@ -1774,13 +1775,19 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Super Manifest
-        public async Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(FilterOptionsDto filterOptionsDto)
+        public async Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             try
             {
+                //get startDate and endDate
+                var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.SuperManifestStatus == SuperManifestStatus.ArrivedScan || x.SuperManifestStatus == SuperManifestStatus.Pending)
+                                                                    && x.DateModified >= startDate && x.DateModified < endDate);
 
                 if (serviceCenters.Length > 0)
                 {
@@ -1788,9 +1795,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Filter it by the destination service centre send from filter option
-                var filter = filterOptionsDto.filter;
-                int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
-                if (!string.IsNullOrEmpty(filter) && filterValue > 0 && filterValue != 99999)
+                int filterValue = Convert.ToInt32(dateFilterCriteria.ServiceCentreId);
+                if (filterValue > 0 && filterValue != 99999)
                 {
                     manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
                 }
