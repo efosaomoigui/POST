@@ -2,14 +2,18 @@
 using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Utility;
+using GIGLS.Core.IRepositories;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure.IdentityInfrastrure;
+using GIGLS.Infrastructure.Persistence.Repositories;
+using LinqKit;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -124,6 +128,66 @@ namespace GIGLS.Infrastructure.Persistence.Repository
         {
             return Context.Set<TEntity>().AnyAsync(predicate);
         }
+    
+        internal IQueryable<TEntity> Select(
+             Expression<Func<TEntity, bool>> filter = null,
+             List<Expression<Func<TEntity, object>>> includes = null,
+             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+             int? page = null,
+             int? pageSize = null)
+        {
+            IQueryable<TEntity> query = Context.Set<TEntity>();
+
+            if (includes != null)
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (orderBy == null)
+            {
+                query = query.OrderBy("DateCreated asc");
+            }
+
+            if (filter != null)
+            {
+                query = query.AsExpandable().Where(filter);
+            }
+            if (page != null && pageSize != null)
+            {
+                var t = (page.Value - 1) * pageSize.Value;
+                query = query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
+            return query;
+        }
+
+        internal async Task<IEnumerable<TEntity>> SelectAsync(
+            Expression<Func<TEntity, bool>> filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            List<Expression<Func<TEntity, object>>> includes = null,
+            int? page = null,
+            int? pageSize = null)
+        {
+            return await Select(filter, includes, orderBy, page, pageSize).ToListAsync();
+        }
+
+        public IQueryFluent<TEntity> Query(Expression<Func<TEntity, bool>> query)
+        {
+            return new QueryFluent<TEntity,TContext>(this, query);
+        }
+
+        public IQueryFluent<TEntity> Query()
+        {
+            return new QueryFluent<TEntity,TContext>(this);
+        }
+
+
+
+
+
     }
 
     public class AuthRepository<TEntity, TContext> : IDisposable
