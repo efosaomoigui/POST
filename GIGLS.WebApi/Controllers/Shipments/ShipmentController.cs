@@ -87,11 +87,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
             return await HandleApiOperationAsync(async () =>
             {
-                var result = _service.GetIntlTransactionShipments(filterOptionsDto);
+                var result = await  _service.GetIntlTransactionShipments(filterOptionsDto);
 
                 return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
-                    Object = result.Result
+                    Object = result
                 };
             });
         }

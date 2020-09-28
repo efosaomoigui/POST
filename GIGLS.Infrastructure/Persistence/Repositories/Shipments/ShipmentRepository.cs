@@ -994,13 +994,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             try
             {
-                //filter by service center
-                //var shipmentRequest = _context.IntlShipmentRequest.AsQueryable();
-
                 var shipmentRequest = _context.IntlShipmentRequest
                     .Join(
                         _context.IntlShipmentRequestItem,
@@ -1130,9 +1127,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentDTO.Count();
-                    var retVal = new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
-
-                    return Task.FromResult(retVal);
+                    return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
                 }
 
                 intlShipmentDTO = (from a in shipmentRequest
@@ -1218,8 +1213,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 intlShipmentDTO = intlShipmentDTO.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 count = intlShipmentDTO.Count();
-                var retValue = new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
-                return Task.FromResult(retValue);
+                return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
             }
             catch (Exception)
             {
