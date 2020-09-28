@@ -5,6 +5,7 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
 {
@@ -15,6 +16,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             _context = context;
         }
+
 
         public Task<CountryDTO> GetCountryByServiceCentreId(int serviceCentreId)
         {
@@ -68,6 +70,49 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                      ContactNumber = country.ContactNumber
                                  };
                 return Task.FromResult(countryDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CountryByStationDTO>> GetCountryByStationId(int[] stationId)
+        {
+            try
+            {
+                var countries =  _context.Country;
+                var countryDto = from country in countries
+                                 join state in _context.State on country.CountryId equals state.CountryId
+                                 join station in _context.Station on state.StateId equals station.StateId
+                                 where stationId.Contains(station.StationId)
+                                 select new CountryByStationDTO
+                                 {
+                                     CurrencySymbol = country.CurrencySymbol,
+                                     CurrencyCode = country.CurrencyCode,
+                                     StationId = station.StationId
+                                 };
+                return Task.FromResult(countryDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CountryDTO>> GetCountries(int[] countryId)
+        {
+            try
+            {
+                var countries = _context.Country;
+                var countryDto = from country in countries
+                                 where countryId.Contains(country.CountryId)
+                                 select new CountryDTO
+                                 {
+                                     CurrencySymbol = country.CurrencySymbol,
+                                     CurrencyCode = country.CurrencyCode,
+                                 };
+                return Task.FromResult(countryDto.ToList());
             }
             catch (Exception)
             {

@@ -2066,19 +2066,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-       
+       [AllowAnonymous]
         [HttpPost]
         [Route("getwallettransactions")]
-        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
-            if (shipmentAndPreShipmentParamDTO == null)
-            {
-                throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
-            }
             return await HandleApiOperationAsync(async () =>
             {
                 var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
-                return new ServiceResponse<WalletTransactionSummaryDTO>
+                return new ServiceResponse<List<WalletTransactionDTO>>
                 {
                     Object = Transactionhistory
                 };
@@ -2089,10 +2085,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("getshipments")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
-            if (shipmentAndPreShipmentParamDTO == null)
-            {
-                throw new GenericException("Missing payload", $"{(int)HttpStatusCode.BadRequest}");
-            }
             return await HandleApiOperationAsync(async () =>
             {
                 var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
@@ -2103,8 +2095,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
-        [AllowAnonymous]
         [HttpGet]
         [Route("getactivecountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()

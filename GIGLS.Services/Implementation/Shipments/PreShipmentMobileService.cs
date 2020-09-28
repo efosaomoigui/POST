@@ -5579,15 +5579,26 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //set default values if payload is null
+                if (shipmentAndPreShipmentParamDTO == null)
+                {
+                    shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                    {
+                        Page = 1,
+                        PageSize = 20,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
                 int totalCount;
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
                 var mobileShipments = new List<PreShipmentMobile>();
-                if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
+                if (shipmentAndPreShipmentParamDTO.PageSize < 1)
                 {
                     shipmentAndPreShipmentParamDTO.PageSize = 20;
                 }
-                if (shipmentAndPreShipmentParamDTO.Page <= 0)
+                if (shipmentAndPreShipmentParamDTO.Page < 1)
                 {
                     shipmentAndPreShipmentParamDTO.Page = 1;
                 }
@@ -5648,20 +5659,34 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).OrderByDescending(x => x.DateCreated).ToList();
                 var agilityShipment = await GetPreShipmentForEcommercePaginated(shipmentAndPreShipmentParamDTO, user.UserChannelCode);
 
+                //get all waybills in shipmentlist
+                var arrWaybills = shipmentDto.Select(x => x.Waybill).ToArray();
+                var partnerMoblieRequests = await _uow.MobilePickUpRequests.FindAsync(r => arrWaybills.Contains(r.Waybill) && r.Status == MobilePickUpRequestStatus.Delivered.ToString());
+
+                //partner information using id
+                var partnerIds = partnerMoblieRequests.Select(x => x.UserId).ToArray();
+                var partnerInfo = await _uow.User.GetUsers(partnerIds);
+
+                //get all ratings for all waybill in the shipment list
+                var ratings = await _uow.MobileRating.FindAsync(r => arrWaybills.Contains(r.Waybill));
+
+                //get all stationids in the shipment list
+                var stationIds = shipmentDto.Select(x => x.SenderStationId).ToArray();
+                var stations = await _uow.Country.GetCountryByStationId(stationIds);
+
                 //added agility shipment to Giglgo list of shipments.
                 foreach (var shipment in shipmentDto)
                 {
-
                     if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
                     {
                         var s = agilityShipment.Where(x => x.Waybill == shipment.Waybill).FirstOrDefault();
                         agilityShipment.Remove(s);
                     }
 
-                    var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && r.Status == MobilePickUpRequestStatus.Delivered.ToString());
-                    if (partnerId != null)
+                    var partner = partnerMoblieRequests.Where(r => r.Waybill == shipment.Waybill).FirstOrDefault();
+                    if (partner != null)
                     {
-                        var partneruser = await _uow.User.GetUserById(partnerId.UserId);
+                        var partneruser = partnerInfo.Where(x => x.Id == partner.UserId).FirstOrDefault();
                         if (partneruser != null)
                         {
                             shipment.PartnerFirstName = partneruser.FirstName;
@@ -5672,25 +5697,24 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     shipment.IsRated = false;
 
-                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                    var rating = ratings.Where(j => j.Waybill == shipment.Waybill).FirstOrDefault();
                     if (rating != null)
                     {
                         shipment.IsRated = rating.IsRatedByCustomer;
                     }
 
-                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                    var country = stations.Where(x => x.StationId == shipment.SenderStationId).FirstOrDefault();
                     if (country != null)
                     {
                         shipment.CurrencyCode = country.CurrencyCode;
                         shipment.CurrencySymbol = country.CurrencySymbol;
                     }
-
                 }
 
                 var newlist = shipmentDto.Union(agilityShipment);
-                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(20).ToList());
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(shipmentAndPreShipmentParamDTO.PageSize).ToList());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -5700,13 +5724,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //set default values if payload is null
+                if (shipmentAndPreShipmentParamDTO == null)
+                {
+                    shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                    {
+                        Page = 1,
+                        PageSize = 20,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
                 int totalCount;
                 var shipmentList = new List<Shipment>();
-                if (shipmentAndPreShipmentParamDTO.PageSize <= 0)
+                if (shipmentAndPreShipmentParamDTO.PageSize < 1)
                 {
                     shipmentAndPreShipmentParamDTO.PageSize = 20;
                 }
-                if (shipmentAndPreShipmentParamDTO.Page <= 0)
+                if (shipmentAndPreShipmentParamDTO.Page < 1)
                 {
                     shipmentAndPreShipmentParamDTO.Page = 1;
                 }
@@ -5740,15 +5775,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                              shipmentstatus = "Shipment",
+                                                              shipmentstatus = r.ShipmentScanStatus.ToString(),
                                                               CustomerId = r.CustomerId,
                                                               CustomerType = r.CustomerType,
                                                               CountryId = r.DepartureCountryId
-                                                          }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                                                          }).OrderByDescending(x => x.DateCreated).ToList();
+
+                //get all stationids in the shipment list
+                var countryIds = shipmentDto.Select(x => x.CountryId).ToArray();
+                var countryInfo = await _uow.Country.GetCountries(countryIds);
 
                 foreach (var shipments in shipmentDto)
                 {
-                    var country = await _uow.Country.GetAsync(shipments.CountryId);
+                    var country = countryInfo.Where(x => x.CountryId == shipments.CountryId).FirstOrDefault();
 
                     if (country != null)
                     {

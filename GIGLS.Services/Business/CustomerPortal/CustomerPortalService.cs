@@ -2860,23 +2860,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
         {
-            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            bool disableShipmentCreation = bool.Parse(isDisable);
-
-            bool allowTestUser = await AllowTestingUserToCreateShipment();
-
-            if (allowTestUser)
-            {
-                disableShipmentCreation = false;
-            }
-
-            if (disableShipmentCreation)
-            {
-                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
-
             return await _iWalletTransactionService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
         }
 
