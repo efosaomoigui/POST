@@ -572,6 +572,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestsinsupermanifest/code/{manifest}")]
+        public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestsInSuperManifest = await _manifestGroupMappingService.GetManifestsInSuperManifest(manifest);
+
+                return new ServiceResponse<List<ManifestDTO>>
+                {
+                    Object = manifestsInSuperManifest
+                };
+            });
+        }
+
         [HttpPost]
         [Route("dropoffs")]
         public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)

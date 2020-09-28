@@ -15,6 +15,7 @@ using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -344,9 +345,9 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("unmappedmanifestforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
