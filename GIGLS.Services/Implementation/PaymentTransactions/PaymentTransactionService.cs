@@ -221,7 +221,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
-            wallet.Balance = wallet.Balance - amountToDebit;
             int[] serviceCenterIds = { };
 
             if (!paymentTransaction.FromApp)
@@ -233,7 +232,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                 serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
             }
-            
 
             var newWalletTransaction = new WalletTransaction
             {
@@ -247,6 +245,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 Waybill = paymentTransaction.Waybill,
                 Description = generalLedgerEntity.Description
             };
+            //get the balance after transaction
+            if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+            }
+            else
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+            }
+            wallet.Balance = wallet.Balance - amountToDebit;
 
             _uow.WalletTransaction.Add(newWalletTransaction);
         }
@@ -319,8 +327,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 }
 
-                wallet.Balance = wallet.Balance - amountToDebit;
-
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
                 var newWalletTransaction = new WalletTransaction
@@ -335,6 +341,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     Waybill = paymentTransaction.Waybill,
                     Description = generalLedgerEntity.Description
                 };
+
+                if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+                }
+                else
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+                }
+
+                wallet.Balance = wallet.Balance - amountToDebit;
 
                 _uow.WalletTransaction.Add(newWalletTransaction);
             }

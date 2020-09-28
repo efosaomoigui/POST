@@ -65,6 +65,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre();
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
+        Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(FilterOptionsDto filterOptionsDto);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

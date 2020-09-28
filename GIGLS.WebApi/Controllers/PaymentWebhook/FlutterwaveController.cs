@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.CustomerPortal
+namespace GIGLS.WebApi.Controllers.PaymentWebhook
 {
     [RoutePrefix("api/rave")]
     public class FlutterwaveController : BaseWebApiController

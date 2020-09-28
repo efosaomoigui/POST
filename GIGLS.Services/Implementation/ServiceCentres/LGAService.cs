@@ -199,13 +199,13 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
         public async Task<IEnumerable<LGADTO>> GetLGAByState(int stateId)
         {
-            var lgas = new List<LGADTO>();
             try
             {
+                var lgas = new List<LGADTO>();
                 var items = _uow.LGA.GetAll().Where(x => x.StateId == stateId).ToList();
                 if (items.Any())
                 {
-                    lgas = (Mapper.Map<List<LGADTO>>(items));
+                    lgas = Mapper.Map<List<LGADTO>>(items);
                 }
                 return lgas;
             }
