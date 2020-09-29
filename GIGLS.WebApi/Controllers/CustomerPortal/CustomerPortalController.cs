@@ -2066,7 +2066,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-       [AllowAnonymous]
+    
         [HttpPost]
         [Route("getwallettransactions")]
         public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -2174,7 +2174,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
 
     }
 }

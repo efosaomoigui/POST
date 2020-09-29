@@ -653,6 +653,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-       
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("getmobilepickuprequests")]
+        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetAllMobilePickUpRequests(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var pickuprequests = await _portalService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<MobilePickUpRequestsDTO>>
+                {
+                    Object = pickuprequests
+                };
+            });
+        }
+
     }
 }

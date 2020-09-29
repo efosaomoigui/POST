@@ -206,5 +206,55 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            try
+            {
+                var mobilerequests = new List<MobilePickUpRequests>();
+                var mobilerequestsDTO = new List<MobilePickUpRequestsDTO>();
+                //var userid = await _userservice.GetCurrentUserId();
+                var userid = "ab3722d7-57f3-4e6e-a32d-1580315b7da6";
+                int totalCount;
+                //set default values if payload is null
+                if (shipmentAndPreShipmentParamDTO == null)
+                {
+                    shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                    {
+                        Page = 1,
+                        PageSize = 20,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+                if (shipmentAndPreShipmentParamDTO.PageSize < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.PageSize = 20;
+                }
+                if (shipmentAndPreShipmentParamDTO.Page < 1)
+                {
+                    shipmentAndPreShipmentParamDTO.Page = 1;
+                }
+
+                if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+                {
+
+                    mobilerequests = _uow.MobilePickUpRequests.Query(x => x.UserId == userid && x.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && x.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    mobilerequests = _uow.MobilePickUpRequests.Query(x => x.UserId == userid).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
+                }
+                if (mobilerequests.Any())
+                {
+                    mobilerequestsDTO = Mapper.Map<List<MobilePickUpRequestsDTO>>(mobilerequests);
+                }
+                return mobilerequestsDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
