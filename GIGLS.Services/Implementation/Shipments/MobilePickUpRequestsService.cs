@@ -212,8 +212,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var mobilerequests = new List<MobilePickUpRequests>();
                 var mobilerequestsDTO = new List<MobilePickUpRequestsDTO>();
-                //var userid = await _userservice.GetCurrentUserId();
-                var userid = "ab3722d7-57f3-4e6e-a32d-1580315b7da6";
+                var userid = await _userservice.GetCurrentUserId();
                 int totalCount;
                 //set default values if payload is null
                 if (shipmentAndPreShipmentParamDTO == null)
