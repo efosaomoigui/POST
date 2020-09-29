@@ -654,6 +654,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("getmobilepickuprequests")]
         public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetAllMobilePickUpRequests(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)

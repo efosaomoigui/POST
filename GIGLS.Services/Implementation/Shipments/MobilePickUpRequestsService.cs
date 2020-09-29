@@ -243,10 +243,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     mobilerequests = _uow.MobilePickUpRequests.Query(x => x.UserId == userid).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).ToList();
                 }
-                if (mobilerequests.Any())
-                {
-                    mobilerequestsDTO = Mapper.Map<List<MobilePickUpRequestsDTO>>(mobilerequests);
-                }
+
+                mobilerequestsDTO = Mapper.Map<List<MobilePickUpRequestsDTO>>(mobilerequests);
                 return mobilerequestsDTO;
             }
             catch (Exception)
