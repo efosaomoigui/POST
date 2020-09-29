@@ -574,7 +574,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("manifestsinsupermanifest/code/{manifest}")]
+        [Route("manifestsinsupermanifest/{manifest}")]
         public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
         {
             return await HandleApiOperationAsync(async () =>
