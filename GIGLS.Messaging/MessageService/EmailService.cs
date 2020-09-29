@@ -70,6 +70,42 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
+        private async Task<string> ConfigPaymentMessageForInternationalShipment(MessageDTO message) 
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:PaymentNotificationTemplate"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Payment Notificational For Your Shipment";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Subject", message.Subject },
+                { "TPL_CustomerName", message.CustomerName },
+                { "TPL_CustomerCode", message.CustomerCode },
+                { "TPL_CustomerEmail", message.To },
+                { "TPL_Password", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
         private async Task<string> ConfigEcommerceRegistrationMessage(MessageDTO message)
         {
             var myMessage = new SendGridMessage

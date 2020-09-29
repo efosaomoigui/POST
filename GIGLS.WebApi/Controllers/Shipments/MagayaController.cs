@@ -184,7 +184,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto) 
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto) 
         {
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
@@ -195,7 +195,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var result = _service.getIntlShipmentRequests(filterOptionsDto);
 
                 //3. Pass the return to the view or caller
-                return new ServiceResponse<Tuple<List<IntlShipmentRequestDTO>, int>>()
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
                     Object = result.Result
                 };
