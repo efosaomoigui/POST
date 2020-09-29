@@ -2860,6 +2860,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await _iWalletTransactionService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await _preShipmentMobileService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
+        }
+
         public async Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId)
         {
             return await _uow.Station.GetStationsByCountry(countryId);

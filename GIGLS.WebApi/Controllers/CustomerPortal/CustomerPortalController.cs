@@ -2080,9 +2080,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+       [AllowAnonymous]
+        [HttpPost]
+        [Route("getwallettransactions")]
+        public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<WalletTransactionDTO>>
+                {
+                    Object = Transactionhistory
+                };
+            });
+        }
+       
+        [HttpPost]
+        [Route("getshipments")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipmenthistory
+                };
+            });
+        }
 
-
-        [AllowAnonymous]
         [HttpGet]
         [Route("getactivecountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
