@@ -257,6 +257,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
+                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
                         }
                     }
 
@@ -278,6 +279,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
+                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
                         }
                     }
 
@@ -293,6 +295,7 @@ namespace GIGLS.Services.Implementation.Messaging
                             var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
                             messageDTO.Body = storeMessageDTO.Body;
                             messageDTO.To = storeMessageDTO.To;
+                            messageDTO.SMSSenderPlatform = storeMessageDTO.SMSSenderPlatform;
                         }                        
                     }
 
@@ -371,7 +374,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
 
             if (obj is WebsiteMessageDTO)
@@ -524,7 +527,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
             }
 
             if (obj is ShipmentDeliveryDelayMessageDTO)
@@ -560,7 +563,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
             }
 
             if (obj is ShipmentCancelMessageDTO)
@@ -595,7 +598,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
             }
 
             return await Task.FromResult(true);
@@ -654,7 +657,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     Message = messageDTO.FinalBody,
                     Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
-                    ResultDescription = exceptionMessage
+                    ResultDescription = exceptionMessage + " Sent using " + messageDTO.SMSSenderPlatform
                 });
             }
             catch (Exception) { }
