@@ -653,9 +653,6 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-<<<<<<< Updated upstream
-       
-=======
 
         [HttpPost]
         [Route("getmobilepickuprequests")]
@@ -670,7 +667,5 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-
->>>>>>> Stashed changes
     }
 }

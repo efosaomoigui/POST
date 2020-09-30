@@ -180,5 +180,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
+        Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
     }
 }

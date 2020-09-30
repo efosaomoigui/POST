@@ -23,7 +23,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _portalService = portalService;
         }
 
-
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
         {
             return await _portalService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
@@ -198,5 +197,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _portalService.ValidateOTP(otp);
         }
+
+        public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await _portalService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
+        }
+    
     }
 }
