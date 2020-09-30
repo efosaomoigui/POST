@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Messaging
             message.To = messageDto.To;
             message.EmailSmsType = messageDto.EmailSmsType;
             message.MessageType = messageDto.MessageType;
+            message.SMSSenderPlatform = messageDto.SMSSenderPlatform;
             await _uow.CompleteAsync();
         }
     }
