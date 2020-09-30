@@ -270,11 +270,11 @@ namespace GIGLS.Services.Business.Tracking
                 var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);                               
 
                 ////check for international
-                if (shipment != null && shipment.IsInternational)
-                {
-                    var internationResult = await TrackShipmentForInternational(waybillNumber);
-                    result.ToList().AddRange(internationResult);
-                }
+                //if (shipment != null && shipment.IsInternational)
+                //{
+                //    var internationResult = await TrackShipmentForInternational(waybillNumber);
+                //    result.ToList().AddRange(internationResult);
+                //}
 
                 foreach (var track in result)
                 {
