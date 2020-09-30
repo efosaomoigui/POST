@@ -435,10 +435,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
+                string thirdparty = ShipmentScanStatus.THIRDPARTYTRANSIT.ToString();
+
 
                 foreach (var tracking in result)
                 {
-                    if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms)))
+                    if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms) || tracking.Status.Equals(thirdparty)))
                     {
                         finalResult.Add(tracking);
                     }

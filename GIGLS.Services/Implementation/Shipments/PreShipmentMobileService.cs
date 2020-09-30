@@ -2451,7 +2451,6 @@ namespace GIGLS.Services.Implementation.Shipments
             catch
             {
                 throw;
-                //throw new GenericException("Error: You cannot track this waybill number.");
             }
         }
 
