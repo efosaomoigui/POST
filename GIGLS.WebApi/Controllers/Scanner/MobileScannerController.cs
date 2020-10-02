@@ -574,7 +574,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("manifestsinsupermanifest/code/{manifest}")]
+        [Route("manifestsinsupermanifest/{manifest}")]
         public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
         {
             return await HandleApiOperationAsync(async () =>
@@ -584,6 +584,21 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<List<ManifestDTO>>
                 {
                     Object = manifestsInSuperManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.RemoveManifestFromSuperManifest(superManifest, manifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }
