@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     string smim = ShipmentScanStatus.SMIM.ToString();
                     string fms = ShipmentScanStatus.FMS.ToString();
-                    string thirdparty = ShipmentScanStatus.THIRDPARTYTRANSIT.ToString();
+                    string thirdparty = ShipmentScanStatus.THIRDPARTY.ToString();
 
                     shipmentTracking = shipmentTracking.Where(x => !(x.Status == smim || x.Status == fms || x.Status == thirdparty));
                 }
