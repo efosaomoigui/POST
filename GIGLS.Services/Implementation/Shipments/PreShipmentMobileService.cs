@@ -2113,7 +2113,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
                         if (qrCode != null)
                         {
-                            Shipmentdto.QRCode = qrCode.Number;
+                            Shipmentdto.QRCode = qrCode.SenderCode;
                         }
                     }
                 }
