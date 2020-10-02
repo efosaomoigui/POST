@@ -4217,20 +4217,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
 
+                        if (mobileShipment == null)
+                        {
+                            throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                        }
+
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill);
 
                         if (deliveryNumber == null)
                         {
                             throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
                         }
-                        if(deliveryNumber.UserId != userId)
+                        else
                         {
-                            throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
-                        }
-
-                        if (mobileShipment == null)
-                        {
-                            throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                            if (deliveryNumber.UserId != userId)
+                            {
+                                throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
+                            }
                         }
 
                         var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
@@ -4243,9 +4246,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         deliveryNumber.Number = detail.DeliveryNumber;
                         deliveryNumber.IsUsed = true;
                         mobileShipment.DeliveryNumber = detail.DeliveryNumber;
-
-                        _uow.DeliveryNumber.Remove(number);
-                       
+                        _uow.DeliveryNumber.Remove(number);                       
                         await _uow.CompleteAsync();
                     }
                 }
@@ -4287,9 +4288,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Generate Receiver Delivery Code
                     deliveryNumber.ReceiverCode = await GenerateDeliveryCode();
 
-                    //Send SMS To Receiver with Delivery Code
-                    await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
-
                     //Update Shipment Status
                     var request = new MobilePickUpRequestsDTO()
                     {
@@ -4297,6 +4295,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = mobileShipment.Waybill
                     };
                     await UpdateMobilePickupRequest(request);
+
+                    //Send SMS To Receiver with Delivery Code
+                    await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
                 }
                 else if (mobileShipment.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() && mobileShipment.ZoneMapping == 1)
                 {

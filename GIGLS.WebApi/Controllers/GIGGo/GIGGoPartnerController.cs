@@ -524,7 +524,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         }
 
         [HttpPost]
-        [Route("adddeliverynumbernew")]
+        [Route("addnewdeliverynumber")]
         public async Task<IServiceResponse<bool>> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
         {
             return await HandleApiOperationAsync(async () =>
