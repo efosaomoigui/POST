@@ -41,6 +41,6 @@
         DCC,  //WHEN SHIPMENT DEPARTS COLLATION CENTER
         MNT, //WHEN MANIFEST IS NOT FOUND IN THE SUPERMANIFEST
         DLP,  //DELAYED PICKUP
-        THIRDPARTYTRANSIT //For 3rd party and gigm captain
+        THIRDPARTY //For 3rd party and gigm captain
     }
 }
