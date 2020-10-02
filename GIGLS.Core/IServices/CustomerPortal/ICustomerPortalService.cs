@@ -181,6 +181,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
-        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
     }
 }

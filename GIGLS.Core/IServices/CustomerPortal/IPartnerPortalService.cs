@@ -50,6 +50,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
         Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
-        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
     }
 }
