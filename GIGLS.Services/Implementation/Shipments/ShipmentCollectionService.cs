@@ -306,6 +306,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 Status = shipmentCollectionDto.ShipmentScanStatus.ToString(),
                 Waybill = shipmentCollectionDto.Waybill,
                 User = shipmentCollectionDto.UserId,
+                Location = shipmentCollectionDto.Location
             }, shipmentCollectionDto.ShipmentScanStatus);
 
             //Get Destination Service centre details
@@ -448,10 +449,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     deliveryNumber.IsUsed = true;
                     deliveryNumber.UserId = shipmentCollectionDto.UserId;
-                }
-                
-            }
-            
+                }                
+            }           
 
             await _uow.CompleteAsync();
         }
