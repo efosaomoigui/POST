@@ -49,5 +49,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> Generate(int length);
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
         Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
     }
 }
