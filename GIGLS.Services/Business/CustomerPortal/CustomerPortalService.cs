@@ -435,7 +435,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
-                string thirdparty = ShipmentScanStatus.THIRDPARTYTRANSIT.ToString();
+                string thirdparty = ShipmentScanStatus.THIRDPARTY.ToString();
 
 
                 foreach (var tracking in result)
