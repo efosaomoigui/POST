@@ -121,10 +121,6 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             try
             {
-                //Need optimisation
-                //var smsMessages = await _messageService.GetSmsAsync();
-                //messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
-
                 var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
                 messageDTO = Mapper.Map<MessageDTO>(smsMessages);
 
@@ -343,7 +339,8 @@ namespace GIGLS.Services.Implementation.Messaging
                      "Sender Name",
                      "Sender Email",
                      "WaybillNumber",
-                     "OTP"
+                     "OTP",
+                    "DispatchRiderPhoneNumber"
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
@@ -352,6 +349,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = mobileMessageDTO.WaybillNumber;
                 strArray[2] = mobileMessageDTO.SenderName;
                 strArray[3] = Convert.ToString(mobileMessageDTO.OTP);
+                strArray[4] = mobileMessageDTO.DispatchRiderPhoneNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -889,8 +887,8 @@ namespace GIGLS.Services.Implementation.Messaging
                      "Sender Name",
                      "Sender Email",
                     "WaybillNumber",
-                    "ExpectedTimeofDelivery"
-
+                    "ExpectedTimeofDelivery",
+                    "DispatchRiderPhoneNumber"
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
@@ -898,6 +896,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = mobileMessageDTO.SenderName;
                 strArray[1] = mobileMessageDTO.WaybillNumber;
                 strArray[3] = mobileMessageDTO.ExpectedTimeofDelivery;
+                strArray[4] = mobileMessageDTO.DispatchRiderPhoneNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -905,7 +904,6 @@ namespace GIGLS.Services.Implementation.Messaging
                 //C. populate the message subject
                 messageDTO.Subject =
                     string.Format(messageDTO.Subject, strArray);
-
 
                 //populate the message template
                 messageDTO.FinalBody =
