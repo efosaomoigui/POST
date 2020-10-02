@@ -168,7 +168,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<WalletDTO> GetWalletBalanceWithName();
         Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
         Task<bool> PayForShipment(string waybill);
-        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
         Task<bool> DeleteDropOff(string waybill);
         Task<IEnumerable<NewCountryDTO>> GetActiveCountries();
         Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
@@ -181,5 +181,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
     }
 }
