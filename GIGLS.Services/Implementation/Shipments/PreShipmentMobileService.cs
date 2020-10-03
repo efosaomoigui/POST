@@ -2544,6 +2544,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
 
+                        //Remove this block of code Later
+                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.IsDeleted == false);
+                        if(deliveryNumber != null && string.IsNullOrWhiteSpace(deliveryNumber.SenderCode) && !string.IsNullOrWhiteSpace(deliveryNumber.Number))
+                        {
+                            deliveryNumber.SenderCode = deliveryNumber.Number;
+                            deliveryNumber.Number = null;
+                        }
+                        //end of block
+
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = pickuprequest.Waybill,
