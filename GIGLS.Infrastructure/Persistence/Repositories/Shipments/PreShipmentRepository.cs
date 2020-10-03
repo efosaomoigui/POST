@@ -90,5 +90,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
+
+
+
+        public Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            var dropOffs = _context.PreShipment.Where(x => (x.CustomerCode.ToLower() == searchOption.Option.ToLower() || x.SenderPhoneNumber.ToLower() == searchOption.Option.ToLower()) && x.IsProcessed == false).ToList();
+            List<PreShipmentDTO> shipmentDto = (from r in dropOffs
+                                                select new PreShipmentDTO()
+                                                {
+                                                    PreShipmentId = r.PreShipmentId,
+                                                    TempCode = r.TempCode,
+                                                    Waybill = r.Waybill,
+                                                    CompanyType = r.CompanyType,
+                                                    DateCreated = r.DateCreated,
+                                                    DateModified = r.DateModified,
+                                                    ReceiverAddress = r.ReceiverAddress,
+                                                    ReceiverCity = r.ReceiverCity,
+                                                    ReceiverName = r.ReceiverName,
+                                                    ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                    SenderUserId = r.SenderUserId,
+                                                    Value = r.Value,
+                                                    IsProcessed = r.IsProcessed,
+                                                    CustomerCode = r.CustomerCode,
+                                                    PickupOptions = r.PickupOptions,
+                                                    SenderCity = r.SenderCity,
+                                                    SenderName = r.SenderName,
+                                                    SenderPhoneNumber = r.SenderPhoneNumber,
+                                                    IsAgent = r.IsAgent,
+                                                    DepartureStationId = r.DepartureStationId,
+                                                    DestinationStationId = r.DestinationStationId,
+                                                }).ToList();
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
     }
 }

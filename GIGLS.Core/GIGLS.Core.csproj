@@ -426,6 +426,7 @@
     <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\SearchOption.cs" />
     <Compile Include="DTO\Shipments\ShipmentDetailDanfoDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />

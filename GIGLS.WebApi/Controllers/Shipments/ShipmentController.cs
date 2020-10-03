@@ -25,13 +25,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentService _service;
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
+        private readonly IPreShipmentService _preshipmentService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
+            _preshipmentService = preshipmentService;
         }
 
 
@@ -726,6 +728,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("getdropoffsbyphonenooruserchanelcode")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preshipmentService.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = preshipment
                 };
             });
         }
