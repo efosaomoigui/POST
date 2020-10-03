@@ -2807,6 +2807,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
         }
 
-
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
+        }
     }
 }

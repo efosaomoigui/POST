@@ -391,5 +391,11 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
+        }
     }
 }
