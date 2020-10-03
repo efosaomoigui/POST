@@ -10,6 +10,7 @@ namespace GIGLS.Core.Domain
     {
         public int DeliveryNumberId { get; set; }
         public string Number { get; set; }
+        public string SenderCode { get; set; }
 
         public string UserId { get; set; }
 

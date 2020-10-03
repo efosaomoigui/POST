@@ -198,10 +198,9 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task SendSMSForMobileShipmentCreation(MobileShipmentCreationMessageDTO smsMessageExtensionDTO)
+        private async Task SendSMSForMobileShipmentCreation(MobileShipmentCreationMessageDTO smsMessageExtensionDTO, MessageType messageType)
         {
-            await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
-            //await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
+            await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, smsMessageExtensionDTO);
         }
 
         private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
@@ -529,7 +528,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = PaymentType.Online,
                         UserId = newPreShipment.UserId
                     };
-                   
+
                     if (transaction.CreditDebitType == CreditDebitType.Credit)
                     {
                         transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
@@ -538,7 +537,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
                     }
-                
+
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
 
@@ -552,11 +551,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
-                    await _uow.CompleteAsync();
 
                     //Pin Generation 
-                    var deliveryNumber = await GenerateDeliveryNumber(1, waybill);
-                    message.QRCode = deliveryNumber.Number;
+                    var number = await GenerateDeliveryCode();
+                    var deliveryNumber = new DeliveryNumber
+                    {
+                        SenderCode = number,
+                        IsUsed = false,
+                        Waybill = waybill
+                    };
+                    _uow.DeliveryNumber.Add(deliveryNumber);
+
+                    message.QRCode = deliveryNumber.SenderCode;
+
+                    await _uow.CompleteAsync();
 
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -564,7 +572,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentScanStatus = ShipmentScanStatus.MCRT
                     });
 
-                    await SendSMSForMobileShipmentCreation(message);
+                    await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
                     return preShipmentDTO;
                 }
                 else
@@ -2105,7 +2113,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
                         if (qrCode != null)
                         {
-                            Shipmentdto.QRCode = qrCode.Number;
+                            Shipmentdto.QRCode = qrCode.SenderCode;
                         }
                     }
                 }
@@ -2535,6 +2543,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
+
+                        //Remove this block of code Later
+                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.IsDeleted == false);
+                        if(deliveryNumber != null && string.IsNullOrWhiteSpace(deliveryNumber.SenderCode) && !string.IsNullOrWhiteSpace(deliveryNumber.Number))
+                        {
+                            deliveryNumber.SenderCode = deliveryNumber.Number;
+                            deliveryNumber.Number = null;
+                        }
+                        //end of block
 
                         await ScanMobileShipment(new ScanDTO
                         {
@@ -4147,7 +4164,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //Remove this later
         public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
         {
             try
@@ -4194,41 +4210,58 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        public async Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail)
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
-                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill);
-                if (deliveryNumber == null)
+                var number = await _uow.DeliveryNumber.GetAsync(s => s.Number.ToLower() == detail.DeliveryNumber.ToLower());
+                if (number == null)
                 {
-                    await UpdateDeliveryNumber(detail);
-                }
-                else if (deliveryNumber.Number.ToLower() != detail.DeliveryNumber.ToLower())
-                {
-                    throw new GenericException($"This PIN {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException("Delivery Number does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else
                 {
-                    var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
-
-                    if (mobileShipment == null)
+                    if (number.IsUsed)
                     {
-                        throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                        throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
                     }
-
-                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
-
-                    if (shipment != null)
+                    else
                     {
-                        shipment.DeliveryNumber = detail.DeliveryNumber;
+                        var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
+
+                        if (mobileShipment == null)
+                        {
+                            throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                        }
+
+                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill);
+
+                        if (deliveryNumber == null)
+                        {
+                            throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
+                        }
+                        else
+                        {
+                            if (deliveryNumber.UserId != userId)
+                            {
+                                throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
+                            }
+                        }
+
+                        var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
+
+                        if (shipment != null)
+                        {
+                            shipment.DeliveryNumber = detail.DeliveryNumber;
+                        }
+
+                        deliveryNumber.Number = detail.DeliveryNumber;
+                        deliveryNumber.IsUsed = true;
+                        mobileShipment.DeliveryNumber = detail.DeliveryNumber;
+                        _uow.DeliveryNumber.Remove(number);                       
+                        await _uow.CompleteAsync();
                     }
-
-                    deliveryNumber.IsUsed = true;
-                    deliveryNumber.UserId = userId;
-                    mobileShipment.DeliveryNumber = detail.DeliveryNumber;
-                    await _uow.CompleteAsync();
-
                 }
                 return true;
             }
@@ -4237,6 +4270,123 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill && s.IsDeleted == false);
+
+                if (deliveryNumber == null)
+                {
+                    throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
+
+                if (mobileShipment == null)
+                {
+                    throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (mobileShipment.shipmentstatus == "Assigned for Pickup")
+                {
+                    if (deliveryNumber.SenderCode.ToLower() != detail.DeliveryNumber.ToLower())
+                    {
+                        throw new GenericException($"This Sender Delivery Code {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
+                    }
+                    deliveryNumber.UserId = userId;
+
+                    //Generate Receiver Delivery Code
+                    deliveryNumber.ReceiverCode = await GenerateDeliveryCode();
+
+                    //Update Shipment Status
+                    var request = new MobilePickUpRequestsDTO()
+                    {
+                        Status = MobilePickUpRequestStatus.Confirmed.ToString(),
+                        Waybill = mobileShipment.Waybill
+                    };
+                    await UpdateMobilePickupRequest(request);
+
+                    //Send SMS To Receiver with Delivery Code
+                    await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
+                }
+                else if (mobileShipment.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() && mobileShipment.ZoneMapping == 1)
+                {
+                    if (deliveryNumber.ReceiverCode.ToLower() != detail.DeliveryNumber.ToLower())
+                    {
+                        throw new GenericException($"This Receiver Delivery Code {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
+                    }
+
+                    //Update Shipment Status
+                    var request = new MobilePickUpRequestsDTO()
+                    {
+                        Status = MobilePickUpRequestStatus.Delivered.ToString(),
+                        Waybill = mobileShipment.Waybill
+
+                    };
+                    await UpdateMobilePickupRequest(request);
+                }
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private async Task<string> GenerateDeliveryCode()
+        {
+            try
+            {
+                int maxSize = 6;
+                char[] chars = new char[62];
+                string a;
+                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = "DN" + strippedText.ToUpper();
+                return number;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private async Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number)
+        {
+            try
+            {
+                var message = new MobileShipmentCreationMessageDTO
+                {
+                    SenderPhoneNumber = preShipmentMobile.ReceiverPhoneNumber,
+                    SenderName = preShipmentMobile.ReceiverName,
+                    WaybillNumber = preShipmentMobile.Waybill,
+                    QRCode = number
+                };
+
+                await SendSMSForMobileShipmentCreation(message, MessageType.RMCS);
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> deleterecord(string detail)
         {
             try
@@ -4607,7 +4757,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     {
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
-                                    
+
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();
@@ -5487,39 +5637,6 @@ namespace GIGLS.Services.Implementation.Shipments
             return await Task.FromResult(locationDTOs.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
-        {
-            //var deliveryNumberlist = new DeliveryNumberDTO();
-
-            int maxSize = 6;
-            char[] chars = new char[62];
-            string a;
-            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            chars = a.ToCharArray();
-            int size = maxSize;
-            byte[] data = new byte[1];
-            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
-            crypto.GetNonZeroBytes(data);
-            size = maxSize;
-            data = new byte[size];
-            crypto.GetNonZeroBytes(data);
-            StringBuilder result = new StringBuilder(size);
-            foreach (byte b in data)
-            { result.Append(chars[b % (chars.Length - 1)]); }
-            var strippedText = result.ToString();
-            var number = new DeliveryNumber
-            {
-                Number = "DN" + strippedText.ToUpper(),
-                IsUsed = false,
-                Waybill = waybill
-            };
-            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
-            //deliveryNumberlist.Add(deliverynumberDTO);
-            _uow.DeliveryNumber.Add(number);
-            await _uow.CompleteAsync();
-            return await Task.FromResult(deliverynumberDTO);
-        }
-
         //method called after no action is done on a shipment with status 'Assigned for Pickup' after 90 minutes  
         public async Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request)
         {
@@ -5724,7 +5841,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommercePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO, string userChannelCode)
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommercePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO, string userChannelCode)
         {
             try
             {
