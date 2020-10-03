@@ -3253,21 +3253,26 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 await _uow.CompleteAsync();
 
-                var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
+                //var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
+
+                //Get the rider phone number
+                var dispatchRider = await _uow.User.GetUserById(userId);
 
                 var emailMessageExtensionDTO = new MobileMessageDTO()
                 {
-                    SenderName = user.FirstName + " " + user.LastName,
-                    SenderEmail = user.Email,
+                    SenderName = preshipmentMobile.ReceiverName,
+                    SenderEmail = preshipmentMobile.ReceiverEmail,
                     WaybillNumber = preshipmentMobile.Waybill,
-                    SenderPhoneNumber = preshipmentMobile.SenderPhoneNumber
+                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber,
+                    DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
                 };
 
                 var smsMessageExtensionDTO = new MobileMessageDTO()
                 {
                     SenderName = preshipmentMobile.ReceiverName,
                     WaybillNumber = preshipmentMobile.Waybill,
-                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber
+                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber,
+                    DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
                 };
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
