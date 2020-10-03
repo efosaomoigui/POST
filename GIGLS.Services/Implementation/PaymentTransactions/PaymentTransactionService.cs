@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
             {
                 Waybill = shipment.Waybill,
-                QRCode = deliveryNumber.Number
+                QRCode = deliveryNumber.SenderCode
             };
 
             if (shipment.DepartureServiceCentreId == 309)
@@ -470,7 +470,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var strippedText = result.ToString();
             var number = new DeliveryNumber
             {
-                Number = "DN" + strippedText.ToUpper(),
+                SenderCode = "DN" + strippedText.ToUpper(),
                 IsUsed = false,
                 Waybill = waybill
             };
