@@ -388,6 +388,7 @@
     <Compile Include="DTO\PaymentTransactions\ThirdPartyPricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
+    <Compile Include="DTO\Report\MobileShipmentFilterCriteria.cs" />
     <Compile Include="DTO\ShipmentAndPreShipmentParamDTO.cs" />
     <Compile Include="DTO\PreShipmentSummaryDTO.cs" />
     <Compile Include="DTO\ReferrerCodeDTO.cs" />
