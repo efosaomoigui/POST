@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
+using System.Data.SqlClient;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -187,9 +188,55 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               DateCreated = s.DateCreated
                           }).ToList();
 
-             return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
+            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
         }
 
+        public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)
+        {
+            try
+            {
+                //DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+                //DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
+                //get startDate and endDate
+                var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter departureStationId = new SqlParameter("@DepartureStationId", accountFilterCriteria.DepartureStationId);
+                SqlParameter destinationStationId = new SqlParameter("@DestinationStationId", accountFilterCriteria.DestinationStationId);
+                SqlParameter countryId = new SqlParameter("@CountryId", accountFilterCriteria.CountryId);
+                SqlParameter vehicleType = new SqlParameter("@VehicleType", (object)accountFilterCriteria.VehicleType ?? DBNull.Value);
+                SqlParameter companyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType ?? DBNull.Value);
+                SqlParameter shipmentstatus = new SqlParameter("@Shipmentstatus", (object)accountFilterCriteria.Shipmentstatus ?? DBNull.Value);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                startDate,
+                endDate,
+                departureStationId,
+                destinationStationId,
+                countryId,
+                vehicleType,
+                companyType,
+                shipmentstatus
+                };
+
+                //var listCreated = new List<PreShipmentMobileReportDTO>();
+
+               var listCreated = await _context.Database.SqlQuery<PreShipmentMobileReportDTO>("GIGGOReporting " +
+                  "@StartDate, @EndDate, @DepartureStationId, @DestinationStationId, @CountryId, @VehicleType, @CompanyType, @Shipmentstatus",
+                  param).ToListAsync();
+
+                return await Task.FromResult(listCreated);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

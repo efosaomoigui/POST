@@ -673,5 +673,19 @@ namespace GIGLS.Services.Implementation.Report
 
             return dashboardDTO;
         }
+
+        public async Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria)
+        {
+            if(accountFilterCriteria == null)
+            {
+                accountFilterCriteria = new MobileShipmentFilterCriteria
+                {
+                    StartDate = null,
+                    EndDate = null
+                };
+            }
+
+            return await _uow.PreShipmentMobile.GetPreShipments(accountFilterCriteria);
+        }
     }
 }
