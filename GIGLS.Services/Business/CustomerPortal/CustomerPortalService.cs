@@ -2174,25 +2174,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             var deliveryNumberlist = new List<DeliveryNumberDTO>();
             for (int i = 0; i < value; i++)
             {
-                int maxSize = 6;
-                char[] chars = new char[62];
-                string a;
-                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-                chars = a.ToCharArray();
-                int size = maxSize;
-                byte[] data = new byte[1];
-                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
-                crypto.GetNonZeroBytes(data);
-                size = maxSize;
-                data = new byte[size];
-                crypto.GetNonZeroBytes(data);
-                StringBuilder result = new StringBuilder(size);
-                foreach (byte b in data)
-                { result.Append(chars[b % (chars.Length - 1)]); }
-                var strippedText = result.ToString();
+                var tagNumber = await _preShipmentMobileService.GenerateDeliveryCode();
                 var number = new DeliveryNumber
                 {
-                    Number = "DN" + strippedText.ToUpper(),
+                    Number = tagNumber,
                     IsUsed = false,
                 };
                 var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);

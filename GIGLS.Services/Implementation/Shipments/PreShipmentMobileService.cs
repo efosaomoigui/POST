@@ -4337,14 +4337,14 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task<string> GenerateDeliveryCode()
+        public async Task<string> GenerateDeliveryCode()
         {
             try
             {
                 int maxSize = 6;
-                char[] chars = new char[62];
+                char[] chars = new char[54];
                 string a;
-                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+                a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
                 chars = a.ToCharArray();
                 int size = maxSize;
                 byte[] data = new byte[1];
