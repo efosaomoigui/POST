@@ -15,6 +15,7 @@ using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
+using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -25,13 +26,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentService _service;
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
+        private readonly ICustomerPortalService _customerPortalService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService) : base(nameof(ShipmentController))
+            IUserService userService, ICustomerPortalService customerPortalService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
+            _customerPortalService = customerPortalService;
         }
 
 
@@ -726,6 +729,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgiggoprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _customerPortalService.GetPrice(PreshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
                 };
             });
         }
