@@ -450,12 +450,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
         {
-            //var deliveryNumberlist = new DeliveryNumberDTO();
-
             int maxSize = 6;
-            char[] chars = new char[62];
+            char[] chars = new char[54];
             string a;
-            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
             chars = a.ToCharArray();
             int size = maxSize;
             byte[] data = new byte[1];
@@ -475,7 +473,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 Waybill = waybill
             };
             var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
-            //deliveryNumberlist.Add(deliverynumberDTO);
             _uow.DeliveryNumber.Add(number);
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);

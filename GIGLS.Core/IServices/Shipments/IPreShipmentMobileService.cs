@@ -78,5 +78,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
+        Task<string> GenerateDeliveryCode();
     }
 }
