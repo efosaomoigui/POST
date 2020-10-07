@@ -4214,7 +4214,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userId = await _userService.GetCurrentUserId();
+                //var userId = await _userService.GetCurrentUserId();
                 var number = await _uow.DeliveryNumber.GetAsync(s => s.Number.ToLower() == detail.DeliveryNumber.ToLower());
                 if (number == null)
                 {
@@ -4241,13 +4241,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
                         }
-                        else
-                        {
-                            if (deliveryNumber.UserId != userId)
-                            {
-                                throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
-                            }
-                        }
+                        //else
+                        //{
+                        //    if (deliveryNumber.UserId != userId)
+                        //    {
+                        //        throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
+                        //    }
+                        //}
 
                         var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
 
