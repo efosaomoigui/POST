@@ -176,7 +176,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
 
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
-            if (walletTransactions.Count() < 1)
+            if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
                 {
