@@ -2775,7 +2775,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                 {
-                    await ConfirmMobilePickupRequest(pickuprequest, userId);
+                    //await ConfirmMobilePickupRequest(pickuprequest, userId);
+
+                    throw new GenericException($"Your App version is Old, Kindly update to the latest.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
@@ -4221,7 +4223,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userId = await _userService.GetCurrentUserId();
+                //var userId = await _userService.GetCurrentUserId();
                 var number = await _uow.DeliveryNumber.GetAsync(s => s.Number.ToLower() == detail.DeliveryNumber.ToLower());
                 if (number == null)
                 {
@@ -4248,13 +4250,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
                         }
-                        else
-                        {
-                            if (deliveryNumber.UserId != userId)
-                            {
-                                throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
-                            }
-                        }
+                        //else
+                        //{
+                        //    if (deliveryNumber.UserId != userId)
+                        //    {
+                        //        throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
+                        //    }
+                        //}
 
                         var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
 
@@ -4314,7 +4316,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         Status = MobilePickUpRequestStatus.Confirmed.ToString(),
                         Waybill = mobileShipment.Waybill
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await ConfirmMobilePickupRequest(request, userId);
 
                     //Send SMS To Receiver with Delivery Code
                     await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
@@ -4333,7 +4337,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = mobileShipment.Waybill
 
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await DeliveredMobilePickupRequest(request, userId);
+                    await UpdateActivityStatus(userId, ActivityStatus.OffDelivery);
                 }
                 await _uow.CompleteAsync();
                 return true;
