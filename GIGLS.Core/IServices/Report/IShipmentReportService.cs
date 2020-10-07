@@ -21,5 +21,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria);
         Task<DashboardDTO> GetShipmentProgressSummary(ShipmentProgressSummaryFilterCriteria baseFilterCriteria);
         Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryBreakDown(ShipmentProgressSummaryFilterCriteria baseFilterCriteria);
+        Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria);
     }
 }
