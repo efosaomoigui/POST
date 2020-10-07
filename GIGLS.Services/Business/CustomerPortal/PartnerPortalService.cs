@@ -8,8 +8,10 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Infrastructure;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.CustomerPortal
@@ -165,7 +167,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
         {
-            return await _portalService.UpdateDeliveryNumber(detail);
+            throw new GenericException($"Your App version is Old, Kindly update to the latest.", $"{(int)HttpStatusCode.Forbidden}");
+            //return await _portalService.UpdateDeliveryNumber(detail);
         }
 
         public async Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail)
