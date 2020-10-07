@@ -2768,7 +2768,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                 {
-                    await ConfirmMobilePickupRequest(pickuprequest, userId);
+                    //await ConfirmMobilePickupRequest(pickuprequest, userId);
+
+                    throw new GenericException($"Your App version is Old, Kindly update to the latest.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
@@ -4307,7 +4309,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         Status = MobilePickUpRequestStatus.Confirmed.ToString(),
                         Waybill = mobileShipment.Waybill
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await ConfirmMobilePickupRequest(request, userId);
 
                     //Send SMS To Receiver with Delivery Code
                     await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
@@ -4326,7 +4330,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = mobileShipment.Waybill
 
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await DeliveredMobilePickupRequest(request, userId);
+                    await UpdateActivityStatus(userId, ActivityStatus.OffDelivery);
                 }
                 await _uow.CompleteAsync();
                 return true;
