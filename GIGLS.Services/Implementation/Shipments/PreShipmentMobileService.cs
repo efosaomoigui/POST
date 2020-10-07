@@ -2777,7 +2777,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //await ConfirmMobilePickupRequest(pickuprequest, userId);
 
-                    throw new GenericException($"Your App version is Old, Kindly update to the latest.", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException($"Your App version is Old, Kindly update to the latest version.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {

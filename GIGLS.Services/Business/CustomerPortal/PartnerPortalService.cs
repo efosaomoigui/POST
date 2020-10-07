@@ -167,7 +167,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
         {
-            throw new GenericException($"Your App version is Old, Kindly update to the latest.", $"{(int)HttpStatusCode.Forbidden}");
+            throw new GenericException($"Your App version is Old, Kindly update to the latest version.", $"{(int)HttpStatusCode.Forbidden}");
             //return await _portalService.UpdateDeliveryNumber(detail);
         }
 
