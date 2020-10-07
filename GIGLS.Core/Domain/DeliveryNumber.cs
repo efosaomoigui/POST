@@ -9,6 +9,12 @@ namespace GIGLS.Core.Domain
         [MaxLength(20)]
         public string Number { get; set; }
 
+        [MaxLength(20)]
+        public string SenderCode { get; set; }
+
+        [MaxLength(20)]
+        public string ReceiverCode { get; set; }
+
         [MaxLength(128)]
         public string UserId { get; set; }
 

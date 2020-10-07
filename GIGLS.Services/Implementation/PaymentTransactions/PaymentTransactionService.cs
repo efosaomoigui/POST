@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
             {
                 Waybill = shipment.Waybill,
-                QRCode = deliveryNumber.Number
+                QRCode = deliveryNumber.SenderCode
             };
 
             if (shipment.DepartureServiceCentreId == 309)
@@ -450,12 +450,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
         {
-            //var deliveryNumberlist = new DeliveryNumberDTO();
-
             int maxSize = 6;
-            char[] chars = new char[62];
+            char[] chars = new char[54];
             string a;
-            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
             chars = a.ToCharArray();
             int size = maxSize;
             byte[] data = new byte[1];
@@ -470,12 +468,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var strippedText = result.ToString();
             var number = new DeliveryNumber
             {
-                Number = "DN" + strippedText.ToUpper(),
+                SenderCode = "DN" + strippedText.ToUpper(),
                 IsUsed = false,
                 Waybill = waybill
             };
             var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
-            //deliveryNumberlist.Add(deliverynumberDTO);
             _uow.DeliveryNumber.Add(number);
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);

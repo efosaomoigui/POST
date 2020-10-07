@@ -91,7 +91,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                     newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     newDispatch.ServiceCentreId = userServiceCentreId;
-                    newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+
+                    //Set Departure Service Center
+                    newDispatch.DepartureServiceCenterId = userServiceCentreId;
+                    newDispatch.DepartureId = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.ServiceCentreId == newDispatch.DepartureServiceCenterId).Select(x => x.StationId).FirstOrDefault();
+                    //newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
                     newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
                     _uow.Dispatch.Add(newDispatch);
                     dispatchId = newDispatch.DispatchId;

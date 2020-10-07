@@ -15,6 +15,7 @@ using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.Shipments
@@ -26,14 +27,16 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentService _service;
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
+        private readonly IPreShipmentService _preshipmentService;
         private readonly ICustomerPortalService _customerPortalService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService, ICustomerPortalService customerPortalService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
+            _preshipmentService = preshipmentService;
             _customerPortalService = customerPortalService;
         }
 
@@ -347,9 +350,9 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("unmappedmanifestforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -729,6 +732,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("getdropoffsbyphonenooruserchanelcode")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preshipmentService.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = preshipment
                 };
             });
         }

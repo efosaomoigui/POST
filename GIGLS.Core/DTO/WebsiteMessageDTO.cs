@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GIGLS.Core.DTO
+﻿namespace GIGLS.Core.DTO
 {
     public class WebsiteMessageDTO 
     {
@@ -31,8 +25,5 @@ namespace GIGLS.Core.DTO
         public string contactFullName { get; set; }
         public string contactMail { get; set; }
         public string contactPhone { get; set; }
-
-
-
     }
 }

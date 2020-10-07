@@ -99,6 +99,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly IMagayaService _magayaService;
+        private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -110,8 +111,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
             IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,           
-            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService)
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -149,6 +150,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _paymentTransactionService = paymentTransactionService;
             _flutterwavePaymentService = flutterwavePaymentService;
             _magayaService = magayaService;
+            _mobilePickUpRequestService = mobilePickUpRequestsService;
             MapperConfig.Initialize();
         }
 
@@ -267,7 +269,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (paymentLog != null)
             {
-                if(paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
                 {
                     result = await VerifyAndValidateUSSDPayment(referenceCode);
                 }
@@ -433,10 +435,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
+                string thirdparty = ShipmentScanStatus.THIRDPARTY.ToString();
+
 
                 foreach (var tracking in result)
                 {
-                    if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms)))
+                    if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms) || tracking.Status.Equals(thirdparty)))
                     {
                         finalResult.Add(tracking);
                     }
@@ -1500,9 +1504,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.UpdateDeliveryNumber(detail);
         }
-        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        public async Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail)
         {
-            return await _preShipmentMobileService.UpdateDeliveryNumberNew(detail);
+            return await _preShipmentMobileService.UpdateDeliveryNumberV2(detail);
+        }
+        public async Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail)
+        {
+            return await _preShipmentMobileService.VerifyDeliveryCode(detail);
         }
         public async Task<Partnerdto> GetMonthlyPartnerTransactions()
         {
@@ -2166,25 +2174,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             var deliveryNumberlist = new List<DeliveryNumberDTO>();
             for (int i = 0; i < value; i++)
             {
-                int maxSize = 6;
-                char[] chars = new char[62];
-                string a;
-                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-                chars = a.ToCharArray();
-                int size = maxSize;
-                byte[] data = new byte[1];
-                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
-                crypto.GetNonZeroBytes(data);
-                size = maxSize;
-                data = new byte[size];
-                crypto.GetNonZeroBytes(data);
-                StringBuilder result = new StringBuilder(size);
-                foreach (byte b in data)
-                { result.Append(chars[b % (chars.Length - 1)]); }
-                var strippedText = result.ToString();
+                var tagNumber = await _preShipmentMobileService.GenerateDeliveryCode();
                 var number = new DeliveryNumber
                 {
-                    Number = "DN" + strippedText.ToUpper(),
+                    Number = tagNumber,
                     IsUsed = false,
                 };
                 var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
@@ -2852,7 +2845,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 dropoff.IsActive = false;
 
                 await _uow.CompleteAsync();
-                return true; 
+                return true;
             }
             catch
             {
@@ -2888,7 +2881,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
             user.IsInternational = true;
             user.IdentificationType = intlUserProfiler.IdentificationType;
-             await _uow.User.UpdateUser(currentUserId, user);
+            await _uow.User.UpdateUser(currentUserId, user);
             return true;
         }
 
@@ -2900,6 +2893,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
+        }
+
+        public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await _mobilePickUpRequestService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
         }
     }
 }

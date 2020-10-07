@@ -221,5 +221,21 @@ namespace GIGLS.WebApi.Controllers.Report
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("giggoshipment")]
+        public async Task<IServiceResponse<List<PreShipmentMobileReportDTO>>> PreShipmentMobileReport(MobileShipmentFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var summary = await _shipmentService.GetPreShipmentMobile(baseFilterCriteria);
+
+                return new ServiceResponse<List<PreShipmentMobileReportDTO>>
+                {
+                    Object = summary
+                };
+            });
+        }
     }
 }

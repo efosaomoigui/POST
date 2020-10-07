@@ -43,6 +43,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 service.Name = service.Name.ToLower();
                 service.Code = service.Code.Trim();
                 service.Code = service.Code.ToLower();
+                service.FormattedServiceCentreName = service.FormattedServiceCentreName.Trim();
 
                 if (await _uow.ServiceCentre.ExistAsync(c => c.Name.ToLower() == service.Name || c.Code.ToLower() == service.Code))
                 {
@@ -129,6 +130,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
                 centreDto.StationName = centre.Station.StationName;
                 centreDto.StationCode = centre.Station.StationCode;
+                centreDto.FormattedServiceCentreName = centre.FormattedServiceCentreName;
                 return centreDto;
             }
             catch (Exception)
@@ -298,6 +300,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.TargetAmount = service.TargetAmount;
                 centre.TargetOrder = service.TargetOrder;
                 centre.IsHUB = service.IsHUB;
+                centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
                 _uow.Complete();
             }
             catch (Exception)

@@ -12,6 +12,7 @@ namespace GIGLS.Core.DTO
         public int OTP { get; set; }
         public string ExpectedTimeofDelivery { get; set; }
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
+        public string DispatchRiderPhoneNumber { get; set; }
 
     }
 

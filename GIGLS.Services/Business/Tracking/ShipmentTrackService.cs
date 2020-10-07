@@ -107,14 +107,14 @@ namespace GIGLS.Services.Business.Tracking
                 }
 
                 ////check for international
-                if (shipment != null && shipment.IsInternational)
-                {
-                    if (!waybillNumber.Contains("AWR") || !waybillNumber.Contains("WR"))
-                    {
-                        var internationResult = await TrackShipmentForInternational(waybillNumber);
-                        result.ToList().AddRange(internationResult);
-                    }
-                }
+                //if (shipment != null && shipment.IsInternational)
+                //{
+                //    if (!waybillNumber.Contains("AWR") || !waybillNumber.Contains("WR"))
+                //    {
+                //        var internationResult = await TrackShipmentForInternational(waybillNumber);
+                //        result.ToList().AddRange(internationResult);
+                //    }
+                //}
 
                 ///Add Log Visit Reasons for the waybill to the first element
                 var logVisits = await _monitoringService.GetManifestVisitMonitoringByWaybill(waybillNumber);
@@ -270,11 +270,11 @@ namespace GIGLS.Services.Business.Tracking
                 var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);                               
 
                 ////check for international
-                if (shipment != null && shipment.IsInternational)
-                {
-                    var internationResult = await TrackShipmentForInternational(waybillNumber);
-                    result.ToList().AddRange(internationResult);
-                }
+                //if (shipment != null && shipment.IsInternational)
+                //{
+                //    var internationResult = await TrackShipmentForInternational(waybillNumber);
+                //    result.ToList().AddRange(internationResult);
+                //}
 
                 foreach (var track in result)
                 {
