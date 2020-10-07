@@ -10,6 +10,5 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Task<List<ManifestDTO>> GetManifests();
         Task<List<ManifestDTO>> GetManifest(List<Manifest> manifests);
-        Task<List<ManifestDTO>> GetManifestsInSuperManifest(List<string> manifestCodes);
     }
 }

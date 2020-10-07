@@ -375,23 +375,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Super Manifest
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var unmappedManifests = await _shipmentService.GetUnmappedManifestListForServiceCentre();
-                return new ServiceResponse<IEnumerable<ManifestDTO>>
-                {
-                    Object = unmappedManifests,
-                    Total = unmappedManifests.Count
-                };
-            });
-        }
-
+        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]
@@ -581,6 +565,37 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 await _hubService.MappingHUBManifestToWaybillsForScanner(data.ManifestCode, data.Waybills, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestsinsupermanifest/{manifest}")]
+        public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestsInSuperManifest = await _manifestGroupMappingService.GetManifestsInSuperManifest(manifest);
+
+                return new ServiceResponse<List<ManifestDTO>>
+                {
+                    Object = manifestsInSuperManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.RemoveManifestFromSuperManifest(superManifest, manifest);
                 return new ServiceResponse<bool>
                 {
                     Object = true

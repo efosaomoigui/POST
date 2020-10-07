@@ -15,6 +15,8 @@ namespace GIGLS.Core.View
         public string UserId { get; set; }
         public bool IsWalletCredited { get; set; }
         public string TransactionResponse { get; set; }
+        public OnlinePaymentType OnlinePaymentType { get; set; }
+
 
         //Wallet
         public string WalletNumber { get; set; }

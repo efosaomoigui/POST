@@ -33,4 +33,11 @@ namespace GIGLS.Core.DTO
         public bool IsActive { get; set; }
         
     }
+
+    public class CountryByStationDTO 
+    {
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
+        public int StationId { get; set; }
+    }
 }

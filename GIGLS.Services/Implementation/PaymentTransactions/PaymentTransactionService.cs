@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
             {
                 Waybill = shipment.Waybill,
-                QRCode = deliveryNumber.Number
+                QRCode = deliveryNumber.SenderCode
             };
 
             if (shipment.DepartureServiceCentreId == 309)
@@ -221,7 +221,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
-            wallet.Balance = wallet.Balance - amountToDebit;
             int[] serviceCenterIds = { };
 
             if (!paymentTransaction.FromApp)
@@ -233,7 +232,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                 serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
             }
-            
 
             var newWalletTransaction = new WalletTransaction
             {
@@ -247,6 +245,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 Waybill = paymentTransaction.Waybill,
                 Description = generalLedgerEntity.Description
             };
+            //get the balance after transaction
+            if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+            }
+            else
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+            }
+            wallet.Balance = wallet.Balance - amountToDebit;
 
             _uow.WalletTransaction.Add(newWalletTransaction);
         }
@@ -319,8 +327,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 }
 
-                wallet.Balance = wallet.Balance - amountToDebit;
-
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
                 var newWalletTransaction = new WalletTransaction
@@ -335,6 +341,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     Waybill = paymentTransaction.Waybill,
                     Description = generalLedgerEntity.Description
                 };
+
+                if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+                }
+                else
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+                }
+
+                wallet.Balance = wallet.Balance - amountToDebit;
 
                 _uow.WalletTransaction.Add(newWalletTransaction);
             }
@@ -433,12 +450,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
         {
-            //var deliveryNumberlist = new DeliveryNumberDTO();
-
             int maxSize = 6;
-            char[] chars = new char[62];
+            char[] chars = new char[54];
             string a;
-            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
             chars = a.ToCharArray();
             int size = maxSize;
             byte[] data = new byte[1];
@@ -453,12 +468,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var strippedText = result.ToString();
             var number = new DeliveryNumber
             {
-                Number = "DN" + strippedText.ToUpper(),
+                SenderCode = "DN" + strippedText.ToUpper(),
                 IsUsed = false,
                 Waybill = waybill
             };
             var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
-            //deliveryNumberlist.Add(deliverynumberDTO);
             _uow.DeliveryNumber.Add(number);
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);

@@ -13,10 +13,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,15 +31,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IPaystackPaymentService _paystackService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly IUssdService _ussdService;
 
         public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
-            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService)
+            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, IUssdService ussdService)
         {
             _uow = uow;
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _paystackService = paystackService;
             _flutterwavePaymentService = flutterwavePaymentService;
+            _ussdService = ussdService;
             MapperConfig.Initialize();
         }
 
@@ -57,10 +61,9 @@ namespace GIGLS.Services.Implementation.Wallet
             if (paymentLog != null)
             {
                 response.Status = false;
-                response.Message = $"There is successful transaction for the waybill {waybillPaymentLog.Waybill}";
-                response.data.Message = $"There is successful transaction for the waybill {waybillPaymentLog.Waybill}";
-                response.data.Status = "failed";
-                
+                response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Status = "failed";                
                 return response;
             }
             else
@@ -74,6 +77,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     //Process Payment for FlutterWave;
                     response = await AddWaybillPaymentLogForFlutterWave(waybillPaymentLog);
+                }
+
+                if(waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    response = await AddWaybillPaymentLogForUSSD(waybillPaymentLog);
                 }
             }
                             
@@ -264,6 +272,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
                 }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    response = await _ussdService.VerifyAndValidatePayment(paymentLog.Reference);
+                }
+
                 return response;
             }
                         
@@ -458,6 +472,85 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw ex;
             }
+        }
+
+        private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForUSSD(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            var response = new PaystackWebhookDTO();
+
+            //1. Generate Ref Code
+            waybillPaymentLog.Reference = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
+
+            //2. Check out the country the phone number belong to so that
+            //conversion rate can occur on the waybill amount 
+
+            //3. Send reguest to Oga USSD 
+            var ussdResponse = await ProcessPaymentForUSSD(waybillPaymentLog);
+
+            if(ussdResponse.Status == "success")
+            {
+                //3. Add record to waybill payment log with the order id
+                var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
+
+                //Network Provider represent OrderId
+                newPaymentLog.NetworkProvider = ussdResponse.data.Order_Reference;
+                _uow.WaybillPaymentLog.Add(newPaymentLog);
+                await _uow.CompleteAsync();
+
+                //4. Send SMS to the customer phone number
+
+
+                //return response
+                response.Status = true;
+                response.Message = ussdResponse.data.Message;
+                response.data.Message = ussdResponse.data.Message;
+                response.data.Reference = ussdResponse.data.Order_Reference;
+                response.data.Status = ussdResponse.Status;
+                response.data.Display_Text = ussdResponse.data.Dialing_Code;
+            }
+            else
+            {
+                response.Status = false;
+                response.Message = ussdResponse.Message;
+                response.data.Message = ussdResponse.Message;
+                response.data.Status = ussdResponse.Status;
+
+                //       "status": "error",
+                //      "message": "I lost my glasses so I am finding it hard to find your credentials on the list of authorised users. Help look for my glasses."
+
+            }
+
+            return response;
+        }
+
+        private async Task<USSDResponse> ProcessPaymentForUSSD(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            try
+            {
+                string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
+
+                var ussdData = new USSDDTO
+                {
+                    amount = (int)waybillPaymentLog.Amount,
+                    msisdn = waybillPaymentLog.PhoneNumber,
+                    desc = waybillPaymentLog.Waybill,
+                    reference = waybillPaymentLog.Reference,
+                    country_code = countryCode,
+                    gateway_code = waybillPaymentLog.GatewayCode
+                };
+
+                var responseResult = await _ussdService.ProcessPaymentForUSSD(ussdData);
+                return responseResult;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            return await _ussdService.GetGatewayCode();
         }
     }
 }

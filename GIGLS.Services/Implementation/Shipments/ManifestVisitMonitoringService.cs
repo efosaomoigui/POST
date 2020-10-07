@@ -10,6 +10,8 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,11 +19,13 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public ManifestVisitMonitoringService(IUnitOfWork uow, IUserService userService)
+        public ManifestVisitMonitoringService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -29,15 +33,15 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if (manifestVisitMonitoringDto.UserId == null)
+                var user = await _userService.GetCurrentUserId();
+
+                if(manifestVisitMonitoringDto != null)
                 {
-                    var user = await _userService.GetCurrentUserId();
                     manifestVisitMonitoringDto.UserId = user;
                 }
                 
-                var waybill = await _uow.Shipment.GetAsync(x => x.Waybill == manifestVisitMonitoringDto.Waybill);
-
-                if(waybill == null)
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == manifestVisitMonitoringDto.Waybill);
+                if(shipment == null)
                 {
                     throw new GenericException($"Waybill: {manifestVisitMonitoringDto.Waybill} does not exist");
                 }
@@ -45,7 +49,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var newManifest = new ManifestVisitMonitoring
                 {
                     Waybill = manifestVisitMonitoringDto.Waybill,
-                    ServiceCentreId = waybill.DestinationServiceCentreId,
+                    ServiceCentreId = shipment.DestinationServiceCentreId,
                     Address = manifestVisitMonitoringDto.Address,
                     ReceiverName = manifestVisitMonitoringDto.ReceiverName,
                     ReceiverPhoneNumber = manifestVisitMonitoringDto.ReceiverPhoneNumber,
@@ -55,7 +59,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                                 
                 //add attempt delivery scan to the waybilll
-                var serviceCenter = await _uow.ServiceCentre.GetAsync(waybill.DestinationServiceCentreId);
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(shipment.DestinationServiceCentreId);
                 var newShipmentTracking = new ShipmentTracking
                 {
                     Waybill = manifestVisitMonitoringDto.Waybill,
@@ -69,6 +73,30 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.ManifestVisitMonitoring.Add(newManifest);
                 _uow.ShipmentTracking.Add(newShipmentTracking);
                 await _uow.CompleteAsync();
+
+                //send sms & email to receiver
+                //Get the rider phone number
+                var dispatchRider = await _uow.User.GetUserById(user);
+
+                var emailMessageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = shipment.ReceiverName,
+                    SenderEmail = shipment.ReceiverEmail,
+                    WaybillNumber = shipment.Waybill,
+                    SenderPhoneNumber = shipment.ReceiverPhoneNumber,
+                    DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
+                };
+
+                var smsMessageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = shipment.ReceiverName,
+                    WaybillNumber = shipment.Waybill,
+                    SenderPhoneNumber = shipment.ReceiverPhoneNumber,
+                    DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
+                };
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
+                await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
                 return new { id = newManifest.ManifestVisitMonitoringId };
             }
             catch (Exception)

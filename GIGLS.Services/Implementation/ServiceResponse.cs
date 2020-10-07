@@ -1,9 +1,5 @@
 ﻿using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
-using Microsoft.AspNet.Identity.EntityFramework;
-using System;
 using System.Collections.Generic;
 using GIGLS.Core.DTO.Partnership;
 using ThirdParty.WebServices.Magaya.Services;

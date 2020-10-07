@@ -41,21 +41,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.User = await _userService.GetCurrentUserId();
                 }
 
-                if (tracking.Location == null)
+                var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                //default sc
+                if (UserServiceCenters.Length <= 0)
                 {
-                    var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+                    UserServiceCenters = new int[] { 0 };
+                    var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                    UserServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
+                }
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
+                tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
 
-                    //default sc
-                    if (UserServiceCenters.Length <= 0)
-                    {
-                        UserServiceCenters = new int[] { 0 };
-                        var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
-                        UserServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
-                    }
-
-                    var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
+                if (string.IsNullOrWhiteSpace(tracking.Location))
+                {
                     tracking.Location = serviceCenter.Name;
-                    tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
                 }
 
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))

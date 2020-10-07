@@ -19,6 +19,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -685,6 +686,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
             }
             return await Task.FromResult(deliveryNumberlist);
+        }
+
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            try
+            {
+                if (searchOption == null)
+                {
+                    throw new GenericException("Phone Number or User Chanel Code needed", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                return await _uow.PreShipment.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+               
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

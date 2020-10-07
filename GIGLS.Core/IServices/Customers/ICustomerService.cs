@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CustomerDTO>> SearchForCustomers(CustomerSearchOption searchOption);
         Task<CustomerDTO> GetCustomer(string userChannelCode, UserChannelType userChannelType);
         Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO);
+        Task<IndividualCustomerDTO> GetCustomerByCode(string customerCode);
     }
 }

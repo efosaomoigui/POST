@@ -48,6 +48,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task AddWallet(WalletDTO wallet);
         Task<string> Generate(int length);
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
-        Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail);
+        Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
+        Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
     }
 }

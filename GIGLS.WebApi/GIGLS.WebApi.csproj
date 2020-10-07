@@ -305,8 +305,8 @@
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
-    <Compile Include="Controllers\CustomerPortal\FlutterwaveController.cs" />
-    <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
     <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
@@ -330,6 +330,7 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
     <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
     <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
