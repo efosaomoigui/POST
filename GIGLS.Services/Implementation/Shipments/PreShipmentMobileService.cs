@@ -4773,6 +4773,13 @@ namespace GIGLS.Services.Implementation.Shipments
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
 
+                                    //Fix For Home Delivery for Lagos, Abuja , Port Harcourt For now
+                                    if(preshipmentmobile.ReceiverStationId == 4 || preshipmentmobile.ReceiverStationId == 3 || preshipmentmobile.ReceiverStationId == 30)
+                                    {
+                                        var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
+                                        detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                    }
+
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();
