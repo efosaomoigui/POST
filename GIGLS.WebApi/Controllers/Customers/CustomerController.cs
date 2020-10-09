@@ -9,6 +9,7 @@ using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -152,6 +153,22 @@ namespace GIGLS.WebApi.Controllers
                 return new ServiceResponse<IndividualCustomerDTO>
                 {
                     Object = customerObj
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("deliveryno/{deliveryNo}")]
+        public async Task<IServiceResponse<DeliveryNumberDTO>> GetDeliveryNoByWaybill(string deliveryNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _service.GetDeliveryNoByWaybill(deliveryNo);
+
+                return new ServiceResponse<DeliveryNumberDTO>
+                {
+                    Object = item
                 };
             });
         }

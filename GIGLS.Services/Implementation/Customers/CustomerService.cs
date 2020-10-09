@@ -8,6 +8,7 @@ using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using GIGLS.CORE.Enums;
 using System.Configuration;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -397,6 +398,21 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 var individualCustomerDTO = await _individualCustomerService.GetCustomerByCode(customerCode);
                 return individualCustomerDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<DeliveryNumberDTO> GetDeliveryNoByWaybill(string waybill)
+        {
+            try
+            {
+                var dto = new DeliveryNumberDTO();
+                var item = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == waybill);
+                dto = Mapper.Map<DeliveryNumberDTO>(item);
+                return dto;
             }
             catch (Exception)
             {
