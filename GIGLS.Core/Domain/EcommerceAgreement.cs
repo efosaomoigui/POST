@@ -60,6 +60,9 @@ namespace GIGLS.Core.Domain
 
         public bool IsApi { get; set; }
 
+        [MaxLength(100)]
+        public string Source { get; set; }
+
 
     }
 }

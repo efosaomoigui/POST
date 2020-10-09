@@ -42,7 +42,10 @@ namespace GIGLS.Core.DTO.Customers
 
         [Required]
         public bool IsCod { get; set; }
-        
+
+        [Required]
+        public string Source { get; set; }
+
         public string AccountName { get; set; }
         
         public string AccountNumber { get; set; }
