@@ -156,7 +156,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
 
             //QR Code
-            var deliveryNumber = await GenerateDeliveryNumber(1, shipment.Waybill);
+            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
             //send sms to the customer
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
@@ -360,7 +360,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
-
 
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
