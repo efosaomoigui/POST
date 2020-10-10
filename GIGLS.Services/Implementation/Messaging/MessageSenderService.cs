@@ -121,10 +121,6 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             try
             {
-                //Need optimisation
-                //var smsMessages = await _messageService.GetSmsAsync();
-                //messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
-
                 var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
                 messageDTO = Mapper.Map<MessageDTO>(smsMessages);
 
@@ -257,6 +253,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
+                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
                         }
                     }
 
@@ -278,6 +275,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
+                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
                         }
                     }
 
@@ -293,6 +291,7 @@ namespace GIGLS.Services.Implementation.Messaging
                             var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
                             messageDTO.Body = storeMessageDTO.Body;
                             messageDTO.To = storeMessageDTO.To;
+                            messageDTO.SMSSenderPlatform = storeMessageDTO.SMSSenderPlatform;
                         }                        
                     }
 
@@ -340,7 +339,8 @@ namespace GIGLS.Services.Implementation.Messaging
                      "Sender Name",
                      "Sender Email",
                      "WaybillNumber",
-                     "OTP"
+                     "OTP",
+                    "DispatchRiderPhoneNumber"
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
@@ -349,6 +349,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = mobileMessageDTO.WaybillNumber;
                 strArray[2] = mobileMessageDTO.SenderName;
                 strArray[3] = Convert.ToString(mobileMessageDTO.OTP);
+                strArray[4] = mobileMessageDTO.DispatchRiderPhoneNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -371,7 +372,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
 
             if (obj is WebsiteMessageDTO)
@@ -524,7 +525,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
             }
 
             if (obj is ShipmentDeliveryDelayMessageDTO)
@@ -560,7 +561,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
             }
 
             if (obj is ShipmentCancelMessageDTO)
@@ -595,7 +596,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
                 //use to determine sms sender service to use
-                messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
+                //messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
             }
 
             return await Task.FromResult(true);
@@ -654,7 +655,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     Message = messageDTO.FinalBody,
                     Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
-                    ResultDescription = exceptionMessage
+                    ResultDescription = exceptionMessage + " Sent using " + messageDTO.SMSSenderPlatform
                 });
             }
             catch (Exception) { }
@@ -886,8 +887,8 @@ namespace GIGLS.Services.Implementation.Messaging
                      "Sender Name",
                      "Sender Email",
                     "WaybillNumber",
-                    "ExpectedTimeofDelivery"
-
+                    "ExpectedTimeofDelivery",
+                    "DispatchRiderPhoneNumber"
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
@@ -895,6 +896,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = mobileMessageDTO.SenderName;
                 strArray[1] = mobileMessageDTO.WaybillNumber;
                 strArray[3] = mobileMessageDTO.ExpectedTimeofDelivery;
+                strArray[4] = mobileMessageDTO.DispatchRiderPhoneNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -902,7 +904,6 @@ namespace GIGLS.Services.Implementation.Messaging
                 //C. populate the message subject
                 messageDTO.Subject =
                     string.Format(messageDTO.Subject, strArray);
-
 
                 //populate the message template
                 messageDTO.FinalBody =

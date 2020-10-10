@@ -341,5 +341,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
             return Task.FromResult(hasAgentRole);
         }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsers(string[] ids)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && ids.Contains(x.Id)).ToList();
+            return Task.FromResult(user);
+        }
     }
 }

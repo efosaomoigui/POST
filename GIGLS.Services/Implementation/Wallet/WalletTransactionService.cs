@@ -16,6 +16,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -47,7 +48,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.DateOfEntry = DateTime.Now;
-
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
             return new { id = newWalletTransaction.WalletTransactionId };
@@ -394,5 +394,77 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return await GetWalletTransactionByWalletIdForMobile(customer, filterCriteria);
         }
+
+        private async Task<List<WalletTransactionDTO>> GetWalletTransactionByWalletIdForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            //set default values if payload is null
+            if (shipmentAndPreShipmentParamDTO == null)
+            {
+                shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                {
+                 Page = 1,
+                 PageSize = 20,
+                 StartDate = null,
+                 EndDate = null
+                };
+            }
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+            int totalCount;
+            var walletTransactionDTOList = new List<WalletTransactionDTO>();
+            var walletTransactions = new List<WalletTransaction>();
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (shipmentAndPreShipmentParamDTO.PageSize < 1)
+            {
+                shipmentAndPreShipmentParamDTO.PageSize = 20;
+            }
+            if (shipmentAndPreShipmentParamDTO.Page < 1)
+            {
+                shipmentAndPreShipmentParamDTO.Page = 1;
+            }    
+
+            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+            {
+               
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId && s.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && s.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+            else
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+
+            if (walletTransactions.Any())
+            {
+                 walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(x => x.DateCreated));
+            }
+            return walletTransactionDTOList;
+        }
+
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await GetWalletTransactionByWalletIdForMobilePaginated(shipmentAndPreShipmentParamDTO);
+        }
+
     }
 }

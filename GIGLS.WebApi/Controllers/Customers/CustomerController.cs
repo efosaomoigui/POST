@@ -139,5 +139,21 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("code/{code}")]
+        public async Task<IServiceResponse<IndividualCustomerDTO>> GetCustomerByCode(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customerObj = await _service.GetCustomerByCode(code);
+
+                return new ServiceResponse<IndividualCustomerDTO>
+                {
+                    Object = customerObj
+                };
+            });
+        }
     }
 }

@@ -14,5 +14,6 @@ namespace GIGLS.Core.Domain
         public string To { get; set; }
         public EmailSmsType EmailSmsType { get; set; }
         public MessageType MessageType { get; set; }
+        public SMSSenderPlatform SMSSenderPlatform { get; set; }
     }
 }

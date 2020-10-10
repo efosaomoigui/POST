@@ -15,6 +15,7 @@ using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -25,13 +26,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentService _service;
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
+        private readonly IPreShipmentService _preshipmentService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
+            _preshipmentService = preshipmentService;
         }
 
 
@@ -87,11 +90,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
             return await HandleApiOperationAsync(async () =>
             {
-                var result = _service.GetIntlTransactionShipments(filterOptionsDto);
+                var result = await  _service.GetIntlTransactionShipments(filterOptionsDto);
 
                 return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
-                    Object = result.Result
+                    Object = result
                 };
             });
         }
@@ -343,19 +346,18 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        //super manifest
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
+        [HttpPost]
+        [Route("unmappedmanifestforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre();
+                var unmappedManifests = await _service.GetUnmappedManifestForServiceCentre(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ManifestDTO>>
                 {
-                    Object = unmappedManifest,
-                    Total = unmappedManifest.Count
+                    Object = unmappedManifests,
+                    Total = unmappedManifests.Count
                 };
             });
         }
@@ -368,6 +370,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var centres = await _service.GetUnmappedManifestServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestservicecentreforsupermanifest")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedManifestServiceCentresForSuperManifest()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetUnmappedManifestServiceCentresForSuperManifest();
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
@@ -712,6 +729,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("getdropoffsbyphonenooruserchanelcode")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preshipmentService.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = preshipment
                 };
             });
         }

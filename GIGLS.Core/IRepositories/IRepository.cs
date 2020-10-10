@@ -1,3 +1,4 @@
+using GIGLS.Core.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,8 @@ namespace GIGL.GIGLS.Core.Repositories
         void AddRange(IEnumerable<TEntity> entities);
         
         void Remove(TEntity entity);
-        void RemoveRange(IEnumerable<TEntity> entities);        
+        void RemoveRange(IEnumerable<TEntity> entities);
+        IQueryFluent<TEntity> Query(Expression<Func<TEntity, bool>> query);
+        IQueryFluent<TEntity> Query();
     }
 }

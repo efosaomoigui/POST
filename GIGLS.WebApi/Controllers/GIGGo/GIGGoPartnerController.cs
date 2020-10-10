@@ -524,12 +524,27 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         }
 
         [HttpPost]
-        [Route("verifydeliverynumber")]
-        public async Task<IServiceResponse<bool>> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        [Route("v2/adddeliverynumber")]
+        public async Task<IServiceResponse<bool>> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = await _portalService.UpdateDeliveryNumberNew(detail);
+                var response = await _portalService.UpdateDeliveryNumberV2(detail);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifydeliverynumber")]
+        public async Task<IServiceResponse<bool>> VerifyDeliveryCode(MobileShipmentNumberDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.VerifyDeliveryCode(detail);
 
                 return new ServiceResponse<bool>
                 {
@@ -653,6 +668,19 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-       
+
+        [HttpPost]
+        [Route("getmobilepickuprequests")]
+        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetAllMobilePickUpRequests(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var pickuprequests = await _portalService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<MobilePickUpRequestsDTO>>
+                {
+                    Object = pickuprequests
+                };
+            });
+        }
     }
 }

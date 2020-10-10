@@ -33,6 +33,8 @@ namespace GIGLS.Core.IServices.Shipments
         //Task<List<StationDTO>> GetUnmappedManifestStations();
         //Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId);
         Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(string count);
-        
+        Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption);
+
+
     }
 }

@@ -133,36 +133,50 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [HttpPost]
-        [Route("paywithpaystack")]
-        public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        [Route("initiatepaymentusingussd")]
+        public async Task<IServiceResponse<USSDResponse>> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var walletPaymentLog = await _portalService.InitiatePaymentUsingUSSD(walletPaymentLogDTO);
 
-                //Add wallet payment log
-                var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
-
-                //initialize the secret key from paystack
-                var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
-
-                //Call the paystack class implementation to do the payment
-                var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
-                var updateresult = new object();
-
-                if (result)
+                return new ServiceResponse<USSDResponse>
                 {
-                    paymentinfo.TransactionStatus = "Success";
-                    updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
-                }
-
-                return new ServiceResponse<object>
-                {
-                    Object = updateresult
+                    Object = walletPaymentLog
                 };
             });
         }
+
+        //[HttpPost]
+        //[Route("paywithpaystack")]
+        //public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+
+        //        //Add wallet payment log
+        //        var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
+
+        //        //initialize the secret key from paystack
+        //        var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
+
+        //        //Call the paystack class implementation to do the payment
+        //        var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
+        //        var updateresult = new object();
+
+        //        if (result)
+        //        {
+        //            paymentinfo.TransactionStatus = "Success";
+        //            updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
+        //        }
+
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = updateresult
+        //        };
+        //    });
+        //}
 
 
         [HttpGet]
@@ -171,9 +185,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
+                //var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
+                var result = await _portalService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("gatewaycode")]
+        public async Task<IServiceResponse<GatewayCodeResponse>> GetGatewayCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetGatewayCode();
+                return new ServiceResponse<GatewayCodeResponse>
                 {
                     Object = result
                 };
@@ -901,6 +930,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             var responseJson = await responseMessage.Content.ReadAsStringAsync();
                             var jObject = JObject.Parse(responseJson);
 
+                            //Get country detail
+                            var country = await _portalService.GetUserCountryCode(user);
+                            var countryJson = JObject.FromObject(country);
+
+                            //jObject.Add(countryJson);
+                            jObject.Add(new JProperty("Country", countryJson));
+
                             getTokenResponse = jObject.GetValue("access_token").ToString();
                             return new ServiceResponse<JObject>
                             {
@@ -1138,22 +1174,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = PreshipMentMobile,
-                };
-            });
-        }
-
-        //Should be discard 
-        [HttpGet]
-        [Route("verifypaystackpayment/{reference}/{UserId}")]
-        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyMobilePayment(string reference, string UserId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletPaymentLog = await _paymentService.VerifyPaymentMobile(reference, UserId);
-                return new ServiceResponse<PaystackWebhookDTO>
-                {
-
-                    Object = walletPaymentLog
                 };
             });
         }
@@ -2060,9 +2080,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+    
+        [HttpPost]
+        [Route("getwallettransactions")]
+        public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobilePaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<WalletTransactionDTO>>
+                {
+                    Object = Transactionhistory
+                };
+            });
+        }
+       
+        [HttpPost]
+        [Route("getshipments")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmenthistory = await _portalService.GetPreShipmentsAndShipmentsPaginated(shipmentAndPreShipmentParamDTO);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipmenthistory
+                };
+            });
+        }
 
-
-        [AllowAnonymous]
         [HttpGet]
         [Route("getactivecountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
@@ -2128,7 +2174,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             types.RemoveAt(3);
             return Ok(types);
         }
-
+        
+        [HttpGet]
+        [Route("servicecentresbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
 
     }
 }
