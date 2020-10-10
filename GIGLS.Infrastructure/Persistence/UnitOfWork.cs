@@ -188,8 +188,14 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
 
-        [Inject]
+        [Inject] 
         public IGroupWaybillNumberMappingRepository GroupWaybillNumberMapping { get; set; }
+
+        [Inject]
+        public IMovementManifestNumberRepository MovementManifestNumber { get; set; } 
+
+        [Inject]
+        public IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
 
         [Inject]
         public IWeightLimitRepository WeightLimit { get; set; }

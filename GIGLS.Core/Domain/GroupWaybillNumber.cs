@@ -23,4 +23,24 @@ namespace GIGLS.Core.Domain
         public bool HasManifest { get; set; }
         public int DepartureServiceCentreId { get; set; }
     }
+
+    public class MovementManifestNumber : BaseDomain, IAuditable 
+    {
+        public int MovementManifestNumberId { get; set; }  
+
+        [MaxLength(100), MinLength(5)]
+        [Index(IsUnique = true)]
+        public string MovementManifestCode { get; set; } 
+        public bool IsActive { get; set; }
+
+        [MaxLength(128)]
+        public string UserId { get; set; }
+
+        //Destination Service centre
+        public int ServiceCentreId { get; set; }
+        public virtual ServiceCentre ServiceCentre { get; set; }
+
+        public bool HasManifest { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+    }
 }

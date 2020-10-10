@@ -132,6 +132,12 @@ namespace GIGLS.Core
                 config.CreateMap<GroupWaybillNumber, GroupWaybillNumberDTO>();
                 config.CreateMap<GroupWaybillNumberDTO, GroupWaybillNumber>();
 
+                config.CreateMap<MovementManifestNumber, MovementManifestNumberDTO>();
+                config.CreateMap<MovementManifestNumberDTO, MovementManifestNumber>(); //IMovementManifestNumberMappingRepository
+
+                config.CreateMap<MovementManifestNumberMapping, MovementManifestNumberMappingDTO>();
+                config.CreateMap<MovementManifestNumberMappingDTO, MovementManifestNumberMapping>();
+
                 config.CreateMap<Company, CompanyDTO>();
                 config.CreateMap<CompanyDTO, Company>();
 
