@@ -654,6 +654,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
                 shipmentDTO.CustomerCity = customer.City;
                 shipmentDTO.CustomerState = customer.State;
+                shipmentDTO.SenderAddress = customer.Address;
             }
             else
             {
@@ -666,13 +667,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
                 shipmentDTO.CustomerCity = customer.City;
                 shipmentDTO.CustomerState = customer.State;
+                shipmentDTO.SenderAddress = customer.Address;
             }
 
             shipmentDTO.UserId = currentUserId;
             shipmentDTO.CustomerType = customer.CustomerType.ToString();
 
             var station = await _stationService.GetStationById(shipmentDTO.StationId);
-            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
+            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
 
             //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
             //{
@@ -682,7 +684,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
             var newShipment = await MapIntlShipmentRequest(shipmentDTO);
             newShipment.ReceiverCountry = station.Country;
-            newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
+            newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId ; // station.SuperServiceCentreId;
             newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
             newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
 
