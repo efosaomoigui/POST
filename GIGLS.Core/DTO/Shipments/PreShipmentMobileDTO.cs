@@ -158,7 +158,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string QRCode { get; set; }
         public bool IsScheduled { get; set; }
         public DateTime? ScheduledDate { get; set; }
-}
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
