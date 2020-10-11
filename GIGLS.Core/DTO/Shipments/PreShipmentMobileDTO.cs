@@ -158,7 +158,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string QRCode { get; set; }
         public bool IsScheduled { get; set; }
         public DateTime? ScheduledDate { get; set; }
-
+}
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
@@ -253,7 +255,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderName { get; set; }
         public string SenderPhoneNumber { get; set; }
         public string CompanyType { get; set; }
-        public string CustomerCode { get; set; }
+        public string SenderAddress { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverAddress { get; set; }
@@ -265,11 +267,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? InsuranceValue { get; set; }
         public decimal? Value { get; set; }
         public string shipmentstatus { get; set; }
-        public bool IsDelivered { get; set; }
-        public bool? IsApproved { get; set; }
-        public int SenderStationId { get; set; }
         public string SenderStationName { get; set; }
-        public int ReceiverStationId { get; set; }
         public string ReceiverStationName { get; set; }
         public DateTime DateCreated { get; set; }
         public string VehicleType { get; set; }
