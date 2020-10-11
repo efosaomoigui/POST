@@ -195,6 +195,10 @@ namespace GIGLS.Core
         //Route Section
         IRouteRepository Routes { get; set; }
 
+        //Mpvement Manifest
+        IMovementManifestNumberRepository MovementManifestNumber { get; set; }
+        IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

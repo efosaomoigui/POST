@@ -75,6 +75,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<GroupWaybillNumber> GroupWaybillNumber { get; set; }
         public DbSet<GroupWaybillNumberMapping> GroupWaybillNumberMapping { get; set; }
 
+        //Movement Manifest
+        public DbSet<MovementManifestNumber> MovementManifestNumber { get; set; }   
+        public DbSet<MovementManifestNumberMapping> MovementManifestNumberMapping { get; set; } 
+
 
         //Shipment
         public DbSet<Manifest> Manifest { get; set; }

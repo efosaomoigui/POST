@@ -290,6 +290,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmovementmanifestservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedMovementmanifestservicecentre() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _shipmentService.GetUnmappedMovementManifestServiceCentres(); 
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generateManifestcode")]
@@ -299,6 +315,23 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 ManifestDTO manifestDTO = new ManifestDTO();
                 var groupwaybills = await _manifestService.GenerateManifestCode(manifestDTO);
+
+                return new ServiceResponse<string>
+                {
+                    Object = groupwaybills
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("generateMovementManifestcode")]
+        public async Task<IServiceResponse<string>> GenerateMovementManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                ManifestDTO manifestDTO = new ManifestDTO();
+                var groupwaybills = await _manifestService.GenerateMovementManifestCode(manifestDTO);
 
                 return new ServiceResponse<string>
                 {
@@ -375,7 +408,29 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("manifestFormovementmanifestservicecentre/{serviceCentreId}")]
+        //public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetManifestForMovementManifestServiceCentre(int serviceCentreId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        ShipmentCollectionFilterCriteria filterOptionsDto = new ShipmentCollectionFilterCriteria
+        //        {
+        //            filterValue = serviceCentreId.ToString(),
+        //            filter = "DestinationServiceCentreId"
+        //        };
+                 
+        //        var unmappedGroupWaybills = await _shipmentService.GetManifestForMovementManifestServiceCentre(filterOptionsDto);
+        //        return new ServiceResponse<IEnumerable<GroupWaybillNumberDTO>>
+        //        {
+        //            Object = unmappedGroupWaybills,
+        //            Total = unmappedGroupWaybills.Count
+        //        };
+        //    });
+        //}
+
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]

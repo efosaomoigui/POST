@@ -10,4 +10,9 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Task<List<GroupWaybillNumberDTO>> GetGroupWaybills();
     }
+
+    public interface IMovementManifestNumberRepository : IRepository<MovementManifestNumber>  
+    {
+        Task<List<MovementManifestNumberDTO>> GetMovementManifests(); 
+    }
 }

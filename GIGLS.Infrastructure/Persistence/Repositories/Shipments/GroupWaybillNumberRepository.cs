@@ -32,4 +32,28 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(groupwaybillDto.ToList());
         }
     }
+
+    public class MovementManifestNumberRepository : Repository<MovementManifestNumber, GIGLSContext>, IMovementManifestNumberRepository
+    {
+        public MovementManifestNumberRepository(GIGLSContext context) : base(context)
+        {
+        }
+
+        public Task<List<MovementManifestNumberDTO>> GetMovementManifests()
+        { 
+            var MovementManifestNumber = Context.MovementManifestNumber.Include("ServiceCentre");  
+
+            var movementNumberDto = from gw in MovementManifestNumber 
+                                  select new MovementManifestNumberDTO
+                                  {
+                                      IsActive = gw.IsActive,
+                                      MovementManifestCode = gw.MovementManifestCode,
+                                      MovementManifestNumberId = gw.MovementManifestNumberId,
+                                      ServiceCentreId = gw.ServiceCentreId,
+                                      UserId = gw.UserId,
+                                      ServiceCentreCode = gw.ServiceCentre.Name
+                                  };
+            return Task.FromResult(movementNumberDto.ToList());
+        }
+    }
 }
