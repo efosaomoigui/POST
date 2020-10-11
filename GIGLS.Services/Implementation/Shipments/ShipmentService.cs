@@ -793,6 +793,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
+                //QR Code
+                await GenerateDeliveryNumber(newShipment.Waybill);
+
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
@@ -3229,6 +3232,33 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             _uow.ShipmentPackagingTransactions.AddRange(packageoutflow);
             _uow.ServiceCenterPackage.AddRange(servicePackage);
+        }
+
+        private async Task GenerateDeliveryNumber(string waybill)
+        {
+            int maxSize = 6;
+            char[] chars = new char[54];
+            string a;
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                SenderCode = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };           
+            _uow.DeliveryNumber.Add(number);
         }
     }
 }

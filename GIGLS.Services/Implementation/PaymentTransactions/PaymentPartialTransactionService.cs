@@ -12,6 +12,8 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IMessageService;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -83,7 +85,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
             var result = false;
-                             
+
             if (paymentPartialTransactionProcessDTO == null)
                 throw new GenericException("Null Input");
 
@@ -127,11 +129,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //get total amount already paid
             decimal totalAmountAlreadyPaid = 0;
             var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
-            foreach(var item in partialTransactionsForWaybill)
+            foreach (var item in partialTransactionsForWaybill)
             {
                 totalAmountAlreadyPaid += item.Amount;
             }
-                        
+
             //get total amount customer is paying
             decimal totalAmountPaid = 0;
             foreach (var paymentPartialTransaction in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
@@ -173,8 +175,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 paymentPartialTransaction.UserId = currentUserId;
                 paymentPartialTransaction.PaymentStatus = PaymentStatus.Paid;
                 var paymentTransactionId = await AddPaymentPartialTransaction(paymentPartialTransaction);
-                
-                
+
+
                 totalAmountPaid += paymentPartialTransaction.Amount;
             }
             // get the balance
@@ -188,18 +190,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             /////2.  When payment is complete and balance is 0
             if (balanceAmount == 0)
-            {                
+            {
                 foreach (var item in partialTransactionsForWaybill)
                 {
                     if (item.PaymentType == PaymentType.Cash)
                     {
                         cash += item.Amount;
-                        cashType = item.PaymentType.ToString();                         
+                        cashType = item.PaymentType.ToString();
                     }
                     else if (item.PaymentType == PaymentType.Pos)
                     {
                         pos += item.Amount;
-                        posType = item.PaymentType.ToString();                         
+                        posType = item.PaymentType.ToString();
                     }
                     else if (item.PaymentType == PaymentType.Transfer)
                     {
@@ -207,7 +209,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         transferType = item.PaymentType.ToString();
                     }
                 }
-                                
+
                 // update GeneralLedger
                 generalLedgerEntity.IsDeferred = false;
                 generalLedgerEntity.PaymentType = PaymentType.Partial;
@@ -233,12 +235,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
-                if(shipment != null)
+                if (shipment != null)
                 {
+                    //QR Code
+                    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
+
                     //send sms to the customer
                     var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
                     {
-                        Waybill = invoiceEntity.Waybill
+                        Waybill = invoiceEntity.Waybill,
+                        QRCode = deliveryNumber.SenderCode
                     };
 
                     if (shipment.DepartureServiceCentreId == 309)
@@ -254,6 +260,36 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             return result;
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            int maxSize = 6;
+            char[] chars = new char[54];
+            string a;
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                SenderCode = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }

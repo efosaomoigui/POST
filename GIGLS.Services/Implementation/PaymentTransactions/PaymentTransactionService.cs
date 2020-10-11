@@ -156,7 +156,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
 
             //QR Code
-            var deliveryNumber = await GenerateDeliveryNumber(1, shipment.Waybill);
+            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
             //send sms to the customer
             var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
@@ -361,7 +361,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 
-
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
             generalLedgerEntity.PaymentType = paymentTransaction.PaymentType;
@@ -371,14 +370,31 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
-
-            invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
-            invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
-
             await _uow.CompleteAsync();
-            result = true;
 
+            //QR Code
+            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
+
+            //send sms to the customer
+            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            {
+                Waybill = shipment.Waybill,
+                QRCode = deliveryNumber.SenderCode
+            };
+
+            if (shipment.DepartureServiceCentreId == 309)
+            {
+                await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
+
+            result = true;
             return result;
+            
         }
 
         private async Task<decimal> GetEcommerceWalletLimit(Shipment shipment)
