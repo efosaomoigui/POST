@@ -10,5 +10,6 @@ namespace GIGLS.Core.IRepositories.Wallet
     {
         Task<IEnumerable<WalletDTO>> GetWalletsAsync();
         IQueryable<Core.Domain.Wallet.Wallet> GetWalletsAsQueryable();
+        Task<decimal> GetTotalWalletBalance(int ActiveCountryId);
     }
 }
