@@ -159,6 +159,8 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? ScheduledDate { get; set; }
 
         public string QRCode { get; set; }
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
