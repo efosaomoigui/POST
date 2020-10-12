@@ -68,9 +68,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
         Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
 
-        //Movement Manifest
+        //Movement Manifest 
         Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
-        Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

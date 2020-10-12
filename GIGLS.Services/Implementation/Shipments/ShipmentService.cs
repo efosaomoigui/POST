@@ -1777,7 +1777,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Movement Manifest
-        public async Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria)
         {
             try
             {
@@ -1788,7 +1788,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == x.IsDispatched == true && x.MovementStatus ==MovementStatus.InProgress)
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress)
                                                                     && x.DateModified >= startDate && x.DateModified < endDate);
 
                 if (serviceCenters.Length > 0)
@@ -1911,7 +1911,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var movementManifestNumbers = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => x.HasManifest == false); 
+                var movementManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress); 
 
                 if (serviceCenters.Length > 0)
                 {
@@ -1920,12 +1920,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                var result = allServiceCenters.Where(s => movementManifestNumbers.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                //var result = allServiceCenters.Where(s => movementManifestNumbers.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                var re = allServiceCenters.Where(a => movementManifestNumbers.Any(b => b.ServiceCentreId == a.ServiceCentreId)).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => re.Any(r => r.ServiceCentreId == s.ServiceCentreId)); 
 
                 return unmappedGroupServiceCentres.ToList();
             }
