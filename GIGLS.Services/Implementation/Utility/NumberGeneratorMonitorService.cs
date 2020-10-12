@@ -47,6 +47,11 @@ namespace GIGLS.Services.Implementation.Utility
                     number = long.Parse(numberCode) + 1;
                     numberStr = number.ToString("00");
                 }
+                else if (numberGeneratorType == NumberGeneratorType.MovementManifestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00000");
+                }
                 else
                 {
                     number = long.Parse(numberCode) + 1;

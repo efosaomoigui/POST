@@ -158,7 +158,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<string> GenerateMovementManifestCode(ManifestDTO manifestDTO) 
+        public async Task<string> GenerateMovementManifestCode(MovementManifestNumberDTO manifestDTO) 
         {
             try
             {
