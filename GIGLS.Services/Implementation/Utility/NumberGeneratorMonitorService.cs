@@ -55,7 +55,7 @@ namespace GIGLS.Services.Implementation.Utility
                 else if (numberGeneratorType == NumberGeneratorType.RequestNumber)
                 {
                     number = long.Parse(numberCode) + 1;
-                    numberStr = number.ToString("0000");
+                    numberStr = number.ToString("000000");
                 }
                 else
                 {
