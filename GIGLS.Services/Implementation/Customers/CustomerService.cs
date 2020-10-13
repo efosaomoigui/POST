@@ -437,7 +437,7 @@ namespace GIGLS.Services.Implementation.Customers
                         if (partnerInfo != null)
                         {
                             partnerName = partnerInfo.FirstName;
-                            partnerPhoneNo = partnerInfo.PhoneNumber; 
+                            partnerPhoneNo = partnerInfo.PhoneNumber;
                         }
                     }
                     var obj = new ShipmentActivityDTO();
@@ -448,7 +448,7 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.CreatedOn = item.CreationDate;
                     if (item.StatusCode == "200")
                     {
-                        obj.ActionResult = "SUCCESSFUL"; 
+                        obj.ActionResult = "SUCCESSFUL";
                     }
                     else
                     {
@@ -457,7 +457,11 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.PhoneNo = partnerPhoneNo;
                     obj.Waybill = waybill;
                     shipmentActivity.Add(obj);
-                } 
+                }
+            }
+            return shipmentActivity;
+        }
+
         public async Task<DeliveryNumberDTO> GetDeliveryNoByWaybill(string waybill)
         {
             try
@@ -469,10 +473,8 @@ namespace GIGLS.Services.Implementation.Customers
             }
             catch (Exception)
             {
-
                 throw;
             }
-            return shipmentActivity;
         }
 
     }
