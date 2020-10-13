@@ -2108,18 +2108,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     var partner = await _uow.MobilePickUpRequests.GetPartnerDetailsForAWaybill(waybill);
                     Shipmentdto.partnerDTO = partner;
 
-                    if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
-                    {
-                        var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
-                        if (qrCode != null)
-                        {
-                            Shipmentdto.QRCode = qrCode.SenderCode;
-                        }
-                    }
+                    //if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
+                    //{
+                    //    var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
+                    //    if (qrCode != null)
+                    //    {
+                    //        Shipmentdto.QRCode = qrCode.SenderCode;
+                    //    }
+                    //}
 
                     var codes = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == waybill);
                     if (codes != null)
                     {
+                        Shipmentdto.QRCode = codes.SenderCode;
                         Shipmentdto.SenderCode = codes.SenderCode;
                         Shipmentdto.ReceiverCode = codes.ReceiverCode;
                     }
@@ -2131,11 +2132,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
 
+                        if (agilityshipment.CustomerType.Contains("Individual"))
+                        {
+                            agilityshipment.CustomerType = CustomerType.IndividualCustomer.ToString();
+                        }
+
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), agilityshipment.CustomerType);
                         var CustomerDetails = await _customerService.GetCustomer(agilityshipment.CustomerId, customerType);
 
                         Shipmentdto.SenderAddress = CustomerDetails.Address;
-                        Shipmentdto.SenderName = CustomerDetails.Name;
+                        Shipmentdto.SenderName = CustomerDetails.CustomerName;
                         Shipmentdto.SenderPhoneNumber = CustomerDetails.PhoneNumber;
 
                         Shipmentdto.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
@@ -2153,6 +2159,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             Shipmentdto.CurrencyCode = country.CurrencyCode;
                             Shipmentdto.CurrencySymbol = country.CurrencySymbol;
+                        }
+
+                        var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == agilityshipment.Waybill);
+                        if (qrCode != null)
+                        {
+                            Shipmentdto.QRCode = qrCode.SenderCode;
+                            Shipmentdto.SenderCode = qrCode.SenderCode;
+                            Shipmentdto.ReceiverCode = qrCode.ReceiverCode;
                         }
                     }
                     else
