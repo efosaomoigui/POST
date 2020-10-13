@@ -52,6 +52,11 @@ namespace GIGLS.Services.Implementation.Utility
                     number = long.Parse(numberCode) + 1;
                     numberStr = number.ToString("00000");
                 }
+                else if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("0000");
+                }
                 else
                 {
                     number = long.Parse(numberCode) + 1;
@@ -191,6 +196,14 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.SuperManifest:
                     {
                         return (int)NumberGeneratorType.SuperManifest;
+                    }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return (int)NumberGeneratorType.RequestNumber;
+                    }
+                case NumberGeneratorType.MovementManifestNumber:
+                    {
+                        return (int)NumberGeneratorType.MovementManifestNumber;
                     }
                 default:
                     {
