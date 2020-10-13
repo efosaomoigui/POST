@@ -9,6 +9,7 @@ using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 
 namespace GIGLS.WebApi.Controllers
@@ -172,5 +173,25 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("shipmentactivities/{waybill}")]
+        public async Task<IServiceResponse<List<ShipmentActivityDTO>>> GetShipmentActivities(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var activities = await _service.GetShipmentActivities(waybill);
+
+                return new ServiceResponse<List<ShipmentActivityDTO>>
+                {
+                    Object = activities
+                };
+            });
+        }
+
+
+
+
     }
 }
