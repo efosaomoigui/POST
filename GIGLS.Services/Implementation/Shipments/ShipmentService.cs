@@ -1788,7 +1788,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress)
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress)
                                                                     && x.DateModified >= startDate && x.DateModified < endDate);
 
                 if (serviceCenters.Length > 0)
@@ -1797,11 +1797,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Filter it by the destination service centre send from filter option
-                int filterValue = Convert.ToInt32(dateFilterCriteria.ServiceCentreId);
-                if (filterValue > 0 && filterValue != 99999)
-                {
-                    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
-                }
+                int filterValue = Convert.ToInt32(dateFilterCriteria.filterValue);
+                //if (filterValue > 0 && filterValue != 99999)
+                //{
+                //    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
+                //}
 
                 var result = manifests.ToList();
 
@@ -1911,17 +1911,19 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var movementManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress); 
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress); 
 
                 if (serviceCenters.Length > 0)
                 {
-                    movementManifestNumbers = movementManifestNumbers.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                    ManifestNumbers = ManifestNumbers.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
+
+                var ManifestNumbersResult = ManifestNumbers.ToList();
 
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
                 //var result = allServiceCenters.Where(s => movementManifestNumbers.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
-                var re = allServiceCenters.Where(a => movementManifestNumbers.Any(b => b.ServiceCentreId == a.ServiceCentreId)).ToList();
+                var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
