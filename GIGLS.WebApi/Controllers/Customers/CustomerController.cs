@@ -157,9 +157,6 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-
-
-        [AllowAnonymous]
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("shipmentactivities/{waybill}")]
