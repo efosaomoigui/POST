@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public CountryDTO UserActiveCountry { get; set; }
         public List<CountryDTO> ActiveCountries { get; set; }
         public CountryDTO UserActiveCountryForFilter { get; set; }
+        public WalletTransactionSummary WalletTransactionSummary { get; set; }
     }
 
 }

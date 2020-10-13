@@ -2,7 +2,6 @@
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.IServices.Dashboard;
 using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using System.Threading.Tasks;
 using System.Linq;
@@ -13,43 +12,33 @@ using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.Core.View;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
     public class DashboardService : IDashboardService
     {
         private readonly IUnitOfWork _uow;
-        private IShipmentService _shipmentService;
         private IUserService _userService;
-        private IShipmentTrackingService _shipmentTrackingService;
         private IServiceCentreService _serviceCenterService;
         private IStationService _stationService;
-        private IIndividualCustomerService _individualCustomerService;
-        private ICompanyService _companyService;
         private ICustomerService _customerService;
         private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
         private IRegionService _regionService;
 
         public DashboardService(IUnitOfWork uow,
-            IShipmentService shipmentService, IUserService userService,
-            IShipmentTrackingService shipmentTrackingService,
+            IUserService userService,
             IServiceCentreService serviceCenterService,
             IStationService stationService,
-            IIndividualCustomerService individualCustomerService,
-            ICompanyService companyService,
             ICustomerService customerService,
             IRegionServiceCentreMappingService regionServiceCentreMappingService,
             IRegionService regionService
             )
         {
             _uow = uow;
-            _shipmentService = shipmentService;
             _userService = userService;
-            _shipmentTrackingService = shipmentTrackingService;
             _serviceCenterService = serviceCenterService;
             _stationService = stationService;
-            _individualCustomerService = individualCustomerService;
-            _companyService = companyService;
             _customerService = customerService;
             _regionServiceCentreMappingService = regionServiceCentreMappingService;
             _regionService = regionService;
@@ -1042,6 +1031,9 @@ namespace GIGLS.Services.Implementation.Dashboard
                 string currentUserId = await _userService.GetCurrentUserId();
                 var userEntity = await _uow.User.GetUserById(currentUserId);
                 userEntity.UserActiveCountryId = (int)dashboardFilterCriteria.ActiveCountryId;
+
+                dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
+                dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
                 _uow.Complete();
             }
 
@@ -1178,6 +1170,18 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             dashboardDTO.GraphData = graphDataList;
             await Task.FromResult(0);
+        }
+
+        //Get Wallet balance 
+        private async Task<decimal> GetWalletBalanceForAllCustomers(int countryId)
+        {
+            return await _uow.Wallet.GetTotalWalletBalance(countryId);
+        }
+
+        //Get Wallet Transaction Credit
+        private async Task<WalletTransactionSummary> GetWalletTransactionSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.WalletTransaction.GetWalletTransactionSummary(dashboardFilterCriteria);
         }
     }
 }

@@ -14,5 +14,6 @@ namespace GIGLS.Core.IRepositories.Partnership
         Task<List<PartnerDTO>> GetExternalPartnersAsync();
         Task<List<PartnerDTO>> GetPartnerBySearchParameters(string parameter);
         Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode);
+        Task<PartnerDTO> GetPartnerByUserId(string partnerId);
     }
 }

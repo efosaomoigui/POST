@@ -7,6 +7,7 @@ using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -40,5 +41,27 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             return wallets;
         }
 
+        public async Task<decimal> GetTotalWalletBalance(int ActiveCountryId)
+        {
+            try
+            {
+                SqlParameter countryId = new SqlParameter("@CountryId", ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<decimal>("WalletBalance " +
+                   "@CountryId",
+                   param).FirstOrDefaultAsync();
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
