@@ -458,6 +458,19 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.Waybill = waybill;
                     shipmentActivity.Add(obj);
                 } 
+        public async Task<DeliveryNumberDTO> GetDeliveryNoByWaybill(string waybill)
+        {
+            try
+            {
+                var dto = new DeliveryNumberDTO();
+                var item = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == waybill);
+                dto = Mapper.Map<DeliveryNumberDTO>(item);
+                return dto;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
             return shipmentActivity;
         }
