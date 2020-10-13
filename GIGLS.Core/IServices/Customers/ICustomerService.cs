@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Core.IServices.Customers
 {
@@ -16,5 +17,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<CustomerDTO> GetCustomer(string userChannelCode, UserChannelType userChannelType);
         Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO);
         Task<IndividualCustomerDTO> GetCustomerByCode(string customerCode);
+        Task<List<ShipmentActivityDTO>> GetShipmentActivities(string waybill);
     }
 }
