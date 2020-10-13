@@ -13,6 +13,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Report;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -168,6 +169,51 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                }).ToList();
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
+        }
+
+        public async Task<WalletTransactionSummary> GetWalletTransactionSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new WalletTransactionSummary
+                {
+                    CreditAmount = 0,
+                    DebitAmount = 0
+                };
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<WalletTransactionSummary>("WalletTransactionSummary " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if(summary != null)
+                {
+                    result.CreditAmount = summary.CreditAmount;
+                    result.DebitAmount = summary.DebitAmount;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

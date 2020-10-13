@@ -1,5 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -41,5 +40,11 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
         public PaymentType PaymentType { get; set; }
+    }
+
+    public class WalletTransactionSummary
+    {
+        public decimal CreditAmount { get; set; }
+        public decimal DebitAmount { get; set; }
     }
 }
