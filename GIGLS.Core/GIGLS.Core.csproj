@@ -261,6 +261,7 @@
     <Compile Include="Domain\UserLoginEmail.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
     <Compile Include="Domain\Utility\GlobalProperty.cs" />
+    <Compile Include="Domain\Utility\QRAndBarcode.cs" />
     <Compile Include="Domain\VAT.cs" />
     <Compile Include="Domain\Partnership\VehicleType.cs" />
     <Compile Include="Domain\Vendor.cs" />
@@ -684,6 +685,7 @@
     <Compile Include="IRepositories\Stores\IServiceCenterPackageRepository.cs" />
     <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
     <Compile Include="IRepositories\User\IUserRepository.cs" />
+    <Compile Include="IRepositories\Utility\IQRAndBarcodeRepository.cs" />
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
@@ -825,6 +827,7 @@
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
+    <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />
     <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />
     <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />
     <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
