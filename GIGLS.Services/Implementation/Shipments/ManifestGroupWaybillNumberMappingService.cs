@@ -362,9 +362,83 @@ namespace GIGLS.Services.Implementation.Shipments
                             newManifest.DepartureServiceCentreId = groupWaybillNumberDTO.DepartureServiceCentreId;
                             _uow.Manifest.Add(newManifest);
                         }
-                       
+
                     }
                 }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //map Manifest to Super Manifest
+        public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int departid, int destinationid)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true &&
+                manifestList.Contains(x.ManifestCode) &&
+                x.MovementStatus == MovementStatus.InProgress &&
+                serviceCenters.Contains(x.DepartureServiceCentreId));
+
+                var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+                int manifestByScListCount = manifestByScList.Count;
+
+                if (manifestByScListCount != manifestList?.Count)
+                {
+                    var result = manifestList.Where(x => !manifestByScList.Contains(x));
+
+                    if (result.Any())
+                    {
+                        throw new GenericException($"Error: Movement Manifest cannot be created. " +
+                            $"The following manifests [{string.Join(", ", result.ToList())}] are not available for Processing");
+                    }
+                }
+
+                //convert the list to HashSet to remove duplicate
+                var newManifestList = new HashSet<string>(manifestList);
+
+                foreach (var manifestCode in newManifestList)
+                {
+                    var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+
+                    if (manifest == null)
+                    {
+                        throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                    }
+
+                    //Update The Manifest 
+                    manifest.MovementStatus = MovementStatus.EnRoute;
+
+                    //insert into movement manifest mapping table
+                    var resultMap = new MovementManifestNumberMapping()
+                    {
+                        MovementManifestCode = movementmanifestCode,
+                        ManifestNumber = manifestCode,
+                        DateCreated = DateTime.Now,
+                        UserId = userId
+                    };
+                    _uow.MovementManifestNumberMapping.Add(resultMap);
+
+                }
+
+                var MovementManifestNumberResult = new MovementManifestNumber()
+                {
+                    DepartureServiceCentreId = departid,
+                    DestinationServiceCentreId = destinationid,
+                    DateCreated = DateTime.Now,
+                    MovementManifestCode = movementmanifestCode,
+                    UserId = userId,
+                    MovementStatus = MovementStatus.EnRoute,
+                };
+
+                //create Code for validation and releasae of shipment
+
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -384,18 +458,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
-                
+
                 //optimise these 3 line of code. you can't fetch all the data into memory when you only need to check for boolean value
                 var dispatchList = _uow.Dispatch.GetAllAsQueryable().Where(x => manifestByScList.Contains(x.ManifestNumber)).Select(x => x.DestinationId).ToList();
                 var allAreSame = dispatchList.All(x => x == dispatchList.First());
 
-                if(allAreSame == false)
+                if (allAreSame == false)
                 {
                     throw new GenericException($"Error: Manifest belong to different Stations. ");
                 }
 
 
-                int manifestByScListCount = manifestByScList.Count; 
+                int manifestByScListCount = manifestByScList.Count;
                 if (manifestByScListCount == 0)
                 {
                     throw new GenericException($"No manifest available for Processing");
@@ -417,7 +491,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 foreach (var manifestCode in newManifestList)
                 {
-                    var manifest = await _uow.Manifest.GetAsync(x =>x.ManifestCode == manifestCode);
+                    var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
 
                     if (manifest == null)
                     {
@@ -619,7 +693,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (serviceCentreIds.Contains(manifestMapping.DepartureServiceCentreId))
                 {
                     manifestDTO = Mapper.Map<ManifestDTO>(manifestMapping);
-                    
+
                 }
                 else
                 {

@@ -1787,7 +1787,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var endDate = queryDate.Item2;
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
                 var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress)
                                                                     && x.DateModified >= startDate && x.DateModified < endDate);
 
@@ -1804,7 +1803,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
                 var result = manifests.ToList();
-
                 var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
 
                 if (filterValue != 99999)
@@ -1911,7 +1909,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress); 
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress && x.IsDispatched ==true); 
 
                 if (serviceCenters.Length > 0)
                 {

@@ -88,6 +88,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
+        [Route("mapmovmentmanifest")]
+        public async Task<IServiceResponse<bool>> MovementManifestNumberMapping(ManifestGroupWaybillNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
         [Route("mapsupermanifest")]
         public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
         {

@@ -11,6 +11,7 @@
     public enum MovementStatus
     {
         InProgress,
+        EnRoute,
         ProcessEnded
     }
 }
