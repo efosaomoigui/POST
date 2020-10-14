@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -31,16 +32,12 @@ namespace GIGLS.Core.Domain
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
         public string MovementManifestCode { get; set; } 
-        public bool IsActive { get; set; }
-
+        public MovementStatus MovementStatus { get; set; }
         [MaxLength(128)]
         public string UserId { get; set; }
-
-        //Destination Service centre
-        public int ServiceCentreId { get; set; }
-        public virtual ServiceCentre ServiceCentre { get; set; }
-
-        public bool HasManifest { get; set; }
         public int DepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre DepartureServiceCentre { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentre DestinationServiceCentre { get; set; }
     }
 }

@@ -55,7 +55,7 @@ namespace GIGLS.Services.Implementation.Utility
                 else if (numberGeneratorType == NumberGeneratorType.RequestNumber)
                 {
                     number = long.Parse(numberCode) + 1;
-                    numberStr = number.ToString("000000");
+                    numberStr = number.ToString("0000");
                 }
                 else
                 {
@@ -79,18 +79,29 @@ namespace GIGLS.Services.Implementation.Utility
                 var codeStr = serviceCentreId.ToString("000");
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
-                numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                if (numberGeneratorType != NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                }
+                else
+                {
+                    numberGenerated = (ResolvePrefixFromNumberGeneratorType(numberGeneratorType)-9) + codeStr + numberStr;
+                }
 
                 if (numberGeneratorType == NumberGeneratorType.MagayaWb)
                 {
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
                 }
 
+                if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = "REQ-" + numberGenerated;
+                }
+
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
-                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode ||
-                    numberGeneratorType == NumberGeneratorType.RequestNumber
+                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode 
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
