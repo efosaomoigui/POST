@@ -80,20 +80,17 @@ namespace GIGLS.Services.Implementation.Utility
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
                 numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+
                 if (numberGeneratorType == NumberGeneratorType.MagayaWb)
                 {
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
                 }
 
-                if (numberGeneratorType == NumberGeneratorType.RequestNumber)
-                {
-                    numberGenerated = "REQ-" + ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + numberStr;
-                }
-
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
-                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode
+                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode ||
+                    numberGeneratorType == NumberGeneratorType.RequestNumber
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
@@ -247,6 +244,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.PreShipmentCode:
                     {
                         return "PRE";
+                    }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return "REQ-";
                     }
                 default:
                     {
