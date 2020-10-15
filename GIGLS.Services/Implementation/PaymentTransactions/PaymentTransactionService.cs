@@ -370,6 +370,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
+            invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
+            invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
             await _uow.CompleteAsync();
 
             //QR Code
