@@ -8,6 +8,12 @@ using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using GIGLS.CORE.Enums;
 using System.Configuration;
+using GIGLS.Core.DTO.Shipments;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Linq;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -402,6 +408,74 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        public async Task<DeliveryNumberDTO> GetDeliveryNoByWaybill(string waybill)
+        {
+            try
+            {
+                var dto = new DeliveryNumberDTO();
+                var item = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == waybill);
+                dto = Mapper.Map<DeliveryNumberDTO>(item);
+                return dto;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<ShipmentActivityDTO>> GetShipmentActivities(string waybill)
+        {
+            var shipmentActivity = new List<ShipmentActivityDTO>();
+            HttpClient client = new HttpClient();
+            var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+            var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
+            nodeURL = $"{nodeURL}{url}?waybill={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
+            HttpResponseMessage response = await client.GetAsync(nodeURL);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadAsAsync<DataResponse>();
+
+            if (result.Data.ApiList.Any())
+            {
+                foreach (var item in result.Data.ApiList)
+                {
+                    //get actions performed on shipment
+                   int actionIndx = item.Url.LastIndexOf('/');
+                    actionIndx++;
+                    var action = item.Url.Substring(actionIndx);
+                    var partnerName = String.Empty;
+                    var partnerPhoneNo = String.Empty;
+                    if (item.Body.PartnerId != null)
+                    {
+                        var partnerInfo = await _uow.Partner.GetPartnerByUserId(item.Body.PartnerId);
+                        if (partnerInfo != null)
+                        {
+                            partnerName = partnerInfo.PartnerName;
+                            partnerPhoneNo = partnerInfo.PhoneNumber; 
+                        }
+                    }
+                    var obj = new ShipmentActivityDTO();
+                    obj.Action = action.ToUpper();
+                    obj.ActionBy = partnerName;
+                    obj.ActionTime = item.CreationDate;
+                    obj.ActionReason = item.ReasonText;
+                    obj.CreatedOn = item.CreationDate;
+                    if (item.StatusCode == "200")
+                    {
+                        obj.ActionResult = "SUCCESSFUL"; 
+                    }
+                    else
+                    {
+                        obj.ActionResult = "FAILED";
+                    }
+                    obj.PhoneNo = partnerPhoneNo;
+                    obj.Waybill = waybill;
+                    shipmentActivity.Add(obj);
+                } 
+            }
+            return shipmentActivity;
         }
 
     }

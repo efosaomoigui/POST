@@ -86,7 +86,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     var newShipmentTracking = new ShipmentTracking
                     {
                         Waybill = tracking.Waybill,
-                        //TrackingType = (TrackingType)Enum.Parse(typeof(TrackingType), tracking.TrackingType),
                         Location = tracking.Location,
                         Status = tracking.Status,
                         DateTime = DateTime.Now,
