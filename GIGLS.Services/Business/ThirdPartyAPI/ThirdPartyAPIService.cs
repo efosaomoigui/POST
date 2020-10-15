@@ -25,6 +25,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 using GIGLS.Core.IServices.Utility;
+using System.Dynamic;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -44,8 +45,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
             var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+
             //get the waybill number, then generate a qrcode and barcode using the waybill no.
             var waybill = _uow.PreShipmentMobile.Get(preShipmentDTO.PreShipmentMobileId);
+            var returnObj = new PreShipmentMobileThirdPartyDTO();
 
             if (waybill != null && !String.IsNullOrEmpty(waybill.Waybill))
             {
@@ -64,8 +67,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                 preShipmentDTO.WaybillImageFormat = "PNG";
                 File.Delete(qrCodePath);
                 File.Delete(barCodePath);
+               
+                if (result is PreShipmentMobileThirdPartyDTO)
+                {
+                    returnObj = (PreShipmentMobileThirdPartyDTO)result;
+                    returnObj.WaybillImage = waybillImageString;
+                    returnObj.WaybillImageFormat = "PNG";
+                }
             }
-            return result;
+            return new {waybill = returnObj.waybill, message = returnObj.message, returnObj.IsBalanceSufficient, Zone = returnObj.Zone, waybillImage = returnObj.WaybillImage, waybillImageFormat = returnObj.WaybillImageFormat };
         }
 
         public async Task<IEnumerable<StationDTO>> GetInternationalStations()

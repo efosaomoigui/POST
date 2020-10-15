@@ -272,4 +272,14 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime DateCreated { get; set; }
         public string VehicleType { get; set; }
     }
+
+    public class PreShipmentMobileThirdPartyDTO
+    {
+        public string waybill { get; set; }
+        public string message { get; set; }
+        public bool IsBalanceSufficient { get; set; }
+        public int Zone { get; set; }
+        public string WaybillImage { get; set; }
+        public string WaybillImageFormat { get; set; }
+    }
 }

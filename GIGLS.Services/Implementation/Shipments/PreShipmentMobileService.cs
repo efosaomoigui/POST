@@ -190,7 +190,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
                 }
-                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
+
+                var preshipmentRetuenObj = new PreShipmentMobileThirdPartyDTO();
+                preshipmentRetuenObj.waybill = newPreShipment.Waybill;
+                preshipmentRetuenObj.message = message;
+                preshipmentRetuenObj.IsBalanceSufficient = IsBalanceSufficient;
+                preshipmentRetuenObj.Zone = zoneid.ZoneId;
+
+
+                return preshipmentRetuenObj;
             }
             catch (Exception)
             {
