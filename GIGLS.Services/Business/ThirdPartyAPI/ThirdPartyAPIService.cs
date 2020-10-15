@@ -8,23 +8,64 @@ using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+using BarcodeLib;
+using System.Drawing;
+using System.IO;
+using System.Data;
+using QRCoder;
+using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Drawing.Imaging;
+using Newtonsoft.Json.Converters;
+using System.Drawing.Drawing2D;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using System.Windows;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
     public class ThirdPartyAPIService : IThirdPartyAPIService
     {
-        private readonly ICustomerPortalService _portalService; 
+        private readonly ICustomerPortalService _portalService;
+        private readonly IQRAndBarcodeService _qrandbarcodeService;
         private readonly IUnitOfWork _uow;
 
-        public ThirdPartyAPIService(ICustomerPortalService portalService, IUnitOfWork uow)
+        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow)
         {
             _portalService = portalService;
+            _qrandbarcodeService = qrandbarcodeService;
             _uow = uow;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
-            return await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+            var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+            //get the waybill number, then generate a qrcode and barcode using the waybill no.
+            var waybill = _uow.PreShipmentMobile.Get(preShipmentDTO.PreShipmentMobileId);
+
+            if (waybill != null && !String.IsNullOrEmpty(waybill.Waybill))
+            {
+                //generate the qrcode and barcode.
+                var qrCodePath = await _qrandbarcodeService.ConverWaybillToQRCodeImage(waybill.Waybill);
+                var barCodePath = await _qrandbarcodeService.ConverWaybillToBarCodeImage(waybill.Waybill);
+
+                //get gig image
+                string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+                var gigImgPath  = folderPath + "\\GIGLogisticsLogo.png";
+               
+                //merge both image and convert to base64
+                var mergedImage = await _qrandbarcodeService.MergeImages(qrCodePath, barCodePath, gigImgPath, waybill.Waybill);
+                var waybillImageString = Convert.ToBase64String(mergedImage);
+                preShipmentDTO.WaybillImage = waybillImageString;
+                preShipmentDTO.WaybillImageFormat = "PNG";
+                File.Delete(qrCodePath);
+                File.Delete(barCodePath);
+            }
+            return result;
         }
 
         public async Task<IEnumerable<StationDTO>> GetInternationalStations()
@@ -384,5 +425,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         //        throw new GenericException("Error: You cannot track this waybill number.");
         //    }
         //}
+      
     }
 }
