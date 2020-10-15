@@ -442,7 +442,7 @@ namespace GIGLS.Services.Implementation.Customers
                 foreach (var item in result.Data.ApiList)
                 {
                     //get actions performed on shipment
-                    var actionIndx = item.Url.LastIndexOf('/');
+                   int actionIndx = item.Url.LastIndexOf('/');
                     actionIndx++;
                     var action = item.Url.Substring(actionIndx);
                     var partnerName = String.Empty;
@@ -452,15 +452,15 @@ namespace GIGLS.Services.Implementation.Customers
                         var partnerInfo = await _uow.Partner.GetPartnerByUserId(item.Body.PartnerId);
                         if (partnerInfo != null)
                         {
-                            partnerName = partnerInfo.FirstName;
-                            partnerPhoneNo = partnerInfo.PhoneNumber;
+                            partnerName = partnerInfo.PartnerName;
+                            partnerPhoneNo = partnerInfo.PhoneNumber; 
                         }
                     }
                     var obj = new ShipmentActivityDTO();
                     obj.Action = action.ToUpper();
                     obj.ActionBy = partnerName;
                     obj.ActionTime = item.CreationDate;
-                    obj.ActionReason = item.Reason;
+                    obj.ActionReason = item.ReasonText;
                     obj.CreatedOn = item.CreationDate;
                     if (item.StatusCode == "200")
                     {
