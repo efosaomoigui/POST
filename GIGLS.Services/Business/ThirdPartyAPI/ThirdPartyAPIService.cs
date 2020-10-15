@@ -61,6 +61,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var mergedImage = await _qrandbarcodeService.MergeImages(qrCodePath, barCodePath, gigImgPath, waybill.Waybill);
                 var waybillImageString = Convert.ToBase64String(mergedImage);
                 preShipmentDTO.WaybillImage = waybillImageString;
+                preShipmentDTO.WaybillImageFormat = "PNG";
                 File.Delete(qrCodePath);
                 File.Delete(barCodePath);
             }

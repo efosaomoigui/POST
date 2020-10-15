@@ -46,5 +46,6 @@ namespace GIGLS.Core.DTO.Shipments
         [Required]
         public string VehicleType { get; set; }
         public string WaybillImage { get; set; }
+        public string WaybillImageFormat { get; set; }
     }
 }
