@@ -90,6 +90,12 @@ namespace GIGLS.Services.Business.Scanning
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
             }
 
+            //2. check if the shipment has not been cancelled (DSC)
+            if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scan.ShipmentScanStatus == ShipmentScanStatus.AD)
+            {
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} is for Home Delivery, Kindly assign a Dispatch rider to deliver it to the customer within 24 hours!");
+            }
+
             var serviceCenters = await _userService.GetCurrentServiceCenter();
             var currentCenter = serviceCenters[0].ServiceCentreId;
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();

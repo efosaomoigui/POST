@@ -70,6 +70,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DestinationServiceCentreId = departure;
                 shipment.PickupOptions = PickupOptions.SERVICECENTER;
 
+                if (shipment.CustomerType.Contains("Individual"))
+                {
+                    throw new GenericException($"Return can not be initiated for this waybill {waybill} as the customer is not authorized to perform return");
+                }
+
                 //change ecommerce customer destination address to their return address
                 if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
                 {

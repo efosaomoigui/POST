@@ -33,6 +33,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var countries = await _userService.GetPriviledgeCountrys();
                 var dashboard = await _dashboardService.GetDashboard();
 
                 return new ServiceResponse<DashboardDTO>

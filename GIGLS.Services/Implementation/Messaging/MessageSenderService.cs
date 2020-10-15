@@ -86,9 +86,6 @@ namespace GIGLS.Services.Implementation.Messaging
 
             try
             {
-                //var emailMessages = await _messageService.GetEmailAsync();
-                //messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
-
                 var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == messageType);
                 if (smsMessages != null)
                 {
@@ -210,7 +207,6 @@ namespace GIGLS.Services.Implementation.Messaging
                     var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
-                    //
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
 
@@ -234,7 +230,16 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[16] = country.CurrencyCode;
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
-                   
+                    //Add Delivery Code to ArrivedFinalDestination message
+                    if(messageDTO.MessageType == MessageType.ARF)
+                    {
+                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
+                        if(deliveryNumber != null)
+                        {
+                            strArray[17] = deliveryNumber.SenderCode;
+                        }
+                    }
+
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
                     if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
                     {

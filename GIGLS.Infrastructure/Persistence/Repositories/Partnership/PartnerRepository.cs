@@ -198,5 +198,32 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                 throw;
             }
         }
+
+        public Task<PartnerDTO> GetPartnerByUserId(string partnerId)
+        {
+            var partners = _context.Partners;
+
+            var partnerDto = from partner in partners
+                             where partner.UserId == partnerId
+                             select new PartnerDTO
+                             {
+                                 PartnerId = partner.PartnerId,
+                                 PartnerName = partner.PartnerName,
+                                 Email = partner.Email,
+                                 Address = partner.Address,
+                                 PartnerCode = partner.PartnerCode,
+                                 PhoneNumber = partner.PhoneNumber,
+                                 OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 IdentificationNumber = "",
+                                 WalletPan = "",
+                                 IsActivated = partner.IsActivated,
+                                 ActivityStatus = partner.ActivityStatus
+                             };
+
+            return Task.FromResult(partnerDto.FirstOrDefault());
+        }
     }
 }
