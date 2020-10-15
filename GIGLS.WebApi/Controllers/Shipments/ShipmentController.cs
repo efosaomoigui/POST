@@ -177,6 +177,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("giggoextension")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddGIGGOShipmentFromAgility(PreShipmentMobileFromAgilityDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.AddAgilityShipmentToGIGGo(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{ShipmentId:int}")]
@@ -753,11 +768,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getgiggoprice")]
-        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO preshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var Price = await _customerPortalService.GetPrice(PreshipmentMobile);
+                preshipmentMobile.IsFromAgility = true;
+                var Price = await _customerPortalService.GetPrice(preshipmentMobile);
 
                 return new ServiceResponse<MobilePriceDTO>
                 {
