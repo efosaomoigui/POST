@@ -913,28 +913,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 var hashString = await ComputeHash(shipmentDTO);
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
 
-                //if (checkForHash != null)
-                //{
-                //    DateTime dateTime = DateTime.Now.AddMinutes(-30);
-                //    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
+                if (checkForHash != null)
+                {
+                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
 
-                //    if (timeResult > 0)
-                //    {
-                //        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
-                //    }
-                //    else
-                //    {
-                //        checkForHash.DateModified = DateTime.Now;
-                //    }
-                //}
-                //else
-                //{
-                //    var hasher = new ShipmentHash()
-                //    {
-                //        HashedShipment = hashString
-                //    };
-                //    _uow.ShipmentHash.Add(hasher);
-                //}
+                    if (timeResult > 0)
+                    {
+                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    }
+                    else
+                    {
+                        checkForHash.DateModified = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    var hasher = new ShipmentHash()
+                    {
+                        HashedShipment = hashString
+                    };
+                    _uow.ShipmentHash.Add(hasher);
+                }
 
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
@@ -957,6 +957,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
+
+                //QR Code
+                await GenerateDeliveryNumber(newShipment.Waybill);
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
