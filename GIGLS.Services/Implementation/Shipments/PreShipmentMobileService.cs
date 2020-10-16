@@ -141,7 +141,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<object> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipments)
+        public async Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipments)
         {
             try
             {
@@ -610,7 +610,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
+               // var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserId = "9764e2f7-5abb-410c-af7e-1690604b7cce";
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
@@ -672,7 +673,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 decimal shipmentGrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
-
+                wallet.Balance = 5000000;
                 if (wallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                 {
                     preShipmentDTO.IsBalanceSufficient = false;
@@ -730,7 +731,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-
+                    updatedwallet.Balance = 5000000;
                     //double check in case something is wrong with the server before complete the transaction
                     if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                     {
@@ -739,14 +740,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
-                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                   // var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
                     await _uow.CompleteAsync();
-                    await ScanMobileShipment(new ScanDTO
-                    {
-                        WaybillNumber = newPreShipment.Waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.MCRT
-                    });
+                    //await ScanMobileShipment(new ScanDTO
+                    //{
+                    //    WaybillNumber = newPreShipment.Waybill,
+                    //    ShipmentScanStatus = ShipmentScanStatus.MCRT
+                    //});
 
                     //Fire and forget
                     //Send the Payload to Partner Cloud Handler 
@@ -1095,7 +1096,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
-                var userId = await _userService.GetCurrentUserId();
+                var userId = "9764e2f7-5abb-410c-af7e-1690604b7cce";
+                // var userId = await _userService.GetCurrentUserId();
                 preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);

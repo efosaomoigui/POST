@@ -45,23 +45,20 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
             var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
-
-            //get the waybill number, then generate a qrcode and barcode using the waybill no.
-            var waybill = _uow.PreShipmentMobile.Get(preShipmentDTO.PreShipmentMobileId);
             var returnObj = new PreShipmentMobileThirdPartyDTO();
 
-            if (waybill != null && !String.IsNullOrEmpty(waybill.Waybill))
+            if (!String.IsNullOrEmpty(result.waybill))
             {
                 //generate the qrcode and barcode.
-                var qrCodePath = await _qrandbarcodeService.ConverWaybillToQRCodeImage(waybill.Waybill);
-                var barCodePath = await _qrandbarcodeService.ConverWaybillToBarCodeImage(waybill.Waybill);
+                var qrCodePath = await _qrandbarcodeService.ConverWaybillToQRCodeImage(result.waybill);
+                var barCodePath = await _qrandbarcodeService.ConverWaybillToBarCodeImage(result.waybill);
 
                 //get gig image
                 string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
                 var gigImgPath  = folderPath + "\\GIGLogisticsLogo.png";
                
                 //merge both image and convert to base64
-                var mergedImage = await _qrandbarcodeService.MergeImages(qrCodePath, barCodePath, gigImgPath, waybill.Waybill);
+                var mergedImage = await _qrandbarcodeService.MergeImages(qrCodePath, barCodePath, gigImgPath, result.waybill);
                 var waybillImageString = Convert.ToBase64String(mergedImage);
                 preShipmentDTO.WaybillImage = waybillImageString;
                 preShipmentDTO.WaybillImageFormat = "PNG";
