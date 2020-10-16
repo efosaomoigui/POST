@@ -1763,8 +1763,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //Remove this 
-        [AllowAnonymous]
         [HttpPost]
         [Route("addmobilepickuprequestfortimedoutrequests")]
         public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
