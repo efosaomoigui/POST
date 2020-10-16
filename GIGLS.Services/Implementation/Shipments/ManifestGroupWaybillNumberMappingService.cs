@@ -2,10 +2,12 @@
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
@@ -13,6 +15,8 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -25,10 +29,11 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
         private readonly IShipmentTrackingService _trackingService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
-            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService)
+            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _manifestService = manifestService;
@@ -36,6 +41,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userService = userService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
             _trackingService = trackingService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -339,7 +345,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //check if GroupWaybill has not been added to manifest 
                     var isGroupWaybillMapped = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
 
-                    //if the waybill has not been added to manifest, add it
+                    //the waybill has not been added to manifest, add it
                     if (!isGroupWaybillMapped)
                     {
                         //Add new Mapping
@@ -362,9 +368,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             newManifest.DepartureServiceCentreId = groupWaybillNumberDTO.DepartureServiceCentreId;
                             _uow.Manifest.Add(newManifest);
                         }
-
                     }
                 }
+
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -374,12 +380,13 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //map Manifest to Super Manifest
-        public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int departid, int destinationid)
+        public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId) 
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var currentServiceCentre = await _userService.GetCurrentServiceCenter(); 
 
                 var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true &&
                 manifestList.Contains(x.ManifestCode) &&
@@ -387,21 +394,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 serviceCenters.Contains(x.DepartureServiceCentreId));
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
-                int manifestByScListCount = manifestByScList.Count;
-
-                if (manifestByScListCount != manifestList?.Count)
-                {
-                    var result = manifestList.Where(x => !manifestByScList.Contains(x));
-
-                    if (result.Any())
-                    {
-                        throw new GenericException($"Error: Movement Manifest cannot be created. " +
-                            $"The following manifests [{string.Join(", ", result.ToList())}] are not available for Processing");
-                    }
-                }
+                //int manifestByScListCount = manifestByScList.Count;
 
                 //convert the list to HashSet to remove duplicate
                 var newManifestList = new HashSet<string>(manifestList);
+                var today = DateTime.Now;
 
                 foreach (var manifestCode in newManifestList)
                 {
@@ -420,28 +417,75 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         MovementManifestCode = movementmanifestCode,
                         ManifestNumber = manifestCode,
-                        DateCreated = DateTime.Now,
                         UserId = userId
                     };
                     _uow.MovementManifestNumberMapping.Add(resultMap);
 
                 }
 
+                //create Code for validation and release code for shipment
+                var driverCode = await GenerateDeliveryCode();
+                var destServiceCentreCode = await GenerateDeliveryCode();
+
+                var message = new MovementManifestMessageDTO
+                {
+                    MovementManifestCode = movementmanifestCode,
+                    DepartureServiceCentre = currentServiceCentre[0],
+                    DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
+                };
+
+                //message.QRCode = deliveryNumber.SenderCode;
+                await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
+
                 var MovementManifestNumberResult = new MovementManifestNumber()
                 {
-                    DepartureServiceCentreId = departid,
-                    DestinationServiceCentreId = destinationid,
-                    DateCreated = DateTime.Now,
+                    DepartureServiceCentreId = serviceCenters[0],
+                    DestinationServiceCentreId = destinationScId,
                     MovementManifestCode = movementmanifestCode,
                     UserId = userId,
                     MovementStatus = MovementStatus.EnRoute,
+                    DriverCode = driverCode,
+                    DestinationServiceCentreCode = destServiceCentreCode
                 };
 
-                //create Code for validation and releasae of shipment
-
+                _uow.MovementManifestNumber.Add(MovementManifestNumberResult);
                 await _uow.CompleteAsync();
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task SendSMSForMobileShipmentCreation(MovementManifestMessageDTO  smsMessageExtensionDTO, MessageType messageType)
+        {
+            await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, smsMessageExtensionDTO);
+        }
+
+        public async Task<string> GenerateDeliveryCode()
+        {
+            try
+            {
+                int maxSize = 6;
+                char[] chars = new char[54];
+                string a;
+                a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = "DN" + strippedText.ToUpper();
+                return number;
+            }
+            catch
             {
                 throw;
             }

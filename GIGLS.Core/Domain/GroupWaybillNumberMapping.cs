@@ -36,7 +36,6 @@ namespace GIGL.GIGLS.Core.Domain   //
     public class MovementManifestNumberMapping : BaseDomain
     {
         public int MovementManifestNumberMappingId { get; set; } 
-        public DateTime DateMapped { get; set; }
 
         [MaxLength(100), MinLength(5)]
         public string MovementManifestCode { get; set; } 

@@ -38,7 +38,11 @@ namespace GIGLS.CORE.DTO.Shipments
         public int MovementManifestNumberMappingId { get; set; } 
         public DateTime DateMapped { get; set; }
         public string MovementManifestCode { get; set; } 
-        public List<string> ManifestNumber { get; set; } 
+        public List<string> ManifestNumbers { get; set; } 
         public string UserId { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre DepartureServiceCentre { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentre DestinationServiceCentre { get; set; }
     }
 }

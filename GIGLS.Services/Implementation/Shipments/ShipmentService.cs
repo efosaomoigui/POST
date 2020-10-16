@@ -2009,6 +2009,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return zone;
         }
 
+
+        public async Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId)
+        {
+            return await _centreService.GetServiceCentreById(ServiceCenterId);
+        }
+
         public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
         {
             //filter by User Active Country

@@ -204,7 +204,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                          {
                                              MovementManifestCode = gw.MovementManifestCode,
                                              MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                             DateMapped = gw.DateMapped,
                                              DateCreated = gw.DateCreated,
                                              DateModified = gw.DateModified,
                                              //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
@@ -242,7 +241,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                          {
                                              MovementManifestCode = gw.MovementManifestCode,
                                              MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                             DateMapped = gw.DateMapped,
                                              DateCreated = gw.DateCreated,
                                              DateModified = gw.DateModified,
                                              //DepartureServiceCentreId = gw.DepartureServiceCentreId,
@@ -278,7 +276,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                           {
                                               MovementManifestCode = gw.MovementManifestCode,
                                               MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                              DateMapped = gw.DateMapped,
                                               DateCreated = gw.DateCreated,
                                               DateModified = gw.DateModified,
                                               //DepartureServiceCentreId = gw.DepartureServiceCentreId,
