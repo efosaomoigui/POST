@@ -539,32 +539,32 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //check if the shipment pin corresponds to the pin for the waybill 
-            if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
-            {
-                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
-                if (deliveryNumber != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
-                    {
-                        if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-                        {
-                            throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                        }
-                    }
-                    else
-                    {
-                        if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-                        {
-                            throw new GenericException($"This Delivery Nubmer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                        }
-                    }
+            //if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
+            //{
+            //    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+            //    if (deliveryNumber != null)
+            //    {
+            //        if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
+            //        {
+            //            if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+            //            {
+            //                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+            //            {
+            //                throw new GenericException($"This Delivery Nubmer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+            //            }
+            //        }
 
-                }
-                else
-                {
-                    throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                }
-            }
+            //    }
+            //    else
+            //    {
+            //        throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+            //    }
+            //}
 
             await UpdateShipmentCollection(shipmentCollection);
 

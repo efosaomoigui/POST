@@ -2142,13 +2142,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     var partner = await _uow.MobilePickUpRequests.GetPartnerDetailsForAWaybill(waybill);
                     Shipmentdto.partnerDTO = partner;
 
-                    if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
+                    //if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
+                    //{
+                    //    var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
+                    //    if (qrCode != null)
+                    //    {
+                    //        Shipmentdto.QRCode = qrCode.SenderCode;
+                    //    }
+                    //}
+
+                    var codes = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == waybill);
+                    if (codes != null)
                     {
-                        var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
-                        if (qrCode != null)
-                        {
-                            Shipmentdto.QRCode = qrCode.SenderCode;
-                        }
+                        Shipmentdto.QRCode = codes.SenderCode;
+                        Shipmentdto.SenderCode = codes.SenderCode;
+                        Shipmentdto.ReceiverCode = codes.ReceiverCode;
                     }
                 }
                 else
@@ -2158,11 +2166,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
 
+                        if (agilityshipment.CustomerType.Contains("Individual"))
+                        {
+                            agilityshipment.CustomerType = CustomerType.IndividualCustomer.ToString();
+                        }
+
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), agilityshipment.CustomerType);
                         var CustomerDetails = await _customerService.GetCustomer(agilityshipment.CustomerId, customerType);
 
                         Shipmentdto.SenderAddress = CustomerDetails.Address;
-                        Shipmentdto.SenderName = CustomerDetails.Name;
+                        Shipmentdto.SenderName = CustomerDetails.CustomerName;
                         Shipmentdto.SenderPhoneNumber = CustomerDetails.PhoneNumber;
 
                         Shipmentdto.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
@@ -2180,6 +2193,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             Shipmentdto.CurrencyCode = country.CurrencyCode;
                             Shipmentdto.CurrencySymbol = country.CurrencySymbol;
+                        }
+
+                        var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == agilityshipment.Waybill);
+                        if (qrCode != null)
+                        {
+                            Shipmentdto.QRCode = qrCode.SenderCode;
+                            Shipmentdto.SenderCode = qrCode.SenderCode;
+                            Shipmentdto.ReceiverCode = qrCode.ReceiverCode;
                         }
                     }
                     else
@@ -2802,7 +2823,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                 {
-                    await ConfirmMobilePickupRequest(pickuprequest, userId);
+                    //await ConfirmMobilePickupRequest(pickuprequest, userId);
+
+                    throw new GenericException($"Your App version is Old, Kindly update to the latest version.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
@@ -4248,7 +4271,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userId = await _userService.GetCurrentUserId();
+                //var userId = await _userService.GetCurrentUserId();
                 var number = await _uow.DeliveryNumber.GetAsync(s => s.Number.ToLower() == detail.DeliveryNumber.ToLower());
                 if (number == null)
                 {
@@ -4275,13 +4298,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("No record in Delivery Number for this Waybill", $"{(int)HttpStatusCode.NotFound}");
                         }
-                        else
-                        {
-                            if (deliveryNumber.UserId != userId)
-                            {
-                                throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
-                            }
-                        }
+                        //else
+                        //{
+                        //    if (deliveryNumber.UserId != userId)
+                        //    {
+                        //        throw new GenericException("This Waybill was not verified by you", $"{(int)HttpStatusCode.Forbidden}");
+                        //    }
+                        //}
 
                         var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
 
@@ -4341,7 +4364,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         Status = MobilePickUpRequestStatus.Confirmed.ToString(),
                         Waybill = mobileShipment.Waybill
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await ConfirmMobilePickupRequest(request, userId);
 
                     //Send SMS To Receiver with Delivery Code
                     await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
@@ -4360,7 +4385,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = mobileShipment.Waybill
 
                     };
-                    await UpdateMobilePickupRequest(request);
+                    //await UpdateMobilePickupRequest(request);
+
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(request, userId);
+                    await DeliveredMobilePickupRequest(request, userId);
+                    await UpdateActivityStatus(userId, ActivityStatus.OffDelivery);
                 }
                 await _uow.CompleteAsync();
                 return true;
@@ -4790,6 +4819,13 @@ namespace GIGLS.Services.Implementation.Shipments
                                     if (UserServiceCenters.Any())
                                     {
                                         detail.SenderServiceCentreId = UserServiceCenters[0];
+                                    }
+
+                                    //Fix For Home Delivery for Lagos, Abuja , Port Harcourt For now
+                                    if(preshipmentmobile.ReceiverStationId == 4 || preshipmentmobile.ReceiverStationId == 3 || preshipmentmobile.ReceiverStationId == 30)
+                                    {
+                                        var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
+                                        detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
                                     }
 
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);

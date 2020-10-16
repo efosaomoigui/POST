@@ -6,6 +6,7 @@ namespace GIGLS.Core.DTO.Report
     {
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? ActiveCountryId { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database
@@ -62,6 +63,5 @@ namespace GIGLS.Core.DTO.Report
             return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(1));
         }
 
-        public int? ActiveCountryId { get; set; }
     }
 }
