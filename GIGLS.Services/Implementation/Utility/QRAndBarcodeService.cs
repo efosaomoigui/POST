@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using QRCoder;
 using BarcodeLib;
+using System.Web.Hosting;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -33,7 +34,7 @@ namespace GIGLS.Services.Implementation.Utility
                 QRCode qrCode = new QRCode(qrCodeData);
                 Image qrCodeImage = qrCode.GetGraphic(20);
                 var imgPath = String.Empty;
-                string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+                string folderPath = HostingEnvironment.MapPath("~/Images/");
                 using (var ms = new MemoryStream())
                 {
                     Bitmap bmp1 = new Bitmap(qrCodeImage);
@@ -64,7 +65,7 @@ namespace GIGLS.Services.Implementation.Utility
                 // Generate the barcode with your settings
                 Image barcodeImage = barcodeAPI.Encode(TYPE.CODE128, waybill);
                 var imgPath = String.Empty;
-                string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+                string folderPath = HostingEnvironment.MapPath("~/Images/");
                 using (var ms = new MemoryStream())
                 {
                     Bitmap bmp1 = new Bitmap(barcodeImage);
@@ -96,7 +97,7 @@ namespace GIGLS.Services.Implementation.Utility
             int gigImgWidth = frame1.PixelWidth + frame1.PixelWidth;
             int gigImgHeight = frame1.PixelHeight / 2;
             int bcImgsp = frame1.PixelWidth / imageHeight;
-            string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+            string folderPath = HostingEnvironment.MapPath("~/Images/");
             folderPath = $"{folderPath}\\{waybill}MI.png";
 
             // Draws the images into a DrawingVisual component

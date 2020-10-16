@@ -11,6 +11,7 @@ using GIGLS.Core.DTO.User;
 using System;
 using System.IO;
 using GIGLS.Core.IServices.Utility;
+using System.Web.Hosting;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -39,7 +40,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var barCodePath = await _qrandbarcodeService.ConverWaybillToBarCodeImage(result.waybill);
 
                 //get gig image
-                string folderPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+                string folderPath = HostingEnvironment.MapPath("~/Images/");
                 var gigImgPath  = folderPath + "\\GIGLogisticsLogo.png";
                
                 //merge both image and convert to base64
@@ -50,12 +51,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                 File.Delete(qrCodePath);
                 File.Delete(barCodePath);
 
+                //get merged image path and delete also;
                 if (result is PreShipmentMobileThirdPartyDTO)
                 {
                     returnObj = (PreShipmentMobileThirdPartyDTO)result;
                     returnObj.WaybillImage = waybillImageString;
                     returnObj.WaybillImageFormat = "PNG";
                 }
+               // var imgPath = $"{folderPath}\\{result.waybill}MI.png";
+               // File.Delete(imgPath);
             }
             return new {waybill = returnObj.waybill, message = returnObj.message, returnObj.IsBalanceSufficient, Zone = returnObj.Zone, waybillImage = returnObj.WaybillImage, waybillImageFormat = returnObj.WaybillImageFormat };
         }
