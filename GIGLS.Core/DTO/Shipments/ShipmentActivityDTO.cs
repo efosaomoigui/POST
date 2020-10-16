@@ -40,13 +40,9 @@ namespace GIGLS.Core.DTO.Shipments
         {
             Body = new Body();
         }
-        public string Method { get; set; }
         public string StatusCode { get; set; }
-        public string ApiId { get; set; }
-        public string completeUrl { get; set; }
-        public string baseUrl { get; set; }
         public string Url { get; set; }
-        public string Reason { get; set; }
+        public string ReasonText { get; set; }
         public DateTime CreationDate { get; set; }
         public Body Body { get; set; }
     }
@@ -57,6 +53,4 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerId { get; set; }
         public string waybillNumber { get; set; }
     }
-
-
 }
