@@ -161,5 +161,6 @@ namespace GIGLS.Core.Domain
         public bool IsScheduled { get; set; }
         public DateTime? ScheduledDate { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public bool IsFromAgility { get; set; }
     }
 }

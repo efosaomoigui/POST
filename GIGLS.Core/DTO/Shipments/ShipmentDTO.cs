@@ -144,6 +144,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public string VehicleType { get; set; }
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 

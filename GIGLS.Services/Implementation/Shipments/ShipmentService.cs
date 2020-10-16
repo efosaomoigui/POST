@@ -331,6 +331,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
                 shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
 
+                if(shipment.IsFromMobile == true)
+                {
+                    var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == shipment.Waybill && x.IsFromAgility == true);
+                    if(preShipmentMobile != null)
+                    {
+                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == preShipmentMobile.Waybill);
+                        shipmentDto.SenderCode = deliveryNumber.SenderCode;
+
+                        if(shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                        {
+                            shipmentDto.ReceiverCode = deliveryNumber.ReceiverCode;
+                        }
+                    }
+                }
+
                 return shipmentDto;
             }
             catch (Exception)
@@ -898,28 +913,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 var hashString = await ComputeHash(shipmentDTO);
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
 
-                if (checkForHash != null)
-                {
-                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
-                    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
+                //if (checkForHash != null)
+                //{
+                //    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                //    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
 
-                    if (timeResult > 0)
-                    {
-                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
-                    }
-                    else
-                    {
-                        checkForHash.DateModified = DateTime.Now;
-                    }
-                }
-                else
-                {
-                    var hasher = new ShipmentHash()
-                    {
-                        HashedShipment = hashString
-                    };
-                    _uow.ShipmentHash.Add(hasher);
-                }
+                //    if (timeResult > 0)
+                //    {
+                //        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                //    }
+                //    else
+                //    {
+                //        checkForHash.DateModified = DateTime.Now;
+                //    }
+                //}
+                //else
+                //{
+                //    var hasher = new ShipmentHash()
+                //    {
+                //        HashedShipment = hashString
+                //    };
+                //    _uow.ShipmentHash.Add(hasher);
+                //}
 
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
@@ -3385,6 +3400,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(mobileShipment);
 
                 newPreShipment.DateCreated = DateTime.Now;
+                newPreShipment.IsFromAgility = true;
+
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 await _uow.CompleteAsync();
 
