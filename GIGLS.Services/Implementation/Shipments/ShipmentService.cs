@@ -858,10 +858,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Items cannot be empty");
                 }
 
+                if (shipment.PaymentType == PaymentType.Wallet)
+                {
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
+                    if(wallet.Balance < shipment.GrandTotal)
+                    {
+                        throw new GenericException("Insufficient Balance in the Wallet");
+                    }
+                    shipment.TransactionCode = wallet.WalletNumber;
+                }
+
                 shipment.DateCreated = DateTime.Now;
                 var zoneid = await _domesticRouteZoneMapService.GetZoneMobile(shipment.SenderStationId, shipment.ReceiverStationId);
                 shipment.ZoneMapping = zoneid.ZoneId;
-
 
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
                 shipmentDTO.IsFromMobile = true;
@@ -886,28 +895,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 var hashString = await ComputeHash(shipmentDTO);
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
 
-                //if (checkForHash != null)
-                //{
-                //    DateTime dateTime = DateTime.Now.AddMinutes(-30);
-                //    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
+                if (checkForHash != null)
+                {
+                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
 
-                //    if (timeResult > 0)
-                //    {
-                //        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
-                //    }
-                //    else
-                //    {
-                //        checkForHash.DateModified = DateTime.Now;
-                //    }
-                //}
-                //else
-                //{
-                //    var hasher = new ShipmentHash()
-                //    {
-                //        HashedShipment = hashString
-                //    };
-                //    _uow.ShipmentHash.Add(hasher);
-                //}
+                    if (timeResult > 0)
+                    {
+                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    }
+                    else
+                    {
+                        checkForHash.DateModified = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    var hasher = new ShipmentHash()
+                    {
+                        HashedShipment = hashString
+                    };
+                    _uow.ShipmentHash.Add(hasher);
+                }
 
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
@@ -931,12 +940,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
-                if (shipment.PaymentType == PaymentType.Wallet)
-                {
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipmentDTO.CustomerCode);
-                    shipment.TransactionCode = wallet.WalletNumber;
-                }
-
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
@@ -959,23 +962,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-
-                ////For Corporate Customers, Pay for their shipments through wallet immediately
-                //if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
-                //{
-                //    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
-                //    var wallet = walletEnumeration.FirstOrDefault();
-
-                //    if (wallet != null)
-                //    {
-                //        await _paymentService.ProcessPayment(new PaymentTransactionDTO()
-                //        {
-                //            PaymentType = PaymentType.Wallet,
-                //            TransactionCode = wallet.WalletNumber,
-                //            Waybill = newShipment.Waybill
-                //        });
-                //    }
-                //}
+                
                 return newShipment;
             }
             catch (Exception ex)
@@ -3298,15 +3285,14 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.Customer[0].CustomerCode);
-                //var currentUserId = userDTO.Id;
 
                 preShipment.UserId = userDTO.Id;
-                var user = await _userService.GetUserById(preShipment.UserId);
-                preShipment.CustomerCode = user.UserChannelCode;
+                //var user = await _userService.GetUserById(preShipment.UserId);
+                preShipment.CustomerCode = userDTO.UserChannelCode;
 
                 var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DepartureServiceCentreId);
                 var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == userDTO.UserChannelCode);
 
                 if (preShipment.PickupOptions == PickupOptions.SERVICECENTER)
                 {
@@ -3314,14 +3300,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.ReceiverAddress = receieverServiceCenter.Address;
                 }
 
-                if (user.UserChannelType == UserChannelType.Ecommerce)
+                if (userDTO.UserChannelType == UserChannelType.Ecommerce)
                 {
                     preShipment.CustomerType = CustomerType.Company.ToString();
                     preShipment.CompanyType = CompanyType.Ecommerce.ToString();
                     preShipment.SenderName = customer.Name;
 
                 }
-                else if (user.UserChannelType == UserChannelType.Corporate)
+                else if (userDTO.UserChannelType == UserChannelType.Corporate)
                 {
                     preShipment.CustomerType = CustomerType.Company.ToString();
                     preShipment.CompanyType = CompanyType.Corporate.ToString();
@@ -3362,15 +3348,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     SenderPhoneNumber = preShipment.Customer[0].PhoneNumber,
                     CustomerCode = preShipment.Customer[0].CustomerCode,
                     VehicleType = preShipment.VehicleType,
-
                     UserId = preShipment.UserId,
-
                     IsdeclaredVal = preShipment.IsdeclaredVal,
                     DiscountValue = preShipment.Discount,
                     InsuranceValue = preShipment.InsuranceValue,
                     Vat = 0,
                     DeliveryPrice = preShipment.DeliveryPrice,
-
+                    SenderLocality = preShipment.SenderLocality,
                     ZoneMapping = preShipment.ZoneMapping,
 
                     CountryId = preShipment.CountryId,

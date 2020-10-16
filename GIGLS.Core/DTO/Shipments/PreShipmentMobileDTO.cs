@@ -290,6 +290,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CompanyType { get; set; }
         public string CustomerCode { get; set; }
         public string SenderAddress { get; set; }
+        public string SenderLocality { get; set; }
 
         //Receivers Information
         public string ReceiverName { get; set; }
