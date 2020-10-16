@@ -1680,7 +1680,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
-        public async Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment)
+        public async Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment)
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
