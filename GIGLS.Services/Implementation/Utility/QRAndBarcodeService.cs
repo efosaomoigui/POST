@@ -1,16 +1,8 @@
 ﻿using GIGLS.Core.IServices.Utility;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Utility;
 using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.Core.Domain.Utility;
-using AutoMapper;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO;
 using System.Linq;
-using System.Net;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
@@ -32,8 +24,6 @@ namespace GIGLS.Services.Implementation.Utility
             MapperConfig.Initialize();
         }
 
-
-
         public async Task<string> ConverWaybillToQRCodeImage(string waybill)
         {
             try
@@ -48,7 +38,7 @@ namespace GIGLS.Services.Implementation.Utility
                 {
                     Bitmap bmp1 = new Bitmap(qrCodeImage);
                     bmp1.Save(ms, ImageFormat.Png);
-                    Image img = System.Drawing.Image.FromStream(ms);
+                    Image img = Image.FromStream(ms);
                     img.Save($"{folderPath}\\{waybill}QC.png", ImageFormat.Png);
                     imgPath = $"{folderPath}\\{waybill}QC.png";
                 }
@@ -79,7 +69,7 @@ namespace GIGLS.Services.Implementation.Utility
                 {
                     Bitmap bmp1 = new Bitmap(barcodeImage);
                     bmp1.Save(ms, ImageFormat.Png);
-                    Image img = System.Drawing.Image.FromStream(ms);
+                    Image img = Image.FromStream(ms);
                     img.Save($"{folderPath}\\{waybill}BC.png", ImageFormat.Png);
                     imgPath = $"{folderPath}\\{waybill}BC.png";
                 }
