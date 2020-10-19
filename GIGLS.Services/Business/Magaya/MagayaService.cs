@@ -639,77 +639,87 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
         {
             //get the current user info
-            var currentUserId = await _userService.GetCurrentUserId();
-            var user = await _userService.GetUserById(currentUserId);
-            var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
-
-            if (customer.CustomerType == CustomerType.Company)
+            try
             {
-                shipmentDTO.CustomerId = customer.CompanyId;
-                shipmentDTO.CustomerFirstName = customer.Name;
-                shipmentDTO.CustomerLastName = customer.Name;
-                shipmentDTO.CustomerEmail = customer.Email;
-                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
-                shipmentDTO.CustomerAddress = customer.Address;
-                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
-                shipmentDTO.CustomerCity = customer.City;
-                shipmentDTO.CustomerState = customer.State;
-            }
-            else
-            {
-                shipmentDTO.CustomerId = customer.IndividualCustomerId;
-                shipmentDTO.CustomerFirstName = customer.FirstName;
-                shipmentDTO.CustomerLastName = customer.LastName;
-                shipmentDTO.CustomerEmail = customer.Email;
-                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
-                shipmentDTO.CustomerAddress = customer.Address;
-                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
-                shipmentDTO.CustomerCity = customer.City;
-                shipmentDTO.CustomerState = customer.State;
-            }
+                var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
 
-            shipmentDTO.UserId = currentUserId;
-            shipmentDTO.CustomerType = customer.CustomerType.ToString();
-
-            var station = await _stationService.GetStationById(shipmentDTO.StationId);
-            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
-
-            //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
-            //{
-            var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
-            shipmentDTO.RequestNumber = RequestNumber;
-            //}
-
-            var newShipment = await MapIntlShipmentRequest(shipmentDTO);
-            newShipment.ReceiverCountry = station.Country;
-            newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
-            newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
-            newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
-
-            var serialNumber = 1;
-            foreach (var shipmentItem in newShipment.ShipmentRequestItems)
-            {
-                shipmentItem.SerialNumber = serialNumber;
-
-                //check for volumetric weight
-                if (shipmentItem.IsVolumetric)
+                if (customer.CustomerType == CustomerType.Company)
                 {
-                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
-                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
-                    newShipment.ApproximateItemsWeight += Weight;
-                    newShipment.GrandTotal += shipmentItem.Price;
+                    shipmentDTO.CustomerId = customer.CompanyId;
+                    shipmentDTO.CustomerFirstName = customer.Name;
+                    shipmentDTO.CustomerLastName = customer.Name;
+                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                    shipmentDTO.CustomerAddress = customer.Address;
+                    shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                    shipmentDTO.CustomerCity = customer.City;
+                    shipmentDTO.CustomerState = customer.State;
+                    shipmentDTO.SenderAddress = customer.Address;
                 }
                 else
                 {
-                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    shipmentDTO.CustomerId = customer.IndividualCustomerId;
+                    shipmentDTO.CustomerFirstName = customer.FirstName;
+                    shipmentDTO.CustomerLastName = customer.LastName;
+                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                    shipmentDTO.CustomerAddress = customer.Address;
+                    shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                    shipmentDTO.CustomerCity = customer.City;
+                    shipmentDTO.CustomerState = customer.State;
+                    shipmentDTO.SenderAddress = customer.Address;
                 }
 
-                serialNumber++;
+                shipmentDTO.UserId = currentUserId;
+                shipmentDTO.CustomerType = customer.CustomerType.ToString();
+
+                var station = await _stationService.GetStationById(shipmentDTO.StationId);
+                var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
+
+                //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
+                //{
+                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
+                shipmentDTO.RequestNumber = RequestNumber;
+                //}
+
+                var newShipment = await MapIntlShipmentRequest(shipmentDTO);
+                newShipment.ReceiverCountry = station.Country;
+                newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
+                newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
+                newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+
+                var serialNumber = 1;
+                foreach (var shipmentItem in newShipment.ShipmentRequestItems)
+                {
+                    shipmentItem.SerialNumber = serialNumber;
+
+                    //check for volumetric weight
+                    if (shipmentItem.IsVolumetric)
+                    {
+                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+                        newShipment.ApproximateItemsWeight += Weight;
+                        newShipment.GrandTotal += shipmentItem.Price;
+                    }
+                    else
+                    {
+                        newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    }
+
+                    serialNumber++;
+                }
+                newShipment.DestinationServiceCentre = null;
+                _uow.IntlShipmentRequest.Add(newShipment);
+                await _uow.CompleteAsync();
+                return shipmentDTO;
+            } 
+            catch (Exception ex)
+            {
+                throw;
             }
 
-            _uow.IntlShipmentRequest.Add(newShipment);
-            await _uow.CompleteAsync();
-            return shipmentDTO;
         }
 
         public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)
@@ -935,7 +945,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
         {
-            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto); 
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
             return result;
         }
 

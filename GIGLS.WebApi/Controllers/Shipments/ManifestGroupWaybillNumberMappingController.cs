@@ -10,6 +10,7 @@ using System.Linq;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Fleets;
 using System;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -79,6 +80,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmovmentmanifest")]
+        public async Task<IServiceResponse<bool>> MovementManifestNumberMapping(MovementManifestNumberMappingDTO data) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId); 
                 return new ServiceResponse<bool>
                 {
                     Object = true
