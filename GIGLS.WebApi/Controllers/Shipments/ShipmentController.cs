@@ -365,6 +365,38 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestFormovementmanifestservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre([FromUri] MovementManifestFilterCriteria filterOptionsDto) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unmappedGroupWaybills = await _service.GetManifestForMovementManifestServiceCentre(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = unmappedGroupWaybills,
+                    Total = unmappedGroupWaybills.Count
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmovementmanifestservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedMovementmanifestservicecentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetUnmappedMovementManifestServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("unmappedmanifestforservicecentre")]
         public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria filterOptionsDto)

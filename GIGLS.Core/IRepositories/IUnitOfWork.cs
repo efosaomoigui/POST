@@ -190,6 +190,10 @@ namespace GIGLS.Core
         IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
         IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
 
+        //Mpvement Manifest
+        IMovementManifestNumberRepository MovementManifestNumber { get; set; }
+        IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

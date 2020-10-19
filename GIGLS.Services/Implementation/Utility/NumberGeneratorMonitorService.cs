@@ -47,6 +47,16 @@ namespace GIGLS.Services.Implementation.Utility
                     number = long.Parse(numberCode) + 1;
                     numberStr = number.ToString("00");
                 }
+                else if (numberGeneratorType == NumberGeneratorType.MovementManifestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00000");
+                }
+                else if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("0000");
+                }
                 else
                 {
                     number = long.Parse(numberCode) + 1;
@@ -69,7 +79,15 @@ namespace GIGLS.Services.Implementation.Utility
                 var codeStr = serviceCentreId.ToString("000");
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
-                numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                if (numberGeneratorType != NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                }
+                else
+                {
+                    numberGenerated = (ResolvePrefixFromNumberGeneratorType(numberGeneratorType)-9) + codeStr + numberStr;
+                }
+
                 if (numberGeneratorType == NumberGeneratorType.MagayaWb)
                 {
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
@@ -77,13 +95,13 @@ namespace GIGLS.Services.Implementation.Utility
 
                 if (numberGeneratorType == NumberGeneratorType.RequestNumber)
                 {
-                    numberGenerated = "REQ-" + ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + numberStr;
+                    numberGenerated = "REQ-" + numberGenerated;
                 }
 
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
-                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode
+                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode 
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
@@ -187,6 +205,14 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return (int)NumberGeneratorType.SuperManifest;
                     }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return (int)NumberGeneratorType.RequestNumber;
+                    }
+                case NumberGeneratorType.MovementManifestNumber:
+                    {
+                        return (int)NumberGeneratorType.MovementManifestNumber;
+                    }
                 default:
                     {
                         return (int)NumberGeneratorType.WaybillNumber;
@@ -229,6 +255,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.PreShipmentCode:
                     {
                         return "PRE";
+                    }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return "REQ-";
                     }
                 default:
                     {

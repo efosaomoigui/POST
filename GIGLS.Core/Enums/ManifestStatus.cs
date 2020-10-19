@@ -7,4 +7,11 @@
         Rejected,
         Delivered
     }
+
+    public enum MovementStatus
+    {
+        InProgress,
+        EnRoute,
+        ProcessEnded
+    }
 }

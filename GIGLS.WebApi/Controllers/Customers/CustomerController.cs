@@ -174,10 +174,6 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-
-
-
-
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("deliveryno/{deliveryNo}")]

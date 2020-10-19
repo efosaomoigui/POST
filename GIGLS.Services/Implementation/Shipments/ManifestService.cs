@@ -158,6 +158,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<string> GenerateMovementManifestCode(MovementManifestNumberDTO manifestDTO) 
+        {
+            try
+            {
+                var manifestCode = await _service.GenerateNextNumber(NumberGeneratorType.MovementManifestNumber);
+                return manifestCode;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public Task<List<ManifestDTO>> GetManifests()
         {

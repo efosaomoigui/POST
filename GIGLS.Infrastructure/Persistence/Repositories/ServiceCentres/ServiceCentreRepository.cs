@@ -452,7 +452,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
-                                where c.CountryId == countryId
+                                where c.CountryId == countryId && s.IsPublic == true
                                     select new ServiceCentreDTO
                                     {
                                         Name = s.Name,

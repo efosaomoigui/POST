@@ -55,7 +55,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
-        public bool IsHomeDelivery { get; set; }
+        public bool IsHomeDelivery { get; set; } = true;
 
         //General but optional
 
