@@ -936,8 +936,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the customer, if information does not exist in our record
-                var customerId = await CreateCustomer(shipmentDTO);
+                // create the individual customer, if information does not exist in our record
+                var customerId = await CreateIndividualCustomer(shipmentDTO);
 
                 //Block account that has been suspended/pending from create shipment
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
@@ -3420,6 +3420,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DestinationServiceCentreId);
                     preShipment.ReceiverAddress = receieverServiceCenter.Address;
+                    preShipment.ReceiverLongitude = (double)receieverServiceCenter.Longitude;
+                    preShipment.ReceiverLatitude = (double)receieverServiceCenter.Latitude;
                 }
                 var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DepartureServiceCentreId);
                 var mobileShipment = new PreShipmentMobileDTO
@@ -3443,8 +3445,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     SenderStationId = preShipment.SenderStationId,
                     SenderLocation = new LocationDTO
                     {
-                        Latitude = preShipment.SenderLatitude,
-                        Longitude = preShipment.SenderLongitude
+                        Latitude = senderInfo.Latitude,
+                        Longitude = senderInfo.Longitude
                     },
                     SenderName = preShipment.SenderName,
                     SenderPhoneNumber = preShipment.Customer[0].PhoneNumber,
@@ -3636,12 +3638,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
 
-                //var customer = await _uow.IndividualCustomer.GetAsync(customerDTO.IndividualCustomerId);
-                //if (customer == null)
-                //{
-                //    throw new GenericException("Individual Customer information does not exist");
-                //}
-
                 individualCustomerByPhone.FirstName = customerDTO.FirstName;
                 individualCustomerByPhone.LastName = customerDTO.LastName;
                 individualCustomerByPhone.Email = customerDTO.Email;
@@ -3655,15 +3651,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 individualCustomerByPhone.UserActiveCountryId = customerDTO.UserActiveCountryId;
 
                 await _uow.CompleteAsync();
-
-                //await _individualCustomerService.UpdateCustomer(individualCustomerId, individualCustomerDTO);
             }
             else
             {
                 if (customerDTO.PhoneNumber.StartsWith("0"))
                 {
-                    //customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
-
                     var country = await _uow.Country.GetAsync(x => x.CountryId == customerDTO.UserActiveCountryId);
                     if (country != null)
                     {
@@ -3692,14 +3684,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
 
 
-                // add to user table for login
-                //1. If userEmail is null, use CustomerCode
-                if (String.IsNullOrEmpty(newCustomer.Email))
-                {
-                    newCustomer.Email = newCustomer.CustomerCode;
-                }
+                //// add to user table for login
+                ////1. If userEmail is null, use CustomerCode
+                //if (String.IsNullOrEmpty(newCustomer.Email))
+                //{
+                //    newCustomer.Email = newCustomer.CustomerCode;
+                //}
 
-                //var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
                 customerDTO.IndividualCustomerId = newCustomer.IndividualCustomerId;
                 customerDTO.CustomerCode = newCustomer.CustomerCode;
             }
