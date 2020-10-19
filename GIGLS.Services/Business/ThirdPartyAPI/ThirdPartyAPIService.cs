@@ -30,36 +30,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
-            var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+           var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
             var returnObj = new PreShipmentMobileThirdPartyDTO();
-
             if (!String.IsNullOrEmpty(result.waybill))
             {
-                //generate the qrcode and barcode.
-                var qrCodePath = await _qrandbarcodeService.ConverWaybillToQRCodeImage(result.waybill);
-                var barCodePath = await _qrandbarcodeService.ConverWaybillToBarCodeImage(result.waybill);
-
-                //get gig image
-                string folderPath = HostingEnvironment.MapPath("~/Images/");
-                var gigImgPath  = folderPath + "\\GIGLogisticsLogo.png";
-               
-                //merge both image and convert to base64
-                var mergedImage = await _qrandbarcodeService.MergeImages(qrCodePath, barCodePath, gigImgPath, result.waybill);
-                var waybillImageString = Convert.ToBase64String(mergedImage);
-                preShipmentDTO.WaybillImage = waybillImageString;
-                preShipmentDTO.WaybillImageFormat = "PNG";
-                File.Delete(qrCodePath);
-                File.Delete(barCodePath);
-
-                //get merged image path and delete also;
+                var res = await _qrandbarcodeService.AddImage(result.waybill);
                 if (result is PreShipmentMobileThirdPartyDTO)
                 {
                     returnObj = (PreShipmentMobileThirdPartyDTO)result;
-                    returnObj.WaybillImage = waybillImageString;
-                    returnObj.WaybillImageFormat = "PNG";
+                    returnObj.WaybillImage = res.WaybillImage;
+                    returnObj.WaybillImageFormat = res.WaybillImageFormat;
                 }
-               // var imgPath = $"{folderPath}\\{result.waybill}MI.png";
-               // File.Delete(imgPath);
             }
             return new {waybill = returnObj.waybill, message = returnObj.message, returnObj.IsBalanceSufficient, Zone = returnObj.Zone, waybillImage = returnObj.WaybillImage, waybillImageFormat = returnObj.WaybillImageFormat };
         }

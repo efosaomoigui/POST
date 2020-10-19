@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using QRCoder;
 using BarcodeLib;
 using System.Web.Hosting;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -24,6 +25,27 @@ namespace GIGLS.Services.Implementation.Utility
             _uow = uow;
             MapperConfig.Initialize();
         }
+
+        public async Task<PreShipmentMobileThirdPartyDTO> AddImage(string waybill)
+        {
+            var result = new PreShipmentMobileThirdPartyDTO();
+            //generate the qrcode and barcode.
+            var qrCodePath = await ConverWaybillToQRCodeImage(waybill);
+            var barCodePath = await ConverWaybillToBarCodeImage(waybill);
+            //get gig image
+            string folderPath = HostingEnvironment.MapPath("~/Images/");
+            var gigImgPath = folderPath + "\\GIGLogisticsLogo.png";
+            var imageByte = await MergeImages(qrCodePath, barCodePath, gigImgPath, waybill);
+            File.Delete(qrCodePath);
+            File.Delete(barCodePath);
+            var waybillImageString = Convert.ToBase64String(imageByte);
+            result.WaybillImage = waybillImageString;
+            result.WaybillImageFormat = "PNG";
+
+            return result;
+
+        }
+
 
         public async Task<string> ConverWaybillToQRCodeImage(string waybill)
         {
@@ -51,7 +73,6 @@ namespace GIGLS.Services.Implementation.Utility
                 throw;
             }
         }
-
 
         public async Task<string> ConverWaybillToBarCodeImage(string waybill)
         {
@@ -107,6 +128,7 @@ namespace GIGLS.Services.Implementation.Utility
                 drawingContext.DrawImage(frame1, new Rect(0, 0, imageWidth, imageHeight));
                 drawingContext.DrawImage(frame2, new Rect(imageWidth, 0, imageWidth, imageHeight));
                 drawingContext.DrawImage(frame3, new Rect(0, imageHeight, gigImgWidth, gigImgHeight));
+               
             }
 
             // Converts visual into a BitmapSource
@@ -120,16 +142,46 @@ namespace GIGLS.Services.Implementation.Utility
             // Saves image
             using (Stream stream = File.Create(folderPath))
                 encoder.Save(stream);
+           
+            //add text to image
+            var result = await AddTextToImage(waybill, folderPath);
+            return result;
+        }
 
+
+        public async Task<byte[]> AddTextToImage(string waybill,string imgPath)
+        {
+            PointF textLocation = new PointF(200f, 520f);
+
+            Bitmap bitmap = (Bitmap)Image.FromFile(imgPath);//load the image file
+
+            using (Graphics graphics = Graphics.FromImage(bitmap))
+            {
+                using (Font arialFont = new Font("ArialBlack", 34))
+                {
+                    graphics.DrawString(waybill.ToUpper(), arialFont,System.Drawing.Brushes.Black, textLocation);
+                }
+            }
+            string folderPath = HostingEnvironment.MapPath("~/Images/");
+            folderPath = $"{folderPath}\\{waybill}AI.png";
+
+            bitmap.Save(folderPath);//save the image file
+            bitmap.Dispose();
+            File.Delete(imgPath);
             byte[] binaryResult = null;
             using (var ms = new MemoryStream())
             {
                 Bitmap bmpm = new Bitmap(folderPath);
                 bmpm.Save(ms, ImageFormat.Png);
                 binaryResult = ms.ToArray();
+                bmpm.Dispose();
+                File.Delete(folderPath);
+
             }
+           
             return binaryResult;
         }
+
 
     }
 }
