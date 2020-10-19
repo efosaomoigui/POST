@@ -432,10 +432,10 @@ namespace GIGLS.Services.Implementation.Customers
             HttpClient client = new HttpClient();
             var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
             var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
-            nodeURL = $"{nodeURL}{url}?waybill={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
+            nodeURL = $"{nodeURL}{url}?waybillNumber={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
          
             HttpResponseMessage response = await client.GetAsync(nodeURL);
-            //response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
             string jObject = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<DataResponse>(jObject);
 
