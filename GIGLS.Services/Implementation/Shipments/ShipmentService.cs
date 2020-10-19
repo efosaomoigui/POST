@@ -331,15 +331,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
                 shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
 
-                if(shipment.IsFromMobile == true)
+                if (shipment.IsFromMobile == true)
                 {
                     var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == shipment.Waybill && x.IsFromAgility == true);
-                    if(preShipmentMobile != null)
+                    if (preShipmentMobile != null)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == preShipmentMobile.Waybill);
                         shipmentDto.SenderCode = deliveryNumber.SenderCode;
 
-                        if(shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                        if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
                         {
                             shipmentDto.ReceiverCode = deliveryNumber.ReceiverCode;
                         }
@@ -879,7 +879,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipment.PaymentType == PaymentType.Wallet)
                 {
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
-                    if(wallet.Balance < shipment.GrandTotal)
+                    if (wallet.Balance < shipment.GrandTotal)
                     {
                         throw new GenericException("Insufficient Balance in the Wallet");
                     }
@@ -983,7 +983,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-                
+
                 return newShipment;
             }
             catch (Exception ex)
@@ -3495,7 +3495,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
         private async Task GenerateDeliveryNumber(string waybill)
         {
             int maxSize = 6;
@@ -3519,8 +3518,120 @@ namespace GIGLS.Services.Implementation.Shipments
                 SenderCode = "DN" + strippedText.ToUpper(),
                 IsUsed = false,
                 Waybill = waybill
-            };           
+            };
             _uow.DeliveryNumber.Add(number);
         }
+
+        private async Task<CustomerDTO> CreateIndividualCustomer(ShipmentDTO shipmentDTO)
+        {
+            var customerDTO = shipmentDTO.Customer[0];
+            var customerType = shipmentDTO.CustomerType;
+
+            if (customerDTO.UserActiveCountryId == 0)
+            {
+                customerDTO.UserActiveCountryId = await GetUserCountryId();
+            }
+
+            //reset rowversion
+            customerDTO.RowVersion = null;
+
+            // individualCustomer
+            customerDTO.CustomerType = CustomerType.IndividualCustomer;
+
+
+            int individualCustomerId = 0;
+            var individualCustomerByPhone = await _uow.IndividualCustomer.
+                GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
+
+            if (individualCustomerByPhone != null)
+            {
+                individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
+            }
+
+            if (individualCustomerId > 0)
+            {
+                // update
+                customerDTO.IndividualCustomerId = individualCustomerId;
+
+                var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+
+                //var customer = await _uow.IndividualCustomer.GetAsync(customerDTO.IndividualCustomerId);
+                //if (customer == null)
+                //{
+                //    throw new GenericException("Individual Customer information does not exist");
+                //}
+
+                individualCustomerByPhone.FirstName = customerDTO.FirstName;
+                individualCustomerByPhone.LastName = customerDTO.LastName;
+                individualCustomerByPhone.Email = customerDTO.Email;
+                individualCustomerByPhone.Address = customerDTO.Address;
+                individualCustomerByPhone.City = customerDTO.City;
+                individualCustomerByPhone.Gender = customerDTO.Gender;
+                individualCustomerByPhone.PictureUrl = customerDTO.PictureUrl;
+                individualCustomerByPhone.PhoneNumber = customerDTO.PhoneNumber;
+                individualCustomerByPhone.State = customerDTO.State;
+                individualCustomerByPhone.Password = customerDTO.Password;
+                individualCustomerByPhone.UserActiveCountryId = customerDTO.UserActiveCountryId;
+
+                await _uow.CompleteAsync();
+
+                //await _individualCustomerService.UpdateCustomer(individualCustomerId, individualCustomerDTO);
+            }
+            else
+            {
+                if (customerDTO.PhoneNumber.StartsWith("0"))
+                {
+                    //customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == customerDTO.UserActiveCountryId);
+                    if (country != null)
+                    {
+                        customerDTO.PhoneNumber = customerDTO.PhoneNumber.Substring(1, customerDTO.PhoneNumber.Length - 1);
+                        string phone = $"{country.PhoneNumberCode}{customerDTO.PhoneNumber}";
+                        customerDTO.PhoneNumber = phone;
+
+                    }
+                }
+
+                // create new
+                var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+                if (await _uow.IndividualCustomer.ExistAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim()))
+                {
+                    throw new GenericException($"Individual Customer Phone Number {customerDTO.PhoneNumber } Already Exist");
+                }
+
+                var newCustomer = Mapper.Map<IndividualCustomer>(individualCustomerDTO);
+
+                //generate customer code
+                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
+                newCustomer.CustomerCode = customerCode;
+
+                _uow.IndividualCustomer.Add(newCustomer);
+
+                await _uow.CompleteAsync();
+
+
+                // add to user table for login
+                //1. If userEmail is null, use CustomerCode
+                if (String.IsNullOrEmpty(newCustomer.Email))
+                {
+                    newCustomer.Email = newCustomer.CustomerCode;
+                }
+
+                //var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
+                customerDTO.IndividualCustomerId = newCustomer.IndividualCustomerId;
+                customerDTO.CustomerCode = newCustomer.CustomerCode;
+            }
+
+            // individualCustomer
+            customerDTO.CustomerType = CustomerType.IndividualCustomer;
+            shipmentDTO.CustomerId = customerDTO.IndividualCustomerId;
+            shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
+            shipmentDTO.CustomerCode = customerDTO.CustomerCode;
+
+            return customerDTO;
+        }
+
+
     }
 }
