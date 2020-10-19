@@ -435,8 +435,8 @@ namespace GIGLS.Services.Implementation.Customers
             nodeURL = $"{nodeURL}{url}?waybill={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
          
             HttpResponseMessage response = await client.GetAsync(nodeURL);
-            response.EnsureSuccessStatusCode();
-            var jObject = await response.Content.ReadAsStringAsync();
+            //response.EnsureSuccessStatusCode();
+            string jObject = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<DataResponse>(jObject);
 
             if (result.Data.ApiList.Any())
@@ -458,12 +458,14 @@ namespace GIGLS.Services.Implementation.Customers
                             partnerPhoneNo = partnerInfo.PhoneNumber; 
                         }
                     }
-                    var obj = new ShipmentActivityDTO();
-                    obj.Action = action.ToUpper();
-                    obj.ActionBy = partnerName;
-                    obj.ActionTime = item.CreationDate;
-                    obj.ActionReason = item.ReasonText;
-                    obj.CreatedOn = item.CreationDate;
+                    var obj = new ShipmentActivityDTO
+                    {
+                        Action = action.ToUpper(),
+                        ActionBy = partnerName,
+                        ActionTime = item.CreationDate,
+                        ActionReason = item.ReasonText,
+                        CreatedOn = item.CreationDate
+                    };
                     if (item.StatusCode == "200")
                     {
                         obj.ActionResult = "SUCCESSFUL"; 
