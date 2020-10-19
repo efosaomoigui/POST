@@ -512,6 +512,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         string[] words = preShipmentDTO.SenderName.Split(' ');
                         message.SenderName = words.FirstOrDefault();
                     }
+
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
                     newPreShipment.IsDelivered = false;
@@ -4833,8 +4834,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DepartureServiceCentreId = detail.SenderServiceCentreId,
                                         CustomerId = customerid,
                                         UserId = user,
-                                       // PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
-                                        PickupOptions = PickupOptions.HOMEDELIVERY,
+                                        PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
+                                      //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                                         ApproximateItemsWeight = 0.00,

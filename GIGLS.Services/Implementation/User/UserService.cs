@@ -92,6 +92,11 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetCorporateCustomerUsers();
         }
 
+        public async Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId)
+        {
+            return await _serviceCentreService.GetServiceCentreById(ServiceCenterId);
+        }
+
         public IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
         {
             return _unitOfWork.User.GetCorporateCustomerUsersAsQueryable();

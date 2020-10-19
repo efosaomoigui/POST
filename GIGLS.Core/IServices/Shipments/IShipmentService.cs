@@ -71,6 +71,7 @@ namespace GIGLS.Core.IServices.Shipments
         //Movement Manifest 
         Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
         Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria);
+        Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

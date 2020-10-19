@@ -26,5 +26,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestDTO>> GetManifestsInSuperManifest(string superManifestCode);
         Task<ManifestDTO> GetSuperManifestForManifest(string manifest);
         Task<List<ManifestDTO>> GetManifestsInSuperManifestDetails(string superManifestCode);
+        Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationid);
     }
 }
