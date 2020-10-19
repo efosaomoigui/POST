@@ -3306,27 +3306,16 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.Customer[0].CustomerCode);
-
                 preShipment.UserId = userDTO.Id;
-                //var user = await _userService.GetUserById(preShipment.UserId);
                 preShipment.CustomerCode = userDTO.UserChannelCode;
 
-                var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DepartureServiceCentreId);
-                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == userDTO.UserChannelCode);
-
-                if (preShipment.PickupOptions == PickupOptions.SERVICECENTER)
-                {
-                    var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DestinationServiceCentreId);
-                    preShipment.ReceiverAddress = receieverServiceCenter.Address;
-                }
+               var customer = await _uow.Company.GetAsync(s => s.CustomerCode == userDTO.UserChannelCode);
 
                 if (userDTO.UserChannelType == UserChannelType.Ecommerce)
                 {
                     preShipment.CustomerType = CustomerType.Company.ToString();
                     preShipment.CompanyType = CompanyType.Ecommerce.ToString();
                     preShipment.SenderName = customer.Name;
-
                 }
                 else if (userDTO.UserChannelType == UserChannelType.Corporate)
                 {
@@ -3341,6 +3330,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.SenderName = preShipment.Customer[0].FirstName + " " + preShipment.Customer[0].LastName;
                 }
 
+                if (preShipment.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DestinationServiceCentreId);
+                    preShipment.ReceiverAddress = receieverServiceCenter.Address;
+                }
+                var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DepartureServiceCentreId);
                 var mobileShipment = new PreShipmentMobileDTO
                 {
                     CalculatedTotal = (double)preShipment.DeliveryPrice,
@@ -3408,6 +3403,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 await _uow.CompleteAsync();
 
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                 await AddMobileShipmentTracking(new MobileShipmentTrackingDTO
                 {
                     DateTime = DateTime.Now,
@@ -3421,7 +3417,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Send the Payload to Partner Cloud Handler 
                 NodeApiCreateShipment(newPreShipment);
                 return mobileShipment;
-
             }
             catch
             {
