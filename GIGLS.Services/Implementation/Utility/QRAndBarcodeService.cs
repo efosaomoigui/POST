@@ -79,10 +79,6 @@ namespace GIGLS.Services.Implementation.Utility
                 var imgPath = String.Empty;
 
                 Barcode barcodeAPI = new Barcode();
-                //int imageWidth = 290;
-                //int imageHeight = 120;
-               // System.Drawing.Color foreColor = System.Drawing.Color.Black;
-               // System.Drawing.Color backColor = System.Drawing.Color.Transparent;
                 // Generate the barcode with your settings
                 Image barcodeImage = barcodeAPI.Encode(TYPE.CODE128, waybill);
                 using (var ms = new MemoryStream())
@@ -113,8 +109,6 @@ namespace GIGLS.Services.Implementation.Utility
             int imageHeight = frame1.PixelHeight;
             int gigImgWidth = frame1.PixelWidth + frame1.PixelWidth;
             int gigImgHeight = frame1.PixelHeight / 2;
-            //int bcImgsp = frame1.PixelWidth / imageHeight;
-            //string folderPath = HostingEnvironment.MapPath("~/Images/");
             string imgPath = $"{folderPath}\\{waybill}MI.png";
 
             // Draws the images into a DrawingVisual component
@@ -156,9 +150,7 @@ namespace GIGLS.Services.Implementation.Utility
                     graphics.DrawString(waybill.ToUpper(), arialFont,System.Drawing.Brushes.Black, textLocation);
                 }
             }
-            //string folderPath = HostingEnvironment.MapPath("~/Images/");
             string aiImagePath = $"{folderPath}\\{waybill}AI.png";
-
             bitmap.Save(aiImagePath);//save the image file
             bitmap.Dispose();
             File.Delete(imgPath);

@@ -27,31 +27,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
-            //var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
-            //var returnObj = new PreShipmentMobileThirdPartyDTO();
-            //if (!String.IsNullOrEmpty(result.waybill))
-            //{
-            //    var res = await _qrandbarcodeService.AddImage(result.waybill);
-
-            //    if (result is PreShipmentMobileThirdPartyDTO)
-            //    {
-            //        returnObj = (PreShipmentMobileThirdPartyDTO)result;
-            //        returnObj.WaybillImage = res.WaybillImage;
-            //        returnObj.WaybillImageFormat = res.WaybillImageFormat;
-
-            //        //update the preshipment table with the waybillimageurl
-            //        var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == result.waybill);
-            //        if (preShipmentMobile != null)
-            //        {
-            //            preShipmentMobile.WaybillImageUrl = res.ImagePath;
-            //            _portalService.UpdatePreShipmentMobile(preShipmentMobile);
-            //        }
-            //    }
-            //}
-            //return new {waybill = returnObj.waybill, message = returnObj.message, returnObj.IsBalanceSufficient,
-            //    Zone = returnObj.Zone, waybillImage = returnObj.WaybillImage, waybillImageFormat = returnObj.WaybillImageFormat };
-
-
             var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
 
             if (!string.IsNullOrEmpty(result.waybill))
