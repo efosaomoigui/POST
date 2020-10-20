@@ -30,10 +30,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
-          // var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+            var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
             var returnObj = new PreShipmentMobileThirdPartyDTO();
-            var result = new PreShipmentMobileThirdPartyDTO();
-            result.waybill = "1000000009";
             if (!String.IsNullOrEmpty(result.waybill))
             {
                 var res = await _qrandbarcodeService.AddImage(result.waybill);
