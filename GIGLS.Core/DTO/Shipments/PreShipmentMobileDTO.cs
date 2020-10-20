@@ -161,6 +161,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public string WaybillImageUrl { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -280,5 +281,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int Zone { get; set; }
         public string WaybillImage { get; set; }
         public string WaybillImageFormat { get; set; }
+        public string ImagePath { get; set; }
     }
 }
