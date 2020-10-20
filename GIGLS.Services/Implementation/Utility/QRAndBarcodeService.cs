@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core.IServices.Utility;
 using System;
 using System.Threading.Tasks;
-using GIGLS.Core;
 using System.Linq;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
@@ -19,49 +18,44 @@ namespace GIGLS.Services.Implementation.Utility
 {
     public class QRAndBarcodeService : IQRAndBarcodeService
     {
-        private readonly IUnitOfWork _uow;
-
-        public QRAndBarcodeService(IUnitOfWork uow)
-        {
-            _uow = uow;
-            MapperConfig.Initialize();
-        }
-
         public async Task<PreShipmentMobileThirdPartyDTO> AddImage(string waybill)
         {
-            var result = new PreShipmentMobileThirdPartyDTO();
-            //generate the qrcode and barcode.
-            var qrCodePath = await ConverWaybillToQRCodeImage(waybill);
-            var barCodePath = await ConverWaybillToBarCodeImage(waybill);
             //get gig image
             string folderPath = HostingEnvironment.MapPath("~/Images/");
+
+            //generate the qrcode and barcode.
+            var qrCodePath = await ConverWaybillToQRCodeImage(waybill, folderPath);
+            var barCodePath = await ConverWaybillToBarCodeImage(waybill, folderPath);
             var gigImgPath = folderPath + "\\GIGLogisticsLogo.png";
-            var imageByte = await MergeImages(qrCodePath, barCodePath, gigImgPath, waybill);
+            var imageByte = await MergeImages(qrCodePath, barCodePath, gigImgPath, waybill, folderPath);
             File.Delete(qrCodePath);
             File.Delete(barCodePath);
             var waybillImageString = Convert.ToBase64String(imageByte);
-            result.WaybillImage = waybillImageString;
-            result.WaybillImageFormat = "PNG";
 
             //upload the image to azure blob
             var filename = $"{waybill}AI.png";
             var blobname = await AzureBlobServiceUtil.UploadAsync(imageByte, filename);
-            result.ImagePath = blobname;
 
+            var result = new PreShipmentMobileThirdPartyDTO
+            {
+                WaybillImage = waybillImageString,
+                WaybillImageFormat = "PNG",
+                ImagePath = blobname
+            };
             return result;
         }
 
-
-        public async Task<string> ConverWaybillToQRCodeImage(string waybill)
+        private async Task<string> ConverWaybillToQRCodeImage(string waybill, string folderPath)
         {
             try
             {
+                var imgPath = String.Empty;
+
                 QRCodeGenerator qrGenerator = new QRCodeGenerator();
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(waybill, QRCodeGenerator.ECCLevel.Q);
                 QRCode qrCode = new QRCode(qrCodeData);
                 Image qrCodeImage = qrCode.GetGraphic(20);
-                var imgPath = String.Empty;
-                string folderPath = HostingEnvironment.MapPath("~/Images/");
+
                 using (var ms = new MemoryStream())
                 {
                     Bitmap bmp1 = new Bitmap(qrCodeImage);
@@ -70,7 +64,6 @@ namespace GIGLS.Services.Implementation.Utility
                     img.Save($"{folderPath}\\{waybill}QC.png", ImageFormat.Png);
                     imgPath = $"{folderPath}\\{waybill}QC.png";
                 }
-
                 return imgPath;
             }
             catch
@@ -79,19 +72,19 @@ namespace GIGLS.Services.Implementation.Utility
             }
         }
 
-        public async Task<string> ConverWaybillToBarCodeImage(string waybill)
+        private async Task<string> ConverWaybillToBarCodeImage(string waybill, string folderPath)
         {
             try
             {
+                var imgPath = String.Empty;
+
                 Barcode barcodeAPI = new Barcode();
-                int imageWidth = 290;
-                int imageHeight = 120;
-                System.Drawing.Color foreColor = System.Drawing.Color.Black;
-                System.Drawing.Color backColor = System.Drawing.Color.Transparent;
+                //int imageWidth = 290;
+                //int imageHeight = 120;
+               // System.Drawing.Color foreColor = System.Drawing.Color.Black;
+               // System.Drawing.Color backColor = System.Drawing.Color.Transparent;
                 // Generate the barcode with your settings
                 Image barcodeImage = barcodeAPI.Encode(TYPE.CODE128, waybill);
-                var imgPath = String.Empty;
-                string folderPath = HostingEnvironment.MapPath("~/Images/");
                 using (var ms = new MemoryStream())
                 {
                     Bitmap bmp1 = new Bitmap(barcodeImage);
@@ -101,16 +94,14 @@ namespace GIGLS.Services.Implementation.Utility
                     imgPath = $"{folderPath}\\{waybill}BC.png";
                 }
                 return imgPath;
-
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
-
         }
 
-        public async Task<byte[]> MergeImages(string path1, string path2, string path3, string waybill)
+        private async Task<byte[]> MergeImages(string path1, string path2, string path3, string waybill, string folderPath)
         {
             // Loads the images to tile 
             BitmapFrame frame1 = BitmapDecoder.Create(new Uri(path1), BitmapCreateOptions.None, BitmapCacheOption.OnLoad).Frames.First();
@@ -122,9 +113,9 @@ namespace GIGLS.Services.Implementation.Utility
             int imageHeight = frame1.PixelHeight;
             int gigImgWidth = frame1.PixelWidth + frame1.PixelWidth;
             int gigImgHeight = frame1.PixelHeight / 2;
-            int bcImgsp = frame1.PixelWidth / imageHeight;
-            string folderPath = HostingEnvironment.MapPath("~/Images/");
-            folderPath = $"{folderPath}\\{waybill}MI.png";
+            //int bcImgsp = frame1.PixelWidth / imageHeight;
+            //string folderPath = HostingEnvironment.MapPath("~/Images/");
+            string imgPath = $"{folderPath}\\{waybill}MI.png";
 
             // Draws the images into a DrawingVisual component
             DrawingVisual drawingVisual = new DrawingVisual();
@@ -132,8 +123,7 @@ namespace GIGLS.Services.Implementation.Utility
             {
                 drawingContext.DrawImage(frame1, new Rect(0, 0, imageWidth, imageHeight));
                 drawingContext.DrawImage(frame2, new Rect(imageWidth, 0, imageWidth, imageHeight));
-                drawingContext.DrawImage(frame3, new Rect(0, imageHeight, gigImgWidth, gigImgHeight));
-               
+                drawingContext.DrawImage(frame3, new Rect(0, imageHeight, gigImgWidth, gigImgHeight));               
             }
 
             // Converts visual into a BitmapSource
@@ -145,16 +135,15 @@ namespace GIGLS.Services.Implementation.Utility
             encoder.Frames.Add(BitmapFrame.Create(bmp));
 
             // Saves image
-            using (Stream stream = File.Create(folderPath))
+            using (Stream stream = File.Create(imgPath))
                 encoder.Save(stream);
            
             //add text to image
-            var result = await AddTextToImage(waybill, folderPath);
+            var result = await AddTextToImage(waybill, imgPath, folderPath);
             return result;
         }
 
-
-        public async Task<byte[]> AddTextToImage(string waybill,string imgPath)
+        private async Task<byte[]> AddTextToImage(string waybill, string imgPath, string folderPath)
         {
             PointF textLocation = new PointF(200f, 520f);
 
@@ -167,26 +156,23 @@ namespace GIGLS.Services.Implementation.Utility
                     graphics.DrawString(waybill.ToUpper(), arialFont,System.Drawing.Brushes.Black, textLocation);
                 }
             }
-            string folderPath = HostingEnvironment.MapPath("~/Images/");
-            folderPath = $"{folderPath}\\{waybill}AI.png";
+            //string folderPath = HostingEnvironment.MapPath("~/Images/");
+            string aiImagePath = $"{folderPath}\\{waybill}AI.png";
 
-            bitmap.Save(folderPath);//save the image file
+            bitmap.Save(aiImagePath);//save the image file
             bitmap.Dispose();
             File.Delete(imgPath);
             byte[] binaryResult = null;
             using (var ms = new MemoryStream())
             {
-                Bitmap bmpm = new Bitmap(folderPath);
+                Bitmap bmpm = new Bitmap(aiImagePath);
                 bmpm.Save(ms, ImageFormat.Png);
                 binaryResult = ms.ToArray();
                 bmpm.Dispose();
-                File.Delete(folderPath);
-
+                File.Delete(aiImagePath);
             }
            
             return binaryResult;
         }
-
-
     }
 }
