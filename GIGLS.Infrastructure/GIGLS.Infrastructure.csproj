@@ -238,6 +238,7 @@
     <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />
+    <Compile Include="Persistence\Repositories\Utility\QRAndBarcodeRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\GlobalPropertyRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\NumberGeneratorMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
