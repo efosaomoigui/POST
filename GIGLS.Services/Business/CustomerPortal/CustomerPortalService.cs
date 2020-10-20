@@ -2899,5 +2899,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _mobilePickUpRequestService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
         }
+        public async Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile)
+        {
+            try
+            {
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -13,6 +13,7 @@ using QRCoder;
 using BarcodeLib;
 using System.Web.Hosting;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -42,8 +43,12 @@ namespace GIGLS.Services.Implementation.Utility
             result.WaybillImage = waybillImageString;
             result.WaybillImageFormat = "PNG";
 
-            return result;
+            //upload the image to azure blob
+            var filename = $"{waybill}AI.png";
+            var blobname = await AzureBlobServiceUtil.UploadAsync(imageByte, filename);
+            result.ImagePath = blobname;
 
+            return result;
         }
 
 

@@ -635,5 +635,21 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("preshipmentmobile/{waybillNumber}")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreShipmentMobileByWaybill(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetPreShipmentMobileByWaybill(waybillNumber);
+
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
