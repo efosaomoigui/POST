@@ -1097,8 +1097,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
-                var userId = "9764e2f7-5abb-410c-af7e-1690604b7cce";
-                // var userId = await _userService.GetCurrentUserId();
+                 var userId = await _userService.GetCurrentUserId();
                 preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
