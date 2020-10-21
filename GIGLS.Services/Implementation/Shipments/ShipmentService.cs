@@ -57,6 +57,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
+        private readonly IGIGGoPricingService _gIGGoPricingService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -66,8 +67,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService
-            )
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -84,6 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
+            _gIGGoPricingService = gIGGoPricingService;
             MapperConfig.Initialize();
         }
 
@@ -876,6 +877,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Items cannot be empty");
                 }
 
+                shipment.CustomerCode = shipment.Customer[0].CustomerCode;
                 if (shipment.PaymentType == PaymentType.Wallet)
                 {
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
@@ -889,6 +891,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DateCreated = DateTime.Now;
                 var zoneid = await _domesticRouteZoneMapService.GetZoneMobile(shipment.SenderStationId, shipment.ReceiverStationId);
                 shipment.ZoneMapping = zoneid.ZoneId;
+                if (shipment.ZoneMapping != 1)
+                {
+                    throw new GenericException("This is only available for shipments within a City");
+                }
+
 
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
                 shipmentDTO.IsFromMobile = true;
@@ -936,8 +943,55 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the individual customer, if information does not exist in our record
-                var customerId = await CreateIndividualCustomer(shipmentDTO);
+                // create the customer, if information does not exist in our record
+                var customerId = await CreateCustomer(shipmentDTO);
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var departureId = serviceCenterIds[0];
+
+                var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == departureId);
+                shipment.SenderAddress = senderInfo.Address;
+                shipment.SenderLocation = new LocationDTO()
+                {
+                    Latitude = senderInfo.Latitude,
+                    Longitude = senderInfo.Longitude
+
+                };
+
+                //get price
+                var preshipmentDTO = Mapper.Map<PreShipmentMobileDTO>(shipment);
+
+
+                preshipmentDTO.IsFromAgility = true;
+                preshipmentDTO.Value = (decimal)shipment.DeclarationOfValueCheck;
+                var priceDTO = await GetGIGGOPrice(preshipmentDTO);
+
+                decimal total = 0.0M;
+                if (shipment.CountryId == 1)
+                {
+
+                    if (shipmentDTO.Customer[0].CustomerType != CustomerType.Company)
+                    {
+                        total = await RoundShipmentTotal((decimal)priceDTO.GrandTotal, -2);
+                    }
+                    else
+                    {
+                        total = (decimal)priceDTO.GrandTotal;
+                    }
+                }
+                else
+                {
+                    if (shipmentDTO.Customer[0].CustomerType != CustomerType.Company)
+                    {
+                        total = await RoundShipmentTotal((decimal)priceDTO.GrandTotal, 0);
+                    }
+                }
+
+                shipmentDTO.GrandTotal = total;
+
+                shipment.DeliveryPrice = priceDTO.DeliveryPrice;
+                shipment.Discount = priceDTO.Discount;
+                shipment.PickUpCharge = priceDTO.PickUpCharge;
+                shipment.InsuranceValue = priceDTO.InsuranceValue;
 
                 //Block account that has been suspended/pending from create shipment
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
@@ -1210,7 +1264,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 customerDTO.CustomerType = CustomerType.IndividualCustomer;
             }
 
-            var createdObject = await _customerService.CreateCustomer(customerDTO);
+            var createdObject = new CustomerDTO();
+
+            if (shipmentDTO.IsFromMobile)
+            {
+                createdObject = await GetAndCreateCustomer(customerDTO);
+            }
+            else
+            {
+                createdObject = await _customerService.CreateCustomer(customerDTO);
+            }
+
 
             // set the customerId
             // company
@@ -2049,13 +2113,13 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres() 
-        { 
+        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres()
+        {
             try
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress && x.IsDispatched ==true); 
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress && x.IsDispatched == true);
 
                 if (serviceCenters.Length > 0)
                 {
@@ -2072,7 +2136,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => re.Any(r => r.ServiceCentreId == s.ServiceCentreId)); 
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => re.Any(r => r.ServiceCentreId == s.ServiceCentreId));
 
                 return unmappedGroupServiceCentres.ToList();
             }
@@ -3391,26 +3455,28 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.Customer[0].CustomerCode);
-                preShipment.UserId = userDTO.Id;
-                preShipment.CustomerCode = userDTO.UserChannelCode;
-
-               var customer = await _uow.Company.GetAsync(s => s.CustomerCode == userDTO.UserChannelCode);
-
-                if (userDTO.UserChannelType == UserChannelType.Ecommerce)
+                preShipment.CustomerCode = preShipment.Customer[0].CustomerCode;
+                var user = await _uow.User.GetUserUsingCustomerForCustomerPortal(preShipment.CustomerCode);
+                if (user != null)
                 {
-                    preShipment.CustomerType = CustomerType.Company.ToString();
-                    preShipment.CompanyType = CompanyType.Ecommerce.ToString();
-                    preShipment.SenderName = customer.Name;
-                }
-                else if (userDTO.UserChannelType == UserChannelType.Corporate)
-                {
-                    preShipment.CustomerType = CustomerType.Company.ToString();
-                    preShipment.CompanyType = CompanyType.Corporate.ToString();
-                    preShipment.SenderName = customer.Name;
+                    preShipment.UserId = user.Id;
                 }
                 else
                 {
+                    preShipment.UserId = await _userService.GetCurrentUserId();
+                }
+
+                if (preShipment.CustomerType == CustomerType.Company.ToString())
+                {
+                    var company = await _uow.Company.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
+                    preShipment.CustomerCode = company.CustomerCode;
+                    preShipment.CompanyType = company.CompanyType.ToString();
+                    preShipment.CustomerType = CustomerType.Company.ToString();
+                    preShipment.SenderName = company.Name;
+                }
+                else
+                {
+                    var individual = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
                     preShipment.CustomerType = "Individual";
                     preShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
                     preShipment.SenderName = preShipment.Customer[0].FirstName + " " + preShipment.Customer[0].LastName;
@@ -3420,10 +3486,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DestinationServiceCentreId);
                     preShipment.ReceiverAddress = receieverServiceCenter.Address;
-                    preShipment.ReceiverLongitude = (double)receieverServiceCenter.Longitude;
-                    preShipment.ReceiverLatitude = (double)receieverServiceCenter.Latitude;
+                    preShipment.ReceiverLocation = new LocationDTO
+                    {
+                        Latitude = (double)receieverServiceCenter.Latitude,
+                        Longitude = (double)receieverServiceCenter.Longitude
+                    };
                 }
-                var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DepartureServiceCentreId);
                 var mobileShipment = new PreShipmentMobileDTO
                 {
                     CalculatedTotal = (double)preShipment.DeliveryPrice,
@@ -3437,16 +3505,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverStationId = preShipment.ReceiverStationId,
                     ReceiverLocation = new LocationDTO
                     {
-                        Latitude = preShipment.ReceiverLatitude,
-                        Longitude = preShipment.ReceiverLongitude
+                        Latitude = preShipment.ReceiverLocation.Latitude,
+                        Longitude = preShipment.ReceiverLocation.Longitude
                     },
                     GrandTotal = preShipment.GrandTotal,
-                    SenderAddress = senderInfo.Address,
+                    SenderAddress = preShipment.SenderAddress,
                     SenderStationId = preShipment.SenderStationId,
                     SenderLocation = new LocationDTO
                     {
-                        Latitude = senderInfo.Latitude,
-                        Longitude = senderInfo.Longitude
+                        Latitude = preShipment.SenderLocation.Latitude,
+                        Longitude = preShipment.SenderLocation.Longitude
                     },
                     SenderName = preShipment.SenderName,
                     SenderPhoneNumber = preShipment.Customer[0].PhoneNumber,
@@ -3605,103 +3673,124 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.DeliveryNumber.Add(number);
         }
 
-        private async Task<CustomerDTO> CreateIndividualCustomer(ShipmentDTO shipmentDTO)
+        //For GIG Go Extension Feature
+        private async Task<CustomerDTO> GetAndCreateCustomer(CustomerDTO customerDTO)
         {
-            var customerDTO = shipmentDTO.Customer[0];
-            var customerType = shipmentDTO.CustomerType;
 
-            if (customerDTO.UserActiveCountryId == 0)
+            // handle Company customers
+            if (CustomerType.Company.Equals(customerDTO.CustomerType))
             {
-                customerDTO.UserActiveCountryId = await GetUserCountryId();
-            }
+                int companyId = 0;
 
-            //reset rowversion
-            customerDTO.RowVersion = null;
+                var companyByCode = await _uow.Company.GetAsync(x => x.CustomerCode == customerDTO.CustomerCode);
 
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
-
-
-            int individualCustomerId = 0;
-            var individualCustomerByPhone = await _uow.IndividualCustomer.
-                GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
-
-            if (individualCustomerByPhone != null)
-            {
-                individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
-            }
-
-            if (individualCustomerId > 0)
-            {
-                // update
-                customerDTO.IndividualCustomerId = individualCustomerId;
-
-                var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
-
-                individualCustomerByPhone.FirstName = customerDTO.FirstName;
-                individualCustomerByPhone.LastName = customerDTO.LastName;
-                individualCustomerByPhone.Email = customerDTO.Email;
-                individualCustomerByPhone.Address = customerDTO.Address;
-                individualCustomerByPhone.City = customerDTO.City;
-                individualCustomerByPhone.Gender = customerDTO.Gender;
-                individualCustomerByPhone.PictureUrl = customerDTO.PictureUrl;
-                individualCustomerByPhone.PhoneNumber = customerDTO.PhoneNumber;
-                individualCustomerByPhone.State = customerDTO.State;
-                individualCustomerByPhone.Password = customerDTO.Password;
-                individualCustomerByPhone.UserActiveCountryId = customerDTO.UserActiveCountryId;
-
-                await _uow.CompleteAsync();
-            }
-            else
-            {
-                if (customerDTO.PhoneNumber.StartsWith("0"))
+                if (companyByCode == null)
                 {
-                    var country = await _uow.Country.GetAsync(x => x.CountryId == customerDTO.UserActiveCountryId);
-                    if (country != null)
-                    {
-                        customerDTO.PhoneNumber = customerDTO.PhoneNumber.Substring(1, customerDTO.PhoneNumber.Length - 1);
-                        string phone = $"{country.PhoneNumberCode}{customerDTO.PhoneNumber}";
-                        customerDTO.PhoneNumber = phone;
+                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                    || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
+                    foreach (var item in CompanyByName)
+                    {
+                        companyId = item.CompanyId;
                     }
                 }
-
-                // create new
-                var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
-                if (await _uow.IndividualCustomer.ExistAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim()))
+                else
                 {
-                    throw new GenericException($"Individual Customer Phone Number {customerDTO.PhoneNumber } Already Exist");
+                    companyId = companyByCode.CompanyId;
                 }
 
-                var newCustomer = Mapper.Map<IndividualCustomer>(individualCustomerDTO);
-
-                //generate customer code
-                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
-                newCustomer.CustomerCode = customerCode;
-
-                _uow.IndividualCustomer.Add(newCustomer);
-
-                await _uow.CompleteAsync();
-
-
-                //// add to user table for login
-                ////1. If userEmail is null, use CustomerCode
-                //if (String.IsNullOrEmpty(newCustomer.Email))
-                //{
-                //    newCustomer.Email = newCustomer.CustomerCode;
-                //}
-
-                customerDTO.IndividualCustomerId = newCustomer.IndividualCustomerId;
-                customerDTO.CustomerCode = newCustomer.CustomerCode;
+                if (companyId > 0)
+                {
+                    customerDTO.CompanyId = companyId;
+                    var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
+                }
             }
 
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
-            shipmentDTO.CustomerId = customerDTO.IndividualCustomerId;
-            shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
-            shipmentDTO.CustomerCode = customerDTO.CustomerCode;
+            // handle IndividualCustomers
+            if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
+            {
+                int individualCustomerId = 0;
+                var individualCustomerByPhone = await _uow.IndividualCustomer.
+                    GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
+
+                if (individualCustomerByPhone != null)
+                {
+                    individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
+                }
+
+                if (individualCustomerId > 0)
+                {
+                    // update
+                    customerDTO.IndividualCustomerId = individualCustomerId;
+                    var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+
+                    individualCustomerByPhone.FirstName = customerDTO.FirstName;
+                    individualCustomerByPhone.LastName = customerDTO.LastName;
+                    individualCustomerByPhone.Email = customerDTO.Email;
+                    individualCustomerByPhone.Address = customerDTO.Address;
+                    individualCustomerByPhone.City = customerDTO.City;
+                    individualCustomerByPhone.Gender = customerDTO.Gender;
+                    individualCustomerByPhone.PictureUrl = customerDTO.PictureUrl;
+                    individualCustomerByPhone.PhoneNumber = customerDTO.PhoneNumber;
+                    individualCustomerByPhone.State = customerDTO.State;
+                    individualCustomerByPhone.Password = customerDTO.Password;
+                    individualCustomerByPhone.UserActiveCountryId = customerDTO.UserActiveCountryId;
+
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    if (customerDTO.PhoneNumber.StartsWith("0"))
+                    {
+                        var country = await _uow.Country.GetAsync(x => x.CountryId == customerDTO.UserActiveCountryId);
+                        if (country != null)
+                        {
+                            customerDTO.PhoneNumber = customerDTO.PhoneNumber.Substring(1, customerDTO.PhoneNumber.Length - 1);
+                            string phone = $"{country.PhoneNumberCode}{customerDTO.PhoneNumber}";
+                            customerDTO.PhoneNumber = phone;
+
+                        }
+                    }
+
+                    // create new
+                    var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
+                    if (await _uow.IndividualCustomer.ExistAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim()))
+                    {
+                        throw new GenericException($"Individual Customer Phone Number {customerDTO.PhoneNumber } Already Exist");
+                    }
+
+                    var newCustomer = Mapper.Map<IndividualCustomer>(individualCustomerDTO);
+
+                    //generate customer code
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
+                    newCustomer.CustomerCode = customerCode;
+
+                    _uow.IndividualCustomer.Add(newCustomer);
+
+                    await _uow.CompleteAsync();
+
+                    customerDTO.IndividualCustomerId = newCustomer.IndividualCustomerId;
+                    customerDTO.CustomerCode = newCustomer.CustomerCode;
+                }
+            }
 
             return customerDTO;
+        }
+
+        public async Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment)
+        {
+            if (preShipment.Value > 0)
+            {
+                preShipment.PreShipmentItems[0].Value = preShipment.Value.ToString();
+            }
+
+            return await _gIGGoPricingService.GetGIGGOPrice(preShipment);
+        }
+
+        private async Task<decimal> RoundShipmentTotal(decimal number, int precision)
+        {
+            decimal factor = (decimal)Math.Pow(10, precision);
+            return Math.Round(number * factor) / factor;
         }
 
 

@@ -805,11 +805,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 preshipmentMobile.IsFromAgility = true;
-                var Price = await _customerPortalService.GetPrice(preshipmentMobile);
+                var price = await _service.GetGIGGOPrice(preshipmentMobile);
 
                 return new ServiceResponse<MobilePriceDTO>
                 {
-                    Object = Price,
+                    Object = price,
                 };
             });
         }
