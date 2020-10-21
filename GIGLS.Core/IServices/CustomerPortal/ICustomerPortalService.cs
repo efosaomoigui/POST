@@ -156,7 +156,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
-        Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
         Task<GatewayCodeResponse> GetGatewayCode();
         Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
@@ -182,5 +182,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
+        Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
     }
 }

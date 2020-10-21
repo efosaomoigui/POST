@@ -266,6 +266,7 @@
   <ItemGroup>
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
+    <Content Include="Images\GIGLogisticsLogo.png" />
     <Content Include="MagayaDirectory\commoditytypes.xml" />
     <Content Include="MagayaDirectory\Locations.xml" />
     <Content Include="MagayaDirectory\transactiontypes.xml" />
@@ -456,7 +457,6 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
-    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
