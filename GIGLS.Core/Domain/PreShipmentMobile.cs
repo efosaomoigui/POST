@@ -163,5 +163,6 @@ namespace GIGLS.Core.Domain
         public int DestinationServiceCenterId { get; set; }
         [MaxLength(500)]
         public string WaybillImageUrl { get; set; }
+        public bool IsFromAgility { get; set; }
     }
 }

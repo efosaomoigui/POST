@@ -1097,8 +1097,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
-                 var userId = await _userService.GetCurrentUserId();
-                preShipment.UserId = userId;
+                if(preShipment.IsFromAgility)
+                {
+                    var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.CustomerCode);
+                    preShipment.UserId = userDTO.Id;
+                    //var user = await _userService.GetUserById(currentUserId);
+                }
+                else
+                {
+                    var userId = await _userService.GetCurrentUserId();
+                    preShipment.UserId = userId;
+                }
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
@@ -1130,12 +1139,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Get the customer Type
-                var userChannelCode = await _userService.GetUserChannelCode();
-                var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
-
-                if (userChannel != null)
+                if (preShipment.IsFromAgility)
                 {
-                    preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
+                    if (userChannel != null)
+                    {
+                        preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    }
+                }
+                else
+                {
+                    var userChannelCode = await _userService.GetUserChannelCode();
+                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+                    if (userChannel != null)
+                    {
+                        preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    }
                 }
 
                 //Get the vat value from VAT
@@ -1227,8 +1246,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
                 var Percentage = Convert.ToDecimal(DiscountPercent.Value);
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
-
-                decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
+                decimal EstimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
                 //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
@@ -1260,6 +1278,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
+                    DeliveryPrice = preShipment.DeliveryPrice,
                     PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
                     GrandTotal = grandTotal,
@@ -1318,7 +1337,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal percentage = 0.0M;
 
                 //Get the customer Types
-                preShipment.Shipmentype = await GetEcommerceCustomerShipmentType(preShipment.Shipmentype);
+                if (preShipment.IsFromAgility)
+                {
+                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
+
+                    if (userChannel != null)
+                    {
+                        if (userChannel.CompanyType == CompanyType.Ecommerce)
+                        {
+                            preShipment.Shipmentype = ShipmentType.Ecommerce;
+                        }
+                    }
+                }
+                else
+                {
+                    preShipment.Shipmentype = await GetEcommerceCustomerShipmentType(preShipment.Shipmentype);
+                }
 
                 if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                 {
@@ -2577,7 +2611,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         //Remove this block of code Later
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.IsDeleted == false);
-                        if(deliveryNumber != null && string.IsNullOrWhiteSpace(deliveryNumber.SenderCode) && !string.IsNullOrWhiteSpace(deliveryNumber.Number))
+                        if (deliveryNumber != null && string.IsNullOrWhiteSpace(deliveryNumber.SenderCode) && !string.IsNullOrWhiteSpace(deliveryNumber.Number))
                         {
                             deliveryNumber.SenderCode = deliveryNumber.Number;
                             deliveryNumber.Number = null;
@@ -4292,7 +4326,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         deliveryNumber.Number = detail.DeliveryNumber;
                         deliveryNumber.IsUsed = true;
                         mobileShipment.DeliveryNumber = detail.DeliveryNumber;
-                        _uow.DeliveryNumber.Remove(number);                       
+                        _uow.DeliveryNumber.Remove(number);
                         await _uow.CompleteAsync();
                     }
                 }

@@ -348,7 +348,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     IsDefault = s.IsDefault,
                                     IsHUB = s.IsHUB,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName
+                                    Latitude = s.Latitude,
+                                    Longitude = s.Longitude,
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    SupperServiceCentreId = sc.SuperServiceCentreId
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
