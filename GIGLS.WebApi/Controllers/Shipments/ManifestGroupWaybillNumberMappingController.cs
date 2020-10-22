@@ -58,6 +58,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
+        [Route("movementmanifestbydate")] 
+        public async Task<IServiceResponse<IEnumerable<MovementManifestNumberDTO>>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var MovementmanifestNumberMappings = await _service.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<MovementManifestNumberDTO>>
+                {
+                    Object = MovementmanifestNumberMappings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
         [Route("supermanifestbydate")]
         public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
         {
@@ -179,6 +195,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<GroupWaybillNumberDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestnumbersinmovementmanifest/code/{movementmanifestCode}")]
+        public async Task<IServiceResponse<List<MovementManifestNumberMappingDTOTwo>>> GetManifestNumbersInMovementManifest(string movementmanifestCode) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ManifestNumbersInMovementManifest = await _service.GetManifestNumbersInMovementManifest(movementmanifestCode);
+
+                return new ServiceResponse<List<MovementManifestNumberMappingDTOTwo>>
+                {
+                    Object = ManifestNumbersInMovementManifest
                 };
             });
         }

@@ -52,6 +52,22 @@ namespace GIGLS.WebApi.Controllers.dispatchs
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("movementdispatch")]
+        public async Task<IServiceResponse<object>> AddMovementDispatch(MovementDispatchDTO dispatchDTO) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dispatch = await _dispatchService.AddMovementDispatch(dispatchDTO); 
+
+                return new ServiceResponse<object>
+                {
+                    Object = dispatch
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{dispatchId:int}")]

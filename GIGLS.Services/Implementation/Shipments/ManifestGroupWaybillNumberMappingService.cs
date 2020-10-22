@@ -11,6 +11,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -118,7 +120,52 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //Get WaybillNumbers In Group
+        public async Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode)  
+        {
+            try
+
+            {                
+                var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementmanifestCode);
+                var movementManifestList = movementmanifestMappingList.ToList();
+
+                var arrOfVals = movementManifestList.Select(s => s.ManifestNumber).ToArray();
+                var dispatch = await _uow.Dispatch.FindAsync(x => arrOfVals.Contains(x.ManifestNumber));
+
+                var dispatchList = dispatch.ToList();
+
+                var result = movementManifestList.Join(dispatchList, arg => arg.ManifestNumber, arg => arg.ManifestNumber,
+                    (first, second) => new { 
+                        first.MovementManifestNumberMappingId, 
+                        first.MovementManifestCode,
+                        first.ManifestNumber, 
+                        second.DepartureServiceCenterId, 
+                        second.DestinationServiceCenterId, 
+                        second.Departure,
+                        second.Destination,
+                    });
+
+                var servicecenter =  _uow.ServiceCentre.GetAll();
+
+                var resultList = result.Select(s => new MovementManifestNumberMappingDTOTwo
+                {
+                    MovementManifestNumberMappingId = s.MovementManifestNumberMappingId,
+                    MovementManifestCode = s.MovementManifestCode,
+                    ManifestNumbers = s.ManifestNumber,
+                    DepartureServiceCentreId = s.DepartureServiceCenterId,
+                    DestinationServiceCentreId = s.DestinationServiceCenterId,
+                    DepartureServiceCentre = servicecenter.Where(c => c.ServiceCentreId == s.DepartureServiceCenterId).FirstOrDefault(),
+                    DestinationServiceCentre = servicecenter.Where(c => c.ServiceCentreId == s.DestinationServiceCenterId).FirstOrDefault()
+                });
+
+                return resultList.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get WaybillNumbers In Group 
         public async Task<List<GroupWaybillNumberDTO>> GetGroupWaybillNumbersInManifest(string manifest)
         {
             try
@@ -650,6 +697,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria) 
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetManifestMovementNumberMappings(serviceCenters, dateFilterCriteria); 
+
+                return manifestManifests;
             }
             catch (Exception)
             {

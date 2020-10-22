@@ -228,6 +228,61 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
+
+        /// <summary>
+        /// This method creates a new dispatch, updates the manifest and system wallet information
+        /// </summary>
+        /// <param name="MovementdispatchDTO"></param>
+        /// <returns></returns>
+        public async Task<object> AddMovementDispatch(MovementDispatchDTO dispatchDTO) 
+        {
+            {
+                int userServiceCentreId;
+                int dispatchId;
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                userServiceCentreId = serviceCenterIds[0];
+
+                //get the login user
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserDetail = await _userService.GetUserById(currentUserId);
+
+                //var dispatchObj = _uow.MovementDispatch.SingleOrDefault(s => s.MovementManifestNumber == dispatchDTO.MovementManifestNumber);
+
+                // create dispatch
+                var newDispatch = Mapper.Map<MovementDispatch>(dispatchDTO);
+                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                newDispatch.ServiceCentreId = userServiceCentreId;
+
+                //Set Departure Service Center
+                newDispatch.DepartureServiceCenterId = userServiceCentreId;
+                newDispatch.DepartureId = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.ServiceCentreId == newDispatch.DepartureServiceCenterId)
+                    .Select(x => x.StationId).FirstOrDefault();
+
+                //newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+
+                _uow.MovementDispatch.Add(newDispatch); 
+                dispatchId = newDispatch.DispatchId;
+
+                // update manifest
+                List<Dispatch> data = new List<Dispatch>();
+
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(userServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+
+                // commit transaction
+                await _uow.CompleteAsync();
+                return new { Id = dispatchId };
+            }
+        }
+
+
         /// <summary>
         /// This method ensures that all waybills attached to the manifestNumber 
         /// are filter for scanning processing.
