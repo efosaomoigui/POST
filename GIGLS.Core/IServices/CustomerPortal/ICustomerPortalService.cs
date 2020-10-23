@@ -183,5 +183,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
+        Task<object> CreateNotification(NotificationDTO notificationDTO);
+        Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
+        Task UpdateNotificationAsRead(int notificationId);
     }
 }

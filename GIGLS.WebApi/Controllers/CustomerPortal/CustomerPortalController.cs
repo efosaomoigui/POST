@@ -2187,5 +2187,49 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("createnotification")]
+        public async Task<IServiceResponse<object>> CreateNotification(NotificationDTO notificationDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var notification = await _portalService.CreateNotification(notificationDto);
+
+                return new ServiceResponse<object>
+                {
+                    Object = notification
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getnotifications/{isRead?}")]
+        public async Task<IServiceResponse<IEnumerable<NotificationDTO>>> GetNotifications(bool? isRead = null)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _portalService.GetNotifications(isRead);
+                return new ServiceResponse<IEnumerable<NotificationDTO>>
+                {
+                    Object = locations
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updatenotification/{notificationId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateNotificationAsRead(int notificationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.UpdateNotificationAsRead(notificationId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }

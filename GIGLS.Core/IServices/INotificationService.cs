@@ -11,5 +11,9 @@ namespace GIGLS.Core.IServices
         Task<object> AddNotification(NotificationDTO notificationDto);
         Task UpdateNotification(int notificationId, NotificationDTO notificationDto);
         Task RemoveNotification(int notificationId);
+
+        Task<object> CreateNotification(NotificationDTO notificationDTO);
+        Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
+        Task UpdateNotificationAsRead(int notificationId);
     }
 }
