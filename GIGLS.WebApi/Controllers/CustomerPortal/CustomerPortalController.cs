@@ -2231,5 +2231,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("messagebytype/{messageType}")]
+        public async Task<IServiceResponse<MessageDTO>> GetMessage(MessageType messageType)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var message = await _portalService.GetMessageByType(messageType);
+
+                return new ServiceResponse<MessageDTO>
+                {
+                    Object = message
+                };
+            });
+        }
+
     }
 }

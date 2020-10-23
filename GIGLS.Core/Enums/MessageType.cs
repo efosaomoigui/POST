@@ -55,6 +55,7 @@
         INTLPEMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL
         RMCS, //Message for Receiver Delivery Code
         REQMAIL, //International Message for customer
-        REQSCA //International Message for Service centre
+        REQSCA, //International Message for Service centre
+        ISTC //International Shipments Terms and Condition shown on the App
     } 
 }

@@ -2929,5 +2929,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             await _notificationService.UpdateNotificationAsRead(notificationId);
         }
+
+        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        {
+            return await _messageSenderService.GetMessageByType(messageType);
+        }
     }
 }
