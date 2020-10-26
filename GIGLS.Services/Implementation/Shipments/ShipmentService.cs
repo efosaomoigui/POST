@@ -899,6 +899,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
                 shipmentDTO.IsFromMobile = true;
+                shipmentDTO.IsGIGGOExtension = true;
 
                 //Update SenderAddress for corporate customers
                 shipmentDTO.SenderAddress = null;
@@ -1458,6 +1459,11 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
+            //Make GiGo Shipments not available for grouping
+            if (shipmentDTO.IsGIGGOExtension)
+            {
+                newShipment.IsGrouped = true;
+            }
             _uow.Shipment.Add(newShipment);
 
             //save into DeliveryOptionMapping table
