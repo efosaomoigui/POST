@@ -146,6 +146,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string VehicleType { get; set; }
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
+        public bool IsGIGGOExtension { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
