@@ -2930,9 +2930,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _notificationService.UpdateNotificationAsRead(notificationId);
         }
 
-        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        //Get International Shipments Terms and Conditions
+        public async Task<MessageDTO> GetIntlMessageForApp()
         {
-            return await _messageSenderService.GetMessageByType(messageType);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
         }
     }
 }

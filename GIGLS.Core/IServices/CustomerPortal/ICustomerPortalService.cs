@@ -186,6 +186,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> CreateNotification(NotificationDTO notificationDTO);
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
-        Task<MessageDTO> GetMessageByType(MessageType messageType);
+        Task<MessageDTO> GetIntlMessageForApp();
     }
 }

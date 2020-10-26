@@ -2232,12 +2232,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("messagebytype/{messageType}")]
-        public async Task<IServiceResponse<MessageDTO>> GetMessage(MessageType messageType)
+        [Route("intlshipmentsmessage")]
+        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var message = await _portalService.GetMessageByType(messageType);
+                var message = await _portalService.GetIntlMessageForApp();
 
                 return new ServiceResponse<MessageDTO>
                 {
