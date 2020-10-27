@@ -730,7 +730,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-                    updatedwallet.Balance = 5000000;
                     //double check in case something is wrong with the server before complete the transaction
                     if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                     {
@@ -739,14 +738,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
-                   // var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
                     await _uow.CompleteAsync();
-                    //await ScanMobileShipment(new ScanDTO
-                    //{
-                    //    WaybillNumber = newPreShipment.Waybill,
-                    //    ShipmentScanStatus = ShipmentScanStatus.MCRT
-                    //});
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = newPreShipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MCRT
+                    });
 
                     //Fire and forget
                     //Send the Payload to Partner Cloud Handler 
