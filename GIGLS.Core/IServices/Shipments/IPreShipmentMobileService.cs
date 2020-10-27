@@ -79,5 +79,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<string> GenerateDeliveryCode();
+        Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam);
     }
 }

@@ -130,6 +130,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("{searchParam}/batchedpreshipmentmobile")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetBatchedPreShipmentMobile(string searchParam)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preShipmentMobileService.GetBatchPreShipmentMobile(searchParam);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
 
     }
 }

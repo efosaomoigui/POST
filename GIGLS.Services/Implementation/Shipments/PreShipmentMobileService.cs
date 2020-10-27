@@ -38,6 +38,8 @@ using System.Net.Http;
 using GIGLS.Core.DTO.Report;
 using System.Security.Cryptography;
 using System.Text;
+using ThirdParty.WebServices.Magaya.Business.New;
+using PaymentType = GIGLS.Core.Enums.PaymentType;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -742,7 +744,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Fire and forget
                     //Send the Payload to Partner Cloud Handler 
-                    NodeApiCreateShipment(newPreShipment);
+                    if (!preShipmentDTO.IsBatchPickUp)
+                    {
+                        NodeApiCreateShipment(newPreShipment);
+                    }
 
                     //We will send SMS & Email
                     //await SendSMSForMobileShipmentCreation(message);
@@ -5968,6 +5973,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return await Task.FromResult(shipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+        public async Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam)
+        {
+            try
+            {
+                var batchedPreshipmentDTO = new List<PreShipmentMobileDTO>();
+                var user = await _uow.User.GetUserByEmailorChannelCode(searchParam);
+                if (user == null)
+                {
+                    throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                var batchedPreshipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode).ToList();
+                if (batchedPreshipment.Any())
+                {
+                    batchedPreshipment = batchedPreshipment.Where(x => x.IsBatchPickUp == true && x.IsCancelled == false && x.IsDelivered == false).ToList();
+                }
+                return batchedPreshipment;
             }
             catch (Exception)
             {

@@ -108,10 +108,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public IQueryable<PreShipmentMobileDTO> GetPreShipmentForUser(string userChannelCode)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+            var preShipments =  Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
 
             var shipmentDto = (from r in preShipments
                                join co in _context.Country on r.CountryId equals co.CountryId
+                               join dest in Context.ServiceCentre on r.DestinationServiceCenterId equals dest.ServiceCentreId
                                select new PreShipmentMobileDTO()
                                {
                                    PreShipmentMobileId = r.PreShipmentMobileId,
@@ -125,6 +126,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    shipmentstatus = r.shipmentstatus,
                                    GrandTotal = r.GrandTotal,
                                    CurrencySymbol = co.CurrencySymbol,
+                                   DestinationServiceCenterName = dest.Name,
+                                   IsDelivered = r.IsDelivered,
+                                   IsBatchPickUp = r.IsBatchPickUp,
+                                   IsCancelled = r.IsCancelled,
                                    PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -238,5 +243,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 throw;
             }
         }
+
     }
 }
