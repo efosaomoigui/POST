@@ -160,6 +160,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Please select Receiver Station");
                 }
 
+                if (preShipment.SenderLocation.Latitude == null)
+                {
+                    throw new GenericException("Sender Latitude is required");
+                }
+
+                if (preShipment.SenderLocation.Longitude == null)
+                {
+                    throw new GenericException("Sender Longitude is required");
+                }
+
+                if (preShipment.ReceiverLocation.Longitude == null)
+                {
+                    throw new GenericException("Receiver Longitude is required");
+                }
+
+                if (preShipment.ReceiverLocation.Latitude == null)
+                {
+                    throw new GenericException("Receiver Latitude is required");
+                }
+
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipmentThirdParty(preShipment);
