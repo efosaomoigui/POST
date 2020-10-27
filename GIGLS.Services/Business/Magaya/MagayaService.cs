@@ -386,6 +386,20 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         //response.IsSuccessStatusCode
                     }
 
+                    using (var client2 = new HttpClient()) 
+                    {
+                        var creationNotice = new
+                        {
+                            UserId = mDto.IntlShipmentRequest.CustomerId,
+                            Subject = "Shipment Item Received",
+                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                        };
+
+                        client2.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
+                        var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
+                        //response.IsSuccessStatusCode
+                    }
+
 
                     if (mDto.IntlShipmentRequest != null)
                     {
