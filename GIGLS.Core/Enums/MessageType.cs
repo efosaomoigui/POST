@@ -54,7 +54,7 @@
         SRMEmail, // Message for Regional Managers when Store Keeper sends shipment to their region
         INTLPEMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL
         RMCS, //Message for Receiver Delivery Code
-        REQMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL 
-        REQSCA,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR HOUSTON TEAM
+        REQMAIL, //International Message for customer
+        REQSCA //International Message for Service centre
     } 
 }
