@@ -611,8 +611,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 // get the current user info
-               // var currentUserId = await _userService.GetCurrentUserId();
-                var currentUserId = "9764e2f7-5abb-410c-af7e-1690604b7cce";
+                var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
@@ -674,7 +673,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 decimal shipmentGrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
-                wallet.Balance = 5000000;
                 if (wallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                 {
                     preShipmentDTO.IsBalanceSufficient = false;
