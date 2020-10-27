@@ -143,6 +143,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string TempCode { get; set; }
 
         public List<int> PackageOptionIds { get; set; } = new List<int>();
+
+        public string RequestNumber { get; set; }
+        public string URL { get; set; }
+        public string ItemDetails { get; set; } 
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
@@ -217,6 +221,9 @@ namespace GIGLS.Core.DTO.Shipments
         public int StationId { get; set; }
 
         public bool IsProcessed { get; set; }
+
+        public string URL { get; set; }
+        public string ItemDetails { get; set; }
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
@@ -295,5 +302,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+
+        public string URL { get; set; }
+        public string ItemDetails { get; set; }
     }
 }

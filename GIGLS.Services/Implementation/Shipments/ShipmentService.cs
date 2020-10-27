@@ -1900,6 +1900,53 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> CheckReleaseMovementManifest(string movementManifestCode) 
+        {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ReleaseMovementManifest(string movementManifestCode, string code)
+        {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode); 
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.DriverCode == code)
+                {
+                    ManifestNumber.IsDriverValid = true;
+                    await _uow.CompleteAsync();
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres() 
         { 

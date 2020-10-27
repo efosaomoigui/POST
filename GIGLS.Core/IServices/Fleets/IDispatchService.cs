@@ -16,5 +16,6 @@ namespace GIGLS.Core.IServices.Fleets
         Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
 
         Task<object> AddMovementDispatch(MovementDispatchDTO dispatchDTO);
+        Task<MovementDispatchDTO> GetMovementDispatchManifestCode(string movementmanifestcode);
     }
 }

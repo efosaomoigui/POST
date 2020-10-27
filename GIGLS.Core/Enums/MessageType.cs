@@ -53,6 +53,8 @@
         DBDO, // When discrepancy has been identified during confirmation of bank deposit
         SRMEmail, // Message for Regional Managers when Store Keeper sends shipment to their region
         INTLPEMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL
-        RMCS //Message for Receiver Delivery Code
+        RMCS, //Message for Receiver Delivery Code
+        REQMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL 
+        REQSCA,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR HOUSTON TEAM
     } 
 }

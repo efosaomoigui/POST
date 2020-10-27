@@ -123,7 +123,6 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode)  
         {
             try
-
             {                
                 var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementmanifestCode);
                 var movementManifestList = movementmanifestMappingList.ToList();

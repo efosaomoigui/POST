@@ -168,6 +168,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
 
             var movementManifestNumberVals = movementManifestNumber.ToList();
+            var allServiceCenters = _context.ServiceCentre.AsQueryable();
 
             var movementManifestNumberDto = from mgw in movementManifestNumber
                                             select new MovementManifestNumberDTO
@@ -177,9 +178,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 DateCreated = mgw.DateCreated,
                                                 DateModified = mgw.DateModified,
                                                 IsDeleted = mgw.IsDeleted,
-                                                RowVersion = mgw.RowVersion
+                                                RowVersion = mgw.RowVersion, 
+                                                MovementStatus = mgw.MovementStatus,
+                                                DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
 
-                                            }; 
+        }; 
 
             return movementManifestNumberDto.ToList();
         }
