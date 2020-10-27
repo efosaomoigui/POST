@@ -1062,6 +1062,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     intlDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
                 }
+
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), intlDTO.CustomerType);
                 var customerObj = await GetCustomer(intlDTO.CustomerId, customerType);
 
