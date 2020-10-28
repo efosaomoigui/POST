@@ -30,7 +30,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IPreShipmentService _preshipmentService;
         private readonly ICustomerPortalService _customerPortalService;
 
-        public ShipmentController(IShipmentService service, IShipmentReportService reportService,
+        public ShipmentController(IShipmentService service, IShipmentReportService reportService, ICustomerPortalService customerPortalService,
             IUserService userService, IPreShipmentService preshipmentService) : base(nameof(ShipmentController))
         {
             _service = service;
