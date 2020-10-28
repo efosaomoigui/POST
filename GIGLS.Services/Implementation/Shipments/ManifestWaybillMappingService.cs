@@ -620,7 +620,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //error, the dispatch user can have an undelivered dispatch
                     var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
                     var manifestObjects = _uow.Manifest.GetAll().Where(s =>
-                    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
+                    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery || s.ManifestType == ManifestType.PickupForDelivery).ToList();
 
                     //update userDispatchs
                     var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
@@ -1298,5 +1298,59 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return finalResult;
         }
+
+
+        public async Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile()
+        {
+            try
+            {
+                var result = new List<PreshipmentManifestDTO>();
+                //get the current user
+                string user = await _userService.GetCurrentUserId();
+                //get the dispatch for the user
+                var dispatches = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == user && s.ReceivedBy == null).ToList();
+                if (dispatches.Any())
+                {
+                    //get the all manifest for the dispatch user
+                    var manifestNumbers = dispatches.Select(s => s.ManifestNumber).ToList();
+                    var manifests = _uow.Manifest.GetAll().Where(s =>
+                    manifestNumbers.Contains(s.ManifestCode) && s.ManifestType == ManifestType.PickupForDelivery).ToList();
+
+                    //get all waybills for all the manifests
+                    foreach (var item in manifests)
+                    {
+                        var preshipmentManifest = new PreshipmentManifestDTO();
+                        preshipmentManifest.ManifestCode = item.ManifestCode;
+                        preshipmentManifest.ManifestId = item.ManifestId;
+                        preshipmentManifest.ManifestType = item.ManifestType;
+                        preshipmentManifest.DateTime = item.DateTime;
+
+                        var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == item.ManifestCode).Select(x => x.Waybill).ToList();
+                        if (waybillsInManifest.Any())
+                        {
+                            for (int i = 0; i < waybillsInManifest.Count; i++)
+                            {
+                                var waybill = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybillsInManifest[i]);
+                                var preshipmentWaybill = new PreShipmentMobileWaybill();
+                                preshipmentWaybill.Waybill = waybill.Waybill;
+                                preshipmentWaybill.Receiver.Address = waybill.ReceiverAddress;
+                                preshipmentWaybill.Receiver.Name = waybill.ReceiverName;
+                                preshipmentWaybill.Receiver.PhoneNo = waybill.ReceiverPhoneNumber;
+                                preshipmentManifest.Waybills.Add(preshipmentWaybill);
+                            }
+                        }
+                        result.Add(preshipmentManifest);
+                    }
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
     }
 }

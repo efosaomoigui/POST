@@ -4400,7 +4400,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number)
+        public async Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number)
         {
             try
             {
@@ -5995,7 +5995,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var batchedPreshipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode).ToList();
                 if (batchedPreshipment.Any())
                 {
-                    batchedPreshipment = batchedPreshipment.Where(x => x.IsBatchPickUp == true && x.IsCancelled == false && x.IsDelivered == false).ToList();
+                    batchedPreshipment = batchedPreshipment.Where(x => x.IsBatchPickUp == true && x.shipmentstatus == "Shipment Created").ToList();
                 }
                 return batchedPreshipment;
             }

@@ -16,6 +16,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Domain.Expenses;
 using System.Net;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -24,12 +25,14 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
+        private readonly IPreShipmentMobileService _preshipmentMobileService;
 
-        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow)
+        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPreShipmentMobileService preshipmentMobileService)
         {
             _walletService = walletService;
             _userService = userService;
             _uow = uow;
+            _preshipmentMobileService = preshipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -91,6 +94,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                     newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     newDispatch.ServiceCentreId = userServiceCentreId;
+                    newDispatch.DriverDetail = dispatchDTO.UserId;
 
                     //Set Departure Service Center
                     newDispatch.DepartureServiceCenterId = userServiceCentreId;
@@ -576,6 +580,66 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 throw;
             }
-        }        
+        }
+
+        public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
+        {
+            try
+            {
+                string user = await _userService.GetCurrentUserId();
+                if (String.IsNullOrEmpty(manifestNumber) || waybills != null || waybills.Count < 1)
+                {
+                    throw new GenericException("No waybill number(s) provided");
+                }
+
+                //check to see if all waybill in manifest was fufilled
+                var unFufilled = _uow.PickupManifestWaybillMapping.GetAll().Where(x => !waybills.Contains(x.Waybill) && x.ManifestCode == manifestNumber).ToList();
+                if (unFufilled.Any())
+                {
+                    //remove the contained waybill from the manifest
+                    _uow.PickupManifestWaybillMapping.RemoveRange(unFufilled);
+
+                    //change contained waybill status back to shipment created
+                    var waybillsToRemove = unFufilled.Select(s => s.Waybill).ToList();
+                    var preshipmentWaybills = _uow.PreShipmentMobile.GetAll().Where(x => waybillsToRemove.Contains(x.Waybill)).ToList();
+                    foreach (var item in preshipmentWaybills)
+                    {
+                        item.shipmentstatus = "Shipment Created";
+                    }
+                }
+                //update waybill to pickedup
+                var waybillsToUpdateToPickup = _uow.PreShipmentMobile.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var pickupRequestList = new List<MobilePickUpRequests>();
+                foreach (var item in waybillsToUpdateToPickup)
+                {
+                    item.shipmentstatus = "PickedUp";
+                    // add preshipment record to mobilepickuprequest table
+                    var request = new MobilePickUpRequests();
+                    request.Status = item.shipmentstatus;
+                    request.Waybill = item.Waybill;
+                    request.UserId = user;
+                    request.DateCreated = DateTime.Now;
+                    request.DateModified = DateTime.Now;
+                    pickupRequestList.Add(request);
+                }
+                _uow.MobilePickUpRequests.AddRange(pickupRequestList);
+                await _uow.CompleteAsync();
+
+                //send sms to all receiver
+                for (int i = 0; i < waybillsToUpdateToPickup.Count; i++)
+                {
+                    //Generate Receiver Delivery Code
+                    var deliveryNumber = await _preshipmentMobileService.GenerateDeliveryCode();
+                    //Send SMS To Receiver with Delivery Code
+                    await _preshipmentMobileService.SendReceiverDeliveryCodeBySMS(waybillsToUpdateToPickup[i], deliveryNumber);
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

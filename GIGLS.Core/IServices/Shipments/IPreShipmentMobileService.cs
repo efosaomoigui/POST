@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
@@ -80,5 +81,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<string> GenerateDeliveryCode();
         Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam);
+        Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number);
     }
 }
