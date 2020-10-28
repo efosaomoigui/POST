@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
@@ -187,5 +188,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
+        Task<List<StoreDTO>> GetStoresByCountry(int countryId);
     }
 }

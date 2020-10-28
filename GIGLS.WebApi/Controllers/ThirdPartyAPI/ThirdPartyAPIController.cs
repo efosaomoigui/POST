@@ -53,11 +53,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("price")]
-        public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO preshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _thirdPartyAPIService.GetPrice(PreshipmentMobile);
+                var PreshipMentMobile = await _thirdPartyAPIService.GetPrice(preshipmentMobile);
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = PreshipMentMobile
@@ -89,14 +89,14 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
-        public async Task<IServiceResponse<object>> CreateShipment(CreatePreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<object>> CreateShipment(CreatePreShipmentMobileDTO preshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _thirdPartyAPIService.CreatePreShipment(PreshipmentMobile);
+                var result = await _thirdPartyAPIService.CreatePreShipment(preshipmentMobile);
                 return new ServiceResponse<object>
                 {
-                    Object = PreshipMentMobile
+                    Object = result
                 };
             });
         }

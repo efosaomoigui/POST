@@ -58,6 +58,7 @@ using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -2934,6 +2935,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MessageDTO> GetIntlMessageForApp()
         {
             return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+        }
+
+        public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
+        {
+            return await _uow.Store.GetStoresByCountryId(countryId);
         }
     }
 }
