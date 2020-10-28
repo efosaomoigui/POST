@@ -40,6 +40,7 @@ using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -2183,6 +2184,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("storesbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stores = await _portalService.GetStoresByCountry(countryId);
+                return new ServiceResponse<List<StoreDTO>>
+                {
+                    Object = stores
                 };
             });
         }
