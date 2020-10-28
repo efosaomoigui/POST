@@ -109,6 +109,7 @@ namespace GIGLS.Core
         IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
+        IMovementDispatchRepository MovementDispatch { get; set; } 
         IDispatchActivityRepository DispatchActivity { get; set; }
         IEmailSendLogRepository EmailSendLog { get; set; }
         ISmsSendLogRepository SmsSendLog { get; set; }

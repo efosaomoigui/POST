@@ -22,6 +22,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.ServiceModel;
 using System.Threading.Tasks;
 //using ThirdParty.WebServices;
@@ -366,6 +367,40 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
                     }
 
+                    using (var client = new HttpClient())
+                    {
+                        var notice = new
+                        {
+                            customerId = mDto.IntlShipmentRequest.CustomerId,
+                            title = "Shipment Item Received",
+                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                            data = new
+                            {
+                                waybillNumber = mDto.WarehouseReceipt.Number,
+                                action = "pay for shipment"
+                            }
+                        };
+
+                        client.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
+                        var response = client.PostAsJsonAsync("/api/customer/sendNotif", notice).Result;
+                        //response.IsSuccessStatusCode
+                    }
+
+                    using (var client2 = new HttpClient()) 
+                    {
+                        var creationNotice = new
+                        {
+                            UserId = mDto.IntlShipmentRequest.CustomerId,
+                            Subject = "Shipment Item Received",
+                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                        };
+
+                        client2.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
+                        var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
+                        //response.IsSuccessStatusCode
+                    }
+
+
                     if (mDto.IntlShipmentRequest != null)
                     {
                         var request = await _uow.IntlShipmentRequest.GetAsync(s => s.RequestNumber == mDto.IntlShipmentRequest.RequestNumber);
@@ -375,6 +410,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             await _uow.CompleteAsync();
                         }
                     }
+
                 }
                 else
                 {
@@ -689,6 +725,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+                string itemName = "";
 
                 var serialNumber = 1;
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
@@ -702,6 +739,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                         newShipment.ApproximateItemsWeight += Weight;
                         newShipment.GrandTotal += shipmentItem.Price;
+                        itemName += shipmentItem.ItemName + " -- ";
                     }
                     else
                     {
@@ -710,11 +748,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     serialNumber++;
                 }
+
                 newShipment.DestinationServiceCentre = null;
                 _uow.IntlShipmentRequest.Add(newShipment);
                 await _uow.CompleteAsync();
+
+                newShipment.DestinationServiceCentre = destinationServiceCenter;
+                var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
+                castObj.ItemDetails = itemName;
+
+                //Send an email with details of request to customer
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+
+                //Send an email with details of request to Houston team
+                castObj.CustomerEmail = ""; //houston email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
+
                 return shipmentDTO;
-            } 
+            }
             catch (Exception ex)
             {
                 throw;

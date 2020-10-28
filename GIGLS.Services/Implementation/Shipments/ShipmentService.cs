@@ -2003,22 +2003,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 var endDate = queryDate.Item2;
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => (x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress)
-                                                                    && x.DateModified >= startDate && x.DateModified < endDate);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress);
 
                 if (serviceCenters.Length > 0)
                 {
                     manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
-
+                var result = manifests.ToList();
                 //Filter it by the destination service centre send from filter option
                 int filterValue = Convert.ToInt32(dateFilterCriteria.filterValue);
-                //if (filterValue > 0 && filterValue != 99999)
-                //{
-                //    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
-                //}
-
-                var result = manifests.ToList();
+                if (filterValue > 0 && filterValue != 99999)
+                {
+                    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
+                }
+                
                 var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
 
                 if (filterValue != 99999)
@@ -2118,9 +2116,56 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
-        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres()
+        public async Task<bool> CheckReleaseMovementManifest(string movementManifestCode) 
         {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ReleaseMovementManifest(string movementManifestCode, string code)
+        {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode); 
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.DriverCode == code)
+                {
+                    ManifestNumber.IsDriverValid = true;
+                    await _uow.CompleteAsync();
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres() 
+        { 
             try
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
@@ -2136,13 +2181,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                //var result = allServiceCenters.Where(s => movementManifestNumbers.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
-                var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
+                var result = allServiceCenters.Where(s => ManifestNumbers.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                //var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => re.Any(r => r.ServiceCentreId == s.ServiceCentreId));
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
                 return unmappedGroupServiceCentres.ToList();
             }
