@@ -369,7 +369,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     using (var client = new HttpClient())
                     {
-                        string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrlDev"];
+                        string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrl"];
 
                         var notice = new
                         {
