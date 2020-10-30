@@ -369,6 +369,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     using (var client = new HttpClient())
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrlDev"];
+
                         var notice = new
                         {
                             customerId = mDto.IntlShipmentRequest.CustomerId,
@@ -381,13 +383,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             }
                         };
 
-                        client.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
-                        var response = client.PostAsJsonAsync("/api/customer/sendNotif", notice).Result;
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        var response = client.PostAsJsonAsync("customer/sendNotif", notice).Result;
                         //response.IsSuccessStatusCode
                     }
 
                     using (var client2 = new HttpClient()) 
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+
                         var creationNotice = new
                         {
                             UserId = mDto.IntlShipmentRequest.CustomerId,
@@ -395,7 +399,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
                         };
 
-                        client2.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
+                        client2.BaseAddress = new Uri(apiBaseUri);
                         var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
                         //response.IsSuccessStatusCode
                     }
