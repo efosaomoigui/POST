@@ -443,13 +443,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == false);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == false && s.IsPublic == true);
 
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
-                                where c.CountryId == countryId && s.IsPublic == true
+                                where c.CountryId == countryId 
                                     select new ServiceCentreDTO
                                     {
                                         Name = s.Name,
