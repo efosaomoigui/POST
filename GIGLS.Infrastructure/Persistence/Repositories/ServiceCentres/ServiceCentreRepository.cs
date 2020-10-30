@@ -470,7 +470,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         IsDefault = s.IsDefault,
                                         Longitude = s.Longitude,
                                         Latitude = s.Latitude,
-                                        FormattedServiceCentreName = s.FormattedServiceCentreName
+                                        FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                        IsPublic = s.IsPublic
                                     };
                     return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
               
