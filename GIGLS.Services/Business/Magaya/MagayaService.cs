@@ -682,7 +682,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             //get the current user info
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
+                //var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserId = shipmentDTO.UserId; // await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
                 var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
 
@@ -766,7 +767,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
 
                 //Send an email with details of request to Houston team
-                castObj.CustomerEmail = ""; //houston email
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail))? "giglhouston@giglogistics.com" : houstonEmail; //houston email
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
 
                 return shipmentDTO;
