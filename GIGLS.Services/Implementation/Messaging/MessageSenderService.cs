@@ -14,8 +14,10 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Infrastructure;
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -1192,6 +1194,17 @@ namespace GIGLS.Services.Implementation.Messaging
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
 
+        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        {
+            var message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+
+            if (message == null)
+            {
+                throw new GenericException("Message Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            return Mapper.Map<MessageDTO>(message);
+        }
+
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{
@@ -1212,7 +1225,7 @@ namespace GIGLS.Services.Implementation.Messaging
         //            foreach (var email in emails)
         //            {
         //                obj.Email = email;
-                        
+
         //                //prepare generic message finalBody
         //                bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
         //                if (verifySendEmail)
@@ -1221,7 +1234,7 @@ namespace GIGLS.Services.Implementation.Messaging
         //                    await LogEmailMessage(messageDTO, result);
         //                }
         //            }
-                   
+
         //        }
         //    }
         //    catch (Exception ex)

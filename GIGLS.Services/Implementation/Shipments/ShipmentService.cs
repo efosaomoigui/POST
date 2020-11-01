@@ -110,6 +110,18 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(DateFilterCriteria filterOptionsDto)
+        {
+            try
+            {
+                return await _uow.IntlShipmentRequest.GetIntlTransactionShipmentRequest(filterOptionsDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try

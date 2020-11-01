@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
@@ -999,6 +1000,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto)
         {
             var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
             return result;
