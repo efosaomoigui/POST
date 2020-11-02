@@ -2261,19 +2261,5 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
-        [Route("storesbycountry/{countryId}")]
-        public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var stores = await _portalService.GetStoresByCountry(countryId);
-                return new ServiceResponse<List<StoreDTO>>
-                {
-                    Object = stores
-                };
-            });
-        }
-
     }
 }
