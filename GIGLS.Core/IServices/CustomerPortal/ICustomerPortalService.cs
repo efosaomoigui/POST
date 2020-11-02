@@ -183,17 +183,14 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
-<<<<<<< HEAD
 
         Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
-=======
         Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
         Task<List<StoreDTO>> GetStoresByCountry(int countryId);
         Task<object> CreateNotification(NotificationDTO notificationDTO);
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
->>>>>>> Dev_New
     }
 }

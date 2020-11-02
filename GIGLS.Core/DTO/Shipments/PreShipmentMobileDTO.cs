@@ -162,11 +162,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
-<<<<<<< HEAD
         public bool IsBatchPickUp { get; set; }
-=======
         public string WaybillImageUrl { get; set; }
->>>>>>> Dev_New
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {

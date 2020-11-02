@@ -2903,7 +2903,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _mobilePickUpRequestService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
         }
-<<<<<<< HEAD
 
         public async Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile()
         {
@@ -2914,9 +2913,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
           return  await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
         }
-
-
-=======
         public async Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile)
         {
             try
@@ -2955,6 +2951,5 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
->>>>>>> Dev_New
     }
 }

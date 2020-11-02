@@ -3295,7 +3295,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                     throw new GenericException("Shipment has not been porcessed", $"{(int)HttpStatusCode.Forbidden}");
                 }
-
+                //update the actual receiver if neccessary
+                if (pickuprequest.IsProxy)
+                {
+                    preshipmentmobile.ActualReceiverFirstName = pickuprequest.ProxyName;
+                    preshipmentmobile.ActualReceiverPhoneNumber = pickuprequest.ProxyPhoneNumber;
+                    preshipmentmobile.ActualReceiverLastName = pickuprequest.ProxyEmail;
+                    await _uow.CompleteAsync();
+                }
             }
             catch (Exception)
             {

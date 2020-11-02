@@ -161,11 +161,8 @@ namespace GIGLS.Core.Domain
         public bool IsScheduled { get; set; }
         public DateTime? ScheduledDate { get; set; }
         public int DestinationServiceCenterId { get; set; }
-<<<<<<< HEAD
         public bool IsBatchPickUp { get; set; }
-=======
         [MaxLength(500)]
         public string WaybillImageUrl { get; set; }
->>>>>>> Dev_New
     }
 }

@@ -1350,26 +1350,5 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        public async Task<bool> SignOffManifest(string manifestNumber)
-        {
-            try
-            {
-                //get the current user
-                string user = await _userService.GetCurrentUserId();
-                //get all waybill in the manifest
-                var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == manifestNumber).Select(x => x.Waybill).ToList();
-                var notDelivered = _uow.PreShipmentMobile.GetAll().Where(x => waybillsInManifest.Contains(x.Waybill) && x.ManifestCode == manifestNumber).ToList();
-
-
-
-
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
     }
 }
