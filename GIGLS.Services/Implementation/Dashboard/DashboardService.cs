@@ -1062,6 +1062,10 @@ namespace GIGLS.Services.Implementation.Dashboard
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
 
+            //get outstanding corporate payments
+            var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
+            dashboardDTO.OutstandingCorporatePayment = outstandingPayments;
+
             return dashboardDTO;
         }
 
