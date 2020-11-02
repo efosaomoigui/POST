@@ -40,6 +40,7 @@ using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1763,8 +1764,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //Remove this 
-        [AllowAnonymous]
         [HttpPost]
         [Route("addmobilepickuprequestfortimedoutrequests")]
         public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
@@ -2185,6 +2184,79 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("storesbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stores = await _portalService.GetStoresByCountry(countryId);
+                return new ServiceResponse<List<StoreDTO>>
+                {
+                    Object = stores
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createnotification")]
+        public async Task<IServiceResponse<object>> CreateNotification(NotificationDTO notificationDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var notification = await _portalService.CreateNotification(notificationDto);
+
+                return new ServiceResponse<object>
+                {
+                    Object = notification
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getnotifications/{isRead?}")]
+        public async Task<IServiceResponse<IEnumerable<NotificationDTO>>> GetNotifications(bool? isRead = null)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _portalService.GetNotifications(isRead);
+                return new ServiceResponse<IEnumerable<NotificationDTO>>
+                {
+                    Object = locations
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updatenotification/{notificationId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateNotificationAsRead(int notificationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.UpdateNotificationAsRead(notificationId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("intlshipmentsmessage")]
+        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var message = await _portalService.GetIntlMessageForApp();
+
+                return new ServiceResponse<MessageDTO>
+                {
+                    Object = message
                 };
             });
         }

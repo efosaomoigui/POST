@@ -74,6 +74,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<GroupWaybillNumber> GroupWaybillNumber { get; set; }
         public DbSet<GroupWaybillNumberMapping> GroupWaybillNumberMapping { get; set; }
 
+        //Movement Manifest
+        public DbSet<MovementManifestNumber> MovementManifestNumber { get; set; }   
+        public DbSet<MovementManifestNumberMapping> MovementManifestNumberMapping { get; set; } 
+
 
         //Shipment
         public DbSet<Manifest> Manifest { get; set; }
@@ -120,6 +124,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<FleetPartInventory> FleetPartInventory { get; set; }
         public DbSet<FleetPartInventoryHistory> FleetPartInventoryHistory { get; set; }
         public DbSet<Dispatch> Dispatch { get; set; }
+        public DbSet<MovementDispatch> MovementDispatch { get; set; } 
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
 
         //Partner

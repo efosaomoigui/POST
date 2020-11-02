@@ -8,6 +8,7 @@ namespace GIGLS.CORE.DTO.Report
         public DateTime? EndDate { get; set; }
         public int CountryId { get; set; }
         public int ServiceCentreId { get; set; }
+        public string FilterValue { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database

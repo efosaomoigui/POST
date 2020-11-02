@@ -8,23 +8,51 @@ using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
     public class ThirdPartyAPIService : IThirdPartyAPIService
     {
-        private readonly ICustomerPortalService _portalService; 
+        private readonly ICustomerPortalService _portalService;
+        private readonly IQRAndBarcodeService _qrandbarcodeService;
         private readonly IUnitOfWork _uow;
 
-        public ThirdPartyAPIService(ICustomerPortalService portalService, IUnitOfWork uow)
+        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow)
         {
             _portalService = portalService;
+            _qrandbarcodeService = qrandbarcodeService;
             _uow = uow;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
-            return await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+            var result = await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
+
+            if (!string.IsNullOrEmpty(result.waybill))
+            {
+                var res = await _qrandbarcodeService.AddImage(result.waybill);
+                result.WaybillImage = res.WaybillImage;
+                result.WaybillImageFormat = res.WaybillImageFormat;
+
+                //update the preshipment table with the waybillimageurl
+                var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == result.waybill);
+                if (preShipmentMobile != null)
+                {
+                    preShipmentMobile.WaybillImageUrl = res.ImagePath;
+                    await _uow.CompleteAsync();
+                }
+            }
+
+            return new
+            {
+                result.waybill,
+                result.message,
+                result.IsBalanceSufficient,
+                result.Zone,
+                result.WaybillImage,
+                result.WaybillImageFormat
+            };
         }
 
         public async Task<IEnumerable<StationDTO>> GetInternationalStations()
@@ -72,6 +100,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetActiveHomeDeliveryLocations();
         }
 
+        public async Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber)
+        {
+            return await _uow.PreShipmentMobile.GetBasicPreShipmentMobileDetail(waybillNumber);
+        }
 
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
@@ -384,5 +416,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         //        throw new GenericException("Error: You cannot track this waybill number.");
         //    }
         //}
+
     }
 }

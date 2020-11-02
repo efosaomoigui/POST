@@ -101,6 +101,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                        Total = r.Total,
                                                        CashOnDeliveryAmount = r.CashOnDeliveryAmount,
                                                        IsCashOnDelivery = r.IsCashOnDelivery,
+                                                       WaybillImageUrl = r.WaybillImageUrl,
                                                    }).FirstOrDefault();
 
             return Task.FromResult(preShipmentDto);

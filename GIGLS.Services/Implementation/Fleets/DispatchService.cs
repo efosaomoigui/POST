@@ -232,6 +232,57 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
+
+        /// <summary>
+        /// This method creates a new dispatch, updates the manifest and system wallet information
+        /// </summary>
+        /// <param name="MovementdispatchDTO"></param>
+        /// <returns></returns>
+        public async Task<object> AddMovementDispatch(MovementDispatchDTO dispatchDTO) 
+        {
+            {
+                int userServiceCentreId;
+                int dispatchId;
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                userServiceCentreId = serviceCenterIds[0];
+
+                //get the login user
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserDetail = await _userService.GetUserById(currentUserId);
+                //var dispatchObj = _uow.MovementDispatch.SingleOrDefault(s => s.MovementManifestNumber == dispatchDTO.MovementManifestNumber);
+
+                // create dispatch
+                var newDispatch = Mapper.Map<MovementDispatch>(dispatchDTO);
+                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                newDispatch.ServiceCentreId = userServiceCentreId;
+
+                //Set Departure Service Center
+                newDispatch.DepartureServiceCenterId = userServiceCentreId;
+                newDispatch.DepartureId = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.ServiceCentreId == newDispatch.DepartureServiceCenterId)
+                    .Select(x => x.StationId).FirstOrDefault();
+
+                //newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+
+                _uow.MovementDispatch.Add(newDispatch); 
+                dispatchId = newDispatch.DispatchId;
+
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(userServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+
+                // commit transaction
+                await _uow.CompleteAsync();
+                return new { Id = dispatchId };
+            }
+        }
+
+
         /// <summary>
         /// This method ensures that all waybills attached to the manifestNumber 
         /// are filter for scanning processing.
@@ -362,6 +413,68 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 return dispatchDTO;
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MovementDispatchDTO> GetMovementDispatchManifestCode(string movementmanifestcode)  
+        {
+            try
+            {
+                var dispatchResult = await _uow.MovementDispatch.FindAsync(x => x.MovementManifestNumber.Equals(movementmanifestcode));
+                var dispatch = dispatchResult.FirstOrDefault();
+                if (dispatch == null)
+                {
+                    return null;
+                }
+
+                var dispatchDTO = Mapper.Map<MovementDispatchDTO>(dispatch);
+
+                //get User detail
+                var user = await _uow.User.GetUserById(dispatch.DriverDetail);
+
+                if (user != null)
+                {
+                    dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
+                    dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
+                }
+
+                //get the country by service centre
+                if (dispatchDTO.ServiceCentreId > 0)
+                {
+                    int serviceCentre = (int)dispatchDTO.ServiceCentreId;
+                    var country = await _uow.Country.GetCountryByServiceCentreId(serviceCentre);
+                    dispatchDTO.Country = country;
+                }
+                //get Station Detail
+                var destStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DestinationId);
+                if (destStation != null)
+                {
+                    dispatchDTO.Destination = Mapper.Map<StationDTO>(destStation);
+                }
+
+                var deptStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DepartureId);
+                if (deptStation != null)
+                {
+                    dispatchDTO.Departure = Mapper.Map<StationDTO>(deptStation);
+                }
+                //get Service Center Detail
+                var destService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DestinationServiceCenterId);
+                if (destService != null)
+                {
+                    dispatchDTO.DestinationService = Mapper.Map<ServiceCentreDTO>(destService);
+                }
+
+                var deptService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DepartureServiceCenterId);
+                if (deptService != null)
+                {
+                    dispatchDTO.DepartureService = Mapper.Map<ServiceCentreDTO>(deptService);
+                }
+
+                return dispatchDTO;
             }
             catch (Exception)
             {

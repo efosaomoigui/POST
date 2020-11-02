@@ -54,7 +54,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
-        public bool IsHomeDelivery { get; set; }
+        public bool IsHomeDelivery { get; set; } = true;
 
         //General but optional
 
@@ -162,7 +162,11 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
+<<<<<<< HEAD
         public bool IsBatchPickUp { get; set; }
+=======
+        public string WaybillImageUrl { get; set; }
+>>>>>>> Dev_New
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -272,5 +276,16 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverStationName { get; set; }
         public DateTime DateCreated { get; set; }
         public string VehicleType { get; set; }
+    }
+
+    public class PreShipmentMobileThirdPartyDTO
+    {
+        public string waybill { get; set; }
+        public string message { get; set; }
+        public bool IsBalanceSufficient { get; set; }
+        public int Zone { get; set; }
+        public string WaybillImage { get; set; }
+        public string WaybillImageFormat { get; set; }
+        public string ImagePath { get; set; }
     }
 }

@@ -67,6 +67,14 @@ namespace GIGLS.Core.IServices.Shipments
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
         Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(DateFilterCriteria filterOptionsDto);
+
+        //Movement Manifest 
+        Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
+        Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria);
+        Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
+        Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
+        Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
@@ -101,9 +109,11 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> SetEntityIntl(CustomerDTO custDTo);
         Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
         Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto);
 
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
+
     }
 
 

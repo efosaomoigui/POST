@@ -432,17 +432,19 @@ namespace GIGLS.Services.Implementation.Customers
             HttpClient client = new HttpClient();
             var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
             var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
-            nodeURL = $"{nodeURL}{url}?waybill={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
+            nodeURL = $"{nodeURL}{url}?waybillNumber={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
+         
             HttpResponseMessage response = await client.GetAsync(nodeURL);
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadAsAsync<DataResponse>();
+            string jObject = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<DataResponse>(jObject);
 
             if (result.Data.ApiList.Any())
             {
                 foreach (var item in result.Data.ApiList)
                 {
                     //get actions performed on shipment
-                    var actionIndx = item.Url.LastIndexOf('/');
+                   int actionIndx = item.Url.LastIndexOf('/');
                     actionIndx++;
                     var action = item.Url.Substring(actionIndx);
                     var partnerName = String.Empty;
@@ -452,16 +454,18 @@ namespace GIGLS.Services.Implementation.Customers
                         var partnerInfo = await _uow.Partner.GetPartnerByUserId(item.Body.PartnerId);
                         if (partnerInfo != null)
                         {
-                            partnerName = partnerInfo.FirstName;
+                            partnerName = partnerInfo.PartnerName;
                             partnerPhoneNo = partnerInfo.PhoneNumber; 
                         }
                     }
-                    var obj = new ShipmentActivityDTO();
-                    obj.Action = action.ToUpper();
-                    obj.ActionBy = partnerName;
-                    obj.ActionTime = item.CreationDate;
-                    obj.ActionReason = item.Reason;
-                    obj.CreatedOn = item.CreationDate;
+                    var obj = new ShipmentActivityDTO
+                    {
+                        Action = action.ToUpper(),
+                        ActionBy = partnerName,
+                        ActionTime = item.CreationDate,
+                        ActionReason = item.ReasonText,
+                        CreatedOn = item.CreationDate
+                    };
                     if (item.StatusCode == "200")
                     {
                         obj.ActionResult = "SUCCESSFUL"; 

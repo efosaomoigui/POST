@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
@@ -22,6 +23,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.ServiceModel;
 using System.Threading.Tasks;
 //using ThirdParty.WebServices;
@@ -366,6 +368,44 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
                     }
 
+                    using (var client = new HttpClient())
+                    {
+                        string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrl"];
+
+                        var notice = new
+                        {
+                            customerId = mDto.IntlShipmentRequest.CustomerId,
+                            title = "Shipment Item Received",
+                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                            data = new
+                            {
+                                waybillNumber = mDto.WarehouseReceipt.Number,
+                                action = "pay for shipment"
+                            }
+                        };
+
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        var response = client.PostAsJsonAsync("customer/sendNotif", notice).Result;
+                        //response.IsSuccessStatusCode
+                    }
+
+                    using (var client2 = new HttpClient()) 
+                    {
+                        string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+
+                        var creationNotice = new
+                        {
+                            UserId = mDto.IntlShipmentRequest.CustomerId,
+                            Subject = "Shipment Item Received",
+                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                        };
+
+                        client2.BaseAddress = new Uri(apiBaseUri);
+                        var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
+                        //response.IsSuccessStatusCode
+                    }
+
+
                     if (mDto.IntlShipmentRequest != null)
                     {
                         var request = await _uow.IntlShipmentRequest.GetAsync(s => s.RequestNumber == mDto.IntlShipmentRequest.RequestNumber);
@@ -375,6 +415,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             await _uow.CompleteAsync();
                         }
                     }
+
                 }
                 else
                 {
@@ -639,77 +680,104 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO)
         {
             //get the current user info
-            var currentUserId = await _userService.GetCurrentUserId();
-            var user = await _userService.GetUserById(currentUserId);
-            var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
-
-            if (customer.CustomerType == CustomerType.Company)
+            try
             {
-                shipmentDTO.CustomerId = customer.CompanyId;
-                shipmentDTO.CustomerFirstName = customer.Name;
-                shipmentDTO.CustomerLastName = customer.Name;
-                shipmentDTO.CustomerEmail = customer.Email;
-                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
-                shipmentDTO.CustomerAddress = customer.Address;
-                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
-                shipmentDTO.CustomerCity = customer.City;
-                shipmentDTO.CustomerState = customer.State;
-            }
-            else
-            {
-                shipmentDTO.CustomerId = customer.IndividualCustomerId;
-                shipmentDTO.CustomerFirstName = customer.FirstName;
-                shipmentDTO.CustomerLastName = customer.LastName;
-                shipmentDTO.CustomerEmail = customer.Email;
-                shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
-                shipmentDTO.CustomerAddress = customer.Address;
-                shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
-                shipmentDTO.CustomerCity = customer.City;
-                shipmentDTO.CustomerState = customer.State;
-            }
+                //var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserId = shipmentDTO.UserId; // await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
 
-            shipmentDTO.UserId = currentUserId;
-            shipmentDTO.CustomerType = customer.CustomerType.ToString();
-
-            var station = await _stationService.GetStationById(shipmentDTO.StationId);
-            var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
-
-            //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
-            //{
-            var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
-            shipmentDTO.RequestNumber = RequestNumber;
-            //}
-
-            var newShipment = await MapIntlShipmentRequest(shipmentDTO);
-            newShipment.ReceiverCountry = station.Country;
-            newShipment.DestinationServiceCentreId = station.SuperServiceCentreId;
-            newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
-            newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
-
-            var serialNumber = 1;
-            foreach (var shipmentItem in newShipment.ShipmentRequestItems)
-            {
-                shipmentItem.SerialNumber = serialNumber;
-
-                //check for volumetric weight
-                if (shipmentItem.IsVolumetric)
+                if (customer.CustomerType == CustomerType.Company)
                 {
-                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
-                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
-                    newShipment.ApproximateItemsWeight += Weight;
-                    newShipment.GrandTotal += shipmentItem.Price;
+                    shipmentDTO.CustomerId = customer.CompanyId;
+                    shipmentDTO.CustomerFirstName = customer.Name;
+                    shipmentDTO.CustomerLastName = customer.Name;
+                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                    shipmentDTO.CustomerAddress = customer.Address;
+                    shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                    shipmentDTO.CustomerCity = customer.City;
+                    shipmentDTO.CustomerState = customer.State;
+                    shipmentDTO.SenderAddress = customer.Address;
                 }
                 else
                 {
-                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    shipmentDTO.CustomerId = customer.IndividualCustomerId;
+                    shipmentDTO.CustomerFirstName = customer.FirstName;
+                    shipmentDTO.CustomerLastName = customer.LastName;
+                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
+                    shipmentDTO.CustomerAddress = customer.Address;
+                    shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
+                    shipmentDTO.CustomerCity = customer.City;
+                    shipmentDTO.CustomerState = customer.State;
+                    shipmentDTO.SenderAddress = customer.Address;
                 }
 
-                serialNumber++;
+                shipmentDTO.UserId = currentUserId;
+                shipmentDTO.CustomerType = customer.CustomerType.ToString();
+
+                var station = await _stationService.GetStationById(shipmentDTO.StationId);
+                var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
+
+                //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
+                //{
+                var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
+                shipmentDTO.RequestNumber = RequestNumber;
+                //}
+
+                var newShipment = await MapIntlShipmentRequest(shipmentDTO);
+                newShipment.ReceiverCountry = station.Country;
+                newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
+                newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
+                newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+                string itemName = "";
+
+                var serialNumber = 1;
+                foreach (var shipmentItem in newShipment.ShipmentRequestItems)
+                {
+                    shipmentItem.SerialNumber = serialNumber;
+
+                    //check for volumetric weight
+                    if (shipmentItem.IsVolumetric)
+                    {
+                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+                        newShipment.ApproximateItemsWeight += Weight;
+                        newShipment.GrandTotal += shipmentItem.Price;
+                        itemName += shipmentItem.ItemName + " -- ";
+                    }
+                    else
+                    {
+                        newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    }
+
+                    serialNumber++;
+                }
+
+                newShipment.DestinationServiceCentre = null;
+                _uow.IntlShipmentRequest.Add(newShipment);
+                await _uow.CompleteAsync();
+
+                newShipment.DestinationServiceCentre = destinationServiceCenter;
+                var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
+                castObj.ItemDetails = itemName;
+
+                //Send an email with details of request to customer
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+
+                //Send an email with details of request to Houston team
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail))? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
+
+                return shipmentDTO;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
 
-            _uow.IntlShipmentRequest.Add(newShipment);
-            await _uow.CompleteAsync();
-            return shipmentDTO;
         }
 
         public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)
@@ -935,7 +1003,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
         {
-            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto); 
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
             return result;
         }
 

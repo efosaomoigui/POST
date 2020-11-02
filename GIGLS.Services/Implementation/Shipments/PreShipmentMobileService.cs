@@ -143,7 +143,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<object> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipments)
+        public async Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipments)
         {
             try
             {
@@ -160,6 +160,26 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (preShipment.ReceiverStationId == 0)
                 {
                     throw new GenericException("Please select Receiver Station");
+                }
+
+                if (preShipment.SenderLocation.Latitude == null)
+                {
+                    throw new GenericException("Sender Latitude is required");
+                }
+
+                if (preShipment.SenderLocation.Longitude == null)
+                {
+                    throw new GenericException("Sender Longitude is required");
+                }
+
+                if (preShipment.ReceiverLocation.Longitude == null)
+                {
+                    throw new GenericException("Receiver Longitude is required");
+                }
+
+                if (preShipment.ReceiverLocation.Latitude == null)
+                {
+                    throw new GenericException("Receiver Latitude is required");
                 }
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
@@ -192,7 +212,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
                 }
-                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
+
+                var preshipmentRetuenObj = new PreShipmentMobileThirdPartyDTO();
+                preshipmentRetuenObj.waybill = newPreShipment.Waybill;
+                preshipmentRetuenObj.message = message;
+                preshipmentRetuenObj.IsBalanceSufficient = IsBalanceSufficient;
+                preshipmentRetuenObj.Zone = zoneid.ZoneId;
+
+
+                return preshipmentRetuenObj;
             }
             catch (Exception)
             {
@@ -506,6 +534,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         string[] words = preShipmentDTO.SenderName.Split(' ');
                         message.SenderName = words.FirstOrDefault();
                     }
+
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
                     newPreShipment.IsDelivered = false;
@@ -666,7 +695,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 decimal shipmentGrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
-
                 if (wallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                 {
                     preShipmentDTO.IsBalanceSufficient = false;
@@ -724,7 +752,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-
                     //double check in case something is wrong with the server before complete the transaction
                     if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                     {
@@ -1092,7 +1119,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Preshipment Item Not Found");
                 }
-                var userId = await _userService.GetCurrentUserId();
+                 var userId = await _userService.GetCurrentUserId();
                 preShipment.UserId = userId;
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
@@ -4828,8 +4855,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DepartureServiceCentreId = detail.SenderServiceCentreId,
                                         CustomerId = customerid,
                                         UserId = user,
-                                       // PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
-                                        PickupOptions = PickupOptions.HOMEDELIVERY,
+                                        PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
+                                      //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                                         ApproximateItemsWeight = 0.00,

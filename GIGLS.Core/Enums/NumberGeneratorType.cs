@@ -21,5 +21,6 @@
         PreShipmentCode = 17,
         SuperManifest = 18,
         RequestNumber = 19, 
+        MovementManifestNumber = 111
     }
 }

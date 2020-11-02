@@ -290,6 +290,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generateManifestcode")]
@@ -303,6 +304,23 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<string>
                 {
                     Object = groupwaybills
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("generateMovementManifestcode")]
+        public async Task<IServiceResponse<string>> GenerateMovementManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                MovementManifestNumberDTO manifestDTO = new MovementManifestNumberDTO();
+                var ManifestNos = await _manifestService.GenerateMovementManifestCode(manifestDTO);
+
+                return new ServiceResponse<string>
+                {
+                    Object = ManifestNos
                 };
             });
         }
@@ -327,6 +345,21 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [HttpPost]
         [Route("mapgroupwaybilltomanifest")]
         public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestGroupWaybillNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mappingmanifestTomovementmanifest")]
+        public async Task<IServiceResponse<bool>> MappingManifestToMovementManifest(ManifestGroupWaybillNumberMappingDTO data) 
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -375,7 +408,29 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("manifestFormovementmanifestservicecentre/{serviceCentreId}")]
+        //public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre(int serviceCentreId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        MovementManifestFilterCriteria filterOptionsDto = new MovementManifestFilterCriteria
+        //        {
+        //            filterValue = serviceCentreId.ToString(),
+        //            filter = "DestinationServiceCentreId"
+        //        };
+
+        //        var unmappedMappedManifests = await _shipmentService.GetManifestForMovementManifestServiceCentre(filterOptionsDto); 
+        //        return new ServiceResponse<IEnumerable<ManifestDTO>>
+        //        {
+        //            Object = unmappedMappedManifests,
+        //            Total = unmappedMappedManifests.Count
+        //        };
+        //    });
+        //}
+
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]

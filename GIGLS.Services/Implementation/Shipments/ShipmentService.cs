@@ -110,6 +110,18 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(DateFilterCriteria filterOptionsDto)
+        {
+            try
+            {
+                return await _uow.IntlShipmentRequest.GetIntlTransactionShipmentRequest(filterOptionsDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -1776,6 +1788,51 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Movement Manifest
+        public async Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress);
+
+                if (serviceCenters.Length > 0)
+                {
+                    manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+                var result = manifests.ToList();
+                //Filter it by the destination service centre send from filter option
+                int filterValue = Convert.ToInt32(dateFilterCriteria.filterValue);
+                if (filterValue > 0 && filterValue != 99999)
+                {
+                    manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
+                }
+                
+                var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
+
+                if (filterValue != 99999)
+                {
+                    var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+                    var destinationServiceCentreDTO = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
+
+                    foreach (var item in resultDTO)
+                    {
+                        item.DestinationServiceCentre = destinationServiceCentreDTO;
+                    }
+                }
+                return resultDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //Super Manifest
         public async Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
@@ -1855,6 +1912,86 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> CheckReleaseMovementManifest(string movementManifestCode) 
+        {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ReleaseMovementManifest(string movementManifestCode, string code)
+        {
+            try
+            {
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode); 
+                var ManifestNumber = movementManifest.FirstOrDefault();
+
+                if (ManifestNumber.DriverCode == code)
+                {
+                    ManifestNumber.IsDriverValid = true;
+                    await _uow.CompleteAsync();
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres() 
+        { 
+            try
+            {
+                // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress && x.IsDispatched ==true); 
+
+                if (serviceCenters.Length > 0)
+                {
+                    ManifestNumbers = ManifestNumbers.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                var ManifestNumbersResult = ManifestNumbers.ToList();
+
+                //Filter the service centre details using the destination of the waybill
+                var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
+                var result = allServiceCenters.Where(s => ManifestNumbers.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                //var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
+
+                //Fetch all Service Centre including their Station Detail into Memory
+                var allServiceCenterDTOs = await _centreService.GetServiceCentres();
+
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
+
+                return unmappedGroupServiceCentres.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         //For Super Manifest
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest()
         {
@@ -1927,6 +2064,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var zone = await _countryRouteZoneMapService.GetZone(serviceCentreDetail.CountryId, destinationCountry);
             return zone;
+        }
+
+
+        public async Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId)
+        {
+            return await _centreService.GetServiceCentreById(ServiceCenterId);
         }
 
         public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
