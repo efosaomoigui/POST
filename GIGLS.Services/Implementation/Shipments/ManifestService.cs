@@ -263,7 +263,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string user = await _userService.GetCurrentUserId();
                 //get all waybill in the manifest
                 var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == manifestNumber).Select(x => x.Waybill).ToList();
-                var notDelivered = _uow.PreShipmentMobile.GetAll().Where(x => waybillsInManifest.Contains(x.Waybill) && x.shipmentstatus.ToLower() != "delivered").Select(x => x.Waybill).ToList();
+                var notDelivered = _uow.PreShipmentMobile.GetAll().Where(x => waybillsInManifest.Contains(x.Waybill) && x.shipmentstatus != MobilePickUpRequestStatus.Delivered.ToString() || x.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString()).Select(x => x.Waybill).ToList();
                 if (notDelivered.Any())
                 {
 
