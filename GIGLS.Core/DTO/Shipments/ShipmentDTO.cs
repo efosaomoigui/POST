@@ -147,6 +147,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public bool IsGIGGOExtension { get; set; }
+
+        public string RequestNumber { get; set; }
+        public string URL { get; set; }
+        public string ItemDetails { get; set; } 
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
@@ -221,6 +225,9 @@ namespace GIGLS.Core.DTO.Shipments
         public int StationId { get; set; }
 
         public bool IsProcessed { get; set; }
+
+        public string URL { get; set; }
+        public string ItemDetails { get; set; }
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
@@ -299,5 +306,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+
+        public string URL { get; set; }
+        public string ItemDetails { get; set; }
     }
 }

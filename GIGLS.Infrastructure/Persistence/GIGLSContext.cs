@@ -124,6 +124,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<FleetPartInventory> FleetPartInventory { get; set; }
         public DbSet<FleetPartInventoryHistory> FleetPartInventoryHistory { get; set; }
         public DbSet<Dispatch> Dispatch { get; set; }
+        public DbSet<MovementDispatch> MovementDispatch { get; set; } 
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
 
         //Partner

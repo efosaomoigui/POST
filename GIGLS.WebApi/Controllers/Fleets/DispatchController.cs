@@ -52,6 +52,23 @@ namespace GIGLS.WebApi.Controllers.dispatchs
             });
         }
 
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("movementdispatch")]
+        public async Task<IServiceResponse<object>> AddMovementDispatch(MovementDispatchDTO dispatchDTO) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dispatch = await _dispatchService.AddMovementDispatch(dispatchDTO); 
+
+                return new ServiceResponse<object>
+                {
+                    Object = dispatch
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{dispatchId:int}")]
@@ -62,6 +79,22 @@ namespace GIGLS.WebApi.Controllers.dispatchs
                 var dispatch = await _dispatchService.GetDispatchById(dispatchId);
 
                 return new ServiceResponse<DispatchDTO>
+                {
+                    Object = dispatch
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("MovementDispatch/movementmanifest/{movementManifestCode}")]
+        public async Task<IServiceResponse<MovementDispatchDTO>> GetDispatchForMovementManifest(string movementManifestCode)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dispatch = await _dispatchService.GetMovementDispatchManifestCode(movementManifestCode);
+
+                return new ServiceResponse<MovementDispatchDTO>
                 {
                     Object = dispatch
                 };

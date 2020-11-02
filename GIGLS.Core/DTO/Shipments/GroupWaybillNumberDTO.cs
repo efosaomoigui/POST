@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System.Collections.Generic;
 
@@ -38,7 +39,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ServiceCentreCode { get; set; }
 
         public bool HasManifest { get; set; }
-
+        public MovementStatus MovementStatus { get; set; }
         //
         public int DepartureServiceCentreId { get; set; }
         public ServiceCentre DepartureServiceCentre { get; set; }

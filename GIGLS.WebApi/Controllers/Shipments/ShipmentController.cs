@@ -66,7 +66,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri] FilterOptionsDto filterOptionsDto)
         {
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
@@ -86,14 +86,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri] FilterOptionsDto filterOptionsDto)
         {
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
 
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await  _service.GetIntlTransactionShipments(filterOptionsDto);
+                var result = await _service.GetIntlTransactionShipments(filterOptionsDto);
 
                 return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
@@ -105,7 +105,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("incomingshipments")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -304,7 +304,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -351,7 +351,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedgroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -367,7 +367,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestFormovementmanifestservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre([FromUri] MovementManifestFilterCriteria filterOptionsDto) 
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre([FromUri] MovementManifestFilterCriteria filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -395,6 +395,37 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(string movementmanifestcode, string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.ReleaseMovementManifest(movementmanifestcode, code);
+                return new ServiceResponse<bool>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("checkreleasemovementmanifest/{movementmanifestcode}")] 
+        public async Task<IServiceResponse<bool>> CheckReleaseManifest(string movementmanifestcode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.CheckReleaseMovementManifest(movementmanifestcode);
+                return new ServiceResponse<bool>
+                {
+                    Object = centres
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
@@ -603,7 +634,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -617,7 +648,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     StartLimit = limitStart,
                     EndLimit = limitEnd
                 };
-                
+
                 var chartData = await _service.GetShipmentCreatedByDateMonitor(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -635,7 +666,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -670,7 +701,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -728,7 +759,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria

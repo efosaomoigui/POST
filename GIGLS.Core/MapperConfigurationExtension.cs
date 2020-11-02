@@ -83,7 +83,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<ServiceCentre, ServiceCentreDTO>();
                 config.CreateMap<ServiceCentreDTO, ServiceCentre>();
-
+                
                 config.CreateMap<SpecialDomesticPackageDTO, SpecialDomesticPackage>();
                 config.CreateMap<SpecialDomesticPackage, SpecialDomesticPackageDTO>();
 
@@ -233,6 +233,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
+
+                config.CreateMap<MovementDispatch, MovementDispatchDTO>();
+                config.CreateMap<MovementDispatchDTO, MovementDispatch>();
 
                 config.CreateMap<DispatchActivity, DispatchActivityDTO>();
                 config.CreateMap<DispatchActivityDTO, DispatchActivity>();

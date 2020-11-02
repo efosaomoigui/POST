@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
+using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -149,6 +150,43 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+        public async Task<List<MovementManifestNumberDTO>> GetManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var movementManifestNumber = Context.MovementManifestNumber.Where(s => s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+            if (serviceCentreIds.Length > 0)
+            {
+                var serviceCentreMovementManifests = _context.MovementManifestNumber.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                    Select(s => s.MovementManifestCode).AsQueryable();
+
+                movementManifestNumber = movementManifestNumber.Where(s => serviceCentreMovementManifests.Contains(s.MovementManifestCode));
+            }
+
+            var movementManifestNumberVals = movementManifestNumber.ToList();
+            var allServiceCenters = _context.ServiceCentre.AsQueryable();
+
+            var movementManifestNumberDto = from mgw in movementManifestNumber
+                                            select new MovementManifestNumberDTO
+                                            {
+                                                MovementManifestNumberId = mgw.MovementManifestNumberId,
+                                                MovementManifestCode = mgw.MovementManifestCode,
+                                                DateCreated = mgw.DateCreated,
+                                                DateModified = mgw.DateModified,
+                                                IsDeleted = mgw.IsDeleted,
+                                                RowVersion = mgw.RowVersion, 
+                                                MovementStatus = mgw.MovementStatus,
+                                                DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
+
+        }; 
+
+            return movementManifestNumberDto.ToList();
+        }
+
         public async Task<List<ManifestDTO>> GetManifestSuperManifestMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
         {
             //get startDate and endDate
@@ -185,6 +223,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
         }
-        
+
     }
 }

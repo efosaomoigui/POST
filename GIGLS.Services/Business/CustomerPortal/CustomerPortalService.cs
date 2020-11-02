@@ -58,6 +58,7 @@ using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -100,6 +101,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly IMagayaService _magayaService;
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
+        private readonly INotificationService _notificationService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -112,7 +114,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService)
+            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
+            INotificationService notificationService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -151,6 +154,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _flutterwavePaymentService = flutterwavePaymentService;
             _magayaService = magayaService;
             _mobilePickUpRequestService = mobilePickUpRequestsService;
+            _notificationService = notificationService;
             MapperConfig.Initialize();
         }
 
@@ -2910,6 +2914,32 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
+        }
+
+        public async Task<object> CreateNotification(NotificationDTO notificationDTO)
+        {
+            return await _notificationService.CreateNotification(notificationDTO);
+        }
+
+        public async Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead)
+        {
+            return await _notificationService.GetNotifications(IsRead);
+        }
+
+        public async Task UpdateNotificationAsRead(int notificationId)
+        {
+            await _notificationService.UpdateNotificationAsRead(notificationId);
+        }
+
+        //Get International Shipments Terms and Conditions
+        public async Task<MessageDTO> GetIntlMessageForApp()
+        {
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+        }
+
+        public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
+        {
+            return await _uow.Store.GetStoresByCountryId(countryId);
         }
     }
 }

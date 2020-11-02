@@ -280,6 +280,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IDispatchRepository Dispatch { get; set; }
 
         [Inject]
+        public IMovementDispatchRepository MovementDispatch { get; set; } 
+
+        [Inject]
         public IDispatchActivityRepository DispatchActivity { get; set; }
 
         [Inject]

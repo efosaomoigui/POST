@@ -14,8 +14,10 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Infrastructure;
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -986,14 +988,19 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = bankDepositMessageDTO.Email;
             }
 
-            //7. obj is IntlShipmentRequestDTO
+            //7. obj is IntlShipmentDTO 
             if (obj is ShipmentDTO)
             {
                 var strArray = new string[]
                 {
                     "Customer Name",
                     "Reciever Name",
-                    "Waybill"
+                    "Waybill",
+                    "URL",
+                    "Request Number", 
+                    "Departure", 
+                    "Destination",
+                    "Items Details"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1010,6 +1017,11 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = customerObj.CustomerName;
                 strArray[2] = intlDTO.ReceiverName;
                 strArray[2] = intlDTO.Waybill;
+                strArray[3] = intlDTO.URL; 
+                strArray[4] = intlDTO.RequestNumber;
+                strArray[5] = intlDTO.DepartureServiceCentre.Name;
+                strArray[6] = intlDTO.DestinationServiceCentre.Name;
+                strArray[7] = intlDTO.ItemDetails;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -1026,6 +1038,62 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.To = intlDTO.CustomerDetails.PhoneNumber;
                 messageDTO.ToEmail = intlDTO.CustomerDetails.Email;
+            }
+
+            //8. obj is IntlShipmentRequestDTO 
+            if (obj is IntlShipmentRequestDTO) 
+            {
+                var strArray = new string[]
+                {
+                    "Customer Name",
+                    "Reciever Name",
+                    "Waybill",
+                    "URL",
+                    "Request Number",
+                    "Departure",
+                    "Destination",
+                    "Items Details",
+                    "Description",
+                    "Houston email"
+                };
+
+                var intlDTO = (IntlShipmentRequestDTO)obj;
+
+                //get CustomerDetails (
+                if (intlDTO.CustomerType.Contains("Individual"))
+                {
+                    intlDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), intlDTO.CustomerType);
+                var customerObj = await GetCustomer(intlDTO.CustomerId, customerType);
+
+                //A. map the array
+                strArray[0] = customerObj?.CustomerName;
+                strArray[2] = intlDTO.ReceiverName;
+                strArray[3] = intlDTO.URL;
+                strArray[4] = intlDTO.RequestNumber;
+                strArray[5] = "Houston, United States";
+                strArray[6] = intlDTO.DestinationServiceCentre.Name;
+                strArray[7] = intlDTO.ItemDetails;
+                strArray[8] = "International Shipment Items";
+                strArray[9] = "giglhouston@giglogistics.com";
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = intlDTO.CustomerEmail;
+                messageDTO.ToEmail = intlDTO.CustomerPhoneNumber;
             }
 
             return await Task.FromResult(verifySendEmail);
@@ -1126,6 +1194,17 @@ namespace GIGLS.Services.Implementation.Messaging
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
 
+        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        {
+            var message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+
+            if (message == null)
+            {
+                throw new GenericException("Message Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            return Mapper.Map<MessageDTO>(message);
+        }
+
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{
@@ -1146,7 +1225,7 @@ namespace GIGLS.Services.Implementation.Messaging
         //            foreach (var email in emails)
         //            {
         //                obj.Email = email;
-                        
+
         //                //prepare generic message finalBody
         //                bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
         //                if (verifySendEmail)
@@ -1155,7 +1234,7 @@ namespace GIGLS.Services.Implementation.Messaging
         //                    await LogEmailMessage(messageDTO, result);
         //                }
         //            }
-                   
+
         //        }
         //    }
         //    catch (Exception ex)

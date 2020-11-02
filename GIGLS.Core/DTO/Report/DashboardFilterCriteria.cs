@@ -23,7 +23,7 @@ namespace GIGLS.Core.DTO.Report
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                var threeMonthAgo = DateTime.Now.AddMonths(-3);  //Three (3) Months ago
+                var threeMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
                 startDate = new DateTime(threeMonthAgo.Year, threeMonthAgo.Month, 1);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
