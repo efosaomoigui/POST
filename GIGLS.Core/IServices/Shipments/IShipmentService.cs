@@ -69,6 +69,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
         Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
         Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(DateFilterCriteria filterOptionsDto);
 
         //Movement Manifest 
         Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
@@ -110,6 +111,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> SetEntityIntl(CustomerDTO custDTo);
         Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
         Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto);
 
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);

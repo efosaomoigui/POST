@@ -4,21 +4,18 @@ using GIGLS.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.User;  
+using GIGLS.Core.IServices.User;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
-using ThirdParty.WebServices.Magaya.Services;   
+using ThirdParty.WebServices.Magaya.Services;
 using System.ServiceModel;
-using System.Web.Http.ModelBinding;
-using Newtonsoft.Json.Linq;
-using GIGLS.WebApi.Models;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using GIGLS.Core.DTO.Shipments;
-using System.EnterpriseServices;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -193,6 +190,27 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var result = _service.getIntlShipmentRequests(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("GetIntltransactionRequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlShipmentRequests(filterOptionsDto);
 
                 //3. Pass the return to the view or caller
                 return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()

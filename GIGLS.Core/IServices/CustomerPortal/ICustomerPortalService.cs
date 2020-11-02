@@ -184,10 +184,13 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
+        Task<List<StoreDTO>> GetStoresByCountry(int countryId);
         Task<object> CreateNotification(NotificationDTO notificationDTO);
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
+=========
         Task<List<StoreDTO>> GetStoresByCountry(int countryId);
+>>>>>>>>> Temporary merge branch 2
     }
 }

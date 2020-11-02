@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
@@ -369,6 +370,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     using (var client = new HttpClient())
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrl"];
+
                         var notice = new
                         {
                             customerId = mDto.IntlShipmentRequest.CustomerId,
@@ -381,13 +384,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             }
                         };
 
-                        client.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
-                        var response = client.PostAsJsonAsync("/api/customer/sendNotif", notice).Result;
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        var response = client.PostAsJsonAsync("customer/sendNotif", notice).Result;
                         //response.IsSuccessStatusCode
                     }
 
                     using (var client2 = new HttpClient()) 
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+
                         var creationNotice = new
                         {
                             UserId = mDto.IntlShipmentRequest.CustomerId,
@@ -395,7 +400,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
                         };
 
-                        client2.BaseAddress = new Uri("https://giglgodev.herokuapp.com");
+                        client2.BaseAddress = new Uri(apiBaseUri);
                         var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
                         //response.IsSuccessStatusCode
                     }
@@ -677,7 +682,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             //get the current user info
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
+                //var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserId = shipmentDTO.UserId; // await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
                 var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
 
@@ -761,7 +767,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
 
                 //Send an email with details of request to Houston team
-                castObj.CustomerEmail = ""; //houston email
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail))? "giglhouston@giglogistics.com" : houstonEmail; //houston email
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
 
                 return shipmentDTO;
@@ -995,6 +1002,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto)
         {
             var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
             return result;
