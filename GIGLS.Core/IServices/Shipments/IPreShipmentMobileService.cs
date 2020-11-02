@@ -1,16 +1,17 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.CORE.DTO.Report;
+using System.Collections.Generic;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Zone;
-using GIGLS.CORE.DTO.Report;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -77,10 +78,13 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MobilePriceDTO> GetPriceForBike(PreShipmentMobileDTO preShipment);
         Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<string> GenerateDeliveryCode();
         Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam);
         Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number);
+        Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners();
+
     }
 }

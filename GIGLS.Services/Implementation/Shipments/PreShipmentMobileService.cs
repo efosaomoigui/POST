@@ -5733,9 +5733,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-
-
-
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -5981,22 +5978,11 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-
-        public async Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam)
+        public async Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string userChannelCode)
         {
             try
             {
-                var batchedPreshipmentDTO = new List<PreShipmentMobileDTO>();
-                var user = await _uow.User.GetUserByEmailorChannelCode(searchParam);
-                if (user == null)
-                {
-                    throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
-                }
-                var batchedPreshipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode).ToList();
-                if (batchedPreshipment.Any())
-                {
-                    batchedPreshipment = batchedPreshipment.Where(x => x.IsBatchPickUp == true && x.shipmentstatus == "Shipment Created").ToList();
-                }
+                var batchedPreshipment = _uow.PreShipmentMobile.GetBatchedPreShipmentForUser(userChannelCode).ToList();
                 return batchedPreshipment;
             }
             catch (Exception)
@@ -6004,5 +5990,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+        public async Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners()
+        {
+            try
+            {
+                var customerCodes = _uow.PreShipmentMobile.GetAllBatchedPreShipment().GroupBy(x => x.CustomerCode).Select(x => x.Key).ToList();
+                return await _uow.Company.GetCompaniesByCodes(customerCodes);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

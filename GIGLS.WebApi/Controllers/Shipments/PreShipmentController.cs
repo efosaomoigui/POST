@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -130,8 +131,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+<<<<<<< Updated upstream
         [HttpGet]
         [Route("{searchParam}/batchedpreshipmentmobile")]
+=======
+<<<<<<< Updated upstream
+=======
+        [HttpGet]
+        [Route("batchedpreshipmentmobile/{searchParam}")]
+>>>>>>> Stashed changes
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetBatchedPreShipmentMobile(string searchParam)
         {
             return await HandleApiOperationAsync(async () =>
@@ -143,6 +151,24 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+
+        [HttpGet]
+        [Route("batchedpreshipmentmobileowners")]
+        public async Task<IServiceResponse<List<CompanyDTO>>> GetBatchPreShipmentMobileOwners()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preShipmentMobileService.GetBatchPreShipmentMobileOwners();
+                return new ServiceResponse<List<CompanyDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+>>>>>>> Stashed changes
 
     }
 }

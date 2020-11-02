@@ -242,5 +242,55 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             }
         }
 
+        public IQueryable<PreShipmentMobileDTO> GetBatchedPreShipmentForUser(string userChannelCode)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode && s.IsBatchPickUp == true && s.shipmentstatus == "Shipment Created");
+
+            var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.CountryId equals co.CountryId
+                               select new PreShipmentMobileDTO()
+                               {
+                                   PreShipmentMobileId = r.PreShipmentMobileId,
+                                   Waybill = r.Waybill,
+                                   DateCreated = r.DateCreated,
+                                   DateModified = r.DateModified,
+                                   ReceiverAddress = r.ReceiverAddress,
+                                   SenderAddress = r.SenderAddress,
+                                   ReceiverName = r.ReceiverName,
+                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                   shipmentstatus = r.shipmentstatus,
+                                   GrandTotal = r.GrandTotal,
+                                   CurrencySymbol = co.CurrencySymbol,
+                                   IsDelivered = r.IsDelivered,
+                                   IsBatchPickUp = r.IsBatchPickUp,
+                                   IsCancelled = r.IsCancelled
+                               });
+
+            return shipmentDto;
+        }
+
+        public IQueryable<PreShipmentMobileDTO> GetAllBatchedPreShipment()
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.IsBatchPickUp == true && s.shipmentstatus == "Shipment Created");
+
+            var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.CountryId equals co.CountryId
+                               select new PreShipmentMobileDTO()
+                               {
+                                   PreShipmentMobileId = r.PreShipmentMobileId,
+                                   Waybill = r.Waybill,
+                                   DateCreated = r.DateCreated,
+                                   DateModified = r.DateModified,
+                                   ReceiverAddress = r.ReceiverAddress,
+                                   SenderAddress = r.SenderAddress,
+                                   ReceiverName = r.ReceiverName,
+                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                   shipmentstatus = r.shipmentstatus,
+                                   CustomerCode = r.CustomerCode
+                               });
+
+            return shipmentDto;
+        }
+
     }
 }
