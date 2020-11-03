@@ -38,6 +38,8 @@ using System.Net.Http;
 using GIGLS.Core.DTO.Report;
 using System.Security.Cryptography;
 using System.Text;
+using ThirdParty.WebServices.Magaya.Business.New;
+using PaymentType = GIGLS.Core.Enums.PaymentType;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -769,7 +771,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Fire and forget
                     //Send the Payload to Partner Cloud Handler 
-                    NodeApiCreateShipment(newPreShipment);
+                    if (!preShipmentDTO.IsBatchPickUp)
+                    {
+                        NodeApiCreateShipment(newPreShipment);
+                    }
 
                     //We will send SMS & Email
                     //await SendSMSForMobileShipmentCreation(message);
@@ -3324,7 +3329,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                     throw new GenericException("Shipment has not been porcessed", $"{(int)HttpStatusCode.Forbidden}");
                 }
-
+                //update the actual receiver if neccessary
+                if (pickuprequest.IsProxy)
+                {
+                    preshipmentmobile.ActualReceiverFirstName = pickuprequest.ProxyName;
+                    preshipmentmobile.ActualReceiverPhoneNumber = pickuprequest.ProxyPhoneNumber;
+                    preshipmentmobile.ActualReceiverLastName = pickuprequest.ProxyEmail;
+                    await _uow.CompleteAsync();
+                }
             }
             catch (Exception)
             {
@@ -4456,7 +4468,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number)
+        public async Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number)
         {
             try
             {
@@ -5789,9 +5801,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-
-
-
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -6035,5 +6044,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+        public async Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string userChannelCode)
+        {
+            try
+            {
+                var batchedPreshipment = _uow.PreShipmentMobile.GetBatchedPreShipmentForUser(userChannelCode).ToList();
+                return batchedPreshipment;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners()
+        {
+            try
+            {
+                var customerCodes = _uow.PreShipmentMobile.GetAllBatchedPreShipment().GroupBy(x => x.CustomerCode).Select(x => x.Key).ToList();
+                return await _uow.Company.GetCompaniesByCodes(customerCodes);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

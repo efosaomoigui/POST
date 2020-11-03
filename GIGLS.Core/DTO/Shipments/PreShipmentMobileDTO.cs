@@ -162,6 +162,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderCode { get; set; }
         public string ReceiverCode { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public bool IsBatchPickUp { get; set; }
         public string WaybillImageUrl { get; set; }
         public bool IsFromAgility { get; set; }
     }

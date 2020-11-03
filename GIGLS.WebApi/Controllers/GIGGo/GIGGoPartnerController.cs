@@ -682,5 +682,35 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getallmanifestforuser")]
+        public async Task<IServiceResponse<List<PreshipmentManifestDTO>>> GetAllManifestForPreShipmentMobile()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifests = await _portalService.GetAllManifestForPreShipmentMobile();
+
+                return new ServiceResponse<List<PreshipmentManifestDTO>>
+                {
+                    Object = manifests
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("updatepremobileshipmenttopickup")]
+        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber,waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }
