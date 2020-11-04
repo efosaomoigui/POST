@@ -1313,7 +1313,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //get the all manifest for the dispatch user
                     var manifestNumbers = dispatches.Select(s => s.ManifestNumber).ToList();
-                    var manifests = _uow.Manifest.GetAll().Where(s =>
+                    var manifests = _uow.PickupManifest.GetAll().Where(s =>
                     manifestNumbers.Contains(s.ManifestCode) && s.ManifestType == ManifestType.PickupForDelivery).ToList();
 
                     //get all waybills for all the manifests
@@ -1321,7 +1321,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var preshipmentManifest = new PreshipmentManifestDTO();
                         preshipmentManifest.ManifestCode = item.ManifestCode;
-                        preshipmentManifest.ManifestId = item.ManifestId;
+                        preshipmentManifest.ManifestId = item.PickupManifestId;
                         preshipmentManifest.ManifestType = item.ManifestType;
                         preshipmentManifest.DateTime = item.DateTime;
 
