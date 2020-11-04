@@ -1311,7 +1311,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var dispatches = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == user && s.ReceivedBy == null).ToList();
                 if (dispatches.Any())
                 {
-                    //get the all manifest for the dispatch user
+                    //get all manifest for the dispatch user
                     var manifestNumbers = dispatches.Select(s => s.ManifestNumber).ToList();
                     var manifests = _uow.PickupManifest.GetAll().Where(s =>
                     manifestNumbers.Contains(s.ManifestCode) && s.ManifestType == ManifestType.PickupForDelivery).ToList();
@@ -1325,12 +1325,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentManifest.ManifestType = item.ManifestType;
                         preshipmentManifest.DateTime = item.DateTime;
 
-                        var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == item.ManifestCode).Select(x => x.Waybill).ToList();
+                        var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == item.ManifestCode).ToList();
                         if (waybillsInManifest.Any())
                         {
                             for (int i = 0; i < waybillsInManifest.Count; i++)
                             {
-                                var waybill = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybillsInManifest[i]);
+                                var waybillInx = waybillsInManifest[i];
+                                var waybill = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybillInx.Waybill);
                                 var preshipmentWaybill = new PreShipmentMobileWaybill();
                                 preshipmentWaybill.Waybill = waybill.Waybill;
                                 preshipmentWaybill.Receiver.Address = waybill.ReceiverAddress;
