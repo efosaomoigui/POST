@@ -271,7 +271,7 @@ namespace GIGLS.Services.Implementation.Shipments
                               $"The following waybills [{string.Join(", ", notDelivered.ToList())}] has not been delivered");
                 }
                 //update receiver detail on manifest table with logged in user detail
-                var manifestInfo = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestNumber);
+                var manifestInfo = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
                 manifestInfo.ReceiverById = user;
                 manifestInfo.IsReceived = true;
                 await _uow.CompleteAsync();
