@@ -48,6 +48,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IIndividualCustomerService _individualCustomerService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICustomerService _customerService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
 
         public MagayaService(
@@ -58,7 +59,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IServiceCentreService centreService,
             IStationService stationService, IIndividualCustomerService individualCustomerController,
             IMessageSenderService messageSenderService,
-            ICustomerService customerService)
+            ICustomerService customerService,
+            IGlobalPropertyService globalPropertyService)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -70,6 +72,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _individualCustomerService = individualCustomerController;
             _messageSenderService = messageSenderService;
             _customerService = customerService;
+            _globalPropertyService = globalPropertyService;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -335,6 +338,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             setMagayaShipmentItems(magayaShipmentDTO);
             magayaShipmentDTO.MeasurementUnits = newMeasurementUnits();
             setMagayaShipmentCharges(magayaShipmentDTO);
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
 
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
@@ -372,11 +377,19 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         string apiBaseUri = ConfigurationManager.AppSettings["NodeBaseUrl"];
 
+                        //check interval from global property
+                        string globalPropertyMessage = "";
+                        var MagayaAppMessagePush = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.MagayaAppMessagePush, userActiveCountryId);
+                        if (MagayaAppMessagePush != null)
+                        {
+                            globalPropertyMessage = MagayaAppMessagePush.Value;
+                        }
+
                         var notice = new
                         {
                             customerId = mDto.IntlShipmentRequest.CustomerId,
                             title = "Shipment Item Received",
-                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                            message = globalPropertyMessage, //"We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
                             data = new
                             {
                                 waybillNumber = mDto.WarehouseReceipt.Number,
@@ -393,11 +406,20 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
 
+                        //check interval from global property
+                        string globalPropertyMessage = "";
+                        var MagayaAppMessagePush = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.MagayaInAppMessage, userActiveCountryId);
+                        if (MagayaAppMessagePush != null)
+                        {
+                            globalPropertyMessage = MagayaAppMessagePush.Value;
+                        }
+
+
                         var creationNotice = new
                         {
                             UserId = mDto.IntlShipmentRequest.CustomerId,
                             Subject = "Shipment Item Received",
-                            message = "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
+                            message = globalPropertyMessage, // "We just received your item at our Houston Hub, and it has been processed for shipping to Nigeria. Pay now and get 5% discount.",
                         };
 
                         client2.BaseAddress = new Uri(apiBaseUri);
@@ -692,7 +714,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentDTO.CustomerId = customer.CompanyId;
                     shipmentDTO.CustomerFirstName = customer.Name;
                     shipmentDTO.CustomerLastName = customer.Name;
-                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerEmail = user.Email;
                     shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
                     shipmentDTO.CustomerAddress = customer.Address;
                     shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;
@@ -705,7 +727,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentDTO.CustomerId = customer.IndividualCustomerId;
                     shipmentDTO.CustomerFirstName = customer.FirstName;
                     shipmentDTO.CustomerLastName = customer.LastName;
-                    shipmentDTO.CustomerEmail = customer.Email;
+                    shipmentDTO.CustomerEmail = user.Email;
                     shipmentDTO.CustomerCountryId = customer.UserActiveCountryId;
                     shipmentDTO.CustomerAddress = customer.Address;
                     shipmentDTO.CustomerPhoneNumber = customer.PhoneNumber;

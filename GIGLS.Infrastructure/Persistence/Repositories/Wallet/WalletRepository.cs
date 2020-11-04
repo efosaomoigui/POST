@@ -52,9 +52,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                     countryId
                 };
 
-                var summary = await _context.Database.SqlQuery<decimal>("WalletBalance " +
+                decimal summary = 0.00M;
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("WalletBalance " +
                    "@CountryId",
                    param).FirstOrDefaultAsync();
+
+                if(summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
 
                 return await Task.FromResult(summary);
             }
