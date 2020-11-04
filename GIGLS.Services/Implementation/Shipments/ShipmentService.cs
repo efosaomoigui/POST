@@ -1000,11 +1000,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 shipmentDTO.GrandTotal = total;
+                preshipmentDTO.GrandTotal = total;
 
-                shipment.DeliveryPrice = priceDTO.DeliveryPrice;
-                shipment.Discount = priceDTO.Discount;
-                shipment.PickUpCharge = priceDTO.PickUpCharge;
-                shipment.InsuranceValue = priceDTO.InsuranceValue;
 
                 //Block account that has been suspended/pending from create shipment
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
@@ -1018,9 +1015,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
-                shipment.DepartureServiceCentreId = newShipment.DepartureServiceCentreId;
-                shipment.Waybill = newShipment.Waybill;
 
+                preshipmentDTO.Waybill = newShipment.Waybill;
+                preshipmentDTO.DepartureServiceCentreId = newShipment.DepartureServiceCentreId;
+                
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
@@ -1042,7 +1040,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _paymentService.ProcessPayment(paymentDTO);
 
                 //Add to PreShipment Table
-                await CreatePreShipmentFromAgility(shipment);
+                await CreatePreShipmentFromAgility(preshipmentDTO, priceDTO);
 
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
@@ -3514,11 +3512,12 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.ServiceCenterPackage.AddRange(servicePackage);
         }
 
-        private async Task<PreShipmentMobileDTO> CreatePreShipmentFromAgility(PreShipmentMobileFromAgilityDTO preShipment)
+        private async Task<PreShipmentMobileDTO> CreatePreShipmentFromAgility(PreShipmentMobileDTO preShipment, MobilePriceDTO priceDTO)
         {
             try
             {
                 preShipment.CustomerCode = preShipment.Customer[0].CustomerCode;
+                preShipment.CustomerCode = preShipment.CustomerCode;
                 var user = await _uow.User.GetUserUsingCustomerForCustomerPortal(preShipment.CustomerCode);
                 if (user != null)
                 {
@@ -3555,9 +3554,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         Longitude = (double)receieverServiceCenter.Longitude
                     };
                 }
+             
                 var mobileShipment = new PreShipmentMobileDTO
                 {
-                    CalculatedTotal = (double)preShipment.DeliveryPrice,
+                    CalculatedTotal = (double)priceDTO.DeliveryPrice,
                     IsHomeDelivery = preShipment.PickupOptions == PickupOptions.HOMEDELIVERY ? true : false,
                     IsScheduled = false,
                     Waybill = preShipment.Waybill,
@@ -3585,22 +3585,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     VehicleType = preShipment.VehicleType,
                     UserId = preShipment.UserId,
                     IsdeclaredVal = preShipment.IsdeclaredVal,
-                    DiscountValue = preShipment.Discount,
-                    InsuranceValue = preShipment.InsuranceValue,
-                    Vat = 0,
-                    DeliveryPrice = preShipment.DeliveryPrice,
+                    DiscountValue = priceDTO.Discount,
+                    InsuranceValue = priceDTO.InsuranceValue,
+                    Vat = priceDTO.Vat,
+                    DeliveryPrice = priceDTO.DeliveryPrice,
                     SenderLocality = preShipment.SenderLocality,
                     ZoneMapping = preShipment.ZoneMapping,
 
                     CountryId = preShipment.CountryId,
                     CustomerType = preShipment.CustomerType,
                     CompanyType = preShipment.CompanyType,
-                    Value = (decimal)preShipment.DeclarationOfValueCheck,
-                    ShipmentPickupPrice = (decimal)(preShipment.PickUpCharge == null ? 0.0M : preShipment.PickUpCharge),
+                    Value = (decimal)preShipment.Value,
+                    ShipmentPickupPrice = (decimal)(priceDTO.PickUpCharge == null ? 0.0M : priceDTO.PickUpCharge),
                     IsConfirmed = false,
                     IsDelivered = false,
                     shipmentstatus = "Shipment created",
-                    PreShipmentItems = preShipment.ShipmentItems.Select(s => new PreShipmentItemMobileDTO
+                    PreShipmentItems = preShipment.PreShipmentItems.Select(s => new PreShipmentItemMobileDTO
                     {
                         Description = s.Description,
                         SpecialPackageId = s.SpecialPackageId,
@@ -3608,8 +3608,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         IsVolumetric = s.IsVolumetric,
                         Weight = (decimal)s.Weight,
                         Quantity = s.Quantity,
-                        ItemType = s.Nature,
-                        ItemName = s.Description
+                        CalculatedPrice = s.CalculatedPrice,
+                        ItemName = s.Description,
+                        Value = s.Value
 
                     }).ToList()
                 };
