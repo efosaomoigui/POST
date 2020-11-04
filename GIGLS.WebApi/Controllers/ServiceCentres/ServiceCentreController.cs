@@ -290,5 +290,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{servicecentreId:int}/public/{ispublic}")]
+        public async Task<IServiceResponse<bool>> UpdateServiceCentreViewState(int servicecentreId, bool ispublic)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.ServiceCentreViewState(servicecentreId, ispublic);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
     }
 }
