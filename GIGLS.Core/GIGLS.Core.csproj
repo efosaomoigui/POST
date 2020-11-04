@@ -874,7 +874,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DTO\DHL\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
       <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
