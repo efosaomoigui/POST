@@ -63,5 +63,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string BankName { get; set; }
+        public Rank Rank { get; set; }
     }
 }

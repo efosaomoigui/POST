@@ -64,5 +64,6 @@ namespace GIGLS.Core.DTO.Customers
 
         public string BankName { get; set; }
 
+        public Rank Rank { get; set; }
     }
 }
