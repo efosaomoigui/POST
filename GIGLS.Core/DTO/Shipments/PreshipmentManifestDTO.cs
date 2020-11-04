@@ -9,16 +9,25 @@ namespace GIGLS.Core.DTO.Shipments
 {
     public class PreshipmentManifestDTO
     {
+        public PreshipmentManifestDTO()
+        {
+            Waybills = new List<PreShipmentMobileWaybill>();
+        }
         public int ManifestId { get; set; }
         public string ManifestCode { get; set; }
         public DateTime DateTime { get; set; }
         public ManifestType ManifestType { get; set; }
-        public List<PreShipmentMobileWaybill> Waybills {get; set;}
+        public List<PreShipmentMobileWaybill> Waybills { get; set; }
     }
 
 
     public class PreShipmentMobileWaybill
     {
+        public PreShipmentMobileWaybill()
+        {
+            Receiver = new ReceiverDTO();
+            Sender = new SenderDTO();
+        }
         public string Waybill { get; set; }
         public ReceiverDTO Receiver { get; set; }
         public SenderDTO Sender { get; set; }
