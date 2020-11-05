@@ -26,5 +26,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId);
         Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria);
         Task<EcommerceAgreementDTO> GetCustomerPendingRequestsById(int companyId);
+        Task<CompanyDTO> UpdateCompanyRank(string customerCode, Rank rank);
     }
 }

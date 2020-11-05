@@ -571,5 +571,30 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task<CompanyDTO> UpdateCompanyRank(string customerCode,Rank rank)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(customerCode))
+                {
+                    throw new GenericException("Customer code not provided");
+                }
+                var company = await _uow.Company.GetCompanyByCode(customerCode);
+                if (company == null)
+                {
+                    throw new GenericException("Company information does not exist");
+                }
+                company.Rank = rank;             
+                _uow.Complete();
+                var companyDto = Mapper.Map<CompanyDTO>(company);
+
+                return companyDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

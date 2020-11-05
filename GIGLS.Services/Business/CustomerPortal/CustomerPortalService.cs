@@ -102,6 +102,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMagayaService _magayaService;
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
+        private readonly ICompanyService _companyService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -115,7 +116,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService)
+            INotificationService notificationService,ICompanyService companyService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -155,6 +156,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _magayaService = magayaService;
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
+            _companyService = companyService;
             MapperConfig.Initialize();
         }
 
@@ -2952,5 +2954,28 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
+
+        public async Task<bool> PhoneNoExist(string number)
+        {
+            bool exist = false;
+            var phoneNumber = await _uow.User.GetUserByPhoneNumber(number);
+            if (phoneNumber != null)
+            {
+                exist = true;
+            }
+            return exist;
+        }
+
+        public async Task<bool> UpdateCompanyRank(string customerCode, Rank rank)
+        {
+            bool updated = false;
+            var company = await _companyService.UpdateCompanyRank(customerCode,rank);
+            if (company != null)
+            {
+                updated = true;
+            }
+            return updated;
+        }
+
     }
 }
