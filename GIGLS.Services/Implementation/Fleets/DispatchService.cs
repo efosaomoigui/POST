@@ -700,7 +700,7 @@ namespace GIGLS.Services.Implementation.Fleets
             try
             {
                 string user = await _userService.GetCurrentUserId();
-                if (String.IsNullOrEmpty(manifestNumber) || waybills != null || waybills.Count < 1)
+                if (String.IsNullOrEmpty(manifestNumber) || waybills == null || waybills.Count < 1)
                 {
                     throw new GenericException("No waybill number(s) provided");
                 }
@@ -725,7 +725,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 var pickupRequestList = new List<MobilePickUpRequests>();
                 foreach (var item in waybillsToUpdateToPickup)
                 {
-                    item.shipmentstatus = "PickedUp";
+                    item.shipmentstatus = ManifestType.Pickup.ToString();
                     // add preshipment record to mobilepickuprequest table
                     var request = new MobilePickUpRequests();
                     request.Status = item.shipmentstatus;
