@@ -2263,7 +2263,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("unboarduser")]
+        [Route("onboarduser")]
         public async Task<IServiceResponse<ResponseDTO>> UnboardUser(NewCompanyDTO company)
         {
             return await HandleApiOperationAsync(async () =>
