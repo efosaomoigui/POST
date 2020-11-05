@@ -698,7 +698,6 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("updatepremobileshipmenttopickup/{manifestNumber}")]
         public async Task<IServiceResponse<bool>> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
