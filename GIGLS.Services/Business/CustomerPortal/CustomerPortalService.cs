@@ -2956,7 +2956,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<ResponseDTO> UnboardUser(CompanyDTO company)
+        public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
             return await _companyService.UnboardUser(company);
         }

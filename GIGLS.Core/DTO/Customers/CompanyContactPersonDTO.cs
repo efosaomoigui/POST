@@ -29,4 +29,16 @@ namespace GIGLS.Core.DTO.Customers
         public DateTime CompanyDateCreated { get; set; }
         public DateTime CompanyDateModified { get; set; }
     }
+
+    public class NewCompanyContactPersonDTO : BaseDomainDTO
+    {
+        public int CompanyContactPersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Designation { get; set; }
+        public string PhoneNumber { get; set; }
+
+        public int CompanyId { get; set; }
+    }
 }

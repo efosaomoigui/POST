@@ -66,4 +66,49 @@ namespace GIGLS.Core.DTO.Customers
 
         public Rank Rank { get; set; }
     }
+
+    public class NewCompanyDTO : BaseDomainDTO
+    {
+        public NewCompanyDTO()
+        {
+            ContactPersons = new List<NewCompanyContactPersonDTO>();
+        }
+        public int CompanyId { get; set; }
+        public string Name { get; set; }
+        public string RcNumber { get; set; }
+        public string Email { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Address { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Industry { get; set; }
+        public CompanyType CompanyType { get; set; }
+        public CompanyStatus CompanyStatus { get; set; }
+        public int SettlementPeriod { get; set; }
+        public string CustomerCode { get; set; }
+        public CustomerCategory CustomerCategory { get; set; }
+
+        public string ReturnOption { get; set; }
+        public int ReturnServiceCentre { get; set; }
+        public string ReturnAddress { get; set; }
+        public string Password { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public bool IsRegisteredFromMobile { get; set; }
+        public bool isCodNeeded { get; set; }
+        public List<NewCompanyContactPersonDTO> ContactPersons { get; set; }
+        public string CurrencySymbol { get; set; }
+        public bool IsFromMobile { get; set; }
+
+        //added this for Giglgo customers
+        public decimal? WalletAmount { get; set; }
+        public bool? IsEligible { get; set; }
+
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
+        public Rank Rank { get; set; }
+    }
 }

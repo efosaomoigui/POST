@@ -18,6 +18,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -573,7 +574,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public async Task<ResponseDTO> UnboardUser(CompanyDTO company)
+        public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
             try
             {
@@ -617,7 +618,7 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                var newCompany = Mapper.Map<Company>(company);
+                var newCompany = JObject.FromObject(company).ToObject<Company>();
                 newCompany.CompanyStatus = CompanyStatus.Active;
 
                 //Enable Eligibility so that the customer can create shipment on GIGGO APP
@@ -646,7 +647,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 if (company.ContactPersons.Any())
                 {
-                    foreach (CompanyContactPersonDTO personDto in company.ContactPersons)
+                    foreach (NewCompanyContactPersonDTO personDto in company.ContactPersons)
                     {
                         var person = Mapper.Map<CompanyContactPerson>(personDto);
                         person.CompanyId = newCompany.CompanyId;
