@@ -2279,7 +2279,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("phone")]
+        [Route("phonenoexist")]
         public async Task<IServiceResponse<ResponseDTO>> PhoneNoExist(UserValidationDTO userValidationDTO)
         {
             return await HandleApiOperationAsync(async () =>
