@@ -2261,5 +2261,54 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("unboarduser")]
+        public async Task<IServiceResponse<ResponseDTO>> UnboardUser(CompanyDTO company)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UnboardUser(company);
+
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("phone")]
+        public async Task<IServiceResponse<ResponseDTO>> PhoneNoExist(UserValidationDTO userValidationDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.PhoneNoExist(userValidationDTO);
+
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updaterank")]
+        public async Task<IServiceResponse<ResponseDTO>> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UpdateUserRank(userValidationDTO);
+
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+
+
     }
 }

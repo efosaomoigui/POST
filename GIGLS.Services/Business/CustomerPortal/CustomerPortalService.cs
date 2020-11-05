@@ -2955,26 +2955,46 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
 
-        public async Task<bool> PhoneNoExist(string number)
+
+        public async Task<ResponseDTO> UnboardUser(CompanyDTO company)
         {
-            bool exist = false;
-            var phoneNumber = await _uow.User.GetUserByPhoneNumber(number);
-            if (phoneNumber != null)
-            {
-                exist = true;
-            }
-            return exist;
+            return await _companyService.UnboardUser(company);
         }
 
-        public async Task<bool> UpdateCompanyRank(string customerCode, Rank rank)
+        public async Task<ResponseDTO> PhoneNoExist(UserValidationDTO userValidationDTO)
         {
-            bool updated = false;
-            var company = await _companyService.UpdateCompanyRank(customerCode,rank);
-            if (company != null)
+            var result = new ResponseDTO();
+            if (userValidationDTO == null)
             {
-                updated = true;
+                result.Succeeded = false;
+                result.Message = $"Invalid payload";
+                return result;
             }
-            return updated;
+            if (String.IsNullOrEmpty(userValidationDTO.PhoneNumber))
+            {
+                result.Succeeded = false;
+                result.Message = $"Phone number not provided";
+                return result;
+            }
+            var phoneNumber = await _uow.User.GetUserByPhoneNumber(userValidationDTO.PhoneNumber);
+            if (phoneNumber != null)
+            {
+                result.Exist = true;
+                result.Message = "Phone number already exist";
+                result.Succeeded = true;
+            }
+            else
+            {
+                result.Exist = false;
+                result.Message = "Phone number does not exist";
+                result.Succeeded = true;
+            }
+            return result;
+        }
+
+        public async Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            return await _companyService.UpdateUserRank(userValidationDTO);
         }
 
     }
