@@ -80,13 +80,10 @@ namespace GIGLS.Core.DTO.Customers
         public string[] Industry { get; set; }
         public string[] ProductType { get; set; }
         public CompanyType CompanyType { get; set; }
-        public CompanyStatus CompanyStatus { get; set; }
         private int SettlementPeriod { get; set; }
         private string CustomerCode { get; set; }
         public CustomerCategory CustomerCategory { get; set; }
 
-        public string ReturnOption { get; set; }
-        private int ReturnServiceCentre { get; set; }
         public string ReturnAddress { get; set; }
         public string Password { get; set; }
         public string FirstName { get; set; }
@@ -98,7 +95,6 @@ namespace GIGLS.Core.DTO.Customers
         public bool IsFromMobile { get; set; }
 
         //added this for Giglgo customers
-        public decimal? WalletAmount { get; set; }
         private bool? IsEligible { get; set; }
 
         private string AccountName { get; set; }

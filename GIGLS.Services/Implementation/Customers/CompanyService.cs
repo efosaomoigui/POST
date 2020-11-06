@@ -635,6 +635,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsInternational = true;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
+                newCompany.CompanyStatus = CompanyStatus.Active;
                 //get the CompanyType
                 var companyType = "";
                 //generate customer code
