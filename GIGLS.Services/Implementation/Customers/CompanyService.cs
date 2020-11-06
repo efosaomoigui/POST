@@ -17,6 +17,8 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.User;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -576,5 +578,214 @@ namespace GIGLS.Services.Implementation.Customers
         {
             return await _uow.Company.GetCompaniesByCodes(codes);
         }
+
+        public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Invalid payload";
+                    return result;
+                }
+               //check if user already exist
+                var emailExist = await _uow.User.GetUserByEmail(company.Email);
+
+                if (emailExist != null)
+                {
+                    result.Succeeded = false;
+                    result.Exist = true;
+                    result.Message = "Email already exist";
+                    return result;
+                }
+
+                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
+                {
+                    result.Succeeded = false;
+                    result.Message = $"{company.Name}, phone number or email detail already exist";
+                    return result;
+                }
+
+                //check phone number existence
+                var phoneExist = await _uow.User.GetUserByPhoneNumber(company.PhoneNumber);
+
+                if (phoneExist != null)
+                {
+                    result.Succeeded = false;
+                    result.Exist = true;
+                    result.Message = $"Phone Number already exist";
+                    return result;
+                }
+                var industry = string.Join(",", company.Industry);
+                var productType = string.Join(",",company.ProductType);
+
+                company.Industry = null;
+                company.ProductType = null;
+
+                //create company object
+                var newCompany = JObject.FromObject(company).ToObject<Company>();
+                //check if registration is from Giglgo
+                if (company.IsFromMobile == true)
+                {
+                    newCompany.IsRegisteredFromMobile = true;
+                }
+                newCompany.CompanyStatus = CompanyStatus.Active;
+                //Enable Eligibility so that the customer can create shipment on GIGGO APP
+                newCompany.IsEligible = true;
+                newCompany.IsDeleted = false;
+                newCompany.DateCreated = DateTime.UtcNow;
+                newCompany.DateModified = DateTime.UtcNow;
+                newCompany.IsInternational = true;
+                newCompany.ProductType = productType;
+                newCompany.Industry = industry;
+                //get the CompanyType
+                var companyType = "";
+                //generate customer code
+                if (newCompany.CompanyType == CompanyType.Corporate)
+                {
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                        NumberGeneratorType.CustomerCodeCorporate);
+                    newCompany.CustomerCode = customerCode;
+                    companyType = CompanyType.Corporate.ToString();
+                }
+                else
+                {
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                        NumberGeneratorType.CustomerCodeEcommerce);
+                    newCompany.CustomerCode = customerCode;
+                    companyType = CompanyType.Ecommerce.ToString();
+                }
+                //get user country by code
+                if (!String.IsNullOrEmpty(company.CountryCode))
+                {
+                    var userCountry = _uow.Country.GetAll().Where(x => x.CountryCode.ToLower() == company.CountryCode.ToLower()).FirstOrDefault();
+                    newCompany.UserActiveCountryId = userCountry.CountryId; 
+                }
+
+                _uow.Company.Add(newCompany);
+
+                if (!String.IsNullOrEmpty(company.FirstName))
+                {
+                    CompanyContactPersonDTO personDto = new CompanyContactPersonDTO();
+                    personDto.FirstName = newCompany.FirstName;
+                    personDto.LastName = newCompany.LastName;
+                    personDto.Email = newCompany.Email;
+                    personDto.PhoneNumber = newCompany.PhoneNumber;
+                    var person = Mapper.Map<CompanyContactPerson>(personDto);
+                    person.CompanyId = newCompany.CompanyId;
+                    _uow.CompanyContactPerson.Add(person);   
+                }
+
+                //-- add to user table for login
+                //1. set the userChannelType
+                var userChannelType = UserChannelType.Corporate;
+                if (newCompany.CompanyType == CompanyType.Ecommerce)
+                {
+                    userChannelType = UserChannelType.Ecommerce;
+                }
+
+                //2. If userEmail is null, use CustomerCode
+                if (String.IsNullOrEmpty(newCompany.Email))
+                {
+                    newCompany.Email = newCompany.CustomerCode;
+                }
+                var password = "";
+                if (newCompany.Password == null)
+                {
+                    password = await _passwordGenerator.Generate();
+                }
+                else
+                {
+                    password = newCompany.Password;
+                }
+
+                var aspUser = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                {
+                    ConfirmPassword = password,
+                    Department = newCompany.CompanyType.ToString(),
+                    DateCreated = DateTime.Now,
+                    Designation = newCompany.CompanyType.ToString(),
+                    Email = newCompany.Email,
+                    FirstName = newCompany.Name,
+                    LastName = newCompany.Name,
+                    Organisation = newCompany.CompanyType.ToString(),
+                    Password = password,
+                    PhoneNumber = newCompany.PhoneNumber,
+                    UserType = UserType.Regular,
+                    Username = newCompany.Email,
+                    UserChannelCode = newCompany.CustomerCode,
+                    UserChannelPassword = password,
+                    UserChannelType = userChannelType,
+                    PasswordExpireDate = DateTime.Now,
+                    UserActiveCountryId = newCompany.UserActiveCountryId,
+                    IsActive = true,
+                    
+                    
+                });
+
+                //complete
+                _uow.Complete();
+
+                // add customer to a wallet
+                await _walletService.AddWallet(new WalletDTO
+                {
+                    CustomerId = newCompany.CompanyId,
+                    CustomerType = CustomerType.Company,
+                    CustomerCode = newCompany.CustomerCode,
+                    CompanyType = companyType
+                });
+                var entity =  Mapper.Map<CompanyDTO>(newCompany);
+                result.Message = "Signup Successful";
+                result.Succeeded = true;
+                result.Entity = entity;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                if (userValidationDTO == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Invalid payload";
+                    return result;
+                }
+                if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Customer code or rank not provided";
+                    return result;
+                }
+                var company =  _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Company information does not exist";
+                    return result;
+                }
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
+                company.Rank = userValidationDTO.Rank;
+                _uow.Complete();
+                result.Message = "User Update Successful";
+                result.Succeeded = true;
+                result.Entity = companyDTO;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        
     }
 }
