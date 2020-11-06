@@ -2308,6 +2308,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("sendmessage")]
+        public async Task<IServiceResponse<bool>> SendMessage(NewMessageDTO newMessageDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.SendMessage(newMessageDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
 
 
     }

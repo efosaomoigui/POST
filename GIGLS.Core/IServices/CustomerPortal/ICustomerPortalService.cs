@@ -192,6 +192,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
         Task<ResponseDTO> PhoneNoExist(UserValidationDTO userValidationDTO);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
-        Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj);
+        Task<bool> SendMessage(NewMessageDTO obj);
     }
 }

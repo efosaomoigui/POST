@@ -3002,7 +3002,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _messageSenderService.SendMessage(newMessageDTO.MessageType,newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
-
-
+        
     }
 }

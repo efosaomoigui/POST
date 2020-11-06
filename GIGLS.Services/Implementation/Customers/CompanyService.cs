@@ -591,6 +591,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (emailExist != null)
                 {
                     result.Succeeded = false;
+                    result.Exist = true;
                     result.Message = "Email already exist";
                     return result;
                 }
@@ -602,31 +603,40 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                //check if registration is from Giglgo
-                if (company.IsFromMobile == true)
-                {
-                    company.IsRegisteredFromMobile = true;
-                }
-
                 //check phone number existence
                 var phoneExist = await _uow.User.GetUserByPhoneNumber(company.PhoneNumber);
 
                 if (phoneExist != null)
                 {
                     result.Succeeded = false;
+                    result.Exist = true;
                     result.Message = $"Phone Number already exist";
                     return result;
                 }
+                var industry = string.Join(",", company.Industry);
+                var productType = string.Join(",",company.ProductType);
 
+                company.Industry = null;
+                company.ProductType = null;
+
+                //create company object
                 var newCompany = JObject.FromObject(company).ToObject<Company>();
+                //check if registration is from Giglgo
+                if (company.IsFromMobile == true)
+                {
+                    newCompany.IsRegisteredFromMobile = true;
+                }
                 newCompany.CompanyStatus = CompanyStatus.Active;
-
                 //Enable Eligibility so that the customer can create shipment on GIGGO APP
                 newCompany.IsEligible = true;
-
+                newCompany.IsDeleted = false;
+                newCompany.DateCreated = DateTime.UtcNow;
+                newCompany.DateModified = DateTime.UtcNow;
+                newCompany.IsInternational = true;
+                newCompany.ProductType = productType;
+                newCompany.Industry = industry;
                 //get the CompanyType
                 var companyType = "";
-
                 //generate customer code
                 if (newCompany.CompanyType == CompanyType.Corporate)
                 {
@@ -642,17 +652,25 @@ namespace GIGLS.Services.Implementation.Customers
                     newCompany.CustomerCode = customerCode;
                     companyType = CompanyType.Ecommerce.ToString();
                 }
+                //get user country by code
+                if (!String.IsNullOrEmpty(company.CountryCode))
+                {
+                    var userCountry = _uow.Country.GetAll().Where(x => x.CountryCode.ToLower() == company.CountryCode.ToLower()).FirstOrDefault();
+                    newCompany.UserActiveCountryId = userCountry.CountryId; 
+                }
 
                 _uow.Company.Add(newCompany);
 
-                if (company.ContactPersons.Any())
+                if (!String.IsNullOrEmpty(company.FirstName))
                 {
-                    foreach (NewCompanyContactPersonDTO personDto in company.ContactPersons)
-                    {
-                        var person = Mapper.Map<CompanyContactPerson>(personDto);
-                        person.CompanyId = newCompany.CompanyId;
-                        _uow.CompanyContactPerson.Add(person);
-                    }
+                    CompanyContactPersonDTO personDto = new CompanyContactPersonDTO();
+                    personDto.FirstName = newCompany.FirstName;
+                    personDto.LastName = newCompany.LastName;
+                    personDto.Email = newCompany.Email;
+                    personDto.PhoneNumber = newCompany.PhoneNumber;
+                    var person = Mapper.Map<CompanyContactPerson>(personDto);
+                    person.CompanyId = newCompany.CompanyId;
+                    _uow.CompanyContactPerson.Add(person);   
                 }
 
                 //-- add to user table for login
@@ -697,7 +715,9 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelType = userChannelType,
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
-                    IsActive = true
+                    IsActive = true,
+                    
+                    
                 });
 
                 //complete
