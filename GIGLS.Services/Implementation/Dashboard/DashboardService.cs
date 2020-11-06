@@ -1074,7 +1074,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             //get outstanding corporate payments
             var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
-            dashboardDTO.OutstandingCorporatePayment = outstandingPayments;
+            dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
 
             return dashboardDTO;
         }
