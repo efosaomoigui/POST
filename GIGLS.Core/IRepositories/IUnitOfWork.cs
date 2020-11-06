@@ -192,6 +192,7 @@ namespace GIGLS.Core
         IEcommerceAgreementRepository EcommerceAgreement { get; set; }
         IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
         IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+        IFinancialReportRepository FinancialReport { get; set; }
 
         //Route Section
         IRouteRepository Routes { get; set; }
