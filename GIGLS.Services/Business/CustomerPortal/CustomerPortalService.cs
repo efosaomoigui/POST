@@ -2997,5 +2997,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _companyService.UpdateUserRank(userValidationDTO);
         }
 
+        public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
+        {
+            return await _messageSenderService.SendMessage(newMessageDTO.MessageType,newMessageDTO.EmailSmsType,newMessageDTO);
+        }
+
+
+
     }
 }

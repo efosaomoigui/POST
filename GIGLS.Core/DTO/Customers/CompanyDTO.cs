@@ -96,6 +96,7 @@ namespace GIGLS.Core.DTO.Customers
         public string LastName { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
         public bool isCodNeeded { get; set; }
+        public NewCountryDTO Country { get; set; }
         public List<NewCompanyContactPersonDTO> ContactPersons { get; set; }
         public string CurrencySymbol { get; set; }
         public bool IsFromMobile { get; set; }
