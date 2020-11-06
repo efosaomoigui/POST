@@ -400,5 +400,23 @@ namespace GIGLS.Services.IServices.ServiceCentres
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
         }
+
+        public async Task ServiceCentreViewState(int serviceCentreId, bool ispublic)
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
+                if (centre == null)
+                {
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                centre.IsPublic = ispublic;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
