@@ -441,6 +441,9 @@ namespace GIGLS.Core
                 config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
                 config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
 
+                config.CreateMap<FinancialReport, FinancialReportDTO>();
+                config.CreateMap<FinancialReportDTO, FinancialReport>();
+
             });
 
             isInit = true;

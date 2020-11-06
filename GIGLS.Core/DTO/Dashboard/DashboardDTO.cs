@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public int TargetOrder { get; set; }
         public decimal WalletBalance { get; set; }
         public decimal OutstandingCorporatePayment { get; set; }
+        public EarningsBreakdownDTO EarningsBreakdownDTO { get; set; }
 
         public CountryDTO UserActiveCountry { get; set; }
         public List<CountryDTO> ActiveCountries { get; set; }

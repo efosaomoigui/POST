@@ -38,6 +38,8 @@ using System.Net.Http;
 using GIGLS.Core.DTO.Report;
 using System.Security.Cryptography;
 using System.Text;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Account;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -64,6 +66,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IGiglgoStationService _giglgoStationService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
+        private readonly IFinancialReportService _financialReportService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -71,7 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
-            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService)
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -94,6 +97,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _giglgoStationService = giglgoStationService;
             _groupWaybillNumberService = groupWaybillNumberService;
+            _financialReportService = financialReportService;
             MapperConfig.Initialize();
         }
 
@@ -3232,6 +3236,20 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
 
+
+                        //Add to Financial Reports
+                        var financialReport = new FinancialReportDTO
+                        {
+                            Source = ReportSource.GIGGo,
+                            Waybill = preshipmentmobile.Waybill,
+                            PartnerEarnings = price,
+                            GrandTotal = shipmentPrice,
+                            Earnings = shipmentPrice - price,
+                            Demurrage = 0.00M,
+                            CountryId = preshipmentmobile.CountryId
+                        };
+                        await _financialReportService.AddReport(financialReport);
+
                     }
                     else
                     {
@@ -3274,6 +3292,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                 UserId = userId
                             };
                             var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+                            //Add to Financial Reports
+                            var financialReport = new FinancialReportDTO
+                            {
+                                Source = ReportSource.GIGGo,
+                                Waybill = preshipmentmobile.Waybill,
+                                PartnerEarnings = price,
+                                GrandTotal = preshipmentmobile.GrandTotal,
+                                Earnings = preshipmentmobile.GrandTotal - price,
+                                Demurrage = 0.00M,
+                                CountryId = preshipmentmobile.CountryId
+                            };
+                            await _financialReportService.AddReport(financialReport);
                             return;
                         }
                         else
