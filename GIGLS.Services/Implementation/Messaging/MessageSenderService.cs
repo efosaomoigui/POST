@@ -686,8 +686,10 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception) { }
-
+            catch (Exception ex) {
+                throw new Exception(ex.Message);
+            }
+                
             return true;
         }
 
@@ -1047,14 +1049,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     "Customer Name",
                     "Reciever Name",
-                    "Waybill",
                     "URL",
                     "Request Number",
                     "Departure",
                     "Destination",
                     "Items Details",
-                    "Description",
-                    "Houston email"
+                    "Description"
                 };
 
                 var intlDTO = (IntlShipmentRequestDTO)obj;
@@ -1070,14 +1070,13 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //A. map the array
                 strArray[0] = customerObj?.CustomerName;
-                strArray[2] = intlDTO.ReceiverName;
-                strArray[3] = intlDTO.URL;
-                strArray[4] = intlDTO.RequestNumber;
-                strArray[5] = "Houston, United States";
-                strArray[6] = intlDTO.DestinationServiceCentre.Name;
-                strArray[7] = intlDTO.ItemDetails;
-                strArray[8] = "International Shipment Items";
-                strArray[9] = "giglhouston@giglogistics.com";
+                strArray[1] = intlDTO.ReceiverName;
+                strArray[2] = intlDTO.URL;
+                strArray[3] = intlDTO.RequestNumber;
+                strArray[4] = "Houston, United States";
+                strArray[5] = intlDTO.DestinationServiceCentre.Name;
+                strArray[6] = intlDTO.ItemDetails;
+                strArray[7] = "International Shipment Items";
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -1093,7 +1092,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
 
                 messageDTO.To = intlDTO.CustomerEmail;
-                messageDTO.ToEmail = intlDTO.CustomerPhoneNumber;
+                messageDTO.ToEmail = intlDTO.CustomerEmail;
             }
 
             return await Task.FromResult(verifySendEmail);
