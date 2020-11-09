@@ -62,6 +62,16 @@ namespace GIGLS.Services.Implementation.Fleets
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
 
+
+                //check to see if there is a pending manifest for the user
+                var pendingManifest = _uow.PickupManifest.GetAll().Where(x => x.IsReceived == false && x.DispatchedById == currentUserId).ToList();
+                if (pendingManifest.Count > 0)
+                {
+                    var manifests = pendingManifest.Select(x => x.ManifestCode);
+                    throw new GenericException($"Error: Dispatch not registered. " +
+                               $"The following manifests [{string.Join(", ", manifests.ToList())}] has not been signed off");
+                }
+
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
