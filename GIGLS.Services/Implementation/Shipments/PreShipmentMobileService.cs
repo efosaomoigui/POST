@@ -3293,7 +3293,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     pickuprequest.Status = MobilePickUpRequestStatus.Confirmed.ToString();
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
-                    throw new GenericException("Shipment has not been porcessed", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException("Shipment has not been processed", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 //update the actual receiver if neccessary
                 if (pickuprequest.IsProxy)

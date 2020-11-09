@@ -64,10 +64,11 @@ namespace GIGLS.Services.Implementation.Fleets
 
 
                 //check to see if there is a pending manifest for the user
-                var pendingManifest = _uow.PickupManifest.GetAll().Where(x => x.IsReceived == false && x.DispatchedById == currentUserId).ToList();
-                if (pendingManifest.Count > 0)
+               
+                var pendingDispatch = _uow.Dispatch.GetAll().Where(x => x.ReceivedBy == null && x.DriverDetail == dispatchDTO.UserId).ToList();
+                if (pendingDispatch.Any())
                 {
-                    var manifests = pendingManifest.Select(x => x.ManifestCode);
+                    var manifests = pendingDispatch.Select(x => x.ManifestNumber);
                     throw new GenericException($"Error: Dispatch not registered. " +
                                $"The following manifests [{string.Join(", ", manifests.ToList())}] has not been signed off");
                 }

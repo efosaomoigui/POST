@@ -261,6 +261,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get the current user
                 string user = await _userService.GetCurrentUserId();
+                var userInfo = await _userService.GetUserById(user);
                 //get all waybill in the manifest
                 var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == manifestNumber).Select(x => x.Waybill).ToList();
                 var notDelivered = _uow.PreShipmentMobile.GetAll().Where(x => waybillsInManifest.Contains(x.Waybill) && (x.shipmentstatus != MobilePickUpRequestStatus.Delivered.ToString() || x.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString())).Select(x => x.Waybill).ToList();
@@ -271,9 +272,13 @@ namespace GIGLS.Services.Implementation.Shipments
                               $"The following waybills [{string.Join(", ", notDelivered.ToList())}] has not been delivered");
                 }
                 //update receiver detail on manifest table with logged in user detail
+                //also update the dispatch table for receiver
                 var manifestInfo = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
                 manifestInfo.ReceiverById = user;
                 manifestInfo.IsReceived = true;
+
+                var DispatchInfo = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifestNumber);
+                DispatchInfo.ReceivedBy = $"{userInfo.FirstName}{userInfo.LastName}";
                 await _uow.CompleteAsync();
                 return true;
             }
