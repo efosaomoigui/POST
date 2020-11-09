@@ -636,6 +636,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
                 newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 //get the CompanyType
                 var companyType = "";
                 //generate customer code
