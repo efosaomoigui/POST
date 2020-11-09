@@ -165,6 +165,11 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsBatchPickUp { get; set; }
         public string WaybillImageUrl { get; set; }
         public bool IsFromAgility { get; set; }
+        public List<CustomerDTO> Customer { get; set; }
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
