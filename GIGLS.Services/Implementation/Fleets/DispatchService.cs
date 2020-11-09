@@ -725,7 +725,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 var pickupRequestList = new List<MobilePickUpRequests>();
                 foreach (var item in waybillsToUpdateToPickup)
                 {
-                    item.shipmentstatus = ManifestType.Pickup.ToString();
+                    item.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     // add preshipment record to mobilepickuprequest table
                     var request = new MobilePickUpRequests();
                     request.Status = item.shipmentstatus;
