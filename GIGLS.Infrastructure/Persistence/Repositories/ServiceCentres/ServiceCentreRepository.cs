@@ -45,7 +45,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsDefault = s.IsDefault,
                                     SupperServiceCentreId = sc.SuperServiceCentreId,
                                     IsHUB = s.IsHUB,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
                                 };
 
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
@@ -76,7 +77,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     TargetOrder = s.TargetOrder,
                                     StationId = s.StationId,
                                     IsDefault = s.IsDefault,
-                                    IsHUB = s.IsHUB
+                                    IsHUB = s.IsHUB,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -113,7 +115,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     CountryId = c.CountryId,
                                     Country = c.CountryName,
                                     IsDefault = s.IsDefault,
-                                    IsHUB = s.IsHUB
+                                    IsHUB = s.IsHUB,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -153,7 +156,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsDefault = s.IsDefault,
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -197,7 +201,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         IsDefault = s.IsDefault,
                                         Longitude = s.Longitude,
                                         Latitude = s.Latitude,
-                                        FormattedServiceCentreName = s.FormattedServiceCentreName
+                                        FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                        IsPublic = s.IsPublic
                                     };
                     return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
                 }
@@ -228,7 +233,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         IsHUB = s.IsHUB,
                                         Longitude = s.Longitude,
                                         Latitude = s.Latitude,
-                                        FormattedServiceCentreName = s.FormattedServiceCentreName
+                                        FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                        IsPublic = s.IsPublic
                                     };
                     return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
                 }
@@ -267,7 +273,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     CountryId = c.CountryId,
                                     Country = c.CountryName,
                                     IsDefault = s.IsDefault,
-                                    IsHUB = s.IsHUB
+                                    IsHUB = s.IsHUB,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -308,6 +315,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     DateModified = s.DateModified,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
                                     IsHUB = s.IsHUB,
+                                    IsPublic = s.IsPublic,
                                     CountryDTO = new CountryDTO
                                     {
                                         CountryId = c.CountryId,
@@ -348,9 +356,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     IsDefault = s.IsDefault,
                                     IsHUB = s.IsHUB,
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
                                     Latitude = s.Latitude,
                                     Longitude = s.Longitude,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
                                     SupperServiceCentreId = sc.SuperServiceCentreId
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
@@ -386,7 +395,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     IsDefault = s.IsDefault,
                                     IsHUB = s.IsHUB,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -432,7 +442,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsDefault = s.IsDefault,
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
