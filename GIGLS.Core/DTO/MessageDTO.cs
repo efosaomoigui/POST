@@ -29,7 +29,7 @@ namespace GIGLS.Core.DTO
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
     }
 
-    public class NewMessageDTO : BaseDomainDTO
+    public class NewMessageDTO
     {
         public string ReceiverDetail { get; set; }
         public EmailSmsType EmailSmsType { get; set; }
