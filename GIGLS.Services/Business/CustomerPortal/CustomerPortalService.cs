@@ -2981,7 +2981,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 result.Exist = true;
                 result.Message = "Phone number already exist";
-                result.Succeeded = true;
+                result.Succeeded = false;
             }
             else
             {

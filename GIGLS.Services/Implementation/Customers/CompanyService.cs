@@ -759,7 +759,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Customer code or rank not provided";
+                    result.Message = $"User code or rank not provided";
                     return result;
                 }
                 var company =  _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
@@ -769,10 +769,10 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Company information does not exist";
                     return result;
                 }
-                var companyDTO = Mapper.Map<CompanyDTO>(company);
                 company.Rank = userValidationDTO.Rank;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
                 _uow.Complete();
-                result.Message = "User Update Successful";
+                result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
                 return result;
