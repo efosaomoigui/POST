@@ -614,18 +614,15 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.To = newMsgDTO.ReceiverDetail;
                 messageDTO.ToEmail = newMsgDTO.ReceiverDetail;
-
-                var customer = _uow.Company.GetAll().Where(x => x.Email.ToLower() == newMsgDTO.ReceiverDetail.ToLower() || x.PhoneNumber == newMsgDTO.ReceiverDetail).FirstOrDefault();
-                //Set default country as Nigeria for GIG Go APP
-                //prepare message format base on country code
-                if (customer != null)
+                messageDTO.Subject = newMsgDTO.Subject;
+                messageDTO.Body = newMsgDTO.Body;
+                messageDTO.FinalBody = newMsgDTO.Body;
+                if (newMsgDTO.EmailSmsType.ToString() == "SMS")
                 {
-                    var userCountry = _uow.Country.GetAll().Where(x => x.CountryId == customer.UserActiveCountryId).FirstOrDefault();
-                    messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, userCountry.PhoneNumberCode); 
-                }
-                else
-                {
-                    messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+                    if (!newMsgDTO.ReceiverDetail.StartsWith("+"))
+                    {
+                        messageDTO.To = $"+{newMsgDTO.ReceiverDetail}";
+                    }
                 }
             }
 
