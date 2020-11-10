@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.Account
         public decimal Earnings { get; set; }
         public decimal Demurrage { get; set; }
         public int CountryId { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 }
