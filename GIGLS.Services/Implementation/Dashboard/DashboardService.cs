@@ -1036,14 +1036,18 @@ namespace GIGLS.Services.Implementation.Dashboard
                 dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
                 dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
 
+                dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
                 //get all earnings
                 var earnings = _uow.FinancialReport.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilterCriteria.ActiveCountryId);
-                dashboardDTO.EarningsBreakdownDTO = await GetEarningsBreakdown(earnings);
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+
+                var demmurage = earnings.Where(x => x.Demurrage > 0).Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
 
                 var intlShipments = _uow.Invoice.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentStatus == PaymentStatus.Paid &&
                s.PaymentMethod == PaymentType.Cash.ToString() && s.IsInternational == true).Select(x => x.Amount).DefaultIfEmpty(0).Sum();
 
-                dashboardDTO.EarningsBreakdownDTO.IntlShipments = intlShipments;
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal += intlShipments;
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
                 _uow.Complete();
             }
 
