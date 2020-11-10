@@ -2971,32 +2971,27 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _companyService.UnboardUser(company);
         }
 
-        public async Task<ResponseDTO> PhoneNoExist(UserValidationDTO userValidationDTO)
+        public async Task<ResponseDTO> ValidateUser(string userDetail)
         {
             var result = new ResponseDTO();
-            if (userValidationDTO == null)
+           
+            if (String.IsNullOrEmpty(userDetail))
             {
                 result.Succeeded = false;
-                result.Message = $"Invalid payload";
+                result.Message = $"User detail not provided";
                 return result;
             }
-            if (String.IsNullOrEmpty(userValidationDTO.PhoneNumber))
-            {
-                result.Succeeded = false;
-                result.Message = $"Phone number not provided";
-                return result;
-            }
-            var phoneNumber = await _uow.User.GetUserByPhoneNumber(userValidationDTO.PhoneNumber);
-            if (phoneNumber != null)
+            var user = _uow.Company.GetAll().Where(x => x.Email.ToLower() == userDetail.ToLower() || x.PhoneNumber.ToLower() == userDetail.ToLower() || x.Name.ToLower() == userDetail.ToLower()).FirstOrDefault();
+            if (user != null)
             {
                 result.Exist = true;
-                result.Message = "Phone number already exist";
-                result.Succeeded = true;
+                result.Message = "User detail already exist";
+                result.Succeeded = false;
             }
             else
             {
                 result.Exist = false;
-                result.Message = "Phone number does not exist";
+                result.Message = "User detail does not exist";
                 result.Succeeded = true;
             }
             return result;
@@ -3009,7 +3004,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-            return await _messageSenderService.SendMessage(newMessageDTO.MessageType,newMessageDTO.EmailSmsType,newMessageDTO);
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), newMessageDTO.MessageCode);
+            return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
         

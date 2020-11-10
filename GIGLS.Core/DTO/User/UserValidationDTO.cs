@@ -9,7 +9,6 @@ namespace GIGLS.Core.DTO.User
 {
     public class UserValidationDTO
     {
-        public string PhoneNumber { get; set; }
         public Rank Rank { get; set; }
         public string UserCode { get; set; }
     }

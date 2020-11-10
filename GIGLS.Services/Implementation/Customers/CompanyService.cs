@@ -640,23 +640,11 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsInternational = true;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
-                //get the CompanyType
-                var companyType = "";
-                //generate customer code
-                if (newCompany.CompanyType == CompanyType.Corporate)
-                {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                        NumberGeneratorType.CustomerCodeCorporate);
-                    newCompany.CustomerCode = customerCode;
-                    companyType = CompanyType.Corporate.ToString();
-                }
-                else
-                {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                        NumberGeneratorType.CustomerCodeEcommerce);
-                    newCompany.CustomerCode = customerCode;
-                    companyType = CompanyType.Ecommerce.ToString();
-                }
+                newCompany.CompanyType = CompanyType.Ecommerce;
+                newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.CustomerCategory = CustomerCategory.Normal;
+                newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
+                newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -734,7 +722,7 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerId = newCompany.CompanyId,
                     CustomerType = CustomerType.Company,
                     CustomerCode = newCompany.CustomerCode,
-                    CompanyType = companyType
+                    CompanyType = newCompany.CompanyType.ToString(),
                 });
                 var entity =  Mapper.Map<CompanyDTO>(newCompany);
                 result.Message = "Signup Successful";
@@ -762,7 +750,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Customer code or rank not provided";
+                    result.Message = $"User code or rank not provided";
                     return result;
                 }
                 var company =  _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
@@ -772,10 +760,10 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Company information does not exist";
                     return result;
                 }
-                var companyDTO = Mapper.Map<CompanyDTO>(company);
                 company.Rank = userValidationDTO.Rank;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
                 _uow.Complete();
-                result.Message = "User Update Successful";
+                result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
                 return result;
