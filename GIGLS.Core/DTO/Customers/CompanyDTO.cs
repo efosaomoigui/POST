@@ -71,7 +71,6 @@ namespace GIGLS.Core.DTO.Customers
     {
         private int CompanyId { get; set; }
         public string Name { get; set; }
-        public string RcNumber { get; set; }
         public string Email { get; set; }
         public string City { get; set; }
         public string State { get; set; }
@@ -79,10 +78,9 @@ namespace GIGLS.Core.DTO.Customers
         public string PhoneNumber { get; set; }
         public string[] Industry { get; set; }
         public string[] ProductType { get; set; }
-        public CompanyType CompanyType { get; set; }
         private int SettlementPeriod { get; set; }
         private string CustomerCode { get; set; }
-        public CustomerCategory CustomerCategory { get; set; }
+        private CustomerCategory CustomerCategory { get; set; }
 
         public string ReturnAddress { get; set; }
         public string Password { get; set; }

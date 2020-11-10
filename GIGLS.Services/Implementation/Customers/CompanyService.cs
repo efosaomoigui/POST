@@ -635,25 +635,11 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsInternational = true;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
+                newCompany.CompanyType = CompanyType.Ecommerce;
                 newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.CustomerCategory = CustomerCategory.Normal;
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
-                //get the CompanyType
-                var companyType = "";
-                //generate customer code
-                if (newCompany.CompanyType == CompanyType.Corporate)
-                {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                        NumberGeneratorType.CustomerCodeCorporate);
-                    newCompany.CustomerCode = customerCode;
-                    companyType = CompanyType.Corporate.ToString();
-                }
-                else
-                {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                        NumberGeneratorType.CustomerCodeEcommerce);
-                    newCompany.CustomerCode = customerCode;
-                    companyType = CompanyType.Ecommerce.ToString();
-                }
+                newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -731,7 +717,7 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerId = newCompany.CompanyId,
                     CustomerType = CustomerType.Company,
                     CustomerCode = newCompany.CustomerCode,
-                    CompanyType = companyType
+                    CompanyType = newCompany.CompanyType.ToString(),
                 });
                 var entity =  Mapper.Map<CompanyDTO>(newCompany);
                 result.Message = "Signup Successful";

@@ -190,7 +190,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
-        Task<ResponseDTO> PhoneNoExist(UserValidationDTO userValidationDTO);
+        Task<ResponseDTO> ValidateUser(string userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task<bool> SendMessage(NewMessageDTO obj);
     }

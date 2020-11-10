@@ -1,4 +1,6 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Infrastructure;
@@ -102,5 +104,134 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("onboarduser")]
+        public async Task<IServiceResponse<bool>> UnboardUser(NewCompanyDTO company)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var companyItem = await _portalService.UnboardUser(company);
+                        response.Object = companyItem.Succeeded;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("validateuser")]
+        public async Task<IServiceResponse<bool>> ValidateUser([FromUri] string userDetail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var validateItem = await _portalService.ValidateUser(userDetail);
+                        response.Object = validateItem.Succeeded;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+        [HttpPut]
+        [Route("updaterank")]
+        public async Task<IServiceResponse<bool>> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var userItem = await _portalService.UpdateUserRank(userValidationDTO);
+                        response.Object = userItem.Succeeded;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+        [HttpPost]
+        [Route("sendmessage")]
+        public async Task<IServiceResponse<bool>> SendMessage(NewMessageDTO newMessageDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var sendItem = await _portalService.SendMessage(newMessageDTO);
+                        response.Object = true;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+
     }
+
 }
+
