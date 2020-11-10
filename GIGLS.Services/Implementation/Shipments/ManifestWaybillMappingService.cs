@@ -1328,10 +1328,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == item.ManifestCode).ToList();
                         if (waybillsInManifest.Any())
                         {
-                            for (int i = 0; i < waybillsInManifest.Count; i++)
+                            foreach (var waybillInx in waybillsInManifest)
                             {
-                                var waybillInx = waybillsInManifest[i];
                                 var waybill = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybillInx.Waybill);
+                                if (waybill.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString() || waybill.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                                {
+                                    continue;
+                                }
                                 var preshipmentWaybill = new PreShipmentMobileWaybill();
                                 preshipmentWaybill.Waybill = waybill.Waybill;
                                 preshipmentWaybill.Receiver.Address = waybill.ReceiverAddress;
