@@ -728,7 +728,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     var preshipmentWaybills = _uow.PreShipmentMobile.GetAll().Where(x => waybillsToRemove.Contains(x.Waybill)).ToList();
                     foreach (var item in preshipmentWaybills)
                     {
-                        item.shipmentstatus = "Shipment Created";
+                        item.shipmentstatus = "Shipment created";
                     }
                 }
                 //update waybill to pickedup
