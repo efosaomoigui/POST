@@ -1337,6 +1337,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                 preshipmentWaybill.Receiver.Address = waybill.ReceiverAddress;
                                 preshipmentWaybill.Receiver.Name = waybill.ReceiverName;
                                 preshipmentWaybill.Receiver.PhoneNo = waybill.ReceiverPhoneNumber;
+                                preshipmentWaybill.Sender.Address = waybill.SenderAddress;
+                                preshipmentWaybill.Sender.PhoneNo = waybill.SenderPhoneNumber;
+                                preshipmentWaybill.Sender.Name = waybill.SenderName;
                                 preshipmentManifest.Waybills.Add(preshipmentWaybill);
                             }
                         }
