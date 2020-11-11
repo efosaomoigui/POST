@@ -1077,8 +1077,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
 
             //get outstanding corporate payments
-            var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
-            dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
+            if(dashboardFilterCriteria.ActiveCountryId == 1)
+            {
+                var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
+                dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
+            }
 
             return dashboardDTO;
         }
