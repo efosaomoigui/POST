@@ -423,7 +423,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         };
 
                         client2.BaseAddress = new Uri(apiBaseUri);
-                        var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
+                        var response = client2.PostAsJsonAsync("api/portal/createnotification", creationNotice).Result;
                         //response.IsSuccessStatusCode
                     }
 
@@ -554,7 +554,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.Value = 0;
                 shipmentDTO.DeliveryTime = DateTime.Now;
                 shipmentDTO.PaymentStatus = (mDto.MagayaPaymentOption == "Collect") ? PaymentStatus.Pending : PaymentStatus.Paid;
-                shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                shipmentDTO.CustomerType = (mDto.IntlShipmentRequest.CustomerType == CustomerType.Company.ToString())? CustomerType.Company.ToString() : CustomerType.IndividualCustomer.ToString();
                 shipmentDTO.CustomerCode = "";
 
                 //Departure and Destination Details
