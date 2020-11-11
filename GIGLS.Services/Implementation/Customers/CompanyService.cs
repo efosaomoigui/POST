@@ -623,7 +623,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 company.Industry = null;
                 company.ProductType = null;
-
+                company.Email = company.Email.ToLower();
                 //create company object
                 var newCompany = JObject.FromObject(company).ToObject<Company>();
                 //check if registration is from Giglgo

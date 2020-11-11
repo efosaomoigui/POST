@@ -2244,6 +2244,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-       
+
     }
 }

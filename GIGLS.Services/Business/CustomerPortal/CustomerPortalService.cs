@@ -3008,6 +3008,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
-        
+        public async Task<UserDTO> GetUserByEmail(string email)
+        {
+            var user = await _uow.User.GetUserByEmail(email);
+            var userDTO = Mapper.Map<UserDTO>(user);
+            return userDTO; 
+        }
+
+
     }
 }
