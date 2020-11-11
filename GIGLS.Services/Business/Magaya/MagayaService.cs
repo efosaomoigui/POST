@@ -423,7 +423,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         };
 
                         client2.BaseAddress = new Uri(apiBaseUri);
-                        var response = client2.PostAsJsonAsync("/portal/createnotification", creationNotice).Result;
+                        var response = client2.PostAsJsonAsync("api/portal/createnotification", creationNotice).Result;
                         //response.IsSuccessStatusCode
                     }
 
