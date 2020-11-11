@@ -3004,7 +3004,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-            var msgType = (MessageType)Enum.Parse(typeof(MessageType), newMessageDTO.MessageCode);
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "NODESMS");
             return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 

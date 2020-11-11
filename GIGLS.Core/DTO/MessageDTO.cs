@@ -33,6 +33,7 @@ namespace GIGLS.Core.DTO
     {
         public string ReceiverDetail { get; set; }
         public EmailSmsType EmailSmsType { get; set; }
-        public string MessageCode { get; set; }
+        public string Body { get; set; }
+        public string Subject { get; set; }
     }
 }
