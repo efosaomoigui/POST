@@ -193,5 +193,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<ResponseDTO> ValidateUser(string userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task<bool> SendMessage(NewMessageDTO obj);
+        Task<UserDTO> GetUserByEmail(string email);
     }
 }
