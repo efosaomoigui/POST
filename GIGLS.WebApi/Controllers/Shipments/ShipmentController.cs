@@ -16,6 +16,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -27,14 +28,16 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
         private readonly IPreShipmentService _preshipmentService;
+        private readonly ICustomerPortalService _customerPortalService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService, IPreShipmentService preshipmentService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
             _preshipmentService = preshipmentService;
+            _customerPortalService = customerPortalService;
         }
 
 
@@ -167,6 +170,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 ShipmentDTO.DeliveryOption = null;
 
                 var shipment = await _service.AddShipmentForPaymentWaiver(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("giggoextension")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddGIGGOShipmentFromAgility(PreShipmentMobileFromAgilityDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.AddAgilityShipmentToGIGGo(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -806,6 +824,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<PreShipmentDTO>>
                 {
                     Object = preshipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgiggoprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                preshipmentMobile.IsFromAgility = true;
+                var price = await _service.GetGIGGOPrice(preshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = price,
                 };
             });
         }

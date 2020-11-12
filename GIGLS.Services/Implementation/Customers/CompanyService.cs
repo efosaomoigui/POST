@@ -571,5 +571,10 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task<List<CompanyDTO>> GetCompaniesBy(List<string> codes)
+        {
+            return await _uow.Company.GetCompaniesByCodes(codes);
+        }
     }
 }
