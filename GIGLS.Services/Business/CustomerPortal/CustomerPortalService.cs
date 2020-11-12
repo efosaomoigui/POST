@@ -2997,9 +2997,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Succeeded = true;
                 }
             }
-            if (!String.IsNullOrEmpty(userDetail.Email))
+           else if (!String.IsNullOrEmpty(userDetail.Email))
             {
-                var user = _uow.Company.GetAll().Where(x => x.Email.ToLower() == userDetail.Email.ToLower()).FirstOrDefault();
+                var user = await _uow.User.GetUserByEmail(userDetail.Email);
                 if (user != null)
                 {
                     result.Exist = true;
@@ -3014,7 +3014,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
 
-            if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            else if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
             {
                 var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
                 if (user != null)
