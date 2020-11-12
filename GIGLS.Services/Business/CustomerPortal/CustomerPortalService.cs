@@ -2971,29 +2971,67 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _companyService.UnboardUser(company);
         }
 
-        public async Task<ResponseDTO> ValidateUser(string userDetail)
+        public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
         {
             var result = new ResponseDTO();
-           
-            if (String.IsNullOrEmpty(userDetail))
+
+            if (userDetail == null)
             {
                 result.Succeeded = false;
-                result.Message = $"User detail not provided";
+                result.Message = $"Invalid payload";
                 return result;
             }
-            var user = _uow.Company.GetAll().Where(x => x.Email.ToLower() == userDetail.ToLower() || x.PhoneNumber.ToLower() == userDetail.ToLower() || x.Name.ToLower() == userDetail.ToLower()).FirstOrDefault();
-            if (user != null)
+            if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
-                result.Exist = true;
-                result.Message = "User detail already exist";
-                result.Succeeded = false;
+                var user = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                }
+                else
+                {
+                    result.Exist = false;
+                    result.Message = "User detail does not exist";
+                    result.Succeeded = true;
+                }
             }
-            else
+            if (!String.IsNullOrEmpty(userDetail.Email))
             {
-                result.Exist = false;
-                result.Message = "User detail does not exist";
-                result.Succeeded = true;
+                var user = _uow.Company.GetAll().Where(x => x.Email.ToLower() == userDetail.Email.ToLower()).FirstOrDefault();
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                }
+                else
+                {
+                    result.Exist = false;
+                    result.Message = "User detail does not exist";
+                    result.Succeeded = true;
+                }
             }
+
+            if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            {
+                var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                }
+                else
+                {
+                    result.Exist = false;
+                    result.Message = "User detail does not exist";
+                    result.Succeeded = true;
+                }
+            }
+
+
             return result;
         }
 

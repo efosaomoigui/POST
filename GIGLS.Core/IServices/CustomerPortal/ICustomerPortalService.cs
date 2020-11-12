@@ -193,7 +193,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
-        Task<ResponseDTO> ValidateUser(string userDetail);
+        Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task<bool> SendMessage(NewMessageDTO obj);
         Task<UserDTO> GetUserByEmail(string email);
