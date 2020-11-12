@@ -1376,6 +1376,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             }
 
+            if (shipmentDTO.Waybill != null && !shipmentDTO.Waybill.Contains("AWR")) 
+            {
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                shipmentDTO.Waybill = waybill;
+            }
+
             if (shipmentDTO.Waybill == null)
             {
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
