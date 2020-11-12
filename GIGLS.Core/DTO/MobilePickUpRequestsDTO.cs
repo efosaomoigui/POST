@@ -24,6 +24,11 @@ namespace GIGLS.Core.DTO
         public string IndentificationUrl { get; set; }
         public string DeliveryAddressImageUrl { get; set; }
         public string QRCode { get; set; }
+        public bool IsProxy { get; set; }
+        public string ProxyName { get; set; }
+        public string ProxyPhoneNumber { get; set; }
+        public string ProxyEmail { get; set; }
+
 
     }
 
