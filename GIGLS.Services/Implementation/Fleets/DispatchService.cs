@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.Domain.Expenses;
 using System.Net;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -755,6 +756,12 @@ namespace GIGLS.Services.Implementation.Fleets
                 //send sms to all receiver
                 for (int i = 0; i < waybillsToUpdateToPickup.Count; i++)
                 {
+                    var preshipment = waybillsToUpdateToPickup[i];
+                    await _preshipmentMobileService.ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = preshipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                    });
                     //Generate Receiver Delivery Code
                     var deliveryNumber = await _preshipmentMobileService.GenerateDeliveryCode();
                     //Send SMS To Receiver with Delivery Code
