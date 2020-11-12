@@ -171,6 +171,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 }
                             }
                         }
+                        else
+                        {
+                            var result = JObject.FromObject(responseDTO);
+                            return new ServiceResponse<JObject>
+                            { 
+                                Object = result,
+                            };
+                        }
                     }
                     else
                     {
@@ -188,11 +196,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPost]
         [Route("validateuser")]
-        public async Task<IServiceResponse<bool>> ValidateUser([FromUri] string userDetail)
+        public async Task<IServiceResponse<ResponseDTO>> ValidateUser([FromUri] string userDetail)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<bool>();
+                var response = new ServiceResponse<ResponseDTO>();
                 var request = Request;
                 var headers = request.Headers;
                 if (headers.Contains("api_key"))
@@ -202,7 +210,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         var validateItem = await _portalService.ValidateUser(userDetail);
-                        response.Object = validateItem.Succeeded;
+                        response.Object = validateItem;
                     }
                     else
                     {
@@ -220,11 +228,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPut]
         [Route("updaterank")]
-        public async Task<IServiceResponse<bool>> UpdateUserRank(UserValidationDTO userValidationDTO)
+        public async Task<IServiceResponse<ResponseDTO>> UpdateUserRank(UserValidationDTO userValidationDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<bool>();
+                var response = new ServiceResponse<ResponseDTO>();
                 var request = Request;
                 var headers = request.Headers;
                 if (headers.Contains("api_key"))
@@ -234,7 +242,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         var userItem = await _portalService.UpdateUserRank(userValidationDTO);
-                        response.Object = userItem.Succeeded;
+                        response.Object = userItem;
                     }
                     else
                     {
@@ -266,7 +274,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         var sendItem = await _portalService.SendMessage(newMessageDTO);
-                        response.Object = true;
+                        response.Object = sendItem;
                     }
                     else
                     {
