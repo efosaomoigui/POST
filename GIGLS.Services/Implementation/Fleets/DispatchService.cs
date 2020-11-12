@@ -47,7 +47,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 int userServiceCentreId;
                 int dispatchId;
 
-                if(dispatchDTO.ManifestType == ManifestType.Pickup)
+                if(dispatchDTO.ManifestType == ManifestType.Pickup || dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                     userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
@@ -61,7 +61,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
-
 
                 //check to see if there is a pending manifest for the user
                if(dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
@@ -89,12 +88,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
                         var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
-                    }
-                    
+                    }                    
                 }
 
                 var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
-                if (dispatchObj != null && dispatchDTO.ManifestType == ManifestType.Pickup)
+                if (dispatchObj != null )
                 {
                     dispatchObj.DriverDetail = dispatchDTO.DriverDetail;
                     dispatchObj.Amount = dispatchDTO.Amount;
@@ -107,7 +105,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                     newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     newDispatch.ServiceCentreId = userServiceCentreId;
-                    newDispatch.DriverDetail = dispatchDTO.UserId;
+
+                    if (dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
+                    {
+                        newDispatch.DriverDetail = dispatchDTO.UserId;
+                    }
 
                     //Set Departure Service Center
                     newDispatch.DepartureServiceCenterId = userServiceCentreId;
@@ -195,8 +197,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestObjs.ForEach(x => x.IsDispatched = true);
                     manifestObjs.ForEach(x => x.ManifestType = dispatchDTO.ManifestType);
                     manifestObjs.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.Dispatched);
-                    manifestObjs.ForEach(x => x.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId);
-                    
+                    manifestObjs.ForEach(x => x.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId);                    
                 }
                 
                 ////--start--///Set the DepartureCountryId
