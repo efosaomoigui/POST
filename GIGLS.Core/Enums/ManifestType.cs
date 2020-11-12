@@ -6,7 +6,8 @@
         Transit,
         Delivery,
         HUB,
-        Pickup
+        Pickup,
+        PickupForDelivery
 
     }
 }

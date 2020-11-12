@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> GenerateMovementManifestCode(MovementManifestNumberDTO manifestDTO); 
         Task<PickupManifestDTO> GetPickupManifestByCode(string manifest);
         Task ChangeManifestType(string manifestCode);
+        Task<bool> SignOffManifest(string manifestNumber);
     }
 }

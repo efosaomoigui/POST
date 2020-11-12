@@ -211,6 +211,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _portalService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
         }
-    
+
+        public async Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile()
+        {
+            return await _portalService.GetAllManifestForPreShipmentMobile();
+        }
+
+        public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
+        {
+            return await _portalService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
+        }
+
     }
 }

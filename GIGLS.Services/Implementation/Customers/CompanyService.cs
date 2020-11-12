@@ -574,6 +574,12 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+        public async Task<List<CompanyDTO>> GetCompaniesBy(List<string> codes)
+        {
+            return await _uow.Company.GetCompaniesByCodes(codes);
+        }
+        }
+
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
             try
