@@ -64,13 +64,15 @@ namespace GIGLS.Services.Implementation.Fleets
 
 
                 //check to see if there is a pending manifest for the user
-               
-                var pendingDispatch = _uow.Dispatch.GetAll().Where(x => x.ReceivedBy == null && x.DriverDetail == dispatchDTO.UserId).ToList();
-                if (pendingDispatch.Any())
+               if(dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
                 {
-                    var manifests = pendingDispatch.Select(x => x.ManifestNumber);
-                    throw new GenericException($"Error: Dispatch not registered. " +
-                               $"The following manifests [{string.Join(", ", manifests.ToList())}] has not been signed off");
+                    var pendingDispatch = _uow.Dispatch.GetAll().Where(x => x.ReceivedBy == null && x.DriverDetail == dispatchDTO.UserId).ToList();
+                    if (pendingDispatch.Any())
+                    {
+                        var manifests = pendingDispatch.Select(x => x.ManifestNumber);
+                        throw new GenericException($"Error: Dispatch not registered. " +
+                                   $"The following manifests [{string.Join(", ", manifests.ToList())}] has not been signed off");
+                    }
                 }
 
                 //check for the type of delivery manifest to know which type of process to do
