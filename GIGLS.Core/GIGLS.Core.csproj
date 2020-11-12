@@ -318,6 +318,15 @@
     <Compile Include="DTO\DeliveryLocationDTO.cs" />
     <Compile Include="DTO\Devices\DeviceDTO.cs" />
     <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
+    <Compile Include="DTO\DHL\AddressPayload.cs" />
+    <Compile Include="DTO\DHL\Dimensions.cs" />
+    <Compile Include="DTO\DHL\Enum\Content.cs" />
+    <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
+    <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\RateRequestPayload.cs" />
+    <Compile Include="DTO\DHL\RateRequestResponse.cs" />
+    <Compile Include="DTO\DHL\RequestedShipmentPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
@@ -876,9 +885,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DTO\DHL\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
       <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
