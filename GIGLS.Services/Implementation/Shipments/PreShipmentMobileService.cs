@@ -4033,6 +4033,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill);
+                var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == preshipmentmobile.Waybill);
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
@@ -4042,11 +4043,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequests != null)
                 {
                     var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
-                    var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
+                    var partnersPrice = (0.4M * Convert.ToDecimal(pickuprice));
 
                     var rider = await _userService.GetUserById(pickuprequests.UserId);
                     var riderWallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == rider.UserChannelCode);
-                    riderWallet.Balance = riderWallet.Balance + Partnersprice;
+                    riderWallet.Balance = riderWallet.Balance + partnersPrice;
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
@@ -4059,15 +4060,29 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Destination = preshipmentmobile.ReceiverAddress,
                         Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = Partnersprice,
+                        AmountReceived = partnersPrice,
                         Waybill = preshipmentmobile.Waybill
                     };
                     await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+
+                    //update financial report 
+                    if(report != null)
+                    {
+                        report.PartnerEarnings = partnersPrice;
+                        report.Earnings = 0.00M;
+                        report.GrandTotal = 0.00M;
+                    }
                 }
                 else
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
+
+                    //remove from report
+                    if (report != null)
+                    {
+                        report.IsDeleted = true;
+                    }
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
@@ -5266,6 +5281,13 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MSCC
                         });
+
+                        //remove from report
+                        var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == Waybill);
+                        if(report != null)
+                        {
+                            report.IsDeleted = true;
+                        }
                     }
                     else
                     {
