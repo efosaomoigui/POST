@@ -347,5 +347,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.IsDeleted == false && ids.Contains(x.Id)).ToList();
             return Task.FromResult(user);
         }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorChannelCode(string searchParam)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(searchParam) || x.UserChannelCode.Contains(searchParam)).FirstOrDefault();
+            return Task.FromResult(user);
+        }
     }
 }

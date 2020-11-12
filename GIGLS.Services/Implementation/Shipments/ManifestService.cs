@@ -10,6 +10,7 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,11 +18,13 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private readonly INumberGeneratorMonitorService _service;
+        private readonly IUserService _userService;
 
-        public ManifestService(IUnitOfWork uow, INumberGeneratorMonitorService service)
+        public ManifestService(IUnitOfWork uow, INumberGeneratorMonitorService service, IUserService userService)
         {
             _uow = uow;
             _service = service;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -250,6 +253,40 @@ namespace GIGLS.Services.Implementation.Shipments
 
             manifest.ManifestType = ManifestType.Transit;
             _uow.Complete();
+        }
+
+        public async Task<bool> SignOffManifest(string manifestNumber)
+        {
+            try
+            {
+                //get the current user
+                string user = await _userService.GetCurrentUserId();
+                var userInfo = await _userService.GetUserById(user);
+                //get all waybill in the manifest
+                var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == manifestNumber).Select(x => x.Waybill).ToList();
+                var notDelivered = _uow.PreShipmentMobile.GetAll().Where(x => waybillsInManifest.Contains(x.Waybill) && (x.shipmentstatus != MobilePickUpRequestStatus.Delivered.ToString() && x.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString())).Select(x => x.Waybill).ToList();
+                if (notDelivered.Any())
+                {
+
+                    throw new GenericException($"Error: Cannot sign off manifest. " +
+                              $"The following waybills [{string.Join(", ", notDelivered.ToList())}] has not been delivered");
+                }
+                //update receiver detail on manifest table with logged in user detail
+                //also update the dispatch table for receiver
+                var manifestInfo = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
+                manifestInfo.ReceiverById = user;
+                manifestInfo.IsReceived = true;
+
+                var DispatchInfo = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifestNumber);
+                DispatchInfo.ReceivedBy = $"{userInfo.FirstName}{userInfo.LastName}";
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }
