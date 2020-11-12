@@ -1365,7 +1365,16 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
 
-            var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
+            var departureServiceCentre = new ServiceCentreDTO();
+
+            if(shipmentDTO.IsGIGGOExtension == true)
+            {
+                departureServiceCentre = await _userService.GetGIGGOServiceCentre();
+            }
+            else
+            {
+                departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
+            }
 
             if (shipmentDTO.Waybill == null)
             {
