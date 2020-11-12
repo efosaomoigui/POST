@@ -12,4 +12,11 @@ namespace GIGLS.Core.DTO.User
         public Rank Rank { get; set; }
         public string UserCode { get; set; }
     }
+
+    public class UserValidationNewDTO
+    {
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string BusinessName { get; set; }
+    }
 }

@@ -32,7 +32,7 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
-        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator, 
+        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
             IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
         {
             _walletService = walletService;
@@ -52,7 +52,7 @@ namespace GIGLS.Services.Implementation.Customers
                 //block the registration for APP User
                 var gigGoEmailUser = await _uow.User.GetUserByEmail(company.Email);
 
-                if(gigGoEmailUser != null)
+                if (gigGoEmailUser != null)
                 {
                     throw new GenericException($"Email already exist");
                 }
@@ -63,7 +63,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 //check if registration is from Giglgo
-                if(company.IsFromMobile == true)
+                if (company.IsFromMobile == true)
                 {
                     company.IsRegisteredFromMobile = true;
                 }
@@ -142,7 +142,7 @@ namespace GIGLS.Services.Implementation.Customers
                     password = newCompany.Password;
                 }
 
-                if(company.EcommerceAgreementId != 0)
+                if (company.EcommerceAgreementId != 0)
                 {
                     var pendingRequest = await CheckEcommerceAgreement(company.EcommerceAgreementId);
                 }
@@ -218,7 +218,7 @@ namespace GIGLS.Services.Implementation.Customers
         {
             var company = await _uow.EcommerceAgreement.GetAsync(x => x.EcommerceAgreementId == companyId);
 
-            if(company.Status == EcommerceAgreementStatus.Pending)
+            if (company.Status == EcommerceAgreementStatus.Pending)
             {
                 company.Status = EcommerceAgreementStatus.Registerd;
             }
@@ -231,7 +231,7 @@ namespace GIGLS.Services.Implementation.Customers
 
         public async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
         {
-            if(countryId < 1)
+            if (countryId < 1)
             {
                 int getUserActiveCountry = await _userService.GetUserActiveCountryId();
                 countryId = getUserActiveCountry;
@@ -253,7 +253,7 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 //Delete user, wallet and customer table
-                
+
                 var company = await _uow.Company.GetAsync(companyId);
                 if (company == null)
                 {
@@ -262,15 +262,15 @@ namespace GIGLS.Services.Implementation.Customers
                 _uow.Company.Remove(company);
 
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == company.CustomerCode);
-                if(wallet != null)
+                if (wallet != null)
                 {
                     _uow.Wallet.Remove(wallet);
                 }
-                
+
                 var user = await _uow.User.GetUserByChannelCode(company.CustomerCode);
-                if(user != null)
+                if (user != null)
                 {
-                   await _uow.User.Remove(user.Id);
+                    await _uow.User.Remove(user.Id);
                 }
 
                 _uow.Complete();
@@ -319,7 +319,7 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 var company = await _uow.Company.GetCompanyById(companyId);
-                
+
                 if (company == null)
                 {
                     throw new GenericException("Company information does not exist");
@@ -327,7 +327,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
                 companyDto.UserActiveCountryName = companyDto.Country.CountryName;
-                
+
                 return companyDto;
             }
             catch (Exception)
@@ -522,7 +522,7 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
-        
+
         public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
         {
             try
@@ -533,7 +533,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Wallet information does not exist");
                 }
-                return company;                
+                return company;
             }
             catch (Exception)
             {
@@ -579,6 +579,7 @@ namespace GIGLS.Services.Implementation.Customers
             return await _uow.Company.GetCompaniesByCodes(codes);
         }
 
+
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
             try
@@ -590,7 +591,7 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = "Invalid payload";
                     return result;
                 }
-               //check if user already exist
+                //check if user already exist
                 var emailExist = await _uow.User.GetUserByEmail(company.Email);
 
                 if (emailExist != null)
@@ -619,7 +620,7 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
                 var industry = string.Join(",", company.Industry);
-                var productType = string.Join(",",company.ProductType);
+                var productType = string.Join(",", company.ProductType);
 
                 company.Industry = null;
                 company.ProductType = null;
@@ -649,7 +650,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
                     var userCountry = _uow.Country.GetAll().Where(x => x.CountryCode.ToLower() == company.CountryCode.ToLower()).FirstOrDefault();
-                    newCompany.UserActiveCountryId = userCountry.CountryId; 
+                    newCompany.UserActiveCountryId = userCountry.CountryId;
                 }
 
                 _uow.Company.Add(newCompany);
@@ -663,7 +664,7 @@ namespace GIGLS.Services.Implementation.Customers
                     personDto.PhoneNumber = newCompany.PhoneNumber;
                     var person = Mapper.Map<CompanyContactPerson>(personDto);
                     person.CompanyId = newCompany.CompanyId;
-                    _uow.CompanyContactPerson.Add(person);   
+                    _uow.CompanyContactPerson.Add(person);
                 }
 
                 //-- add to user table for login
@@ -709,8 +710,8 @@ namespace GIGLS.Services.Implementation.Customers
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
-                    
-                    
+
+
                 });
 
                 //complete
@@ -724,7 +725,7 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CompanyType = newCompany.CompanyType.ToString(),
                 });
-                var entity =  Mapper.Map<CompanyDTO>(newCompany);
+                var entity = Mapper.Map<CompanyDTO>(newCompany);
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
@@ -753,7 +754,7 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"User code or rank not provided";
                     return result;
                 }
-                var company =  _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
+                var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
                 if (company == null)
                 {
                     result.Succeeded = false;
@@ -773,7 +774,6 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
-
-        
     }
+        
 }

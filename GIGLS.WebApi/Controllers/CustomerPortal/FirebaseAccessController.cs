@@ -196,7 +196,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPost]
         [Route("validateuser")]
-        public async Task<IServiceResponse<ResponseDTO>> ValidateUser([FromUri] string userDetail)
+        public async Task<IServiceResponse<ResponseDTO>> ValidateUser(UserValidationNewDTO userDetail)
         {
             return await HandleApiOperationAsync(async () =>
             {
