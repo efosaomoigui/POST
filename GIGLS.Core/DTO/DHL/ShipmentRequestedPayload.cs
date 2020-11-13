@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.DHL
 {
-    public class RequestedShipmentPayload
+    public class ShipmentRequestedPayload
     {
-        public RequestedShipmentPayload()
+        public ShipmentRequestedPayload()
         {
             ShipmentRequest = new ShipmentRequest();
         }

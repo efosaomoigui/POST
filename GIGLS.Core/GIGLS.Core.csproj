@@ -325,7 +325,7 @@
     <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
     <Compile Include="DTO\DHL\RateRequestPayload.cs" />
     <Compile Include="DTO\DHL\RateRequestResponse.cs" />
-    <Compile Include="DTO\DHL\RequestedShipmentPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
