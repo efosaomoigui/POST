@@ -2989,6 +2989,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
@@ -3005,6 +3006,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
@@ -3022,6 +3024,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
@@ -3042,7 +3045,24 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "NODESMS");
+            //check if the receiver detail exist
+            if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
+            {
+                var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
+            {
+                var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
             return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
