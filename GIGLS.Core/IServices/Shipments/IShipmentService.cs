@@ -77,6 +77,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
         Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
+        Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
+        Task<InternationalShipmentDTO> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

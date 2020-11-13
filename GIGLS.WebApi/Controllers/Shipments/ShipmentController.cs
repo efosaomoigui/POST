@@ -844,5 +844,35 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("international")]
+        public async Task<IServiceResponse<InternationalShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.AddInternationalShipment(shipmentDTO);
+                return new ServiceResponse<InternationalShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("getinternationalprice")]
+        public async Task<IServiceResponse<InternationalShipmentDTO>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetInternationalShipmentPrice(shipmentDTO);
+                return new ServiceResponse<InternationalShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }
