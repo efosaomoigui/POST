@@ -260,11 +260,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPost]
         [Route("sendmessage")]
-        public async Task<IServiceResponse<bool>> SendMessage(NewMessageDTO newMessageDTO)
+        public async Task<IServiceResponse<string>> SendMessage(NewMessageDTO newMessageDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<bool>();
+                var response = new ServiceResponse<string>();
                 var request = Request;
                 var headers = request.Headers;
                 if (headers.Contains("api_key"))
@@ -274,7 +274,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         var sendItem = await _portalService.SendMessage(newMessageDTO);
-                        response.Object = sendItem;
+                        if (sendItem)
+                        {
+                            response.Object = "Message sent";
+                        }
+                        else
+                        {
+                            response.Object = "Message not sent, please check your receiver detail";
+                        }
                     }
                     else
                     {
