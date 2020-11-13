@@ -17,6 +17,8 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -26,6 +28,7 @@ using System.Net;
 using System.Net.Http;
 using System.ServiceModel;
 using System.Threading.Tasks;
+using ThirdParty.WebServices.Business;
 //using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.DTO;
@@ -402,7 +405,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         //response.IsSuccessStatusCode
                     }
 
-                    using (var client2 = new HttpClient()) 
+                    using (var client2 = new HttpClient())
                     {
                         string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
 
@@ -490,7 +493,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             Nature = "Normal",
                             Length = intlShipmentDTO.ShipmentRequestItems[i].Length,
                             Width = intlShipmentDTO.ShipmentRequestItems[i].Width,
-                            Height = intlShipmentDTO.ShipmentRequestItems[i].Height
+                            Height = intlShipmentDTO.ShipmentRequestItems[i].Height,
+                            RequiresInsurance = intlShipmentDTO.ShipmentRequestItems[i].RequiresInsurance,
+                            ItemValue = intlShipmentDTO.ShipmentRequestItems[i].ItemValue
                         }
                     );
             };
@@ -554,7 +559,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.Value = 0;
                 shipmentDTO.DeliveryTime = DateTime.Now;
                 shipmentDTO.PaymentStatus = (mDto.MagayaPaymentOption == "Collect") ? PaymentStatus.Pending : PaymentStatus.Paid;
-                shipmentDTO.CustomerType = (mDto.IntlShipmentRequest.CustomerType == CustomerType.Company.ToString())? CustomerType.Company.ToString() : CustomerType.IndividualCustomer.ToString();
+                shipmentDTO.CustomerType = (mDto.IntlShipmentRequest.CustomerType == CustomerType.Company.ToString()) ? CustomerType.Company.ToString() : CustomerType.IndividualCustomer.ToString();
                 shipmentDTO.CustomerCode = "";
 
                 //Departure and Destination Details
@@ -574,6 +579,26 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Delivery Options
                 shipmentDTO.DeliveryOptionId = 1;
+
+                //Insurance
+                var requestDtoJson = mDto.IntlShipmentRequest?.ShipmentRequestItems;
+                decimal totalInsuranceCharge = 0;
+
+                if (requestDtoJson != null)
+                {
+                    for (int i = 0; i < requestDtoJson.Count; i++)
+                    {
+                        var ob = requestDtoJson[i].ToString();
+                        var resultJson = JsonConvert.DeserializeObject<IntlShipmentRequestItemDTO>(ob);
+
+                        if (resultJson.RequiresInsurance == true)
+                        {
+                            var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
+                            totalInsuranceCharge += (resultJson.ItemValue * (percentVal / 100));
+                        }
+
+                    };
+                }
 
                 //PickUp Options
                 shipmentDTO.PickupOptions = PickupOptions.HOMEDELIVERY;
@@ -607,7 +632,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 shipmentDTO.Insurance = 0;
                 shipmentDTO.Vat = 0;
-                shipmentDTO.Total = (decimal)totalChargeAmount;
+                shipmentDTO.Total = (decimal)totalChargeAmount + totalInsuranceCharge;
                 shipmentDTO.ShipmentPackagePrice = 0;
                 shipmentDTO.ShipmentPickupPrice = 0;
 
@@ -760,6 +785,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     shipmentItem.SerialNumber = serialNumber;
 
+                    if (shipmentItem.RequiresInsurance)
+                    {
+                        if (shipmentItem.ItemValue <= 0)
+                        {
+                            throw new Exception("After indicating that you require insurance, item value must be greater than zero!");
+                        }
+                    }
+
                     //check for volumetric weight
                     if (shipmentItem.IsVolumetric)
                     {
@@ -790,7 +823,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Send an email with details of request to Houston team
                 string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail))? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
 
                 return shipmentDTO;
@@ -857,7 +890,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     IsVolumetric = c.IsVolumetric,
                     Length = c.Length,
                     Width = c.Width,
-                    Height = c.Height
+                    Height = c.Height,
+                    RequiresInsurance = c.RequiresInsurance,
+                    ItemValue = c.ItemValue
                 }).ToList()
             };
 
