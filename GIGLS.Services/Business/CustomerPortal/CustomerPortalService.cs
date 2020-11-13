@@ -2989,6 +2989,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
@@ -3005,6 +3006,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
@@ -3022,6 +3024,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
+                    return result;
                 }
                 else
                 {
