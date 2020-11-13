@@ -111,14 +111,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (boolResult)
             {
-                //remove from bank deposit order if it is there
-                var bankDepositOrder = await _uow.BankProcessingOrderForShipmentAndCOD.GetAsync(s => s.Waybill == shipment.Waybill && s.DepositType == DepositType.Shipment);
-
-                if(bankDepositOrder != null)
-                {
-                    bankDepositOrder.IsDeleted = true;
-                }
-
                 await _uow.CompleteAsync();
 
                 //send message if payment has been done on the waybill
