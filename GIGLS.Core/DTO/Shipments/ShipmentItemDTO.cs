@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Foreign key information
         public int ShipmentId { get; set; }
+        public int? SpecialPackageId { get; set; }
 
     }
 

@@ -49,7 +49,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  IdentificationNumber = "",
                                  WalletPan = "",
                                  IsActivated = partner.IsActivated,
-                                 ActivityStatus = partner.ActivityStatus
+                                 ActivityStatus = partner.ActivityStatus,
+                                 UserId = partner.UserId
                              };
 
             return Task.FromResult(partnerDto.ToList());
