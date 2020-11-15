@@ -52,6 +52,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int IntlShipmentRequestId { get; set; }
 
         public bool RequiresInsurance { get; set; } 
-        public decimal ItemValue { get; set; }
+        public dynamic ItemValue { get; set; }
     }
 }
