@@ -90,5 +90,6 @@ namespace GIGLS.Core.IServices.User
         Task<bool> IsCustomerHasAgentRole(string userId);
         Task<UserDTO> GetUserUsingCustomerForAgentApp(string emailPhoneCode);
         Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
+        Task<IdentityResult> SetDashboardAccess(string userid, bool val);
     }
 }

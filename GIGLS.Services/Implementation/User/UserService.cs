@@ -1493,5 +1493,19 @@ namespace GIGLS.Services.Implementation.User
         {
             return await _unitOfWork.User.IsCustomerHasAgentRole(userId);
         }
+
+        public async Task<IdentityResult> SetDashboardAccess(string userid, bool val)
+        {
+            var user = await _unitOfWork.User.GetUserById(userid);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            user.DashboardAccess = val;
+
+            return await _unitOfWork.User.UpdateUser(userid, user);
+        }
     }
 }
