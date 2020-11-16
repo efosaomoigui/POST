@@ -94,5 +94,6 @@ namespace GIGLS.Core.DTO.User
         public string BusinessNature { get; set; }
 
         public bool IsMagaya { get; set; }
+        public bool DashboardAccess { get; set; }
     }
 }

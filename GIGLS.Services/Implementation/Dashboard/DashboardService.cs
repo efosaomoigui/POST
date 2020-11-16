@@ -684,6 +684,13 @@ namespace GIGLS.Services.Implementation.Dashboard
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
 
+                if (!currentUser.DashboardAccess)
+                {
+                    dashboardDTO = await GetClaimDetails(claimValue);
+                    return dashboardDTO;
+                }
+
+
                 if (claimValue[0] == "Public")
                 {
                     dashboardDTO = new DashboardDTO()
@@ -1218,6 +1225,36 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return earningsBreakdownDTO;
 
+        }
+
+        //Get Claim for Non-Dashboard Access
+        private async Task<DashboardDTO> GetClaimDetails(string[] claimValue)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            if (claimValue[0] == "Public")
+            {
+                dashboardDTO.Public = "Public";
+            }
+            else if (claimValue[0] == "Region")
+            {
+                //get the region
+                var regionDTO = await _regionService.GetRegionById(int.Parse(claimValue[1]));
+                dashboardDTO.Region = regionDTO;
+            }
+            else if (claimValue[0] == "Station")
+            {
+                //get the station
+                var stationDTO = await _stationService.GetStationById(int.Parse(claimValue[1]));
+                dashboardDTO.Station = stationDTO;
+            }
+            else if (claimValue[0] == "ServiceCentre")
+            {
+                var serviceCentre = await _serviceCenterService.GetServiceCentreById(int.Parse(claimValue[1]));
+                dashboardDTO.ServiceCentre = serviceCentre;
+            }
+
+            return dashboardDTO;
         }
     }
 }
