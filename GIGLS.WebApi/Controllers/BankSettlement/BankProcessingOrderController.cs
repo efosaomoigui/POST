@@ -138,7 +138,8 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder(refCode, type);
+                //var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder(refCode, type);
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrderV2(refCode, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankprocessingorders.Item2,

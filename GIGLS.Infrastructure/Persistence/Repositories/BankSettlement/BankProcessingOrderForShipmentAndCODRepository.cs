@@ -104,6 +104,29 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             return Task.FromResult(result);
         }
 
+        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrdersV2(DepositType type, string refcode, int [] serviceCenters)
+        {
+            var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable().Where(s => s.DepositType == type && s.RefCode == refcode && serviceCenters.Contains(s.ServiceCenterId));
+
+            var processingorders = from processingorderCode in processingordersvalue
+                                   select new BankProcessingOrderForShipmentAndCODDTO
+                                   {
+                                       ProcessingOrderId = processingorderCode.ProcessingOrderId,
+                                       RefCode = processingorderCode.RefCode,
+                                       ServiceCenterId = processingorderCode.ServiceCenterId,
+                                       Status = processingorderCode.Status,
+                                       Waybill = processingorderCode.Waybill,
+                                       WaybillCreated = Context.Shipment.Where(c => c.Waybill == processingorderCode.Waybill).Select(x => x.DateCreated).FirstOrDefault(),
+                                       GrandTotal = processingorderCode.GrandTotal,
+                                       CODAmount = processingorderCode.CODAmount ?? 0,
+                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                       DemurrageAmount = processingorderCode.DemurrageAmount ?? 0,
+                                       VerifiedBy = processingorderCode.VerifiedBy
+                                   };
+            var result = processingorders.ToList();
+            return Task.FromResult(result);
+        }
+
         public Task<IQueryable<BankProcessingOrderForShipmentAndCOD>> GetAllWaybillsForBankProcessingOrdersAsQueryable(DepositType type)
         {
             var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
