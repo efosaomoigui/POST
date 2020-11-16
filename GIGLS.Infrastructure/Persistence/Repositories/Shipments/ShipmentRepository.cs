@@ -1185,7 +1185,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        DestinationCountryId = a.DestinationCountryId,
                                        IsProcessed = a.IsProcessed
 
-                                   }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
+                                   }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
+                                   || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue)).ToList();
 
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
@@ -1547,7 +1548,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            DestinationCountryId = a.DestinationCountryId,
                                            IsProcessed = a.IsProcessed
 
-                                       }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue || s.TrackingId == dateFilterCriteria.FilterValue)).OrderByDescending(x => x.DateCreated).ToList();
+                                       }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue 
+                                       || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue 
+                                       || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue)).OrderByDescending(x => x.DateCreated).ToList();
                     count = intlShipmentDTO.Count();
                     return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
                 }

@@ -49,6 +49,9 @@ namespace GIGLS.Core.DTO.Shipments
         public double Height { get; set; }
 
         //Foreign key information
-        public int IntlShipmentRequestId { get; set; }  
+        public int IntlShipmentRequestId { get; set; }
+
+        public bool RequiresInsurance { get; set; } 
+        public dynamic ItemValue { get; set; }
     }
 }
