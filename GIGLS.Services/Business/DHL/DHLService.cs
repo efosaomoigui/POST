@@ -17,14 +17,39 @@ namespace GIGLS.Services.Business.DHL
 {
     public class DHLService : IDHLService
     {
-        public Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        public async Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
+            var createShipment = await CreateDHLShipment(shipmentDTO);
             throw new NotImplementedException();
         }
 
-        public Task<InternationalShipmentDTO> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
-            throw new NotImplementedException();
+            var getPrice = await GetDHLPrice(shipmentDTO);
+            var formattedPrice = FormatPriceReponse(getPrice);
+            return formattedPrice;
+        }
+
+        private TotalNetResult FormatPriceReponse(RateRequestResponse rateRequestResponse)
+        {
+            TotalNetResult output = new TotalNetResult();
+
+            if (rateRequestResponse.RateResponse.Provider.Any())
+            {
+                if (rateRequestResponse.RateResponse.Provider[0].Notification.Any())
+                {
+                    if (rateRequestResponse.RateResponse.Provider[0].Notification[0].Code == "0")
+                    {
+                        if (rateRequestResponse.RateResponse.Provider[0].Service.Any())
+                        {
+                            output.Amount = rateRequestResponse.RateResponse.Provider[0].Service[0].TotalNet.Amount;
+                            output.Currency = rateRequestResponse.RateResponse.Provider[0].Service[0].TotalNet.Currency;
+                        }
+                    }
+                }
+            }
+
+            return output;
         }
 
         private async Task<RateRequestResponse> CreateDHLShipment(InternationalShipmentDTO shipmentDTO)
@@ -69,7 +94,7 @@ namespace GIGLS.Services.Business.DHL
             var internationalDetail = GetInternationalDetail(shipmentDTO);
             var packages = GetPackages(shipmentDTO);
             string timeStamp = GetShipTimeStamp();
-            var shipperContact = GetShipperContact();
+            var shipperContact = GetShipperContact(shipmentDTO);
             var receiverContact = GetReceiverContact(shipmentDTO);
 
             var ship = new ShipDTO
@@ -167,29 +192,30 @@ namespace GIGLS.Services.Business.DHL
             {
                 Contact = new Contact
                 {
-                    PersonName = shipmentDTO.ReceiverEmail,
-                    CompanyName = "GIG LOGISTICS",
-                    PhoneNumber = "2348035324958",
-                    EmailAddress = "azeez.oladejo@giglogistics.com"
+                    PersonName = shipmentDTO.ReceiverName,
+                    CompanyName = shipmentDTO.ReceiverCompanyName,
+                    PhoneNumber = shipmentDTO.ReceiverPhoneNumber,
+                    EmailAddress = shipmentDTO.ReceiverEmail
                 },
                 Address = new AddressPayload
                 {
-                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING STATION, GBAGADA PHASE 2",
-                    City = "LAGOS ",
-                    PostalCode = "100001",
-                    CountryCode = "NG"
+                    StreetLines = shipmentDTO.ReceiverAddress,
+                    City = shipmentDTO.ReceiverCity,
+                    PostalCode = shipmentDTO.RecieverPostalCode,
+                    CountryCode = shipmentDTO.ReceiverCode
                 }
             };
+
             return receiver;
         }
 
-        private Details GetShipperContact()
+        private Details GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
             Details shipper = new Details
             {
                 Contact = new Contact
                 {
-                    PersonName = "KME HEERBAL",
+                    PersonName = shipmentDTO.ReceiverName,
                     CompanyName = "GIG LOGISTICS",
                     PhoneNumber = "2348035324958",
                     EmailAddress = "azeez.oladejo@giglogistics.com"

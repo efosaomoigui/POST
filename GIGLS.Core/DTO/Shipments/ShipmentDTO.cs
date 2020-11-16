@@ -332,6 +332,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int DestinationServiceCentreId { get; set; }
 
         public string ReceiverName { get; set; }
+        public string ReceiverCompanyName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }

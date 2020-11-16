@@ -153,6 +153,7 @@
     <Compile Include="Domain\Demurrage.cs" />
     <Compile Include="Domain\Devices\Device.cs" />
     <Compile Include="Domain\Devices\DeviceManagement.cs" />
+    <Compile Include="Domain\DHL\InternationalShipmentWaybill.cs" />
     <Compile Include="Domain\Dispatch.cs" />
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
@@ -327,6 +328,7 @@
     <Compile Include="DTO\DHL\RateRequestResponse.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
+    <Compile Include="DTO\DHL\TotalNetResult.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
