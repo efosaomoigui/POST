@@ -760,7 +760,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     await _preshipmentMobileService.ScanMobileShipment(new ScanDTO
                     {
                         WaybillNumber = preshipment.Waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                        ShipmentScanStatus = ShipmentScanStatus.PICKED
                     });
                     //Generate Receiver Delivery Code
                     var deliveryNumber = await _preshipmentMobileService.GenerateDeliveryCode();
