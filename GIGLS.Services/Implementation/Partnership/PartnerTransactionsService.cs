@@ -64,6 +64,11 @@ namespace GIGLS.Services.Implementation.Partnership
                     string responseFromServer = reader.ReadToEnd();
                     Response = JsonConvert.DeserializeObject<RootObject>(responseFromServer);
 
+                    //check if request was fufilled
+                    if (Response.status.ToLower() == "request_denied")
+                    {
+                        throw new GenericException($"Geo-Location service unavailable.");
+                    }
                 }
             }
             catch (Exception)
