@@ -163,7 +163,24 @@ namespace GIGLS.Services.Business.DHL
 
         private Details GetReceiverContact(InternationalShipmentDTO shipmentDTO)
         {
-            throw new NotImplementedException();
+            Details receiver = new Details
+            {
+                Contact = new Contact
+                {
+                    PersonName = shipmentDTO.ReceiverEmail,
+                    CompanyName = "GIG LOGISTICS",
+                    PhoneNumber = "2348035324958",
+                    EmailAddress = "azeez.oladejo@giglogistics.com"
+                },
+                Address = new AddressPayload
+                {
+                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING STATION, GBAGADA PHASE 2",
+                    City = "LAGOS ",
+                    PostalCode = "100001",
+                    CountryCode = "NG"
+                }
+            };
+            return receiver;
         }
 
         private Details GetShipperContact()
@@ -174,13 +191,13 @@ namespace GIGLS.Services.Business.DHL
                 {
                     PersonName = "KME HEERBAL",
                     CompanyName = "GIG LOGISTICS",
-                    PhoneNumber = "2349057138606",
+                    PhoneNumber = "2348035324958",
                     EmailAddress = "azeez.oladejo@giglogistics.com"
                 },
                 Address = new AddressPayload
                 {
-                    StreetLines = "GBAGADA PHASE 2",
-                    City = "ILUPEJU ",
+                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING STATION, GBAGADA PHASE 2",
+                    City = "LAGOS ",
                     PostalCode = "100001",
                     CountryCode = "NG"
                 }
