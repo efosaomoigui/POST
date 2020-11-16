@@ -106,7 +106,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
 
         public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrdersV2(DepositType type, string refcode, int [] serviceCenters)
         {
-            var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable().Where(s => s.DepositType == type && s.RefCode == refcode && serviceCenters.Contains(s.ServiceCenterId));
+            var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable().Where(s => s.DepositType == type && s.RefCode == refcode);
+
+            if(serviceCenters.Length > 0)
+            {
+                processingordersvalue = processingordersvalue.Where(s => serviceCenters.Contains(s.ServiceCenterId));
+            }
 
             var processingorders = from processingorderCode in processingordersvalue
                                    select new BankProcessingOrderForShipmentAndCODDTO
