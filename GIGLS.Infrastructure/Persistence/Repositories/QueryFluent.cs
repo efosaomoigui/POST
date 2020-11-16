@@ -40,7 +40,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<TEntity>> SelectAsync() { return await _repository.SelectAsync(_expression, _orderBy, _includes); }
 
-
         public IQueryFluent<TEntity> Include(Expression<Func<TEntity, object>> expression)
         {
             _includes.Add(expression);
@@ -52,12 +51,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             _orderBy = orderBy;
             return this;
         }
-
-
-
-
-
-
     }
 }
 
