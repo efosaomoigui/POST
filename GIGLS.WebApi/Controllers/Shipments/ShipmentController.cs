@@ -844,5 +844,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("shipmentcontact")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsForUserByUserCodeOrPhoneNo(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preshipmentService.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
     }
 }
