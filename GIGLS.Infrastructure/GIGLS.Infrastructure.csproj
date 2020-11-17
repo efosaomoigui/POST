@@ -193,6 +193,7 @@
     <Compile Include="Persistence\Repositories\ShipmentScan\MobileScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\ShipmentScan\ScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\DemurrageRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\InternationalShipmentWaybillRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />

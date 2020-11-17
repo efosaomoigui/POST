@@ -1,8 +1,8 @@
-﻿using DocumentFormat.OpenXml.Vml.Spreadsheet;
-using GIGLS.Core.DTO.DHL;
+﻿using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.DHL.Enum;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.DHL;
+using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,17 +17,49 @@ namespace GIGLS.Services.Business.DHL
 {
     public class DHLService : IDHLService
     {
-        public async Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             var createShipment = await CreateDHLShipment(shipmentDTO);
-            throw new NotImplementedException();
+            var result = FormatShipmentCreationReponse(createShipment);
+            return result;
         }
-
         public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             var getPrice = await GetDHLPrice(shipmentDTO);
             var formattedPrice = FormatPriceReponse(getPrice);
             return formattedPrice;
+        }
+
+        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentRequestResponse rateRequestResponse)
+        {
+            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+
+            if (rateRequestResponse.ShipmentResponse.Notification.Any())
+            {
+                if (rateRequestResponse.ShipmentResponse.Notification.Any())
+                {
+                    if (rateRequestResponse.ShipmentResponse.Notification[0].Code == "0")
+                    {
+                        output.ShipmentIdentificationNumber = rateRequestResponse.ShipmentResponse.ShipmentIdentificationNumber;
+                        output.PackageResult = rateRequestResponse.ShipmentResponse.PackagesResult.ToString();
+                        //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
+                        //{
+                        //    output.ImageFormat = rateRequestResponse.ShipmentResponse.LabelImage[0].LabelImageFormat;
+                        //    output.GraphicImage = rateRequestResponse.ShipmentResponse.LabelImage[0].GraphicImage;
+                        //}
+                    }
+                    else
+                    {
+                        throw new GenericException($"There was an issue processing your request: {rateRequestResponse.ShipmentResponse.Notification[0].Message}");
+                    }
+                }
+            }
+            else
+            {
+                throw new GenericException("There was an issue processing your request. ");
+            }
+
+            return output;
         }
 
         private TotalNetResult FormatPriceReponse(RateRequestResponse rateRequestResponse)
@@ -46,17 +78,21 @@ namespace GIGLS.Services.Business.DHL
                             output.Currency = rateRequestResponse.RateResponse.Provider[0].Service[0].TotalNet.Currency;
                         }
                     }
+                    else
+                    {
+                        throw new GenericException("There was an issue processing your request");
+                    }
                 }
             }
 
             return output;
         }
 
-        private async Task<RateRequestResponse> CreateDHLShipment(InternationalShipmentDTO shipmentDTO)
+        private async Task<ShipmentRequestResponse> CreateDHLShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
-                var result = new RateRequestResponse();
+                var result = new ShipmentRequestResponse();
 
                 //Get Price from DHL
                 var rateRequest = GetShipmentRequestPayload(shipmentDTO);
@@ -76,7 +112,7 @@ namespace GIGLS.Services.Business.DHL
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
-                    result = JsonConvert.DeserializeObject<RateRequestResponse>(responseResult);
+                    result = JsonConvert.DeserializeObject<ShipmentRequestResponse>(responseResult);
                 }
 
                 return result;

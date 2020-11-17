@@ -17,6 +17,7 @@ using GIGLS.Core.IServices.User;
 using System;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -847,7 +848,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("international")]
+        [Route("addinternationalshipment")]
         public async Task<IServiceResponse<InternationalShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
@@ -863,12 +864,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("getinternationalprice")]
-        public async Task<IServiceResponse<InternationalShipmentDTO>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        public async Task<IServiceResponse<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _service.GetInternationalShipmentPrice(shipmentDTO);
-                return new ServiceResponse<InternationalShipmentDTO>
+                return new ServiceResponse<TotalNetResult>
                 {
                     Object = shipment
                 };

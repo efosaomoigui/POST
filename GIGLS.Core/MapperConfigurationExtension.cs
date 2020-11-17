@@ -39,6 +39,8 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
+using GIGLS.Core.Domain.DHL;
+using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.Core
 {
@@ -446,6 +448,11 @@ namespace GIGLS.Core
 
                 config.CreateMap<PreShipmentMobileDTO, PreShipmentMobileFromAgilityDTO>();
                 config.CreateMap<PreShipmentMobileFromAgilityDTO, PreShipmentMobileDTO>();
+
+                config.CreateMap<InternationalShipmentDTO, ShipmentDTO>();
+
+                config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
+                config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
 
             });
 

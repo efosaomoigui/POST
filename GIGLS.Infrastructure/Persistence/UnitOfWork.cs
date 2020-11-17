@@ -491,6 +491,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
 
+        [Inject]
+        public IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -330,6 +330,8 @@ namespace GIGLS.Core.DTO.Shipments
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverCompanyName { get; set; }
@@ -421,5 +423,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public string   Content { get; set; }
+        public PaymentType PaymentType { get; set; }
     }
 }

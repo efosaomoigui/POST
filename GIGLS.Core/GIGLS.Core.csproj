@@ -324,6 +324,7 @@
     <Compile Include="DTO\DHL\Enum\Content.cs" />
     <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
     <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentWaybillDTO.cs" />
     <Compile Include="DTO\DHL\RateRequestPayload.cs" />
     <Compile Include="DTO\DHL\RateRequestResponse.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
@@ -656,6 +657,7 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalShipmentWaybillRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
