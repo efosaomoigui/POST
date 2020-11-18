@@ -848,7 +848,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
-                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
+                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
                 {
                     var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
                     var wallet = walletEnumeration.FirstOrDefault();
