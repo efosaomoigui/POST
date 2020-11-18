@@ -1391,7 +1391,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get the current user
                 string user = await _userService.GetCurrentUserId();
                 //get the dispatch for the user
-                var dispatches = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == user && s.ReceivedBy == null).ToList();
+               // var dispatches = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == user && s.ReceivedBy == null).ToList();
+                var dispatches = await _uow.Dispatch.GetDeliveryDispatchForPartner(user, ManifestType.PickupForDelivery);
+                //int userDispatchsCount = userDispatchs.Count;
+
                 if (dispatches.Any())
                 {
                     //get all manifest for the dispatch user
