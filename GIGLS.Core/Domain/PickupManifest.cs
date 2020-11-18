@@ -35,5 +35,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public bool Picked { get; set; }
     }
 }
