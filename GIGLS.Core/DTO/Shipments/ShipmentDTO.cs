@@ -150,7 +150,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string RequestNumber { get; set; }
         public string URL { get; set; }
-        public string ItemDetails { get; set; } 
+        public string ItemDetails { get; set; }
+        public InternationalShipmentType InternationalShipmentType { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
@@ -330,8 +331,6 @@ namespace GIGLS.Core.DTO.Shipments
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
-        public int DepartureCountryId { get; set; }
-        public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverCompanyName { get; set; }

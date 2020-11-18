@@ -3948,13 +3948,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
                 shipment.Waybill = dhlShipment.Waybill;
 
-                //4. Add the Shipment to Agility
-                await AddDHLShipmentToAgility(shipment);
-
                 //5. Add DHL Waybill Payload to the different table
                 AddDHLWaybill(dhlShipment);
 
-
+                //4. Add the Shipment to Agility
+                await AddDHLShipmentToAgility(shipment, shipmentDTO.PaymentType);
                 return shipmentDTO;
             }
             catch (Exception ex)
@@ -3968,6 +3966,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipment = Mapper.Map<ShipmentDTO>(shipmentDTO);
             shipment.Customer.Add(shipmentDTO.CustomerDetails);
             shipment.CustomerId = shipmentDTO.CustomerId;
+            shipment.InternationalShipmentType = InternationalShipmentType.DHL;
+            shipment.IsInternational = true;
             return shipment;
         }
         
@@ -4052,7 +4052,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.InternationalShipmentWaybill.Add(result);
         }
 
-        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO)
+        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO, PaymentType paymentType)
         {
             try
             {
@@ -4069,7 +4069,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
                 // create the shipment and shipmentItems
-                var newShipment = await CreateDHLShipment(shipmentDTO);
+                var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
 
                 // create the Invoice and GeneralLedger
@@ -4082,8 +4082,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
-                //process payment for ecommerce & company by wallet
-                if (shipmentDTO.CustomerDetails.CustomerType == CustomerType.Company)
+                if (paymentType == PaymentType.Wallet)
                 {
                     var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(shipmentDTO.CustomerDetails.CustomerCode));
                     var wallet = walletEnumeration.FirstOrDefault();
@@ -4115,7 +4114,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        private async Task<ShipmentDTO> CreateDHLShipment(ShipmentDTO shipmentDTO)
+        private async Task<ShipmentDTO> CreateInternationalShipmentOnAgility(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
