@@ -689,7 +689,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //get the dispatch for the user
                 // var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
-                var userDispatchs = await _uow.Dispatch.GetDeliveryDispatchForPartner(userId, ManifestType.Delivery);
+                var userDispatchs = await _uow.Dispatch.GetDeliveryDispatchForPartner(userId);
                 //int userDispatchsCount = userDispatchs.Count;
 
                 if (!userDispatchs.Any())
@@ -1392,7 +1392,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string user = await _userService.GetCurrentUserId();
                 //get the dispatch for the user
                // var dispatches = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == user && s.ReceivedBy == null).ToList();
-                var dispatches = await _uow.Dispatch.GetDeliveryDispatchForPartner(user, ManifestType.PickupForDelivery);
+                var dispatches = await _uow.Dispatch.GetPickupForDeliveryDispatchForPartner(user);
                 //int userDispatchsCount = userDispatchs.Count;
 
                 if (dispatches.Any())

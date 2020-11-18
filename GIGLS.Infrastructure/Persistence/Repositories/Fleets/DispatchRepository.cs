@@ -97,7 +97,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             }
         }
 
-        public Task<List<DispatchDTO>> GetDeliveryDispatchForPartner(string userId, ManifestType manifestType)
+        public Task<List<DispatchDTO>> GetDeliveryDispatchForPartner(string userId)
         {
             try
             {
@@ -105,7 +105,43 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
 
                 var dispatchDto = (from r in dispatchs
                                    join m in _context.Manifest on r.ManifestNumber equals m.ManifestCode
-                                   where m.ManifestType == manifestType
+                                   where m.ManifestType == ManifestType.Delivery
+                                   select new DispatchDTO
+                                   {
+                                       DispatchId = r.DispatchId,
+                                       RegistrationNumber = r.RegistrationNumber,
+                                       ManifestNumber = r.ManifestNumber,
+                                       Amount = r.Amount,
+                                       RescuedDispatchId = r.RescuedDispatchId,
+                                       DriverDetail = r.DriverDetail,
+                                       DispatchedBy = r.DispatchedBy,
+                                       ServiceCentreId = r.ServiceCentreId,
+                                       DepartureId = r.DepartureId,
+                                       DestinationId = r.DestinationId,
+                                       DateCreated = r.DateCreated,
+                                       DateModified = r.DateModified,
+                                       DepartureServiceCenterId = r.DepartureServiceCenterId,
+                                       DestinationServiceCenterId = r.DestinationServiceCenterId,
+                                       IsSuperManifest = r.IsSuperManifest
+                                   }).ToList();
+
+                return Task.FromResult(dispatchDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<DispatchDTO>> GetPickupForDeliveryDispatchForPartner(string userId)
+        {
+            try
+            {
+                var dispatchs = _context.Dispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null);
+
+                var dispatchDto = (from r in dispatchs
+                                   join m in _context.PickupManifest on r.ManifestNumber equals m.ManifestCode
+                                   where m.ManifestType == ManifestType.PickupForDelivery
                                    select new DispatchDTO
                                    {
                                        DispatchId = r.DispatchId,
