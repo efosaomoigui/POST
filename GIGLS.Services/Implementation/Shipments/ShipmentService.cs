@@ -3947,6 +3947,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //3. Create shipment on DHL
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
                 shipment.Waybill = dhlShipment.Waybill;
+                shipment.InternationalShipmentType = InternationalShipmentType.DHL;
+                shipment.IsInternational = true;
 
                 //5. Add DHL Waybill Payload to the different table
                 AddDHLWaybill(dhlShipment);
