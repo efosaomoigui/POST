@@ -10,6 +10,8 @@ namespace GIGLS.Core.IRepositories.Fleets
     {
         Task<List<DispatchDTO>> GetDispatchAsync(int[] serviceCentreIds);
         Task<List<DispatchDTO>> CheckForOutstandingDispatch(string driverId);
+        Task<List<DispatchDTO>> GetDeliveryDispatchForPartner(string userId);
+        Task<List<DispatchDTO>> GetPickupForDeliveryDispatchForPartner(string userId);
     }
 
     public interface IMovementDispatchRepository : IRepository<MovementDispatch>   
