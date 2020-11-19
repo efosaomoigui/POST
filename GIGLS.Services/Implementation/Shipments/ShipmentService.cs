@@ -3946,15 +3946,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //3. Create shipment on DHL
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
-                shipment.Waybill = dhlShipment.Waybill;
                 shipment.InternationalShipmentType = InternationalShipmentType.DHL;
                 shipment.IsInternational = true;
 
-                //5. Add DHL Waybill Payload to the different table
-                AddDHLWaybill(dhlShipment);
-
                 //4. Add the Shipment to Agility
-                await AddDHLShipmentToAgility(shipment, shipmentDTO.PaymentType);
+                await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
                 return shipmentDTO;
             }
             catch (Exception ex)
@@ -4054,22 +4050,10 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.InternationalShipmentWaybill.Add(result);
         }
 
-        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO, PaymentType paymentType)
+        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO, InternationalShipmentWaybillDTO dhlShipment,  PaymentType paymentType)
         {
             try
             {
-                // create the customer, if information does not exist in our record
-                //var customerId = await CreateCustomer(shipmentDTO);
-
-                ////Block account that has been suspended/pending from create shipment
-                //if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString() || shipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
-                //{
-                //    if (customerId.CompanyStatus != CompanyStatus.Active)
-                //    {
-                //        throw new GenericException($"{customerId.Name} account has been {customerId.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
-                //    }
-                //}
-
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
@@ -4080,6 +4064,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //QR Code
                 //await GenerateDeliveryNumber(newShipment.Waybill);
+
+                //5. Add DHL Waybill Payload to the different table
+                dhlShipment.Waybill = shipmentDTO.Waybill;
+                AddDHLWaybill(dhlShipment);
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
@@ -4118,27 +4106,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<ShipmentDTO> CreateInternationalShipmentOnAgility(ShipmentDTO shipmentDTO)
         {
-            await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
-            var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
+            //Make GIGGO as Destination Service centre
+            var destiantion = await _userService.GetGIGGOServiceCentre();
+            shipmentDTO.DestinationServiceCentreId = destiantion.ServiceCentreId;
 
-            //which service centre will I use to received the shipment? LOsHUB or GIGGO or who??
-            //Get SuperCentre for Home Delivery
-            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
-            {
-                //also check that the destination is not a hub
-                if (destinationSC.IsHUB != true)
-                {
-                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
-                }
-            }
-
-            // get deliveryOptionIds and set the first value in shipment
-            var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
-            if (deliveryOptionIds.Any())
-            {
-                shipmentDTO.DeliveryOptionId = deliveryOptionIds[0];
-            }
+            //set HOME SERVICE ON-FORWARDING LOS (LPPO) as default Delivery option for international shipment
+            shipmentDTO.DeliveryOptionId = 6;
+            shipmentDTO.DeliveryOptionIds.Add(6);
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
@@ -4146,30 +4120,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
             shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
-
-            var departureServiceCentre = new ServiceCentreDTO();
-
-            if (shipmentDTO.IsGIGGOExtension == true)
-            {
-                departureServiceCentre = await _userService.GetGIGGOServiceCentre();
-            }
-            else
-            {
-                departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
-            }
-
-            if (shipmentDTO.Waybill != null && !shipmentDTO.Waybill.Contains("AWR"))
-            {
-                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-                shipmentDTO.Waybill = waybill;
-            }
-
-            if (shipmentDTO.Waybill == null)
-            {
-                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-                shipmentDTO.Waybill = waybill;
-            }
-
+            var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
+            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+            shipmentDTO.Waybill = waybill;
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
@@ -4179,7 +4132,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             else
             {
-                newShipment.DeclarationOfValueCheck = null;
+                newShipment.DeclarationOfValueCheck = 0.00M;
             }
 
             newShipment.ApproximateItemsWeight = 0;
@@ -4237,7 +4190,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             ////--start--///Set the DepartureCountryId and DestinationCountryId
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
-            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
+            //var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
 
             //check if the shipment contains cod
             if (newShipment.IsCashOnDelivery == true)
@@ -4259,7 +4212,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             newShipment.DepartureCountryId = departureCountry.CountryId;
-            newShipment.DestinationCountryId = destinationCountry.CountryId;
+            //newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
             ////--end--///Set the DepartureCountryId and DestinationCountryId
@@ -4272,7 +4225,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.Shipment.Add(newShipment);
 
             //save into DeliveryOptionMapping table
-            foreach (var deliveryOptionId in deliveryOptionIds)
+            foreach (var deliveryOptionId in shipmentDTO.DeliveryOptionIds)
             {
                 var deliveryOptionMapping = new ShipmentDeliveryOptionMapping()
                 {
@@ -4284,7 +4237,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //set before returning
             shipmentDTO.DepartureCountryId = departureCountry.CountryId;
-            shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
+          //  shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
 
             return shipmentDTO;
         }
