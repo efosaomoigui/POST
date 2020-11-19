@@ -1738,39 +1738,39 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            bool disableShipmentCreation = bool.Parse(isDisable);
+            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            //bool disableShipmentCreation = bool.Parse(isDisable);
 
-            bool allowTestUser = await AllowTestingUserToCreateShipment();
+            //bool allowTestUser = await AllowTestingUserToCreateShipment();
 
-            if (allowTestUser)
-            {
-                disableShipmentCreation = false;
-            }
+            //if (allowTestUser)
+            //{
+            //    disableShipmentCreation = false;
+            //}
 
-            if (disableShipmentCreation)
-            {
-                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
+            //if (disableShipmentCreation)
+            //{
+            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            //}
 
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
         }
 
         public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            bool disableShipmentCreation = bool.Parse(isDisable);
-            bool allowTestUser = await AllowTestingUserToCreateShipment();
+            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            //bool disableShipmentCreation = bool.Parse(isDisable);
+            //bool allowTestUser = await AllowTestingUserToCreateShipment();
 
-            if (allowTestUser)
-            {
-                disableShipmentCreation = false;
-            }
+            //if (allowTestUser)
+            //{
+            //    disableShipmentCreation = false;
+            //}
 
-            if (disableShipmentCreation)
-            {
-                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
+            //if (disableShipmentCreation)
+            //{
+            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            //}
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
             var userDTO = Mapper.Map<UserDTO>(user);

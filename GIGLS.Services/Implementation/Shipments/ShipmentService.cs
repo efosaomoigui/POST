@@ -843,7 +843,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
-                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
+                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
                 {
                     var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
                     var wallet = walletEnumeration.FirstOrDefault();
@@ -3062,6 +3062,25 @@ namespace GIGLS.Services.Implementation.Shipments
             var boolRresult = false;
             try
             {
+                //Check if waybill sales has already been deposited
+                //remove from bank deposit order if it is there
+                var bankDepositOrder = await _uow.BankProcessingOrderForShipmentAndCOD.GetAsync(s => s.Waybill == waybill && s.DepositType == DepositType.Shipment);
+
+                if (bankDepositOrder != null)
+                {
+                    if(bankDepositOrder.Status == DepositStatus.Deposited || bankDepositOrder.Status == DepositStatus.Verified)
+                    {
+                        throw new GenericException($"Error Cancelling the Shipment." +
+                                $" The shipment with waybill number {waybill} has already been deposited in the bank with ref code {bankDepositOrder.RefCode}.");
+                    }
+
+                    var bankDeposit = await _uow.BankProcessingOrderCodes.GetAsync(s => s.Code == bankDepositOrder.RefCode);
+                    bankDeposit.TotalAmount = bankDeposit.TotalAmount - bankDepositOrder.GrandTotal;
+
+                    bankDepositOrder.IsDeleted = true;
+                }
+
+
                 //1. check if there is a dispatch for the waybill (Manifest -> Group -> Waybill)
                 //If there is, throw an exception (since, the shipment has already left the terminal)
                 var groupwaybillMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(s => s.WaybillNumber == waybill);
