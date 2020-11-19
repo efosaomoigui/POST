@@ -128,5 +128,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("outstandingcorporatepayments")]
+        public async Task<IServiceResponse<List<WalletDTO>>> GetOutstaningCorporatePayments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletsObj = await _walletService.GetOutstaningCorporatePayments();
+
+                return new ServiceResponse<List<WalletDTO>>
+                {
+                    Object = walletsObj
+                };
+            });
+        }
+
     }
 }
