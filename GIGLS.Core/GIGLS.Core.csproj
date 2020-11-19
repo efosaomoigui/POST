@@ -810,6 +810,7 @@
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
     <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
+    <Compile Include="IServices\Shipments\IInternationalShipmentWaybillService.cs" />
     <Compile Include="IServices\Shipments\IMobileGroupCodeWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />

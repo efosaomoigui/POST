@@ -2,7 +2,7 @@
 
 namespace GIGLS.Core.Domain.DHL
 {
-    public class InternationalShipmentWaybill
+    public class InternationalShipmentWaybill : BaseDomain
     {
         public int Id { get; set; }
 

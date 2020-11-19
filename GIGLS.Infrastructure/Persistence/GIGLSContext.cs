@@ -18,6 +18,7 @@ using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.Domain.Expenses;
+using GIGLS.Core.Domain.DHL;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -287,6 +288,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
         public DbSet<ShipmentPackagingTransactions> ShipmentPackagingTransactions { get; set; }
         public DbSet<ServiceCenterPackage> ServiceCenterPackage { get; set; }
+        public DbSet<InternationalShipmentWaybill> InternationalShipmentWaybill { get; set; }
 
         #endregion
 

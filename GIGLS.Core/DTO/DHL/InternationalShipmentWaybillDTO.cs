@@ -1,6 +1,8 @@
-﻿namespace GIGLS.Core.DTO.DHL
+﻿using GIGLS.Core.Domain;
+
+namespace GIGLS.Core.DTO.DHL
 {
-    public class InternationalShipmentWaybillDTO
+    public class InternationalShipmentWaybillDTO : BaseDomain
     {
         public int Id { get; set; }
         public string Waybill { get; set; }
