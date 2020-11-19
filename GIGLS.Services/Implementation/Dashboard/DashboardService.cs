@@ -1213,20 +1213,6 @@ namespace GIGLS.Services.Implementation.Dashboard
             return await _uow.WalletTransaction.GetWalletTransactionSummary(dashboardFilterCriteria);
         }
 
-        //Get Earnings Breakdown
-        private async Task<EarningsBreakdownDTO> GetEarningsBreakdown(IQueryable<FinancialReport> earnings)
-        {
-            var earningsBreakdownDTO = new EarningsBreakdownDTO();
-
-            earningsBreakdownDTO.GIGGO = earnings.Where(x => x.Source == ReportSource.GIGGo).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.Agility = earnings.Where(x => x.Source == ReportSource.Agility).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.Demurrage = earnings.Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
-
-            return earningsBreakdownDTO;
-
-        }
-
         //Get Claim for Non-Dashboard Access
         private async Task<DashboardDTO> GetClaimDetails(string[] claimValue)
         {
@@ -1255,6 +1241,20 @@ namespace GIGLS.Services.Implementation.Dashboard
             }
 
             return dashboardDTO;
+        }
+
+        //Get Earnings Breakdown
+        private async Task<EarningsBreakdownDTO> GetEarningsBreakdown(IQueryable<FinancialReport> earnings)
+        {
+            var earningsBreakdownDTO = new EarningsBreakdownDTO();
+
+            earningsBreakdownDTO.GIGGO = earnings.Where(x => x.Source == ReportSource.GIGGo).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.Agility = earnings.Where(x => x.Source == ReportSource.Agility).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.Demurrage = earnings.Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
+
+            return earningsBreakdownDTO;
+
         }
     }
 }
