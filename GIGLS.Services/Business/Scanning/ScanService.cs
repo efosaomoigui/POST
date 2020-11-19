@@ -14,6 +14,8 @@ using GIGLS.Core;
 using System.Linq;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -155,6 +157,45 @@ namespace GIGLS.Services.Business.Scanning
                         if (shipment.isInternalShipment == true && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                         {
                             await UpdateShipmentPackageForServiceCenter(shipment);
+                        }
+
+                        //Send SMS When Intl Shipment arrives Nigeria
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && shipment.IsInternational == true)
+                        {
+                            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
+
+                            var messageDTO = new ShipmentDTO
+                            {
+                                CustomerType = shipment.CustomerType,
+                                CustomerId = shipment.CustomerId,
+                                ReceiverName = shipment.ReceiverName,
+                                Waybill = shipment.Waybill,
+                                PickupOptions = shipment.PickupOptions,
+                                ReceiverEmail = shipment.ReceiverEmail,
+                                CustomerDetails = new CustomerDTO
+                                {
+                                    PhoneNumber = shipment.ReceiverPhoneNumber,
+                                    Email = shipment.ReceiverEmail
+                                },
+                                DepartureServiceCentre = new ServiceCentreDTO
+                                {
+                                    
+                                },
+                                DestinationServiceCentre = new ServiceCentreDTO
+                                {
+
+                                }
+                            };
+
+                            if (invoice.PaymentStatus == PaymentStatus.Paid)
+                            {
+                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISN);
+                            }
+                            else
+                            {
+                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISNU);
+                            }
+
                         }
 
                         return true;
