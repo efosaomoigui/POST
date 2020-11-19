@@ -720,13 +720,18 @@ namespace GIGLS.Services.Implementation.Fleets
                     throw new GenericException("No waybill number(s) provided");
                 }
 
+
+                //check if manifest has already been picked
+                var manifest = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
+                if (manifest != null && manifest.Picked)
+                {
+                    return true;
+                }
+
                 //check to see if all waybill in manifest was fufilled
                 var unFufilled = _uow.PickupManifestWaybillMapping.GetAll().Where(x => !waybills.Contains(x.Waybill) && x.ManifestCode == manifestNumber).ToList();
                 if (unFufilled.Any())
                 {
-                    //remove the contained waybill from the manifest
-                    _uow.PickupManifestWaybillMapping.RemoveRange(unFufilled);
-
                     //change contained waybill status back to shipment created
                     var waybillsToRemove = unFufilled.Select(s => s.Waybill).ToList();
                     var preshipmentWaybills = _uow.PreShipmentMobile.GetAll().Where(x => waybillsToRemove.Contains(x.Waybill)).ToList();
@@ -767,6 +772,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     //Send SMS To Receiver with Delivery Code
                     await _preshipmentMobileService.SendReceiverDeliveryCodeBySMS(waybillsToUpdateToPickup[i], deliveryNumber);
                 }
+                manifest.Picked = true;
+                await _uow.CompleteAsync();
                 return true;
             }
             catch (Exception)

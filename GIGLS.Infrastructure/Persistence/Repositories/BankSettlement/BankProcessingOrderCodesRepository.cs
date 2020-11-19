@@ -45,6 +45,32 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
 
+        public Task<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeV2(DepositType type, string refcode)
+        {
+            var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable().Where(s => s.DepositType == type && s.Code == refcode);
+           
+            var processingcodes = (from processingorderCode in processingorderCodes
+                                   select new BankProcessingOrderCodesDTO
+                                   {
+                                       CodeId = processingorderCode.CodeId,
+                                       Code = processingorderCode.Code,
+                                       DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
+                                       DepositType = processingorderCode.DepositType,
+                                       TotalAmount = processingorderCode.TotalAmount,
+                                       UserId = processingorderCode.UserId,
+                                       Status = processingorderCode.Status,
+                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                       ScName = processingorderCode.ScName,
+                                       FullName = processingorderCode.FullName,
+                                       VerifiedBy = processingorderCode.VerifiedBy,
+                                       BankName = processingorderCode.BankName,
+                                       DateCreated = processingorderCode.DateCreated,
+                                       DateModified = processingorderCode.DateModified
+                                   }).FirstOrDefault();
+
+            return Task.FromResult(processingcodes);
+        }
+
         public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria, ServiceCentreDTO[] sc)  
         {
             //get startDate and endDate

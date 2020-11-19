@@ -156,9 +156,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 }
                                 else
                                 {
+
                                     //get access token from response body
                                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                                     var jObject = JObject.Parse(responseJson);
+
+                                    var country = await _portalService.GetUserCountryCode(user);
+                                    var countryJson = JObject.FromObject(country);
+
+                                    //jObject.Add(countryJson);
+                                    jObject.Add(new JProperty("Country", countryJson));
 
 
                                     //jObject.Add(company);
