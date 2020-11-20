@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories.Shipments
 {
-    public interface IShipmentContactRepository : IRepository<ShipmentContact>
+    public interface IShipmentContactHistoryRepository : IRepository<ShipmentContactHistory>
     {
 
     }

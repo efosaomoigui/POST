@@ -150,7 +150,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string RequestNumber { get; set; }
         public string URL { get; set; }
-        public string ItemDetails { get; set; } 
+        public string ItemDetails { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 

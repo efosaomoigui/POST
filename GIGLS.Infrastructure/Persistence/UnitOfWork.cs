@@ -490,6 +490,10 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+        [Inject]
+        public IShipmentContactRepository ShipmentContact { get; set; }     
+        [Inject]
+        public IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
 
         public int Complete()
         {

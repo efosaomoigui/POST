@@ -3870,11 +3870,5 @@ namespace GIGLS.Services.Implementation.Shipments
             return Math.Round(number * factor) / factor;
         }
 
-        public async Task<ShipmentContactDTO> GetShipmentContact(ShipmentFilterCriteria baseFilterCriteria)
-        {
-           
-        }
-
-
     }
 }
