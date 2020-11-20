@@ -999,7 +999,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
 
-            var shipments = _context.Shipment.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate && x.DestinationServiceCentreId == baseFilterCriteria.ServiceCentreId && x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+            var shipments = _context.Shipment.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate && x.DestinationServiceCentreId == baseFilterCriteria.ServiceCentreId && x.ShipmentScanStatus == ShipmentScanStatus.MAHD);
 
             List<ShipmentDTO> shipmentDto = (from r in shipments
                                              select new ShipmentDTO()
