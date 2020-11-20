@@ -287,6 +287,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
         public DbSet<ShipmentPackagingTransactions> ShipmentPackagingTransactions { get; set; }
         public DbSet<ServiceCenterPackage> ServiceCenterPackage { get; set; }
+        public DbSet<FinancialReport> FinancialReport { get; set; }
 
         #endregion
 
