@@ -531,6 +531,7 @@
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />
     <Compile Include="Enums\IncrementType.cs" />
+    <Compile Include="Enums\InternationalShipmentStatus.cs" />
     <Compile Include="Enums\InternationalShipmentType.cs" />
     <Compile Include="Enums\InventoryType.cs" />
     <Compile Include="Enums\JobCardMaintenanceStatus.cs" />

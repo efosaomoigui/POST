@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.DHL
 {
@@ -12,6 +13,7 @@ namespace GIGLS.Core.Domain.DHL
         [MaxLength(100)]
         public string ShipmentIdentificationNumber { get; set; }
         public string PackageResult { get; set; }
+        public InternationalShipmentStatus InternationalShipmentStatus { get; set; }
 
         //[MaxLength(10)]
         //public string ImageFormat { get; set; }
