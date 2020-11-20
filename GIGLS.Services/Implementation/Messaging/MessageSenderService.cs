@@ -1094,7 +1094,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
                 {
-                    strArray[8] = "GIGL Pick Up Center";
+                    strArray[8] = "Pick Up At GIGL Center";
                 }
                 else if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
