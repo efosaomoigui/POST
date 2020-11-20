@@ -24,7 +24,6 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
-        Task<List<ShipmentDTO>> GetShipmentContact(ShipmentContactFilterCriteria baseFilterCriteria);
 
     }
 

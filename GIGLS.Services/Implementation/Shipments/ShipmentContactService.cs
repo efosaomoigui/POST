@@ -22,14 +22,14 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
-        private readonly IShipmentService _shipmentService;
+        private readonly IShipmentCollectionService _shipmentCollectionService;
 
         public ShipmentContactService(IUnitOfWork uow, IUserService userService,
-            IShipmentService shipmentService)
+            IShipmentCollectionService shipmentCollectionService)
         {
             _uow = uow;
             _userService = userService;
-            _shipmentService = shipmentService;          
+            _shipmentCollectionService = shipmentCollectionService;          
             MapperConfig.Initialize();
         }
 
@@ -37,13 +37,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var today = DateTime.Now;
             var shipmentContacts = new List<ShipmentContactDTO>();
-            var shipmentDto = await _uow.Shipment.GetShipmentContact(baseFilterCriteria);
+            var shipmentDto = await _shipmentCollectionService.GetShipmentsCollectionForContact(baseFilterCriteria);
 
 
             if (shipmentDto.Any())
             {
                 var waybills = shipmentDto.Select(x => x.Waybill).ToList();
-                var contacts = _uow.ShipmentContact.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var contacts = _uow.ShipmentContact.Query(x => waybills.Contains(x.Waybill)).Select().ToList();
 
                 foreach (var item in shipmentDto)
                 {
@@ -51,27 +51,27 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shc != null)
                     {
                         var shcDto = JObject.FromObject(shc).ToObject<ShipmentContactDTO>();
-                        shcDto.DestinationServiceCentre = item.DestinationServiceCentre.Name;
-                        shcDto.DepartureServiceCentre = item.DepartureServiceCentre.Name;
+                        shcDto.DestinationServiceCentre = item.OriginalDestinationServiceCentre.Name;
+                        shcDto.DepartureServiceCentre = item.OriginalDepartureServiceCentre.Name;
                         shcDto.Age = (today - item.DateCreated).Days;
                         shcDto.ContactedBy = shc.ContactedBy;
-                        shcDto.ReceiverName = item.ReceiverName;
-                        shcDto.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
+                        shcDto.ReceiverName = item.Name;
+                        shcDto.ReceiverPhoneNumber = item.PhoneNumber;
                         shipmentContacts.Add(shcDto);
                     }
                     else
                     {
                         var shcDto = new ShipmentContactDTO();
-                        shcDto.DestinationServiceCentre = item.DestinationServiceCentre.Name;
-                        shcDto.DepartureServiceCentre = item.DepartureServiceCentre.Name;
+                        shcDto.DestinationServiceCentre = item.OriginalDestinationServiceCentre.Name;
+                        shcDto.DepartureServiceCentre = item.OriginalDepartureServiceCentre.Name;
                         shcDto.Age = (int)(today - item.DateCreated).TotalDays;
                         shcDto.Waybill = item.Waybill;
                         shcDto.ContactedBy = "";
                         shcDto.Status = ShipmentContactStatus.NotContacted;
                         shcDto.NoOfContact = 0;
                         shcDto.ShipmentStatus = item.ShipmentScanStatus.ToString();
-                        shcDto.ReceiverName = item.ReceiverName;
-                        shcDto.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
+                        shcDto.ReceiverName = item.Name;
+                        shcDto.ReceiverPhoneNumber = item.PhoneNumber;
                         shcDto.ShipmentCreatedDate = item.DateCreated;
                         shipmentContacts.Add(shcDto);
                     }

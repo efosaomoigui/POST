@@ -985,52 +985,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             throw new NotImplementedException();
         }
-        public Task<List<ShipmentDTO>> GetShipmentContact(ShipmentContactFilterCriteria baseFilterCriteria)
-        {
-            //get startDate and endDate
-            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
-            var startDate = queryDate.Item1;
-            var endDate = queryDate.Item2;
-
-            if (baseFilterCriteria.StartDate == null && baseFilterCriteria.EndDate == null)
-            {
-                //Last 20 days
-                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
-            }
-
-            var shipments = _context.Shipment.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate && x.DestinationServiceCentreId == baseFilterCriteria.ServiceCentreId && x.ShipmentScanStatus == ShipmentScanStatus.MAHD);
-
-            List<ShipmentDTO> shipmentDto = (from r in shipments
-                                             select new ShipmentDTO()
-                                             {
-                                                 ShipmentId = r.ShipmentId,
-                                                 Waybill = r.Waybill,
-                                                 DeliveryTime = r.DeliveryTime,
-                                                 DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                                 {
-                                                     Code = x.Code,
-                                                     Name = x.Name
-                                                 }).FirstOrDefault(),
-
-                                                 DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                                 {
-                                                     Code = x.Code,
-                                                     Name = x.Name
-                                                 }).FirstOrDefault(),
-                                                 ReceiverAddress = r.ReceiverAddress,
-                                                 ReceiverName = r.ReceiverName,
-                                                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                                 UserId = r.UserId,
-                                                 SenderAddress = r.SenderAddress,
-                                                 ShipmentScanStatus = r.ShipmentScanStatus,
-                                                 DateCreated = r.DateCreated
-                                             }).ToList();
-
-            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
-        }
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository

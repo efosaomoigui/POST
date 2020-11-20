@@ -4,6 +4,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -1172,5 +1173,69 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.RiderDelivery.Add(addRiderDelivery);
             await _uow.CompleteAsync();
         }
+
+
+        public async Task<List<ShipmentCollectionDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+
+                int totalCount;
+                var currentUser = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(currentUser);
+                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                if (baseFilterCriteria.StartDate == null && baseFilterCriteria.EndDate == null)
+                {
+                    //Last 20 days
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                var shipmentCollections = _uow.ShipmentCollection.Query(x => x.DateCreated >= startDate && x.DateCreated <= endDate && x.DestinationServiceCentreId == baseFilterCriteria.ServiceCentreId && x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select().ToList();
+                var deptCentreIds = shipmentCollections.Select(x => x.DepartureServiceCentreId).ToList();
+                var destCentreIds = shipmentCollections.Select(x => x.DestinationServiceCentreId).ToList();
+                var waybills = shipmentCollections.Select(x => x.Waybill).ToList();
+                var deptCentres = _uow.ServiceCentre.Query(x => deptCentreIds.Contains(x.ServiceCentreId)).Select().ToList();
+                var destCentres = _uow.ServiceCentre.Query(x => destCentreIds.Contains(x.ServiceCentreId)).Select().ToList();
+                var shipments = _uow.Shipment.Query(x => waybills.Contains(x.Waybill)).Select().ToList();
+                var shipmentcollectionDTO = shipmentCollections.Select(shipmentCollection => new ShipmentCollectionDTO
+                {
+
+                    Waybill = shipmentCollection.Waybill,
+                    Name = shipments.Where(x => x.Waybill == shipmentCollection.Waybill).FirstOrDefault().ReceiverName,
+                    PhoneNumber = shipments.Where(x => x.Waybill == shipmentCollection.Waybill).FirstOrDefault().ReceiverPhoneNumber,
+                    Email = shipmentCollection.Email,
+                    Address = shipmentCollection.Address,
+                    City = shipmentCollection.City,
+                    State = shipmentCollection.State,
+                    IndentificationUrl = shipmentCollection.IndentificationUrl,
+                    ShipmentScanStatus = shipmentCollection.ShipmentScanStatus,
+                    UserId = shipmentCollection.UserId,
+                    DateCreated = shipmentCollection.DateCreated,
+                    DestinationServiceCentreId = shipmentCollection.DestinationServiceCentreId,
+                    OriginalDepartureServiceCentre = deptCentres.Where(c => c.ServiceCentreId == shipmentCollection.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                    {
+                        Code = x.Code,
+                        Name = x.Name
+                    }).FirstOrDefault(),
+
+                    OriginalDestinationServiceCentre = destCentres.Where(c => c.ServiceCentreId == shipmentCollection.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                    {
+                        Code = x.Code,
+                        Name = x.Name
+                    }).FirstOrDefault()
+                }).ToList();
+                return await Task.FromResult(shipmentcollectionDTO);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+       
     }
 }
