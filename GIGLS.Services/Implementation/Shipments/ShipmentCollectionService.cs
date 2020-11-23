@@ -1179,20 +1179,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-
-                int totalCount;
-                var currentUser = await _userService.GetCurrentUserId();
-                var user = await _uow.User.GetUserById(currentUser);
-                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
-                var startDate = queryDate.Item1;
-                var endDate = queryDate.Item2;
-
-                if (baseFilterCriteria.StartDate == null && baseFilterCriteria.EndDate == null)
-                {
-                    //Last 20 days
-                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
-                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
-                }
                 var shipmentCollectionDTO = await _uow.ShipmentCollection.GetShipmentCollectionForContact(baseFilterCriteria);
                 return shipmentCollectionDTO;
             }

@@ -6,5 +6,7 @@ namespace GIGLS.Core.DTO.Report
     public class ShipmentContactFilterCriteria : BaseFilterCriteria
     {
         public int RegionId { get; set; }
+
+
     }
 }

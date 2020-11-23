@@ -42,38 +42,31 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 foreach (var item in shipmentDto)
                 {
+                    var shcDto = new ShipmentContactDTO();
+
                     if (item.ShipmentContactId > 0)
                     {
-                        var shcDto = new ShipmentContactDTO();
-                        shcDto.DestinationServiceCentre = item.DestinationServiceCentre;
-                        shcDto.DepartureServiceCentre = item.DepartsureServiceCentre;
-                        shcDto.Age = (today - item.DateCreated).Days;
                         shcDto.ContactedBy = item.ContactedBy;
-                        shcDto.ReceiverName = item.ReceiverName;
                         shcDto.Status = ShipmentContactStatus.Contacted;
                         shcDto.NoOfContact = item.NoOfContact;
-                        shcDto.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
-                        shcDto.Waybill = item.Waybill;
-                        shipmentContacts.Add(shcDto);
                     }
                     else
                     {
-                        var shcDto = new ShipmentContactDTO();
-                        shcDto.DestinationServiceCentre = item.DestinationServiceCentre;
-                        shcDto.DepartureServiceCentre = item.DepartsureServiceCentre;
-                        shcDto.Age = (int)(today - item.DateCreated).TotalDays;
-                        shcDto.Waybill = item.Waybill;
                         shcDto.ContactedBy = "";
                         shcDto.Status = ShipmentContactStatus.NotContacted;
                         shcDto.NoOfContact = 0;
-                        shcDto.ShipmentStatus = item.ShipmentScanStatus.ToString();
-                        shcDto.ReceiverName = item.ReceiverName;
-                        shcDto.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
-                        shcDto.ShipmentCreatedDate = item.DateCreated;
-                        shipmentContacts.Add(shcDto);
                     }
-                }
 
+                    shcDto.DestinationServiceCentre = item.DestinationServiceCentre;
+                    shcDto.DepartureServiceCentre = item.DepartsureServiceCentre;
+                    shcDto.Age = (int)(today - item.DateCreated).Days;
+                    shcDto.ReceiverName = item.ReceiverName;
+                    shcDto.Waybill = item.Waybill;
+                    shcDto.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
+                    shcDto.ShipmentCreatedDate = item.DateCreated;
+                    shcDto.ShipmentStatus = item.ShipmentScanStatus.ToString();
+                    shipmentContacts.Add(shcDto);
+                }
             }
 
             return shipmentContacts.OrderByDescending(x => x.Age).ToList();

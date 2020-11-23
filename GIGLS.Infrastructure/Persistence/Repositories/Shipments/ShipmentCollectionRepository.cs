@@ -65,10 +65,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             try
             {
-               
+                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+                var startDate1 = queryDate.Item1;
+                var endDate1 = queryDate.Item2;
+
                 //declare parameters for the stored procedure
-                SqlParameter startDate = new SqlParameter("@StartDate", baseFilterCriteria.StartDate);
-                SqlParameter endDate = new SqlParameter("@EndDate", baseFilterCriteria.EndDate);
+                SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
+                SqlParameter endDate = new SqlParameter("@EndDate", startDate1);
                 SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
                 SqlParameter scanStatus = new SqlParameter("@ScanStatus",ShipmentScanStatus.ARF);
 
