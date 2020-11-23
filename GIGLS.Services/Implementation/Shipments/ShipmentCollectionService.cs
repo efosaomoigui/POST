@@ -1175,7 +1175,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<List<ShipmentCollectionDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria)
+        public async Task<List<ShipmentCollectionForContactDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria)
         {
             try
             {
@@ -1193,42 +1193,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
-
-                var shipmentCollections = _uow.ShipmentCollection.Query(x => x.DateCreated >= startDate && x.DateCreated <= endDate && x.DestinationServiceCentreId == baseFilterCriteria.ServiceCentreId && x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select().ToList();
-                var deptCentreIds = shipmentCollections.Select(x => x.DepartureServiceCentreId).ToList();
-                var destCentreIds = shipmentCollections.Select(x => x.DestinationServiceCentreId).ToList();
-                var waybills = shipmentCollections.Select(x => x.Waybill).ToList();
-                var deptCentres = _uow.ServiceCentre.Query(x => deptCentreIds.Contains(x.ServiceCentreId)).Select().ToList();
-                var destCentres = _uow.ServiceCentre.Query(x => destCentreIds.Contains(x.ServiceCentreId)).Select().ToList();
-                var shipments = _uow.Shipment.Query(x => waybills.Contains(x.Waybill)).Select().ToList();
-                var shipmentcollectionDTO = shipmentCollections.Select(shipmentCollection => new ShipmentCollectionDTO
-                {
-
-                    Waybill = shipmentCollection.Waybill,
-                    Name = shipments.Where(x => x.Waybill == shipmentCollection.Waybill).FirstOrDefault().ReceiverName,
-                    PhoneNumber = shipments.Where(x => x.Waybill == shipmentCollection.Waybill).FirstOrDefault().ReceiverPhoneNumber,
-                    Email = shipmentCollection.Email,
-                    Address = shipmentCollection.Address,
-                    City = shipmentCollection.City,
-                    State = shipmentCollection.State,
-                    IndentificationUrl = shipmentCollection.IndentificationUrl,
-                    ShipmentScanStatus = shipmentCollection.ShipmentScanStatus,
-                    UserId = shipmentCollection.UserId,
-                    DateCreated = shipmentCollection.DateCreated,
-                    DestinationServiceCentreId = shipmentCollection.DestinationServiceCentreId,
-                    OriginalDepartureServiceCentre = deptCentres.Where(c => c.ServiceCentreId == shipmentCollection.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                    {
-                        Code = x.Code,
-                        Name = x.Name
-                    }).FirstOrDefault(),
-
-                    OriginalDestinationServiceCentre = destCentres.Where(c => c.ServiceCentreId == shipmentCollection.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                    {
-                        Code = x.Code,
-                        Name = x.Name
-                    }).FirstOrDefault()
-                }).ToList();
-                return await Task.FromResult(shipmentcollectionDTO);
+                var shipmentCollectionDTO = await _uow.ShipmentCollection.GetShipmentCollectionForContact(baseFilterCriteria);
+                return shipmentCollectionDTO;
             }
             catch (Exception)
             {
@@ -1236,6 +1202,5 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-       
     }
 }

@@ -1,10 +1,16 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.Domain;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -53,6 +59,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return shipmentCollectionAsQueryable;
         }
+
+
+        public async Task<List<ShipmentCollectionForContactDTO>> GetShipmentCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+               
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", baseFilterCriteria.StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", baseFilterCriteria.EndDate);
+                SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
+                SqlParameter scanStatus = new SqlParameter("@ScanStatus",ShipmentScanStatus.ARF);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    serviceCentreId,
+                    startDate,
+                    endDate,
+                    scanStatus
+                };
+
+                var result =  _context.Database.SqlQuery<ShipmentCollectionForContactDTO>("ShipmentCollectionForContacts " +
+                   "@ServiceCentreId,@StartDate, @EndDate, @ScanStatus",
+                   param).ToList();
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
     }
 }
