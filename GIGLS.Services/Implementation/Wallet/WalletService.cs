@@ -574,5 +574,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
         }
+
+        public async Task<List<WalletDTO>> GetOutstaningCorporatePayments()
+        {
+           
+            var walletDTO = await _uow.Wallet.GetOutstaningCorporatePayments();
+
+            return walletDTO;
+        }
     }
 }

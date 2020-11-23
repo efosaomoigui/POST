@@ -189,6 +189,7 @@
     <Compile Include="Business\ThirdPartyAPI\ThirdPartyAPIService.cs" />
     <Compile Include="Business\Tracking\ShipmentTrackService.cs" />
     <Compile Include="Implementation\Account\ExpenditureService.cs" />
+    <Compile Include="Implementation\Account\FinancialReportService.cs" />
     <Compile Include="Implementation\Account\GeneralLedgerService.cs" />
     <Compile Include="Implementation\Account\IncomeService.cs" />
     <Compile Include="Implementation\Account\InsuranceService.cs" />

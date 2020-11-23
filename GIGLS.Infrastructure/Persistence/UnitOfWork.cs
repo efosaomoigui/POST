@@ -492,6 +492,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
 
         [Inject]
+        public IFinancialReportRepository FinancialReport { get; set; }
+
+        [Inject]
         public IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
 
         public int Complete()

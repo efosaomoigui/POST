@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using GIGLS.Core.View;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -726,7 +727,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private async Task<DashboardDTO> GetDashboardForServiceCentreSC(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria) 
+        private async Task<DashboardDTO> GetDashboardForServiceCentreSC(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria)
         {
             var dashboardDTO = new DashboardDTO();
 
@@ -754,7 +755,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.ServiceCentre = serviceCentre;
 
             dashboardDTO.TotalShipmentDelivered = _uow.MagayaShipment.GetAll().
-                Where(s => s.IsShipmentCollected == true && serviceCenterId == s.ServiceCenterId && 
+                Where(s => s.IsShipmentCollected == true && serviceCenterId == s.ServiceCenterId &&
                 s.DateCreated >= startDate && s.DateCreated < endDate).Count();
 
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
@@ -768,7 +769,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
             // populate graph data
-            await PopulateGraphDataByDateInMagaya(dashboardDTO); 
+            await PopulateGraphDataByDateInMagaya(dashboardDTO);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -941,7 +942,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private async Task<DashboardDTO> GetDashboardForMagaya(DashboardFilterCriteria dashboardFilterCriteria) 
+        private async Task<DashboardDTO> GetDashboardForMagaya(DashboardFilterCriteria dashboardFilterCriteria)
         {
             var dashboardDTO = new DashboardDTO();
 
@@ -993,7 +994,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
             // populate graph data
-            await PopulateGraphDataByDateInMagaya(dashboardDTO); 
+            await PopulateGraphDataByDateInMagaya(dashboardDTO);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -1012,7 +1013,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var endDate = queryDate.Item2;
 
             int[] serviceCenterIds = { };   // empty array
-            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => 
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
             s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
 
             //filter by country
@@ -1041,6 +1042,19 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                 dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
                 dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
+
+                dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
+                //get all earnings
+                var earnings = _uow.FinancialReport.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilterCriteria.ActiveCountryId);
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+
+                var demmurage = earnings.Where(x => x.Demurrage > 0).Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
+
+                var intlShipments = _uow.Invoice.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentStatus == PaymentStatus.Paid &&
+               s.PaymentMethod == PaymentType.Cash.ToString() && s.IsInternational == true).Select(x => x.Amount).DefaultIfEmpty(0).Sum();
+
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal += intlShipments;
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
                 _uow.Complete();
             }
 
@@ -1068,6 +1082,13 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            //get outstanding corporate payments
+            if(dashboardFilterCriteria.ActiveCountryId == 1)
+            {
+                var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
+                dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
+            }
 
             return dashboardDTO;
         }
@@ -1126,7 +1147,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
         }
 
-        private async Task PopulateGraphDataByDateInMagaya(DashboardDTO dashboardDTO) 
+        private async Task PopulateGraphDataByDateInMagaya(DashboardDTO dashboardDTO)
         {
             var graphDataList = new List<GraphDataDTO>();
             var shipmentsOrderedByServiceCenter =  dashboardDTO.MagayaShipmentOrdered;
@@ -1163,7 +1184,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                     ShipmentYear = year,
                     TotalShipmentByMonth = thisMonthShipments.Count(),
                     TotalSalesByMonth = (from a in thisMonthShipments
-                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
+                                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
                 };
 
                 graphDataList.Add(graphData);
@@ -1184,6 +1205,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             return await _uow.Wallet.GetTotalWalletBalance(countryId);
         }
+
 
         //Get Wallet Transaction Credit
         private async Task<WalletTransactionSummary> GetWalletTransactionSummary(DashboardFilterCriteria dashboardFilterCriteria)
@@ -1219,6 +1241,20 @@ namespace GIGLS.Services.Implementation.Dashboard
             }
 
             return dashboardDTO;
+        }
+
+        //Get Earnings Breakdown
+        private async Task<EarningsBreakdownDTO> GetEarningsBreakdown(IQueryable<FinancialReport> earnings)
+        {
+            var earningsBreakdownDTO = new EarningsBreakdownDTO();
+
+            earningsBreakdownDTO.GIGGO = earnings.Where(x => x.Source == ReportSource.GIGGo).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.Agility = earnings.Where(x => x.Source == ReportSource.Agility).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.Demurrage = earnings.Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
+
+            return earningsBreakdownDTO;
+
         }
     }
 }

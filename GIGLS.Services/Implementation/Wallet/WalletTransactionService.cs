@@ -156,6 +156,54 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletTransactions;
         }
 
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionCreditOrDebit(AccountFilterCriteria accountFilterCriteria)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionCreditOrDebitAsync(serviceCenterIds, accountFilterCriteria);
+
+            //get customer details
+            ////set the customer name
+            foreach (var item in walletTransactions)
+            {
+                // handle Company customers
+                if (CustomerType.Company == item.Wallet.CustomerType)
+                {
+                    var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (companyDTO != null)
+                    {
+                        item.Wallet.CustomerName = companyDTO.Name;
+                        item.Wallet.Country = companyDTO.Country;
+                        item.Wallet.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                    }
+                }
+                else if (CustomerType.Partner == item.Wallet.CustomerType)
+                {
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (partnerDTO != null)
+                    {
+                        item.Wallet.CustomerName = partnerDTO.PartnerName;
+                        item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                        item.Wallet.Country = partnerDTO.Country;
+                    }
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (individualCustomerDTO != null)
+                    {
+                        item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                        item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                        item.Wallet.Country = individualCustomerDTO.Country;
+                    }
+                }
+            }
+            return walletTransactions;
+        }
+
         public async Task<WalletTransactionDTO> GetWalletTransactionById(int walletTransactionId)
         {
             var walletTransaction = await _uow.WalletTransaction.GetAsync(s => s.WalletTransactionId == walletTransactionId, "ServiceCentre");
