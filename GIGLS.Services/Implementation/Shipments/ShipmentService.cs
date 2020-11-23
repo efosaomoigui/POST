@@ -4192,23 +4192,23 @@ namespace GIGLS.Services.Implementation.Shipments
             //var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
 
             //check if the shipment contains cod
-            if (newShipment.IsCashOnDelivery == true)
-            {
-                //collect the cods and add to CashOnDeliveryRegisterAccount()
-                var cashondeliveryentity = new CashOnDeliveryRegisterAccount
-                {
-                    Amount = newShipment.CashOnDeliveryAmount ?? 0,
-                    CODStatusHistory = CODStatushistory.Created,
-                    Description = "Cod From Sales",
-                    ServiceCenterId = 0,
-                    Waybill = newShipment.Waybill,
-                    UserId = newShipment.UserId,
-                    DepartureServiceCenterId = newShipment.DepartureServiceCentreId,
-                    DestinationCountryId = destinationCountry.CountryId
-                };
+            //if (newShipment.IsCashOnDelivery == true)
+            //{
+            //    //collect the cods and add to CashOnDeliveryRegisterAccount()
+            //    var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+            //    {
+            //        Amount = newShipment.CashOnDeliveryAmount ?? 0,
+            //        CODStatusHistory = CODStatushistory.Created,
+            //        Description = "Cod From Sales",
+            //        ServiceCenterId = 0,
+            //        Waybill = newShipment.Waybill,
+            //        UserId = newShipment.UserId,
+            //        DepartureServiceCenterId = newShipment.DepartureServiceCentreId,
+            //        DestinationCountryId = destinationCountry.CountryId
+            //    };
 
-                _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
-            }
+            //    _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+            //}
 
             newShipment.DepartureCountryId = departureCountry.CountryId;
             //newShipment.DestinationCountryId = destinationCountry.CountryId;
