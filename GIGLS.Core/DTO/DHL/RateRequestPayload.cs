@@ -34,7 +34,7 @@ namespace GIGLS.Core.DTO.DHL
         public string DropOffType { get; set; }
         public DateTime ShipTimestamp { get; set; }
         public string NextBusinessDay { get; set; } = "Y";
-        public string Account { get; set; };
+        public string Account { get; set; }
         public string UnitOfMeasurement { get; set; }
         public string Content { get; set; }
         public string PaymentInfo { get; set; } = "DAP";
