@@ -495,6 +495,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
 
+        [Inject]
+        public IFinancialReportRepository FinancialReport { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

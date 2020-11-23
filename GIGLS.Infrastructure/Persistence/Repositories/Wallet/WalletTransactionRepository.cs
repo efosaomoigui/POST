@@ -114,6 +114,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                  Description = w.Description,
                                                                  IsDeferred = w.IsDeferred,
                                                                  PaymentType = w.PaymentType,
+                                                                 PaymentTypeReference = w.PaymentTypeReference,
                                                                  UserId = w.UserId,
                                                                  ServiceCentreId = w.ServiceCentreId,
                                                                  ServiceCentre = Context.ServiceCentre.Where(s => s.ServiceCentreId == w.ServiceCentreId).Select(x => new ServiceCentreDTO {
@@ -131,6 +132,70 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                      //CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
                                                                  }).FirstOrDefault()
                                                              }).OrderByDescending(s => s.DateOfEntry).ToList();
+
+            return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
+        }
+
+        public Task<List<WalletTransactionDTO>> GetWalletTransactionCreditOrDebitAsync(int[] serviceCentreIds, AccountFilterCriteria accountFilterCriteria)
+        {
+            //filter by service center
+            var walletTransactionContext = _context.WalletTransactions.Where(x => x.CreditDebitType == accountFilterCriteria.creditDebitType).AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                walletTransactionContext = _context.WalletTransactions.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+            }
+
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+
+            //If No Date Supplied
+            if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
+            {
+                var OneMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
+                startDate = new DateTime(OneMonthAgo.Year, OneMonthAgo.Month, 1);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            } 
+            else
+            {
+                var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
+
+
+           
+            walletTransactionContext = walletTransactionContext.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
+
+            List<WalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
+                                                               select new WalletTransactionDTO()
+                                                               {
+                                                                   WalletTransactionId = w.WalletTransactionId,
+                                                                   DateOfEntry = w.DateOfEntry,
+                                                                   Amount = w.Amount,
+                                                                   CreditDebitType = w.CreditDebitType,
+                                                                   Description = w.Description,
+                                                                   IsDeferred = w.IsDeferred,
+                                                                   PaymentType = w.PaymentType,
+                                                                   PaymentTypeReference = w.PaymentTypeReference,
+                                                                   UserId = w.UserId,
+                                                                   ServiceCentreId = w.ServiceCentreId,
+                                                                   ServiceCentre = Context.ServiceCentre.Where(s => s.ServiceCentreId == w.ServiceCentreId).Select(x => new ServiceCentreDTO
+                                                                   {
+                                                                       Code = x.Code,
+                                                                       Name = x.Name
+                                                                   }).FirstOrDefault(),
+                                                                   WalletId = w.WalletId,
+                                                                   Wallet = Context.Wallets.Where(s => s.WalletId == w.WalletId).Select(x => new WalletDTO
+                                                                   {
+                                                                       Balance = x.Balance,
+                                                                       CompanyType = x.CompanyType,
+                                                                       CustomerCode = x.CustomerCode,
+                                                                       CustomerId = x.CustomerId,
+                                                                       CustomerType = x.CustomerType,
+                                                                       WalletNumber = x.WalletNumber,
+                                                                       //CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
+                                                                   }).FirstOrDefault()
+                                                               }).OrderByDescending(s => s.DateOfEntry).ToList();
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
