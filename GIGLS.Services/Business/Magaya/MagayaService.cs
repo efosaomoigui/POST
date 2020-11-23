@@ -374,6 +374,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         // send email message for payment notification
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
+
+                        //Send an email to Chairman
+                        var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                        if (chairmanEmail != null)
+                        {
+                            //seperate email by comma and send message to those email
+                            string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                            foreach (string email in chairmanEmails)
+                            {
+                                // send email message for payment notification
+                                shipmentDto.CustomerDetails.Email = email;
+                                await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
+                            }
+                        }
                     }
 
                     using (var client = new HttpClient())
@@ -804,13 +820,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                         newShipment.ApproximateItemsWeight += Weight;
                         newShipment.GrandTotal += shipmentItem.Price;
-                        itemName += shipmentItem.ItemName + " ";
+                        //itemName += shipmentItem.ItemName + " ";
                     }
                     else
                     {
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
 
+                    itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
                 }
 
@@ -824,6 +841,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+
+                //Send an email to Chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        castObj.CustomerEmail = email;
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
+                    }
+                }
 
                 //Send an email with details of request to Houston team
                 string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
