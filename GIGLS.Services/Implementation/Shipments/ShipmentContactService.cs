@@ -114,7 +114,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    var newContact = JObject.FromObject(shipmentContactDTO).ToObject<ShipmentContact>(); JObject.FromObject(shipmentContactDTO).ToObject<ShipmentContact>();
+                    var newContact = JObject.FromObject(shipmentContactDTO).ToObject<ShipmentContact>();
                     newContact.Status = ShipmentContactStatus.Contacted;
                     newContact.NoOfContact = newContact.NoOfContact + 1;
                     newContact.ContactedBy = $"{userInfo.FirstName} {userInfo.LastName}";
