@@ -4,6 +4,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -1179,5 +1180,20 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.RiderDelivery.Add(addRiderDelivery);
             await _uow.CompleteAsync();
         }
+
+
+        public async Task<List<ShipmentCollectionForContactDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var shipmentCollectionDTO = await _uow.ShipmentCollection.GetShipmentCollectionForContact(baseFilterCriteria);
+                return shipmentCollectionDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

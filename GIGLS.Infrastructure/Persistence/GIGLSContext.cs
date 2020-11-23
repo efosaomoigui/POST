@@ -289,6 +289,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentPackagingTransactions> ShipmentPackagingTransactions { get; set; }
         public DbSet<ServiceCenterPackage> ServiceCenterPackage { get; set; }
         public DbSet<FinancialReport> FinancialReport { get; set; }
+        public DbSet<ShipmentContact> ShipmentContact { get; set; }
+        public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
 
         //routes
         public DbSet<Route> Routes { get; }
