@@ -4432,7 +4432,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (mobileShipment.shipmentstatus == "Assigned for Pickup")
+                if (mobileShipment.shipmentstatus == "Assigned for Pickup" || mobileShipment.shipmentstatus == MobilePickUpRequestStatus.Resolved.ToString())
                 {
                     if (deliveryNumber.SenderCode.ToLower() != detail.DeliveryNumber.ToLower())
                     {
