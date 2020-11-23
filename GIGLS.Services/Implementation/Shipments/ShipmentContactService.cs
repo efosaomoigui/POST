@@ -38,8 +38,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var today = DateTime.Now;
             var shipmentContacts = new List<ShipmentContactDTO>();
             var shipmentDto = await _shipmentCollectionService.GetShipmentsCollectionForContact(baseFilterCriteria);
-
-
             if (shipmentDto.Any())
             {
                 foreach (var item in shipmentDto)
