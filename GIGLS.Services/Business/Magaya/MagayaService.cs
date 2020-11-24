@@ -854,7 +854,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         castObj.CustomerEmail = email;
                         await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
                     }
                 }
 
