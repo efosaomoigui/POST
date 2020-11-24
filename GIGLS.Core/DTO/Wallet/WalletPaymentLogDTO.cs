@@ -26,6 +26,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string PhoneNumber { get; set; }
         public string ExternalReference { get; set; }
         public string GatewayCode { get; set; }
+        public TransactionType TransactionType { get; set; }
     }
 
 }
