@@ -71,7 +71,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
-                SqlParameter endDate = new SqlParameter("@EndDate", startDate1);
+                SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
                 SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
                 SqlParameter scanStatus = new SqlParameter("@ScanStatus",ShipmentScanStatus.ARF);
 
