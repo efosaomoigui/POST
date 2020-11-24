@@ -561,7 +561,7 @@
     <Compile Include="Enums\StockRequestStatus.cs" />
     <Compile Include="Enums\SuperManifestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
-    <Compile Include="Enums\TransactionType.cs" />
+    <Compile Include="Enums\WalletTransactionType.cs" />
     <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />

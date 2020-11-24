@@ -1,9 +1,11 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
@@ -26,13 +28,16 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly INodeService _nodeService;
 
-        public FlutterwavePaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
+        public FlutterwavePaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
+            IPaymentTransactionService paymentTransactionService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _uow = uow;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -392,6 +397,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         verifyResult.data.Status = verifyResult.data.Status.ToLower();
                     }
 
+                    var userPayload = new UserPayload();
+
                     //2. if the payment successful
                     if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                     {
@@ -407,7 +414,11 @@ namespace GIGLS.Services.Implementation.Wallet
                             var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                             if (user != null)
+                            {
                                 customerId = user.Id;
+                                userPayload.Email = user.Email;
+                                userPayload.UserId = user.Id;
+                            }
                         }
 
                         //update the wallet
@@ -432,6 +443,15 @@ namespace GIGLS.Services.Implementation.Wallet
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
                     await _uow.CompleteAsync();
+
+                    //Call Node API for subscription process
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                    {
+                        if (userPayload != null)
+                        {
+                            _nodeService.WalletNotification(userPayload);
+                        }
+                    }
                 }
             }
             return verifyResult;
