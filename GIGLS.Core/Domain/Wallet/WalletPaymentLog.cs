@@ -36,6 +36,6 @@ namespace GIGLS.Core.Domain.Wallet
         [MaxLength(20)]
         public string PhoneNumber { get; set; }
 
-        public TransactionType TransactionType { get; set; }
+        public WalletTransactionType TransactionType { get; set; }
     }
 }

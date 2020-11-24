@@ -1,6 +1,6 @@
 ﻿namespace GIGLS.Core.Enums
 {
-    public enum TransactionType
+    public enum WalletTransactionType
     {
         Normal,
         ClassSubscription
