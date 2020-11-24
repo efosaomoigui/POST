@@ -24,6 +24,8 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices.Utility;
 using System.Linq;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -35,17 +37,20 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly INodeService _nodeService;
+
 
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
-            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
+            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _messageSenderService = messageSenderService;
             _globalPropertyService = globalPropertyService;
+            _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -113,6 +118,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (paymentLog == null)
                     return result;
 
+                var userPayload = new UserPayload();
+
                 //2. if the payment successful
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
@@ -128,7 +135,11 @@ namespace GIGLS.Services.Implementation.Wallet
                       var  user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
+                        {
                             customerId = user.Id;
+                            userPayload.Email = user.Email;
+                            userPayload.UserId = user.Id;
+                        }
                     }
 
                     //update the wallet
@@ -153,6 +164,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
+
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == TransactionType.ClassSubscription)
+                {
+                    if(userPayload != null)
+                    {
+                        _nodeService.WalletNotification(userPayload);
+                    }
+                }
+
                 result = true;
             }
 
