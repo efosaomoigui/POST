@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -130,6 +131,32 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("batchedpreshipmentmobile/{searchParam}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetBatchedPreShipmentMobile(string searchParam)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preShipmentMobileService.GetBatchPreShipmentMobile(searchParam);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
 
+        [HttpGet]
+        [Route("batchedpreshipmentmobileowners")]
+        public async Task<IServiceResponse<List<CompanyDTO>>> GetBatchPreShipmentMobileOwners()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preShipmentMobileService.GetBatchPreShipmentMobileOwners();
+                return new ServiceResponse<List<CompanyDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
     }
 }

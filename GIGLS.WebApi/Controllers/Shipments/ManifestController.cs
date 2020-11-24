@@ -180,5 +180,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("signoffmanifest/{manifestCode}")]
+        public async Task<IServiceResponse<bool>> SignOffManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.SignOffManifest(manifestCode);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }

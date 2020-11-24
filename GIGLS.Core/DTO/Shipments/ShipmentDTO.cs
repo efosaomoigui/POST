@@ -143,6 +143,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string TempCode { get; set; }
 
         public List<int> PackageOptionIds { get; set; } = new List<int>();
+        public string VehicleType { get; set; }
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
+        public bool IsGIGGOExtension { get; set; }
 
         public string RequestNumber { get; set; }
         public string URL { get; set; }

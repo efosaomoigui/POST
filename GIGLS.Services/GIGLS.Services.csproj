@@ -182,6 +182,7 @@
     <Compile Include="Business\CustomerPortal\PartnerPortalService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
+    <Compile Include="Business\Pricing\GIGGoPricingService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />
     <Compile Include="Business\ThirdPartyAPI\ThirdPartyAPIService.cs" />

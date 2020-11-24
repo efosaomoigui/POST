@@ -864,6 +864,27 @@ namespace GIGLS.WebApi.Controllers.User
                     Object = true
                 };
             });
-        }       
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("api/user/activatedashboard/{id}")]
+        public async Task<IServiceResponse<bool>> SetDashboardAccess(string id, bool val)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.SetDashboardAccess(id, val);
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully: ", $"{GetErrorResult(result)}");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
     }
 }
