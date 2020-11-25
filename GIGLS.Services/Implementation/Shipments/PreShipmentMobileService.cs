@@ -4432,7 +4432,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (mobileShipment.shipmentstatus == "Assigned for Pickup")
+                if (mobileShipment.shipmentstatus == "Assigned for Pickup" || mobileShipment.shipmentstatus == MobilePickUpRequestStatus.Resolved.ToString())
                 {
                     if (deliveryNumber.SenderCode.ToLower() != detail.DeliveryNumber.ToLower())
                     {
@@ -5828,10 +5828,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} is not currently assigned to this {request.Waybill}", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString())
+                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString() && formerpickup.Status != "Enroute Pickup")
                 {
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
                 }
+
                 formerpickup.Status = MobilePickUpRequestStatus.Moved.ToString();
                 waybillData.shipmentstatus = "Shipment created";
 
