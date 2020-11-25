@@ -2988,7 +2988,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
-                var user = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                var company = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                if (company != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+                else
+                {
+                    result.Exist = false;
+                    result.Message = "User detail does not exist";
+                    result.Succeeded = true;
+                }
+
+                //also check aspnet table for business name
+                var user = _uow.User.GetUserByCompanyName(userDetail.BusinessName);
                 if (user != null)
                 {
                     result.Exist = true;
