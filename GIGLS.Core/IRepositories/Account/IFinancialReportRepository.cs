@@ -13,10 +13,8 @@ namespace GIGLS.Core.IRepositories.Account
     {
         Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter);
         Task<List<FinancialReportDTO>> GetFinancialReportBreakdown(AccountFilterCriteria accountFilterCriteria);
-        Task<List<FinancialReportDTO>> GetIntlReportBreakdown(AccountFilterCriteria accountFilterCriteria);
         Task<decimal> GetTotalFinancialReportEarnings(DashboardFilterCriteria dashboardFilterCriteria);
         Task<List<FinancialReportDTO>> GetFinancialReportBreakdownForDemurrage(AccountFilterCriteria accountFilterCriteria);
-        Task<decimal> GetTotalIntlShipmentEarningsPaidInNigeria(DashboardFilterCriteria dashboardFilterCriteria);
         Task<decimal> GetTotalFinancialReportDemurrage(DashboardFilterCriteria dashboardFilterCriteria);
     }
 }

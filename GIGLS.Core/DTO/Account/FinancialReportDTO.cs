@@ -16,4 +16,11 @@ namespace GIGLS.Core.DTO.Account
         public string CurrencySymbol { get; set; }
         public double ConversionRate { get; set; }
     }
+
+    public class FinancialBreakdownSummaryDTO 
+    {
+        public decimal GIGGo { get; set; }
+        public decimal Agility { get; set; }
+        public decimal Intl { get; set; }
+    }
 }

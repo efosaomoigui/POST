@@ -27,27 +27,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         //Get Earnings Breakdown
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
-            //get startDate and endDate
-            var queryDate = dashboardFilter.getStartDateAndEndDate();
-            var startDate = queryDate.Item1;
-            var endDate = queryDate.Item2;
-
-            var earnings = _context.FinancialReport.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilter.ActiveCountryId);
-
             var earningsBreakdownDTO = new EarningsBreakdownDTO();
+            var results = await GetFinancialBreakdownSummary(dashboardFilter);
 
-            earningsBreakdownDTO.GIGGO = earnings.Where(x => x.Source == ReportSource.GIGGo).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.Agility = earnings.Where(x => x.Source == ReportSource.Agility).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.GIGGO = results.GIGGo;
+            earningsBreakdownDTO.Agility = results.Agility;
+            earningsBreakdownDTO.IntlShipments = results.Intl;
+
             earningsBreakdownDTO.Demurrage = await GetTotalFinancialReportDemurrage(dashboardFilter);
 
-            var intlShipments = await GetTotalIntlShipmentEarningsPaidInNigeria(dashboardFilter);
-
-            earningsBreakdownDTO.IntlShipments = intlShipments;
-
             return earningsBreakdownDTO;
-
         }
-
 
         public async Task<List<FinancialReportDTO>> GetFinancialReportBreakdown(AccountFilterCriteria accountFilterCriteria)
         {
@@ -131,49 +121,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
 
         }
 
-        public Task<List<FinancialReportDTO>> GetIntlReportBreakdown(AccountFilterCriteria accountFilterCriteria)
-        {
-            //filter by service center
-            var transactionContext = _context.Invoice.Where(x => x.IsInternational == true && x.PaymentStatus == PaymentStatus.Paid
-            && x.PaymentMethod == PaymentType.Cash.ToString()).AsQueryable();
-
-
-            var startDate = DateTime.Now;
-            var endDate = DateTime.Now;
-
-            //If No Date Supplied
-            if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
-            {
-                var OneMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
-                startDate = new DateTime(OneMonthAgo.Year, OneMonthAgo.Month, 1);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-            }
-            else
-            {
-                var queryDate = accountFilterCriteria.getStartDateAndEndDate();
-                startDate = queryDate.Item1;
-                endDate = queryDate.Item2;
-            }
-
-            transactionContext = transactionContext.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
-
-            List<FinancialReportDTO> transactionDTO = (from w in transactionContext
-                                                       select new FinancialReportDTO()
-                                                       {
-                                                           Waybill = w.Waybill,
-                                                           Source = ReportSource.Intl,
-                                                           Earnings = w.Amount,
-                                                           PartnerEarnings = 0,
-                                                           GrandTotal = w.Amount,
-                                                           Demurrage = 0,
-                                                           DateCreated = w.DateCreated,
-                                                           CurrencySymbol = _context.Country.Where(x => x.CountryId == w.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault()
-
-                                                       }).ToList();
-
-            return Task.FromResult(transactionDTO.OrderByDescending(s => s.DateCreated).ToList());
-        }
-
         public async Task<decimal> GetTotalFinancialReportEarnings(DashboardFilterCriteria dashboardFilterCriteria)
         {
             try
@@ -254,37 +201,46 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
-        public async Task<decimal> GetTotalIntlShipmentEarningsPaidInNigeria(DashboardFilterCriteria dashboardFilterCriteria)
+        public async Task<FinancialBreakdownSummaryDTO> GetFinancialBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria)
         {
             try
             {
-                //get startDate and endDate
+                var result = new FinancialBreakdownSummaryDTO
+                {
+                    GIGGo = 0,
+                    Agility = 0,
+                    Intl = 0
+                };
+
                 var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
                 var StartDate = queryDate.Item1;
                 var EndDate = queryDate.Item2;
 
+
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
                 SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
                     endDate,
+                    countryId
                 };
 
-                var summaryResult = await _context.Database.SqlQuery<decimal?>("IntlShipmentsPaidInNigeriaBalance " +
-                   "@StartDate, @EndDate",
+                var summary = await _context.Database.SqlQuery<FinancialBreakdownSummaryDTO>("FinancialBreakdownSummary " +
+                   "@StartDate, @EndDate, @CountryId",
                    param).FirstOrDefaultAsync();
 
-                decimal summary = 0.00M;
-
-                if (summaryResult != null)
+                if (summary != null)
                 {
-                    summary = (decimal)summaryResult;
+                    result.GIGGo = summary.GIGGo;
+                    result.Agility = summary.Agility;
+                    result.Intl = summary.Intl;
                 }
 
-                return await Task.FromResult(summary);
+                return await Task.FromResult(result);
             }
             catch (Exception)
             {

@@ -170,15 +170,28 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 QRCode = deliveryNumber.SenderCode
             };
 
-            if (shipment.DepartureServiceCentreId == 309)
+            if(shipment.DepartureCountryId == 1)
             {
-
+                //Add to Financial Reports
+                var financialReport = new FinancialReportDTO
+                {
+                    Source = ReportSource.Agility,
+                    Waybill = shipment.Waybill,
+                    PartnerEarnings = 0.0M,
+                    GrandTotal = invoiceEntity.Amount,
+                    Earnings = invoiceEntity.Amount,
+                    Demurrage = 0.00M,
+                    CountryId = invoiceEntity.CountryId
+                };
+                await _financialReportService.AddReport(financialReport);
+            }
+            else
+            {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
 
                 double amountToDebitDouble = (double)invoiceEntity.Amount * countryRateConversion.Rate;
 
                 var amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
-
 
                 //Add to Financial Reports
                 var financialReport = new FinancialReportDTO
@@ -194,24 +207,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 };
                 await _financialReportService.AddReport(financialReport);
 
+            }
+
+
+            if (shipment.DepartureServiceCentreId == 309)
+            {
                 await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
             }
             else
             {
-                //Add to Financial Reports
-                var financialReport = new FinancialReportDTO
-                {
-                    Source = ReportSource.Agility,
-                    Waybill = shipment.Waybill,
-                    PartnerEarnings = 0.0M,
-                    GrandTotal = invoiceEntity.Amount,
-                    Earnings = invoiceEntity.Amount,
-                    Demurrage = 0.00M,
-                    CountryId = invoiceEntity.CountryId
-                };
-                await _financialReportService.AddReport(financialReport);
-
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
 
