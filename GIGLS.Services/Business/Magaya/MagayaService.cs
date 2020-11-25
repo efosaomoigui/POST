@@ -831,13 +831,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                         newShipment.ApproximateItemsWeight += Weight;
                         newShipment.GrandTotal += shipmentItem.Price;
-                        itemName += shipmentItem.ItemName + " -- ";
+                        //itemName += shipmentItem.ItemName + " ";
                     }
                     else
                     {
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
 
+                    itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
                 }
 
