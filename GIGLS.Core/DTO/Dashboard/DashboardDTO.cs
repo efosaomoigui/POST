@@ -33,6 +33,8 @@ namespace GIGLS.Core.DTO.Dashboard
         public List<CountryDTO> ActiveCountries { get; set; }
         public CountryDTO UserActiveCountryForFilter { get; set; }
         public WalletTransactionSummary WalletTransactionSummary { get; set; }
+        public WalletPaymentLogSummary WalletPaymentLogSummary { get; set; }
+        public WalletBreakdown WalletBreakdown { get; set; }
     }
 
 }
