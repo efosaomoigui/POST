@@ -602,7 +602,7 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
+                if (await _uow.Company.ExistAsync(c => c.Name.Trim().ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email.ToLower() == company.Email.ToLower()))
                 {
                     result.Succeeded = false;
                     result.Message = $"{company.Name}, phone number or email detail already exist";
@@ -699,7 +699,7 @@ namespace GIGLS.Services.Implementation.Customers
                     Email = newCompany.Email,
                     FirstName = newCompany.FirstName,
                     LastName = newCompany.LastName,
-                    Organisation = newCompany.CompanyType.ToString(),
+                    Organisation = newCompany.Name,
                     Password = password,
                     PhoneNumber = newCompany.PhoneNumber,
                     UserType = UserType.Regular,
@@ -711,7 +711,6 @@ namespace GIGLS.Services.Implementation.Customers
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
                 });
-
                 //complete
                 _uow.Complete();
 
