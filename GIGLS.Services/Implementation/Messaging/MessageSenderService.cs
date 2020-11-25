@@ -1004,7 +1004,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Destination",
                     "Items Details",
                     "ETA",
-                    "PickupOptions"
+                    "PickupOptions",
+                    "GrandTotal",
+                    "CurrencySymbol"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1028,6 +1030,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[7] = intlDTO.ItemDetails;
                 strArray[8] = DateTime.Now.AddDays(10).ToString("dd/MM/yyyy");
                 strArray[9] = intlDTO.PickupOptions.ToString();
+                strArray[10] = intlDTO.GrandTotal.ToString();
 
                 if(intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
@@ -1036,6 +1039,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 else if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
                 {
                     strArray[9] = " and is ready for pickup";
+                }
+
+                var countryId = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DepartureCountryId);
+                if(countryId != null)
+                {
+                    strArray[11] = countryId.CurrencySymbol;
                 }
 
                 //B. decode url parameter
