@@ -276,11 +276,7 @@ namespace GIGLS.Services.Implementation.Report
             }
             var earnings = new List<FinancialReportDTO>();
 
-            if(accountFilter.ServiceCenterId == 2)
-            {
-                earnings = await _uow.FinancialReport.GetIntlReportBreakdown(accountFilter);
-            }
-            else if (accountFilter.ServiceCenterId == 3)
+            if (accountFilter.ServiceCenterId == 3)
             {
                 earnings = await _uow.FinancialReport.GetFinancialReportBreakdownForDemurrage(accountFilter);
             }

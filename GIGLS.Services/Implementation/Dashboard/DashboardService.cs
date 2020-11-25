@@ -1050,9 +1050,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                 //get all earnings
                 dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetTotalFinancialReportEarnings(dashboardFilterCriteria);
                 var demmurage = await _uow.FinancialReport.GetTotalFinancialReportDemurrage(dashboardFilterCriteria);
-                var intlShipments = await _uow.FinancialReport.GetTotalIntlShipmentEarningsPaidInNigeria(dashboardFilterCriteria);
 
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal += intlShipments;
                 dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
 
                 _uow.Complete();
