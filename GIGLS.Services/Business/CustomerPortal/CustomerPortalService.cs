@@ -2804,6 +2804,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
+            if (waybill.Contains("AWR"))
+            {
+                throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
