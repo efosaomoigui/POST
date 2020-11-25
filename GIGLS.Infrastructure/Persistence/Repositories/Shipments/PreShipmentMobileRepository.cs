@@ -272,7 +272,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public IQueryable<PreShipmentMobileDTO> GetAllBatchedPreShipment()
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.IsBatchPickUp == true && s.shipmentstatus == "Shipment Created");
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.IsBatchPickUp == true);
 
             var shipmentDto = (from r in preShipments
                                join co in _context.Country on r.CountryId equals co.CountryId
