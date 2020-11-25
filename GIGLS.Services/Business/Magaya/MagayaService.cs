@@ -5,6 +5,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
@@ -362,8 +363,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 string error_code = "";
 
                 //Magaya Request for Shipment Creation
-                result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                //result = api_session_error.no_error;
+                //result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
                 {
@@ -444,7 +445,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    throw new Exception("Error Creating Shipment: ");
+                    throw new Exception("Error Creating Shipment");
                 }
 
                 errval = error_code;
@@ -452,7 +453,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             catch (Exception ex)
             {
                 errval = ex.Message;
+                result = api_session_error.error_saving_to_database;
             }
+
             return result;
         }
 
@@ -551,7 +554,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                 }
 
-                var serviceCenter = await _centreService.GetServiceCentreById(int.Parse(claimValue[1]));
+                if (claimValue[1] == "Global")
+                {
+                    throw new Exception("Global Privilegde Cannot Create Shipment Here");
+                }
+
+                var idVal = int.Parse(claimValue[1]);
+                var serviceCenter = await _centreService.GetServiceCentreById(idVal);
                 var shipmentItems = getShipmentItems(magayaShipmentDTO);
 
                 var shipmentDTO = new ShipmentDTO();
@@ -596,10 +605,25 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
                             var intValue = (resultJson.ItemValue.GetType().ToString() == "System.String") ? 
                                 (resultJson.ItemValue == "") ? 0:decimal.Parse(resultJson.ItemValue) : resultJson.ItemValue;
+
                             totalInsuranceCharge += (resultJson.ItemValue) * (percentVal / 100);
                         }
 
                     };
+                }
+
+                //updaqte the customer user country
+                //string ob1 = "";
+                var user = new UserDTO();
+                var resultJson2 = new IntlShipmentRequestDTO();
+                var customer = new CustomerDTO();
+
+                if (mDto.IntlShipmentRequest != null)
+                {
+                    var ob1 = mDto.IntlShipmentRequest;
+                    var customerUserId = ob1.UserId;
+                    user = await _userService.GetUserById(customerUserId);
+                    customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
                 }
 
                 //PickUp Options
@@ -624,7 +648,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                          tetCustomerDetails(magayaShipmentDTO)
                     };
 
+                shipmentDTO.Customer[0].UserActiveCountryId = customer.UserActiveCountryId;
+
                 shipmentDTO.CustomerDetails = tetCustomerDetails(magayaShipmentDTO);
+                shipmentDTO.CustomerDetails.UserActiveCountryId = customer.UserActiveCountryId;
                 shipmentDTO.IsdeclaredVal = false;
                 shipmentDTO.DeclarationOfValueCheck = 0;
 
@@ -903,9 +930,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return varEntity;
         }
 
-        public async Task<string> GetMagayaWayBillNumber()
+        public async Task<string> GetMagayaWayBillNumber(NumberGeneratorType numbertype)
         {
-            var mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+            var mwaybill = String.Empty;
+
+            if (numbertype == NumberGeneratorType.MagayaWbM)
+            {
+                mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWbM, "MG");
+            }
+
+            mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+
             return mwaybill;
         }
 

@@ -16,6 +16,7 @@ using System;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -308,11 +309,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetMagayaWaybillNo")]
-        public async Task<IServiceResponse<string>> GetMagayaWaybillNo() 
+        public async Task<IServiceResponse<string>> GetMagayaWaybillNo([FromUri] NumberGeneratorType numbertype = NumberGeneratorType.MagayaWb) 
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.GetMagayaWayBillNumber();
+                var _result = _service.GetMagayaWayBillNumber(numbertype);
 
                 return new ServiceResponse<string>()
                 {

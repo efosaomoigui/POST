@@ -157,6 +157,7 @@ namespace GIGLS.Core.DTO.Shipments
     {
         //Shipment Information 
         public int IntlShipmentRequestId { get; set; }
+        //IntlShipmentRequest
 
         public string RequestNumber { get; set; }
 
@@ -172,6 +173,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerPhoneNumber { get; set; }
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
+        public string ItemSenderfullName { get; set; }  
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -228,6 +230,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
+
+        public bool IsMobile { get; set; }
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
