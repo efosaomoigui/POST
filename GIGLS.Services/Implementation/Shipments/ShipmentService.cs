@@ -3070,13 +3070,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if(bankDepositOrder.Status == DepositStatus.Deposited || bankDepositOrder.Status == DepositStatus.Verified)
                     {
-                        //throw new GenericException($"Error Cancelling the Shipment." +
-                        //        $" The shipment with waybill number {waybill} has already been deposited in the bank with ref code {bankDepositOrder.RefCode}.");
-
-                        var bankDeposit = await _uow.BankProcessingOrderCodes.GetAsync(s => s.Code == bankDepositOrder.RefCode);
-                        bankDeposit.TotalAmount = bankDeposit.TotalAmount - bankDepositOrder.GrandTotal;
-                        bankDepositOrder.IsDeleted = true;
+                        throw new GenericException($"Error Cancelling the Shipment." +
+                                $" The shipment with waybill number {waybill} has already been deposited in the bank with ref code {bankDepositOrder.RefCode}.");
                     }
+
+                    var bankDeposit = await _uow.BankProcessingOrderCodes.GetAsync(s => s.Code == bankDepositOrder.RefCode);
+                    bankDeposit.TotalAmount = bankDeposit.TotalAmount - bankDepositOrder.GrandTotal;
+
+                    bankDepositOrder.IsDeleted = true;
                 }
 
 
