@@ -1324,6 +1324,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentManifest.ManifestId = item.PickupManifestId;
                         preshipmentManifest.ManifestType = item.ManifestType;
                         preshipmentManifest.DateTime = item.DateTime;
+                        preshipmentManifest.Picked = item.Picked;
 
                         var waybillsInManifest = _uow.PickupManifestWaybillMapping.GetAll().Where(x => x.ManifestCode == item.ManifestCode).ToList();
                         if (waybillsInManifest.Any())
