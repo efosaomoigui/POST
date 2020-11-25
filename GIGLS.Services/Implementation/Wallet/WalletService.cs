@@ -594,6 +594,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
               
                 var user = await _uow.User.GetUserById(chargeWalletDTO.UserId);
+                if (user == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"user does not exist";
+                    return result;
+                }
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
                 if (wallet == null)
                 {
@@ -623,7 +629,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     CreditDebitType = CreditDebitType.Debit,
                     Description = "Customer subscription",
                     PaymentType = PaymentType.Wallet,
-                    PaymentTypeReference = null,
+                    PaymentTypeReference = "",
                     UserId = chargeWalletDTO.UserId
                 }, false);
                 result.Succeeded = true;

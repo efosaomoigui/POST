@@ -20,7 +20,7 @@ namespace GIGLS.Core.DTO.Wallet
         public int UserActiveCountryId { get; set; }
         public CountryDTO Country { get; set; }        
     }
-    public class ChargeWalletDTO : BaseDomainDTO
+    public class ChargeWalletDTO
     {
         public string UserId { get; set; }
         public decimal Amount { get; set; }

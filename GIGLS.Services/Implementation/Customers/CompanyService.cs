@@ -697,8 +697,8 @@ namespace GIGLS.Services.Implementation.Customers
                     DateCreated = DateTime.Now,
                     Designation = newCompany.CompanyType.ToString(),
                     Email = newCompany.Email,
-                    FirstName = newCompany.Name,
-                    LastName = newCompany.Name,
+                    FirstName = newCompany.FirstName,
+                    LastName = newCompany.LastName,
                     Organisation = newCompany.CompanyType.ToString(),
                     Password = password,
                     PhoneNumber = newCompany.PhoneNumber,
@@ -710,8 +710,6 @@ namespace GIGLS.Services.Implementation.Customers
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
-
-
                 });
 
                 //complete
