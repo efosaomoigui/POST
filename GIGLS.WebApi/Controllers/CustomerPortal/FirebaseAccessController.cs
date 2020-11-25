@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Infrastructure;
@@ -302,6 +303,40 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return response;
             });
         }
+
+
+        [AllowAnonymous]
+        [HttpPut]
+        [Route("chargewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<ResponseDTO>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var result = await _portalService.ChargeWallet(chargeWalletDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
 
 
     }
