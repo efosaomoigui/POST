@@ -574,5 +574,69 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
         }
+
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                if (chargeWalletDTO == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Invalid payload";
+                    return result;
+                }
+                if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount == 0)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"User or amount not provided";
+                    return result;
+                }
+              
+                var user = await _uow.User.GetUserById(chargeWalletDTO.UserId);
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
+                //charge wallet
+                if ((wallet.Balance - chargeWalletDTO.Amount) >= 0)
+                {
+                    wallet.Balance -= chargeWalletDTO.Amount;
+                }
+                else
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Insufficient balance on customer wallet";
+                    return result;
+                }
+                await _uow.CompleteAsync();
+
+                //update wallet transaction
+                await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = chargeWalletDTO.Amount,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Customer subscription",
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = null,
+                    UserId = chargeWalletDTO.UserId
+                }, false);
+                result.Succeeded = true;
+                result.Message = $"Wallet successfully charged";
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
     }
 }

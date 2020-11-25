@@ -3073,6 +3073,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return userDTO; 
         }
 
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await _walletService.ChargeWallet(chargeWalletDTO);
+        }
+
 
     }
 }
