@@ -447,6 +447,9 @@ namespace GIGLS.Core
                 config.CreateMap<PreShipmentMobileDTO, PreShipmentMobileFromAgilityDTO>();
                 config.CreateMap<PreShipmentMobileFromAgilityDTO, PreShipmentMobileDTO>();
 
+                config.CreateMap<FinancialReport, FinancialReportDTO>();
+                config.CreateMap<FinancialReportDTO, FinancialReport>();
+
             });
 
             isInit = true;

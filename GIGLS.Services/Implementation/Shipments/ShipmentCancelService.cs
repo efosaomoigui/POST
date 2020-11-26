@@ -111,6 +111,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (boolResult)
             {
+                //remove report
+                var report = await _uow.FinancialReport.GetAsync(x => x.Waybill == shipment.Waybill);
+                if (report != null)
+                {
+                    report.IsDeleted = true;
+                }
+
                 await _uow.CompleteAsync();
 
                 //send message if payment has been done on the waybill

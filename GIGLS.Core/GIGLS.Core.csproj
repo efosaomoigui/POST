@@ -160,6 +160,7 @@
     <Compile Include="Domain\EcommerceAgreement.cs" />
     <Compile Include="Domain\Expenses\Expenditure.cs" />
     <Compile Include="Domain\Expenses\ExpenseType.cs" />
+    <Compile Include="Domain\FinancialReport.cs" />
     <Compile Include="Domain\Fleet.cs" />
     <Compile Include="Domain\FleetMake.cs" />
     <Compile Include="Domain\FleetModel.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Domain\HaulageDistanceMappingPrice.cs" />
     <Compile Include="DTO\Account\DailySalesByServiceCentreDTO.cs" />
     <Compile Include="DTO\Account\DailySalesDTO.cs" />
+    <Compile Include="DTO\Account\FinancialReportDTO.cs" />
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
@@ -313,6 +315,7 @@
     <Compile Include="DTO\Customers\EcommerceAgreementDTO.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
     <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
+    <Compile Include="DTO\Dashboard\EarningsBreakdownDTO.cs" />
     <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
     <Compile Include="DTO\DeliveryLocationDTO.cs" />
@@ -360,6 +363,7 @@
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\Node\UserPayload.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
     <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
@@ -546,6 +550,7 @@
     <Compile Include="Enums\Rank.cs" />
     <Compile Include="Enums\RateType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
+    <Compile Include="Enums\ReportSource.cs" />
     <Compile Include="Enums\ShipmentProgressSummaryType.cs" />
     <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
@@ -558,6 +563,7 @@
     <Compile Include="Enums\StockRequestStatus.cs" />
     <Compile Include="Enums\SuperManifestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
+    <Compile Include="Enums\WalletTransactionType.cs" />
     <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
@@ -572,6 +578,7 @@
     <Compile Include="IMessageService\IEmailService.cs" />
     <Compile Include="IMessageService\IMessageService.cs" />
     <Compile Include="IMessageService\ISMSService.cs" />
+    <Compile Include="IRepositories\Account\IFinancialReportRepository.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
@@ -715,6 +722,7 @@
     <Compile Include="IRepositories\Zone\IWeightLimitRepository.cs" />
     <Compile Include="IRepositories\Zone\IZoneRepository.cs" />
     <Compile Include="IServices\Account\IExpenditureService.cs" />
+    <Compile Include="IServices\Account\IFinancialReportService.cs" />
     <Compile Include="IServices\Account\IGeneralLedgerService.cs" />
     <Compile Include="IServices\Account\IIncomeService.cs" />
     <Compile Include="IServices\Account\IInsuranceService.cs" />
@@ -778,6 +786,7 @@
     <Compile Include="IServices\Nav\IMainNavService.cs" />
     <Compile Include="IServices\Nav\ISubNavService.cs" />
     <Compile Include="IServices\Nav\ISubSubNavService.cs" />
+    <Compile Include="IServices\Node\INodeService.cs" />
     <Compile Include="IServices\Partnership\IFleetPartnerService.cs" />
     <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
     <Compile Include="IServices\Partnership\IPartnerPayoutService.cs" />

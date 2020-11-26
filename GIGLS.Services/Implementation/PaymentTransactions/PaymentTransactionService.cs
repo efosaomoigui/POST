@@ -18,6 +18,8 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IMessageService;
 using System.Text;
 using System.Security.Cryptography;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Account;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -29,9 +31,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IFinancialReportService _financialReportService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, IMessageSenderService messageSenderService)
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, 
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
         {
             _uow = uow;
             _userService = userService;
@@ -39,6 +43,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _messageSenderService = messageSenderService;
+            _financialReportService = financialReportService;
             MapperConfig.Initialize();
         }
 
@@ -154,6 +159,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
             await _uow.CompleteAsync();
+
+            //Add to Financial Reports
+            var financialReport = new FinancialReportDTO
+            {
+                Source = ReportSource.Agility,
+                Waybill = shipment.Waybill,
+                PartnerEarnings = 0.0M,
+                GrandTotal = invoiceEntity.Amount,
+                Earnings = invoiceEntity.Amount,
+                Demurrage = 0.00M,
+                CountryId = invoiceEntity.CountryId
+            };
+            await _financialReportService.AddReport(financialReport);
 
             //QR Code
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
@@ -373,6 +391,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
             await _uow.CompleteAsync();
+
+            //Add to Financial Reports
+            var financialReport = new FinancialReportDTO
+            {
+                Source = ReportSource.Agility,
+                Waybill = shipment.Waybill,
+                PartnerEarnings = 0.0M,
+                GrandTotal = invoiceEntity.Amount,
+                Earnings = invoiceEntity.Amount,
+                Demurrage = 0.00M,
+                CountryId = invoiceEntity.CountryId
+            };
+            await _financialReportService.AddReport(financialReport);
 
             //QR Code
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);

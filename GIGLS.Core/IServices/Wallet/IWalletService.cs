@@ -22,6 +22,7 @@ namespace GIGLS.Core.IServices.Wallet
         IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService();
         Task<WalletDTO> GetWalletBalance(string userChannelCode);
         Task<WalletDTO> GetWalletBalanceWithName();
+        Task<List<WalletDTO>> GetOutstaningCorporatePayments();
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
     }
 

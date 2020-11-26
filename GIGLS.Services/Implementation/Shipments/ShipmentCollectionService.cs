@@ -425,6 +425,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     CountryId = getServiceCentreDetail.CountryId
                 };
 
+                var financialReport = await _uow.FinancialReport.GetAsync(x => x.Waybill == shipmentCollectionDto.Waybill);
+
+                if(financialReport != null)
+                {
+                    financialReport.Demurrage = shipmentCollectionDto.Demurrage.AmountPaid;
+                }
+
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.Demurrage.Add(newDemurrage);
                 _uow.GeneralLedger.Add(generalLedger);
