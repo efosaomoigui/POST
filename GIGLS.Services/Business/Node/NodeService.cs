@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.Node
 {
     public class NodeService : INodeService
     {
-        public void WalletNotification(UserPayload user)
+        public async Task WalletNotification(UserPayload user)
         {
             try
             {
@@ -29,7 +30,7 @@ namespace GIGLS.Services.Business.Node
                 {
                     var json = JsonConvert.SerializeObject(dic);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = client.PostAsync(nodeURL, data);
+                    var response = await client.PostAsync(nodeURL, data);
                 }
             }
             catch (Exception)
