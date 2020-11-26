@@ -630,6 +630,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //update wallet transaction
+                //generate paymentref
+                var today = DateTime.Now;
+                var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
                 await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
@@ -637,11 +640,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     CreditDebitType = CreditDebitType.Debit,
                     Description = "Customer subscription",
                     PaymentType = PaymentType.Wallet,
-                    PaymentTypeReference = "",
+                    PaymentTypeReference = referenceNo,
                     UserId = chargeWalletDTO.UserId
                 }, false);
                 result.Succeeded = true;
                 result.Message = $"Wallet successfully charged";
+                result.Entity = new { transactionId = referenceNo };
                 return result;
             }
             catch (Exception ex)
