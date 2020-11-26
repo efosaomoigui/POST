@@ -1,9 +1,10 @@
 ﻿using GIGLS.Core.DTO.Node;
+using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Node
 {
     public interface INodeService : IServiceDependencyMarker
     {
-        void WalletNotification(UserPayload user);
+        Task WalletNotification(UserPayload user);
     }
 }
