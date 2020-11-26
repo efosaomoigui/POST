@@ -449,7 +449,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         if (userPayload != null)
                         {
-                            _nodeService.WalletNotification(userPayload);
+                            await _nodeService.WalletNotification(userPayload);
                         }
                     }
                 }
