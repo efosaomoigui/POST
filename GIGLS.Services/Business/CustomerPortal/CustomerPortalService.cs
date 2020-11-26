@@ -2996,27 +2996,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Succeeded = false;
                     return result;
                 }
-                else
-                {
-                    result.Exist = false;
-                    result.Message = "User detail does not exist";
-                    result.Succeeded = true;
-                }
 
                 //also check aspnet table for business name
-                var user = _uow.User.GetUserByCompanyName(userDetail.BusinessName);
+                var user = await _uow.User.GetUserByCompanyName(userDetail.BusinessName);
                 if (user != null)
                 {
                     result.Exist = true;
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
                     return result;
-                }
-                else
-                {
-                    result.Exist = false;
-                    result.Message = "User detail does not exist";
-                    result.Succeeded = true;
                 }
             }
             if (!String.IsNullOrEmpty(userDetail.Email))
@@ -3028,12 +3016,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Message = "User detail already exist";
                     result.Succeeded = false;
                     return result;
-                }
-                else
-                {
-                    result.Exist = false;
-                    result.Message = "User detail does not exist";
-                    result.Succeeded = true;
                 }
             }
 
@@ -3047,15 +3029,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Succeeded = false;
                     return result;
                 }
-                else
-                {
-                    result.Exist = false;
-                    result.Message = "User detail does not exist";
-                    result.Succeeded = true;
-                }
             }
 
-
+            result.Exist = false;
+            result.Message = "User detail does not exist";
+            result.Succeeded = true;
             return result;
         }
 
