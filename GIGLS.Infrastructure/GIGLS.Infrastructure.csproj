@@ -212,6 +212,8 @@
     <Compile Include="Persistence\Repositories\Shipments\ManifestVisitMonitoringRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentMobileRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactHistoryRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
