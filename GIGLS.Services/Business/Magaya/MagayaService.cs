@@ -619,10 +619,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         if (resultJson.RequiresInsurance == true)
                         {
                             var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
-                            var intValue = (resultJson.ItemValue.GetType().ToString() == "System.String") ? 
-                                (resultJson.ItemValue == "") ? 0:decimal.Parse(resultJson.ItemValue) : resultJson.ItemValue;
+                            var itemsType = resultJson.ItemValue;
 
-                            totalInsuranceCharge += (resultJson.ItemValue) * (percentVal / 100);
+                            var intValue = (resultJson.ItemValue == null) ? 0 : decimal.Parse(resultJson.ItemValue);
+
+                            totalInsuranceCharge += (intValue) * (percentVal / 100);
                         }
 
                     };
@@ -829,7 +830,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
-                    var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String")? 
+                    var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String") ?
                         (shipmentItem.ItemValue == "") ? 0 : decimal.Parse(shipmentItem.ItemValue) : shipmentItem.ItemValue;
 
                     if (shipmentItem.RequiresInsurance)
@@ -970,8 +971,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWbM, "MG");
             }
-
-            mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+            else
+            {
+                mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+            }
 
             return mwaybill;
         }
