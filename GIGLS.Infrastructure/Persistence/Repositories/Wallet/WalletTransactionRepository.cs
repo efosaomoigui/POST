@@ -293,22 +293,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                     USSD = 0
                 };
 
-                var StartDate = DateTime.Now;
-                var EndDate = DateTime.Now;
-
-                //If No Date Supplied
-                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
-                {
-                    var today = DateTime.Now.AddDays(1);  
-                    StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                    EndDate = new DateTime(today.Year, today.Month, today.Day);
-                }
-                else
-                {
-                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                    StartDate = queryDate.Item1;
-                    EndDate = queryDate.Item2;
-                }
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
