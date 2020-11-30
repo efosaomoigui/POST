@@ -739,6 +739,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         item.shipmentstatus = "Shipment created";
                     }
+                    //then delete it from PickupManifestWaybillMapping
+                    _uow.PickupManifestWaybillMapping.RemoveRange(unFufilled);
                 }
                 //update waybill to pickedup
                 var waybillsToUpdateToPickup = _uow.PreShipmentMobile.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
