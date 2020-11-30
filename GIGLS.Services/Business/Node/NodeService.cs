@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Node;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Node;
 using Newtonsoft.Json;
 using System;
@@ -17,6 +18,18 @@ namespace GIGLS.Services.Business.Node
             try
             {
                 await ProcessWalletNotification(user);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task CreateShipment(CreateShipmentNodeDTO nodePayload)
+        {
+            try
+            {
+                await ProcessShipmentCreation(nodePayload);
             }
             catch (Exception)
             {
@@ -48,6 +61,35 @@ namespace GIGLS.Services.Business.Node
                     string result = await response.Content.ReadAsStringAsync();
                     var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
 
+                    nodeResponse = jObject;
+                }
+
+                return nodeResponse;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public static async Task<NodeResponse> ProcessShipmentCreation(CreateShipmentNodeDTO nodePayload)
+        {
+            try
+            {
+                var nodeResponse = new NodeResponse();
+
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
+                nodeURL = nodeURL + nodePostShipment;
+
+                using (var client = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(nodePayload);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(nodeURL, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
                     nodeResponse = jObject;
                 }
 

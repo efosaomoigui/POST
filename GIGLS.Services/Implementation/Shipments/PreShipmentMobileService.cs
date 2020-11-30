@@ -31,17 +31,16 @@ using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Utility;
-using Audit.Core;
 using System.Configuration;
 using System.Net;
 using System.Net.Http;
 using GIGLS.Core.DTO.Report;
 using System.Security.Cryptography;
 using System.Text;
-using ThirdParty.WebServices.Magaya.Business.New;
 using PaymentType = GIGLS.Core.Enums.PaymentType;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -69,6 +68,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGiglgoStationService _giglgoStationService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IFinancialReportService _financialReportService;
+        private readonly INodeService _nodeService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -76,7 +76,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
-            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService)
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
+            INodeService nodeService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -100,6 +101,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _giglgoStationService = giglgoStationService;
             _groupWaybillNumberService = groupWaybillNumberService;
             _financialReportService = financialReportService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -777,7 +779,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Send the Payload to Partner Cloud Handler 
                     if (!preShipmentDTO.IsBatchPickUp)
                     {
-                        NodeApiCreateShipment(newPreShipment);
+                        await NodeApiCreateShipment(newPreShipment);
                     }
 
                     //We will send SMS & Email
@@ -867,7 +869,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private void NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        private async Task NodeApiCreateShipment(PreShipmentMobile newPreShipment)
         {
             try
             {
@@ -893,12 +895,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 };
 
-                HttpClient client = new HttpClient();
-
-                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
-                nodeURL = nodeURL + nodePostShipment;
-                client.PostAsJsonAsync(nodeURL, nodePayload);
+                await _nodeService.CreateShipment(nodePayload);
             }
             catch (Exception)
             {
