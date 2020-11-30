@@ -1018,7 +1018,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 preshipmentDTO.Waybill = newShipment.Waybill;
                 preshipmentDTO.DepartureServiceCentreId = newShipment.DepartureServiceCentreId;
-                
+
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
@@ -1367,7 +1367,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var departureServiceCentre = new ServiceCentreDTO();
 
-            if(shipmentDTO.IsGIGGOExtension == true)
+            if (shipmentDTO.IsGIGGOExtension == true)
             {
                 departureServiceCentre = await _userService.GetGIGGOServiceCentre();
             }
@@ -1376,10 +1376,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             }
 
-            if (shipmentDTO.Waybill != null && !shipmentDTO.Waybill.Contains("AWR")) 
+
+            if (shipmentDTO.Waybill != null && !shipmentDTO.Waybill.Contains("AWR"))
             {
-                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-                shipmentDTO.Waybill = waybill;
+                if (shipmentDTO.Waybill.Contains("MWR"))
+                {
+                    //do nothing
+                }
+                else
+                {
+                    var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                    shipmentDTO.Waybill = waybill;
+                }
+
             }
 
             if (shipmentDTO.Waybill == null)
@@ -2039,7 +2048,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     manifests = manifests.Where(s => s.DestinationServiceCentreId == filterValue);
                 }
-                
+
                 var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
 
                 if (filterValue != 99999)
@@ -2139,7 +2148,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> CheckReleaseMovementManifest(string movementManifestCode) 
+        public async Task<bool> CheckReleaseMovementManifest(string movementManifestCode)
         {
             try
             {
@@ -2165,7 +2174,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode); 
+                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
                 var ManifestNumber = movementManifest.FirstOrDefault();
 
                 if (ManifestNumber.DriverCode == code)
@@ -2187,8 +2196,8 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres() 
-        { 
+        public async Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres()
+        {
             try
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
@@ -3068,7 +3077,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (bankDepositOrder != null)
                 {
-                    if(bankDepositOrder.Status == DepositStatus.Deposited || bankDepositOrder.Status == DepositStatus.Verified)
+                    if (bankDepositOrder.Status == DepositStatus.Deposited || bankDepositOrder.Status == DepositStatus.Verified)
                     {
                         //throw new GenericException($"Error Cancelling the Shipment." +
                         //        $" The shipment with waybill number {waybill} has already been deposited in the bank with ref code {bankDepositOrder.RefCode}.");
@@ -3585,7 +3594,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Longitude = (double)receieverServiceCenter.Longitude
                     };
                 }
-             
+
                 var mobileShipment = new PreShipmentMobileDTO
                 {
                     CalculatedTotal = (double)priceDTO.DeliveryPrice,
