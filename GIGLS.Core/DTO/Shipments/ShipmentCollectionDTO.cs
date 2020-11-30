@@ -46,4 +46,21 @@ namespace GIGLS.CORE.DTO.Shipments
         public string DeliveryNumber { get; set; }
 
     }
+
+
+
+    public class ShipmentCollectionForContactDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string DepartsureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public int ShipmentContactId { get; set; }
+        public string ContactedBy { get; set; }
+        public int NoOfContact { get; set; }
+
+
+    }
 }

@@ -3888,6 +3888,5 @@ namespace GIGLS.Services.Implementation.Shipments
             return Math.Round(number * factor) / factor;
         }
 
-
     }
 }
