@@ -18,6 +18,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -61,6 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
         private readonly IGIGGoPricingService _gIGGoPricingService;
+        private readonly INodeService _nodeService;
         private readonly IDHLService _DhlService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -71,7 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, IDHLService dHLService)
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, , IDHLService dHLService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -89,6 +91,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
             _gIGGoPricingService = gIGGoPricingService;
+            _nodeService = nodeService;
             _DhlService = dHLService;
             MapperConfig.Initialize();
         }
@@ -3671,7 +3674,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Fire and forget
                 //Send the Payload to Partner Cloud Handler 
-                NodeApiCreateShipment(newPreShipment);
+                await NodeApiCreateShipment(newPreShipment);
                 return mobileShipment;
             }
             catch
@@ -3680,7 +3683,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private void NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        private async Task NodeApiCreateShipment(PreShipmentMobile newPreShipment)
         {
             try
             {
@@ -3706,12 +3709,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 };
 
-                HttpClient client = new HttpClient();
-
-                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
-                nodeURL = nodeURL + nodePostShipment;
-                client.PostAsJsonAsync(nodeURL, nodePayload);
+                await _nodeService.CreateShipment(nodePayload);
             }
             catch (Exception)
             {

@@ -14,6 +14,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -1634,8 +1635,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-
-
-
+    
     }
 }

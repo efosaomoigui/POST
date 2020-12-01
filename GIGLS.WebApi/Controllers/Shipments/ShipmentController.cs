@@ -30,15 +30,17 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IUserService _userService;
         private readonly IPreShipmentService _preshipmentService;
         private readonly ICustomerPortalService _customerPortalService;
+        private readonly IShipmentContactService _shipmentContactService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
             _preshipmentService = preshipmentService;
             _customerPortalService = customerPortalService;
+            _shipmentContactService = shipmentContactService;
         }
 
 
@@ -842,6 +844,48 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = price,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("shipmentcontact")]
+        public async Task<IServiceResponse<List<ShipmentContactDTO>>> GetShipmentContacts(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcontacts = await _shipmentContactService.GetShipmentContact(baseFilterCriteria);
+                return new ServiceResponse<List<ShipmentContactDTO>>
+                {
+                    Object = shipmentcontacts
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updateshipmentcontact")]
+        public async Task<IServiceResponse<bool>> AddOrUpdateContact(ShipmentContactDTO shipmentContactDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcontact = await _shipmentContactService.AddOrUpdateShipmentContactAndHistory(shipmentContactDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipmentcontact
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getshipmentcontacthistory/{waybill}")]
+        public async Task<IServiceResponse<List<ShipmentContactHistoryDTO>>> GetShipmentContactHistoryByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var history = await _shipmentContactService.GetShipmentContactHistoryByWaybill(waybill);
+                return new ServiceResponse<List<ShipmentContactHistoryDTO>>
+                {
+                    Object = history
                 };
             });
         }

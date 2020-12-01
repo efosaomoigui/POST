@@ -182,6 +182,7 @@
     <Compile Include="Business\CustomerPortal\PartnerPortalService.cs" />
     <Compile Include="Business\DHL\DHLService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
+    <Compile Include="Business\Node\NodeService.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\GIGGoPricingService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
@@ -279,6 +280,7 @@
     <Compile Include="Implementation\ServiceCentres\RegionServiceCentreMappingService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentDeliveryOptionMappingService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentPackagePriceService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentContactService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentRerouteService.cs" />
     <Compile Include="Implementation\Shipments\ManifestGroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestService.cs" />
