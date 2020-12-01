@@ -889,6 +889,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Items cannot be empty");
                 }
 
+                if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
+                    if (receieverServiceCenter.Latitude == null || receieverServiceCenter.Longitude == null)
+                    {
+                        throw new GenericException("Destination Service Center Longitude and Latitude details not found");
+
+                    }
+                }
+
+                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
+                {
+                    throw new GenericException("Receiver Longitude and Latitude details not found");
+                }
+
                 shipment.CustomerCode = shipment.Customer[0].CustomerCode;
                 if (shipment.PaymentType == PaymentType.Wallet)
                 {
