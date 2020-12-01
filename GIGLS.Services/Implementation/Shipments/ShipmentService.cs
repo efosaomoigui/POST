@@ -73,7 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, , IDHLService dHLService)
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
