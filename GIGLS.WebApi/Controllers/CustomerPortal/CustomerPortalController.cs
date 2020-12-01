@@ -40,6 +40,7 @@ using System.Net;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -72,22 +73,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[HttpPost]
-        //[Route("AddIntlShipmentTransactions")]
-        //public async Task<IServiceResponse<object>> AddIntlShipmentTransactions(IntlShipmentRequestDTO TransactionDTO)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var customer = await _portalService.GetCustomer(TransactionDTO.UserId);
-        //        TransactionDTO.CustomerId = customer.IndividualCustomerId;
-        //        var result = await _magayaService.CreateIntlShipmentRequest(TransactionDTO);
-        //        return new ServiceResponse<object>
-        //        {
-        //            Object = result
-        //        };
-        //    });
-        //}
 
         [HttpPost]
         [Route("AddIntlShipmentTransactions")]
@@ -672,76 +657,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[AllowAnonymous]
-        //[HttpPost]
-        //[Route("validateotp/{OTP}")]
-        //public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var Otp = await _portalService.IsOTPValid(OTP);
-        //        if (Otp != null && Otp.IsActive == true)
-        //        {
-        //            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-        //            string getTokenResponse;
-
-        //            using (var client = new HttpClient())
-        //            {
-        //                //setup client
-        //                client.BaseAddress = new Uri(apiBaseUri);
-        //                client.DefaultRequestHeaders.Accept.Clear();
-        //                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //                //setup login data
-        //                var formContent = new FormUrlEncodedContent(new[]
-        //                    {
-        //                 new KeyValuePair<string, string>("grant_type", "password"),
-        //                 new KeyValuePair<string, string>("Username", Otp.Username),
-        //                 new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
-        //                 });
-
-        //                //setup login data
-        //                HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
-
-        //                if (!responseMessage.IsSuccessStatusCode)
-        //                {
-        //                    throw new GenericException("Incorrect Login Details");
-        //                }
-        //                else
-        //                {
-        //                    Otp = await _portalService.GenerateReferrerCode(Otp);
-        //                }
-
-        //                //get access token from response body
-        //                var responseJson = await responseMessage.Content.ReadAsStringAsync();
-        //                var jObject = JObject.Parse(responseJson);
-
-        //                getTokenResponse = jObject.GetValue("access_token").ToString();
-
-        //                return new ServiceResponse<JObject>
-        //                {
-        //                    Object = jObject,
-        //                    ReferrerCode = Otp.Referrercode
-        //                };
-        //            }
-
-        //        }
-        //        else
-        //        {
-        //            var data = new { IsActive = false };
-
-        //            var jObject = JObject.FromObject(data);
-
-        //            return new ServiceResponse<JObject>
-        //            {
-        //                ShortDescription = "User has not been verified",
-        //                Object = jObject
-        //            };
-        //        }
-        //    });
-        //}
-
+        
         [AllowAnonymous]
         [HttpPost]
         [Route("verifyotp")]
@@ -786,8 +702,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
                         var jObject = JObject.Parse(responseJson);
 
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
+                        //Get country detail
+                        var country = await _portalService.GetUserCountryCode(userDto);
+                        var countryJson = JObject.FromObject(country);
 
+                        //jObject.Add(countryJson);
+                        jObject.Add(new JProperty("Country", countryJson));
+
+                        getTokenResponse = jObject.GetValue("access_token").ToString();
                         return new ServiceResponse<JObject>
                         {
                             Object = jObject,
@@ -1763,8 +1685,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //Remove this 
-        [AllowAnonymous]
         [HttpPost]
         [Route("addmobilepickuprequestfortimedoutrequests")]
         public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
@@ -2185,6 +2105,79 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("storesbycountry/{countryId}")]
+        public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stores = await _portalService.GetStoresByCountry(countryId);
+                return new ServiceResponse<List<StoreDTO>>
+                {
+                    Object = stores
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createnotification")]
+        public async Task<IServiceResponse<object>> CreateNotification(NotificationDTO notificationDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var notification = await _portalService.CreateNotification(notificationDto);
+
+                return new ServiceResponse<object>
+                {
+                    Object = notification
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getnotifications/{isRead?}")]
+        public async Task<IServiceResponse<IEnumerable<NotificationDTO>>> GetNotifications(bool? isRead = null)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var locations = await _portalService.GetNotifications(isRead);
+                return new ServiceResponse<IEnumerable<NotificationDTO>>
+                {
+                    Object = locations
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updatenotification/{notificationId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateNotificationAsRead(int notificationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.UpdateNotificationAsRead(notificationId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("intlshipmentsmessage")]
+        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var message = await _portalService.GetIntlMessageForApp();
+
+                return new ServiceResponse<MessageDTO>
+                {
+                    Object = message
                 };
             });
         }

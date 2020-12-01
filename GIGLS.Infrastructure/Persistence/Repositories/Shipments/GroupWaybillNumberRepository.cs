@@ -46,12 +46,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var movementNumberDto = from gw in MovementManifestNumber 
                                   select new MovementManifestNumberDTO
                                   {
-                                      IsActive = gw.IsActive,
+                                      //IsActive = gw.IsActive,
                                       MovementManifestCode = gw.MovementManifestCode,
                                       MovementManifestNumberId = gw.MovementManifestNumberId,
-                                      ServiceCentreId = gw.ServiceCentreId,
+                                      ServiceCentreId = gw.DepartureServiceCentreId,
                                       UserId = gw.UserId,
-                                      ServiceCentreCode = gw.ServiceCentre.Name
+                                      ServiceCentreCode = gw.DepartureServiceCentre.Code
                                   };
             return Task.FromResult(movementNumberDto.ToList());
         }

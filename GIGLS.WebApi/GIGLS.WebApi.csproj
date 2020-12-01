@@ -438,6 +438,7 @@
     </Content>
     <Content Include="ReportTemplate\dailysales.xlsx" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy.pubxml" />

@@ -8,6 +8,8 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
 using System.Data.SqlClient;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -52,11 +54,82 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                     countryId
                 };
 
-                var summary = await _context.Database.SqlQuery<decimal>("WalletBalance " +
+                decimal summary = 0.00M;
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("WalletBalance " +
                    "@CountryId",
                    param).FirstOrDefaultAsync();
 
+                if(summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
                 return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<WalletBreakdown> GetWalletBreakdown(int activeCountryId)
+        {
+            try
+            {
+                var result = new WalletBreakdown
+                {
+                    IndividualCustomer = 0,
+                    Ecommerce = 0,
+                };
+
+                SqlParameter countryId = new SqlParameter("@CountryId", activeCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<WalletBreakdown>("WalletBalanceBreakdown " +
+                   "@CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summaryResult != null)
+                {
+                    result.IndividualCustomer = summaryResult.IndividualCustomer;
+                    result.Ecommerce = summaryResult.Ecommerce;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<WalletDTO>> GetOutstaningCorporatePayments()
+        {
+            try
+            {
+                var outstandingPayments = _context.Wallets.Where(x => x.CompanyType == CompanyType.Corporate.ToString() && x.Balance < 0);
+                var companiesDto = from w in outstandingPayments
+                                   join c in _context.Company on w.CustomerCode equals c.CustomerCode
+                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                                   select new WalletDTO
+                                   {
+                                       CustomerCode = w.CustomerCode,
+                                       Balance = w.Balance,
+                                       CustomerName = c.Name,
+                                       Country = new CountryDTO
+                                       {
+                                           CountryId = co.CountryId,
+                                           CountryName = co.CountryName,
+                                           CurrencySymbol = co.CurrencySymbol,
+                                           CurrencyCode = co.CurrencyCode,
+                                           PhoneNumberCode = co.PhoneNumberCode
+                                       },
+                                   };
+                return Task.FromResult(companiesDto.OrderBy(x => x.Balance).ToList());
             }
             catch (Exception)
             {

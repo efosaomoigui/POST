@@ -14,6 +14,8 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IMessageService;
 using System.Security.Cryptography;
 using System.Text;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Account;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -23,13 +25,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IFinancialReportService _financialReportService;
 
-        public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, IMessageSenderService messageSenderService)
+        public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, 
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _messageSenderService = messageSenderService;
+            _financialReportService = financialReportService;
             MapperConfig.Initialize();
         }
 
@@ -237,6 +242,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 if (shipment != null)
                 {
+                    //Add to Financial Reports
+                    var financialReport = new FinancialReportDTO
+                    {
+                        Source = ReportSource.Agility,
+                        Waybill = shipment.Waybill,
+                        PartnerEarnings = 0.0M,
+                        GrandTotal = invoiceEntity.Amount,
+                        Earnings = invoiceEntity.Amount,
+                        Demurrage = 0.00M,
+                        CountryId = invoiceEntity.CountryId
+                    };
+
+                    await _financialReportService.AddReport(financialReport);
+
                     //QR Code
                     var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 

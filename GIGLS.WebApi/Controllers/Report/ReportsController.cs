@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
@@ -234,6 +235,54 @@ namespace GIGLS.WebApi.Controllers.Report
                 return new ServiceResponse<List<PreShipmentMobileReportDTO>>
                 {
                     Object = summary
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("earningsbreakdown")]
+        public async Task<IServiceResponse<EarningsBreakdownDTO>> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var earnings = await _accountService.GetEarningsBreakdown(dashboardFilter);
+
+                return new ServiceResponse<EarningsBreakdownDTO>
+                {
+                    Object = earnings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("financialreport")]
+        public async Task<IServiceResponse<List<FinancialReportDTO>>> GetFinancialBreakdownByType(AccountFilterCriteria accountFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var financialreport = await _accountService.GetFinancialBreakdownByType(accountFilter);
+
+                return new ServiceResponse<List<FinancialReportDTO>>
+                {
+                    Object = financialreport
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("walletfundingbreakdown")]
+        public async Task<IServiceResponse<List<WalletPaymentLogView>>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _accountService.GetWalletPaymentLogBreakdown(dashboardFilter);
+
+                return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = report
                 };
             });
         }

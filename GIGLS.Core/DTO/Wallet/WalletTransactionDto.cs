@@ -47,4 +47,18 @@ namespace GIGLS.Core.DTO.Wallet
         public decimal CreditAmount { get; set; }
         public decimal DebitAmount { get; set; }
     }
+
+    public class WalletPaymentLogSummary
+    {
+        public decimal Paystack { get; set; }
+        public decimal TheTeller { get; set; }
+        public decimal Flutterwave { get; set; }
+        public decimal USSD { get; set; }
+    }
+
+    public class WalletBreakdown
+    {
+        public decimal IndividualCustomer { get; set; }
+        public decimal Ecommerce { get; set; }
+    }
 }

@@ -281,6 +281,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IDispatchRepository Dispatch { get; set; }
 
         [Inject]
+        public IMovementDispatchRepository MovementDispatch { get; set; } 
+
+        [Inject]
         public IDispatchActivityRepository DispatchActivity { get; set; }
 
         [Inject]
@@ -491,6 +494,13 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+        [Inject]
+        public IShipmentContactRepository ShipmentContact { get; set; }     
+        [Inject]
+        public IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
+
+        [Inject]
+        public IFinancialReportRepository FinancialReport { get; set; }
 
         public int Complete()
         {

@@ -65,6 +65,8 @@
         EcommerceGIGGOIntraStateBikeDiscount,
         GIGGODropOffDiscount,
         ChairmanEmail,
-        HighValueShipment
+        HighValueShipment,
+        MagayaAppMessagePush,
+        MagayaInAppMessage
     }
 }

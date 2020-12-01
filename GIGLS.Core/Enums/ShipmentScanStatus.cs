@@ -41,6 +41,8 @@
         DCC,  //WHEN SHIPMENT DEPARTS COLLATION CENTER
         MNT, //WHEN MANIFEST IS NOT FOUND IN THE SUPERMANIFEST
         DLP,  //DELAYED PICKUP
-        THIRDPARTY //For 3rd party and gigm captain
+        THIRDPARTY, //For 3rd party and gigm captain
+        PICKED, // PICKED UP
+        AISN //ARRIVE INTL SHIPMENT TO NIGERIA
     }
 }

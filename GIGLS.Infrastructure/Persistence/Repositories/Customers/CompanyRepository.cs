@@ -487,5 +487,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
+
+        public Task<List<CompanyDTO>> GetCompaniesByCodes(List<string> codes)
+        {
+            try
+            {
+                var companies = Context.Company.Where(x => codes.Contains(x.CustomerCode)).ToList();
+                var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
+                return Task.FromResult(companiesDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

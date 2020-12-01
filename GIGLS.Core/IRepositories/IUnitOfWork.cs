@@ -109,6 +109,7 @@ namespace GIGLS.Core
         IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
+        IMovementDispatchRepository MovementDispatch { get; set; } 
         IDispatchActivityRepository DispatchActivity { get; set; }
         IEmailSendLogRepository EmailSendLog { get; set; }
         ISmsSendLogRepository SmsSendLog { get; set; }
@@ -191,6 +192,7 @@ namespace GIGLS.Core
         IEcommerceAgreementRepository EcommerceAgreement { get; set; }
         IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
         IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+        IFinancialReportRepository FinancialReport { get; set; }
 
         //Route Section
         IRouteRepository Routes { get; set; }
@@ -198,6 +200,8 @@ namespace GIGLS.Core
         //Mpvement Manifest
         IMovementManifestNumberRepository MovementManifestNumber { get; set; }
         IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
+        IShipmentContactRepository ShipmentContact { get; set; }
+        IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

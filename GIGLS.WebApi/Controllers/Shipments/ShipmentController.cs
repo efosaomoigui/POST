@@ -16,6 +16,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using System;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -27,14 +28,18 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentReportService _reportService;
         private readonly IUserService _userService;
         private readonly IPreShipmentService _preshipmentService;
+        private readonly ICustomerPortalService _customerPortalService;
+        private readonly IShipmentContactService _shipmentContactService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService,IPreShipmentService preshipmentService) : base(nameof(ShipmentController))
+            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
             _userService = userService;
             _preshipmentService = preshipmentService;
+            _customerPortalService = customerPortalService;
+            _shipmentContactService = shipmentContactService;
         }
 
 
@@ -63,7 +68,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri] FilterOptionsDto filterOptionsDto)
         {
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
@@ -83,14 +88,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri] FilterOptionsDto filterOptionsDto)
         {
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
 
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await  _service.GetIntlTransactionShipments(filterOptionsDto);
+                var result = await _service.GetIntlTransactionShipments(filterOptionsDto);
 
                 return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
                 {
@@ -102,7 +107,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("incomingshipments")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -167,6 +172,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 ShipmentDTO.DeliveryOption = null;
 
                 var shipment = await _service.AddShipmentForPaymentWaiver(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("giggoextension")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddGIGGOShipmentFromAgility(PreShipmentMobileFromAgilityDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.AddAgilityShipmentToGIGGo(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -286,7 +306,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -333,7 +353,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedgroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -349,7 +369,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestFormovementmanifestservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre([FromUri] MovementManifestFilterCriteria filterOptionsDto) 
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre([FromUri] MovementManifestFilterCriteria filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -377,6 +397,37 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(string movementmanifestcode, string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.ReleaseMovementManifest(movementmanifestcode, code);
+                return new ServiceResponse<bool>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("checkreleasemovementmanifest/{movementmanifestcode}")] 
+        public async Task<IServiceResponse<bool>> CheckReleaseManifest(string movementmanifestcode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.CheckReleaseMovementManifest(movementmanifestcode);
+                return new ServiceResponse<bool>
+                {
+                    Object = centres
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
@@ -585,7 +636,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -599,7 +650,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     StartLimit = limitStart,
                     EndLimit = limitEnd
                 };
-                
+
                 var chartData = await _service.GetShipmentCreatedByDateMonitor(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -617,7 +668,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -652,7 +703,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -710,7 +761,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; 
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -775,6 +826,65 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<PreShipmentDTO>>
                 {
                     Object = preshipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgiggoprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                preshipmentMobile.IsFromAgility = true;
+                var price = await _service.GetGIGGOPrice(preshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = price,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("shipmentcontact")]
+        public async Task<IServiceResponse<List<ShipmentContactDTO>>> GetShipmentContacts(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcontacts = await _shipmentContactService.GetShipmentContact(baseFilterCriteria);
+                return new ServiceResponse<List<ShipmentContactDTO>>
+                {
+                    Object = shipmentcontacts
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updateshipmentcontact")]
+        public async Task<IServiceResponse<bool>> AddOrUpdateContact(ShipmentContactDTO shipmentContactDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcontact = await _shipmentContactService.AddOrUpdateShipmentContactAndHistory(shipmentContactDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipmentcontact
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getshipmentcontacthistory/{waybill}")]
+        public async Task<IServiceResponse<List<ShipmentContactHistoryDTO>>> GetShipmentContactHistoryByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var history = await _shipmentContactService.GetShipmentContactHistoryByWaybill(waybill);
+                return new ServiceResponse<List<ShipmentContactHistoryDTO>>
+                {
+                    Object = history
                 };
             });
         }

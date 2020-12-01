@@ -58,6 +58,7 @@ using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -100,6 +101,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly IMagayaService _magayaService;
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
+        private readonly INotificationService _notificationService;
+        private readonly ICompanyService _companyService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -112,7 +115,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService)
+            IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
+            INotificationService notificationService,ICompanyService companyService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -151,6 +155,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _flutterwavePaymentService = flutterwavePaymentService;
             _magayaService = magayaService;
             _mobilePickUpRequestService = mobilePickUpRequestsService;
+            _notificationService = notificationService;
+            _companyService = companyService;
             MapperConfig.Initialize();
         }
 
@@ -1680,7 +1686,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
-        public async Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment)
+        public async Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment)
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
@@ -1734,39 +1740,39 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            bool disableShipmentCreation = bool.Parse(isDisable);
+            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            //bool disableShipmentCreation = bool.Parse(isDisable);
 
-            bool allowTestUser = await AllowTestingUserToCreateShipment();
+            //bool allowTestUser = await AllowTestingUserToCreateShipment();
 
-            if (allowTestUser)
-            {
-                disableShipmentCreation = false;
-            }
+            //if (allowTestUser)
+            //{
+            //    disableShipmentCreation = false;
+            //}
 
-            if (disableShipmentCreation)
-            {
-                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
+            //if (disableShipmentCreation)
+            //{
+            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            //}
 
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
         }
 
         public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            bool disableShipmentCreation = bool.Parse(isDisable);
-            bool allowTestUser = await AllowTestingUserToCreateShipment();
+            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            //bool disableShipmentCreation = bool.Parse(isDisable);
+            //bool allowTestUser = await AllowTestingUserToCreateShipment();
 
-            if (allowTestUser)
-            {
-                disableShipmentCreation = false;
-            }
+            //if (allowTestUser)
+            //{
+            //    disableShipmentCreation = false;
+            //}
 
-            if (disableShipmentCreation)
-            {
-                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
+            //if (disableShipmentCreation)
+            //{
+            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            //}
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
             var userDTO = Mapper.Map<UserDTO>(user);
@@ -2798,8 +2804,24 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
+            //if (waybill.Contains("AWR"))
+            //{
+            //    throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            //}
+
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
+
+            //block third party payment process
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+
+            if (shipment != null)
+            {
+                if (shipment.CustomerCode != currentUser.UserChannelCode)
+                {
+                    throw new GenericException($"Third Party Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+                }
+            }
 
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
 
@@ -2899,5 +2921,162 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _mobilePickUpRequestService.GetAllMobilePickUpRequestsPaginated(shipmentAndPreShipmentParamDTO);
         }
+
+        public async Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile()
+        {
+            return await _manifestWaybillMappingService.GetAllManifestForPreShipmentMobile();
+        }
+
+        public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
+        {
+          return  await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
+        }
+        public async Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile)
+        {
+            try
+            {
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> CreateNotification(NotificationDTO notificationDTO)
+        {
+            return await _notificationService.CreateNotification(notificationDTO);
+        }
+
+        public async Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead)
+        {
+            return await _notificationService.GetNotifications(IsRead);
+        }
+
+        public async Task UpdateNotificationAsRead(int notificationId)
+        {
+            await _notificationService.UpdateNotificationAsRead(notificationId);
+        }
+
+        //Get International Shipments Terms and Conditions
+        public async Task<MessageDTO> GetIntlMessageForApp()
+        {
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+        }
+
+        public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
+        {
+            return await _uow.Store.GetStoresByCountryId(countryId);
+        }
+
+
+        public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
+        {
+            return await _companyService.UnboardUser(company);
+        }
+
+        public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
+        {
+            var result = new ResponseDTO();
+
+            if (userDetail == null)
+            {
+                result.Succeeded = false;
+                result.Message = $"Invalid payload";
+                return result;
+            }
+            if (!String.IsNullOrEmpty(userDetail.BusinessName))
+            {
+                var company = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                if (company != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+
+                //also check aspnet table for business name
+                var user = await _uow.User.GetUserByCompanyName(userDetail.BusinessName);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+            if (!String.IsNullOrEmpty(userDetail.Email))
+            {
+                var user = await _uow.User.GetUserByEmail(userDetail.Email);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+
+             if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            {
+                var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+
+            result.Exist = false;
+            result.Message = "User detail does not exist";
+            result.Succeeded = true;
+            return result;
+        }
+
+        public async Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            return await _companyService.UpdateUserRank(userValidationDTO);
+        }
+
+        public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
+        {
+            //check if the receiver detail exist
+            if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
+            {
+                var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
+            {
+                var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
+            return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
+        }
+
+        public async Task<UserDTO> GetUserByEmail(string email)
+        {
+            var user = await _uow.User.GetUserByEmail(email);
+            var userDTO = Mapper.Map<UserDTO>(user);
+            return userDTO; 
+        }
+
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await _walletService.ChargeWallet(chargeWalletDTO);
+        }
+
+
     }
 }

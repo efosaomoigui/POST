@@ -16,6 +16,8 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Domain.Expenses;
 using System.Net;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -24,12 +26,14 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
+        private readonly IPreShipmentMobileService _preshipmentMobileService;
 
-        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow)
+        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPreShipmentMobileService preshipmentMobileService)
         {
             _walletService = walletService;
             _userService = userService;
             _uow = uow;
+            _preshipmentMobileService = preshipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -44,7 +48,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 int userServiceCentreId;
                 int dispatchId;
 
-                if(dispatchDTO.ManifestType == ManifestType.Pickup)
+                if(dispatchDTO.ManifestType == ManifestType.Pickup || dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                     userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
@@ -58,6 +62,18 @@ namespace GIGLS.Services.Implementation.Fleets
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
+
+                //check to see if there is a pending manifest for the user
+               if(dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
+                {
+                    var pendingDispatch = _uow.Dispatch.GetAll().Where(x => x.ReceivedBy == null && x.DriverDetail == dispatchDTO.UserId).ToList();
+                    if (pendingDispatch.Any())
+                    {
+                        var manifests = pendingDispatch.Select(x => x.ManifestNumber);
+                        throw new GenericException($"Error: Dispatch not registered. " +
+                                   $"The following manifests [{string.Join(", ", manifests.ToList())}] has not been signed off");
+                    }
+                }
 
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
@@ -73,12 +89,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
                         var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
-                    }
-                    
+                    }                    
                 }
 
                 var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
-                if (dispatchObj != null && dispatchDTO.ManifestType == ManifestType.Pickup)
+                if (dispatchObj != null )
                 {
                     dispatchObj.DriverDetail = dispatchDTO.DriverDetail;
                     dispatchObj.Amount = dispatchDTO.Amount;
@@ -91,6 +106,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                     newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     newDispatch.ServiceCentreId = userServiceCentreId;
+
+                    if (dispatchDTO.ManifestType == ManifestType.PickupForDelivery)
+                    {
+                        newDispatch.DriverDetail = dispatchDTO.UserId;
+                    }
 
                     //Set Departure Service Center
                     newDispatch.DepartureServiceCenterId = userServiceCentreId;
@@ -178,8 +198,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestObjs.ForEach(x => x.IsDispatched = true);
                     manifestObjs.ForEach(x => x.ManifestType = dispatchDTO.ManifestType);
                     manifestObjs.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.Dispatched);
-                    manifestObjs.ForEach(x => x.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId);
-                    
+                    manifestObjs.ForEach(x => x.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId);                    
                 }
                 
                 ////--start--///Set the DepartureCountryId
@@ -227,6 +246,57 @@ namespace GIGLS.Services.Implementation.Fleets
                 return new { Id = dispatchId };
             }
         }
+
+
+        /// <summary>
+        /// This method creates a new dispatch, updates the manifest and system wallet information
+        /// </summary>
+        /// <param name="MovementdispatchDTO"></param>
+        /// <returns></returns>
+        public async Task<object> AddMovementDispatch(MovementDispatchDTO dispatchDTO) 
+        {
+            {
+                int userServiceCentreId;
+                int dispatchId;
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                userServiceCentreId = serviceCenterIds[0];
+
+                //get the login user
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserDetail = await _userService.GetUserById(currentUserId);
+                //var dispatchObj = _uow.MovementDispatch.SingleOrDefault(s => s.MovementManifestNumber == dispatchDTO.MovementManifestNumber);
+
+                // create dispatch
+                var newDispatch = Mapper.Map<MovementDispatch>(dispatchDTO);
+                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                newDispatch.ServiceCentreId = userServiceCentreId;
+
+                //Set Departure Service Center
+                newDispatch.DepartureServiceCenterId = userServiceCentreId;
+                newDispatch.DepartureId = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.ServiceCentreId == newDispatch.DepartureServiceCenterId)
+                    .Select(x => x.StationId).FirstOrDefault();
+
+                //newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+
+                _uow.MovementDispatch.Add(newDispatch); 
+                dispatchId = newDispatch.DispatchId;
+
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(userServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+
+                // commit transaction
+                await _uow.CompleteAsync();
+                return new { Id = dispatchId };
+            }
+        }
+
 
         /// <summary>
         /// This method ensures that all waybills attached to the manifestNumber 
@@ -358,6 +428,68 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 return dispatchDTO;
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MovementDispatchDTO> GetMovementDispatchManifestCode(string movementmanifestcode)  
+        {
+            try
+            {
+                var dispatchResult = await _uow.MovementDispatch.FindAsync(x => x.MovementManifestNumber.Equals(movementmanifestcode));
+                var dispatch = dispatchResult.FirstOrDefault();
+                if (dispatch == null)
+                {
+                    return null;
+                }
+
+                var dispatchDTO = Mapper.Map<MovementDispatchDTO>(dispatch);
+
+                //get User detail
+                var user = await _uow.User.GetUserById(dispatch.DriverDetail);
+
+                if (user != null)
+                {
+                    dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
+                    dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
+                }
+
+                //get the country by service centre
+                if (dispatchDTO.ServiceCentreId > 0)
+                {
+                    int serviceCentre = (int)dispatchDTO.ServiceCentreId;
+                    var country = await _uow.Country.GetCountryByServiceCentreId(serviceCentre);
+                    dispatchDTO.Country = country;
+                }
+                //get Station Detail
+                var destStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DestinationId);
+                if (destStation != null)
+                {
+                    dispatchDTO.Destination = Mapper.Map<StationDTO>(destStation);
+                }
+
+                var deptStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DepartureId);
+                if (deptStation != null)
+                {
+                    dispatchDTO.Departure = Mapper.Map<StationDTO>(deptStation);
+                }
+                //get Service Center Detail
+                var destService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DestinationServiceCenterId);
+                if (destService != null)
+                {
+                    dispatchDTO.DestinationService = Mapper.Map<ServiceCentreDTO>(destService);
+                }
+
+                var deptService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DepartureServiceCenterId);
+                if (deptService != null)
+                {
+                    dispatchDTO.DepartureService = Mapper.Map<ServiceCentreDTO>(deptService);
+                }
+
+                return dispatchDTO;
             }
             catch (Exception)
             {
@@ -576,6 +708,81 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 throw;
             }
-        }        
+        }
+
+        public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
+        {
+            try
+            {
+                string user = await _userService.GetCurrentUserId();
+                if (String.IsNullOrEmpty(manifestNumber) || waybills == null || waybills.Count < 1)
+                {
+                    throw new GenericException("No waybill number(s) provided");
+                }
+
+
+                //check if manifest has already been picked
+                var manifest = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
+                if (manifest != null && manifest.Picked)
+                {
+                    return true;
+                }
+
+                //check to see if all waybill in manifest was fufilled
+                var unFufilled = _uow.PickupManifestWaybillMapping.GetAll().Where(x => !waybills.Contains(x.Waybill) && x.ManifestCode == manifestNumber).ToList();
+                if (unFufilled.Any())
+                {
+                    //change contained waybill status back to shipment created
+                    var waybillsToRemove = unFufilled.Select(s => s.Waybill).ToList();
+                    var preshipmentWaybills = _uow.PreShipmentMobile.GetAll().Where(x => waybillsToRemove.Contains(x.Waybill)).ToList();
+                    foreach (var item in preshipmentWaybills)
+                    {
+                        item.shipmentstatus = "Shipment created";
+                    }
+                    //then delete it from PickupManifestWaybillMapping
+                    _uow.PickupManifestWaybillMapping.RemoveRange(unFufilled);
+                }
+                //update waybill to pickedup
+                var waybillsToUpdateToPickup = _uow.PreShipmentMobile.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var pickupRequestList = new List<MobilePickUpRequests>();
+                foreach (var item in waybillsToUpdateToPickup)
+                {
+                    item.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
+                    // add preshipment record to mobilepickuprequest table
+                    var request = new MobilePickUpRequests();
+                    request.Status = item.shipmentstatus;
+                    request.Waybill = item.Waybill;
+                    request.UserId = user;
+                    request.DateCreated = DateTime.Now;
+                    request.DateModified = DateTime.Now;
+                    pickupRequestList.Add(request);
+                }
+                _uow.MobilePickUpRequests.AddRange(pickupRequestList);
+                await _uow.CompleteAsync();
+
+                //send sms to all receiver
+                for (int i = 0; i < waybillsToUpdateToPickup.Count; i++)
+                {
+                    var preshipment = waybillsToUpdateToPickup[i];
+                    await _preshipmentMobileService.ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = preshipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.PICKED
+                    });
+                    //Generate Receiver Delivery Code
+                    var deliveryNumber = await _preshipmentMobileService.GenerateDeliveryCode();
+                    //Send SMS To Receiver with Delivery Code
+                    await _preshipmentMobileService.SendReceiverDeliveryCodeBySMS(waybillsToUpdateToPickup[i], deliveryNumber);
+                }
+                manifest.Picked = true;
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

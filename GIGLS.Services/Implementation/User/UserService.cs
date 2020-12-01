@@ -92,6 +92,11 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetCorporateCustomerUsers();
         }
 
+        public async Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId)
+        {
+            return await _serviceCentreService.GetServiceCentreById(ServiceCenterId);
+        }
+
         public IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
         {
             return _unitOfWork.User.GetCorporateCustomerUsersAsQueryable();
@@ -1487,6 +1492,20 @@ namespace GIGLS.Services.Implementation.User
         public async Task<bool> IsCustomerHasAgentRole(string userId)
         {
             return await _unitOfWork.User.IsCustomerHasAgentRole(userId);
+        }
+
+        public async Task<IdentityResult> SetDashboardAccess(string userid, bool val)
+        {
+            var user = await _unitOfWork.User.GetUserById(userid);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            user.DashboardAccess = val;
+
+            return await _unitOfWork.User.UpdateUser(userid, user);
         }
     }
 }

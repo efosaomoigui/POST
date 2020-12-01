@@ -4,21 +4,19 @@ using GIGLS.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.User;  
+using GIGLS.Core.IServices.User;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
-using ThirdParty.WebServices.Magaya.Services;   
+using ThirdParty.WebServices.Magaya.Services;
 using System.ServiceModel;
-using System.Web.Http.ModelBinding;
-using Newtonsoft.Json.Linq;
-using GIGLS.WebApi.Models;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using GIGLS.Core.DTO.Shipments;
-using System.EnterpriseServices;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -57,7 +55,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<api_session_error>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
+        public async Task<IServiceResponse<Tuple<api_session_error, string, string>>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -71,7 +69,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
 
                 //4. Pass the return to the view or caller
-                return new ServiceResponse<api_session_error>()
+                return new ServiceResponse<Tuple<api_session_error, string, string>>()
                 {
                     Object = await result
                 };
@@ -202,6 +200,27 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("GetIntltransactionRequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlShipmentRequests(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
         [HttpGet]
         [Route("GetEntitiesObject")]
         public async Task<IServiceResponse<EntityList>> GetEntitiesObject()
@@ -290,11 +309,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetMagayaWaybillNo")]
-        public async Task<IServiceResponse<string>> GetMagayaWaybillNo() 
+        public async Task<IServiceResponse<string>> GetMagayaWaybillNo([FromUri] NumberGeneratorType numbertype = NumberGeneratorType.MagayaWb) 
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.GetMagayaWayBillNumber();
+                var _result = _service.GetMagayaWayBillNumber(numbertype);
 
                 return new ServiceResponse<string>()
                 {

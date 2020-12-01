@@ -10,5 +10,7 @@ namespace GIGLS.Core.DTO.Stores
         public string Address { get; set; }
         public string City { get; set; }
         public string State { get; set; }
+        public string URL { get; set; }
+        public int CountryId { get; set; }
     }
 }

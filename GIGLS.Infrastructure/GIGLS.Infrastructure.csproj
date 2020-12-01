@@ -120,6 +120,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
     <Compile Include="Persistence\GIGLSContextForView.cs" />
+    <Compile Include="Persistence\Repositories\Account\FinancialReportRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\GeneralLedgerRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InsuranceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
@@ -212,6 +213,8 @@
     <Compile Include="Persistence\Repositories\Shipments\ManifestVisitMonitoringRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentMobileRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactHistoryRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />

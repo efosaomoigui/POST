@@ -83,7 +83,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<ServiceCentre, ServiceCentreDTO>();
                 config.CreateMap<ServiceCentreDTO, ServiceCentre>();
-
+                
                 config.CreateMap<SpecialDomesticPackageDTO, SpecialDomesticPackage>();
                 config.CreateMap<SpecialDomesticPackage, SpecialDomesticPackageDTO>();
 
@@ -233,6 +233,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
+
+                config.CreateMap<MovementDispatch, MovementDispatchDTO>();
+                config.CreateMap<MovementDispatchDTO, MovementDispatch>();
 
                 config.CreateMap<DispatchActivity, DispatchActivityDTO>();
                 config.CreateMap<DispatchActivityDTO, DispatchActivity>();
@@ -437,6 +440,15 @@ namespace GIGLS.Core
 
                 config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
                 config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
+
+                config.CreateMap<ShipmentDTO, PreShipmentMobileFromAgilityDTO>();
+                config.CreateMap<PreShipmentMobileFromAgilityDTO, ShipmentDTO>();
+
+                config.CreateMap<PreShipmentMobileDTO, PreShipmentMobileFromAgilityDTO>();
+                config.CreateMap<PreShipmentMobileFromAgilityDTO, PreShipmentMobileDTO>();
+
+                config.CreateMap<FinancialReport, FinancialReportDTO>();
+                config.CreateMap<FinancialReportDTO, FinancialReport>();
 
             });
 

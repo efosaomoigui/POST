@@ -38,5 +38,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsHUB { get; set; }
         public string FormattedServiceCentreName { get; set; }
         public CountryDTO CountryDTO { get; set; }
+        public bool IsPublic { get; set; }
     }
 }

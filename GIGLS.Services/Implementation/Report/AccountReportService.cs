@@ -9,6 +9,12 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Enums;
 using System;
 using GIGLS.Core.DTO.Customers;
+using System.Linq;
+using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO;
+using GIGLS.Core.IServices;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -17,12 +23,14 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IShipmentService _shipmentService;
-        
-        public AccountReportService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService)
+        private readonly ICountryService _countryService;
+
+        public AccountReportService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService, ICountryService countryService)
         {
             _uow = uow;
             _userService = userService;
             _shipmentService = shipmentService;
+            _countryService = countryService;
         }
 
         public async Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria)
@@ -198,6 +206,97 @@ namespace GIGLS.Services.Implementation.Report
             }
 
             return invoices;
+        }
+
+        //Get Earnings Breakdown
+        public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            if(dashboardFilter.ActiveCountryId == null)
+            {
+                CountryDTO userActiveCountry = null;
+
+                //set user active country from PriviledgeCountrys
+                var countries = await _userService.GetPriviledgeCountrys();
+                if (countries.Count == 1)
+                {
+                    userActiveCountry = countries[0];
+                }
+                else
+                {
+                    //If UserActive Country is already set in the UserEntity, use that value
+                    string currentUserId = await _userService.GetCurrentUserId();
+                    var currentUser = await _userService.GetUserById(currentUserId);
+
+                    if (currentUser.UserActiveCountryId > 0)
+                    {
+                        var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                        if (userActiveCountryFromEntity.CurrencySymbol != null)
+                        {
+                            userActiveCountry = userActiveCountryFromEntity;
+                        }
+                    }
+                }
+                dashboardFilter.ActiveCountryId = userActiveCountry.CountryId;
+            }
+
+            var earnings = await _uow.FinancialReport.GetEarningsBreakdown(dashboardFilter);
+
+            return earnings;
+
+        }
+
+        //Get Each Financial Breakdown
+        public async Task<List<FinancialReportDTO>> GetFinancialBreakdownByType(AccountFilterCriteria accountFilter)
+        {
+            if (accountFilter.CountryId == 0)
+            {
+                CountryDTO userActiveCountry = null;
+
+                //set user active country from PriviledgeCountrys
+                var countries = await _userService.GetPriviledgeCountrys();
+                if (countries.Count == 1)
+                {
+                    userActiveCountry = countries[0];
+                }
+                else
+                {
+                    //If UserActive Country is already set in the UserEntity, use that value
+                    string currentUserId = await _userService.GetCurrentUserId();
+                    var currentUser = await _userService.GetUserById(currentUserId);
+
+                    if (currentUser.UserActiveCountryId > 0)
+                    {
+                        var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                        if (userActiveCountryFromEntity.CurrencySymbol != null)
+                        {
+                            userActiveCountry = userActiveCountryFromEntity;
+                        }
+                    }
+                }
+                accountFilter.CountryId = userActiveCountry.CountryId;
+            }
+            var earnings = new List<FinancialReportDTO>();
+
+            if (accountFilter.ServiceCenterId == 3)
+            {
+                earnings = await _uow.FinancialReport.GetFinancialReportBreakdownForDemurrage(accountFilter);
+            }
+            else
+            {
+                earnings = await _uow.FinancialReport.GetFinancialReportBreakdown(accountFilter);
+            }
+
+            return earnings;
+
+        }
+
+        //Get Each Wallet Payment Breakdown
+        public async Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            var result = await _uow.WalletPaymentLog.GetWalletPaymentLogBreakdown(dashboardFilter);
+
+            return result;
+
         }
 
     }

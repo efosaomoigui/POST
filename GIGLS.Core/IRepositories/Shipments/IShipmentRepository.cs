@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
@@ -23,11 +24,13 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
     {
         Task<List<IntlShipmentRequestDTO>> GetShipments(int[] serviceCentreIds);
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(DateFilterCriteria dateFilterCriteria);
     }
 }

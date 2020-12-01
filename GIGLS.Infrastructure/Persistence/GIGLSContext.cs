@@ -125,6 +125,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<FleetPartInventory> FleetPartInventory { get; set; }
         public DbSet<FleetPartInventoryHistory> FleetPartInventoryHistory { get; set; }
         public DbSet<Dispatch> Dispatch { get; set; }
+        public DbSet<MovementDispatch> MovementDispatch { get; set; } 
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
 
         //Partner
@@ -287,6 +288,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
         public DbSet<ShipmentPackagingTransactions> ShipmentPackagingTransactions { get; set; }
         public DbSet<ServiceCenterPackage> ServiceCenterPackage { get; set; }
+        public DbSet<FinancialReport> FinancialReport { get; set; }
+        public DbSet<ShipmentContact> ShipmentContact { get; set; }
+        public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
 
         //routes
         public DbSet<Route> Routes { get; }

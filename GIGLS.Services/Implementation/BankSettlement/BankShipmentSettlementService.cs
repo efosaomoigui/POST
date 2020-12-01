@@ -705,6 +705,49 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(comboresult);
         }
 
+        //General Search 2
+        public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrderV2(string refcode, DepositType type)
+        {
+            try
+            {
+                refcode = refcode.Trim();
+                var bankprcessingresultValue = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeV2(type, refcode);
+
+                if (bankprcessingresultValue == null)
+                {
+                    throw new GenericException($"Ref Code {refcode} does not exist.");
+                }
+
+                decimal total = bankprcessingresultValue.TotalAmount;
+
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersV2(type, refcode, serviceCenters);
+
+                if (type == DepositType.COD)
+                {
+                    foreach (var item in accompanyWaybills)
+                    {
+                        item.Amount = item.CODAmount;
+                    }
+                }
+                else if (type == DepositType.Demurrage)
+                {
+                    foreach (var item in accompanyWaybills)
+                    {
+                        item.Amount = item.DemurrageAmount;
+                    }
+                }
+
+                var comboresult = Tuple.Create(refcode, accompanyWaybills, total, bankprcessingresultValue);
+                return await Task.FromResult(comboresult);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder3(string _refcode, DepositType type)
         {
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);

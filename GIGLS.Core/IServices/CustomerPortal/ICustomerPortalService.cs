@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
@@ -156,7 +157,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
-        Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
         Task<GatewayCodeResponse> GetGatewayCode();
         Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
@@ -182,5 +183,20 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
+
+        Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
+        Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
+        Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
+        Task<List<StoreDTO>> GetStoresByCountry(int countryId);
+        Task<object> CreateNotification(NotificationDTO notificationDTO);
+        Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
+        Task UpdateNotificationAsRead(int notificationId);
+        Task<MessageDTO> GetIntlMessageForApp();
+        Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
+        Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
+        Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
+        Task<bool> SendMessage(NewMessageDTO obj);
+        Task<UserDTO> GetUserByEmail(string email);
+        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
     }
 }

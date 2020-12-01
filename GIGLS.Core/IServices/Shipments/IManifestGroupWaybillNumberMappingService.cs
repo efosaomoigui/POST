@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,5 +27,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestDTO>> GetManifestsInSuperManifest(string superManifestCode);
         Task<ManifestDTO> GetSuperManifestForManifest(string manifest);
         Task<List<ManifestDTO>> GetManifestsInSuperManifestDetails(string superManifestCode);
+        Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationid);
+        Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
+        Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode);
     }
 }
