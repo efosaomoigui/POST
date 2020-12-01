@@ -317,7 +317,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return;
         }
 
-        public async Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
+        public async Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
             //2. initialize type of shipment and flag
@@ -348,6 +348,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
             var errval = string.Empty;
+            var result2 = string.Empty; 
             api_session_error result = api_session_error.no_error;
 
             //5. initialize the serializer object
@@ -364,6 +365,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                result2 = error_code;
+
                 //result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
@@ -461,7 +464,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    throw new Exception("Error Creating Shipment");
+                    throw new Exception("Error Creating Shipment ---"+result2);
                 }
 
                 errval = error_code;
@@ -469,10 +472,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             catch (Exception ex)
             {
                 errval = ex.Message;
-                result = api_session_error.error_saving_to_database;
+                throw new Exception("Error Creating Shipment ---" + result2);
             }
 
-            return result;
+            return new Tuple<api_session_error, string, string>(result, errval, result2);
         }
 
         public List<ShipmentItemDTO> getShipmentItems(WarehouseReceipt magayaShipmentDTO)

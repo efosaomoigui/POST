@@ -55,7 +55,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<api_session_error>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
+        public async Task<IServiceResponse<Tuple<api_session_error, string, string>>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -69,7 +69,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
 
                 //4. Pass the return to the view or caller
-                return new ServiceResponse<api_session_error>()
+                return new ServiceResponse<Tuple<api_session_error, string, string>>()
                 {
                     Object = await result
                 };
