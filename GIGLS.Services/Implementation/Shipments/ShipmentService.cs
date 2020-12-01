@@ -778,6 +778,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userId = await _userService.GetCurrentUserId();
+                var userInfo = await _uow.User.GetUserById(userId);
                 var hashString = await ComputeHash(shipmentDTO);
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
 
@@ -841,6 +843,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
+
+                //add to shipmentmonitor table
+                var timeMonitor = new ShipmentTimeMonitor()
+                {
+                    Waybill = newShipment.Waybill,
+                    UserId = userId,
+                    UserName = $"{userInfo.FirstName} {userInfo.LastName}",
+                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
+                };
+                _uow.ShipmentTimeMonitor.Add(timeMonitor);
+
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
@@ -3887,6 +3900,21 @@ namespace GIGLS.Services.Implementation.Shipments
             decimal factor = (decimal)Math.Pow(10, precision);
             return Math.Round(number * factor) / factor;
         }
+
+
+        public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var shipmentCollectionDTO = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
+                return shipmentCollectionDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
     }
 }
