@@ -778,8 +778,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                var userId = await _userService.GetCurrentUserId();
-                var userInfo = await _uow.User.GetUserById(userId);
                 var hashString = await ComputeHash(shipmentDTO);
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
 
@@ -831,10 +829,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // complete transaction if all actions are successful
                 //add to shipmentmonitor table
+                //var userId = await _userService.GetCurrentUserId();
+                var userInfo = await _uow.User.GetUserById(newShipment.UserId);
                 var timeMonitor = new ShipmentTimeMonitor()
                 {
                     Waybill = newShipment.Waybill,
-                    UserId = userId,
+                    UserId = newShipment.UserId,
                     UserName = $"{userInfo.FirstName} {userInfo.LastName}",
                     TimeInMinuetes = shipmentDTO.TimeInMinuetes
                 };
