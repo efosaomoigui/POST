@@ -830,6 +830,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 await GenerateDeliveryNumber(newShipment.Waybill);
 
                 // complete transaction if all actions are successful
+                //add to shipmentmonitor table
+                var timeMonitor = new ShipmentTimeMonitor()
+                {
+                    Waybill = newShipment.Waybill,
+                    UserId = userId,
+                    UserName = $"{userInfo.FirstName} {userInfo.LastName}",
+                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
+                };
+                _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();
 
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))
@@ -843,17 +852,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-
-                //add to shipmentmonitor table
-                var timeMonitor = new ShipmentTimeMonitor()
-                {
-                    Waybill = newShipment.Waybill,
-                    UserId = userId,
-                    UserName = $"{userInfo.FirstName} {userInfo.LastName}",
-                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
-                };
-                _uow.ShipmentTimeMonitor.Add(timeMonitor);
-
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
@@ -3906,8 +3904,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipmentCollectionDTO = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
-                return shipmentCollectionDTO;
+                var codShipments = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
+                if (codShipments.Any())
+                {
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus.ToString()).ToList();
+                    var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
+                    foreach (var item in codShipments)
+                    {
+                        item.ShipmentStatus = scanST.Where(x => x.Code == item.ShipmentScanStatus.ToString()).FirstOrDefault().Reason;
+                    }
+                }
+                return codShipments;
             }
             catch (Exception)
             {

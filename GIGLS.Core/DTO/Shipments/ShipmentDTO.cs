@@ -323,5 +323,6 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal CODAmount { get; set; }
         public bool IsCOD { get; set; }
         public string ShipmentStatus { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
     }
 }
