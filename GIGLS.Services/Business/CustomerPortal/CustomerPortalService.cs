@@ -102,6 +102,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMagayaService _magayaService;
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
+        private readonly ICompanyService _companyService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -115,7 +116,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService)
+            INotificationService notificationService,ICompanyService companyService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -155,6 +156,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _magayaService = magayaService;
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
+            _companyService = companyService;
             MapperConfig.Initialize();
         }
 
@@ -2977,6 +2979,115 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return requests;
         }
+
+
+
+        public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
+        {
+            return await _companyService.UnboardUser(company);
+        }
+
+        public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
+        {
+            var result = new ResponseDTO();
+
+            if (userDetail == null)
+            {
+                result.Succeeded = false;
+                result.Message = $"Invalid payload";
+                return result;
+            }
+            if (!String.IsNullOrEmpty(userDetail.BusinessName))
+            {
+                var company = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                if (company != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+
+                //also check aspnet table for business name
+                var user = await _uow.User.GetUserByCompanyName(userDetail.BusinessName);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+            if (!String.IsNullOrEmpty(userDetail.Email))
+            {
+                var user = await _uow.User.GetUserByEmail(userDetail.Email);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+
+             if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            {
+                var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
+                if (user != null)
+                {
+                    result.Exist = true;
+                    result.Message = "User detail already exist";
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+
+            result.Exist = false;
+            result.Message = "User detail does not exist";
+            result.Succeeded = true;
+            return result;
+        }
+
+        public async Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO)
+        {
+            return await _companyService.UpdateUserRank(userValidationDTO);
+        }
+
+        public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
+        {
+            //check if the receiver detail exist
+            if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
+            {
+                var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
+            {
+                var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
+                if (userExist == null)
+                {
+                    return false;
+                }
+            }
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
+            return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
+        }
+
+        public async Task<UserDTO> GetUserByEmail(string email)
+        {
+            var user = await _uow.User.GetUserByEmail(email);
+            var userDTO = Mapper.Map<UserDTO>(user);
+            return userDTO; 
+        }
+
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await _walletService.ChargeWallet(chargeWalletDTO);
+        }
+
 
     }
 }

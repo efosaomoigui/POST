@@ -481,6 +481,7 @@
     <Compile Include="DTO\User\IntertnationalUserProfilerDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\User\UserValidationDTO.cs" />
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResultComparer.cs" />
@@ -552,6 +553,7 @@
     <Compile Include="Enums\PreShipmentProcessingStatus.cs" />
     <Compile Include="Enums\PreShipmentStatus.cs" />
     <Compile Include="Enums\PricingType.cs" />
+    <Compile Include="Enums\Rank.cs" />
     <Compile Include="Enums\RateType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
     <Compile Include="Enums\ReportSource.cs" />

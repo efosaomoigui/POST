@@ -606,6 +606,26 @@ namespace GIGLS.Services.Implementation.Messaging
                 //messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
             }
 
+            if (obj is NewMessageDTO)
+            {
+                var newMsgDTO = (NewMessageDTO)obj;
+                //A. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                messageDTO.To = newMsgDTO.ReceiverDetail;
+                messageDTO.ToEmail = newMsgDTO.ReceiverDetail;
+                messageDTO.Subject = newMsgDTO.Subject;
+                messageDTO.Body = newMsgDTO.Body;
+                messageDTO.FinalBody = newMsgDTO.Body;
+                if (newMsgDTO.EmailSmsType.ToString() == "SMS")
+                {
+                    if (!newMsgDTO.ReceiverDetail.StartsWith("+"))
+                    {
+                        messageDTO.To = $"+{newMsgDTO.ReceiverDetail}";
+                    }
+                }
+            }
+
             return await Task.FromResult(true);
         }
 
