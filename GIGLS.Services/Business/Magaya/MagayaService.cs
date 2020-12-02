@@ -364,10 +364,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 string error_code = "";
 
                 //Magaya Request for Shipment Creation
-                result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                result2 = error_code;
+                //result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                //result2 = error_code;
 
-                //result = api_session_error.no_error;
+                result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
                 {
@@ -472,7 +472,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             catch (Exception ex)
             {
                 errval = ex.Message;
-                throw new Exception("Error Creating Shipment ---" + result2);
+                throw new Exception("Error Creating Shipment ---" + result2+"----"+ errval);
             }
 
             return new Tuple<api_session_error, string, string>(result, errval, result2);
