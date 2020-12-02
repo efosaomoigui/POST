@@ -34,13 +34,13 @@ namespace GIGLS.Services.Implementation.Utility
 
             //upload the image to azure blob
             var filename = $"{waybill}AI.png";
-            var blobname = await AzureBlobServiceUtil.UploadAsync(imageByte, filename);
+           // var blobname = await AzureBlobServiceUtil.UploadAsync(imageByte, filename);
 
             var result = new PreShipmentMobileThirdPartyDTO
             {
                 WaybillImage = waybillImageString,
                 WaybillImageFormat = "PNG",
-                ImagePath = blobname
+                ImagePath = filename
             };
             return result;
         }
