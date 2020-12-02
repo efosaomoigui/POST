@@ -33,5 +33,6 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<IntlShipmentRequestDTO>> GetShipments(int[] serviceCentreIds);
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipmentRequest(DateFilterCriteria dateFilterCriteria);
+        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria, string currentUserId);
     }
 }
