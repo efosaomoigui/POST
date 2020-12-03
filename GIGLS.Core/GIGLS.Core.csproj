@@ -365,6 +365,7 @@
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\Node\UserPayload.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
     <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
@@ -565,6 +566,7 @@
     <Compile Include="Enums\StockRequestStatus.cs" />
     <Compile Include="Enums\SuperManifestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
+    <Compile Include="Enums\WalletTransactionType.cs" />
     <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
@@ -789,6 +791,7 @@
     <Compile Include="IServices\Nav\IMainNavService.cs" />
     <Compile Include="IServices\Nav\ISubNavService.cs" />
     <Compile Include="IServices\Nav\ISubSubNavService.cs" />
+    <Compile Include="IServices\Node\INodeService.cs" />
     <Compile Include="IServices\Partnership\IFleetPartnerService.cs" />
     <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
     <Compile Include="IServices\Partnership\IPartnerPayoutService.cs" />
