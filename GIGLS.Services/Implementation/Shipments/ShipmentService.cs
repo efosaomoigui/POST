@@ -836,7 +836,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = newShipment.Waybill,
                     UserId = newShipment.UserId,
                     UserName = $"{userInfo.FirstName} {userInfo.LastName}",
-                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
+                    TimeInSeconds = shipmentDTO.TimeInSeconds
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();

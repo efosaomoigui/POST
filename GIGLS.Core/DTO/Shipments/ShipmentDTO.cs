@@ -152,7 +152,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
-        public int TimeInMinuetes { get; set; }
+        public int TimeInSeconds { get; set; }
 
     }
 
