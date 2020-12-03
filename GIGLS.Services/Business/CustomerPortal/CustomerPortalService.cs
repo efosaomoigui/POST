@@ -2970,6 +2970,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
 
+        public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+
+            return requests;
+        }
+
+
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {

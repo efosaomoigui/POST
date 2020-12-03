@@ -320,6 +320,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
+            var requestNo = mDto.RequestNumber;
             //2. initialize type of shipment and flag
             string type = "WH";
 
@@ -551,6 +552,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         public async Task<ShipmentDTO> CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
         {
+            //var requestDetails = 
+            var shipmentReq = await GetShipmentRequest(mDto.RequestNumber);
+            var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
+            mDto.IntlShipmentRequest = shipmentDTlMapped;
             var magayaShipmentDTO = mDto.WarehouseReceipt;
             try
             {
@@ -609,27 +614,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DeliveryOptionId = 1;
 
                 //Insurance
-                var requestDtoJson = mDto.IntlShipmentRequest?.ShipmentRequestItems;
+                var requestDto = mDto.IntlShipmentRequest.ShipmentRequestItems;
                 decimal totalInsuranceCharge = 0;
 
-                if (requestDtoJson != null)
+                if (requestDto != null)
                 {
-                    for (int i = 0; i < requestDtoJson.Count; i++)
+                    foreach (var item in shipmentReq.ShipmentRequestItems)
                     {
-                        var ob = requestDtoJson[i].ToString();
-                        var resultJson = JsonConvert.DeserializeObject<IntlShipmentRequestItemDTO>(ob);
-
-                        if (resultJson.RequiresInsurance == true)
-                        {
-                            var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
-                            var itemsType = resultJson.ItemValue;
-
-                            var intValue = (resultJson.ItemValue == null) ? 0 : decimal.Parse(resultJson.ItemValue);
-
-                            totalInsuranceCharge += (intValue) * (percentVal / 100);
-                        }
-
-                    };
+                        var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
+                        var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
+                        totalInsuranceCharge += (intValue) * (percentVal / 100);
+                    }
                 }
 
                 //updaqte the customer user country
