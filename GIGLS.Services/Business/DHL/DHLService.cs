@@ -363,8 +363,8 @@ namespace GIGLS.Services.Business.DHL
             AddressPayload address = new AddressPayload
             {
                 City = "Lagos",
-                CountryCode = "100001",
-                PostalCode = "NG"
+                PostalCode = "100001",
+                CountryCode = "NG"
             };
 
             return address;
