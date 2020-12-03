@@ -39,6 +39,7 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
+using ThirdParty.WebServices.Business;
 
 namespace GIGLS.Core
 {
@@ -449,6 +450,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<FinancialReport, FinancialReportDTO>();
                 config.CreateMap<FinancialReportDTO, FinancialReport>();
+
+                config.CreateMap<IntlShipmentRequestDTL, IntlShipmentRequestDTO>();
+                config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequestDTL>();
 
             });
 
