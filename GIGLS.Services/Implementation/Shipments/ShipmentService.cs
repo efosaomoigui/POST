@@ -839,7 +839,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = newShipment.Waybill,
                     UserId = newShipment.UserId,
                     UserName = $"{userInfo.FirstName} {userInfo.LastName}",
-                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
+                    TimeInSeconds = shipmentDTO.TimeInSeconds
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();
@@ -3929,7 +3929,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var codShipments = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
                 if (codShipments.Any())
                 {
-                    var statuses = codShipments.Select(x => x.ShipmentScanStatus.ToString()).ToList();
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
                     var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
                     foreach (var item in codShipments)
                     {
