@@ -16,6 +16,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -58,6 +59,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
         private readonly IGIGGoPricingService _gIGGoPricingService;
+        private readonly INodeService _nodeService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -67,7 +69,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService)
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -85,6 +87,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
             _gIGGoPricingService = gIGGoPricingService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -828,6 +831,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 await GenerateDeliveryNumber(newShipment.Waybill);
 
                 // complete transaction if all actions are successful
+                //add to shipmentmonitor table
+                //var userId = await _userService.GetCurrentUserId();
+                var userInfo = await _uow.User.GetUserById(newShipment.UserId);
+                var timeMonitor = new ShipmentTimeMonitor()
+                {
+                    Waybill = newShipment.Waybill,
+                    UserId = newShipment.UserId,
+                    UserName = $"{userInfo.FirstName} {userInfo.LastName}",
+                    TimeInSeconds = shipmentDTO.TimeInSeconds
+                };
+                _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();
 
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))
@@ -887,6 +901,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!shipment.ShipmentItems.Any())
                 {
                     throw new GenericException("Shipment Items cannot be empty");
+                }
+
+                if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
+                    if (receieverServiceCenter.Latitude == null || receieverServiceCenter.Longitude == null)
+                    {
+                        throw new GenericException("Destination Service Center Longitude and Latitude details not found");
+
+                    }
+                }
+
+                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
+                {
+                    throw new GenericException("Receiver Longitude and Latitude details not found");
                 }
 
                 shipment.CustomerCode = shipment.Customer[0].CustomerCode;
@@ -3666,7 +3695,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Fire and forget
                 //Send the Payload to Partner Cloud Handler 
-                NodeApiCreateShipment(newPreShipment);
+                await NodeApiCreateShipment(newPreShipment);
                 return mobileShipment;
             }
             catch
@@ -3675,7 +3704,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private void NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        private async Task NodeApiCreateShipment(PreShipmentMobile newPreShipment)
         {
             try
             {
@@ -3701,12 +3730,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 };
 
-                HttpClient client = new HttpClient();
-
-                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
-                nodeURL = nodeURL + nodePostShipment;
-                client.PostAsJsonAsync(nodeURL, nodePayload);
+                await _nodeService.CreateShipment(nodePayload);
             }
             catch (Exception)
             {
@@ -3886,6 +3910,29 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             decimal factor = (decimal)Math.Pow(10, precision);
             return Math.Round(number * factor) / factor;
+        }
+
+
+        public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var codShipments = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
+                if (codShipments.Any())
+                {
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
+                    var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
+                    foreach (var item in codShipments)
+                    {
+                        item.ShipmentStatus = scanST.Where(x => x.Code == item.ShipmentScanStatus.ToString()).FirstOrDefault().Reason;
+                    }
+                }
+                return codShipments;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
 

@@ -59,7 +59,7 @@ namespace GIGLS.Infrastructure.Persistence
         //General Shipment Pricing
         public DbSet<DomesticRouteZoneMap> DomesticRouteZoneMap { get; set; }
         public DbSet<DomesticZonePrice> DomesticZonePrice { get; set; }
-        public DbSet<CountryRouteZoneMap> CountryRouteZoneMap { get; set; }        
+        public DbSet<CountryRouteZoneMap> CountryRouteZoneMap { get; set; }
 
         //Haulauge Pricing
         public DbSet<Haulage> Haulage { get; set; }
@@ -75,8 +75,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<GroupWaybillNumberMapping> GroupWaybillNumberMapping { get; set; }
 
         //Movement Manifest
-        public DbSet<MovementManifestNumber> MovementManifestNumber { get; set; }   
-        public DbSet<MovementManifestNumberMapping> MovementManifestNumberMapping { get; set; } 
+        public DbSet<MovementManifestNumber> MovementManifestNumber { get; set; }
+        public DbSet<MovementManifestNumberMapping> MovementManifestNumberMapping { get; set; }
 
 
         //Shipment
@@ -85,7 +85,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<Shipment> Shipment { get; set; }
         public DbSet<IntlShipmentRequest> IntlShipmentRequest { get; set; }
-        public DbSet<IntlShipmentRequestItem> IntlShipmentRequestItem { get; set; }  
+        public DbSet<IntlShipmentRequestItem> IntlShipmentRequestItem { get; set; }
         public DbSet<MagayaShipmentAgility> MagayaShipment { get; set; }
         public DbSet<ShipmentItem> ShipmentItem { get; set; }
         public DbSet<MagayaShipmentItem> MagayaShipmentItem { get; set; }
@@ -124,7 +124,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<FleetPartInventory> FleetPartInventory { get; set; }
         public DbSet<FleetPartInventoryHistory> FleetPartInventoryHistory { get; set; }
         public DbSet<Dispatch> Dispatch { get; set; }
-        public DbSet<MovementDispatch> MovementDispatch { get; set; } 
+        public DbSet<MovementDispatch> MovementDispatch { get; set; }
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
 
         //Partner
@@ -272,7 +272,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<VehicleType> VehicleType { get; set; }
 
         public DbSet<PickupManifest> PickupManifest { get; set; }
-        
+
         public DbSet<PickupManifestWaybillMapping> PickupManifestWaybillMapping { get; set; }
         public DbSet<RiderDelivery> RiderDelivery { get; set; }
         public DbSet<DeliveryLocation> DeliveryLocation { get; set; }
@@ -288,6 +288,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentPackagingTransactions> ShipmentPackagingTransactions { get; set; }
         public DbSet<ServiceCenterPackage> ServiceCenterPackage { get; set; }
         public DbSet<FinancialReport> FinancialReport { get; set; }
+        public DbSet<ShipmentContact> ShipmentContact { get; set; }
+        public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
+        public DbSet<ShipmentTimeMonitor> ShipmentTimeMonitor { get; set; }
 
         #endregion
 

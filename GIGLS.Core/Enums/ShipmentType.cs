@@ -7,4 +7,10 @@
         Ecommerce,
         Store
     }
+
+    public enum ShipmentContactStatus
+    {
+        NotContacted,
+        Contacted
+    }
 }
