@@ -426,7 +426,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverName = shipment.ReceiverName,
                     ReceiverPhoneNumber = shipment.ReceiverPhoneNumber,
                     ReceiverAddress = shipment.ReceiverAddress,
-                    ReceiverCity = shipment.ReceiverCity
+                    ReceiverCity = shipment.ReceiverCity,
+                    DestinationServiceCentreId = shipment.DestinationServiceCenterId
                 };
 
                 if (shipment.IsAgent)
@@ -531,7 +532,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var station = await _uow.Station.GetAsync(x => x.StationId == shipment.DestinationStationId);
 
-                    if (station == null)
+                    if (station != null)
                     {
                         shipmentDto.DestinationServiceCentreId = station.SuperServiceCentreId;
                     }
