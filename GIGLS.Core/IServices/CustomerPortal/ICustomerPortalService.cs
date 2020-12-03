@@ -192,5 +192,12 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
+        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
+        Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
+        Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
+        Task<bool> SendMessage(NewMessageDTO obj);
+        Task<UserDTO> GetUserByEmail(string email);
+        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
     }
 }

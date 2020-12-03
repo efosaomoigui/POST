@@ -197,6 +197,7 @@ namespace GIGLS.Core
         IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
         IShipmentContactRepository ShipmentContact { get; set; }
         IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
+        IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
         IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
 
         int Complete();

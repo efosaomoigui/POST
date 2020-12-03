@@ -78,6 +78,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
         Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
+        Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
+
         Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
         Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
     }
@@ -118,6 +120,7 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
+        Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO);
 
     }
 
