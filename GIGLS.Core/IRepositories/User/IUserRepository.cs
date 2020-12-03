@@ -57,6 +57,7 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
         Task<bool> IsCustomerHasAgentRole(string userId);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForAgentApp(string emailPhoneCode);
-        Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsers(string[] ids);       
+        Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsers(string[] ids);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByCompanyName(string name);
     }
 }

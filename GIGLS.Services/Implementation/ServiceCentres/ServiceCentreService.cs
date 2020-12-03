@@ -166,6 +166,17 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
+        }       
+        public async Task<IEnumerable<ServiceCentreDTO>> GetActiveServiceCentres()
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetActiveServiceCentres();
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public async Task<ServiceCentreDTO> GetDefaultServiceCentre()

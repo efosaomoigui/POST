@@ -81,13 +81,13 @@ namespace GIGLS.Infrastructure.Persistence
         public IShipmentRepository Shipment { get; set; }
 
         [Inject]
-        public IIntlShipmentRequestItemRepository IntlShipmentRequestItem { get; set; }  
+        public IIntlShipmentRequestItemRepository IntlShipmentRequestItem { get; set; }
 
         [Inject]
-        public IMagayaShipmentRepository MagayaShipment { get; set; } 
+        public IMagayaShipmentRepository MagayaShipment { get; set; }
 
         [Inject]
-        public IMagayaShipmentItemRepository MagayaShipmentItem { get; set; } 
+        public IMagayaShipmentItemRepository MagayaShipmentItem { get; set; }
 
         [Inject]
         public IShipmentTrackingRepository ShipmentTracking { get; set; }
@@ -188,11 +188,11 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
 
-        [Inject] 
+        [Inject]
         public IGroupWaybillNumberMappingRepository GroupWaybillNumberMapping { get; set; }
 
         [Inject]
-        public IMovementManifestNumberRepository MovementManifestNumber { get; set; } 
+        public IMovementManifestNumberRepository MovementManifestNumber { get; set; }
 
         [Inject]
         public IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
@@ -270,8 +270,8 @@ namespace GIGLS.Infrastructure.Persistence
         public ICashOnDeliveryRegisterAccountRepository CashOnDeliveryRegisterAccount { get; set; }
 
         [Inject]
-        public IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }  
-        
+        public IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }
+
 
         [Inject]
         public ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
@@ -280,7 +280,7 @@ namespace GIGLS.Infrastructure.Persistence
         public IDispatchRepository Dispatch { get; set; }
 
         [Inject]
-        public IMovementDispatchRepository MovementDispatch { get; set; } 
+        public IMovementDispatchRepository MovementDispatch { get; set; }
 
         [Inject]
         public IDispatchActivityRepository DispatchActivity { get; set; }
@@ -359,7 +359,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ISLARepository SLA { get; set; }
-        
+
         [Inject]
         public ISLASignedUserRepository SLASignedUser { get; set; }
 
@@ -396,7 +396,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IMobileShipmentTrackingRepository MobileShipmentTracking
-        {get; set;}
+        { get; set; }
 
         [Inject]
         public IMobilePickUpRequestsRepository MobilePickUpRequests
@@ -491,12 +491,13 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
         [Inject]
-        public IShipmentContactRepository ShipmentContact { get; set; }     
+        public IShipmentContactRepository ShipmentContact { get; set; }
         [Inject]
         public IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
-
         [Inject]
         public IFinancialReportRepository FinancialReport { get; set; }
+        [Inject]
+        public IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
 
         public int Complete()
         {
