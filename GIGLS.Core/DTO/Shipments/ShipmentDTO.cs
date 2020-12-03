@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.DHL.Enum;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -318,22 +319,22 @@ namespace GIGLS.Core.DTO.Shipments
     public class InternationalShipmentDTO : BaseDomainDTO
     {
         //Shipment Information
-        public int ShipmentId { get; set; }
-        public string SealNumber { get; set; }
-        public string Waybill { get; set; }
+        //public int ShipmentId { get; set; }
+        //public string SealNumber { get; set; }
+        //public string Waybill { get; set; }
 
         //Senders' Information
-        public decimal Value { get; set; }
-        public DateTime? DeliveryTime { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
-        public string CustomerType { get; set; }
-        public int CustomerId { get; set; }
-        public string CompanyType { get; set; }
-        public string CustomerCode { get; set; }
+        //public decimal Value { get; set; }
+       // public DateTime? DeliveryTime { get; set; }
+      //  public PaymentStatus PaymentStatus { get; set; }
+        //public string CustomerType { get; set; }
+        //public int CustomerId { get; set; }
+        //public string CompanyType { get; set; }
+        //public string CustomerCode { get; set; }
 
         //Receivers Information
-        public int DepartureServiceCentreId { get; set; }
-        public int DestinationServiceCentreId { get; set; }
+       // public int DepartureServiceCentreId { get; set; }
+       // public int DestinationServiceCentreId { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverCompanyName { get; set; }
@@ -346,17 +347,18 @@ namespace GIGLS.Core.DTO.Shipments
         public string RecieverPostalCode { get; set; }
         public string ReceiverStreetLines { get; set; }
         public string ReceiverStateOrProvinceCode { get; set; }
+        public string ReceiverCountryCode { get; set; }
 
         //Delivery Options
-        public int DeliveryOptionId { get; set; } = 1;
-        public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+        //public int DeliveryOptionId { get; set; } = 1;
+        //public List<int> DeliveryOptionIds { get; set; } = new List<int>();
 
         //PickUp Options
-        public PickupOptions PickupOptions { get; set; }
+        // public PickupOptions PickupOptions { get; set; }
 
         //General but optional
-        public DateTime? ExpectedDateOfArrival { get; set; }
-        public DateTime? ActualDateOfArrival { get; set; }
+        //public DateTime? ExpectedDateOfArrival { get; set; }
+        //public DateTime? ActualDateOfArrival { get; set; }
 
         //Shipment Items
         public List<ShipmentItemDTO> ShipmentItems { get; set; }
@@ -364,43 +366,44 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal GrandTotal { get; set; }
 
         //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
-        public bool IsCashOnDelivery { get; set; }
-        public decimal? CashOnDeliveryAmount { get; set; } = 0;
+      //  public bool IsCashOnDelivery { get; set; }
+      //  public decimal? CashOnDeliveryAmount { get; set; } = 0;
 
-        public decimal? ExpectedAmountToCollect { get; set; } = 0;
-        public decimal? ActualAmountCollected { get; set; } = 0;
+        //public decimal? ExpectedAmountToCollect { get; set; } = 0;
+        //public decimal? ActualAmountCollected { get; set; } = 0;
 
         //General Details comes with role user
-        public string UserId { get; set; }
+      //  public string UserId { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
         public bool IsdeclaredVal { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; } = 0;
 
         //discount information
-        public decimal? AppliedDiscount { get; set; } = 0;
-        public decimal? DiscountValue { get; set; } = 0;
-        public decimal? Insurance { get; set; } = 0;
-        public decimal? Vat { get; set; } = 0;
-        public decimal? Total { get; set; } = 0;
+     //   public decimal? AppliedDiscount { get; set; } = 0;
+      //  public decimal? DiscountValue { get; set; } = 0;
+        //public decimal? Insurance { get; set; } = 0;
+        //public decimal? Vat { get; set; } = 0;
+        //public decimal? Total { get; set; } = 0;
 
         public decimal ShipmentPackagePrice { get; set; }
 
         public decimal ShipmentPickupPrice { get; set; }
+
         //wallet information
-        public string WalletNumber { get; set; }
+     //   public string WalletNumber { get; set; }
 
         //from client
-        public decimal? vatvalue_display { get; set; } = 0;
-        public decimal? InvoiceDiscountValue_display { get; set; } = 0;
-        public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
+        //public decimal? vatvalue_display { get; set; } = 0;
+        //public decimal? InvoiceDiscountValue_display { get; set; } = 0;
+        //public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
 
         //payment method
         public string PaymentMethod { get; set; }
-        public bool IsInternational { get; set; } = true;
+     //   public bool IsInternational { get; set; } = true;
 
         public string Description { get; set; }
 
-        public int DepositStatus { get; set; }
+        //public int DepositStatus { get; set; }
 
         public bool ReprintCounterStatus { get; set; }
 
@@ -412,19 +415,18 @@ namespace GIGLS.Core.DTO.Shipments
         //Country info
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
-        public decimal CurrencyRatio { get; set; }
-        public string ShipmentHash { get; set; }
+      //  public decimal CurrencyRatio { get; set; }
+      //  public string ShipmentHash { get; set; }
 
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public string VehicleType { get; set; }
-        public string SenderCode { get; set; }
-        public string ReceiverCode { get; set; }
-        public bool IsGIGGOExtension { get; set; }
+        //public string SenderCode { get; set; }
+     //   public bool IsGIGGOExtension { get; set; }
 
-        public string RequestNumber { get; set; }
-        public string URL { get; set; }
+        //public string RequestNumber { get; set; }
+        //public string URL { get; set; }
         public string ItemDetails { get; set; }
-        public string   Content { get; set; }
+        public Content Content { get; set; }
         public PaymentType PaymentType { get; set; }
     }
 

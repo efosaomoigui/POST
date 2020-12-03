@@ -3975,21 +3975,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 }
 
-                //Bind CustomerDetail to the payload
-                var customer = await HandleCustomer(shipmentDTO.CustomerDetails);
-                shipmentDTO.CustomerDetails = customer;
-
+                //Bind Agility Shipment Payload
+                var shipment = await BindShipmentPayload(shipmentDTO);
+                shipmentDTO.CustomerDetails = shipment.CustomerDetails;
+               
                 //Block account that has been suspended/pending from create shipment
-                if (customer.CustomerType == CustomerType.Company)
+                if (shipment.CustomerDetails.CustomerType == CustomerType.Company)
                 {
-                    if (customer.CompanyStatus != CompanyStatus.Active)
+                    if (shipment.CustomerDetails.CompanyStatus != CompanyStatus.Active)
                     {
-                        throw new GenericException($"{customer.Name} account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException($"{shipment.CustomerDetails.Name} account has been {shipment.CustomerDetails.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
-
-                //Bind Agility Shipment Payload
-                var shipment = BindShipmentPayload(shipmentDTO);
 
                 //3. Create shipment on DHL
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
@@ -4006,11 +4003,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private ShipmentDTO BindShipmentPayload(InternationalShipmentDTO shipmentDTO)
+        private async Task<ShipmentDTO> BindShipmentPayload(InternationalShipmentDTO shipmentDTO)
         {
+            //Bind CustomerDetail to the payload
             var shipment = Mapper.Map<ShipmentDTO>(shipmentDTO);
+            shipment.Customer = new List<CustomerDTO>();
+
+            var customer = await HandleCustomer(shipmentDTO.CustomerDetails);
+            shipment.CustomerDetails = customer;
             shipment.Customer.Add(shipmentDTO.CustomerDetails);
-            shipment.CustomerId = shipmentDTO.CustomerId;
+            shipment.CustomerType = shipment.CustomerDetails.CustomerType.ToString();
+            shipment.CustomerCode = shipment.CustomerDetails.CustomerCode;
+
+            if (CustomerType.Company.Equals(customer.CustomerType))
+            {
+                shipment.CustomerId = shipment.CustomerDetails.CompanyId;
+                shipment.CompanyType = shipment.CustomerDetails.CompanyType.ToString();
+            }
+            else
+            {
+                shipment.CustomerId = shipment.CustomerDetails.IndividualCustomerId;
+                shipment.CompanyType = shipment.CustomerDetails.CustomerType.ToString();
+            }
+
             shipment.InternationalShipmentType = InternationalShipmentType.DHL;
             shipment.IsInternational = true;
             return shipment;
@@ -4018,76 +4033,15 @@ namespace GIGLS.Services.Implementation.Shipments
         
         private async Task<CustomerDTO> HandleCustomer(CustomerDTO customerDetails)
         {
-            //var customerDTO = shipmentDTO.Customer[0];
-            //var customerType = shipmentDTO.CustomerType;
+            //reset rowversion
+            customerDetails.RowVersion = null;
 
             if (customerDetails.UserActiveCountryId == 0)
             {
                 customerDetails.UserActiveCountryId = await GetUserCountryId();
             }
 
-            //reset rowversion
-            customerDetails.RowVersion = null;
-
-            // company
-            //if (CustomerType.Company.ToString() == customerType)
-            //{
-            //    customerDTO.CustomerType = CustomerType.Company;
-            //}
-            //else
-            //{
-            //    // individualCustomer
-            //    customerDTO.CustomerType = CustomerType.IndividualCustomer;
-            //}
-
             var createdObject = await GetAndCreateCustomer(customerDetails);
-
-            //if (shipmentDTO.IsFromMobile)
-            //{
-            //    createdObject = await GetAndCreateCustomer(customerDTO);
-            //}
-            //else
-            //{
-            //    createdObject = await _customerService.CreateCustomer(customerDTO);
-            //}
-
-
-            // set the customerId
-            // company
-            //if (CustomerType.Company.ToString() == customerType)
-            //{
-            //    shipmentDTO.CustomerId = createdObject.CompanyId;
-            //}
-            //else
-            //{
-            //    // individualCustomer
-            //    customerDTO.CustomerType = CustomerType.IndividualCustomer;
-            //    shipmentDTO.CustomerId = createdObject.IndividualCustomerId;
-            //}
-
-            //set the actual company type - Corporate, Ecommerce, Individual
-            //if (CustomerType.Company.ToString() == customerType)
-            //{
-            //    var company = await _uow.Company.GetAsync(s => s.CompanyId == shipmentDTO.CustomerId);
-            //    createdObject.CompanyStatus = company.CompanyStatus;
-            //    if (company.CompanyType == CompanyType.Corporate)
-            //    {
-            //        shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
-            //    }
-            //    else
-            //    {
-            //        shipmentDTO.CompanyType = CompanyType.Ecommerce.ToString();
-            //    }
-            //}
-            //else
-            //{
-            //    shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
-            //}
-
-            //set the customerCode in the shipment
-            //var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
-            //shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
-
             return createdObject;
         }
 
@@ -4153,7 +4107,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<ShipmentDTO> CreateInternationalShipmentOnAgility(ShipmentDTO shipmentDTO)
         {
-            //Make GIGGO as Destination Service centre
+            //Make GIGGO as Destination Service centre or Create a new service centre for this
             var destiantion = await _userService.GetGIGGOServiceCentre();
             shipmentDTO.DestinationServiceCentreId = destiantion.ServiceCentreId;
 

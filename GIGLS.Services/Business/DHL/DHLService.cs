@@ -23,6 +23,7 @@ namespace GIGLS.Services.Business.DHL
             var result = FormatShipmentCreationReponse(createShipment);
             return result;
         }
+
         public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             var getPrice = await GetDHLPrice(shipmentDTO);
@@ -80,7 +81,7 @@ namespace GIGLS.Services.Business.DHL
                     }
                     else
                     {
-                        throw new GenericException("There was an issue processing your request");
+                        throw new GenericException($"{rateRequestResponse.RateResponse.Provider[0].Notification[0].Message}");
                     }
                 }
             }
@@ -98,7 +99,7 @@ namespace GIGLS.Services.Business.DHL
                 var rateRequest = GetShipmentRequestPayload(shipmentDTO);
 
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
-                string path = ConfigurationManager.AppSettings["DHLPriceRequest"];
+                string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
                 string url = baseUrl + path;
 
                 using (var client = new HttpClient())
@@ -170,11 +171,6 @@ namespace GIGLS.Services.Business.DHL
             int count = 1;
            foreach(var item in shipmentDTO.ShipmentItems)
             {
-                RequestedPackagesDTO requestedPackagesDTO = new RequestedPackagesDTO();
-                requestedPackagesDTO.CustomerReferences = item.Description_s;
-                requestedPackagesDTO.number = count;
-                requestedPackagesDTO.Weight = (decimal)item.Weight;
-
                 Dimensions dimensions = new Dimensions
                 {
                     Height = (decimal)item.Height,
@@ -182,7 +178,14 @@ namespace GIGLS.Services.Business.DHL
                     Length = (decimal)item.Length
                 };
 
-                requestedPackagesDTO.Dimensions = dimensions;
+                RequestedPackagesDTO requestedPackagesDTO = new RequestedPackagesDTO
+                {
+                    CustomerReferences = item.Description_s,
+                    number = count,
+                    Weight = (decimal)item.Weight,
+                    Dimensions = dimensions
+                };
+
                 items.Add(requestedPackagesDTO);      
                 count++;
             }
@@ -195,7 +198,7 @@ namespace GIGLS.Services.Business.DHL
             var internationalDetail = new InternationalDetailDTO
             {
                 Commodities = commodities,
-                Content = shipmentDTO.Content
+                Content = shipmentDTO.Content.ToString()
             };
             return internationalDetail;
         }
@@ -238,7 +241,7 @@ namespace GIGLS.Services.Business.DHL
                     StreetLines = shipmentDTO.ReceiverAddress,
                     City = shipmentDTO.ReceiverCity,
                     PostalCode = shipmentDTO.RecieverPostalCode,
-                    CountryCode = shipmentDTO.ReceiverCode
+                    CountryCode = shipmentDTO.ReceiverCountryCode
                 }
             };
 
@@ -251,7 +254,7 @@ namespace GIGLS.Services.Business.DHL
             {
                 Contact = new Contact
                 {
-                    PersonName = shipmentDTO.ReceiverName,
+                    PersonName = shipmentDTO.CustomerDetails.CustomerName,
                     CompanyName = "GIG LOGISTICS",
                     PhoneNumber = "2348035324958",
                     EmailAddress = "azeez.oladejo@giglogistics.com"
@@ -320,7 +323,7 @@ namespace GIGLS.Services.Business.DHL
             rateRequest.RequestedShipment.DropOffType = DropOffType.REGULAR_PICKUP.ToString();
             rateRequest.RequestedShipment.ShipTimestamp = DateTime.Now.AddDays(2);
             rateRequest.RequestedShipment.UnitOfMeasurement = UnitOfMeasurement.SI.ToString();
-            rateRequest.RequestedShipment.Content = shipmentDTO.Content;
+            rateRequest.RequestedShipment.Content = shipmentDTO.Content.ToString();
 
             //Shipper address -- GIGL default address
             var address = GetShipperAddress();
@@ -331,7 +334,7 @@ namespace GIGLS.Services.Business.DHL
             //Receiver Address
             rateRequest.RequestedShipment.Ship.Recipient.City = shipmentDTO.ReceiverCity;
             rateRequest.RequestedShipment.Ship.Recipient.PostalCode = shipmentDTO.RecieverPostalCode;
-            rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCode;
+            rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode;
 
             int count = 1;
             foreach (var item in shipmentDTO.ShipmentItems)
