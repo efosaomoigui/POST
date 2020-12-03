@@ -3907,7 +3907,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var codShipments = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
                 if (codShipments.Any())
                 {
-                    var statuses = codShipments.Select(x => x.ShipmentScanStatus.ToString()).ToList();
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
                     var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
                     foreach (var item in codShipments)
                     {
