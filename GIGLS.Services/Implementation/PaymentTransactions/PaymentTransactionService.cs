@@ -521,6 +521,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
             }
 
+            //if the shipment is International Shipment & Payment was initiated before the shipment get to Nigeria
+            //5% discount should be give to the customer
+            if (shipment.IsInternational)
+            {
+                //check if the shipment has a scan of AISN in Tracking Table, 
+                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                && x.Status == ShipmentScanStatus.AISN.ToString());
+
+                if (!isPresent)
+                {
+                    amountToDebit = amountToDebit * 0.95m;
+                }                
+            }
+
             return amountToDebit;
         }
 

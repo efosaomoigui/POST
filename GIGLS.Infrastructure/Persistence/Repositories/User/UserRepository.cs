@@ -50,6 +50,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return user;
         }
 
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByCompanyName(string name)
+        {
+            var user = _userManager.Users.Where(x => x.Organisation.ToLower() == name.ToLower()).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System 

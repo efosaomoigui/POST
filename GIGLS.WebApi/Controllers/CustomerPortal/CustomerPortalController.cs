@@ -89,6 +89,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPut]
+        [Route("intlshipmentrequest/{requestNumber}")]
+        public async Task<IServiceResponse<object>> UpdateIntlShipmentRequest(string requestNumber,IntlShipmentRequestDTO transactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _magayaService.UpdateIntlShipmentRequest(requestNumber,transactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
@@ -2178,6 +2192,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<MessageDTO>
                 {
                     Object = message
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("intlshipmentrequests")]
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var requests = await _portalService.GetIntlShipmentRequestsForUser(filterCriteria);
+
+                return new ServiceResponse<List<IntlShipmentRequestDTO>>
+                {
+                    Object = requests
                 };
             });
         }
