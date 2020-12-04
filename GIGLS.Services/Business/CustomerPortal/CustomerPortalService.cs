@@ -2614,11 +2614,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
                 existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
-                existingPreShipment.SenderCity = existingPreShipment.SenderCity;
-                existingPreShipment.Value = existingPreShipment.Value;
-                existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
-                existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                existingPreShipment.SenderCity = preShipmentDTO.SenderCity;
+                existingPreShipment.Value = preShipmentDTO.Value;
+                existingPreShipment.DepartureStationId = preShipmentDTO.DepartureStationId;
+                existingPreShipment.DestinationStationId = preShipmentDTO.DestinationStationId;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
+                existingPreShipment.DestinationServiceCenterId = preShipmentDTO.DestinationServiceCenterId;
 
                 if (existingPreShipment.IsAgent)
                 {
