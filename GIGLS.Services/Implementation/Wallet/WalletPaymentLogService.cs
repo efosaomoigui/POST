@@ -110,7 +110,13 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 walletPaymentLogDto.PaymentCountryId = 1;
             }
-                       
+
+            //if the country is not Nigeria or Ghana, block it
+            if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76)
+            {
+                throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (wallet != null)
             {

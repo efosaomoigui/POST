@@ -21,7 +21,7 @@ namespace GIGLS.Core.Domain
         [MaxLength(128)]
         public string UserName { get; set; }
 
-        public int TimeInMinuetes { get; set; }
+        public int TimeInSeconds { get; set; }
 
         [MaxLength(128)]
         public string UserId { get; set; }
