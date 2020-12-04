@@ -839,7 +839,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = newShipment.Waybill,
                     UserId = newShipment.UserId,
                     UserName = $"{userInfo.FirstName} {userInfo.LastName}",
-                    TimeInMinuetes = shipmentDTO.TimeInMinuetes
+                    TimeInSeconds = shipmentDTO.TimeInSeconds
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();
@@ -2242,13 +2242,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                //var result = allServiceCenters.Where(s => movementManifestNumbers.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
-                var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
+
+                var result = allServiceCenters.Where(s => ManifestNumbers.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList(); var re = allServiceCenters.Where(a => ManifestNumbers.Any(b => b.DepartureServiceCentreId == a.ServiceCentreId)).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => re.Any(r => r.ServiceCentreId == s.ServiceCentreId));
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
                 return unmappedGroupServiceCentres.ToList();
             }
@@ -3929,7 +3929,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var codShipments = await _uow.Shipment.GetCODShipments(baseFilterCriteria);
                 if (codShipments.Any())
                 {
-                    var statuses = codShipments.Select(x => x.ShipmentScanStatus.ToString()).ToList();
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
                     var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
                     foreach (var item in codShipments)
                     {

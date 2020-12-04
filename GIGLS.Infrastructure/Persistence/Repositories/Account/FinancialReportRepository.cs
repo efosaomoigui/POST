@@ -8,6 +8,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,42 +27,20 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         //Get Earnings Breakdown
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
-            //get startDate and endDate
-            var queryDate = dashboardFilter.getStartDateAndEndDate();
-            var startDate = queryDate.Item1;
-            var endDate = queryDate.Item2;
-
-            var earnings = _context.FinancialReport.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilter.ActiveCountryId);
-
             var earningsBreakdownDTO = new EarningsBreakdownDTO();
+            var results = await GetFinancialBreakdownSummary(dashboardFilter);
 
-            earningsBreakdownDTO.GIGGO = earnings.Where(x => x.Source == ReportSource.GIGGo).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.Agility = earnings.Where(x => x.Source == ReportSource.Agility).Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
-            earningsBreakdownDTO.Demurrage = earnings.Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
+            earningsBreakdownDTO.GIGGO = results.GIGGo;
+            earningsBreakdownDTO.Agility = results.Agility;
+            earningsBreakdownDTO.IntlShipments = results.Intl;
 
-            var intlShipments = _context.Invoice.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentStatus == PaymentStatus.Paid &&
-              s.PaymentMethod == PaymentType.Cash.ToString() && s.IsInternational == true).Select(x => x.Amount).DefaultIfEmpty(0).Sum();
-
-            earningsBreakdownDTO.IntlShipments = intlShipments;
+            earningsBreakdownDTO.Demurrage = await GetTotalFinancialReportDemurrage(dashboardFilter);
 
             return earningsBreakdownDTO;
-
         }
 
-
-        public Task<List<FinancialReportDTO>> GetFinancialReportBreakdown(AccountFilterCriteria accountFilterCriteria)
+        public async Task<List<FinancialReportDTO>> GetFinancialReportBreakdown(AccountFilterCriteria accountFilterCriteria)
         {
-            var transactionContext = _context.FinancialReport.Where(x => x.CountryId == accountFilterCriteria.CountryId).AsQueryable();
-
-            if(accountFilterCriteria.CompanyType == "Demurrage")
-            {
-                transactionContext = transactionContext.Where(x => x.Demurrage > 0);
-            }
-            else
-            {
-                transactionContext = transactionContext.Where(x => x.Source.ToString() == accountFilterCriteria.CompanyType);
-            }
-
             var startDate = DateTime.Now;
             var endDate = DateTime.Now;
 
@@ -79,32 +58,31 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 endDate = queryDate.Item2;
             }
 
-            transactionContext = transactionContext.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
-            List<FinancialReportDTO> transactionDTO = (from w in transactionContext
-                                                       select new FinancialReportDTO()
-                                                       {
-                                                           Waybill = w.Waybill,
-                                                           Source = w.Source,
-                                                           Earnings = w.Earnings,
-                                                           PartnerEarnings = w.PartnerEarnings,
-                                                           GrandTotal = w.GrandTotal,
-                                                           Demurrage = w.Demurrage,
-                                                           DateCreated = w.DateCreated,
-                                                           CurrencySymbol = _context.Country.Where(x => x.CountryId == w.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault()
-                                                          
-                                                       }).ToList();
+            //declare parameters for the stored procedure
+            SqlParameter startDates = new SqlParameter("@StartDate", startDate);
+            SqlParameter endDates = new SqlParameter("@EndDate", endDate);
+            SqlParameter countryId = new SqlParameter("@CountryId", accountFilterCriteria.CountryId);
+            SqlParameter source = new SqlParameter("@Source", accountFilterCriteria.ServiceCenterId);
 
-            return Task.FromResult(transactionDTO.OrderByDescending(s => s.DateCreated).ToList());
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                    startDates,
+                    endDates,
+                    countryId,
+                    source
+            };
+
+            var summary = await _context.Database.SqlQuery<FinancialReportDTO>("FinancialReports " +
+               "@StartDate, @EndDate, @Source, @CountryId",
+               param).ToListAsync();
+
+            return await Task.FromResult(summary);
         }
 
-        public Task<List<FinancialReportDTO>> GetIntlReportBreakdown(AccountFilterCriteria accountFilterCriteria)
+        public Task<List<FinancialReportDTO>> GetFinancialReportBreakdownForDemurrage(AccountFilterCriteria accountFilterCriteria)
         {
-            //filter by service center
-            var transactionContext = _context.Invoice.Where(x => x.IsInternational == true && x.PaymentStatus == PaymentStatus.Paid 
-            && x.PaymentMethod == PaymentType.Cash.ToString()).AsQueryable();
-
-
             var startDate = DateTime.Now;
             var endDate = DateTime.Now;
 
@@ -122,23 +100,152 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 endDate = queryDate.Item2;
             }
 
-            transactionContext = transactionContext.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
+            var transactionContext = _context.FinancialReport.Where(x => x.CountryId == accountFilterCriteria.CountryId &&
+            x.Demurrage > 0 &&
+            x.DateCreated >= startDate && x.DateCreated < endDate).AsQueryable();
 
-            List<FinancialReportDTO> transactionDTO = (from w in transactionContext
-                                                       select new FinancialReportDTO()
-                                                       {
-                                                           Waybill = w.Waybill,
-                                                           Source = ReportSource.Intl,
-                                                           Earnings = w.Amount,
-                                                           PartnerEarnings = 0,
-                                                           GrandTotal = w.Amount,
-                                                           Demurrage = 0,
-                                                           DateCreated = w.DateCreated,
-                                                           CurrencySymbol = _context.Country.Where(x => x.CountryId == w.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault()
+            List<FinancialReportDTO> reportDTO = (from w in transactionContext
+                                                  select new FinancialReportDTO()
+                                                  {
 
-                                                       }).ToList();
+                                                      Waybill = w.Waybill,
+                                                      Earnings = w.Earnings,
+                                                      GrandTotal = w.GrandTotal,
+                                                      PartnerEarnings = w.PartnerEarnings,
+                                                      Demurrage = w.Demurrage,
+                                                      Source = w.Source,
+                                                      CurrencySymbol = _context.Country.Where(s => s.CountryId == w.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault()
+                                                  }).ToList();
 
-            return Task.FromResult(transactionDTO.OrderByDescending(s => s.DateCreated).ToList());
+            return Task.FromResult(reportDTO.OrderByDescending(s => s.DateCreated).ToList());
+
+        }
+
+        public async Task<decimal> GetTotalFinancialReportEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("FinancialReportsEarnings " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetTotalFinancialReportDemurrage(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("FinancialReportsDemurrage " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<FinancialBreakdownSummaryDTO> GetFinancialBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new FinancialBreakdownSummaryDTO
+                {
+                    GIGGo = 0,
+                    Agility = 0,
+                    Intl = 0
+                };
+
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<FinancialBreakdownSummaryDTO>("FinancialBreakdownSummary " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result.GIGGo = summary.GIGGo;
+                    result.Agility = summary.Agility;
+                    result.Intl = summary.Intl;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

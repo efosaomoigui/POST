@@ -280,5 +280,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 throw;
             }
         }
+
+        public async Task<WalletPaymentLogSummary> GetWalletPaymentSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new WalletPaymentLogSummary
+                {
+                    Paystack = 0,
+                    TheTeller = 0,
+                    Flutterwave = 0,
+                    USSD = 0
+                };
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<WalletPaymentLogSummary>("WalletPaymentLogSummary " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result.Paystack = summary.Paystack;
+                    result.TheTeller = summary.TheTeller;
+                    result.USSD = summary.USSD;
+                    result.Flutterwave = summary.Flutterwave;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

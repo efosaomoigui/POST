@@ -152,7 +152,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
-        public int TimeInMinuetes { get; set; }
+        public int TimeInSeconds { get; set; }
 
     }
 
@@ -327,6 +327,6 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal CODAmount { get; set; }
         public bool IsCOD { get; set; }
         public string ShipmentStatus { get; set; }
-        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string ShipmentScanStatus { get; set; }
     }
 }

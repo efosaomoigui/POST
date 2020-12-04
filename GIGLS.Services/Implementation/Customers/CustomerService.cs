@@ -468,7 +468,7 @@ namespace GIGLS.Services.Implementation.Customers
                     };
                     if (item.StatusCode == "200")
                     {
-                        obj.ActionResult = "SUCCESSFUL"; 
+                        obj.ActionResult = "SUCCESSFUL";
                     }
                     else
                     {
@@ -477,7 +477,7 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.PhoneNo = partnerPhoneNo;
                     obj.Waybill = waybill;
                     shipmentActivity.Add(obj);
-                } 
+                }
             }
             return shipmentActivity;
         }

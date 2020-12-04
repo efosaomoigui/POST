@@ -1042,19 +1042,17 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                 dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
                 dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
+                dashboardDTO.WalletPaymentLogSummary = await GetWalletPaymentSummary(dashboardFilterCriteria);
+                dashboardDTO.WalletBreakdown = await GetWalletBreakdown(userEntity.UserActiveCountryId);
 
                 dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
+
                 //get all earnings
-                var earnings = _uow.FinancialReport.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilterCriteria.ActiveCountryId);
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+                dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetTotalFinancialReportEarnings(dashboardFilterCriteria);
+                var demmurage = await _uow.FinancialReport.GetTotalFinancialReportDemurrage(dashboardFilterCriteria);
 
-                var demmurage = earnings.Where(x => x.Demurrage > 0).Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
-
-                var intlShipments = _uow.Invoice.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentStatus == PaymentStatus.Paid &&
-               s.PaymentMethod == PaymentType.Cash.ToString() && s.IsInternational == true).Select(x => x.Amount).DefaultIfEmpty(0).Sum();
-
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal += intlShipments;
                 dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
+
                 _uow.Complete();
             }
 
@@ -1206,11 +1204,27 @@ namespace GIGLS.Services.Implementation.Dashboard
             return await _uow.Wallet.GetTotalWalletBalance(countryId);
         }
 
+        //Get Total Earnings in Financial Reports 
+        private async Task<decimal> GetTotalFinancialReportEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetTotalFinancialReportEarnings(dashboardFilterCriteria);
+        }
+
+        private async Task<WalletBreakdown> GetWalletBreakdown(int countryId)
+        {
+            return await _uow.Wallet.GetWalletBreakdown(countryId);
+        }
 
         //Get Wallet Transaction Credit
         private async Task<WalletTransactionSummary> GetWalletTransactionSummary(DashboardFilterCriteria dashboardFilterCriteria)
         {
             return await _uow.WalletTransaction.GetWalletTransactionSummary(dashboardFilterCriteria);
+        }
+
+        //Get Wallet Transaction Credit
+        private async Task<WalletPaymentLogSummary> GetWalletPaymentSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.WalletTransaction.GetWalletPaymentSummary(dashboardFilterCriteria);
         }
 
         //Get Claim for Non-Dashboard Access

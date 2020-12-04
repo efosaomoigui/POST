@@ -171,13 +171,13 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> PayForShipment(string waybill);
         Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
         Task<bool> DeleteDropOff(string waybill);
+        Task<object> GetUserCountryCode(UserDTO user);
         Task<IEnumerable<NewCountryDTO>> GetActiveCountries();
         Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
         Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler);
         Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
-        Task<object> GetUserCountryCode(UserDTO user);
-        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
@@ -192,12 +192,12 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
         Task<MessageDTO> GetIntlMessageForApp();
-        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
         Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task<bool> SendMessage(NewMessageDTO obj);
         Task<UserDTO> GetUserByEmail(string email);
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
+        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

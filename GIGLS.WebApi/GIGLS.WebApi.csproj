@@ -308,8 +308,6 @@
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
-    <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
-    <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
     <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
@@ -332,9 +330,6 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
-    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
-    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
-    <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
@@ -348,10 +343,14 @@
     <Compile Include="Controllers\Partnership\PartnerController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\AdminReportController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\RiderDeliveryController.cs" />
+    <Compile Include="Controllers\Routes\RouteController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
@@ -380,6 +379,7 @@
     <Compile Include="Controllers\Shipments\ShipmentPackagePriceController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentRerouteController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
+    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\Sla\SLAController.cs" />
     <Compile Include="Controllers\StateController.cs" />
@@ -403,6 +403,7 @@
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitPriceController.cs" />
     <Compile Include="Controllers\Zone\ZoneController.cs" />
+    <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Filters\Configuration\HttpRequestMessageExtensions.cs" />
     <Compile Include="Filters\Configuration\IPAddressElement.cs" />
     <Compile Include="Filters\Configuration\IPAddressElementCollection.cs" />
@@ -455,11 +456,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\JobCards\" />
-    <Folder Include="Controllers\Stocks\" />
-    <Folder Include="Controllers\Stores\" />
-    <Folder Include="Controllers\Vendors\" />
-    <Folder Include="Controllers\Workshops\" />
+    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
