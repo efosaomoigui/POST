@@ -349,7 +349,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
             var errval = string.Empty;
-            var result2 = string.Empty; 
+            var result2 = string.Empty;
             api_session_error result = api_session_error.no_error;
 
             //5. initialize the serializer object
@@ -465,7 +465,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    throw new Exception("Error Creating Shipment ---"+result2);
+                    throw new Exception("Error Creating Shipment ---" + result2);
                 }
 
                 errval = error_code;
@@ -473,7 +473,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             catch (Exception ex)
             {
                 errval = ex.Message;
-                throw new Exception("Error Creating Shipment ---" + result2+"----"+ errval);
+                throw new Exception("Error Creating Shipment ---" + result2 + "----" + errval);
             }
 
             return new Tuple<api_session_error, string, string>(result, errval, result2);
@@ -553,9 +553,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<ShipmentDTO> CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
         {
             //var requestDetails = 
-            var shipmentReq = await GetShipmentRequest(mDto.RequestNumber);
-            var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
-            mDto.IntlShipmentRequest = shipmentDTlMapped;
             var magayaShipmentDTO = mDto.WarehouseReceipt;
             try
             {
@@ -612,33 +609,38 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Delivery Options
                 shipmentDTO.DeliveryOptionId = 1;
-
-                //Insurance
-                var requestDto = mDto.IntlShipmentRequest.ShipmentRequestItems;
                 decimal totalInsuranceCharge = 0;
 
-                if (requestDto != null)
-                {
-                    foreach (var item in shipmentReq.ShipmentRequestItems)
-                    {
-                        var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
-                        var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
-                        totalInsuranceCharge += (intValue) * (percentVal / 100);
-                    }
-                }
-
-                //updaqte the customer user country
-                //string ob1 = "";
                 var user = new UserDTO();
                 var resultJson2 = new IntlShipmentRequestDTO();
                 var customer = new CustomerDTO();
 
-                if (mDto.IntlShipmentRequest != null)
+                //Insurance
+                if (mDto.RequestNumber != null)
                 {
-                    var ob1 = mDto.IntlShipmentRequest;
-                    var customerUserId = ob1.UserId;
-                    user = await _userService.GetUserById(customerUserId);
-                    customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+                    var shipmentReq = await GetShipmentRequest(mDto.RequestNumber);
+                    var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
+                    mDto.IntlShipmentRequest = shipmentDTlMapped;
+
+                    var requestDto = mDto.IntlShipmentRequest.ShipmentRequestItems;
+
+                    if (requestDto != null)
+                    {
+                        foreach (var item in shipmentReq.ShipmentRequestItems)
+                        {
+                            var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
+                            var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
+                            totalInsuranceCharge += (intValue) * (percentVal / 100);
+                        }
+                    }
+
+                    if (shipmentDTlMapped != null)
+                    {
+                        var ob1 = shipmentDTlMapped;
+                        var customerUserId = ob1.UserId;
+                        user = await _userService.GetUserById(customerUserId);
+                        customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+                    }
                 }
 
                 //PickUp Options
@@ -935,7 +937,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var station = await _stationService.GetStationById(shipmentDTO.StationId);
 
                 var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
-                if(destinationServiceCenter == null)
+                if (destinationServiceCenter == null)
                 {
                     throw new GenericException("Destination Service Center does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
