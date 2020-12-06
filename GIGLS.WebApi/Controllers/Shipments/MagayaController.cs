@@ -66,7 +66,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
+                var result = _service.SetTransactions(access_key, MagayaShipmentDTO); 
 
                 //4. Pass the return to the view or caller
                 return new ServiceResponse<Tuple<api_session_error, string, string>>()

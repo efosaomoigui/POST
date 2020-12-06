@@ -320,7 +320,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
-            var requestNo = mDto.RequestNumber;
+            
+            if (mDto.RequestNumber != null)
+            {
+                var requestNo = mDto.RequestNumber;
+                var shipmentReq = await GetShipmentRequest(requestNo);
+                var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
+                mDto.IntlShipmentRequest = shipmentDTlMapped;
+            }
+
             //2. initialize type of shipment and flag
             string type = "WH";
 
@@ -345,7 +353,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             setMagayaShipmentCharges(magayaShipmentDTO);
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
-
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
             var errval = string.Empty;
@@ -365,7 +372,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 string error_code = "";
 
                 //Magaya Request for Shipment Creation
-                //result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
                 //result2 = error_code;
 
                 result = api_session_error.no_error;
@@ -618,7 +625,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //Insurance
                 if (mDto.RequestNumber != null)
                 {
-                    var shipmentReq = await GetShipmentRequest(mDto.RequestNumber);
+                    var shipmentReq = await GetShipmentRequest(mDto.IntlShipmentRequest.RequestNumber);
                     var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
                     mDto.IntlShipmentRequest = shipmentDTlMapped;
 
@@ -1253,7 +1260,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (shipment == null)
                 {
-                    throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    return new IntlShipmentRequestDTO()
+                    {
+                        RequestNumber = "",
+                        DestinationServiceCentre = new ServiceCentreDTO(),
+                        ShipmentRequestItems = new List<IntlShipmentRequestItemDTO>()
+                    };
+                    //throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return await GetShipmentRequest(shipment.IntlShipmentRequestId);

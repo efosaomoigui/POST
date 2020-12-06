@@ -28284,7 +28284,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private string actualAmountCollected;
         private string expectedAmountToCollect;
         private string magayaPaymentOption;
-        private string magayaPaymentType; 
+        private string magayaPaymentType;
         private string requestNumber;
         private IntlShipmentRequestDTL intlShipmentRequest;
 
