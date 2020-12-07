@@ -4063,12 +4063,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
-                //QR Code
-                //await GenerateDeliveryNumber(newShipment.Waybill);
-
                 //5. Add DHL Waybill Payload to the different table
                 dhlShipment.Waybill = shipmentDTO.Waybill;
                 AddDHLWaybill(dhlShipment);
+
+                //QR Code
+                await GenerateDeliveryNumber(shipmentDTO.Waybill);
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();

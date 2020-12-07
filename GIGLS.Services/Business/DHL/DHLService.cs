@@ -43,6 +43,14 @@ namespace GIGLS.Services.Business.DHL
                     {
                         output.ShipmentIdentificationNumber = rateRequestResponse.ShipmentResponse.ShipmentIdentificationNumber;
                         output.PackageResult = rateRequestResponse.ShipmentResponse.PackagesResult.ToString();
+
+                        if (rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Any())
+                        {
+                            string[] itemIds = rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Select(x => x.TrackingNumber).ToArray();
+                            output.PackageResult = string.Join(",", itemIds);
+                            //[{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
+                        }
+
                         //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
                         //{
                         //    output.ImageFormat = rateRequestResponse.ShipmentResponse.LabelImage[0].LabelImageFormat;
