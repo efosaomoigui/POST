@@ -210,6 +210,7 @@ namespace GIGLS.Services.Business.DHL
                 DropOffType = DropOffType.REGULAR_PICKUP.ToString(),
                 UnitOfMeasurement = UnitOfMeasurement.SI.ToString()
             };
+            shipmentInfo.Account = GetGIGAccountNumber();
             return shipmentInfo;
         }
 
@@ -241,7 +242,9 @@ namespace GIGLS.Services.Business.DHL
                     StreetLines = shipmentDTO.ReceiverAddress,
                     City = shipmentDTO.ReceiverCity,
                     PostalCode = shipmentDTO.RecieverPostalCode,
-                    CountryCode = shipmentDTO.ReceiverCountryCode
+                    CountryCode = shipmentDTO.ReceiverCountryCode,
+                    StreetLines2 = shipmentDTO.ReceiverCity,
+                    StreetLines3 = shipmentDTO.ReceiverCity
                 }
             };
 
@@ -261,7 +264,9 @@ namespace GIGLS.Services.Business.DHL
                 },
                 Address = new AddressPayload
                 {
-                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING STATION, GBAGADA PHASE 2",
+                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING",
+                    StreetLines2 = "STATION, GBAGADA PHASE 2",
+                    StreetLines3 = "GBAGADA LAGOS",
                     City = "LAGOS ",
                     PostalCode = "100001",
                     CountryCode = "NG"
@@ -314,11 +319,16 @@ namespace GIGLS.Services.Business.DHL
             return key;
         }
 
+        private string GetGIGAccountNumber()
+        {
+            string account = ConfigurationManager.AppSettings["DHLAccount"];
+            return account;
+        }
+
         private RateRequestPayload GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var rateRequest = new RateRequest();
-            string dhlAccount = ConfigurationManager.AppSettings["DHLAccount"];
-            rateRequest.RequestedShipment.Account = dhlAccount;
+            rateRequest.RequestedShipment.Account = GetGIGAccountNumber();
 
             rateRequest.RequestedShipment.DropOffType = DropOffType.REGULAR_PICKUP.ToString();
             rateRequest.RequestedShipment.ShipTimestamp = DateTime.Now.AddDays(2);
