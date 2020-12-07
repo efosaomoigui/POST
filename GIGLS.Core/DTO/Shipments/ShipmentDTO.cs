@@ -328,5 +328,6 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCOD { get; set; }
         public string ShipmentStatus { get; set; }
         public string ShipmentScanStatus { get; set; }
+        public string CompanyName { get; set; }
     }
 }
