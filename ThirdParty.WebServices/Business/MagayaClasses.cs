@@ -28284,7 +28284,8 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private string actualAmountCollected;
         private string expectedAmountToCollect;
         private string magayaPaymentOption;
-        private string magayaPaymentType;
+        private string magayaPaymentType; 
+        private string requestNumber;
         private IntlShipmentRequestDTL intlShipmentRequest;
 
         private int serviceCenterId;
@@ -28359,6 +28360,19 @@ namespace ThirdParty.WebServices.Magaya.Business.New
             set 
             { 
                 magayaPaymentType = value; 
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("RequestNumber")]
+        public string RequestNumber
+        {
+            get
+            {
+                return requestNumber;
+            }
+            set
+            {
+                requestNumber = value;
             }
         }
 

@@ -152,6 +152,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public int TimeInSeconds { get; set; }
+
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
@@ -314,5 +316,17 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
+    }
+
+
+    public class CODShipmentDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public decimal CODAmount { get; set; }
+        public bool IsCOD { get; set; }
+        public string ShipmentStatus { get; set; }
+        public string ShipmentScanStatus { get; set; }
     }
 }

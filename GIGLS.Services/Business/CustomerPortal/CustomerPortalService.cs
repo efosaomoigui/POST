@@ -2614,11 +2614,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
                 existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
-                existingPreShipment.SenderCity = existingPreShipment.SenderCity;
-                existingPreShipment.Value = existingPreShipment.Value;
-                existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
-                existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                existingPreShipment.SenderCity = preShipmentDTO.SenderCity;
+                existingPreShipment.Value = preShipmentDTO.Value;
+                existingPreShipment.DepartureStationId = preShipmentDTO.DepartureStationId;
+                existingPreShipment.DestinationStationId = preShipmentDTO.DestinationStationId;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
+                existingPreShipment.DestinationServiceCenterId = preShipmentDTO.DestinationServiceCenterId;
 
                 if (existingPreShipment.IsAgent)
                 {
@@ -2970,6 +2971,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
 
+        public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+
+            return requests;
+        }
+
+
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
@@ -3076,7 +3088,5 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _walletService.ChargeWallet(chargeWalletDTO);
         }
-
-
     }
 }

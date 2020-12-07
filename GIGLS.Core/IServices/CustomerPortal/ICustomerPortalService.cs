@@ -198,5 +198,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> SendMessage(NewMessageDTO obj);
         Task<UserDTO> GetUserByEmail(string email);
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
+        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

@@ -216,6 +216,7 @@
     <Compile Include="Domain\MagayaShipmentAgility.cs" />
     <Compile Include="Domain\Route\Route.cs" />
     <Compile Include="Domain\ServiceCenterPackage.cs" />
+    <Compile Include="Domain\ShipmentTimeMonitor.cs" />
     <Compile Include="Domain\ShipmentContactHistory.cs" />
     <Compile Include="Domain\ShipmentContact.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
@@ -690,6 +691,7 @@
     <Compile Include="IRepositories\Shipments\IManifestVisitMonitoringRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentMobileRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentContactHistoryRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentTimeMonitorRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentContactRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
