@@ -136,10 +136,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 shipment = shipment.Where(s => s.IsCancelled == false);
 
                 //filter by Local or International Shipment
-                if (filterOptionsDto.IsInternational != null)
-                {
-                    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
-                }
+                //if (filterOptionsDto.IsInternational != null)
+                //{
+                //    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                //}
 
                 var count = 0;
 
