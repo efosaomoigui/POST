@@ -17,6 +17,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ManifestCode { get; set; }
         public DateTime DateTime { get; set; }
         public ManifestType ManifestType { get; set; }
+        public bool Picked { get; set; }
         public List<PreShipmentMobileWaybill> Waybills { get; set; }
     }
 

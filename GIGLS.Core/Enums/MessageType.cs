@@ -56,6 +56,9 @@
         RMCS, //Message for Receiver Delivery Code
         REQMAIL, //International Message for customer
         REQSCA, //International Message for Service centre
-        ISTC //International Shipments Terms and Condition shown on the App
+        ISTC, //International Shipments Terms and Condition shown on the App
+        AISN, //International Shipment Arrive Nigeria (Paid)
+        AISNU,  //International Shipment Arrive Nigeria (UnPaid)
+        NODESMS //International Shipments Terms and Condition shown on the App
     } 
 }

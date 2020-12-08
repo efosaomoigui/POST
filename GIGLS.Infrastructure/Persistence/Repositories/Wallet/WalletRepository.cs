@@ -8,6 +8,8 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
 using System.Data.SqlClient;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -63,6 +65,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 }
 
                 return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<WalletDTO>> GetOutstaningCorporatePayments()
+        {
+            try
+            {
+                var outstandingPayments = _context.Wallets.Where(x => x.CompanyType == CompanyType.Corporate.ToString() && x.Balance < 0);
+                var companiesDto = from w in outstandingPayments
+                                   join c in _context.Company on w.CustomerCode equals c.CustomerCode
+                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                                   select new WalletDTO
+                                   {
+                                       CustomerCode = w.CustomerCode,
+                                       Balance = w.Balance,
+                                       CustomerName = c.Name,
+                                       Country = new CountryDTO
+                                       {
+                                           CountryId = co.CountryId,
+                                           CountryName = co.CountryName,
+                                           CurrencySymbol = co.CurrencySymbol,
+                                           CurrencyCode = co.CurrencyCode,
+                                           PhoneNumberCode = co.PhoneNumberCode
+                                       },
+                                   };
+                return Task.FromResult(companiesDto.OrderBy(x => x.Balance).ToList());
             }
             catch (Exception)
             {

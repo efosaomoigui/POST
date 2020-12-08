@@ -89,6 +89,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPut]
+        [Route("intlshipmentrequest/{requestNumber}")]
+        public async Task<IServiceResponse<object>> UpdateIntlShipmentRequest(string requestNumber,IntlShipmentRequestDTO transactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _magayaService.UpdateIntlShipmentRequest(requestNumber,transactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
@@ -657,76 +671,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[AllowAnonymous]
-        //[HttpPost]
-        //[Route("validateotp/{OTP}")]
-        //public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var Otp = await _portalService.IsOTPValid(OTP);
-        //        if (Otp != null && Otp.IsActive == true)
-        //        {
-        //            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-        //            string getTokenResponse;
-
-        //            using (var client = new HttpClient())
-        //            {
-        //                //setup client
-        //                client.BaseAddress = new Uri(apiBaseUri);
-        //                client.DefaultRequestHeaders.Accept.Clear();
-        //                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //                //setup login data
-        //                var formContent = new FormUrlEncodedContent(new[]
-        //                    {
-        //                 new KeyValuePair<string, string>("grant_type", "password"),
-        //                 new KeyValuePair<string, string>("Username", Otp.Username),
-        //                 new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
-        //                 });
-
-        //                //setup login data
-        //                HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
-
-        //                if (!responseMessage.IsSuccessStatusCode)
-        //                {
-        //                    throw new GenericException("Incorrect Login Details");
-        //                }
-        //                else
-        //                {
-        //                    Otp = await _portalService.GenerateReferrerCode(Otp);
-        //                }
-
-        //                //get access token from response body
-        //                var responseJson = await responseMessage.Content.ReadAsStringAsync();
-        //                var jObject = JObject.Parse(responseJson);
-
-        //                getTokenResponse = jObject.GetValue("access_token").ToString();
-
-        //                return new ServiceResponse<JObject>
-        //                {
-        //                    Object = jObject,
-        //                    ReferrerCode = Otp.Referrercode
-        //                };
-        //            }
-
-        //        }
-        //        else
-        //        {
-        //            var data = new { IsActive = false };
-
-        //            var jObject = JObject.FromObject(data);
-
-        //            return new ServiceResponse<JObject>
-        //            {
-        //                ShortDescription = "User has not been verified",
-        //                Object = jObject
-        //            };
-        //        }
-        //    });
-        //}
-
+        
         [AllowAnonymous]
         [HttpPost]
         [Route("verifyotp")]
@@ -771,8 +716,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
                         var jObject = JObject.Parse(responseJson);
 
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
+                        //Get country detail
+                        var country = await _portalService.GetUserCountryCode(userDto);
+                        var countryJson = JObject.FromObject(country);
 
+                        //jObject.Add(countryJson);
+                        jObject.Add(new JProperty("Country", countryJson));
+
+                        getTokenResponse = jObject.GetValue("access_token").ToString();
                         return new ServiceResponse<JObject>
                         {
                             Object = jObject,
@@ -2241,6 +2192,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<MessageDTO>
                 {
                     Object = message
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("intlshipmentrequests")]
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var requests = await _portalService.GetIntlShipmentRequestsForUser(filterCriteria);
+
+                return new ServiceResponse<List<IntlShipmentRequestDTO>>
+                {
+                    Object = requests
                 };
             });
         }

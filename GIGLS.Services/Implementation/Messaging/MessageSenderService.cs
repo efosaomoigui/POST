@@ -233,7 +233,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if(messageDTO.MessageType == MessageType.ARF)
+                    if(messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                         if(deliveryNumber != null)
@@ -604,6 +604,26 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //use to determine sms sender service to use
                 //messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
+            }
+
+            if (obj is NewMessageDTO)
+            {
+                var newMsgDTO = (NewMessageDTO)obj;
+                //A. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                messageDTO.To = newMsgDTO.ReceiverDetail;
+                messageDTO.ToEmail = newMsgDTO.ReceiverDetail;
+                messageDTO.Subject = newMsgDTO.Subject;
+                messageDTO.Body = newMsgDTO.Body;
+                messageDTO.FinalBody = newMsgDTO.Body;
+                if (newMsgDTO.EmailSmsType.ToString() == "SMS")
+                {
+                    if (!newMsgDTO.ReceiverDetail.StartsWith("+"))
+                    {
+                        messageDTO.To = $"+{newMsgDTO.ReceiverDetail}";
+                    }
+                }
             }
 
             return await Task.FromResult(true);
@@ -1002,7 +1022,11 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Request Number", 
                     "Departure", 
                     "Destination",
-                    "Items Details"
+                    "Items Details",
+                    "ETA",
+                    "PickupOptions",
+                    "GrandTotal",
+                    "CurrencySymbol"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1017,13 +1041,31 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //A. map the array
                 strArray[0] = customerObj.CustomerName;
-                strArray[2] = intlDTO.ReceiverName;
+                strArray[1] = intlDTO.ReceiverName;
                 strArray[2] = intlDTO.Waybill;
                 strArray[3] = intlDTO.URL; 
                 strArray[4] = intlDTO.RequestNumber;
                 strArray[5] = intlDTO.DepartureServiceCentre.Name;
                 strArray[6] = intlDTO.DestinationServiceCentre.Name;
                 strArray[7] = intlDTO.ItemDetails;
+                strArray[8] = DateTime.Now.AddDays(10).ToString("dd/MM/yyyy");
+                strArray[9] = intlDTO.PickupOptions.ToString();
+                strArray[10] = intlDTO.GrandTotal.ToString();
+
+                if(intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    strArray[9] = " and is ready to be delivered to your location";
+                }
+                else if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    strArray[9] = " and is ready for pickup";
+                }
+
+                var countryId = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DepartureCountryId);
+                if(countryId != null)
+                {
+                    strArray[11] = countryId.CurrencySymbol;
+                }
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -1054,7 +1096,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Departure",
                     "Destination",
                     "Items Details",
-                    "Description"
+                    "Description",
+                    "PickupOptions"
                 };
 
                 var intlDTO = (IntlShipmentRequestDTO)obj;
@@ -1077,6 +1120,15 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[5] = intlDTO.DestinationServiceCentre.Name;
                 strArray[6] = intlDTO.ItemDetails;
                 strArray[7] = "International Shipment Items";
+
+                if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    strArray[8] = "Pick Up At GIGL Center";
+                }
+                else if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    strArray[8] = "Home Delivery";
+                }
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

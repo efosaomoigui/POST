@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Wallet;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,8 @@ namespace GIGLS.Core.IServices.Wallet
         IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService();
         Task<WalletDTO> GetWalletBalance(string userChannelCode);
         Task<WalletDTO> GetWalletBalanceWithName();
+        Task<List<WalletDTO>> GetOutstaningCorporatePayments();
+        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
     }
 
 }

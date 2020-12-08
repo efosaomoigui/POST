@@ -31,15 +31,16 @@ using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Utility;
-using Audit.Core;
 using System.Configuration;
 using System.Net;
 using System.Net.Http;
 using GIGLS.Core.DTO.Report;
 using System.Security.Cryptography;
 using System.Text;
-using ThirdParty.WebServices.Magaya.Business.New;
 using PaymentType = GIGLS.Core.Enums.PaymentType;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -66,6 +67,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IGiglgoStationService _giglgoStationService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
+        private readonly IFinancialReportService _financialReportService;
+        private readonly INodeService _nodeService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -73,7 +76,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
-            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService)
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
+            INodeService nodeService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -96,6 +100,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _giglgoStationService = giglgoStationService;
             _groupWaybillNumberService = groupWaybillNumberService;
+            _financialReportService = financialReportService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -773,7 +779,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Send the Payload to Partner Cloud Handler 
                     if (!preShipmentDTO.IsBatchPickUp)
                     {
-                        NodeApiCreateShipment(newPreShipment);
+                        await NodeApiCreateShipment(newPreShipment);
                     }
 
                     //We will send SMS & Email
@@ -863,7 +869,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private void NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        private async Task NodeApiCreateShipment(PreShipmentMobile newPreShipment)
         {
             try
             {
@@ -889,12 +895,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 };
 
-                HttpClient client = new HttpClient();
-
-                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
-                nodeURL = nodeURL + nodePostShipment;
-                client.PostAsJsonAsync(nodeURL, nodePayload);
+                await _nodeService.CreateShipment(nodePayload);
             }
             catch (Exception)
             {
@@ -3271,6 +3272,20 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
 
+
+                        //Add to Financial Reports
+                        var financialReport = new FinancialReportDTO
+                        {
+                            Source = ReportSource.GIGGo,
+                            Waybill = preshipmentmobile.Waybill,
+                            PartnerEarnings = price,
+                            GrandTotal = shipmentPrice,
+                            Earnings = shipmentPrice - price,
+                            Demurrage = 0.00M,
+                            CountryId = preshipmentmobile.CountryId
+                        };
+                        await _financialReportService.AddReport(financialReport);
+
                     }
                     else
                     {
@@ -3313,6 +3328,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                 UserId = userId
                             };
                             var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+                            //Add to Financial Reports
+                            var financialReport = new FinancialReportDTO
+                            {
+                                Source = ReportSource.GIGGo,
+                                Waybill = preshipmentmobile.Waybill,
+                                PartnerEarnings = price,
+                                GrandTotal = preshipmentmobile.GrandTotal,
+                                Earnings = preshipmentmobile.GrandTotal - price,
+                                Demurrage = 0.00M,
+                                CountryId = preshipmentmobile.CountryId
+                            };
+                            await _financialReportService.AddReport(financialReport);
                             return;
                         }
                         else
@@ -4002,6 +4030,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill);
+                var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == preshipmentmobile.Waybill);
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
@@ -4011,11 +4040,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequests != null)
                 {
                     var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
-                    var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
+                    var partnersPrice = (0.4M * Convert.ToDecimal(pickuprice));
 
                     var rider = await _userService.GetUserById(pickuprequests.UserId);
                     var riderWallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == rider.UserChannelCode);
-                    riderWallet.Balance = riderWallet.Balance + Partnersprice;
+                    riderWallet.Balance = riderWallet.Balance + partnersPrice;
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
@@ -4028,15 +4057,29 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Destination = preshipmentmobile.ReceiverAddress,
                         Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = Partnersprice,
+                        AmountReceived = partnersPrice,
                         Waybill = preshipmentmobile.Waybill
                     };
                     await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+
+                    //update financial report 
+                    if(report != null)
+                    {
+                        report.PartnerEarnings = partnersPrice;
+                        report.Earnings = 0.00M;
+                        report.GrandTotal = 0.00M;
+                    }
                 }
                 else
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
+
+                    //remove from report
+                    if (report != null)
+                    {
+                        report.IsDeleted = true;
+                    }
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
@@ -4386,7 +4429,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (mobileShipment.shipmentstatus == "Assigned for Pickup")
+                if (mobileShipment.shipmentstatus == "Assigned for Pickup" || mobileShipment.shipmentstatus == MobilePickUpRequestStatus.Resolved.ToString())
                 {
                     if (deliveryNumber.SenderCode.ToLower() != detail.DeliveryNumber.ToLower())
                     {
@@ -5235,6 +5278,13 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MSCC
                         });
+
+                        //remove from report
+                        var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == Waybill);
+                        if(report != null)
+                        {
+                            report.IsDeleted = true;
+                        }
                     }
                     else
                     {
@@ -5775,10 +5825,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} is not currently assigned to this {request.Waybill}", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString())
+                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString() && formerpickup.Status != "Enroute Pickup")
                 {
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
                 }
+
                 formerpickup.Status = MobilePickUpRequestStatus.Moved.ToString();
                 waybillData.shipmentstatus = "Shipment created";
 

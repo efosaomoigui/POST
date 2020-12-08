@@ -276,6 +276,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestInfo = await _uow.PickupManifest.GetAsync(x => x.ManifestCode == manifestNumber);
                 manifestInfo.ReceiverById = user;
                 manifestInfo.IsReceived = true;
+                manifestInfo.ManifestStatus = ManifestStatus.Delivered;
 
                 var DispatchInfo = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifestNumber);
                 DispatchInfo.ReceivedBy = $"{userInfo.FirstName}{userInfo.LastName}";

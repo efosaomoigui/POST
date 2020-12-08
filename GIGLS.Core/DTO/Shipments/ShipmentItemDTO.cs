@@ -31,6 +31,7 @@ namespace GIGLS.Core.DTO.Shipments
 
     public class IntlShipmentRequestItemDTO : BaseDomainDTO
     {
+        public int IntlShipmentRequestItemId { get; set; }
         public string Description { get; set; }
         public string ItemName { get; set; }
         public string TrackingId { get; set; }
@@ -49,6 +50,9 @@ namespace GIGLS.Core.DTO.Shipments
         public double Height { get; set; }
 
         //Foreign key information
-        public int IntlShipmentRequestId { get; set; }  
+        public int IntlShipmentRequestId { get; set; }
+
+        public bool RequiresInsurance { get; set; } 
+        public dynamic ItemValue { get; set; }
     }
 }
