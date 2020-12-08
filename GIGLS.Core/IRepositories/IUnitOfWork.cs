@@ -207,4 +207,5 @@ namespace GIGLS.Core
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }
+
 }

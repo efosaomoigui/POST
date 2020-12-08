@@ -59,6 +59,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -103,6 +104,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
+        private readonly IShipmentService _shipmentService; 
+        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;   
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -116,7 +119,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService)
+            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService) 
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -157,6 +160,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
             _companyService = companyService;
+            _shipmentService  = shipmentService;
+            _movementManifestService = movementManifestService;
             MapperConfig.Initialize();
         }
 
@@ -3086,6 +3091,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
         {
             return await _walletService.ChargeWallet(chargeWalletDTO);
+        }
+
+        public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
+        {
+           return await  _shipmentService.ReleaseMovementManifest(valMovementManifest);
+        }
+
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await _movementManifestService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
         }
     }
 }

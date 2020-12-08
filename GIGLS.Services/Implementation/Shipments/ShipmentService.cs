@@ -2199,23 +2199,46 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> ReleaseMovementManifest(string movementManifestCode, string code)
+        public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
         {
             try
             {
-                var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
-                var ManifestNumber = movementManifest.FirstOrDefault();
+                var retVal = false;
+                if (valMovementManifest.flag == MovementManifestActivationTypes.AgentActivation)
+                {
+                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
+                    var ManifestNumber = movementManifest.FirstOrDefault();
 
-                if (ManifestNumber.DriverCode == code)
-                {
-                    ManifestNumber.IsDriverValid = true;
-                    await _uow.CompleteAsync();
-                    return true;
+                    if (ManifestNumber.DriverCode == valMovementManifest.code)
+                    {
+                        ManifestNumber.IsDriverValid = true;
+                        await _uow.CompleteAsync();
+                        retVal =  true;
+                    }
+                    else
+                    {
+                        throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                    }
                 }
-                else
+
+                if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
                 {
-                    throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.DestinationServiceCentreCode == valMovementManifest.movementManifestCode);
+                    var ManifestNumber = movementManifest.FirstOrDefault();
+
+                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
+                    {
+                        ManifestNumber.IsDestinationServiceCentreValid = true;
+                        await _uow.CompleteAsync();
+                        retVal =  true;
+                    }
+                    else
+                    {
+                        throw new Exception("Sorry, The Code is invalid for releasing this shipment");
+                    }
                 }
+
+                return retVal;
 
             }
             catch (Exception)

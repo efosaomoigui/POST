@@ -75,7 +75,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
         Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria);
         Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
-        Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
+        Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
 

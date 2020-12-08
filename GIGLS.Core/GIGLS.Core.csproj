@@ -551,6 +551,7 @@
     <Compile Include="Enums\MessagingLogStatus.cs" />
     <Compile Include="Enums\MobilePickUpRequestStatus.cs" />
     <Compile Include="Enums\ModificationType.cs" />
+    <Compile Include="Enums\MovementManifestActivationTypes.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\OverdueShipmentStatus.cs" />
     <Compile Include="Enums\PageOrder.cs" />

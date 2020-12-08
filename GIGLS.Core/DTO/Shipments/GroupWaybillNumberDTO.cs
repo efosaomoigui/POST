@@ -48,4 +48,13 @@ namespace GIGLS.Core.DTO.Shipments
         public List<string> ManifestNumbers { get; set; } 
         public List<object> ManifestNumbersWithDate { get; set; } 
     }
+
+    public class ReleaseMovementManifestDto
+    {
+        // string movementManifestCode, string code, string userid, string flag
+        public string movementManifestCode { get; set; }
+        public string code { get; set; }
+        public string userid { get; set; }
+        public MovementManifestActivationTypes  flag { get; set; } 
+    }
 }

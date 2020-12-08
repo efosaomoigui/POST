@@ -401,11 +401,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
-        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(string movementmanifestcode, string code)
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.ReleaseMovementManifest(movementmanifestcode, code);
+                var centres = await _service.ReleaseMovementManifest(movementManifestVals);
                 return new ServiceResponse<bool>
                 {
                     Object = centres

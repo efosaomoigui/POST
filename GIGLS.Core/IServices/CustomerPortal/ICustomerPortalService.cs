@@ -21,6 +21,7 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
@@ -196,8 +197,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task<bool> SendMessage(NewMessageDTO obj);
-        Task<UserDTO> GetUserByEmail(string email);
+        Task<UserDTO> GetUserByEmail(string email); 
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
+        Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
     }
 }
