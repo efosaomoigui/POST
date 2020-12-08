@@ -125,10 +125,23 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         {
             try
             {
-                //get startDate and endDate
-                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                var StartDate = queryDate.Item1;
-                var EndDate = queryDate.Item2;
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-3);  
+                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    StartDate = queryDate.Item1;
+                    EndDate = queryDate.Item2;
+                }
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
@@ -165,10 +178,23 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         {
             try
             {
-                //get startDate and endDate
-                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                var StartDate = queryDate.Item1;
-                var EndDate = queryDate.Item2;
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-3);  
+                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    StartDate = queryDate.Item1;
+                    EndDate = queryDate.Item2;
+                }
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);

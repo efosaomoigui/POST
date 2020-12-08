@@ -35,6 +35,16 @@ namespace GIGLS.Core.DTO.Dashboard
         public WalletTransactionSummary WalletTransactionSummary { get; set; }
         public WalletPaymentLogSummary WalletPaymentLogSummary { get; set; }
         public WalletBreakdown WalletBreakdown { get; set; }
+        public bool DashboardAccess { get; set; }
+        public CustomerBreakdownDTO CustomerBreakdownDTO { get; set; }
+    }
+
+    public class CustomerBreakdownDTO
+    {
+        public int Individual { get; set; }
+        public int EcommerceBasic { get; set; }
+        public int EcommerceClass { get; set; }
+        public int Corporate { get; set; }
     }
 
 }

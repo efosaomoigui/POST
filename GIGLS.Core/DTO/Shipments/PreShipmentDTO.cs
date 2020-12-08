@@ -30,6 +30,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
         public decimal Value { get; set; }
 
         //PreShipment Items
