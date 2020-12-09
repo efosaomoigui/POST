@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.Domain.Wallet;
+using System.Net.Http;
 
 namespace GIGLS.Core.IServices.Wallet
 {
@@ -18,5 +19,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task VerifyAndValidateMobilePayment(PaystackWebhookDTO webhook);
         Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
         Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingPin(WaybillPaymentLog waybillPaymentLog, string pin);
+        Task<HttpResponseMessage> VerifyBVN(string bvnNo);
     }
 }

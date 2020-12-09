@@ -1,4 +1,5 @@
-﻿using EfeAuthen.Models;
+﻿using AutoMapper;
+using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -45,10 +46,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IPricingService _pricing;
         private readonly IPaymentService _paymentService;
         private readonly ICustomerPortalService _portalService;
+        private readonly IShipmentCollectionService _shipmentCollectionService;
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService) : base(nameof(MobileScannerController))
+            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -58,6 +60,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _pricing = pricing;
             _paymentService = paymentService;
             _portalService = portalService;
+            _shipmentCollectionService = shipmentCollectionService;
 
         }
 
@@ -184,7 +187,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("deliveryoptionprice")]
         public async Task<IServiceResponse<IEnumerable<DeliveryOptionPriceDTO>>> GetDeliveryOptionPrices()
@@ -200,7 +202,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("zonemapping/{departure:int}/{destination:int}")]
         public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
@@ -224,7 +225,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(types);
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("packageoptions")]
         public async Task<IServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>> GetShipmentPackagePrices()
@@ -240,7 +240,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("customer/{phonenumber}")]
         public async Task<IServiceResponse<IndividualCustomerDTO>> GetCustomerByPhoneNumber(string phonenumber)
@@ -256,7 +255,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "view")]
         [HttpPost]
         [Route("pricing")]
         public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
@@ -275,13 +273,14 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("createshipment")]
-        public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
+        public async Task<IServiceResponse<ShipmentDTO>> AddShipment(NewShipmentDTO newShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
+                //map to real shipmentdto
+                var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
@@ -308,7 +307,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("processpayment")]
         public async Task<IServiceResponse<bool>> ProcessPayment(PaymentTransactionDTO paymentDto)
@@ -320,6 +318,55 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<bool>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("{customerwaybill}/waybill")]
+        public async Task<IServiceResponse<ShipmentDTO>> GetShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _shipmentService.GetShipment(waybill);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("shipmentcollection/{waybill}")]
+        public async Task<IServiceResponse<ShipmentCollectionDTO>> GetShipmentCollectionByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollection = await _shipmentCollectionService.GetShipmentCollectionById(waybill);
+
+                return new ServiceResponse<ShipmentCollectionDTO>
+                {
+                    Object = shipmentCollection
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("releaseshipment")]
+        public async Task<IServiceResponse<bool>> ReleaseShipment(ShipmentCollectionDTO shipmentCollection)
+        {
+            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            if (shipmentCollection.IsComingFromDispatch)
+            {
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+            }
+
+            return await HandleApiOperationAsync(async () => {
+                await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

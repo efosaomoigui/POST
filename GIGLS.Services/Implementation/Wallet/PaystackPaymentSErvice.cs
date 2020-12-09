@@ -423,6 +423,26 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+
+
+        public async Task<HttpResponseMessage> VerifyBVN(string bvnNo)
+        {
+
+            var response = new HttpResponseMessage();
+            var url = "https://api.paystack.co/bank/resolve_bvn/";
+            url = $"{url}{bvnNo}";
+            await Task.Run(async () =>
+            {
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(url);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("Authorization", $"bearer {secretKey}");
+                response = await client.GetAsync(url);
+            });
+
+            return response;
+        }
+
         //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
