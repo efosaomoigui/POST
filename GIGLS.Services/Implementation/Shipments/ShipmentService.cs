@@ -916,7 +916,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
+                if(shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
                 {
                     throw new GenericException("Receiver Longitude and Latitude details not found");
                 }
