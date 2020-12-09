@@ -3088,15 +3088,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _walletService.ChargeWallet(chargeWalletDTO);
         }
-<<<<<<< HEAD
-=======
+
 
         public async Task<HttpResponseMessage> VerifyBVNNo(string bvnNo)
         {
             return await _paystackPaymentService.VerifyBVN(bvnNo);
         }
-
-
->>>>>>> apireqforindiateam
     }
 }
