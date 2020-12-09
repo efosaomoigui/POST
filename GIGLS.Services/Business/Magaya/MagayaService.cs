@@ -932,13 +932,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                 }
 
-                var station = await _stationService.GetStationById(shipmentDTO.StationId);
-
                 var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
                 if(destinationServiceCenter == null)
                 {
                     throw new GenericException("Destination Service Center does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
+
+                var station = await _stationService.GetStationById(destinationServiceCenter.StationId);
 
                 // update details
                 existingRequest.PickupOptions = shipmentDTO.PickupOptions;
