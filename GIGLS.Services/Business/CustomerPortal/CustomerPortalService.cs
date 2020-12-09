@@ -59,6 +59,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
+using System.Net.Http;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -103,7 +104,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
-
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -3075,6 +3075,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
         {
             return await _walletService.ChargeWallet(chargeWalletDTO);
+        }
+
+        public async Task<HttpResponseMessage> VerifyBVNNo(string bvnNo)
+        {
+            return await _paystackPaymentService.VerifyBVN(bvnNo);
         }
 
 
