@@ -184,7 +184,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("deliveryoptionprice")]
         public async Task<IServiceResponse<IEnumerable<DeliveryOptionPriceDTO>>> GetDeliveryOptionPrices()
@@ -200,7 +199,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("zonemapping/{departure:int}/{destination:int}")]
         public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
@@ -224,7 +222,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(types);
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("packageoptions")]
         public async Task<IServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>> GetShipmentPackagePrices()
@@ -240,7 +237,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("customer/{phonenumber}")]
         public async Task<IServiceResponse<IndividualCustomerDTO>> GetCustomerByPhoneNumber(string phonenumber)
@@ -256,7 +252,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "view")]
         [HttpPost]
         [Route("pricing")]
         public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
@@ -275,7 +270,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("createshipment")]
         public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
@@ -308,7 +302,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("processpayment")]
         public async Task<IServiceResponse<bool>> ProcessPayment(PaymentTransactionDTO paymentDto)
