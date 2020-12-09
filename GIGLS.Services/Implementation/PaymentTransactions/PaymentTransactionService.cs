@@ -20,6 +20,7 @@ using System.Text;
 using System.Security.Cryptography;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -482,6 +483,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             else
             {
                 customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+
+            //check if the customer country is same as the country in the user table
+            var user = await _uow.User.GetUserByChannelCode(shipment.CustomerCode);
+            if(user != null)
+            {
+                if(user.UserActiveCountryId != customerCountryId)
+                {
+                    throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
+                }
             }
 
             //2. If the customer country !== Departure Country, Convert the payment
