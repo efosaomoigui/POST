@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -985,6 +986,42 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             throw new NotImplementedException();
         }
+
+
+
+        public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+                var startDate1 = queryDate.Item1;
+                var endDate1 = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
+                SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
+                SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    serviceCentreId,
+                    startDate,
+                    endDate
+                };
+
+                var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments " +
+                   "@ServiceCentreId,@StartDate, @EndDate",
+                   param).ToList();
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository

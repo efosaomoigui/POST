@@ -20,6 +20,7 @@ using System.Text;
 using System.Security.Cryptography;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -484,6 +485,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
             }
 
+            //check if the customer country is same as the country in the user table
+            var user = await _uow.User.GetUserByChannelCode(shipment.CustomerCode);
+            if(user != null)
+            {
+                if(user.UserActiveCountryId != customerCountryId)
+                {
+                    throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
+                }
+            }
+
             //2. If the customer country !== Departure Country, Convert the payment
             if (customerCountryId != shipment.DepartureCountryId)
             {
@@ -492,6 +503,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
                 amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            //if the shipment is International Shipment & Payment was initiated before the shipment get to Nigeria
+            //5% discount should be give to the customer
+            if (shipment.IsInternational)
+            {
+                //check if the shipment has a scan of AISN in Tracking Table, 
+                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                && x.Status == ShipmentScanStatus.AISN.ToString());
+
+                if (!isPresent)
+                {
+                    amountToDebit = amountToDebit * 0.95m;
+                }                
             }
 
             return amountToDebit;
