@@ -450,6 +450,11 @@ namespace GIGLS.Core
                 config.CreateMap<FinancialReport, FinancialReportDTO>();
                 config.CreateMap<FinancialReportDTO, FinancialReport>();
 
+                config.CreateMap<ShipmentDTO, NewShipmentDTO>();
+                config.CreateMap<NewShipmentDTO, ShipmentDTO>();
+
+
+
             });
 
             isInit = true;

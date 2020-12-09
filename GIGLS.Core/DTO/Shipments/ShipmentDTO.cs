@@ -325,4 +325,66 @@ namespace GIGLS.Core.DTO.Shipments
         public string ShipmentStatus { get; set; }
         public string ShipmentScanStatus { get; set; }
     }
+
+
+    public class NewShipmentDTO 
+    {
+        //Shipment Information
+        public int ShipmentId { get; set; }
+        public string Waybill { get; set; }
+        //Senders' Information
+        public decimal Value { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public string CustomerType { get; set; }
+        public int CustomerId { get; set; }
+        public string CustomerCode { get; set; }
+
+        //Receivers Information
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverState { get; set; }
+
+        //Delivery Options
+        public int DeliveryOptionId { get; set; } = 1;
+        public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        //Shipment Items
+        public List<NewShipmentItemDTO> ShipmentItems { get; set; }
+        public decimal GrandTotal { get; set; }
+
+        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+        public bool IsCashOnDelivery { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; } = 0;
+        public List<NewCustomerDTO> Customer { get; set; }
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
+        public decimal? DiscountValue { get; set; } = 0;
+        public decimal? Insurance { get; set; } = 0;
+        public decimal? Vat { get; set; } = 0;
+        public decimal? Total { get; set; } = 0;
+        //from client
+        public decimal? vatvalue_display { get; set; } = 0;
+        public decimal? InvoiceDiscountValue_display { get; set; } = 0;
+        public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
+        public string Description { get; set; }
+        public bool IsFromMobile { get; set; }
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public List<int> PackageOptionIds { get; set; } = new List<int>();
+        public int TimeInSeconds { get; set; }
+
+    }
+
+
+
+
+
+
+
 }

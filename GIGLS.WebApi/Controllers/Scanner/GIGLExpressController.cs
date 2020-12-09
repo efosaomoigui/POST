@@ -1,4 +1,5 @@
-﻿using EfeAuthen.Models;
+﻿using AutoMapper;
+using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -272,10 +273,12 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpPost]
         [Route("createshipment")]
-        public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
+        public async Task<IServiceResponse<ShipmentDTO>> AddShipment(NewShipmentDTO newShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
+                //map to real shipmentdto
+                var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
