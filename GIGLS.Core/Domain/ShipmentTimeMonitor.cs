@@ -25,6 +25,9 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(128)]
         public string UserId { get; set; }
+        public int UserServiceCentreId { get; set; }
+        [MaxLength(128)]
+        public string UserServiceCentreName { get; set; }
 
     }
 }

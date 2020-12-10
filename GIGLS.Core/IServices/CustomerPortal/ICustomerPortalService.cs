@@ -26,6 +26,7 @@ using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.CustomerPortal
@@ -200,6 +201,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> GetUserByEmail(string email); 
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<ResponseDTO> VerifyBVNNo(string bvnNo);
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
     }

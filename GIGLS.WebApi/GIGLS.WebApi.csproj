@@ -351,6 +351,7 @@
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\RiderDeliveryController.cs" />
     <Compile Include="Controllers\Routes\RouteController.cs" />
+    <Compile Include="Controllers\Scanner\GIGLExpressController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
@@ -440,10 +441,15 @@
     </Content>
     <Content Include="ReportTemplate\dailysales.xlsx" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
@@ -456,7 +462,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />

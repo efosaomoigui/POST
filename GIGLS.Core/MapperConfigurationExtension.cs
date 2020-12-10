@@ -453,6 +453,8 @@ namespace GIGLS.Core
 
                 config.CreateMap<IntlShipmentRequestDTL, IntlShipmentRequestDTO>();
                 config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequestDTL>();
+                config.CreateMap<ShipmentDTO, NewShipmentDTO>();
+                config.CreateMap<NewShipmentDTO, ShipmentDTO>();
 
             });
 

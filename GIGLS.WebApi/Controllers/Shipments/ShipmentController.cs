@@ -130,6 +130,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
+                ShipmentDTO.ShipmentScanStatus = ShipmentScanStatus.CRT;
                 if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
                 {
                     ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;

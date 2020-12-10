@@ -790,14 +790,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateTime dateTime = DateTime.Now.AddMinutes(-30);
                     int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
 
-                    if (timeResult > 0)
-                    {
-                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
-                    }
-                    else
-                    {
+                    //if (timeResult > 0)
+                    //{
+                    //    throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    //}
+                    //else
+                    //{
                         checkForHash.DateModified = DateTime.Now;
-                    }
+                   // }
                 }
                 else
                 {
@@ -833,14 +833,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // complete transaction if all actions are successful
                 //add to shipmentmonitor table
-                //var userId = await _userService.GetCurrentUserId();
+                var deptCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
                 var userInfo = await _uow.User.GetUserById(newShipment.UserId);
                 var timeMonitor = new ShipmentTimeMonitor()
                 {
                     Waybill = newShipment.Waybill,
                     UserId = newShipment.UserId,
                     UserName = $"{userInfo.FirstName} {userInfo.LastName}",
-                    TimeInSeconds = shipmentDTO.TimeInSeconds
+                    TimeInSeconds = shipmentDTO.TimeInSeconds,
+                    UserServiceCentreId = shipmentDTO.DepartureServiceCentreId,
+                    UserServiceCentreName = deptCentre.Name
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
                 await _uow.CompleteAsync();
@@ -914,7 +916,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
+                if(shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
                 {
                     throw new GenericException("Receiver Longitude and Latitude details not found");
                 }

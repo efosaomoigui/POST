@@ -59,6 +59,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
+using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Business.CustomerPortal
@@ -106,7 +107,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICompanyService _companyService;
         private readonly IShipmentService _shipmentService; 
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;   
-
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -3005,7 +3005,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
-                var company = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                var company = await _uow.Company.GetAsync(x => x.Name.ToLower() == userDetail.BusinessName.ToLower());
                 if (company != null)
                 {
                     result.Exist = true;
@@ -3062,22 +3062,22 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
             //check if the receiver detail exist
-            if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
-            {
-                var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
-                if (userExist == null)
-                {
-                    return false;
-                }
-            }
-            else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
-            {
-                var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
-                if (userExist == null)
-                {
-                    return false;
-                }
-            }
+            //if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
+            //{
+            //    var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
+            //    if (userExist == null)
+            //    {
+            //        return false;
+            //    }
+            //}
+            //else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
+            //{
+            //    var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
+            //    if (userExist == null)
+            //    {
+            //        return false;
+            //    }
+            //}
             var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
             return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
@@ -3102,6 +3102,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
         {
             return await _movementManifestService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+        }
+
+        public async Task<ResponseDTO> VerifyBVNNo(string bvnNo)
+        {
+            return await _paystackPaymentService.VerifyBVN(bvnNo);
         }
     }
 }
