@@ -199,6 +199,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> SendMessage(NewMessageDTO obj);
         Task<UserDTO> GetUserByEmail(string email);
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
-        Task<HttpResponseMessage> VerifyBVNNo(string bvnNo);
+        Task<ResponseDTO> VerifyBVNNo(string bvnNo);
     }
 }
