@@ -708,7 +708,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.SenderState = magayaShipmentDTO.ShipperAddress.State;
                 shipmentDTO.IsFromMobile = false;
                 shipmentDTO.isInternalShipment = false;
-
+                 
                 //Country info
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;

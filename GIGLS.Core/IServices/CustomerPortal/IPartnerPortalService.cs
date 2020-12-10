@@ -53,5 +53,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
+        Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
     }
 }

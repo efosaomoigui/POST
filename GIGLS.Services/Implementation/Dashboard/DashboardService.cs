@@ -665,7 +665,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get current user
             try
-            {
+            {          
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUser = await _userService.GetUserById(currentUserId);
                 var userClaims = await _userService.GetClaimsAsync(currentUserId);

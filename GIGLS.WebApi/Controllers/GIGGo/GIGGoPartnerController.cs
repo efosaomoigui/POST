@@ -50,6 +50,20 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
+        [HttpGet]
+        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReleaseMovementManifest(movementManifestVals);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
