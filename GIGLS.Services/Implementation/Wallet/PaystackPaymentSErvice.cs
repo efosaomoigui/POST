@@ -438,7 +438,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 HttpClient client = new HttpClient();
                 client.BaseAddress = new Uri(url);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", $"bearer {liveSecretKey}");
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
                 response = await client.GetAsync(url);
             });
 
