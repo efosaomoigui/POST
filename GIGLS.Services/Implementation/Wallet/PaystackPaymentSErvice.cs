@@ -425,22 +425,37 @@ namespace GIGLS.Services.Implementation.Wallet
 
 
 
-        public async Task<HttpResponseMessage> VerifyBVN(string bvnNo)
+        public async Task<ResponseDTO> VerifyBVN(string bvnNo)
         {
 
             var response = new HttpResponseMessage();
+            var result = new ResponseDTO();
             var url = "https://api.paystack.co/bank/resolve_bvn/";
             url = $"{url}{bvnNo}";
+            var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
             await Task.Run(async () =>
             {
                 HttpClient client = new HttpClient();
                 client.BaseAddress = new Uri(url);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", $"bearer {secretKey}");
+                client.DefaultRequestHeaders.Add("Authorization", $"bearer {liveSecretKey}");
                 response = await client.GetAsync(url);
             });
 
-            return response;
+            if (response.IsSuccessStatusCode)
+            {
+                string jObject = await response.Content.ReadAsStringAsync();
+                var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
+                result.Succeeded = content.Status;
+                result.Message = content.Message;
+                result.Entity = content.Data;
+            }
+            else
+            {
+                result.Succeeded = false;
+                result.Message = "unable to connect to server";
+            }
+            return result;
         }
 
         //Ghana Wallet Payment

@@ -3000,7 +3000,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
-                var company = _uow.Company.GetAll().Where(x => x.Name.ToLower() == userDetail.BusinessName.ToLower()).FirstOrDefault();
+                var company = await _uow.Company.GetAsync(x => x.Name.ToLower() == userDetail.BusinessName.ToLower());
                 if (company != null)
                 {
                     result.Exist = true;
@@ -3057,22 +3057,22 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
             //check if the receiver detail exist
-            if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
-            {
-                var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
-                if (userExist == null)
-                {
-                    return false;
-                }
-            }
-            else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
-            {
-                var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
-                if (userExist == null)
-                {
-                    return false;
-                }
-            }
+            //if (newMessageDTO.EmailSmsType == EmailSmsType.Email)
+            //{
+            //    var userExist = await _uow.User.GetUserByEmail(newMessageDTO.ReceiverDetail);
+            //    if (userExist == null)
+            //    {
+            //        return false;
+            //    }
+            //}
+            //else if (newMessageDTO.EmailSmsType == EmailSmsType.SMS)
+            //{
+            //    var userExist = await _uow.User.GetUserByPhoneNumber(newMessageDTO.ReceiverDetail);
+            //    if (userExist == null)
+            //    {
+            //        return false;
+            //    }
+            //}
             var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
             return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
         }
@@ -3089,8 +3089,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _walletService.ChargeWallet(chargeWalletDTO);
         }
 
-
-        public async Task<HttpResponseMessage> VerifyBVNNo(string bvnNo)
+        public async Task<ResponseDTO> VerifyBVNNo(string bvnNo)
         {
             return await _paystackPaymentService.VerifyBVN(bvnNo);
         }

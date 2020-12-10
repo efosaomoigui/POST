@@ -341,11 +341,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpGet]
         [Route("verifybvn/{bvnNo}")]
-        public async Task<IServiceResponse<HttpResponseMessage>> VerifyBVN(string bvnNo)
+        public async Task<IServiceResponse<ResponseDTO>> VerifyBVN(string bvnNo)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<HttpResponseMessage>();
+                var response = new ServiceResponse<ResponseDTO>();
                 var request = Request;
                 var headers = request.Headers;
                 if (headers.Contains("api_key"))

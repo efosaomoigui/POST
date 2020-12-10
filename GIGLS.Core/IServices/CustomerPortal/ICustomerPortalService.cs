@@ -200,6 +200,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> GetUserByEmail(string email);
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
-        Task<HttpResponseMessage> VerifyBVNNo(string bvnNo);
+        Task<ResponseDTO> VerifyBVNNo(string bvnNo);
     }
 }
