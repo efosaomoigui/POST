@@ -963,7 +963,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 foreach (var shipmentRequestItemDTO in shipmentDTO.ShipmentRequestItems)
                 {
-                    var requestItem = await _uow.IntlShipmentRequestItem.GetAsync(s => s.IntlShipmentRequestItemId == shipmentRequestItemDTO.IntlShipmentRequestItemId && s.IntlShipmentRequestId == shipmentRequestItemDTO.IntlShipmentRequestId);
+                    var requestItem = await _uow.IntlShipmentRequestItem.GetAsync(s => s.IntlShipmentRequestItemId == shipmentRequestItemDTO.IntlShipmentRequestItemId && s.IntlShipmentRequestId == shipmentDTO.IntlShipmentRequestId);
                     if (requestItem == null)
                     {
                         throw new GenericException("International Shipment Request Item does not exist", $"{(int)HttpStatusCode.NotFound}");
