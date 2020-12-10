@@ -434,30 +434,34 @@ namespace GIGLS.Services.Implementation.Wallet
             url = $"{url}{bvnNo}";
             var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            await Task.Run(async () =>
+            try
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(url);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
-                response = await client.GetAsync(url);
-            });
+                await Task.Run(async () =>
+                   {
+                       HttpClient client = new HttpClient();
+                       client.BaseAddress = new Uri(url);
+                       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                       client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                       response = await client.GetAsync(url);
+                   });
 
-            if (response.IsSuccessStatusCode)
-            {
                 string jObject = await response.Content.ReadAsStringAsync();
                 var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
+               
                 result.Succeeded = content.Status;
+                result.Exist = content.Status;
                 result.Message = content.Message;
                 result.Entity = content.Data;
+             
             }
-            else
+            catch (Exception ex)
             {
-                result.Succeeded = false;
-                result.Message = "unable to connect to server";
+
+                throw;
             }
             return result;
         }
+
 
         //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
