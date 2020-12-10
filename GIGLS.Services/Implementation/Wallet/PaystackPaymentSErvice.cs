@@ -433,6 +433,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var url = "https://api.paystack.co/bank/resolve_bvn/";
             url = $"{url}{bvnNo}";
             var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             await Task.Run(async () =>
             {
                 HttpClient client = new HttpClient();
