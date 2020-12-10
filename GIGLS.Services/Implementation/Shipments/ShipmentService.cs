@@ -3978,6 +3978,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Bind Agility Shipment Payload
                 var shipment = await BindShipmentPayload(shipmentDTO);
                 shipmentDTO.CustomerDetails = shipment.CustomerDetails;
+
+                //update price to contain VAT, INSURANCE ETC
+                shipment.Total = price.Amount;
                
                 //Block account that has been suspended/pending from create shipment
                 if (shipment.CustomerDetails.CustomerType == CustomerType.Company)

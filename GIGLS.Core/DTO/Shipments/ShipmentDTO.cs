@@ -344,7 +344,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-        public string RecieverPostalCode { get; set; }
+        public string ReceiverPostalCode { get; set; }
         public string ReceiverStreetLines { get; set; }
         public string ReceiverStateOrProvinceCode { get; set; }
         public string ReceiverCountryCode { get; set; }

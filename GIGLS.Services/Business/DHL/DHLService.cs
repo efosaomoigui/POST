@@ -249,7 +249,7 @@ namespace GIGLS.Services.Business.DHL
                 {
                     StreetLines = shipmentDTO.ReceiverAddress,
                     City = shipmentDTO.ReceiverCity,
-                    PostalCode = shipmentDTO.RecieverPostalCode,
+                    PostalCode = shipmentDTO.ReceiverPostalCode,
                     CountryCode = shipmentDTO.ReceiverCountryCode,
                     StreetLines2 = shipmentDTO.ReceiverCity,
                     StreetLines3 = shipmentDTO.ReceiverCity
@@ -351,7 +351,7 @@ namespace GIGLS.Services.Business.DHL
 
             //Receiver Address
             rateRequest.RequestedShipment.Ship.Recipient.City = shipmentDTO.ReceiverCity;
-            rateRequest.RequestedShipment.Ship.Recipient.PostalCode = shipmentDTO.RecieverPostalCode;
+            rateRequest.RequestedShipment.Ship.Recipient.PostalCode = shipmentDTO.ReceiverPostalCode;
             rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode;
 
             int count = 1;
