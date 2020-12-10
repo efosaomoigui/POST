@@ -138,6 +138,49 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
+        public async Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-30);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                var companies = _context.EcommerceAgreement.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.Status == EcommerceAgreementStatus.Pending);
+                var companiesDto = from c in companies
+                                   select new EcommerceAgreementDTO
+                                   {
+                                       EcommerceAgreementId = c.EcommerceAgreementId,
+                                       BusinessEmail = c.BusinessEmail,
+                                       BusinessOwnerName = c.BusinessOwnerName,
+                                       OfficeAddress = c.OfficeAddress,
+                                       ContactName = c.ContactName,
+                                       ContactEmail = c.ContactEmail,
+                                       ContactPhoneNumber = c.ContactPhoneNumber,
+                                       AgreementDate = c.AgreementDate,
+                                       Status = c.Status,
+                                       City = c.City,
+                                       State = c.State,
+                                       CountryId = c.CountryId,
+                                       ReturnAddress = c.ReturnAddress,
+                                       DateCreated = c.DateCreated,
+                                       DateModified = c.DateModified,
+                                   };
+                return await Task.FromResult(companiesDto.OrderByDescending(x => x.DateCreated).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<CompanyDTO>> GetCompanies(CompanyType companyType,  CustomerSearchOption searchOption)
         {
             try
@@ -203,9 +246,50 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencySymbol = x.CurrencySymbol,
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
-                                       }).FirstOrDefault()
+                                       }).FirstOrDefault(),
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<EcommerceAgreementDTO> GetPendingEcommerceRequestById(int companyId)
+        {
+            try
+            {
+                var companies = _context.EcommerceAgreement.Where(x => x.EcommerceAgreementId == companyId);
+                var companiesDto = from c in companies
+                                   select new EcommerceAgreementDTO
+                                   {
+                                       EcommerceAgreementId = c.EcommerceAgreementId,
+                                       BusinessEmail = c.BusinessEmail,
+                                       BusinessOwnerName = c.BusinessOwnerName,
+                                       OfficeAddress = c.OfficeAddress,
+                                       ContactName = c.ContactName,
+                                       ContactEmail = c.ContactEmail,
+                                       ContactPhoneNumber = c.ContactPhoneNumber,
+                                       AgreementDate = c.AgreementDate,
+                                       City = c.City,
+                                       State = c.State,
+                                       CountryId = c.CountryId,
+                                       ReturnAddress = c.ReturnAddress,
+                                       Industry =c.NatureOfBusiness,
+                                       DateCreated = c.DateCreated,
+                                       DateModified = c.DateModified,
+                                       IsCod = c.IsCod,
+                                       BankName = c.BankName,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       IsApi = c.IsApi
+                                   };
+
+                return await Task.FromResult(companiesDto.FirstOrDefault());
             }
             catch (Exception)
             {
@@ -397,6 +481,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        UserActiveCountryName = co.CountryName
                                    };
                 return Task.FromResult(companiesDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CompanyDTO>> GetCompaniesByCodes(List<string> codes)
+        {
+            try
+            {
+                var companies = Context.Company.Where(x => codes.Contains(x.CustomerCode)).ToList();
+                var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
+                return Task.FromResult(companiesDto);
             }
             catch (Exception)
             {

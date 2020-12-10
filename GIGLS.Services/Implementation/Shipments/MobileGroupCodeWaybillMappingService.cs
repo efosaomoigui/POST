@@ -5,6 +5,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,7 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    throw new GenericException($"No GroupCode exists for this : {groupCodeNumber}");
+                    throw new GenericException($"No GroupCode exists for this : {groupCodeNumber}", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)
@@ -84,7 +85,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    throw new GenericException($"No GroupCode exists for this : {groupCodeNumber}");
+                    throw new GenericException($"No GroupCode exists for this : {groupCodeNumber}", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)

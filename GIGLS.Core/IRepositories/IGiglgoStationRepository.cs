@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories
     {
 
         Task<List<GiglgoStationDTO>> GetGoStations();
+        Task<GiglgoStationDTO> GetGoStationsById(int stationId);
     }
 }

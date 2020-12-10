@@ -35,6 +35,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>GIGLS.WebApi.xml</DocumentationFile>
+    <NoWarn>1062;1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -111,16 +112,14 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.1\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.3\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -142,9 +141,8 @@
       <HintPath>..\packages\Microsoft.Owin.Security.3.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.Cookies, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.2.1.0\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security.Jwt, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Security.Jwt.3.1.0\lib\net45\Microsoft.Owin.Security.Jwt.dll</HintPath>
@@ -213,32 +211,26 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -274,11 +266,17 @@
   <ItemGroup>
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
+    <Content Include="Images\GIGLogisticsLogo.png" />
+    <Content Include="MagayaDirectory\commoditytypes.xml" />
+    <Content Include="MagayaDirectory\Locations.xml" />
+    <Content Include="MagayaDirectory\transactiontypes.xml" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\AuthorizationOperationFilter.cs" />
+    <Compile Include="App_Start\AuthTokenOperation.cs" />
     <Compile Include="App_Start\GiglsCustomJwtFormat.cs" />
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\NinjectWebCommon.cs" />
@@ -308,7 +306,8 @@
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
-    <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
     <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
@@ -326,10 +325,14 @@
     <Compile Include="Controllers\Fleets\FleetModelController.cs" />
     <Compile Include="Controllers\Fleets\FleetPartController.cs" />
     <Compile Include="Controllers\Fleets\FleetTripController.cs" />
+    <Compile Include="Controllers\GIGGo\GIGGoPartnerController.cs" />
     <Compile Include="Controllers\Haulage\HaulageController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
+    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
+    <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
@@ -432,67 +435,14 @@
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP1.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP2.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - ReadOnly - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy1.pubxml" />
-    <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy2.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %284%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP1.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP2.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP3.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP4.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %284%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy1.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy2.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy3.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy4.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %284%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %286%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP1.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP2.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP3.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP4.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP5.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP6.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP7.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP8.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - ReadOnly - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %284%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy1.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy2.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy3.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy4.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy5.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy6.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy7.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP1.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapiprod - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapiprod - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemsdevgui - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemsdevgui - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
-    <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
     <Content Include="ReportTemplate\dailysales.xlsx" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -507,7 +457,6 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
-    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
@@ -572,7 +521,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.2.2\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets'))" />
   </Target>
+  <Import Project="..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets" Condition="Exists('..\packages\Microsoft.Web.WebJobs.Publish.2.0.0\build\Microsoft.Web.WebJobs.Publish.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

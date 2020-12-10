@@ -8,7 +8,8 @@
         Wallet,
         Transfer,
         Partial,
-        Waiver
+        Waiver,
+        USSD
     }
 
     public enum CODPaidOutStatus 
@@ -21,6 +22,7 @@
     {
         Paystack,
         TheTeller,
-        Flutterwave
+        Flutterwave,
+        USSD
     }
 }

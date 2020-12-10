@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
         public ManifestType ManifestType { get; set; }
+        public ManifestStatus ManifestStatus { get; set; }
 
         public int DepartureServiceCentreId { get; set; }
         public ServiceCentreDTO DepartureServiceCentre { get; set; }

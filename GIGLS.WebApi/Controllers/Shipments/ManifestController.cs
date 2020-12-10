@@ -68,6 +68,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{movementmanifest}")]
+        public async Task<IServiceResponse<ManifestDTO>> GetMovementManifestByCode(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifests = await _service.GetManifestByCode(manifest);
+
+                return new ServiceResponse<ManifestDTO>
+                {
+                    Object = manifests
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
@@ -117,6 +133,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
+        [Route("generatemovementmaifestcode")]
+        public async Task<IServiceResponse<string>> GenerateMovementManifestCode() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                MovementManifestNumberDTO manifestDTO = new MovementManifestNumberDTO();
+                var groupwaybills = await _service.GenerateMovementManifestCode(manifestDTO);
+
+                return new ServiceResponse<string>
+                {
+                    Object = groupwaybills
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
         [Route("generateMaifestCode")]
         public async Task<IServiceResponse<string>> GenerateManifestCode()
         {
@@ -140,6 +173,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.ChangeManifestType(manifestCode);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("signoffmanifest/{manifestCode}")]
+        public async Task<IServiceResponse<bool>> SignOffManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.SignOffManifest(manifestCode);
                 return new ServiceResponse<bool>
                 {
                     Object = true

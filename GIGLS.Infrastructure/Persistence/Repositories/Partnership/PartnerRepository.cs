@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.Partnership;
 using System.Data.Entity;
 using GIGLS.Core.DTO;
 using System;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 {
@@ -23,39 +24,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
         public Task<Partner> GetLastValidPartnerCode()
         {
             var partnercode = from Partner in Context.Partners
-                                orderby Partner.PartnerCode descending
-                                    select Partner;
+                              orderby Partner.PartnerCode descending
+                              select Partner;
             return partnercode.FirstOrDefaultAsync();
         }
 
         public Task<List<PartnerDTO>> GetPartnersAsync()
         {
             var partners = _context.Partners;
-            
+
             var partnerDto = from partner in partners
-                                select new PartnerDTO
-                                {
-                                    PartnerId = partner.PartnerId,
-                                    PartnerName = partner.PartnerName,
-                                    Email = partner.Email,
-                                    Address = partner.Address,
-                                    PartnerCode = partner.PartnerCode,
-                                    PhoneNumber = partner.PhoneNumber,
-                                    OptionalPhoneNumber = partner.OptionalPhoneNumber,
-                                    PartnerType = partner.PartnerType,
-                                    FirstName = partner.FirstName,
-                                    LastName = partner.LastName,
-                                    IdentificationNumber = "",
-                                    WalletPan = "",
-                                    IsActivated = partner.IsActivated
-                                };
+                             select new PartnerDTO
+                             {
+                                 PartnerId = partner.PartnerId,
+                                 PartnerName = partner.PartnerName,
+                                 Email = partner.Email,
+                                 Address = partner.Address,
+                                 PartnerCode = partner.PartnerCode,
+                                 PhoneNumber = partner.PhoneNumber,
+                                 OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 IdentificationNumber = "",
+                                 WalletPan = "",
+                                 IsActivated = partner.IsActivated,
+                                 ActivityStatus = partner.ActivityStatus,
+                                 UserId = partner.UserId
+                             };
 
             return Task.FromResult(partnerDto.ToList());
         }
 
-        public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync()
+        public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode)
         {
             var partners = _context.Partners.AsQueryable().Where(x => x.IsActivated == true);
+
+            if (fleetCode != null)
+            {
+                partners = partners.Where(x => x.FleetPartnerCode == fleetCode);
+            }
 
             var partnerDto = from partner in partners
                              join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
@@ -64,18 +72,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  PartnerName = partner.PartnerName,
                                  Vehicletype = vehicle.Vehicletype,
                                  Partnercode = vehicle.Partnercode,
+                                 PartnerEmail = partner.Email,
                                  PartnerFirstName = partner.FirstName,
                                  PartnerLastName = partner.LastName,
                                  PartnerPhoneNumber = partner.PhoneNumber,
                                  PartnerType = partner.PartnerType,
+                                 ActivityStatus = partner.ActivityStatus,
+                                 ActivityDate = partner.ActivityDate,
                                  EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
                                  .Select(x => new FleetPartnerDTO
                                  {
                                      FirstName = x.FirstName,
                                      LastName = x.LastName
-                                 }).FirstOrDefault()
+                                 }).FirstOrDefault(),
                              };
-            return Task.FromResult(partnerDto.ToList());
+            return Task.FromResult(partnerDto.OrderByDescending(x => x.ActivityDate).ToList());
         }
 
         public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)
@@ -84,30 +95,31 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             {
                 var partners = _context.Partners.Where(x => x.PartnerId == customerId);
                 var partnersDto = from partner in partners
-                                    select new PartnerDTO
-                                    {
-                                        PartnerId = partner.PartnerId,
-                                        PartnerName = partner.PartnerName,
-                                        Email = partner.Email,
-                                        Address = partner.Address,
-                                        PartnerCode = partner.PartnerCode,
-                                        PhoneNumber = partner.PhoneNumber,
-                                        OptionalPhoneNumber = partner.OptionalPhoneNumber,
-                                        PartnerType = partner.PartnerType,
-                                        FirstName = partner.FirstName,
-                                        LastName = partner.LastName,
-                                        IdentificationNumber = "",
-                                        WalletPan = "",
-                                        UserActiveCountryId = partner.UserActiveCountryId,
-                                        Country = _context.Country.Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new CountryDTO
-                                        {
-                                            CountryId = x.CountryId,
-                                            CountryName = x.CountryName,
-                                            CurrencySymbol = x.CurrencySymbol,
-                                            CurrencyCode = x.CurrencyCode,
-                                            PhoneNumberCode = x.PhoneNumberCode
-                                        }).FirstOrDefault()
-                                    };
+                                  select new PartnerDTO
+                                  {
+                                      PartnerId = partner.PartnerId,
+                                      PartnerName = partner.PartnerName,
+                                      Email = partner.Email,
+                                      Address = partner.Address,
+                                      PartnerCode = partner.PartnerCode,
+                                      PhoneNumber = partner.PhoneNumber,
+                                      OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                      PartnerType = partner.PartnerType,
+                                      FirstName = partner.FirstName,
+                                      LastName = partner.LastName,
+                                      IdentificationNumber = "",
+                                      WalletPan = "",
+                                      UserActiveCountryId = partner.UserActiveCountryId,
+                                      Country = _context.Country.Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new CountryDTO
+                                      {
+                                          CountryId = x.CountryId,
+                                          CountryName = x.CountryName,
+                                          CurrencySymbol = x.CurrencySymbol,
+                                          CurrencyCode = x.CurrencyCode,
+                                          PhoneNumberCode = x.PhoneNumberCode
+                                      }).FirstOrDefault(),
+                                      ActivityStatus = partner.ActivityStatus
+                                  };
                 return Task.FromResult(partnersDto.FirstOrDefault());
             }
             catch (Exception)
@@ -118,7 +130,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 
         public Task<List<PartnerDTO>> GetExternalPartnersAsync()
         {
-            var partners = _context.Partners.Where(s=>s.PartnerType == Core.Enums.PartnerType.DeliveryPartner);
+            var partners = _context.Partners.Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner);
 
             var partnerDto = from partner in partners
                              join wallet in _context.Wallets on partner.PartnerCode equals wallet.CustomerCode
@@ -137,8 +149,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  LastName = partner.LastName,
                                  IsActivated = partner.IsActivated,
                                  WalletBalance = wallet.Balance,
-                                 CurrencySymbol = country.CurrencySymbol
-
+                                 CurrencySymbol = country.CurrencySymbol,
+                                 ActivityStatus = partner.ActivityStatus
                              };
 
             return Task.FromResult(partnerDto.ToList());
@@ -152,7 +164,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                 {
                     parameter = parameter.ToLower();
                 }
-                var partners = _context.Partners.Where(x => x.Email.ToLower() == parameter || x.PartnerCode.ToLower() == parameter 
+                var partners = _context.Partners.Where(x => x.Email.ToLower() == parameter || x.PartnerCode.ToLower() == parameter
                     || x.PartnerName.Contains(parameter) || x.PhoneNumber.Contains(parameter) || x.FirstName.Contains(parameter) || x.LastName.Contains(parameter));
 
                 var partnersDto = from partner in partners
@@ -186,6 +198,33 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             {
                 throw;
             }
+        }
+
+        public Task<PartnerDTO> GetPartnerByUserId(string partnerId)
+        {
+            var partners = _context.Partners;
+
+            var partnerDto = from partner in partners
+                             where partner.UserId == partnerId
+                             select new PartnerDTO
+                             {
+                                 PartnerId = partner.PartnerId,
+                                 PartnerName = partner.PartnerName,
+                                 Email = partner.Email,
+                                 Address = partner.Address,
+                                 PartnerCode = partner.PartnerCode,
+                                 PhoneNumber = partner.PhoneNumber,
+                                 OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 IdentificationNumber = "",
+                                 WalletPan = "",
+                                 IsActivated = partner.IsActivated,
+                                 ActivityStatus = partner.ActivityStatus
+                             };
+
+            return Task.FromResult(partnerDto.FirstOrDefault());
         }
     }
 }

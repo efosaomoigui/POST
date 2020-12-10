@@ -40,14 +40,15 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("getverifiedpartners")]
-        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerfiedPartners()
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerfiedPartners(FleetPartnerDTO fleetCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var partners = await _partnerService.GetVerifiedPartners();
+                var partners = await _partnerService.GetVerifiedPartners(fleetCode.FleetPartnerCode);
                 return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
                 {
                     Object = partners
@@ -79,6 +80,22 @@ namespace GIGLS.WebApi.Controllers.Partnership
             return await HandleApiOperationAsync(async () =>
             {
                 var state = await _partnerService.GetPartnerById(partnerId);
+
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = state
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getpartner/{partnercode}")]
+        public async Task<IServiceResponse<PartnerDTO>> GetPartnerByCode(string partnercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var state = await _partnerService.GetPartnerByCode(partnercode);
 
                 return new ServiceResponse<PartnerDTO>
                 {
@@ -215,6 +232,37 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("partnersunderfleet/{fleetCode}")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetAllPartnersUnderFleetPartner(string fleetCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner(fleetCode);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpGet]
+        [Route("removepartnerfromfleet/{partnerCode}")]
+        public async Task<IServiceResponse<bool>> RemovePartnerFromFleet(string partnerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _fleetPartnerService.RemovePartnerFromFleetPartner(partnerCode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("getallpartnerswithoutenterprise")]
         public async Task<IServiceResponse<IEnumerable<PartnerDTO>>> GetExternalPartnersNotAttachedToAnyFleetPartner()
         {
@@ -269,6 +317,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<PartnerPayoutDTO>>
                 {
                     Object = payout
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("creditpartner")]
+        public async Task<IServiceResponse<bool>> CreditPartner(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.CreditPartnerTransactionByAdmin(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

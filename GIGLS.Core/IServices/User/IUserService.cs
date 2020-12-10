@@ -13,6 +13,7 @@ namespace GIGLS.Core.IServices.User
     public interface IUserService : IServiceDependencyMarker
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email);
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
@@ -84,5 +85,11 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive);
         Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
         Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
+
+        Task<IdentityResult> UpdateMagayaUser(string userid, UserDTO userDto);
+        Task<bool> IsCustomerHasAgentRole(string userId);
+        Task<UserDTO> GetUserUsingCustomerForAgentApp(string emailPhoneCode);
+        Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
+        Task<IdentityResult> SetDashboardAccess(string userid, bool val);
     }
 }

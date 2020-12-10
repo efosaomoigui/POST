@@ -52,6 +52,7 @@ namespace GIGLS.Core.DTO.Partnership
         public string PartnerName { get; set; }
         public string Code { get; set; }
         public string Email { get; set; }
+        public string PartnerType { get; set; }
 
         public string CurrencySymbol { get; set; }
         public string EnterprisePartner { get; set; }
@@ -72,6 +73,7 @@ namespace GIGLS.Core.DTO.Partnership
         public string PartnerCode { get; set; }
         public string Email { get; set; }
         public int Trips { get; set; }
+        public string PartnerType { get; set; }
 
         public string CurrencySymbol { get; set; }
         public decimal AmountReceived { get; set; }
@@ -81,5 +83,12 @@ namespace GIGLS.Core.DTO.Partnership
         public string AccountName { get; set; }
         public string AccountNumber { get; set; }
 
+    }
+
+    public class CreditPartnerTransactionsDTO : BaseDomainDTO
+    {
+        public string Email { get; set; }
+        public decimal AmountReceived { get; set; }
+        public string Waybill { get; set; }
     }
 }

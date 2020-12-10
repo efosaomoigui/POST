@@ -18,5 +18,8 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<EcommerceWalletDTO> GetWalletDetailsForCompany(int companyId);
         Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompanyByEmail(string email);
+        Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria);
+        Task<EcommerceAgreementDTO> GetPendingEcommerceRequestById(int companyId);
+        Task<List<CompanyDTO>> GetCompaniesByCodes(List<string> codes);
     }
 }

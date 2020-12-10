@@ -13,5 +13,9 @@ namespace GIGLS.Core.IServices.Fleets
         Task<object> AddDispatch(DispatchDTO Dispatch);
         Task UpdateDispatch(int DispatchId, DispatchDTO Dispatch);
         Task DeleteDispatch(int DispatchId);
+        Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
+        Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
+        Task<object> AddMovementDispatch(MovementDispatchDTO dispatchDTO);
+        Task<MovementDispatchDTO> GetMovementDispatchManifestCode(string movementmanifestcode);
     }
 }

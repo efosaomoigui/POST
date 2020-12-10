@@ -1,8 +1,10 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
@@ -20,7 +22,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Scanner
 {
-    [Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin, Agent")]
     [RoutePrefix("api/scanner")]
     public class MobileScannerController : BaseWebApiController
     {
@@ -47,12 +48,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly ICustomerPortalService _portalService;
         private readonly IServiceCentreService _serviceCentre;
         private readonly IHUBManifestWaybillMappingService _hubService;
+        private readonly ISuperManifestService _superManifestService;
 
         public MobileScannerController(IScanService scanService, IScanStatusService scanStatusService, IShipmentService shipmentService,
             IGroupWaybillNumberService groupService, IGroupWaybillNumberMappingService groupMappingservice, IManifestService manifestService,
             IManifestGroupWaybillNumberMappingService manifestGroupMappingService, IManifestWaybillMappingService manifestWaybillservice, 
             IStateService stateService, IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            ICustomerPortalService portalService, IServiceCentreService serviceCentre, IHUBManifestWaybillMappingService hubService) : base(nameof(MobileScannerController))
+            ICustomerPortalService portalService, IServiceCentreService serviceCentre, IHUBManifestWaybillMappingService hubService, ISuperManifestService superManifestService) : base(nameof(MobileScannerController))
         {
             _scanService = scanService;
             _scanStatusService = scanStatusService;
@@ -69,6 +71,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _portalService = portalService;
             _serviceCentre = serviceCentre;
             _hubService = hubService;
+            _superManifestService = superManifestService;
         }
 
         [AllowAnonymous]
@@ -130,10 +133,70 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("agentlogin")]
+        public async Task<IServiceResponse<JObject>> LoginForAgentApp(UserloginDetailsModel userLoginModel)
+        {
+            var user = await _portalService.CheckDetailsForAgentApp(userLoginModel.username);
 
-        //Scan Status
-        //------------
-        //1. Get all Scan status  --> ScanTrackService --> scanstatus(get all)
+            if (user.Username != null)
+            {
+                user.Username = user.Username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
+
+            if (user.SystemUserRole != "FastTrack Agent")
+            {
+                throw new GenericException("You are not authorized to use this application. You can download the GIGGO customer app and make shipment request", $"{(int)System.Net.HttpStatusCode.Forbidden}");
+            }
+
+            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+            string getTokenResponse;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                using (var client = new HttpClient())
+                {
+                    //setup client
+                    client.BaseAddress = new Uri(apiBaseUri);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //setup login data
+                    var formContent = new FormUrlEncodedContent(new[]
+                    {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", user.Username),
+                         new KeyValuePair<string, string>("Password", userLoginModel.Password),
+                     });
+
+                    //setup login data
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        throw new GenericException("Incorrect Login Details");
+                    }
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("scanstatus")]
@@ -150,7 +213,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2. Submit the waybills with the status selected -->ScanTrackService  --> scan/multiple(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("scanmultiple")]
@@ -167,9 +229,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Process Scan
-        //---------------
-        //1. Get Service Centre --> ShipmentsService --> byservicecentre(shipment/ungroupmappingservicecentre) (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupmappingservicecentre")]
@@ -185,7 +244,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2. Generate GroupWaybill --> ShipmentsService --> groupwaybill/generategroupwaybillnumber(GET)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generategroupwaybillnumber/{serviceCentreCode}")]
@@ -202,7 +260,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroup")]
@@ -218,9 +275,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Manifest Scan
-        //---------------------
-        //1. Get Service centre --> ShipmentsService --> byservicecentre(shipment/unmappedmanifestservicecentre (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestservicecentre")]
@@ -237,7 +291,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
 
-        //2. Generate Manifest --> ShipmentsService --> GenerateMaifestCode(manifest/generateMaifestCode)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generateManifestcode")]
@@ -255,7 +308,39 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3. Save --> ShipmentsService --> manifestgroupwaybillnumbermapping(manifestgroupwaybillnumbermapping/mapmultiple)
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("generateMovementManifestcode")]
+        public async Task<IServiceResponse<string>> GenerateMovementManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                MovementManifestNumberDTO manifestDTO = new MovementManifestNumberDTO();
+                var ManifestNos = await _manifestService.GenerateMovementManifestCode(manifestDTO);
+
+                return new ServiceResponse<string>
+                {
+                    Object = ManifestNos
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("generatesupermanifestcode")]
+        public async Task<IServiceResponse<string>> GenerateSuperManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var code = await _superManifestService.GenerateSuperManifestCode();
+
+                return new ServiceResponse<string>
+                {
+                    Object = code
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapgroupwaybilltomanifest")]
@@ -264,6 +349,36 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 await _manifestGroupMappingService.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mappingmanifestTomovementmanifest")]
+        public async Task<IServiceResponse<bool>> MappingManifestToMovementManifest(ManifestGroupWaybillNumberMappingDTO data) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmanifesttosupermanifest")]
+        public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingSuperManifestToManifest(data.SuperManifestCode, data.ManifestCodes);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -293,9 +408,29 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Delivery Manifest
-        //------------------
-        //2.Save-- > ShipmentsService-- > ManifestForWaybillsMapping(manifestwaybillmapping / mapmultiplemobile)(POST)
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("manifestFormovementmanifestservicecentre/{serviceCentreId}")]
+        //public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetManifestForMovementManifestServiceCentre(int serviceCentreId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        MovementManifestFilterCriteria filterOptionsDto = new MovementManifestFilterCriteria
+        //        {
+        //            filterValue = serviceCentreId.ToString(),
+        //            filter = "DestinationServiceCentreId"
+        //        };
+
+        //        var unmappedMappedManifests = await _shipmentService.GetManifestForMovementManifestServiceCentre(filterOptionsDto); 
+        //        return new ServiceResponse<IEnumerable<ManifestDTO>>
+        //        {
+        //            Object = unmappedMappedManifests,
+        //            Total = unmappedMappedManifests.Count
+        //        };
+        //    });
+        //}
+
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]
@@ -311,9 +446,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Overdue Shipment
-        //-------------------- -
-        //1.Get all Warehouse-- > ShipmentsService-- > Shipment.byWarehouseServicecentre(shipment / warehouseservicecentre)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("warehouseservicecentre")]
@@ -329,7 +461,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.Save-- > ShipmentsService-- > groupwaybillnumbermappingForOverdue(groupwaybillnumbermapping / mapmultipleForOverdue)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroupforoverdue")]
@@ -345,10 +476,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //Dispatch
-        //------------
-        //1.Get all waybills to be delivered-- > ShipmentsService-- > ManifestForWaybillsMapping / GetManifestForWayBillMobile(manifestwaybillmapping / waybillsinmanifestfordispatch)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
@@ -365,9 +492,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //ReleaseDetails
-        //------------------------
-        //1.Get State : StateService-- > get
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("states")]
@@ -386,7 +510,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2.Get Shipment Detail-- > ShipmentsService-- > getShipmentbyWaybill(shipment / waybillNumber / waybill)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybill/{waybill}")]
@@ -402,8 +525,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.DemuragePaymentTypes-- > Enum
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [AllowAnonymous]
         [HttpGet]
         [Route("demuragepaymenttype")]
@@ -412,21 +533,29 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(EnumExtensions.GetValues<PaymentType>());
         }
 
-        //4.ReleasePaymentTypes-- > Enum
-        //5.Signature pad
-
-
-        //6.Release-- > ShipmentsService-- > shipmentcollection.savecollection(shipmentcollection / collected)(PUT)
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
-            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
-            if (shipmentCollection.IsComingFromDispatch)
-            {
-                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
-            }
+            return await HandleApiOperationAsync(async () => {
+                await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        //used to fix the scanner problem
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("releaseshipment")]
+        public async Task<IServiceResponse<bool>> ReleaseShipmentForCollectionFromDispatch(ShipmentCollectionDTO shipmentCollection)
+        {
+            //Set Request from this endpoint as from Dispatch Rider
+            shipmentCollection.IsComingFromDispatch = true;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
 
             return await HandleApiOperationAsync(async () => {
                 await _collectionservice.ReleaseShipmentForCollection(shipmentCollection);
@@ -437,11 +566,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //7.Log Visit(Pass Name, Address, PhoneNumber)-- >
-        //Log Visit
-        //---------------- -
-        //1.Get some detail from the previous page
-        //2.Get LogVisitReason-- > ScanTrackService-- > logvisitreason(logvisitreason)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getlogvisit")]
@@ -458,7 +582,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.Save-- > ShipmentsService-- > manifestvisitmonitoring(manifestvisitmonitoring)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("logwaybillvisit")]
@@ -474,7 +597,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //HUb Manifest
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("hubservicecentres")]
@@ -505,5 +627,124 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestsinsupermanifest/{manifest}")]
+        public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestsInSuperManifest = await _manifestGroupMappingService.GetManifestsInSuperManifest(manifest);
+
+                return new ServiceResponse<List<ManifestDTO>>
+                {
+                    Object = manifestsInSuperManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.RemoveManifestFromSuperManifest(superManifest, manifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffs")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
+
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = dropoffs
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createdropoff")]
+        public async Task<IServiceResponse<bool>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOffForAgent(preShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipMentMobile
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForDropOff(preshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getspecialpackages")]
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _portalService.GetSpecialPackages();
+
+                return new ServiceResponse<SpecialResultDTO>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getstations")]
+        public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetGoStations();
+
+                return new ServiceResponse<List<GiglgoStationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("itemtypes")]
+        public async Task<IServiceResponse<List<string>>> GetItemTypes()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ItemTypes = await _portalService.GetItemTypes();
+                return new ServiceResponse<List<string>>
+                {
+                    Object = ItemTypes,
+                };
+            });
+        }
     }
 }

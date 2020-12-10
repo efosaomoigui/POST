@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Partnership;
+﻿using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -24,11 +25,13 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Senders' Information
         public string SenderName { get; set; }
-
+        public string SenderStationName { get; set; }
         public string SenderPhoneNumber { get; set; }
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
         public int SenderStationId { get; set; }
+        public string InputtedSenderAddress { get; set; }
+        public string SenderLocality { get; set; }
 
         public int ReceiverStationId { get; set; }
 
@@ -45,12 +48,14 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-        
+        public string ReceiverStationName { get; set; }
+        public string InputtedReceiverAddress { get; set; }
+
         public LocationDTO SenderLocation { get; set; }      
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
-        public bool IsHomeDelivery { get; set; }
+        public bool IsHomeDelivery { get; set; } = true;
 
         //General but optional
 
@@ -145,6 +150,27 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal ShipmentPickupPrice { get; set; }
         public PartnerDTO partnerDTO { get; set; }
 
+        public DateTime? TimeAssigned { get; set; }
+        public DateTime? TimePickedUp { get; set; }
+        public DateTime? TimeDelivered { get; set; }
+
+        public string IndentificationUrl { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+        public bool IsScheduled { get; set; }
+        public DateTime? ScheduledDate { get; set; }
+
+        public string QRCode { get; set; }
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+        public bool IsBatchPickUp { get; set; }
+        public string WaybillImageUrl { get; set; }
+        public bool IsFromAgility { get; set; }
+        public List<CustomerDTO> Customer { get; set; }
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -231,5 +257,114 @@ namespace GIGLS.Core.DTO.Shipments
         //public decimal? ActualAmountCollected { get; set; }
 
     }
-    
+
+    public class PreShipmentMobileReportDTO
+    {
+        public string Waybill { get; set; }
+        public string SenderName { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public string CompanyType { get; set; }
+        public string SenderAddress { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverAddress { get; set; }
+        public decimal GrandTotal { get; set; }
+        public double CalculatedTotal { get; set; }
+        public decimal? DiscountValue { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? DeliveryPrice { get; set; }
+        public decimal? InsuranceValue { get; set; }
+        public decimal? Value { get; set; }
+        public string shipmentstatus { get; set; }
+        public string SenderStationName { get; set; }
+        public string ReceiverStationName { get; set; }
+        public DateTime DateCreated { get; set; }
+        public string VehicleType { get; set; }
+    }
+
+    public class PreShipmentMobileThirdPartyDTO
+    {
+        public string waybill { get; set; }
+        public string message { get; set; }
+        public bool IsBalanceSufficient { get; set; }
+        public int Zone { get; set; }
+        public string WaybillImage { get; set; }
+        public string WaybillImageFormat { get; set; }
+        public string ImagePath { get; set; }
+    }
+
+    public class PreShipmentMobileFromAgilityDTO : BaseDomainDTO
+    {
+        public PreShipmentMobileFromAgilityDTO()
+        {
+            SenderLocation = new LocationDTO();
+            ReceiverLocation = new LocationDTO();
+        }
+
+        public int PreShipmentMobileId { get; set; }
+        public string Waybill { get; set; }
+
+        //Senders' Information
+        public string SenderName { get; set; }
+        public string SenderStationName { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public decimal Value { get; set; }
+        public int SenderStationId { get; set; }
+        public int ReceiverStationId { get; set; }
+        public string CustomerType { get; set; }
+        public string CompanyType { get; set; }
+        public string CustomerCode { get; set; }
+        public string SenderAddress { get; set; }
+        public string SenderLocality { get; set; }
+
+        //Receivers Information
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+       
+        //Delivery Options
+        public bool IsHomeDelivery { get; set; }
+        //Shipment Items
+        public List<PreShipmentItemMobileDTO> PreShipmentItems { get; set; } = null;
+        public List<ShipmentItemDTO> ShipmentItems { get; set; }
+        public decimal GrandTotal { get; set; }
+        //General Details comes with role user
+        public string UserId { get; set; }
+        public bool IsdeclaredVal { get; set; }
+        //discount information
+        public decimal? Discount { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? InsuranceValue { get; set; }
+        public decimal? DeliveryPrice { get; set; }
+        public decimal? Total { get; set; }
+        //Agility Validations
+        public double? CalculatedTotal { get; set; } = 0;
+        public string VehicleType { get; set; }
+        public int? ZoneMapping { get; set; }
+        public string CountryName { get; set; }
+        public int CountryId { get; set; }
+       
+        public ShipmentType Shipmentype { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public LocationDTO SenderLocation { get; set; }
+        public LocationDTO ReceiverLocation { get; set; }
+        public List<CustomerDTO> Customer { get; set; }
+        public CustomerDTO CustomerDetails { get; set; }
+
+        public int DestinationServiceCentreId { get; set; }
+        public string TransactionCode { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public PaymentType PaymentType { get; set; }
+        public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
+        public string Description { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        public List<int> PackageOptionIds { get; set; } = new List<int>();
+        //public bool FromApp { get; set; }
+        public decimal? PickUpCharge { get; set; }
+        
+    }
 }

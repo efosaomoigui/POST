@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
@@ -15,6 +16,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -28,7 +30,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IServiceCentreService _centreService;
         private readonly ICountryService _countryservice;
 
-        public WalletTransactionService(IUnitOfWork uow, IUserService userService, 
+        public WalletTransactionService(IUnitOfWork uow, IUserService userService,
             IWalletService walletService, ICustomerService customerService,
             IServiceCentreService centreService, ICountryService countryservice)
         {
@@ -46,7 +48,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.DateOfEntry = DateTime.Now;
-
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
             return new { id = newWalletTransaction.WalletTransactionId };
@@ -82,17 +83,25 @@ namespace GIGLS.Services.Implementation.Wallet
                 else if (CustomerType.Partner == item.Wallet.CustomerType)
                 {
                     var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
-                    item.Wallet.CustomerName = partnerDTO.PartnerName;
-                    item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
-                    item.Wallet.Country = partnerDTO.Country;
+                   
+                    if (partnerDTO != null)
+                    {
+                        item.Wallet.CustomerName = partnerDTO.PartnerName;
+                        item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                        item.Wallet.Country = partnerDTO.Country;
+                    }
                 }
                 else
                 {
                     // handle IndividualCustomers
                     var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
-                    item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
-                    item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
-                    item.Wallet.Country = individualCustomerDTO.Country;
+
+                    if (individualCustomerDTO != null)
+                    {
+                        item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                        item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                        item.Wallet.Country = individualCustomerDTO.Country;
+                    }
                 }
             }
 
@@ -123,20 +132,75 @@ namespace GIGLS.Services.Implementation.Wallet
                 else if (CustomerType.Partner == item.Wallet.CustomerType)
                 {
                     var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
-                    item.Wallet.CustomerName = partnerDTO.PartnerName;
-                    item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
-                    item.Wallet.Country = partnerDTO.Country;
+
+                    if (partnerDTO != null)
+                    {
+                        item.Wallet.CustomerName = partnerDTO.PartnerName;
+                        item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                        item.Wallet.Country = partnerDTO.Country;
+                    }
                 }
                 else
                 {
                     // handle IndividualCustomers
                     var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
-                    item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
-                    item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
-                    item.Wallet.Country = individualCustomerDTO.Country;
+
+                    if (individualCustomerDTO != null)
+                    {
+                        item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                        item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                        item.Wallet.Country = individualCustomerDTO.Country;
+                    }
                 }
             }
+            return walletTransactions;
+        }
 
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionCreditOrDebit(AccountFilterCriteria accountFilterCriteria)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionCreditOrDebitAsync(serviceCenterIds, accountFilterCriteria);
+
+            //get customer details
+            ////set the customer name
+            foreach (var item in walletTransactions)
+            {
+                // handle Company customers
+                if (CustomerType.Company == item.Wallet.CustomerType)
+                {
+                    var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (companyDTO != null)
+                    {
+                        item.Wallet.CustomerName = companyDTO.Name;
+                        item.Wallet.Country = companyDTO.Country;
+                        item.Wallet.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                    }
+                }
+                else if (CustomerType.Partner == item.Wallet.CustomerType)
+                {
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (partnerDTO != null)
+                    {
+                        item.Wallet.CustomerName = partnerDTO.PartnerName;
+                        item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                        item.Wallet.Country = partnerDTO.Country;
+                    }
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (individualCustomerDTO != null)
+                    {
+                        item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                        item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                        item.Wallet.Country = individualCustomerDTO.Country;
+                    }
+                }
+            }
             return walletTransactions;
         }
 
@@ -158,9 +222,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //get the customer info
             //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
-            
+
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
-            if (walletTransactions.Count() < 1)
+            if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
                 {
@@ -176,7 +240,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
 
             // get the service centre
-            foreach(var item in walletTransactionDTOList)
+            foreach (var item in walletTransactionDTOList)
             {
                 var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
                 item.ServiceCentre = serviceCentre;
@@ -233,7 +297,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //get the customer info
             var country = new CountryDTO();
-            //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
             var userid = await _userService.GetUserByChannelCode(wallet.CustomerCode);
             if (userid != null)
             {
@@ -247,7 +310,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
-            if (walletTransactions.Count() < 1)
+            if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
                 {
@@ -258,7 +321,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     WalletBalance = wallet.Balance,
                     WalletOwnerName = userid.FirstName + " " + userid.LastName,
                     WalletId = wallet.WalletId
-                   
+
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -272,14 +335,184 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletBalance = wallet.Balance,
                 WalletOwnerName = userid.FirstName + " " + userid.LastName,
                 WalletId = wallet.WalletId
-                
+
+            };
+        }
+
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile()
+        {
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
+            if (!walletTransactions.Any())
+            {
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = new List<WalletTransactionDTO>(),
+                    CurrencyCode = country.CurrencyCode,
+                    CurrencySymbol = country.CurrencySymbol,
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                    WalletId = wallet.WalletId
+                };
+            }
+
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
+            };
+        }
+
+        private async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            var walletTransactionDTOList = await _uow.WalletTransaction.GetWalletTransactionMobile(wallet.WalletId, filterCriteria);
+            return new ModifiedWalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
             };
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            var wallet = await _walletService.GetWalletBalance();
-            return await GetWalletTransactionByWalletIdForMobile(wallet);
+            //var wallet = await _walletService.GetWalletBalance();
+            //return await GetWalletTransactionByWalletIdForMobile(wallet);
+            return await GetWalletTransactionByWalletIdForMobile();
         }
+
+        public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer,ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await GetWalletTransactionByWalletIdForMobile(customer, filterCriteria);
+        }
+
+        private async Task<List<WalletTransactionDTO>> GetWalletTransactionByWalletIdForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            //set default values if payload is null
+            if (shipmentAndPreShipmentParamDTO == null)
+            {
+                shipmentAndPreShipmentParamDTO = new ShipmentAndPreShipmentParamDTO
+                {
+                 Page = 1,
+                 PageSize = 20,
+                 StartDate = null,
+                 EndDate = null
+                };
+            }
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+            int totalCount;
+            var walletTransactionDTOList = new List<WalletTransactionDTO>();
+            var walletTransactions = new List<WalletTransaction>();
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (shipmentAndPreShipmentParamDTO.PageSize < 1)
+            {
+                shipmentAndPreShipmentParamDTO.PageSize = 20;
+            }
+            if (shipmentAndPreShipmentParamDTO.Page < 1)
+            {
+                shipmentAndPreShipmentParamDTO.Page = 1;
+            }    
+
+            if (shipmentAndPreShipmentParamDTO.StartDate != null && shipmentAndPreShipmentParamDTO.EndDate != null)
+            {
+               
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId && s.DateCreated >= shipmentAndPreShipmentParamDTO.StartDate && s.DateCreated <= shipmentAndPreShipmentParamDTO.EndDate).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+            else
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == wallet.WalletId).SelectPage(shipmentAndPreShipmentParamDTO.Page, shipmentAndPreShipmentParamDTO.PageSize, out totalCount).OrderBy(s => s.DateCreated).ToList();
+            }
+
+            if (walletTransactions.Any())
+            {
+                 walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(x => x.DateCreated));
+            }
+            return walletTransactionDTOList;
+        }
+
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
+        {
+            return await GetWalletTransactionByWalletIdForMobilePaginated(shipmentAndPreShipmentParamDTO);
+        }
+
     }
 }

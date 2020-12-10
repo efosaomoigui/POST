@@ -5,7 +5,9 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Services.Implementation;
+using GIGLS.Services.Scheduler;
 using GIGLS.WebApi.Filters;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -38,6 +40,54 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
                     Object = bankshipmentprocessingorders.Item2,
                     Total = bankshipmentprocessingorders.Item3,
                     RefCode = bankshipmentprocessingorders.Item1
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("RequestBankProcessingOrderForShipment/ScheduledTask")]
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForShipment_ScheduledTask(DepositType type, int ServiceCenter) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash shipments from sales
+                var o = await _bankprocessingorder.GetBankProcessingOrderForShipment_ScheduleTask(ServiceCenter, type);
+                return new ServiceResponse<object>
+                {
+                    Object = o
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("RequestBankProcessingOrderForCOD/ScheduledTask")]
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForCOD_ScheduledTask(DepositType type, int ServiceCenter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash shipments from sales
+                var o = await _bankprocessingorder.GetBankProcessingOrderForCOD_ScheduledTask(type, ServiceCenter); 
+                return new ServiceResponse<object>
+                {
+                    Object = o
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("RequestBankProcessingOrderForDemurrage/ScheduledTask")]
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForDemurrage_ScheduledTask(DepositType type, int ServiceCenter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash shipments from sales
+                var o = await _bankprocessingorder.GetBankProcessingOrderForDemurrage_ScheduleTask(type, ServiceCenter);  
+                return new ServiceResponse<object>
+                {
+                    Object = o
                 };
             });
         }
@@ -88,7 +138,8 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder(refCode, type);
+                //var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder(refCode, type);
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrderV2(refCode, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankprocessingorders.Item2,
@@ -126,7 +177,8 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder3(refCode, type);
+                //var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder3(refCode, type);
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrderV2(refCode, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankprocessingorders.Item2,
@@ -144,7 +196,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders =  _bankprocessingorder.UpdateBankOrderProcessingCode(bkoc);
+                await _bankprocessingorder.UpdateBankOrderProcessingCode(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -158,7 +210,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
+                await _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
                 return new ServiceResponse<object>
                 {
                 };
@@ -172,7 +224,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_demurrage(bkoc);
+                await _bankprocessingorder.UpdateBankOrderProcessingCode_demurrage(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -187,7 +239,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_cod(bkoc);
+                await _bankprocessingorder.MarkAsVerified_cod(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -201,7 +253,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_demurrage(bkoc); 
+                await _bankprocessingorder.MarkAsVerified_demurrage(bkoc); 
                 return new ServiceResponse<object>
                 {
                 };
@@ -215,7 +267,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified(bkoc);
+                await _bankprocessingorder.MarkAsVerified(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -229,7 +281,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCode(bkoc);
+                await _bankprocessingorder.AddBankProcessingOrderCode(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -243,7 +295,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCodeDemurrageOnly(bkoc);
+                await _bankprocessingorder.AddBankProcessingOrderCodeDemurrageOnly(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -285,11 +337,41 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getbankOrderprocessingcodebyDate")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var resValue = await _bankprocessingorder.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
+                return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
+                {
+                    Object = resValue
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getbankOrderprocessingcodebyByServiceCenter")]
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> getbankOrderprocessingcodebyByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
+        {       
+            return await HandleApiOperationAsync(async () =>
+            {
+                var resValue = await _bankprocessingorder.GetBankOrderProcessingCodeByServiceCenter(type, dateFilterCriteria);  
+                return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
+                {
+                    Object = resValue
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getregionalbankOrderprocessingcodebyDate")]
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var resValue = await _bankprocessingorder.GetRegionalBankOrderProcessingCodeByDate(type, dateFilterCriteria);
                 return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
                 {
                     Object = resValue

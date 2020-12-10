@@ -7,6 +7,7 @@ namespace GIGLS.Core.DTO.Customers
     {
         //CustomerDTO
         public CustomerType CustomerType { get; set; }
+
         public string CustomerName
         {
             get
@@ -38,6 +39,7 @@ namespace GIGLS.Core.DTO.Customers
         public string ReturnOption { get; set; }
         public int ReturnServiceCentre { get; set; }
         public string ReturnAddress { get; set; }
+        public bool isCodNeeded { get; set; }
 
         // IndividualCustomerDTO
         public int IndividualCustomerId { get; set; }
@@ -47,6 +49,7 @@ namespace GIGLS.Core.DTO.Customers
         public string PictureUrl { get; set; }
         public string PicData { get; set; }
         public string WalletNumber { get; set; }
+        public decimal WalletBalance { get; set; }
         public string CustomerCode { get; set; }
 
         public string Password { get; set; }
@@ -55,5 +58,13 @@ namespace GIGLS.Core.DTO.Customers
         public int UserActiveCountryId { get; set; }
         public bool IsFromMobile { get; set; }
         public CountryDTO Country { get; set; }
+
+        //Update for user table
+        public bool IsInternational { get; set; }
+        public IdentificationType IdentificationType { get; set; }
+        public string IdentifictionNumber { get; set; }
+        public string IdentificationImage { get; set; } 
+        public string IdentificationNumber { get; set; }  
+
     }
 }

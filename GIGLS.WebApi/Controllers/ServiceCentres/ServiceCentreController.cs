@@ -41,6 +41,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("jobs")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresJobs() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("hubs")]
@@ -269,6 +284,37 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
 
                 var centres = await _service.GetServiceCentresWithoutHUBForNonLagosStation(usersServiceCentresId[0], countryId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{servicecentreId:int}/public/{ispublic}")]
+        public async Task<IServiceResponse<bool>> UpdateServiceCentreViewState(int servicecentreId, bool ispublic)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.ServiceCentreViewState(servicecentreId, ispublic);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("activeservicecentres")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetActiveServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetActiveServiceCentres();
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres

@@ -29,7 +29,8 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IMessageSenderService _messageSenderService;
 
         public FleetPartnerService(IUnitOfWork uow, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService)
+            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator,
+            IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -195,6 +196,12 @@ namespace GIGLS.Services.Implementation.Partnership
             return vehicles;
         }
 
+        public async Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner(string fleetCode)
+        {
+            var vehicles = await _uow.FleetPartner.GetVehiclesAttachedToFleetPartner(fleetCode);
+            return vehicles;
+        }
+
         public async Task<List<FleetPartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
@@ -254,6 +261,31 @@ namespace GIGLS.Services.Implementation.Partnership
             await _uow.CompleteAsync();
             
         }
+
+        public async Task RemovePartnerFromFleetPartner(string partnerCode)
+        {
+                var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
+                if (partner != null)
+                {
+                    partner.FleetPartnerCode = null;
+                }
+            
+            await _uow.CompleteAsync();
+
+        }
+
+        public async Task<List<VehicleTypeDTO>> GetVerifiedPartners()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var partners = await _uow.Partner.GetVerifiedPartnersAsync(currentUser.UserChannelCode);
+
+            return partners;
+        }
+
+
 
     }
 }

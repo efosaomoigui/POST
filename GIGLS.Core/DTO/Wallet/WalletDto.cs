@@ -14,8 +14,15 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsSystem { get; set; }
         public string CustomerCode { get; set; }
         public string CompanyType { get; set; }
+        public string CustomerPhoneNumber { get; set; }
+        public string CustomerEmail { get; set; }
 
         public int UserActiveCountryId { get; set; }
-        public CountryDTO Country { get; set; }
+        public CountryDTO Country { get; set; }        
+    }
+    public class ChargeWalletDTO
+    {
+        public string UserId { get; set; }
+        public decimal Amount { get; set; }
     }
 }

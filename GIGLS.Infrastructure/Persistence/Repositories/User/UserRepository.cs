@@ -50,10 +50,22 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return user;
         }
 
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByCompanyName(string name)
+        {
+            var user = _userManager.Users.Where(x => x.Organisation.ToLower() == name.ToLower()).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System 
                         && x.UserChannelType == UserChannelType.Employee).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Email == email && x.UserType != UserType.System && x.UserChannelType != UserChannelType.Employee).AsEnumerable();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
@@ -108,39 +120,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public async Task<IdentityResult> UpdateUser(string userId, GIGL.GIGLS.Core.Domain.User user)
         {
-
-            //var updateuser = await _userManager.FindByIdAsync(userId);
-
-            //updateuser.Department = user.Department;
-            //updateuser.Designation = user.Designation;
-            //updateuser.Email = user.Email;
-            //updateuser.FirstName = user.FirstName;
-            //updateuser.LastName = user.LastName;
-            //user.Gender = user.Gender;
-            //updateuser.Organisation = user.Organisation;
-            //updateuser.IsActive = user.IsActive;
-
             return await _userManager.UpdateAsync(user);
         }
 
         public async Task<IdentityResult> RegisterUser(GIGL.GIGLS.Core.Domain.User user, string password)
         {
-            //var user = new GIGL.GIGLS.Core.Domain.User()
-            //{
-
-            //    FirstName = userdto.FirstName,
-            //    LastName = userdto.LastName,
-            //    //Gender = userdto.Gender,
-            //    Email = userdto.Email,
-            //    DateCreated = DateTime.Now.Date,
-            //    DateModified = DateTime.Now.Date,
-            //    UserName = userdto.Username,
-            //};
             try
             {
                 return await _userManager.CreateAsync(user, password);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -179,16 +168,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = await _userManager.FindByIdAsync(userId);
             user.IsDeleted = true;
             return await _userManager.UpdateAsync(user);
-
-            //return await _userManager.DeleteAsync(user);
         }
 
         public async Task<IdentityResult> RemoveRole(string roleId)
         {
-            //var rolResult = await _roleManager.FindByIdAsync(roleId);
-            //var result = _roleManager.DeleteAsync(rolResult);
-            //return await result;
-
             var rolResult = await _roleManager.FindByIdAsync(roleId);
             rolResult.IsDeleted = true;
             rolResult.DateModified = DateTime.Now.Date;
@@ -206,7 +189,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         //Add a user to a role
         public async Task<IdentityResult> AddToRoleAsync(string userid, string name)
         {
-            //var user = await this.GetUserById(userid);
             var Result = await _userManager.AddToRoleAsync(userid, name);
             return Result;
         }
@@ -310,7 +292,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         {
             var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) 
             || x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) 
-            && (x.IsRegisteredFromMobile == true || x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain" || x.UserChannelType==UserChannelType.Ecommerce)).FirstOrDefault();
+            && (x.IsRegisteredFromMobile == true || x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain" 
+            || x.UserChannelType==UserChannelType.Ecommerce || x.UserChannelType == UserChannelType.Corporate)).FirstOrDefault();
             return Task.FromResult(user);
         }
 
@@ -330,6 +313,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user);
         }
 
+        //get User using Customer - For Fast Track Agent App Only
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForAgentApp(string emailPhoneCode)
+        {
+            //var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) ||
+            //x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && (x.UserChannelType == UserChannelType.Employee && x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+
+            var user = _userManager.Users.Where(x => x.Email == emailPhoneCode || x.UserChannelCode == emailPhoneCode || x.PhoneNumber.Contains(emailPhoneCode)).FirstOrDefault();
+            return Task.FromResult(user);
+        }
 
         public async Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive)
         {
@@ -340,6 +332,33 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
                 await _userManager.UpdateAsync(user);
             }
             return await Task.FromResult(user);
+        }
+
+        public Task<bool> IsCustomerHasAgentRole(string userId)
+        {
+            bool hasAgentRole = false;
+
+            //FastTrack Agent
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Id == userId && (x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+                   
+            if (user != null)
+            {
+                hasAgentRole = true;
+            }
+
+            return Task.FromResult(hasAgentRole);
+        }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsers(string[] ids)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && ids.Contains(x.Id)).ToList();
+            return Task.FromResult(user);
+        }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorChannelCode(string searchParam)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(searchParam) || x.UserChannelCode.Contains(searchParam)).FirstOrDefault();
+            return Task.FromResult(user);
         }
     }
 }

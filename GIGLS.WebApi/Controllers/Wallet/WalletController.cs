@@ -74,11 +74,9 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var Wallet = await _walletService.AddWallet(newWallet);
                 await _walletService.AddWallet(newWallet);
                 return new ServiceResponse<object>
                 {
-                    //Object = Wallet
                     Object = true
                 };
             });
@@ -121,8 +119,23 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-
                 var walletsObj = await _walletService.SearchForWallets(searchOption);
+
+                return new ServiceResponse<List<WalletDTO>>
+                {
+                    Object = walletsObj
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("outstandingcorporatepayments")]
+        public async Task<IServiceResponse<List<WalletDTO>>> GetOutstaningCorporatePayments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletsObj = await _walletService.GetOutstaningCorporatePayments();
 
                 return new ServiceResponse<List<WalletDTO>>
                 {

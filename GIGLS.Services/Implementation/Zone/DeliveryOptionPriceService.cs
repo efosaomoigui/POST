@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -29,12 +30,12 @@ namespace GIGLS.Services.Implementation.Zone
             {                
                 if (!await _uow.DeliveryOption.ExistAsync(c => c.DeliveryOptionId == option.DeliveryOptionId))
                 {
-                    throw new GenericException("Deliver Option Not Exist");
+                    throw new GenericException("Deliver Option Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (!await _uow.Zone.ExistAsync(c => c.ZoneId == option.ZoneId))
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if(await _uow.DeliveryOptionPrice.ExistAsync(c => c.ZoneId == option.ZoneId 
@@ -54,9 +55,9 @@ namespace GIGLS.Services.Implementation.Zone
                 await _uow.CompleteAsync();
                 return new { Id = newOption.DeliveryOptionPriceId };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new GenericException(ex.Message);
+                throw;
             }
         }
 
@@ -67,7 +68,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var option = await _uow.DeliveryOptionPrice.GetAsync(optionId);
                 if (option == null)
                 {
-                    throw new GenericException("Delivery Option Price Not Exist");
+                    throw new GenericException("Delivery Option Price Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 _uow.DeliveryOptionPrice.Remove(option);
                 _uow.Complete();
@@ -88,7 +89,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 if (option == null)
                 {
-                    throw new GenericException("Delivery Option Price Not Exist");
+                    throw new GenericException("Delivery Option Price Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return option.Price;
@@ -108,7 +109,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 if (option == null)
                 {
-                    throw new GenericException("Delivery Option Price Not Exist");
+                    throw new GenericException("Delivery Option Price Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return option;
@@ -137,23 +138,23 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 if (!await _uow.DeliveryOption.ExistAsync(c => c.DeliveryOptionId == optionDto.DeliveryOptionId))
                 {
-                    throw new GenericException("Deliver Option Not Exist");
+                    throw new GenericException("Deliver Option Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (!await _uow.Zone.ExistAsync(c => c.ZoneId == optionDto.ZoneId))
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (!await _uow.Country.ExistAsync(c => c.CountryId == optionDto.CountryId))
                 {
-                    throw new GenericException("Country Not Exist");
+                    throw new GenericException("Country Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var option = await _uow.DeliveryOptionPrice.GetAsync(optionId);
                 if (option == null || optionDto.DeliveryOptionPriceId != optionId)
                 {
-                    throw new GenericException("Delivery Option Price Not Exist");
+                    throw new GenericException("Delivery Option Price Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 option.Price = optionDto.Price;

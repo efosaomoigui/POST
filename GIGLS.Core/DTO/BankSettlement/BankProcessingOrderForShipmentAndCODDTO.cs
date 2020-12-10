@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string ServiceCenter { get; set; }
         public DepositStatus Status { get; set; }
         public string VerifiedBy { get; set; }
+        public DateTime WaybillCreated { get; set; }
     }
 
     public class BankProcessingOrderCodesDTO : BaseDomain, IAuditable
@@ -45,8 +46,9 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DepositStatus Status { get; set; }
         public string VerifiedBy { get; set; }
         public string BankName { get; set; }
-                
-        public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
+        public decimal AmountInputted { get; set; }
+
+        public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; } = new  List<BankProcessingOrderForShipmentAndCODDTO>();
     }
 
     public class CodPayOutListDTO : BaseDomain, IAuditable 

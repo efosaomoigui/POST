@@ -19,6 +19,9 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -29,15 +32,18 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IPartnerPayoutService _partnerPayoutService;
+        private readonly IMobileShipmentTrackingService _mobileShipmentTrackingService;
 
         public PartnerTransactionsService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-                                        IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService)
+                                        IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService,
+                                        IMobileShipmentTrackingService mobileShipmentTrackingService) 
         {
             _userService = userService;
             _uow = uow;
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
             _partnerPayoutService = partnerPayoutService;
+            _mobileShipmentTrackingService = mobileShipmentTrackingService;
             MapperConfig.Initialize();
         }
 
@@ -57,13 +63,17 @@ namespace GIGLS.Services.Implementation.Partnership
                     StreamReader reader = new StreamReader(result);
                     string responseFromServer = reader.ReadToEnd();
                     Response = JsonConvert.DeserializeObject<RootObject>(responseFromServer);
-                    
+
+                    //check if request was fufilled
+                    if (Response.status.ToLower() == "request_denied")
+                    {
+                        throw new GenericException($"Geo-Location service unavailable.");
+                    }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // An exception occurred making the REST call
-                throw ex;
+                throw;
             }
 
             return await Task.FromResult(Response);
@@ -80,17 +90,6 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             else
             {
-                //var distance = Convert.ToDecimal(partnerpay.Distance);
-                //var actualdistance = distance / 1000;
-                //var TotalAmountBasedonDistance = actualdistance * 3;
-                //var Time = Convert.ToDecimal(partnerpay.Time);
-                //var actualTimeinMinutes = Convert.ToDecimal(string.Format("{0:F2}", (Time / 60)));
-                //var TotalAmountBasedonTime = actualTimeinMinutes * 2;
-                //var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
-                //var Totalprice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
-                //Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
-                //var Sumofpickupandgooglapicalc =  (Totalprice + partnerpay.ShipmentPrice);
-                //var pickupprice = partnerpay.PickUprice;
                 var TotalAmount = (partnerpay.PickUprice);
                 var amount = (0.8M * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
@@ -99,58 +98,58 @@ namespace GIGLS.Services.Implementation.Partnership
         }
 
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
-        {            
+        {
             walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
             var walletPaymentLog = Mapper.Map<PartnerTransactions>(walletPaymentLogDto);
             _uow.PartnerTransactions.Add(walletPaymentLog);
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.PartnerTransactionsID };
         }
-        
-        public string Encrypt(string clearText)
+
+        public async Task<string> Encrypt(string clearText)
+        {
+            string EncryptionKey = "abc123";
+            byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
+            using (Aes encryptor = Aes.Create())
             {
-                string EncryptionKey = "abc123";
-                byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
-                using (Aes encryptor = Aes.Create())
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                    encryptor.Key = pdb.GetBytes(32);
-                    encryptor.IV = pdb.GetBytes(16);
-                    using (MemoryStream ms = new MemoryStream())
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
                     {
-                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
-                        {
-                            cs.Write(clearBytes, 0, clearBytes.Length);
-                            cs.Close();
-                        }
-                        clearText = Convert.ToBase64String(ms.ToArray());
+                        cs.Write(clearBytes, 0, clearBytes.Length);
+                        cs.Close();
                     }
+                    clearText = Convert.ToBase64String(ms.ToArray());
                 }
-                return clearText;
             }
-        
+            return clearText;
+        }
+
         public async Task<string> Decrypt(string cipherText)
+        {
+            string EncryptionKey = "abc123";
+            cipherText = cipherText.Replace(" ", "+");
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            using (Aes encryptor = Aes.Create())
             {
-                string EncryptionKey = "abc123";
-                cipherText = cipherText.Replace(" ", "+");
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
-                using (Aes encryptor = Aes.Create())
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                    encryptor.Key = pdb.GetBytes(32);
-                    encryptor.IV = pdb.GetBytes(16);
-                    using (MemoryStream ms = new MemoryStream())
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
                     {
-                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
-                        {
-                            cs.Write(cipherBytes, 0, cipherBytes.Length);
-                            cs.Close();
-                        }
-                        cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Close();
                     }
+                    cipherText = Encoding.Unicode.GetString(ms.ToArray());
                 }
-                return cipherText;
             }
+            return cipherText;
+        }
 
         public async Task ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto)
         {
@@ -166,7 +165,7 @@ namespace GIGLS.Services.Implementation.Partnership
             foreach (var partner in paymentLogDto)
             {
                 var existingParntner = await _uow.Partner.GetAsync(s => s.PartnerCode == partner.Code);
-                
+
                 if (existingParntner != null)
                 {
                     // Get Date Info
@@ -193,17 +192,17 @@ namespace GIGLS.Services.Implementation.Partnership
 
         private async Task UpdatePartnerTransactionPayment(ExternalPartnerTransactionsPaymentDTO partner)
         {
-            var transactions = await _uow.PartnerTransactions.FindAsync(x => x.UserId == partner.UserId 
-                                            && x.DateCreated >= partner.filterCriteria.StartDate 
-                                            && x.DateCreated <= partner.filterCriteria.EndDate);
+            //var transactions = await _uow.PartnerTransactions.FindAsync(x => x.UserId == partner.UserId 
+            //                                && x.DateCreated >= partner.filterCriteria.StartDate 
+            //                                && x.DateCreated <= partner.filterCriteria.EndDate);
 
-            if(transactions != null)
-            {
-                foreach (var transaction in transactions)
-                {
-                    transaction.IsProcessed = true;
-                }
-            }
+            //if(transactions != null)
+            //{
+            //    foreach (var transaction in transactions)
+            //    {
+            //        transaction.IsProcessed = true;
+            //    }
+            //}
 
             await AddPartnerWallet(partner);
         }
@@ -241,7 +240,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 StartDate = partner.filterCriteria.StartDate,
                 EndDate = partner.filterCriteria.EndDate
             };
-            var addPartnerPayout = await _partnerPayoutService.AddPartnerPayout(processedByData);
+            await _partnerPayoutService.AddPartnerPayout(processedByData);
         }
 
         public async Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria)
@@ -250,5 +249,115 @@ namespace GIGLS.Services.Implementation.Partnership
 
             return partnersPayout;
         }
+
+        public async Task CreditPartnerTransactionByAdmin(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            try
+            {
+                var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == transactionsDTO.Waybill);
+                if (preshipment == null)
+                {
+                    throw new GenericException($"This waybill {transactionsDTO.Waybill} does not exist");
+                }
+
+                var partnerTrans = await _uow.PartnerTransactions.GetAsync(x => x.Waybill == transactionsDTO.Waybill);
+                if (partnerTrans != null)
+                {
+                    throw new GenericException($"This transaction already exists");
+                }
+
+                var partner = await _uow.Partner.GetAsync(x => x.Email == transactionsDTO.Email);
+                if (partner == null)
+                {
+                    throw new GenericException($"This partner with Email {transactionsDTO.Email} does not exist");
+                }
+
+                var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
+
+                //Add to Partner Transactions
+                var partnerTransactions = new PartnerTransactionsDTO
+                {
+                    Destination = preshipment.ReceiverAddress,
+                    Departure = preshipment.SenderAddress,
+                    AmountReceived = transactionsDTO.AmountReceived,
+                    Waybill = preshipment.Waybill,
+                    UserId = partner.UserId,
+                };
+                var partnerPayment = Mapper.Map<PartnerTransactions>(partnerTransactions);
+                _uow.PartnerTransactions.Add(partnerPayment);
+
+                //Add to Wallet 
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                wallet.Balance = wallet.Balance + transactionsDTO.AmountReceived;
+
+                //Add to Wallet Transactions
+                var walletTransaction = new WalletTransactionDTO
+                {
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Amount = transactionsDTO.AmountReceived,
+                    ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                    Waybill = preshipment.Waybill,
+                    Description = "Credit for Delivered Shipment Request",
+                    PaymentType = PaymentType.Online,
+                    UserId = partner.UserId,
+                    DateOfEntry = DateTime.Now
+                };
+                var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransaction);
+                _uow.WalletTransaction.Add(newWalletTransaction);
+
+                //Update Status if not already updated
+                string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+                string onwardProcessing = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+
+                if (preshipment.shipmentstatus != delivered && preshipment.shipmentstatus != onwardProcessing)
+                {
+                    preshipment.IsDelivered = true;
+                    ShipmentScanStatus status = ShipmentScanStatus.MCRT;
+
+                    if (preshipment.ZoneMapping == 1)
+                    {
+                        preshipment.shipmentstatus = delivered;
+                        status = ShipmentScanStatus.MAHD;
+                    }
+                    else
+                    {
+                        preshipment.shipmentstatus = onwardProcessing;
+                        status = ShipmentScanStatus.MSVC;
+                    }
+
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = preshipment.Waybill,
+                        ShipmentScanStatus = status
+                    });
+                }
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw ;
+            }
+        }
+
+        private async Task ScanMobileShipment(ScanDTO scan)
+        {
+            try
+            {
+                string scanStatus = scan.ShipmentScanStatus.ToString();
+                await _mobileShipmentTrackingService.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                {
+                    DateTime = DateTime.Now,
+                    Status = scanStatus,
+                    Waybill = scan.WaybillNumber,
+                }, scan.ShipmentScanStatus);
+                
+            }
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to scan shipment.");
+            }
+        }
+
     }
 }

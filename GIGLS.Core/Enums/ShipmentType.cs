@@ -4,6 +4,13 @@
     {
         Special,
         Regular,
-        Ecommerce
+        Ecommerce,
+        Store
+    }
+
+    public enum ShipmentContactStatus
+    {
+        NotContacted,
+        Contacted
     }
 }

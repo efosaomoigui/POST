@@ -27,6 +27,7 @@ using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
+using GIGLS.Core.IRepositories.Magaya;
 
 namespace GIGLS.Core
 {
@@ -43,7 +44,11 @@ namespace GIGLS.Core
         IManifestRepository Manifest { get; set; }
         IManifestGroupWaybillNumberMappingRepository ManifestGroupWaybillNumberMapping { get; set; }
         IShipmentItemRepository ShipmentPackage { get; set; }
+        IMagayaShipmentItemRepository MagayaShipmentItem { get; set; } 
+        IIntlShipmentRequestRepository IntlShipmentRequest { get; set; }
+        IIntlShipmentRequestItemRepository IntlShipmentRequestItem { get; set; } 
         IShipmentRepository Shipment { get; set; }
+        IMagayaShipmentRepository MagayaShipment { get; set; }
         IShipmentTrackingRepository ShipmentTracking { get; set; }
         IStockRequestPartRepository StockRequestPart { get; set; }
         IStockRequestRepository StockRequest { get; set; }
@@ -102,6 +107,7 @@ namespace GIGLS.Core
         IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
+        IMovementDispatchRepository MovementDispatch { get; set; } 
         IDispatchActivityRepository DispatchActivity { get; set; }
         IEmailSendLogRepository EmailSendLog { get; set; }
         ISmsSendLogRepository SmsSendLog { get; set; }
@@ -181,6 +187,17 @@ namespace GIGLS.Core
         IFleetPartnerRepository FleetPartner { get; set; }
         IMobileGroupCodeWaybillMappingRepository MobileGroupCodeWaybillMapping { get; set; }
         IPartnerPayoutRepository PartnerPayout { get; set; }
+        IEcommerceAgreementRepository EcommerceAgreement { get; set; }
+        IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
+        IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
+        IFinancialReportRepository FinancialReport { get; set; }
+
+        //Mpvement Manifest
+        IMovementManifestNumberRepository MovementManifestNumber { get; set; }
+        IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
+        IShipmentContactRepository ShipmentContact { get; set; }
+        IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
+        IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

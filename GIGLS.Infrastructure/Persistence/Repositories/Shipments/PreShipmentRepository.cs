@@ -14,6 +14,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -25,213 +26,103 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var preShipment = _context.PreShipment.AsQueryable();
-
-                //filter by cancelled preshipments
-                preShipment = preShipment.Where(s => s.IsCancelled == false);
-
-                //filter by Local or International PreShipment
-                if (filterOptionsDto.IsInternational != null)
-                {
-                    preShipment = preShipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
-                }
-
-                var count = preShipment.Count();
-
-                List<PreShipmentDTO> preShipmentDto = new List<PreShipmentDTO>();
-                //filter
-                var filter = filterOptionsDto.filter;
-                var filterValue = filterOptionsDto.filterValue;
-                if (string.IsNullOrEmpty(filter) || string.IsNullOrEmpty(filterValue))
-                {
-                    preShipmentDto = (from r in preShipment
-                                   select new PreShipmentDTO()
-                                   {
-                                       PreShipmentId = r.PreShipmentId,
-                                       Waybill = r.Waybill,
-                                       CustomerId = r.CustomerId,
-                                       CustomerType = r.CustomerType,
-                                       ActualDateOfArrival = r.ActualDateOfArrival,
-                                       //ActualReceiverName = r.ActualReceiverName,
-                                       //ActualreceiverPhone = r.ActualreceiverPhone,
-                                       //Comments = r.Comments,
-                                       DateCreated = r.DateCreated,
-                                       DateModified = r.DateModified,
-                                       DeliveryOptionId = r.DeliveryOptionId,
-                                       DeliveryOption = new DeliveryOptionDTO
-                                       {
-                                           Code = r.DeliveryOption.Code,
-                                           Description = r.DeliveryOption.Description
-                                       },
-                                       DeliveryTime = r.DeliveryTime,
-                                       DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                       DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                       {
-                                           Code = x.Code,
-                                           Name = x.Name
-                                       }).FirstOrDefault(),
-                                       DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                       DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                       {
-                                           Code = x.Code,
-                                           Name = x.Name
-                                       }).FirstOrDefault(),
-                                       ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                       //GroupWaybill = r.GroupWaybill,
-                                       //IdentificationType = r.IdentificationType,
-                                       //IndentificationUrl = r.IndentificationUrl,
-                                       //IsDomestic = r.IsDomestic,
-                                       PaymentStatus = r.PaymentStatus,
-                                       ReceiverAddress = r.ReceiverAddress,
-                                       ReceiverCity = r.ReceiverCity,
-                                       ReceiverCountry = r.ReceiverCountry,
-                                       ReceiverEmail = r.ReceiverEmail,
-                                       ReceiverName = r.ReceiverName,
-                                       ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                       ReceiverState = r.ReceiverState,
-                                       SealNumber = r.SealNumber,
-                                       UserId = r.UserId,
-                                       Value = r.Value,
-                                       GrandTotal = r.GrandTotal,
-                                       AppliedDiscount = r.AppliedDiscount,
-                                       DiscountValue = r.DiscountValue,
-                                       ShipmentPackagePrice = r.ShipmentPackagePrice,
-                                       CompanyType = r.CompanyType,
-                                       CustomerCode = r.CustomerCode,
-                                       Description = r.Description,
-                                       //Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
-                                       //{
-                                       //    InvoiceId = x.InvoiceId,
-                                       //    InvoiceNo = x.InvoiceNo,
-                                       //    Amount = x.Amount,
-                                       //    PaymentStatus = x.PaymentStatus,
-                                       //    PaymentMethod = x.PaymentMethod,
-                                       //    PaymentDate = x.PaymentDate,
-                                       //    Waybill = x.Waybill,
-                                       //    DueDate = x.DueDate,
-                                       //    IsInternational = x.IsInternational
-                                       //}).FirstOrDefault()
-                                       //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
-                                   }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
-
-                    return new Tuple<Task<List<PreShipmentDTO>>, int>(Task.FromResult(preShipmentDto.ToList()), count);
-                }
-
-                preShipmentDto = (from r in preShipment
-                               select new PreShipmentDTO()
-                               {
-                                   PreShipmentId = r.PreShipmentId,
-                                   Waybill = r.Waybill,
-                                   CustomerId = r.CustomerId,
-                                   CustomerType = r.CustomerType,
-                                   ActualDateOfArrival = r.ActualDateOfArrival,
-                                   //ActualReceiverName = r.ActualReceiverName,
-                                   //ActualreceiverPhone = r.ActualreceiverPhone,
-                                   //Comments = r.Comments,
-                                   DateCreated = r.DateCreated,
-                                   DateModified = r.DateModified,
-                                   DeliveryOptionId = r.DeliveryOptionId,
-                                   DeliveryOption = new DeliveryOptionDTO
-                                   {
-                                       Code = r.DeliveryOption.Code,
-                                       Description = r.DeliveryOption.Description
-                                   },
-                                   DeliveryTime = r.DeliveryTime,
-                                   DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                   DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                   {
-                                       Code = x.Code,
-                                       Name = x.Name
-                                   }).FirstOrDefault(),
-                                   DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                   DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                   {
-                                       Code = x.Code,
-                                       Name = x.Name
-                                   }).FirstOrDefault(),
-                                   ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                   //GroupWaybill = r.GroupWaybill,
-                                   //IdentificationType = r.IdentificationType,
-                                   //IndentificationUrl = r.IndentificationUrl,
-                                   //IsDomestic = r.IsDomestic,
-                                   PaymentStatus = r.PaymentStatus,
-                                   ReceiverAddress = r.ReceiverAddress,
-                                   ReceiverCity = r.ReceiverCity,
-                                   ReceiverCountry = r.ReceiverCountry,
-                                   ReceiverEmail = r.ReceiverEmail,
-                                   ReceiverName = r.ReceiverName,
-                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                   ReceiverState = r.ReceiverState,
-                                   SealNumber = r.SealNumber,
-                                   UserId = r.UserId,
-                                   Value = r.Value,
-                                   GrandTotal = r.GrandTotal,
-                                   AppliedDiscount = r.AppliedDiscount,
-                                   DiscountValue = r.DiscountValue,
-                                   ShipmentPackagePrice = r.ShipmentPackagePrice,
-                                   CompanyType = r.CompanyType,
-                                   CustomerCode = r.CustomerCode,
-                                   Description = r.Description,
-                                   //Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
-                                   //{
-                                   //    InvoiceId = x.InvoiceId,
-                                   //    InvoiceNo = x.InvoiceNo,
-                                   //    Amount = x.Amount,
-                                   //    PaymentStatus = x.PaymentStatus,
-                                   //    PaymentMethod = x.PaymentMethod,
-                                   //    PaymentDate = x.PaymentDate,
-                                   //    Waybill = x.Waybill,
-                                   //    DueDate = x.DueDate,
-                                   //    IsInternational = x.IsInternational
-                                   //}).FirstOrDefault()
-                                   //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
-                               }).Where(s => (s.Waybill == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
-
-
-                //filter
-                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
-                {
-                    preShipmentDto = preShipmentDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
-                }
-
-                //sort
-                var sortorder = filterOptionsDto.sortorder;
-                var sortvalue = filterOptionsDto.sortvalue;
-
-                if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
-                {
-                    System.Reflection.PropertyInfo prop = typeof(PreShipment).GetProperty(sortvalue);
-
-                    if (sortorder == "0")
-                    {
-                        preShipmentDto = preShipmentDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                    }
-                    else
-                    {
-                        preShipmentDto = preShipmentDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                    }
-
-                }
-
-                preShipmentDto = preShipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
-
-                return new Tuple<Task<List<PreShipmentDTO>>, int>(Task.FromResult(preShipmentDto.ToList()), count);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public IQueryable<PreShipment> PreShipmentsAsQueryable()
         {
             var preShipments = _context.PreShipment.AsQueryable();
             return preShipments;
         }
-    
+
+        public Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria, string currentUserId)
+        {
+            //get startDate and endDate
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var dropOffs = _context.PreShipment.AsQueryable().Where(x => x.SenderUserId == currentUserId && x.IsActive == true);
+
+            if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+            {
+                //Last 20 days
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+            }
+
+            dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
+
+            List<PreShipmentDTO> shipmentDto = (from r in dropOffs
+                                                select new PreShipmentDTO()
+                                                {
+                                                    PreShipmentId = r.PreShipmentId,
+                                                    TempCode = r.TempCode,
+                                                    Waybill = r.Waybill,
+                                                    CompanyType = r.CompanyType,
+                                                    DateCreated = r.DateCreated,
+                                                    DateModified = r.DateModified,
+                                                    ReceiverAddress = r.ReceiverAddress,
+                                                    ReceiverCity = r.ReceiverCity,
+                                                    ReceiverName = r.ReceiverName,
+                                                    ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                    SenderUserId = r.SenderUserId,
+                                                    Value = r.Value,
+                                                    IsProcessed = r.IsProcessed,
+                                                    CustomerCode = r.CustomerCode,
+                                                    PickupOptions = r.PickupOptions,
+                                                    SenderCity = r.SenderCity,
+                                                    SenderName = r.SenderName,
+                                                    SenderPhoneNumber = r.SenderPhoneNumber,
+                                                    IsAgent = r.IsAgent,                                                    
+                                                    DepartureStationId = r.DepartureStationId,
+                                                    DestinationStationId = r.DestinationStationId,
+                                                    PreShipmentItems = _context.PreShipmentItem.Where(s => s.PreShipmentId == r.PreShipmentId)
+                                                                        .Select(x => new PreShipmentItemDTO
+                                                                        {
+                                                                            Description = x.Description,
+                                                                            ShipmentType = x.ShipmentType,
+                                                                            Weight = x.Weight,
+                                                                            Quantity = x.Quantity,
+                                                                            SpecialPackageId = x.SpecialPackageId,
+                                                                            PreShipmentId = x.PreShipmentId,
+                                                                            PreShipmentItemId = x.PreShipmentItemId,
+                                                                            ItemValue = x.ItemValue
+                                                                        }).ToList()
+                                                }).ToList();
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+
+
+        public Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            var dropOffs = _context.PreShipment.Where(x => (x.CustomerCode.ToLower() == searchOption.Option.ToLower() || x.SenderPhoneNumber.ToLower() == searchOption.Option.ToLower()) && x.IsProcessed == false).ToList();
+            List<PreShipmentDTO> shipmentDto = (from r in dropOffs
+                                                select new PreShipmentDTO()
+                                                {
+                                                    PreShipmentId = r.PreShipmentId,
+                                                    TempCode = r.TempCode,
+                                                    Waybill = r.Waybill,
+                                                    CompanyType = r.CompanyType,
+                                                    DateCreated = r.DateCreated,
+                                                    DateModified = r.DateModified,
+                                                    ReceiverAddress = r.ReceiverAddress,
+                                                    ReceiverCity = r.ReceiverCity,
+                                                    ReceiverName = r.ReceiverName,
+                                                    ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                    SenderUserId = r.SenderUserId,
+                                                    Value = r.Value,
+                                                    IsProcessed = r.IsProcessed,
+                                                    CustomerCode = r.CustomerCode,
+                                                    PickupOptions = r.PickupOptions,
+                                                    SenderCity = r.SenderCity,
+                                                    SenderName = r.SenderName,
+                                                    SenderPhoneNumber = r.SenderPhoneNumber,
+                                                    IsAgent = r.IsAgent,
+                                                    DepartureStationId = r.DepartureStationId,
+                                                    DestinationStationId = r.DestinationStationId,
+                                                }).ToList();
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
     }
 }

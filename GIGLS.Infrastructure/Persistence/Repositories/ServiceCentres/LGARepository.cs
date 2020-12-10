@@ -33,6 +33,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
-        
+
+        public Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
+        {
+            try
+            {
+                var lgas = Context.LGA.Where(x => x.HomeDeliveryStatus == true).ToList();
+                var lgasDto = Mapper.Map<IEnumerable<LGADTO>>(lgas);
+                return Task.FromResult(lgasDto);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

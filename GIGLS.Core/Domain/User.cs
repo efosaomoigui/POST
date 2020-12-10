@@ -3,6 +3,7 @@ using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -44,6 +45,15 @@ namespace GIGL.GIGLS.Core.Domain
         public string AppType { get; set; }
         public bool? IsUniqueInstalled { get; set; }
         public string RegistrationReferrercode { get; set; }
+        public bool IsMagaya { get; set; }
+
+        public bool IsInternational { get; set; }
+        public IdentificationType IdentificationType { get; set; }
+        public string IdentificationImage { get; set; }
+
+        [MaxLength(100)]
+        public string IdentificationNumber { get; set; }
+        public bool DashboardAccess { get; set; }
 
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)

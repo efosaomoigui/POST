@@ -169,8 +169,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (groupWaybillNumberMapping != null)
                 {
-                    groupwaybillDto.DepartureServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == groupWaybillNumberMapping.DepartureServiceCentreId);
-                    groupwaybillDto.DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == groupWaybillNumberMapping.DestinationServiceCentreId);
+                    groupwaybillDto.DepartureServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == groupWaybillNumberMapping.DepartureServiceCentreId, "Station");
+                    groupwaybillDto.DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == groupWaybillNumberMapping.DestinationServiceCentreId, "Station");
                 }
 
                 return groupwaybillDto;

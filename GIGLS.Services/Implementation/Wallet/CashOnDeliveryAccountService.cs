@@ -16,6 +16,7 @@ using System.Linq;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
 using System;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -127,18 +128,13 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccountByWallet(string walletNumber)
         {
             var wallet = await _walletService.GetWalletById(walletNumber);
-
             var account = await _uow.CashOnDeliveryAccount.FindAsync(c => c.WalletId == wallet.WalletId);
-
             if (account == null)
             {
-                throw new GenericException("Cash on Delivery Wallet information does not exist");
+                throw new GenericException("Cash on Delivery Wallet information does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account.OrderByDescending(x => x.DateCreated));
-
-            //var balance = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
-
             var walletDto = Mapper.Map<WalletDTO>(wallet);
 
             //set the customer name

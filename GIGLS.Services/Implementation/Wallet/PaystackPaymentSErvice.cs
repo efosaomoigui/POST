@@ -19,6 +19,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Collections.Generic;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO;
+using GIGLS.Core.IServices.Utility;
+using System.Linq;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -28,14 +34,22 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly INodeService _nodeService;
 
-        private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
+        private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
+
+        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
+            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
+            _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
+            _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -48,9 +62,7 @@ namespace GIGLS.Services.Implementation.Wallet
             // Initializing a transaction
             var response = api.Transactions.Initialize(wpd.Email, wpd.PaystackAmount);
 
-            //return response.Status;
             return response.Status;
-
         }
 
         //not used for now
@@ -105,8 +117,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (paymentLog == null)
                     return result;
 
+                var userPayload = new UserPayload();
+
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //a. update the wallet for the customer
                     string customerId = null;  //set customer id to null
@@ -117,10 +131,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (walletDto != null)
                     {
                         //use customer code to get customer id
-                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                      var  user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
+                        {
                             customerId = user.Id;
+                            userPayload.Email = user.Email;
+                            userPayload.UserId = user.Id;
+                        }
                     }
 
                     //update the wallet
@@ -133,6 +151,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
                 }
 
                 //3. update the wallet payment log
@@ -144,7 +164,46 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
 
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                {
+                    if(userPayload != null)
+                    {
+                        await _nodeService.WalletNotification(userPayload);
+                    }
+                }
+
                 result = true;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        public async Task<PaymentResponse> VerifyAndProcessPayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();            
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if(paymentLog != null)
+            {
+                if(paymentLog.PaymentCountryId == 76)
+                {
+                    //process for Ghana
+                    result = await ProcessPaymentForWallet(referenceCode);
+                }
+                else
+                {
+                    //Process for Nigeria
+                    result = await VerifyAndValidateWallet(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
             }
 
             return await Task.FromResult(result);
@@ -172,8 +231,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                var userPayload = new UserPayload();
+
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //a. update the wallet for the customer
                     string customerId = null;  //set customer id to null
@@ -187,7 +248,11 @@ namespace GIGLS.Services.Implementation.Wallet
                         var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
+                        {
                             customerId = user.Id;
+                            userPayload.Email = user.Email;
+                            userPayload.UserId = user.Id;
+                        }
                     }
 
                     //update the wallet
@@ -201,6 +266,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
                 }
 
                 //3. update the wallet payment log
@@ -214,6 +281,15 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 result.GatewayResponse = verifyResult.data.Gateway_Response;
                 result.Status = verifyResult.data.Status;
+
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                {
+                    if (userPayload != null)
+                    {
+                        await _nodeService.WalletNotification(userPayload);
+                    }
+                }
             }
 
             return await Task.FromResult(result);
@@ -347,12 +423,15 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
             bool result = false;
 
             //1. verify the payment 
             var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
+
+            var userPayload = new UserPayload();
 
             if (verifyResult.Status)
             {
@@ -377,7 +456,11 @@ namespace GIGLS.Services.Implementation.Wallet
                         var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
+                        {
                             customerId = user.Id;
+                            userPayload.Email = user.Email;
+                            userPayload.UserId = user.Id;
+                        }
                     }
 
                     //update the wallet
@@ -401,11 +484,114 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
+
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                {
+                    if (userPayload != null)
+                    {
+                        await _nodeService.WalletNotification(userPayload);
+                    }
+                }
+
                 result = true;
             }
 
             return await Task.FromResult(result);
+        }
 
+        private async Task<PaymentResponse> ProcessPaymentForWallet(string referenceCode)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(referenceCode);
+
+            PaymentResponse result = new PaymentResponse()
+            {
+                Result = verifyResult.Status,
+                Message = verifyResult.Message
+            };
+
+            var userPayload = new UserPayload();
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == referenceCode);
+
+                if (paymentLog == null)
+                {
+                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                    return result;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                {
+                    //a. update the wallet for the customer
+                    string customerId = null;  //set customer id to null
+
+                    //get wallet detail to get customer code
+                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                    if (walletDto != null)
+                    {
+                        //use customer code to get customer id
+                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                        if (user != null)
+                        {
+                            customerId = user.Id;
+                            userPayload.Email = user.Email;
+                            userPayload.UserId = user.Id;
+                        }
+                    }
+
+                    //update the wallet
+                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                    {
+                        WalletId = paymentLog.WalletId,
+                        Amount = verifyResult.data.Amount,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Description = "Funding made through online payment",
+                        PaymentType = PaymentType.Online,
+                        PaymentTypeReference = verifyResult.data.Reference,
+                        UserId = customerId
+                    }, false);
+
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+
+                //update return response
+                result.GatewayResponse = verifyResult.data.Gateway_Response;
+                result.Status = verifyResult.data.Status;
+
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                {
+                    if (userPayload != null)
+                    {
+                       await _nodeService.WalletNotification(userPayload);
+                    }
+                }
+            }
+            {
+                if (verifyResult.data.Status != null)
+                {
+                    result.Status = verifyResult.data.Status;
+                    result.GatewayResponse = verifyResult.data.Gateway_Response;
+                }
+            }
+
+            return await Task.FromResult(result);
         }
 
         private async Task<bool> ProcessPaymentForWaybill(PaystackWebhookDTO webhook)
@@ -424,7 +610,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //3. Process payment for the waybill if successful
                     PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
@@ -442,8 +628,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         //2. Update waybill Payment log
                         paymentLog.IsPaymentSuccessful = true;
                         paymentLog.IsWaybillSettled = true;
-                        //paymentLog.TransactionStatus = verifyResult.data.Status;
-                        //paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                     }
                 }
 
@@ -546,6 +730,47 @@ namespace GIGLS.Services.Implementation.Wallet
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
+                var walletBalance = await _uow.Wallet.GetAsync(x => x.WalletId == walletDto.WalletId);
+
+                if (walletBalance != null)
+                {
+                    var message = new MessageDTO()
+                    {
+                        CustomerCode = walletDto.CustomerCode,
+                        CustomerName = walletDto.CustomerName,
+                        ToEmail = walletDto.CustomerEmail,
+                        To = walletDto.CustomerEmail,
+                        Currency = walletDto.Country.CurrencySymbol,
+                        Body = walletBalance.Balance.ToString("N"),
+                        Amount = paymentLog.Amount.ToString("N"),
+                        Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                    };
+
+                    //send mail to customer
+                    await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                    //send a copy to chairman
+                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                    if(chairmanEmail != null)
+                    {
+                        //seperate email by comma and send message to those email
+                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                        foreach (string email in chairmanEmails)
+                        {
+                            message.ToEmail = email;
+                            await _messageSenderService.SendPaymentNotificationAsync(message);
+                        }
+                    }
+                }
             }
         }
     }

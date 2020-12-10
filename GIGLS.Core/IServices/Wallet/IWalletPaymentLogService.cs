@@ -1,5 +1,7 @@
-﻿using GIGLS.Core.DTO.Wallet;
+﻿using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
@@ -12,10 +14,14 @@ namespace GIGLS.Core.IServices.Wallet
         Task<IEnumerable<WalletPaymentLogDTO>> GetWalletPaymentLogs();
         Task<WalletPaymentLogDTO> GetWalletPaymentLogById(int walletPaymentLogId);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLog);
+        Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto);
         Task UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLog);
         Task RemoveWalletPaymentLog(int walletPaymentLogId);
         Task PaystackPaymentService(WalletPaymentLogDTO WalletPaymentInfo);
         Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
         Task AddWalletPaymentLogMobile(WalletPaymentLogDTO walletPaymentLogDto);
+        Task<List<WalletPaymentLogView>> GetWalletPaymentLogs(DateFilterCriteria baseFilter);
+        Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
     }
 }

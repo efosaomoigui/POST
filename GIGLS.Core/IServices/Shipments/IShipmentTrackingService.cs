@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,5 +19,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CheckShipmentTracking(string waybill, string status);
         Task<bool> SendEmailForAttemptedScanOfCancelledShipments(ScanDTO scan);
         Task<bool> AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus, MessageType messageType);
+        Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId);
+        Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType);
     }
 }

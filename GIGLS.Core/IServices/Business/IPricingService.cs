@@ -16,5 +16,8 @@ namespace GIGLS.Core.IServices.Business
         Task<decimal> GetMobileSpecialPrice(PricingDTO pricingDto);
         Task<decimal> GetCountryCurrencyRatio();
         Task<int> GetUserCountryId();
+        Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto);
+        Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto);
+        Task<decimal> GetEcommerceDropOffPrice(PricingDTO pricingDto);
     }
 }

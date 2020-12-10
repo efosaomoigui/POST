@@ -67,6 +67,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("transactions")]
+        public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactionCreditOrDebit(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTransactions = await _walletTransactionService.GetWalletTransactionCreditOrDebit(accountFilterCriteria);
+                return new ServiceResponse<List<WalletTransactionDTO>>
+                {
+                    Object = walletTransactions
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{walletTransactionId:int}")]
         public async Task<IServiceResponse<WalletTransactionDTO>> GetWalletTransactionById(int walletTransactionId)
@@ -105,11 +120,9 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var walletTransaction = await _walletTransactionService.AddWalletTransaction(newWalletTransaction);
                 await _walletTransactionService.AddWalletTransaction(newWalletTransaction);
                 return new ServiceResponse<object>
                 {
-                    //Object = walletTransaction
                     Object = true
                 };
             });

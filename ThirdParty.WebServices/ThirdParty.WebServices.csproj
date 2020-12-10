@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\GIGLS.Services\bin\Release\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -44,9 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddEntity.cs" />
+    <Compile Include="Business\IntlShipmentRequestDTL.cs" />
+    <Compile Include="Business\MagayaClasses.cs" />
     <Compile Include="Business\Serializer.cs" />
-    <Compile Include="Business\WarehouseReceiptClass.cs" />
+    <Compile Include="Business\Warehousereceipt.cs" />
     <Compile Include="Business\wh.cs" />
     <Compile Include="Connected Services\Magaya.Services\Reference.cs">
       <AutoGen>True</AutoGen>
@@ -269,7 +274,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="XML\commoditytypes.xml" />
+    <Content Include="XML\transactiontypes.xml" />
     <Content Include="XML\WarehouseReceipt.xml" />
+    <Content Include="XML\Locations.xml" />
     <Content Include="XSD\new_warehsrcpt.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

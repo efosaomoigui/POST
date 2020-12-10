@@ -12,6 +12,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Business;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -32,15 +33,23 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackService = shipmentTrackService;
 
         }
-
         
-
         public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {
             try
             {
                 //1. call agility core tracking
                 var shipmentTracking = await _shipmentTrackService.TrackShipmentForMobile(waybill);
+
+                //remove missing and not found status from customer history
+                if (shipmentTracking.Any())
+                {
+                    string smim = ShipmentScanStatus.SMIM.ToString();
+                    string fms = ShipmentScanStatus.FMS.ToString();
+                    string thirdparty = ShipmentScanStatus.THIRDPARTY.ToString();
+
+                    shipmentTracking = shipmentTracking.Where(x => !(x.Status == smim || x.Status == fms || x.Status == thirdparty));
+                }
 
                 //2. call mobile tracking
                 var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
@@ -182,7 +191,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentTracking = await _uow.MobileShipmentTracking.GetAsync(trackingId);
                 if (shipmentTracking == null || tracking.MobileShipmentTrackingId != trackingId)
                 {
-                    throw new GenericException("MobileShipmentTracking Not Exist");
+                    throw new GenericException("MobileShipmentTracking Not Exist", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 shipmentTracking.Location = shipmentTracking.Location;
                 shipmentTracking.TrackingType = shipmentTracking.TrackingType;

@@ -36,8 +36,11 @@ namespace GIGLS.Services.Implementation.Account
 
         public Task<object> AddExpenditure(GeneralLedgerDTO generalLedger)
         {
-            generalLedger.CreditDebitType = CreditDebitType.Debit;
-            generalLedger.PaymentServiceType = PaymentServiceType.Miscellaneous;
+            if(generalLedger != null)
+            {
+                generalLedger.CreditDebitType = CreditDebitType.Debit;
+                generalLedger.PaymentServiceType = PaymentServiceType.Miscellaneous;
+            }
             return _generalLedgerService.AddGeneralLedger(generalLedger);
         }
 
@@ -45,15 +48,18 @@ namespace GIGLS.Services.Implementation.Account
         {
             var expenditure = Mapper.Map<Expenditure>(expenditureDto);
 
-            if(expenditureDto.UserId == null)
+            if(expenditureDto != null)
             {
-                expenditure.UserId = await _userService.GetCurrentUserId();
-            }
+                if (expenditureDto.UserId == null)
+                {
+                    expenditure.UserId = await _userService.GetCurrentUserId();
+                }
 
-            if(expenditure.ServiceCentreId < 1)
-            {
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                expenditure.ServiceCentreId = serviceCenterIds[0];
+                if (expenditure.ServiceCentreId < 1)
+                {
+                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    expenditure.ServiceCentreId = serviceCenterIds[0];
+                }
             }
 
             _uow.Expenditure.Add(expenditure);
@@ -65,7 +71,7 @@ namespace GIGLS.Services.Implementation.Account
                 var departureCountry = await _uow.Country.GetCountryByServiceCentreId(expenditure.ServiceCentreId);
                 countryIdFromServiceCentreId = departureCountry.CountryId;
             }
-            catch (Exception) { }
+            catch (Exception) { throw; }
             ////--end--///Set the DepartureCountryId
 
             //Add record to general ledger

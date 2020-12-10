@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
 {
-    public class LGAService: ILGAService
+    public class LGAService : ILGAService
     {
         private readonly IUnitOfWork _uow;
 
@@ -26,12 +26,15 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
-                var lga = await _uow.LGA.GetAsync(x => x.LGAName.ToLower() == lgaDto.LGAName.ToLower() && x.LGAState.ToLower() == lgaDto.LGAState.ToLower());
+                var state = await GetState(lgaDto.StateId);
 
-                if(lga != null)
+                var lga = await _uow.LGA.GetAsync(x => x.LGAName.ToLower() == lgaDto.LGAName.ToLower() && x.StateId == lgaDto.StateId);
+
+                if (lga != null)
                 {
                     throw new GenericException("LGA Information already exists");
                 }
+                lgaDto.LGAState = state.StateName;
                 var newlga = Mapper.Map<LGA>(lgaDto);
                 _uow.LGA.Add(newlga);
                 await _uow.CompleteAsync();
@@ -42,7 +45,27 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
-        public async Task<LGADTO> GetLGAById (int lgaId)
+
+
+        private async Task<State> GetState(int stateId)
+        {
+            try
+            {
+                var state = await _uow.State.GetAsync(stateId);
+                if (state == null)
+                {
+                    throw new GenericException("State does not exist");
+                }
+
+                return state;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<LGADTO> GetLGAById(int lgaId)
         {
             try
             {
@@ -70,21 +93,24 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
+                var state = await GetState(lgaDto.StateId);
                 var lga = await _uow.LGA.GetAsync(lgaId);
 
                 //To check if the update already exists
-                var lgas = await _uow.LGA.ExistAsync(c =>c.LGAName.ToLower() == lgaDto.LGAName.ToLower() && c.LGAState.ToLower() == lgaDto.LGAState.ToLower());
+                var lgas = await _uow.LGA.ExistAsync(c => c.LGAName.ToLower() == lgaDto.LGAName.ToLower() && c.StateId == lgaDto.StateId);
                 if (lga == null || lgaDto.LGAId != lgaId)
                 {
                     throw new GenericException("LGA Information does not exist");
                 }
-                else if(lgas == true)
+                else if (lgas == true)
                 {
                     throw new GenericException("LGA Information already exists");
                 }
                 lga.LGAName = lgaDto.LGAName;
-                lga.LGAState = lgaDto.LGAState;
+                lga.LGAState = state.StateName;
+                lga.StateId = state.StateId;
                 lga.Status = lgaDto.Status;
+
                 _uow.Complete();
 
             }
@@ -136,6 +162,54 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 return await _uow.LGA.GetActiveLGAs();
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateHomeDeliveryLocation(int lgaId, bool status)
+        {
+            try
+            {
+                var location = await _uow.LGA.GetAsync(lgaId);
+                if (location == null)
+                {
+                    throw new GenericException("LGA Information does not exist");
+                }
+                location.HomeDeliveryStatus = status;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations()
+        {
+            try
+            {
+                return await _uow.LGA.GetActiveHomeDeliveryLocations();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LGADTO>> GetLGAByState(int stateId)
+        {
+            try
+            {
+                var lgas = new List<LGADTO>();
+                var items = _uow.LGA.GetAll().Where(x => x.StateId == stateId).ToList();
+                if (items.Any())
+                {
+                    lgas = Mapper.Map<List<LGADTO>>(items);
+                }
+                return lgas;
+            }
+            catch (Exception ex)
             {
                 throw;
             }

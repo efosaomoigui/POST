@@ -18,39 +18,11 @@ namespace GIGLS.WebApi.Providers
 {
     public class GiglsCustomOAuthProvider : OAuthAuthorizationServerProvider
     {
-        //private readonly string _publicClientId;
-
-        //Check to validate a client's credentials
         public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
-            //string clientId = string.Empty;
-            //string clientSecret = string.Empty;
-            //string symmetricKeyAsBase64 = string.Empty;
-
-            //if (!context.TryGetBasicCredentials(out clientId, out clientSecret))
-            //{
-            //    context.TryGetFormCredentials(out clientId, out clientSecret);
-            //}
-
-            //if (context.ClientId == null)
-            //{
-            //    context.SetError("invalid_clientId", "client_Id is not set");
-            //    return Task.FromResult<object>(null);
-            //}
-
-            //var audience = AudiencesStore.FindAudience(context.ClientId);//user our CRUD here
-
-            //if (audience == null)
-            //{
-            //    context.SetError("invalid_clientId", string.Format("Invalid client_id '{0}'", context.ClientId));
-            //    return Task.FromResult<object>(null);
-            //}
-
             context.Validated();
             return Task.FromResult<object>(null);
-
         }
-
 
         private static ClaimsIdentity SetClaimsIdentity(OAuthGrantResourceOwnerCredentialsContext context, User user)
         {
@@ -62,9 +34,6 @@ namespace GIGLS.WebApi.Providers
             var resultClaimList = _repo._userManager.GetClaimsAsync(user.Id).Result;
             identity.AddClaims(resultClaimList);
 
-            //var userRoles = context.OwinContext.Get<ApplicationUserManager>().GetRoles(user.Id);
-            //var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
-
             var UserR = _repo._userManager.GetRolesAsync(user.Id).Result;
 
             foreach (var role in UserR)
@@ -73,9 +42,7 @@ namespace GIGLS.WebApi.Providers
             }
 
             return identity;
-
         }
-
 
         //Check to validate a user's credentials
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
@@ -118,11 +85,7 @@ namespace GIGLS.WebApi.Providers
                 if (user == null)
                 {
                     context.SetError("invalid_user", "The user name or password is incorrect.");
-                    //context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user name or password is incorrect!" }));
                     context.Response.Headers.Add("AuthorizationResponse", new[] { "wronguser" });
-                    //Add your flag to the header of the response
-                    //context.Response.Headers.Add(ServerGlobalVariables.OwinChallengeFlag, new[] { ((int)HttpStatusCode.Unauthorized).ToString() });
-
                     return;
                 }
 
@@ -131,22 +94,33 @@ namespace GIGLS.WebApi.Providers
                     if (user.SystemUserId == null)
                     {
                         context.SetError("invalid_access", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user has not been assigned a role!" }));
-                        //context.SetError("invalid_grant", "The user has not been assigned a role.");
                         return;
                     }
                 }
-
-
-                //if (!user.LockoutEnabled) 
-                //{
-                //    context.SetError("invalid_grant", "Your account is locked!");
-                //    return;
-                //}
 
                 if (!user.IsActive)
                 {
                     context.SetError("deactivated", "Your account has not been activated!");
                     return;
+                }
+
+                //differentiate expire toke time
+                if(user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
+                {
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                }
+
+                if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                }
+
+                if(user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                {
+                    var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                    user.Organisation = ecommerce.Name;
+                    user.FirstName = ecommerce.Name;
+                    user.LastName = ecommerce.Name;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -166,15 +140,17 @@ namespace GIGLS.WebApi.Providers
                     { "Organization", user.Organisation},
                     { "Organisation", user.Organisation},
                     { "UserChannelCode", user.UserChannelCode},
-                    { "PictureUrl", user.PictureUrl}
+                    { "PictureUrl", user.PictureUrl},
+                    { "IsMagaya", user.IsMagaya.ToString()},
+                    { "IsInternational", user.IsInternational.ToString()}
                 };
 
                 //get claims for the user
-                var claimsStringArray = "";
+                string claimsStringArray = string.Empty;
 
-                foreach (var claim in user.Claims)
+                if (user.Claims.Any())
                 {
-                    claimsStringArray += claim.ClaimValue + ",";
+                    claimsStringArray = string.Join(",", user.Claims.Select(x => x.ClaimValue));
                 }
 
                 authPropDictionary.Add("Claim", claimsStringArray);
@@ -182,11 +158,12 @@ namespace GIGLS.WebApi.Providers
                 //get roles for the user
                 var roleIds = from ur in user.Roles select ur.RoleId;
                 var roles = _repo._roleManager.Roles.Where(s => roleIds.Contains(s.Id));
-                var rolesStringArray = "";
 
-                foreach (var role in roles)
+                string rolesStringArray = string.Empty;
+
+                if (roles.Any())
                 {
-                    rolesStringArray += role.Name + ",";
+                    rolesStringArray = string.Join(",", roles.Select(x => x.Name));
                 }
 
                 authPropDictionary.Add("Role", rolesStringArray);
@@ -206,21 +183,18 @@ namespace GIGLS.WebApi.Providers
                             Email = user.Email
                         });
                 }
-
             }
         }
 
 
         public override Task TokenEndpoint(OAuthTokenEndpointContext context)
         {
-
             foreach (KeyValuePair<string, string> property in context.Properties.Dictionary)
             {
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);
             }
 
             return Task.FromResult<object>(null);
-
         }
     }
 }

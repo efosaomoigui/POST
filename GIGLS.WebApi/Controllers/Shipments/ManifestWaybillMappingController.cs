@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.IServices.Business;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -151,6 +152,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("pickupmanifest/{manifest}")]
+        public async Task<IServiceResponse<PickupManifestDTO>> GetPickupManifestDetails(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _service.GetPickupManifest(manifest);
+
+                return new ServiceResponse<PickupManifestDTO>
+                {
+                    Object = waybillNumbersIPickupManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
         public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
         {
@@ -184,12 +201,44 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("manifestforwaybillaccounts/{waybill}")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestForWaybillForAccounts(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestDTO = await _service.GetManifestForWaybillForAccounts(waybill);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = manifestDTO
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("activemanifestforwaybill/{waybill}")]
         public async Task<IServiceResponse<ManifestWaybillMappingDTO>> GetActiveManifestForWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestDTO = await _service.GetActiveManifestForWaybill(waybill);
+
+                return new ServiceResponse<ManifestWaybillMappingDTO>
+                {
+                    Object = manifestDTO
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("activemanifestforwaybillaccounts/{waybill}")]
+        public async Task<IServiceResponse<ManifestWaybillMappingDTO>> GetActiveManifestForWaybillAccounts(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestDTO = await _service.GetActiveManifestForWaybillAccounts(waybill);
 
                 return new ServiceResponse<ManifestWaybillMappingDTO>
                 {
@@ -261,6 +310,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedwaybillforpickupmanifest/{stationId:int}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest([FromUri]FilterOptionsDto filterOptionsDto, int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(filterOptionsDto,stationId);
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = unMappedWaybill.Item1,
+                    Total = unMappedWaybill.Item2
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("signoff/{manifestCode}")]
@@ -305,6 +371,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<ManifestWaybillMappingDTO>>
                 {
                     Object = manifestDTO
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("deliverywaybillinmanifestbydate")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetAllCODShipmentOnDeliveryManifestl(dateFilterCriteria);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings
                 };
             });
         }

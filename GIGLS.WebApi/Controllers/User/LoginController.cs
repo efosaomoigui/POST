@@ -42,7 +42,6 @@ namespace GIGLS.WebApi.Controllers.User
             {
                 using (var client = new HttpClient())
                 {
-
                     //setup client
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();
@@ -63,7 +62,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                     //setup login data
 
-                    HttpResponseMessage responseMessage = client.PostAsync("Token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("Token", formContent);
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);

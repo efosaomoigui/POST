@@ -37,9 +37,10 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
-        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners()
+
+        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners(string fleetCode)
         {
-            var partners = await _uow.Partner.GetVerifiedPartnersAsync();
+            var partners = await _uow.Partner.GetVerifiedPartnersAsync(fleetCode);
             return partners;
         }
 
@@ -68,12 +69,38 @@ namespace GIGLS.Services.Implementation.Partnership
             return await Task.FromResult(partnerDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-
-
         public async Task<PartnerDTO> GetPartnerById(int partnerId)
         {
-            var partnerDto = new PartnerDTO();
             var partner = await _uow.Partner.GetAsync(partnerId);
+
+            if (partner == null)
+            {
+                throw new GenericException("PARTNER_NOT_EXIST");
+            }
+            else
+            {
+                PartnerDTO partnerDto = Mapper.Map<PartnerDTO>(partner);
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                if (wallet != null)
+                {
+                    partnerDto.WalletBalance = wallet.Balance;
+                    partnerDto.WalletId = wallet.WalletId;
+                }
+
+                var country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
+                if (country != null)
+                {
+                    partnerDto.CurrencySymbol = country.CurrencySymbol;
+
+                }
+                return partnerDto;
+            }
+        }
+
+        public async Task<PartnerDTO> GetPartnerByCode(string partnerCode)
+        {
+            var partnerDto = new PartnerDTO();
+            var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
 
             if (partner == null)
             {
@@ -92,7 +119,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 if (Country != null)
                 {
                     partnerDto.CurrencySymbol = Country.CurrencySymbol;
-                   
+
                 }
             }
             return partnerDto;
@@ -147,6 +174,7 @@ namespace GIGLS.Services.Implementation.Partnership
             _uow.Partner.Remove(existingPartner);
             await _uow.CompleteAsync();
         }
+
         public async Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners()
         {
             var partners = await _uow.Partner.GetExternalPartnersAsync();

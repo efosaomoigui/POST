@@ -52,14 +52,14 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-        //process payment for vodafone
         [HttpGet]
         [Route("processpayment/{waybill}/{pin}")]
-        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidateWaybillForVodafoneMobilePayment([FromUri]  string waybill, [FromUri]  string pin)
+        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidatePaymentUsingOTP([FromUri]  string waybill, [FromUri]  string pin)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill, pin);
+                //var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill, pin);
+                var result = await _waybillPaymentLogService.VerifyAndValidatePaymentUsingOTP(waybill, pin);
 
                 return new ServiceResponse<PaystackWebhookDTO>
                 {
@@ -77,6 +77,20 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 var result = await _waybillPaymentLogService.GetWaybillPaymentLogListByWaybill(waybill);
 
                 return new ServiceResponse<List<WaybillPaymentLogDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("gatewaycode")]
+        public async Task<IServiceResponse<GatewayCodeResponse>> GetGatewayCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.GetGatewayCode();
+                return new ServiceResponse<GatewayCodeResponse>
                 {
                     Object = result
                 };

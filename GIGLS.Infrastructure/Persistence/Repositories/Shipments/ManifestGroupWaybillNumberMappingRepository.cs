@@ -7,6 +7,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
+using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -18,16 +20,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             _context = context;
         }
-        
+
         public async Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds)
         {
             var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.IsDeleted == false).AsQueryable();
-            
+
             if (serviceCentreIds.Length > 0)
             {
                 var serviceCentreGroupWaybills = _context.GroupWaybillNumberMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
                     Select(s => s.GroupWaybillNumber).AsQueryable();
-                
+
                 //manifestGroupwaybillMapping = manifestGroupwaybillMapping.Where(s => serviceCentreGroupWaybills.Contains(s.GroupWaybillNumber));
                 manifestGroupwaybillMapping = manifestGroupwaybillMapping.Where(s => serviceCentreGroupWaybills.Any(y => s.GroupWaybillNumber == y));
             }
@@ -65,7 +67,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public async Task<ManifestGroupWaybillNumberMappingDTO> GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(string groupWaybill)
         {
             var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
-            
+
             var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
                                                  select new ManifestGroupWaybillNumberMappingDTO
                                                  {
@@ -114,6 +116,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
 
             var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
+                                                 join s in _context.Manifest on mgw.ManifestCode equals s.ManifestCode
+                                                 where s.HasSuperManifest == false
                                                  select new ManifestGroupWaybillNumberMappingDTO
                                                  {
                                                      ManifestGroupWaybillNumberMappingId = mgw.ManifestGroupWaybillNumberMappingId,
@@ -135,6 +139,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          DateTime = p.DateTime,
                                                          IsDispatched = p.IsDispatched,
                                                          IsReceived = p.IsReceived,
+                                                         HasSuperManifest = p.HasSuperManifest,
+                                                         SuperManifestCode = p.SuperManifestCode,
+                                                         SuperManifestStatus = p.SuperManifestStatus,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                          ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
                                                      }).FirstOrDefault()
@@ -142,5 +149,80 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
+
+        public async Task<List<MovementManifestNumberDTO>> GetManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var movementManifestNumber = Context.MovementManifestNumber.Where(s => s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+            if (serviceCentreIds.Length > 0)
+            {
+                var serviceCentreMovementManifests = _context.MovementManifestNumber.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                    Select(s => s.MovementManifestCode).AsQueryable();
+
+                movementManifestNumber = movementManifestNumber.Where(s => serviceCentreMovementManifests.Contains(s.MovementManifestCode));
+            }
+
+            var movementManifestNumberVals = movementManifestNumber.ToList();
+            var allServiceCenters = _context.ServiceCentre.AsQueryable();
+
+            var movementManifestNumberDto = from mgw in movementManifestNumber
+                                            select new MovementManifestNumberDTO
+                                            {
+                                                MovementManifestNumberId = mgw.MovementManifestNumberId,
+                                                MovementManifestCode = mgw.MovementManifestCode,
+                                                DateCreated = mgw.DateCreated,
+                                                DateModified = mgw.DateModified,
+                                                IsDeleted = mgw.IsDeleted,
+                                                RowVersion = mgw.RowVersion, 
+                                                MovementStatus = mgw.MovementStatus,
+                                                DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
+
+        }; 
+
+            return movementManifestNumberDto.ToList();
+        }
+
+        public async Task<List<ManifestDTO>> GetManifestSuperManifestMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var manifestSuperManifestMapping = Context.Manifest.Where(s => s.IsDeleted == false && s.HasSuperManifest == true && s.DateModified >= startDate && s.DateModified < endDate).AsQueryable();
+
+            if (serviceCentreIds.Length > 0)
+            {
+                var serviceCentreManifests = _context.Manifest.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                    Select(s => s.ManifestCode).AsQueryable();
+
+                manifestSuperManifestMapping = manifestSuperManifestMapping.Where(s => serviceCentreManifests.Contains(s.ManifestCode));
+            }
+
+            var manifestSuperManifestMappingDTO = from mgw in manifestSuperManifestMapping
+                                                  select new ManifestDTO
+                                                  {
+                                                      ManifestCode = mgw.ManifestCode,
+                                                      SuperManifestCode = mgw.SuperManifestCode,
+                                                      SuperManifestStatus = mgw.SuperManifestStatus,
+                                                      ManifestType = mgw.ManifestType,
+                                                      DateCreated = mgw.DateCreated,
+                                                      DateModified = mgw.DateModified,
+                                                      IsDeleted = mgw.IsDeleted,
+                                                      RowVersion = mgw.RowVersion,
+                                                      IsDispatched = mgw.IsDispatched,
+                                                      IsReceived = mgw.IsReceived,
+                                                      DispatchedBy = Context.Users.Where(d => d.Id == mgw.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                      ReceiverBy = Context.Users.Where(r => r.Id == mgw.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                  };
+
+            return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
+        }
+
     }
 }

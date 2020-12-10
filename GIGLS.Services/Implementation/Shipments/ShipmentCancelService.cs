@@ -9,6 +9,9 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Report;
 using System;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,12 +20,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IShipmentService _shipmentService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public ShipmentCancelService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService)
+        public ShipmentCancelService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
             _shipmentService = shipmentService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -48,7 +53,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill {waybill} has been collected, it can not be cancel");
             }
 
-
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
             if (shipment == null)
@@ -59,7 +63,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
 
-            //Allow Chairman, Director and Administrator to cancelled waybill
+            //Allow Chairman, Director or Administrator to cancelled waybill
             bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
 
             if (hasAdminRole)
@@ -99,10 +103,49 @@ namespace GIGLS.Services.Implementation.Shipments
 
             _uow.ShipmentCancel.Add(newCancel);
 
+            //get the payment status of the shipment
+            var getPaidInvoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill && s.PaymentStatus == PaymentStatus.Paid);
+
             //cancel shipment from the shipment service
             var boolResult = await _shipmentService.CancelShipment(shipment.Waybill);
 
-            await _uow.CompleteAsync();
+            if (boolResult)
+            {
+                //remove report
+                var report = await _uow.FinancialReport.GetAsync(x => x.Waybill == shipment.Waybill);
+                if (report != null)
+                {
+                    report.IsDeleted = true;
+                }
+
+                await _uow.CompleteAsync();
+
+                //send message if payment has been done on the waybill
+                if (getPaidInvoice != null)
+                {
+                    string customertype = shipment.CustomerType;
+
+                    //get CustomerDetails
+                    if (customertype.Contains("Individual"))
+                    {
+                        customertype = CustomerType.IndividualCustomer.ToString();
+                    }
+                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), customertype);
+                    var customer = await _shipmentService.GetCustomer(shipment.CustomerId, customerType);
+
+                    var cancelMessage = new ShipmentCancelMessageDTO
+                    {
+                        Reason = cancelReason,
+                        WaybillNumber = shipment.Waybill,
+                        SenderEmail = customer.Email,
+                        SenderPhoneNumber = customer.PhoneNumber,
+                        SenderName = customer.CustomerName
+                    };
+
+                    //send message
+                    await _messageSenderService.SendMessage(MessageType.SSC, EmailSmsType.All, cancelMessage);
+                }               
+            }
             return new { waybill = newCancel.Waybill };
         }
 

@@ -16,6 +16,11 @@
         BankProcessingOrderForCOD = 12, 
         BankProcessingOrderForDemurrage = 13,
         PayOutOrder = 14,
-        FleetPartner = 15
+        FleetPartner = 15,
+        MagayaWb = 16,
+        PreShipmentCode = 17,
+        SuperManifest = 18,
+        RequestNumber = 19, 
+        MovementManifestNumber = 111
     }
 }

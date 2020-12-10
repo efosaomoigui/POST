@@ -22,6 +22,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsActive { get; set; }
         public int StationId { get; set; }
         public string StationName { get; set; }
+        public int SupperServiceCentreId { get; set; } 
         public string StationCode { get; set; }
         public int CountryId { get; set; }
         public string Country { get; set; }
@@ -35,6 +36,8 @@ namespace GIGLS.Core.DTO.ServiceCentres
 
         public double? Longitude { get; set; }
         public bool IsHUB { get; set; }
+        public string FormattedServiceCentreName { get; set; }
         public CountryDTO CountryDTO { get; set; }
+        public bool IsPublic { get; set; }
     }
 }

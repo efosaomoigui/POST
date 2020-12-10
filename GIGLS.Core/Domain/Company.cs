@@ -54,5 +54,21 @@ namespace GIGL.GIGLS.Core.Domain
         //added this for Giglgo customers
         public decimal? WalletAmount { get; set; }
         public bool? IsEligible { get; set; }
+
+        [MaxLength(500)]
+        public string AccountName { get; set; }
+
+        [MaxLength(100)]
+        public string AccountNumber { get; set; }
+        public string ProductType { get; set; }
+
+        [MaxLength(100)]
+        public string BankName { get; set; }
+        public Rank Rank { get; set; }
+        public string BVN { get; set; }
+        public string IdentificationNumber { get; set; }
+        public string IdentificationImageUrl { get; set; }
+        public IdentificationType IdentificationType { get; set; }
+        public bool IsInternational { get; set; }
     }
 }

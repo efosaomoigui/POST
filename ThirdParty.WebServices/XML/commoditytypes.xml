@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Description>
+  <DescriptionType>
+    <itemNo>2</itemNo>
+    <description>AUTO PART</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>3</itemNo>
+    <description>BABY ITEMS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>4</itemNo>
+    <description>BAG</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>5</itemNo>
+    <description>BEAUTY SUPPLY</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>6</itemNo>
+    <description>CBD OIL</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>7</itemNo>
+    <description>CHILDREN CLOTHES</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>8</itemNo>
+    <description>CLOTHES</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>9</itemNo>
+    <description>COMPUTER</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>10</itemNo>
+    <description>DIAPERS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>11</itemNo>
+    <description>DRONE CAMERA</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>12</itemNo>
+    <description>ELECTRONIC ITEM</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>13</itemNo>
+    <description>HOUSEHOLD ITEMS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>14</itemNo>
+    <description>MEDICATIONS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>15</itemNo>
+    <description>NEW LAPTOP</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>16</itemNo>
+    <description>PERSONAL EFFECTS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>17</itemNo>
+    <description>SHOES</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>18</itemNo>
+    <description>SUPPLEMENTS</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>19</itemNo>
+    <description>USED CELL PHONE</description>
+  </DescriptionType>
+  <DescriptionType>
+    <itemNo>20</itemNo>
+    <description>USED LAPTOPS</description>
+  </DescriptionType>
+</Description>

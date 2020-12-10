@@ -18,6 +18,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
+using System.Net;
 
 namespace GIGLS.Services.Implementation
 {
@@ -92,12 +93,12 @@ namespace GIGLS.Services.Implementation
             otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
 
             //get the otp details using the email 
-            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress.ToLower() == otp.EmailAddress.ToLower() || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress == otp.EmailAddress || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
             var otpbody = result.LastOrDefault();
 
             if (otpbody == null)
             {
-                throw new GenericException("Invalid OTP");
+                throw new GenericException("Invalid OTP", $"{(int)HttpStatusCode.Forbidden}");
             }
             else
             {
@@ -122,7 +123,7 @@ namespace GIGLS.Services.Implementation
                 {
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
-                    throw new GenericException("OTP has expired!.Kindly Resend OTP.");
+                    throw new GenericException("OTP has expired!.Kindly Resend OTP.", $"{(int)HttpStatusCode.Forbidden}");
                 }
             }
         }
@@ -219,6 +220,21 @@ namespace GIGLS.Services.Implementation
                 throw;
             }
         }
+
+        //Check Details for Fast Track Agent App  
+        public async Task<UserDTO> CheckDetailsForAgentApp(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForAgentApp(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
@@ -275,21 +291,28 @@ namespace GIGLS.Services.Implementation
                 if (VehicleType != null)
                 {
                     registerUser.VehicleLicenseExpiryDate = VehicleType.VehicleLicenseExpiryDate;
+
                     if (VehicleType.VehicleType != null)
                     {
-                        var vehicletypeDTO = new VehicleTypeDTO
+                        var vehicleList = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
+                        var vehicleTypeArray = vehicleList.Select(x => x.Vehicletype).ToList();
+
+                        if (!vehicleTypeArray.Contains(VehicleType.VehicleType))
                         {
-                            Partnercode = registerUser.UserChannelCode,
-                            Vehicletype = VehicleType.VehicleType,
-                        };
-                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
-                        _uow.VehicleType.Add(vehicletype);
-                        VehicleType.VehicleType = null;
-                        await _uow.CompleteAsync();
+                            var vehicletypeDTO = new VehicleTypeDTO
+                            {
+                                Partnercode = registerUser.UserChannelCode,
+                                Vehicletype = VehicleType.VehicleType,
+                            };
+                            var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                            _uow.VehicleType.Add(vehicletype);
+                            VehicleType.VehicleType = null;
+                            await _uow.CompleteAsync();
+                        }
                     }
 
                     var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
-                    if (vehicle.Count() > 0)
+                    if (vehicle.Any())
                     {
                         registerUser.VehicleDetails = new List<VehicleTypeDTO>();
                         registerUser.VehicleType = new List<string>();
@@ -315,7 +338,6 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-
                 registerUser.AverageRatings = averageratings;
                 return registerUser;
             }
@@ -357,33 +379,41 @@ namespace GIGLS.Services.Implementation
                 var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
                 if (referrercode != null)
                 {
-                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
-                    var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
-                    if (wallet != null)
-                    {
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                    }
-                    var transaction = new WalletTransactionDTO
-                    {
-                        WalletId = wallet.WalletId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        Amount = Convert.ToDecimal(bonus.Value),
-                        ServiceCentreId = 296,
-                        Waybill = "",
-                        Description = "Referral Bonus",
-                        PaymentType = PaymentType.Online,
-                        UserId = ReferrerUser.Id
-                    };
-                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
-                    await _uow.CompleteAsync();
-                    var messageExtensionDTO = new MobileMessageDTO()
-                    {
-                        SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
-                        SenderEmail = ReferrerUser.Email
+                    var bonus = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ReferrerCodeBonus.ToString() && s.CountryId == User.UserActiveCountryId);
 
-                    };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    if(bonus != null)
+                    {
+                        decimal bonusAmount = Convert.ToDecimal(bonus.Value);
+
+                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
+                        if (wallet != null)
+                        {
+                            wallet.Balance = wallet.Balance + bonusAmount;
+                        }
+
+                        var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
+                        var transaction = new WalletTransactionDTO
+                        {
+                            WalletId = wallet.WalletId,
+                            CreditDebitType = CreditDebitType.Credit,
+                            Amount = bonusAmount,
+                            ServiceCentreId = 296,
+                            Waybill = "",
+                            Description = "Referral Bonus",
+                            PaymentType = PaymentType.Online,
+                            UserId = ReferrerUser.Id
+                        };
+                        var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                        await _uow.CompleteAsync();
+
+                        var messageExtensionDTO = new MobileMessageDTO()
+                        {
+                            SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
+                            SenderEmail = ReferrerUser.Email
+
+                        };
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    }                   
                 }
             }
 

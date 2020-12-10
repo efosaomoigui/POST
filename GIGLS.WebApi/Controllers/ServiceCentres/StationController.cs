@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres
 {
@@ -132,6 +133,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{stationId:int}/giggostatus/{status}")]
+        public async Task<IServiceResponse<object>> UpdateGIGGoStationStatus(int stationId, bool status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _stationService.UpdateGIGGoStationStatus(stationId, status);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{stationId:int}")]
@@ -143,6 +159,36 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("giggostations")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetActiveGIGGoStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetActiveGIGGoStations();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{stationId:int}/giggostation")]
+        public async Task<IServiceResponse<GiglgoStationDTO>> GetGIGGoStationById(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var station = await _stationService.GetGIGGoStationById(stationId);
+                return new ServiceResponse<GiglgoStationDTO>
+                {
+                    Object = station
                 };
             });
         }

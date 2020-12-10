@@ -12,6 +12,7 @@ namespace GIGLS.Core.IRepositories.User
     public interface IUserRepository : IAuthRepository<GIGL.GIGLS.Core.Domain.User> //where TEntity:class
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email);
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
@@ -54,5 +55,9 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
+        Task<bool> IsCustomerHasAgentRole(string userId);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForAgentApp(string emailPhoneCode);
+        Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsers(string[] ids);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByCompanyName(string name);
     }
 }

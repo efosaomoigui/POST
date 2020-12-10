@@ -5,13 +5,17 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
@@ -21,7 +25,6 @@ using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.CustomerPortal
@@ -52,12 +55,14 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+        Task<IdentityResult> ChangePassword(ChangePasswordDTO passwordDTO);
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
+        Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
-        Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
-        Task<PreShipmentDTO> GetPreShipment(string waybill);
+        //Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
+        //Task<PreShipmentDTO> GetPreShipment(string waybill);
         Task<UserDTO> Register(UserDTO user);
         Task<SignResponseDTO> SignUp(UserDTO user);
         Task<SignResponseDTO> ResendOTP(UserDTO user);
@@ -103,7 +108,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
+        Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<WalletDTO> GetWalletBalance();
         Task<SpecialResultDTO> GetSpecialPackages();
@@ -122,6 +129,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task AddWallet(WalletDTO wallet);
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
         Task<string> Decrypt();
+        Task<string> EncryptWebsiteKey();
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
         Task SendPickUpRequestMessage(string userId);
@@ -135,5 +143,61 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode);
+
+        Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
+        Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
+        Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
+        Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<PreShipmentDTO> GetDropOffDetail(string tempCode);
+        Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
+        Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest);
+        Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickupRequest);
+        Task<List<LocationDTO>> GetPresentDayShipmentLocations();
+        Task<ShipmentDetailDanfoDTO> GetShipmentDetailForDanfo(string waybill);
+        Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
+        Task<UserDTO> CheckDetailsForAgentApp(string user);
+        Task<PreShipmentMobileThirdPartyDTO> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
+        Task<GatewayCodeResponse> GetGatewayCode();
+        Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
+        Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
+        Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
+        Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
+        Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
+        Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
+        Task<WalletDTO> GetWalletBalanceWithName();
+        Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
+        Task<bool> PayForShipment(string waybill);
+        Task<bool> VerifyDeliveryCode(MobileShipmentNumberDTO detail);
+        Task<bool> DeleteDropOff(string waybill);
+        Task<IEnumerable<NewCountryDTO>> GetActiveCountries();
+        Task<IEnumerable<StationDTO>> GetStationsByCountry(int countryId);
+        Task<bool> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
+        Task<object> GetUserCountryCode(UserDTO user);
+        Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
+        Task<bool> ChangeShipmentOwnershipForPartner(PartnerReAssignmentDTO request);
+        Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentsAndShipmentsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
+        Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
+        Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
+
+        Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
+        Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
+        Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile);
+        Task<List<StoreDTO>> GetStoresByCountry(int countryId);
+        Task<object> CreateNotification(NotificationDTO notificationDTO);
+        Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
+        Task UpdateNotificationAsRead(int notificationId);
+        Task<MessageDTO> GetIntlMessageForApp();
+        Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
+        Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
+        Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
+        Task<bool> SendMessage(NewMessageDTO obj);
+        Task<UserDTO> GetUserByEmail(string email);
+        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
     }
 }

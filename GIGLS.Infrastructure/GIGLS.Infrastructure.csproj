@@ -49,12 +49,13 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="LinqKit, Version=1.1.17.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
+      <HintPath>..\packages\LinqKit.1.1.17\lib\net45\LinqKit.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
@@ -89,6 +90,9 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Linq.Dynamic.Core, Version=1.2.2.0, Culture=neutral, PublicKeyToken=0f07ec44de6ac832, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Linq.Dynamic.Core.1.2.2\lib\net45\System.Linq.Dynamic.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
@@ -116,6 +120,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
     <Compile Include="Persistence\GIGLSContextForView.cs" />
+    <Compile Include="Persistence\Repositories\Account\FinancialReportRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\GeneralLedgerRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InsuranceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
@@ -132,6 +137,7 @@
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
+    <Compile Include="Persistence\Repositories\Customers\EcommerceAgreementRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryLocationRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryNumberRepository.cs" />
@@ -157,6 +163,7 @@
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />
+    <Compile Include="Persistence\Repositories\Magaya\MagayaShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\MessageRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\EmailSendLogRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\SmsSendLogRepository.cs" />
@@ -174,6 +181,7 @@
     <Compile Include="Persistence\Repositories\Partnership\VehicleTypeRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\QueryFluent.cs" />
     <Compile Include="Persistence\Repositories\ReferrerCodeRepository.cs" />
     <Compile Include="Persistence\Repositories\Repository.cs" />
     <Compile Include="Persistence\Repositories\RiderDeliveryRepository.cs" />
@@ -204,6 +212,9 @@
     <Compile Include="Persistence\Repositories\Shipments\ManifestVisitMonitoringRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentMobileRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactHistoryRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentTimeMonitorRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentContactRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
@@ -212,6 +223,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentPackagePriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Magaya\MagayaShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRerouteRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentReturnRepository.cs" />
@@ -224,10 +236,13 @@
     <Compile Include="Persistence\Repositories\Stocks\StockRequestPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockSupplyDetailsRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ShipmentPackagingTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\Stores\ServiceCenterPackageRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
     <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />
+    <Compile Include="Persistence\Repositories\Utility\QRAndBarcodeRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\GlobalPropertyRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\NumberGeneratorMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
@@ -257,6 +272,9 @@
     <Compile Include="SoftDeleteHandler\SoftDeleteQueryVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>

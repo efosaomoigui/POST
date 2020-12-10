@@ -1,8 +1,10 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
+﻿using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -17,12 +19,10 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletPaymentLogController : BaseWebApiController
     {
         private readonly IWalletPaymentLogService _walletPaymentLogService;
-        private readonly IPaystackPaymentService _paymentService;
 
-        public WalletPaymentLogController(IWalletPaymentLogService walletPaymentLogService, IPaystackPaymentService paymentService) : base(nameof(WalletPaymentLogController))
+        public WalletPaymentLogController(IWalletPaymentLogService walletPaymentLogService) : base(nameof(WalletPaymentLogController))
         {
             _walletPaymentLogService = walletPaymentLogService;
-            _paymentService = paymentService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -105,14 +105,13 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-
         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet([FromUri]  string referenceCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
+                var result = await _walletPaymentLogService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
                 {
@@ -120,5 +119,36 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
+
+        [HttpPost]
+        [Route("walletlogs")]
+        public async Task<IServiceResponse<List<WalletPaymentLogView>>> GetWalletPaymentLogFilter(DateFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletPaymentLogService.GetWalletPaymentLogs(filterCriteria);
+
+                return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("searchwalletlogs")]
+        public async Task<IServiceResponse<List<WalletPaymentLogView>>> GetWalletPaymentLogFilter(CompanySearchDTO searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletPaymentLogService.GetFromWalletPaymentLogViewBySearchParameter(searchDTO.searchItem);
+
+                return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

@@ -6,6 +6,7 @@ namespace GIGLS.Core.DTO.Report
     {
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? ActiveCountryId { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database
@@ -22,7 +23,7 @@ namespace GIGLS.Core.DTO.Report
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                var threeMonthAgo = DateTime.Now.AddMonths(-3);  //Three (3) Months ago
+                var threeMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
                 startDate = new DateTime(threeMonthAgo.Year, threeMonthAgo.Month, 1);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
@@ -62,6 +63,5 @@ namespace GIGLS.Core.DTO.Report
             return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(1));
         }
 
-        public int? ActiveCountryId { get; set; }
     }
 }

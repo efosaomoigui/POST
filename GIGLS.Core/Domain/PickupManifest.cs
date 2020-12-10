@@ -31,8 +31,10 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsReceived { get; set; }
         public int ServiceCentreId { get; set; }
         public ManifestType ManifestType { get; set; }
+        public ManifestStatus ManifestStatus { get; set; }
 
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public bool Picked { get; set; }
     }
 }

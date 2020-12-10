@@ -10,12 +10,14 @@ using AutoMapper;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO;
 using System.Linq;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Utility
 {
     public class GlobalPropertyService : IGlobalPropertyService
     {
         private readonly IUnitOfWork _uow;
+
         public GlobalPropertyService(IUnitOfWork uow)
         {
             _uow = uow;
@@ -28,7 +30,7 @@ namespace GIGLS.Services.Implementation.Utility
             {
                 if (await _uow.GlobalProperty.ExistAsync(c => c.Key == globalProperty.Key && c.CountryId == globalProperty.CountryId))
                 {
-                    throw new GenericException("Information already exist");
+                    throw new GenericException("Global Property Information Already Exist", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var newGlobal = new GlobalProperty
@@ -73,7 +75,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information does not exist");
+                    throw new GenericException("Global Property Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
@@ -98,7 +100,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information does not exist");
+                    throw new GenericException("Global Property Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
                 _uow.GlobalProperty.Remove(global);
                 _uow.Complete();
@@ -116,7 +118,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null || globalProperty.GlobalPropertyId != globalPropertyId)
                 {
-                    throw new GenericException("Information does not exist");
+                    throw new GenericException("Global Property Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 global.Key = globalProperty.Key;
@@ -140,7 +142,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information does not exist");
+                    throw new GenericException("Global Property Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 global.IsActive = status;
@@ -156,14 +158,31 @@ namespace GIGLS.Services.Implementation.Utility
         {
             try
             {
-                var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString()
-                    && s.CountryId == countryId);
+                var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString() && s.CountryId == countryId);
+                if (global == null)
+                {
+                    throw new GenericException($"Global Property '{globalPropertyType}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
                 return await Task.FromResult(globalDTo);
             }
             catch (Exception)
             {
-                throw new GenericException($"Global Property '{globalPropertyType.ToString()}' does not exist");
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetDropOffDiscountInGlobalProperty(int countryId)
+        {
+            try
+            {
+                var discountPercent = await GetGlobalProperty(GlobalPropertyType.GIGGODropOffDiscount, countryId);
+                decimal discount = Convert.ToDecimal(discountPercent.Value);
+                return discount;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

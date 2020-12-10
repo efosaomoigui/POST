@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
@@ -11,20 +12,22 @@ using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ThirdParty.WebServices;
+using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.DTO;
+using ThirdParty.WebServices.Magaya.Services;
 
 namespace GIGLS.Core.IServices.Shipments
 {
     public interface IShipmentService : IServiceDependencyMarker
     {
-        Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto);
-        Task<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<ShipmentDTO>, int>> GetShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds);
         Task<ShipmentDTO> GetShipment(int shipmentId);
         Task<ShipmentDTO> GetShipment(string waybill);
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<ShipmentDTO> AddShipment(ShipmentDTO shipment);
+        Task<ShipmentDTO> AddShipmentForPaymentWaiver(ShipmentDTO shipmentDTO);
         Task UpdateShipment(int shipmentId, ShipmentDTO shipment);
         Task UpdateShipment(string waybill, ShipmentDTO shipment);
         Task DeleteShipment(int shipmentId);
@@ -59,6 +62,22 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
         Task<bool> ScanShipment(ScanDTO scan);
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
+        Task<PreShipmentDTO> GetTempShipment(string code);
+        Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresForSuperManifest();
+        Task<List<ManifestDTO>> GetUnmappedManifestForServiceCentre(ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
+        Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlTransactionShipments(DateFilterCriteria filterOptionsDto);
+
+        //Movement Manifest 
+        Task<List<ServiceCentreDTO>> GetUnmappedMovementManifestServiceCentres(); //
+        Task<List<ManifestDTO>> GetManifestForMovementManifestServiceCentre(MovementManifestFilterCriteria dateFilterCriteria);
+        Task<ServiceCentreDTO> getServiceCenterById(int ServiceCenterId);
+        Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
+        Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
+        Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
 
     }
 
@@ -66,12 +85,41 @@ namespace GIGLS.Core.IServices.Shipments
     {
         bool OpenConnection(out int access_key); 
         string CloseConnection(int access_key);
-        string SetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
-        string GetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
+        Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo magayaShipmentDTO);
+        string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
         string SetEntity(int access_key, EntityDto entitydto);
-        Entities GetEntities(int access_key, string startwithstring);
-        Employees GetEmployees(int access_key, string startwithstring);
-        Employees GetVendors(int access_key, string startwithstring);
+        EntityList GetEntities(int access_key, string startwithstring);
+        //List<Entity> GetEmployees(int access_key, string startwithstring);
+        //EntityList GetVendors(int access_key, string startwithstring);
+        List<ModeOfTransportation> GetModesOfTransportation();
+        PortList GetPorts();
+        PackageList GetPackageList();
+        LocationList GetLocations();
+        ChargeDefinitionList GetChargeDefinitionList(int access_key);
+        List<string> GetItemStatus();
+        Description CommodityDescription(string description);
+        GUIDItemList QueryLog(int access_key, QuerylogDt0 qdto);
+        TransactionTypes TransactionTypes();
+        WarehouseReceiptList GetWarehouseReceiptRangeByDate(int access_key, QuerylogDt0 querydto);
+        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetFirstTransbyDate(int access_key, QuerylogDt0 querydto, out string customcookie, out int more_result);
+        bool GetNextTransByDate(int access_key, ref string cookie, out string trans_list_xml, out int more_results);
+        bool GetFirstTransByDate(int access_key, QuerylogDt0 querydto, out string cookie, out int more_results);
+        //ShipmentList GetShipmentRangeByDate(int access_key, QuerylogDt0 querydto);
+        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type);
+        TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
+        Task<string> GetMagayaWayBillNumber();
+        EntityList GetEntityObect();
+        Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
+        Task<string> SetEntityIntl(CustomerDTO custDTo);
+        Task<IntlShipmentRequestDTO> CreateIntlShipmentRequest(IntlShipmentRequestDTO shipmentDTO);
+        Task<Tuple<List<IntlShipmentDTO>, int>> getIntlShipmentRequests(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequests(DateFilterCriteria filterOptionsDto);
+
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
+        Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
+        Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO);
+
     }
+
 
 }

@@ -67,6 +67,22 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("api/user/customer/{email}")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetCustomerUsers(email);
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("api/user/customer")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers()
         {
@@ -185,43 +201,46 @@ namespace GIGLS.WebApi.Controllers.User
                 {
                     var userClaims = await _userService.GetClaimsAsync(user.Id);
 
-                    if (userClaims.Count() > 0)
+                    if (userClaims.Any())
                     {
-                        //set service centre
-                        int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
-                        if (serviceCenterIds.Length == 1)
+                        if(userClaims.Any(x => x.Type == "Privilege"))
                         {
-                            var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
-                            user.UserActiveServiceCentre = serviceCentre.Name;
-                        }
-
-                        //set country from PriviledgeCountrys
-                        var countries = await _userService.GetPriviledgeCountrys(userId);
-                        user.Country = countries;
-                        user.CountryName = countries.Select(x => x.CountryName).ToList();
-
-                        //If UserActive Country is already set in the UserEntity, use that value
-                        if (user.UserActiveCountryId > 0)
-                        {
-                            var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
-                            user.UserActiveCountry = userActiveCountry;
-                            user.UserActiveCountryId = userActiveCountry.CountryId;
-
-                            //If countries is empty, use UserActiveCountry
-                            if (countries.Count == 0)
+                            //set service centre
+                            int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
+                            if (serviceCenterIds.Length == 1)
                             {
-                                user.Country = new CountryDTO[] { userActiveCountry }.ToList();
-                                user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                                var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                                user.UserActiveServiceCentre = serviceCentre.Name;
                             }
-                        }
-                        else
-                        {
-                            //set user active country
-                            if (countries.Count == 1)
+
+                            //set country from PriviledgeCountrys
+                            var countries = await _userService.GetPriviledgeCountrys(userId);
+                            user.Country = countries;
+                            user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+                            //If UserActive Country is already set in the UserEntity, use that value
+                            if (user.UserActiveCountryId > 0)
                             {
-                                user.UserActiveCountry = countries[0];
+                                var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                                user.UserActiveCountry = userActiveCountry;
+                                user.UserActiveCountryId = userActiveCountry.CountryId;
+
+                                //If countries is empty, use UserActiveCountry
+                                if (countries.Count == 0)
+                                {
+                                    user.Country = new CountryDTO[] { userActiveCountry }.ToList();
+                                    user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                                }
                             }
-                        }
+                            else
+                            {
+                                //set user active country
+                                if (countries.Count == 1)
+                                {
+                                    user.UserActiveCountry = countries[0];
+                                }
+                            }
+                        }                        
                     }
                 }
 
@@ -578,7 +597,7 @@ namespace GIGLS.WebApi.Controllers.User
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -767,6 +786,32 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("api/user/setmagayauser/")]
+        public async Task<IServiceResponse<bool>> setmagayauser([FromUri] string userid, [FromUri] bool setTo)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                UserDTO udto = new UserDTO()
+                {
+                    IsMagaya = setTo
+                }; 
+
+                var result = await _userService.UpdateMagayaUser(userid, udto);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
 
         [AllowAnonymous]
         [HttpPut]
@@ -819,6 +864,27 @@ namespace GIGLS.WebApi.Controllers.User
                     Object = true
                 };
             });
-        }       
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("api/user/activatedashboard/{id}")]
+        public async Task<IServiceResponse<bool>> SetDashboardAccess(string id, bool val)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.SetDashboardAccess(id, val);
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully: ", $"{GetErrorResult(result)}");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
     }
 }

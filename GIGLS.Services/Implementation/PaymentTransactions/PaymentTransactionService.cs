@@ -15,6 +15,12 @@ using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
 using System.Linq;
 using GIGLS.Core.IServices.Zone;
+using GIGLS.Core.IMessageService;
+using System.Text;
+using System.Security.Cryptography;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Account;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -25,15 +31,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IWalletService _walletService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly IFinancialReportService _financialReportService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService)
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, 
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
+            _messageSenderService = messageSenderService;
+            _financialReportService = financialReportService;
             MapperConfig.Initialize();
         }
 
@@ -97,14 +108,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var result = false;
             var returnWaybill = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew == paymentTransaction.Waybill);
 
-            if(returnWaybill != null)
+            if (returnWaybill != null)
             {
                 result = await ProcessReturnPaymentTransaction(paymentTransaction);
             }
             else
             {
                 result = await ProcessNewPaymentTransaction(paymentTransaction);
-            }           
+            }
 
             return result;
         }
@@ -118,11 +129,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-
-            if (!string.IsNullOrEmpty(paymentTransaction.UserId))
-            {
-                currentUserId = paymentTransaction.UserId;
-            }
+            paymentTransaction.UserId = currentUserId;
 
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
@@ -131,16 +138,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
-            if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
+            if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
             // create payment
-            paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
-
 
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
@@ -151,13 +156,45 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
-            
+
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
-
             await _uow.CompleteAsync();
-            result = true;
 
+            //Add to Financial Reports
+            var financialReport = new FinancialReportDTO
+            {
+                Source = ReportSource.Agility,
+                Waybill = shipment.Waybill,
+                PartnerEarnings = 0.0M,
+                GrandTotal = invoiceEntity.Amount,
+                Earnings = invoiceEntity.Amount,
+                Demurrage = 0.00M,
+                CountryId = invoiceEntity.CountryId
+            };
+            await _financialReportService.AddReport(financialReport);
+
+            //QR Code
+            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
+
+            //send sms to the customer
+            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            {
+                Waybill = shipment.Waybill,
+                QRCode = deliveryNumber.SenderCode
+            };
+
+            if (shipment.DepartureServiceCentreId == 309)
+            {
+                await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
+
+            result = true;
             return result;
         }
 
@@ -172,7 +209,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //Additions for Ecommerce customers (Max wallet negative payment limit)
             //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
-            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
+            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType && !paymentTransaction.FromApp)
             {
                 //Gets the customer wallet limit for ecommerce
                 decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
@@ -195,9 +232,25 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
-            wallet.Balance = wallet.Balance - amountToDebit;
+            if (shipment != null && paymentTransaction.FromApp == true)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Insufficient Balance in the Wallet");
+                }
+            }
 
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            int[] serviceCenterIds = { };
+
+            if (!paymentTransaction.FromApp)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            else
+            {
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
+            }
 
             var newWalletTransaction = new WalletTransaction
             {
@@ -211,6 +264,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 Waybill = paymentTransaction.Waybill,
                 Description = generalLedgerEntity.Description
             };
+            //get the balance after transaction
+            if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+            }
+            else
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+            }
+            wallet.Balance = wallet.Balance - amountToDebit;
 
             _uow.WalletTransaction.Add(newWalletTransaction);
         }
@@ -231,7 +294,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 invoiceEntity.Pos = invoiceEntity.Amount;
             }
         }
-        
+
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -283,8 +346,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 }
 
-                wallet.Balance = wallet.Balance - amountToDebit;
-
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
                 var newWalletTransaction = new WalletTransaction
@@ -300,6 +361,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     Description = generalLedgerEntity.Description
                 };
 
+                if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+                }
+                else
+                {
+                    newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+                }
+
+                wallet.Balance = wallet.Balance - amountToDebit;
+
                 _uow.WalletTransaction.Add(newWalletTransaction);
             }
 
@@ -307,7 +379,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
-
 
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
@@ -318,14 +389,46 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
-
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
-
             await _uow.CompleteAsync();
-            result = true;
 
+            //Add to Financial Reports
+            var financialReport = new FinancialReportDTO
+            {
+                Source = ReportSource.Agility,
+                Waybill = shipment.Waybill,
+                PartnerEarnings = 0.0M,
+                GrandTotal = invoiceEntity.Amount,
+                Earnings = invoiceEntity.Amount,
+                Demurrage = 0.00M,
+                CountryId = invoiceEntity.CountryId
+            };
+            await _financialReportService.AddReport(financialReport);
+
+            //QR Code
+            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
+
+            //send sms to the customer
+            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            {
+                Waybill = shipment.Waybill,
+                QRCode = deliveryNumber.SenderCode
+            };
+
+            if (shipment.DepartureServiceCentreId == 309)
+            {
+                await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
+
+            result = true;
             return result;
+            
         }
 
         private async Task<decimal> GetEcommerceWalletLimit(Shipment shipment)
@@ -337,7 +440,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var customerWalletLimitCategory = companyObj.CustomerCategory;
 
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
-            
+
             switch (customerWalletLimitCategory)
             {
                 case CustomerCategory.Gold:
@@ -382,17 +485,71 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
             }
 
+            //check if the customer country is same as the country in the user table
+            var user = await _uow.User.GetUserByChannelCode(shipment.CustomerCode);
+            if(user != null)
+            {
+                if(user.UserActiveCountryId != customerCountryId)
+                {
+                    throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
+                }
+            }
+
             //2. If the customer country !== Departure Country, Convert the payment
-            if(customerCountryId != shipment.DepartureCountryId)
+            if (customerCountryId != shipment.DepartureCountryId)
             {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
 
-                double amountToDebitDouble = (double)amountToDebit  * countryRateConversion.Rate;
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
-                amountToDebit = (decimal) Math.Round(amountToDebitDouble, 2);
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            //if the shipment is International Shipment & Payment was initiated before the shipment get to Nigeria
+            //5% discount should be give to the customer
+            if (shipment.IsInternational)
+            {
+                //check if the shipment has a scan of AISN in Tracking Table, 
+                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                && x.Status == ShipmentScanStatus.AISN.ToString());
+
+                if (!isPresent)
+                {
+                    amountToDebit = amountToDebit * 0.95m;
+                }                
             }
 
             return amountToDebit;
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            int maxSize = 6;
+            char[] chars = new char[54];
+            string a;
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                SenderCode = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain.Wallet
@@ -23,5 +24,18 @@ namespace GIGLS.Core.Domain.Wallet
         public string UserId { get; set; }
 
         public bool IsWalletCredited { get; set; }
+
+        //manage GIGGO process 
+        public OnlinePaymentType OnlinePaymentType { get; set; }
+
+        public int PaymentCountryId { get; set; }
+
+        [MaxLength(50)]
+        public string ExternalReference { get; set; }
+
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; }
+
+        public WalletTransactionType TransactionType { get; set; }
     }
 }

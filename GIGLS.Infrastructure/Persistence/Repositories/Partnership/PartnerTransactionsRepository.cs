@@ -7,6 +7,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
         public async Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByDate(BaseFilterCriteria filterCriteria)
         {
+            //Excluding It Test
+            string excludeUserList = ConfigurationManager.AppSettings["excludeUserList"];
+            string[] testUserId = excludeUserList.Split(',').ToArray();
+
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
@@ -32,9 +37,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-
-            //Excluding It Test
-            string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f" };
            
             var partnersTrans = Context.PartnerTransactions.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
                                 && !testUserId.Contains(s.UserId));
@@ -92,6 +94,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
                                   .Select(x => new PreShipmentMobileDTO
                                   {
+                                      SenderStationName = _context.Station.Where(y => y.StationId == x.SenderStationId).Select(y => y.StationName).FirstOrDefault(),
+                                      ReceiverStationName = _context.Station.Where(y => y.StationId == x.ReceiverStationId).Select(y => y.StationName).FirstOrDefault(),
                                       PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == x.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -130,6 +134,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
                                   .Select(x => new PreShipmentMobileDTO
                                   {
+                                      SenderStationName = _context.Station.Where(y => y.StationId == x.SenderStationId).Select(y => y.StationName).FirstOrDefault(),
+                                      ReceiverStationName = _context.Station.Where(y => y.StationId == x.ReceiverStationId).Select(y => y.StationName).FirstOrDefault(),
                                       PreShipmentItems = _context.PresShipmentItemMobile.Where(y => y.PreShipmentMobileId == x.PreShipmentMobileId)
                                                             .Select(d => new PreShipmentItemMobileDTO
                                                             {
@@ -177,13 +183,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return await Task.FromResult(earnings);
         }
         
-        private Task<IQueryable<ExternalPartnerTransactionsPaymentCacheDTO>> GetExternalPartnerTransactions(ShipmentCollectionFilterCriteria filterCriteria)
+        private Task<IQueryable<ExternalPartnerTransactionsPaymentCacheDTO>> GetPartnerTransactions(ShipmentCollectionFilterCriteria filterCriteria)
         {
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var partners = _context.Partners.AsQueryable().Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
+            var partners = _context.Partners.AsQueryable().Where(s => (s.PartnerType == Core.Enums.PartnerType.DeliveryPartner || s.PartnerType == Core.Enums.PartnerType.InternalDeliveryPartner) && s.IsActivated == true);
 
             var partnerDto = from partner in partners
                              join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
@@ -202,7 +208,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  Trips = transaction.PartnerTransactionsID,
                                  BankName = partner.BankName,
                                  AccountName = partner.AccountName,
-                                 AccountNumber = partner.AccountNumber
+                                 AccountNumber = partner.AccountNumber,
+                                 PartnerType = partner.PartnerType.ToString()
                              };
 
             return Task.FromResult(partnerDto.AsQueryable().AsNoTracking());
@@ -210,7 +217,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
         public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var partners = await GetExternalPartnerTransactions(filterCriteria);
+            var partners = await GetPartnerTransactions(filterCriteria);
 
             var partnerDto = from partner in partners
                              group partner by partner.PartnerCode into p
@@ -226,7 +233,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  LastName = p.FirstOrDefault().LastName,
                                  BankName = p.FirstOrDefault().BankName,
                                  AccountName = p.FirstOrDefault().AccountName,
-                                 AccountNumber = p.FirstOrDefault().AccountNumber
+                                 AccountNumber = p.FirstOrDefault().AccountNumber,
+                                 PartnerType = p.FirstOrDefault().PartnerType
                              };            
             return await partnerDto.OrderByDescending(s => s.Amount).AsNoTracking().ToListAsync();
         }

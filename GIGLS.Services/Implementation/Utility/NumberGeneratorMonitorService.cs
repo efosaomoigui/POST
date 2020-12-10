@@ -4,6 +4,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Utility
@@ -26,6 +27,11 @@ namespace GIGLS.Services.Implementation.Utility
                 var monitor = _uow.NumberGeneratorMonitor.SingleOrDefault(x =>
                     x.ServiceCentreCode == serviceCenterCode && x.NumberGeneratorType == numberGeneratorType);
 
+                if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    monitor = _uow.NumberGeneratorMonitor.SingleOrDefault(x => x.NumberGeneratorType == numberGeneratorType);
+                }
+
 
                 // At this point, monitor can only be null if it's the first time we're
                 // creating a number for the service centre and numberGeneratorType. 
@@ -33,8 +39,29 @@ namespace GIGLS.Services.Implementation.Utility
                 var numberCode = monitor?.Number ?? "0";
 
                 //2. Increment lastcode to get the next available numberCode by 1
-                var number = long.Parse(numberCode) + 1;
-                var numberStr = number.ToString("000000");
+                var number = 0L;
+                var numberStr = "";
+
+                if(numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00");
+                }
+                else if (numberGeneratorType == NumberGeneratorType.MovementManifestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00000");
+                }
+                else if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("0000");
+                }
+                else
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("000000");
+                }
 
                 //Add or update the NumberGeneratorMonitor Table for the Service Centre and numberGeneratorType
                 if (monitor != null)
@@ -52,12 +79,29 @@ namespace GIGLS.Services.Implementation.Utility
                 var codeStr = serviceCentreId.ToString("000");
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
-                numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                if (numberGeneratorType != NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                }
+                else
+                {
+                    numberGenerated = (ResolvePrefixFromNumberGeneratorType(numberGeneratorType)-9) + codeStr + numberStr;
+                }
+
+                if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
+                }
+
+                if (numberGeneratorType == NumberGeneratorType.RequestNumber)
+                {
+                    numberGenerated = "REQ-" + numberGenerated;
+                }
 
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
-                    numberGeneratorType == NumberGeneratorType.FleetPartner
+                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode 
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
@@ -105,7 +149,7 @@ namespace GIGLS.Services.Implementation.Utility
 
                 if (monitor == null)
                 {
-                    throw new GenericException("NumberGeneratorMonitor failed to update!");
+                    throw new GenericException("Number Generator Monitor failed to update!", $"{(int)HttpStatusCode.NotFound}");
                 }
                 monitor.Number = number;
                 await _uow.CompleteAsync();
@@ -153,6 +197,22 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return (int)NumberGeneratorType.BankProcessingOrderForDemurrage;
                     }
+                case NumberGeneratorType.MagayaWb:
+                    {
+                        return (int)NumberGeneratorType.MagayaWb;
+                    }
+                case NumberGeneratorType.SuperManifest:
+                    {
+                        return (int)NumberGeneratorType.SuperManifest;
+                    }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return (int)NumberGeneratorType.RequestNumber;
+                    }
+                case NumberGeneratorType.MovementManifestNumber:
+                    {
+                        return (int)NumberGeneratorType.MovementManifestNumber;
+                    }
                 default:
                     {
                         return (int)NumberGeneratorType.WaybillNumber;
@@ -191,6 +251,14 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Employee:
                     {
                         return "EMP";
+                    }
+                case NumberGeneratorType.PreShipmentCode:
+                    {
+                        return "PRE";
+                    }
+                case NumberGeneratorType.RequestNumber:
+                    {
+                        return "REQ-";
                     }
                 default:
                     {

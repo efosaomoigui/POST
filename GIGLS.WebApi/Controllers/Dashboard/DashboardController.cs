@@ -33,6 +33,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var countries = await _userService.GetPriviledgeCountrys();
                 var dashboard = await _dashboardService.GetDashboard();
 
                 return new ServiceResponse<DashboardDTO>
@@ -54,7 +55,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 var countries = await _userService.GetPriviledgeCountrys();
                 if (countries.Count == 1)
                 {
-                    userActiveCountry = countries[0];
+                    userActiveCountry = countries[0]; 
                 }
                 else
                 {

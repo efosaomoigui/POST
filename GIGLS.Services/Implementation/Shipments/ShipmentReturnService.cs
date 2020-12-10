@@ -70,6 +70,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DestinationServiceCentreId = departure;
                 shipment.PickupOptions = PickupOptions.SERVICECENTER;
 
+                if (shipment.CustomerType.Contains("Individual"))
+                {
+                    throw new GenericException($"Return can not be initiated for this waybill {waybill} as the customer is not authorized to perform return");
+                }
+
                 //change ecommerce customer destination address to their return address
                 if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
                 {
@@ -107,7 +112,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update the Receiver Details for returned shipments
                 await UpdateReceiverDetailsReturnedShipment(shipment);
-                
+
+
+                //for international shipment
+                if (shipment.Waybill.Contains("AWR"))
+                {
+                    shipment.Waybill = shipment.Waybill + "R";
+                }
+
                 //Create new shipment
                 var newShipment = await _shipmentService.AddShipment(shipment);
                 
@@ -235,13 +247,13 @@ namespace GIGLS.Services.Implementation.Shipments
             //return Task.FromResult(shipmentReturnsDto);
         }
 
-        public Tuple<Task<List<ShipmentReturnDTO>>, int> GetShipmentReturns(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentReturnDTO>, int>> GetShipmentReturns(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;        
-                var shipmentReturns = _uow.ShipmentReturn.FindAsync(s => serviceCenters.Contains(s.ServiceCentreId)).Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();        
+                var shipmentReturns = await _uow.ShipmentReturn.FindAsync(s => serviceCenters.Contains(s.ServiceCentreId));
                 var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
                 shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated);
 
@@ -279,8 +291,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentReturnsDto = shipmentReturnsDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentReturnDTO>>, int>(Task.FromResult(shipmentReturnsDto.ToList()), count);
-
+                return new Tuple<List<ShipmentReturnDTO>, int>(shipmentReturnsDto.ToList(), count);
             }
             catch (Exception)
             {

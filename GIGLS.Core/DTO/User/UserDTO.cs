@@ -68,6 +68,7 @@ namespace GIGLS.Core.DTO.User
 
         public int UserActiveCountryId { get; set; }
         public CountryDTO UserActiveCountry { get; set; }
+        
         public List<string> VehicleType { get; set; }
         public List<VehicleTypeDTO> VehicleDetails { get; set; }
         public bool IsFromMobile { get; set; }
@@ -88,8 +89,11 @@ namespace GIGLS.Core.DTO.User
         public bool? IsUniqueInstalled { get; set; }
 
         public string AppType { get; set; }
-
         public bool? IsEligible { get; set; }
         public string RegistrationReferrercode { get; set; }
+        public string BusinessNature { get; set; }
+
+        public bool IsMagaya { get; set; }
+        public bool DashboardAccess { get; set; }
     }
 }

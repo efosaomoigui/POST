@@ -41,21 +41,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.User = await _userService.GetCurrentUserId();
                 }
 
-                if (tracking.Location == null)
+                var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                //default sc
+                if (UserServiceCenters.Length <= 0)
                 {
-                    var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+                    UserServiceCenters = new int[] { 0 };
+                    var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                    UserServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
+                }
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
+                tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
 
-                    //default sc
-                    if (UserServiceCenters.Length <= 0)
-                    {
-                        UserServiceCenters = new int[] { 0 };
-                        var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
-                        UserServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
-                    }
-
-                    var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
+                if (string.IsNullOrWhiteSpace(tracking.Location))
+                {
                     tracking.Location = serviceCenter.Name;
-                    tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
                 }
 
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
@@ -86,7 +86,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     var newShipmentTracking = new ShipmentTracking
                     {
                         Waybill = tracking.Waybill,
-                        //TrackingType = (TrackingType)Enum.Parse(typeof(TrackingType), tracking.TrackingType),
                         Location = tracking.Location,
                         Status = tracking.Status,
                         DateTime = DateTime.Now,
@@ -96,11 +95,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
-                    
+
                     //send sms and email
-                    if (!scanStatus.Equals(ShipmentScanStatus.CRT))
+                    if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
                     {
-                        await sendSMSEmail(tracking, scanStatus);
+                        if (tracking.isInternalShipment)
+                        {
+                            await SendEmailToStoreKeeper(tracking, scanStatus);
+                        }
+                        else
+                        {
+                            await sendSMSEmail(tracking, scanStatus);
+                        }
                     }
                 }
 
@@ -147,6 +153,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //send message
             await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+
+            return true;
+        }
+
+        //Send email to store keeper when the shipment has arrived final destination
+        private async Task<bool> SendEmailToStoreKeeper(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
+        {
+            var messageType = MessageType.ShipmentCreation;
+            foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+            {
+                if (item.ToString() == scanStatus.ToString())
+                {
+                    messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                    break;
+                }
+            }
+
+            //send message
+            await _messageSenderService.SendMessage(messageType, EmailSmsType.Email, tracking);
 
             return true;
         }
@@ -200,7 +225,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(waybill);
 
-                if (shipmentTracking.Count > 0)
+                if (shipmentTracking.Any())
                 {
                     //1. check if waybill is a returned waybill
                     {
@@ -267,7 +292,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(waybill);
 
-                if (shipmentTracking.Count > 0)
+                if (shipmentTracking.Any())
                 {
                     //1. check if waybill is a returned waybill
                     {
@@ -454,11 +479,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 //1a. Get all the Regional Managers assigned to the ServiceCentre where Scan took place including the departure and destination
                 var departureRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DepartureServiceCentreId);
-                var destinationRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DestinationServiceCentreId);
+                //var destinationRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DestinationServiceCentreId);
                 var currentRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.ServiceCentreId);
 
                 allRegionalManagers.AddRange(departureRegionalManagers);
-                allRegionalManagers.AddRange(destinationRegionalManagers);
+               // allRegionalManagers.AddRange(destinationRegionalManagers);
                 allRegionalManagers.AddRange(currentRegionalManagers);
                 
                 var userDTO = await _userService.GetUserById(tracking.User);
@@ -492,7 +517,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-        private async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
+        public async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
         {
             List<UserDTO> filteredRegionalManagers = new List<UserDTO>();
 
@@ -538,6 +563,15 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return filteredRegionalManagers;
+        }
+
+        //Send email to customer when international shipment has arrived Nigeria
+        public async Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType)
+        {
+            //send message
+            await _messageSenderService.SendGenericEmailMessage(messageType, shipmentDTO);
+
+            return true;
         }
     }
 }

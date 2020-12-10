@@ -26,6 +26,96 @@
             </summary>
             <param name="kernel">The kernel.</param>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.#ctor(GIGLS.Core.IServices.Shipments.IMagayaService,GIGLS.Core.IServices.User.IUserService)">
+            <summary>
+            
+            </summary>
+            <param name="service"></param>
+            <param name="userService"></param>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddShipment(ThirdParty.WebServices.Magaya.Business.New.TheWarehouseReceiptCombo)">
+            <summary>
+            
+            </summary>
+            <param name="MagayaShipmentDTO"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddEntity(ThirdParty.WebServices.Magaya.DTO.EntityDto)">
+            <summary>
+            
+            </summary>
+            <param name="entitydto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddEntityInternational(GIGLS.Core.DTO.Customers.CustomerDTO)">
+            <summary>
+            
+            </summary>
+            <param name="entitydto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetEntities(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="startwithstring"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetIntltransactionRequest(GIGLS.CORE.DTO.Shipments.FilterOptionsDto)">
+            <summary>
+            
+            </summary>
+            <param name="startwithstring"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetModeOfTransportation">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetMagayaWaybillNo">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetPorts">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetPackageLists">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetDescriptions(System.String)">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetTransactionTypes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetWarehouseReceiptRangeByDate(ThirdParty.WebServices.Magaya.Business.New.QuerylogDt0)">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetChargeDefinitions">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
             <summary>
             This api is used to get the price for Shipment Items
@@ -33,18 +123,11 @@
             <param name="thirdPartyPricingDto"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.CreatePreShipmentMobileDTO)">
             <summary>
             This api is used to register a shipment
             </summary>
             <param name="thirdPartyPreShipmentDTO"></param>
-            <returns></returns>
-        </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.TrackShipment(System.String)">
-            <summary>
-            This api is used to track shipment created by the user
-            </summary>
-            <param name="waybillNumber"></param>
             <returns></returns>
         </member>
         <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.PublicTrackShipment(System.String)">
@@ -74,7 +157,7 @@
             <param name="userLoginModel"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ViewShipment">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetShipmentTransactions(GIGLS.Core.DTO.Report.ShipmentCollectionFilterCriteria)">
             <summary>
             This api is used to get shipments created by user
             </summary>
@@ -86,6 +169,12 @@
             This api is used to track shipments created by the user
             </summary>
             <param name="waybillNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetActiveLGAs">
+            <summary>
+            This api is used to get the active lgas for GiG Go shipments 
+            </summary>
             <returns></returns>
         </member>
     </members>

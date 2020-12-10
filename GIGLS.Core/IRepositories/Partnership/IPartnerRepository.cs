@@ -13,6 +13,7 @@ namespace GIGLS.Core.IRepositories.Partnership
         Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId);
         Task<List<PartnerDTO>> GetExternalPartnersAsync();
         Task<List<PartnerDTO>> GetPartnerBySearchParameters(string parameter);
-        Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync();
+        Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode);
+        Task<PartnerDTO> GetPartnerByUserId(string partnerId);
     }
 }

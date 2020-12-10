@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.BankSettlement;
 using System.Collections.Generic;
+using ThirdParty.WebServices.Magaya.Services;
 
 namespace GIGLS.Core.IServices
 {
@@ -8,6 +9,9 @@ namespace GIGLS.Core.IServices
         string Code { get; set; }
         string ShortDescription { get; set; }
         TResponse Object { get; set; }
+        api_session_error magayaErrorMessage { get; set; }
+        string Cookies { get; set; }
+        int more_reults { get; set; }
         decimal Total { get; set; }
         string RefCode { get; set; }
         BankProcessingOrderCodesDTO Shipmentcodref { get; set; }

@@ -14,5 +14,7 @@ namespace GIGLS.Core.IServices.Partnership
         Task<string> Decrypt(string cipherText);
         Task ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto);
         Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria);
+        Task CreditPartnerTransactionByAdmin(CreditPartnerTransactionsDTO transactionsDTO);
+        Task<string> Encrypt(string clearText);
     }
 }

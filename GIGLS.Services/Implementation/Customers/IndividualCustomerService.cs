@@ -132,7 +132,7 @@ namespace GIGLS.Services.Implementation.Customers
                 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -216,6 +216,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers()
         {
             try
@@ -288,6 +289,10 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                if (String.IsNullOrEmpty(customerCode))
+                {
+                    throw new GenericException("Invalid Individual Customer Code");
+                }
                 var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
                 if (customer == null)
                 {

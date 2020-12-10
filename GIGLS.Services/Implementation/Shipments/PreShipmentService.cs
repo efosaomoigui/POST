@@ -19,6 +19,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,20 +73,6 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        public Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-                return _uow.PreShipment.GetPreShipments(filterOptionsDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task DeletePreShipment(int preShipmentId)
         {
             try
@@ -122,230 +109,230 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<PreShipmentDTO> GetPreShipment(string waybill)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //public async Task<PreShipmentDTO> GetPreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
 
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
 
-                return await GetPreShipment(preShipment.PreShipmentId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        return await GetPreShipment(preShipment.PreShipmentId);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-        public async Task<PreShipmentDTO> GetPreShipment(int preShipmentId)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.PreShipmentId == preShipmentId, "PreShipmentItems");
-                if (preShipment == null)
-                {
-                    throw new GenericException("PreShipment Information does not exist");
-                }
+        //public async Task<PreShipmentDTO> GetPreShipment(int preShipmentId)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.PreShipmentId == preShipmentId, "PreShipmentItems");
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException("PreShipment Information does not exist");
+        //        }
 
-                var preShipmentDto = Mapper.Map<PreShipmentDTO>(preShipment);
+        //        var preShipmentDto = Mapper.Map<PreShipmentDTO>(preShipment);
 
-                //get customer info
-                var customerQuery = _uow.Invoice.GetAllFromCustomerView();
-                var customerView = customerQuery.Where(s => s.CustomerCode == preShipmentDto.CustomerCode).FirstOrDefault();
-
-
-                var customerId = 0;
-                var customerType = CustomerType.Company;
-                if (customerView.CompanyId != null && customerView.CompanyId > 0)
-                {
-                    //company
-                    customerId = customerView.CompanyId.GetValueOrDefault();
-                    customerType = CustomerType.Company;
-                }
-                else
-                {
-                    //individual
-                    customerId = customerView.IndividualCustomerId.GetValueOrDefault();
-                    customerType = CustomerType.IndividualCustomer;
-                }
-
-                var customerDTO = await _customerService.GetCustomer(customerId, customerType);
-
-                preShipmentDto.CustomerCode = customerView.CustomerCode;
-                preShipmentDto.CustomerDetails = customerDTO;
-                preShipmentDto.CustomerType = customerDTO.CustomerType.ToString();
+        //        //get customer info
+        //        var customerQuery = _uow.Invoice.GetAllFromCustomerView();
+        //        var customerView = customerQuery.Where(s => s.CustomerCode == preShipmentDto.CustomerCode).FirstOrDefault();
 
 
+        //        var customerId = 0;
+        //        var customerType = CustomerType.Company;
+        //        if (customerView.CompanyId != null && customerView.CompanyId > 0)
+        //        {
+        //            //company
+        //            customerId = customerView.CompanyId.GetValueOrDefault();
+        //            customerType = CustomerType.Company;
+        //        }
+        //        else
+        //        {
+        //            //individual
+        //            customerId = customerView.IndividualCustomerId.GetValueOrDefault();
+        //            customerType = CustomerType.IndividualCustomer;
+        //        }
 
-                return preShipmentDto;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        //        var customerDTO = await _customerService.GetCustomer(customerId, customerType);
 
-        public async Task UpdatePreShipment(int preShipmentId, PreShipmentDTO preShipmentDto)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(preShipmentId);
-                if (preShipment == null || preShipmentId != preShipment.PreShipmentId)
-                {
-                    throw new GenericException("PreShipment Information does not exist");
-                }
+        //        preShipmentDto.CustomerCode = customerView.CustomerCode;
+        //        preShipmentDto.CustomerDetails = customerDTO;
+        //        preShipmentDto.CustomerType = customerDTO.CustomerType.ToString();
 
-                preShipment.SealNumber = preShipmentDto.SealNumber;
-                preShipment.Value = preShipmentDto.Value;
-                preShipment.UserId = preShipmentDto.UserId;
-                preShipment.ReceiverState = preShipmentDto.ReceiverState;
-                preShipment.ReceiverPhoneNumber = preShipmentDto.ReceiverPhoneNumber;
-                preShipment.ReceiverName = preShipmentDto.ReceiverName;
-                preShipment.ReceiverCountry = preShipmentDto.ReceiverCountry;
-                preShipment.ReceiverCity = preShipmentDto.ReceiverCity;
-                preShipment.PaymentStatus = preShipmentDto.PaymentStatus;
-                preShipment.ExpectedDateOfArrival = preShipmentDto.ExpectedDateOfArrival;
-                preShipment.DestinationServiceCentreId = preShipmentDto.DestinationServiceCentreId;
-                preShipment.DepartureServiceCentreId = preShipmentDto.DepartureServiceCentreId;
-                preShipment.DeliveryTime = preShipmentDto.DeliveryTime;
-                preShipment.DeliveryOptionId = preShipmentDto.DeliveryOptionId;
-                preShipment.CustomerType = preShipmentDto.CustomerType;
-                preShipment.CustomerId = preShipmentDto.CustomerId;
-                preShipment.ActualDateOfArrival = preShipmentDto.ActualDateOfArrival;
 
-                await _uow.CompleteAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
-        public async Task UpdatePreShipment(string waybill, PreShipmentDTO preShipmentDto)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //        return preShipmentDto;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                preShipment.SealNumber = preShipmentDto.SealNumber;
-                preShipment.Value = preShipmentDto.Value;
-                preShipment.UserId = preShipmentDto.UserId;
-                preShipment.ReceiverState = preShipmentDto.ReceiverState;
-                preShipment.ReceiverPhoneNumber = preShipmentDto.ReceiverPhoneNumber;
-                preShipment.ReceiverName = preShipmentDto.ReceiverName;
-                preShipment.ReceiverCountry = preShipmentDto.ReceiverCountry;
-                preShipment.ReceiverCity = preShipmentDto.ReceiverCity;
-                preShipment.PaymentStatus = preShipmentDto.PaymentStatus;
-                //shipment.IsDomestic = shipmentDto.IsDomestic;
-                //shipment.IndentificationUrl = shipmentDto.IndentificationUrl;
-                //shipment.IdentificationType = shipmentDto.IdentificationType;
-                //shipment.GroupWaybill = shipmentDto.GroupWaybill;
-                preShipment.ExpectedDateOfArrival = preShipmentDto.ExpectedDateOfArrival;
-                preShipment.DestinationServiceCentreId = preShipmentDto.DestinationServiceCentreId;
-                preShipment.DepartureServiceCentreId = preShipmentDto.DepartureServiceCentreId;
-                preShipment.DeliveryTime = preShipmentDto.DeliveryTime;
-                preShipment.DeliveryOptionId = preShipmentDto.DeliveryOptionId;
-                preShipment.CustomerType = preShipmentDto.CustomerType;
-                preShipment.CustomerId = preShipmentDto.CustomerId;
-                //shipment.Comments = shipmentDto.Comments;
-                //shipment.ActualreceiverPhone = shipmentDto.ActualreceiverPhone;
-                //shipment.ActualReceiverName = shipmentDto.ActualReceiverName;
-                preShipment.ActualDateOfArrival = preShipmentDto.ActualDateOfArrival;
+        //public async Task UpdatePreShipment(int preShipmentId, PreShipmentDTO preShipmentDto)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(preShipmentId);
+        //        if (preShipment == null || preShipmentId != preShipment.PreShipmentId)
+        //        {
+        //            throw new GenericException("PreShipment Information does not exist");
+        //        }
 
-                await _uow.CompleteAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        preShipment.SealNumber = preShipmentDto.SealNumber;
+        //        preShipment.Value = preShipmentDto.Value;
+        //        preShipment.UserId = preShipmentDto.UserId;
+        //        preShipment.ReceiverState = preShipmentDto.ReceiverState;
+        //        preShipment.ReceiverPhoneNumber = preShipmentDto.ReceiverPhoneNumber;
+        //        preShipment.ReceiverName = preShipmentDto.ReceiverName;
+        //        preShipment.ReceiverCountry = preShipmentDto.ReceiverCountry;
+        //        preShipment.ReceiverCity = preShipmentDto.ReceiverCity;
+        //        preShipment.PaymentStatus = preShipmentDto.PaymentStatus;
+        //        preShipment.ExpectedDateOfArrival = preShipmentDto.ExpectedDateOfArrival;
+        //        preShipment.DestinationServiceCentreId = preShipmentDto.DestinationServiceCentreId;
+        //        preShipment.DepartureServiceCentreId = preShipmentDto.DepartureServiceCentreId;
+        //        preShipment.DeliveryTime = preShipmentDto.DeliveryTime;
+        //        preShipment.DeliveryOptionId = preShipmentDto.DeliveryOptionId;
+        //        preShipment.CustomerType = preShipmentDto.CustomerType;
+        //        preShipment.CustomerId = preShipmentDto.CustomerId;
+        //        preShipment.ActualDateOfArrival = preShipmentDto.ActualDateOfArrival;
+
+        //        await _uow.CompleteAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //public async Task UpdatePreShipment(string waybill, PreShipmentDTO preShipmentDto)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
+
+        //        preShipment.SealNumber = preShipmentDto.SealNumber;
+        //        preShipment.Value = preShipmentDto.Value;
+        //        preShipment.UserId = preShipmentDto.UserId;
+        //        preShipment.ReceiverState = preShipmentDto.ReceiverState;
+        //        preShipment.ReceiverPhoneNumber = preShipmentDto.ReceiverPhoneNumber;
+        //        preShipment.ReceiverName = preShipmentDto.ReceiverName;
+        //        preShipment.ReceiverCountry = preShipmentDto.ReceiverCountry;
+        //        preShipment.ReceiverCity = preShipmentDto.ReceiverCity;
+        //        preShipment.PaymentStatus = preShipmentDto.PaymentStatus;
+        //        //shipment.IsDomestic = shipmentDto.IsDomestic;
+        //        //shipment.IndentificationUrl = shipmentDto.IndentificationUrl;
+        //        //shipment.IdentificationType = shipmentDto.IdentificationType;
+        //        //shipment.GroupWaybill = shipmentDto.GroupWaybill;
+        //        preShipment.ExpectedDateOfArrival = preShipmentDto.ExpectedDateOfArrival;
+        //        preShipment.DestinationServiceCentreId = preShipmentDto.DestinationServiceCentreId;
+        //        preShipment.DepartureServiceCentreId = preShipmentDto.DepartureServiceCentreId;
+        //        preShipment.DeliveryTime = preShipmentDto.DeliveryTime;
+        //        preShipment.DeliveryOptionId = preShipmentDto.DeliveryOptionId;
+        //        preShipment.CustomerType = preShipmentDto.CustomerType;
+        //        preShipment.CustomerId = preShipmentDto.CustomerId;
+        //        //shipment.Comments = shipmentDto.Comments;
+        //        //shipment.ActualreceiverPhone = shipmentDto.ActualreceiverPhone;
+        //        //shipment.ActualReceiverName = shipmentDto.ActualReceiverName;
+        //        preShipment.ActualDateOfArrival = preShipmentDto.ActualDateOfArrival;
+
+        //        await _uow.CompleteAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         //
-        public async Task<PreShipmentDTO> AddPreShipment(PreShipmentDTO preShipmentDTO)
-        {
-            try
-            {
-                // create the customer, if not recorded in the system
-                //var customerId = await CreateCustomer(preShipmentDTO);
+        //public async Task<PreShipmentDTO> AddPreShipment(PreShipmentDTO preShipmentDTO)
+        //{
+        //    try
+        //    {
+        //        // create the customer, if not recorded in the system
+        //        //var customerId = await CreateCustomer(preShipmentDTO);
 
-                // create the shipment and shipmentItems
-                var newPreShipment = await CreatePreShipment(preShipmentDTO);
+        //        // create the shipment and shipmentItems
+        //        var newPreShipment = await CreatePreShipment(preShipmentDTO);
 
-                // create the Invoice and GeneralLedger
-                //await CreateInvoice(preShipmentDTO);
-                //CreateGeneralLedger(preShipmentDTO);
+        //        // create the Invoice and GeneralLedger
+        //        //await CreateInvoice(preShipmentDTO);
+        //        //CreateGeneralLedger(preShipmentDTO);
 
-                // complete transaction if all actions are successful
-                await _uow.CompleteAsync();
+        //        // complete transaction if all actions are successful
+        //        await _uow.CompleteAsync();
 
-                //scan the shipment for tracking
-                await ScanPreShipment(new ScanDTO
-                {
-                    WaybillNumber = newPreShipment.Waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.PRECRT
-                });
+        //        //scan the shipment for tracking
+        //        await ScanPreShipment(new ScanDTO
+        //        {
+        //            WaybillNumber = newPreShipment.Waybill,
+        //            ShipmentScanStatus = ShipmentScanStatus.PRECRT
+        //        });
 
-                //send message
-                await _messageSenderService.SendMessage(MessageType.PreShipmentCreation, EmailSmsType.All, preShipmentDTO);
+        //        //send message
+        //        await _messageSenderService.SendMessage(MessageType.PreShipmentCreation, EmailSmsType.All, preShipmentDTO);
 
-                return newPreShipment;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        return newPreShipment;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-        private async Task<PreShipmentDTO> CreatePreShipment(PreShipmentDTO preShipmentDTO)
-        {
-            // get the current user info
-            var currentUserId = await _userService.GetCurrentUserId();
-            preShipmentDTO.UserId = currentUserId;
+        //private async Task<PreShipmentDTO> CreatePreShipment(PreShipmentDTO preShipmentDTO)
+        //{
+        //    // get the current user info
+        //    var currentUserId = await _userService.GetCurrentUserId();
+        //    preShipmentDTO.UserId = currentUserId;
 
-            //Generate Waybill Number(serviceCentreCode, userId, servicecentreId)
-            //var waybill = await _waybillService.GenerateWaybillNumber(loginUserServiceCentre.Code, shipmentDTO.UserId, loginUserServiceCentre.ServiceCentreId);
-            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+        //    //Generate Waybill Number(serviceCentreCode, userId, servicecentreId)
+        //    //var waybill = await _waybillService.GenerateWaybillNumber(loginUserServiceCentre.Code, shipmentDTO.UserId, loginUserServiceCentre.ServiceCentreId);
+        //    var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
 
-            preShipmentDTO.Waybill = waybill;
-            var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
+        //    preShipmentDTO.Waybill = waybill;
+        //    var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
 
-            // add serial numbers to the ShipmentItems
-            var serialNumber = 1;
-            foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
-            {
-                preShipmentItem.SerialNumber = serialNumber;
-                serialNumber++;
-            }
+        //    // add serial numbers to the ShipmentItems
+        //    var serialNumber = 1;
+        //    foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
+        //    {
+        //        preShipmentItem.SerialNumber = serialNumber;
+        //        serialNumber++;
+        //    }
 
-            //service centres from station
-            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DepartureStationId).ToList().FirstOrDefault();
-            var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DestinationStationId).ToList().FirstOrDefault();
+        //    //service centres from station
+        //    var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DepartureStationId).ToList().FirstOrDefault();
+        //    var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DestinationStationId).ToList().FirstOrDefault();
 
-            //delivery options - Ecommerce
-            var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
-                Where(s => s.Code == "ECC").FirstOrDefault();
+        //    //delivery options - Ecommerce
+        //    var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
+        //        Where(s => s.Code == "ECC").FirstOrDefault();
 
-            newPreShipment.DepartureServiceCentreId = departureServiceCentre.ServiceCentreId;
-            newPreShipment.DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId;
-            newPreShipment.DeliveryOptionId = deliveryOption.DeliveryOptionId;
+        //    newPreShipment.DepartureServiceCentreId = departureServiceCentre.ServiceCentreId;
+        //    newPreShipment.DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId;
+        //    newPreShipment.DeliveryOptionId = deliveryOption.DeliveryOptionId;
 
-            //save the display value of Insurance and Vat
-            newPreShipment.Vat = preShipmentDTO.vatvalue_display;
-            newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
+        //    //save the display value of Insurance and Vat
+        //    newPreShipment.Vat = preShipmentDTO.vatvalue_display;
+        //    newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
 
-            _uow.PreShipment.Add(newPreShipment);
-            //await _uow.CompleteAsync();
+        //    _uow.PreShipment.Add(newPreShipment);
+        //    //await _uow.CompleteAsync();
 
-            return preShipmentDTO;
-        }
+        //    return preShipmentDTO;
+        //}
 
 
         //This is used because I don't want an Exception to be thrown when calling it
@@ -378,275 +365,275 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-        public async Task<bool> CancelPreShipment(string waybill)
-        {
-            var boolRresult = false;
-            try
-            {
-                var preShipment = _uow.PreShipment.SingleOrDefault(s => s.Waybill == waybill);
-                preShipment.IsCancelled = true;
+        //public async Task<bool> CancelPreShipment(string waybill)
+        //{
+        //    var boolRresult = false;
+        //    try
+        //    {
+        //        var preShipment = _uow.PreShipment.SingleOrDefault(s => s.Waybill == waybill);
+        //        preShipment.IsCancelled = true;
 
-                //2.5 Scan the Shipment for cancellation
-                await ScanPreShipment(new ScanDTO
-                {
-                    WaybillNumber = waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.PRESSC
-                });
+        //        //2.5 Scan the Shipment for cancellation
+        //        await ScanPreShipment(new ScanDTO
+        //        {
+        //            WaybillNumber = waybill,
+        //            ShipmentScanStatus = ShipmentScanStatus.PRESSC
+        //        });
 
-                //send message
-                //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
-                boolRresult = true;
+        //        //send message
+        //        //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
+        //        boolRresult = true;
 
-                return boolRresult;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-
-        //Management API
-        public async Task<List<PreShipmentDTO>> GetNewPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
-                var preShipments = query.ToList();
-                var preShipmentList = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-
-                //get customers info
-                foreach(var preShipmentDto in preShipmentList)
-                {
-                    var customerView = _uow.Invoice.GetAllFromCustomerView().FirstOrDefault(s => s.CustomerCode == preShipmentDto.CustomerCode);
-                    if(customerView != null)
-                    {
-                        var customerDto = Mapper.Map<CustomerDTO>(customerView);
-                        preShipmentDto.CustomerDetails = customerDto;
-                    }
-                }
-                return await Task.FromResult(preShipmentList);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<PreShipmentDTO>> GetValidPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
-
-                var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-
-                return await Task.FromResult(preShipmentDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<PreShipmentDTO>> GetCompletedPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Completed);
-
-                var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-
-                return await Task.FromResult(preShipmentDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<PreShipmentDTO>> GetDeclinedPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Declined
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
-
-                var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-
-                return await Task.FromResult(preShipmentDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        return boolRresult;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
 
-        public async Task<List<PreShipmentDTO>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Failed);
+        ////Management API
+        //public async Task<List<PreShipmentDTO>> GetNewPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
+        //        var preShipments = query.ToList();
+        //        var preShipmentList = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+        //        //get customers info
+        //        foreach(var preShipmentDto in preShipmentList)
+        //        {
+        //            var customerView = _uow.Invoice.GetAllFromCustomerView().FirstOrDefault(s => s.CustomerCode == preShipmentDto.CustomerCode);
+        //            if(customerView != null)
+        //            {
+        //                var customerDto = Mapper.Map<CustomerDTO>(customerView);
+        //                preShipmentDto.CustomerDetails = customerDto;
+        //            }
+        //        }
+        //        return await Task.FromResult(preShipmentList);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                return await Task.FromResult(preShipmentDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<List<PreShipmentDTO>> GetValidPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
 
-        public async Task<bool> ValidatePreShipment(string waybill)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //        var preShipments = query.ToList();
+        //        var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                preShipment.RequestStatus = PreShipmentRequestStatus.Valid;
+        //        return await Task.FromResult(preShipmentDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                await _uow.CompleteAsync();
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<List<PreShipmentDTO>> GetCompletedPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Completed);
 
-        public async Task<bool> DeclinePreShipment(string waybill, string reason)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //        var preShipments = query.ToList();
+        //        var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
-                preShipment.DeclinedReason = reason;
+        //        return await Task.FromResult(preShipmentDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                await _uow.CompleteAsync();
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<List<PreShipmentDTO>> GetDeclinedPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Declined
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
 
-        public async Task<bool> FailPreShipment(string waybill)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //        var preShipments = query.ToList();
+        //        var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                preShipment.ProcessingStatus = PreShipmentProcessingStatus.Failed;
+        //        return await Task.FromResult(preShipmentDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                await _uow.CompleteAsync();
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
-        public async Task<bool> CreateShipmentFromPreShipment(string waybill)
-        {
-            try
-            {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
-                if (preShipment == null)
-                {
-                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
-                }
+        //public async Task<List<PreShipmentDTO>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Failed);
 
-                //shipment items
-                var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipment.PreShipmentItems);
-                var shipmentDTO = Mapper.Map<ShipmentDTO>(preShipment);
-                shipmentDTO.ShipmentItems = shipmentItems;
+        //        var preShipments = query.ToList();
+        //        var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                //create shipment
-                await _shipmentService.AddShipment(shipmentDTO);
+        //        return await Task.FromResult(preShipmentDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                preShipment.ProcessingStatus = PreShipmentProcessingStatus.Completed;
+        //public async Task<bool> ValidatePreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
 
-                await _uow.CompleteAsync();
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        preShipment.RequestStatus = PreShipmentRequestStatus.Valid;
 
-        public async Task<List<StationDTO>> GetUnmappedManifestStations()
-        {
-            try
-            {
-                var query = _uow.PreShipment.GetAllAsQueryable();
-                var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                    && s.ProcessingStatus == PreShipmentProcessingStatus.Valid).ToList();
+        //        await _uow.CompleteAsync();
+        //        return true;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                var unmappedStations = preShipments.Select(s => s.DepartureServiceCentreId).Distinct();
+        //public async Task<bool> DeclinePreShipment(string waybill, string reason)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
 
-                //Get list of StationDTO
-                var stationsObject = _uow.Station.GetAllAsQueryable().
-                    Where(s => unmappedStations.Contains(s.StationId)).ToList();
+        //        preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
+        //        preShipment.DeclinedReason = reason;
 
-                var result = Mapper.Map<List<StationDTO>>(stationsObject);
+        //        await _uow.CompleteAsync();
+        //        return true;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                return await Task.FromResult(result);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<bool> FailPreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
 
-        public async Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId)
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
-                query = query.Where(s => s.IsMapped == false && s.DepartureStationId == stationId);
+        //        preShipment.ProcessingStatus = PreShipmentProcessingStatus.Failed;
 
-                var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+        //        await _uow.CompleteAsync();
+        //        return true;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                return await Task.FromResult(preShipmentDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<bool> CreateShipmentFromPreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+        //        if (preShipment == null)
+        //        {
+        //            throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+        //        }
+
+        //        //shipment items
+        //        var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipment.PreShipmentItems);
+        //        var shipmentDTO = Mapper.Map<ShipmentDTO>(preShipment);
+        //        shipmentDTO.ShipmentItems = shipmentItems;
+
+        //        //create shipment
+        //        await _shipmentService.AddShipment(shipmentDTO);
+
+        //        preShipment.ProcessingStatus = PreShipmentProcessingStatus.Completed;
+
+        //        await _uow.CompleteAsync();
+        //        return true;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //public async Task<List<StationDTO>> GetUnmappedManifestStations()
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.GetAllAsQueryable();
+        //        var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //            && s.ProcessingStatus == PreShipmentProcessingStatus.Valid).ToList();
+
+        //        var unmappedStations = preShipments.Select(s => s.DepartureServiceCentreId).Distinct();
+
+        //        //Get list of StationDTO
+        //        var stationsObject = _uow.Station.GetAllAsQueryable().
+        //            Where(s => unmappedStations.Contains(s.StationId)).ToList();
+
+        //        var result = Mapper.Map<List<StationDTO>>(stationsObject);
+
+        //        return await Task.FromResult(result);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //public async Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId)
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
+        //        query = query.Where(s => s.IsMapped == false && s.DepartureStationId == stationId);
+
+        //        var preShipments = query.ToList();
+        //        var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+        //        return await Task.FromResult(preShipmentDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
 
         public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(string count)
@@ -699,6 +686,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
             }
             return await Task.FromResult(deliveryNumberlist);
+        }
+
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption)
+        {
+            try
+            {
+                if (searchOption == null)
+                {
+                    throw new GenericException("Phone Number or User Chanel Code needed", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                return await _uow.PreShipment.GetDropOffsForUserByUserCodeOrPhoneNo(searchOption);
+               
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

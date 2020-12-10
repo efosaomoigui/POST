@@ -15,6 +15,7 @@ namespace GIGLS.CORE.DTO.Shipments
         public string State { get; set; }
         public string IndentificationUrl { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string Location { get; set; }
 
         //IsCashOnDelivery Processing
         public string WalletNumber { get; set; }
@@ -41,5 +42,25 @@ namespace GIGLS.CORE.DTO.Shipments
         public bool IsComingFromDispatch { get; set; }
        
         public string ReceiverArea { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+        public string DeliveryNumber { get; set; }
+
+    }
+
+
+
+    public class ShipmentCollectionForContactDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string DepartsureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public int ShipmentContactId { get; set; }
+        public string ContactedBy { get; set; }
+        public int NoOfContact { get; set; }
+
+
     }
 }

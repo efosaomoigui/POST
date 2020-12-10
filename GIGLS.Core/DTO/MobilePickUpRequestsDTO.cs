@@ -21,6 +21,13 @@ namespace GIGLS.Core.DTO
         public string ServiceCentreId { get; set; }
 
         public string Reason { get; set; }
+        public string IndentificationUrl { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+        public string QRCode { get; set; }
+        public bool IsProxy { get; set; }
+        public string ProxyName { get; set; }
+        public string ProxyPhoneNumber { get; set; }
+        public string ProxyEmail { get; set; }
 
 
     }
@@ -38,4 +45,11 @@ namespace GIGLS.Core.DTO
 
 
     }
+
+    public class PartnerReAssignmentDTO
+    {
+        public string CurrentPartnerId { get; set; }
+        public string Waybill { get; set; }
+    }
+
 }

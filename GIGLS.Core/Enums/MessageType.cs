@@ -44,6 +44,21 @@
         APPREPORT, //Mail sent containing Issues reported by GIGGo Users
         HOUSTON,   //Create Message to handle CRT for Hoston Shipment
         FPEmail, //Message Type for Fleet Partner Login Access
-        CEMAIL // Account creation mail
+        CEMAIL, // Account creation mail,
+        MCS, //Message for Mobile Create Shipment
+        ENM, //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
+        DLD,  //DELAYED DELIVERY	
+        MMCS, //Message for Multiple Mobile Create Shipment
+        ARFS, // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
+        DBDO, // When discrepancy has been identified during confirmation of bank deposit
+        SRMEmail, // Message for Regional Managers when Store Keeper sends shipment to their region
+        INTLPEMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL
+        RMCS, //Message for Receiver Delivery Code
+        REQMAIL, //International Message for customer
+        REQSCA, //International Message for Service centre
+        ISTC, //International Shipments Terms and Condition shown on the App
+        AISN, //International Shipment Arrive Nigeria (Paid)
+        AISNU,  //International Shipment Arrive Nigeria (UnPaid)
+        NODESMS //International Shipments Terms and Condition shown on the App
     } 
 }

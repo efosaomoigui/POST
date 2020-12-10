@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
+
     public class Shipment : BaseDomain, IAuditable
     {
 
@@ -113,7 +114,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? InvoiceDiscountValue_display { get; set; }
         public decimal? offInvoiceDiscountvalue_display { get; set; }
 
-        //payment method
+        //payment method 
         [MaxLength(20)]
         public string PaymentMethod { get; set; }
 
@@ -152,5 +153,112 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(20)]
         public string DeliveryNumber { get; set; }
         public bool IsFromMobile { get; set; }
+
+        public bool isInternalShipment { get; set; }
+               
     }
+
+    public class IntlShipmentRequest : BaseDomain, IAuditable
+    { 
+        //Shipment Information 
+        [Key]
+        public int IntlShipmentRequestId { get; set; } 
+
+        [MaxLength(100), MinLength(5)]
+        [Index(IsUnique = true)]
+        public string RequestNumber { get; set; }
+
+        //General Details comes with role user 
+        [MaxLength(128)]
+        public string UserId { get; set; }
+        
+        [MaxLength(50)]
+        public string CustomerFirstName { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerLastName { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerType { get; set; }
+
+        public int CustomerId { get; set; }
+        public int CustomerCountryId { get; set; }
+
+        [MaxLength(500)]
+        public string CustomerAddress { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerEmail { get; set; }
+
+        [MaxLength(100)]
+        public string CustomerPhoneNumber { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerCity { get; set; }
+
+        [MaxLength(50)]
+        public string CustomerState { get; set; }
+
+        //Senders' Information
+        public decimal Value { get; set; }
+
+        //public PaymentStatus PaymentStatus { get; set; }
+
+        //Receivers Information
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentre DestinationServiceCentre { get; set; }
+        public int DestinationCountryId { get; set; }
+
+        [MaxLength(200)]
+        public string ReceiverName { get; set; }
+
+        [MaxLength(100)]
+        public string ReceiverPhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        public string ReceiverEmail { get; set; }
+
+        [MaxLength(500)]
+        public string ReceiverAddress { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverCity { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverState { get; set; }
+
+        [MaxLength(50)]
+        public string ReceiverCountry { get; set; }
+
+        //Delivery Options 
+        //public int DeliveryOptionId { get; set; }
+
+        //public DeliveryOption DeliveryOption { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
+        //Shipment Items
+        public virtual List<IntlShipmentRequestItem> ShipmentRequestItems { get; set; }  
+        public double ApproximateItemsWeight { get; set; }
+
+        public decimal GrandTotal { get; set; }
+
+        //discount information
+        public decimal? Total { get; set; }
+
+        //payment method 
+        [MaxLength(20)]
+        public string PaymentMethod { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        [MaxLength(500)]
+        public string SenderAddress { get; set; }
+
+        [MaxLength(50)]
+        public string SenderState { get; set; }
+
+        public bool IsProcessed { get; set; }
+    } 
+
 }
