@@ -351,6 +351,7 @@
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\RiderDeliveryController.cs" />
     <Compile Include="Controllers\Routes\RouteController.cs" />
+    <Compile Include="Controllers\Scanner\GIGLExpressController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
