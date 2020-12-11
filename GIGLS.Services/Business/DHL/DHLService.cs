@@ -352,7 +352,11 @@ namespace GIGLS.Services.Business.DHL
             //Receiver Address
             rateRequest.RequestedShipment.Ship.Recipient.City = shipmentDTO.ReceiverCity;
             rateRequest.RequestedShipment.Ship.Recipient.PostalCode = shipmentDTO.ReceiverPostalCode;
-            rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode;
+            //rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode;
+            rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2);
+
+            //rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2);
+
 
             int count = 1;
             foreach (var item in shipmentDTO.ShipmentItems)
