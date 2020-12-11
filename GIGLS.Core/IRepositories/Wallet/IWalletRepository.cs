@@ -12,5 +12,6 @@ namespace GIGLS.Core.IRepositories.Wallet
         IQueryable<Core.Domain.Wallet.Wallet> GetWalletsAsQueryable();
         Task<decimal> GetTotalWalletBalance(int ActiveCountryId);
         Task<List<WalletDTO>> GetOutstaningCorporatePayments();
+        Task<WalletBreakdown> GetWalletBreakdown(int activeCountryId);
     }
 }
