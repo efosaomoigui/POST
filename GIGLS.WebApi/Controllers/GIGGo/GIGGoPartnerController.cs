@@ -641,6 +641,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
+        [HttpGet]
+        [Route("getManifestsinmovementmanifestformovementdispatch")]
+        public async Task<IServiceResponse<List<MovementManifestNumberMappingDTO>>> GetManifestsInMovementManifestForMovementDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+
+                return new ServiceResponse<List<MovementManifestNumberMappingDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
         [HttpPut]
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)

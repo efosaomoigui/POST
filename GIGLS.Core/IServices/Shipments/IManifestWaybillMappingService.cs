@@ -33,6 +33,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybillForAccounts(string waybill);
         Task<List<ManifestWaybillMappingDTO>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
+        Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForDispatch();
     }
 
 

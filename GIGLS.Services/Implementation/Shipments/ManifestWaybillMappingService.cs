@@ -680,6 +680,73 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForDispatch() 
+        {
+            try
+            {
+                //get the current user
+                string userId = await _userService.GetCurrentUserId();
+
+                //get the dispatch for the user
+                // var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
+                var userDispatchs = await _uow.MovementDispatch.GetMovementmanifestDispatchForPartner(userId);
+                //int userDispatchsCount = userDispatchs.Count;
+
+                if (!userDispatchs.Any())
+                {
+                    //return an empty list
+                    return new List<MovementManifestNumberMappingDTO>();
+                }
+                else
+                {
+                    //get the active manifest for the dispatch user
+                    var manifestCodeArray = userDispatchs.Select(s => s.MovementManifestNumber).ToList();
+                    var manifestObjects = _uow.MovementManifestNumber.GetAll().Where(s =>
+                    manifestCodeArray.Contains(s.MovementManifestCode)).ToList();
+
+                    //update userDispatchs
+                    var deliveryManifestCodeArray = manifestObjects.Select(s => s.MovementManifestCode).ToList();
+                    userDispatchs = userDispatchs.Where(s => deliveryManifestCodeArray.Contains(s.MovementManifestNumber)).ToList();
+                }
+
+                List<MovementManifestNumberMappingDTO> movementManifestNumberMappingDto= new List<MovementManifestNumberMappingDTO>(); 
+
+                foreach (var manifestcode in userDispatchs)
+                {
+                    //Get all waybills mapped to a manifest
+                    var manifestWaybillMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == manifestcode.MovementManifestNumber);
+
+                    //Get manifest detail
+                    var manifestDTO = await _manifestService.GetMovementManifestByCode(manifestcode.MovementManifestNumber); 
+
+                    //map the data to the DTO
+                    var manifestMappingDto = Mapper.Map<List<MovementManifestNumberMappingDTO>>(manifestWaybillMappingList.ToList());
+
+                    //add manifest details to the dto
+                    foreach (var manifest in manifestMappingDto) 
+                    {
+                        manifest.MovementManifestDetails = manifestDTO;
+                    }
+
+                    //add it to range of array
+                    movementManifestNumberMappingDto.AddRange(manifestMappingDto);
+                }
+
+                //map all the manifest code to the first in the list 
+                if (userDispatchs.Any())
+                {
+                    var userDispatchsArray = userDispatchs.Select(u => u.MovementManifestNumber).ToList();
+                    movementManifestNumberMappingDto[0].MovementManifestCode = string.Join(", ", userDispatchsArray);
+                }
+
+                return movementManifestNumberMappingDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
         {
             try

@@ -138,7 +138,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetScanStatus();
         }
 
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        public async Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+        {
+            return await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch() 
         {
             return await _portalService.GetWaybillsInManifestForDispatch();
         }

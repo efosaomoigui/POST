@@ -2775,6 +2775,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _scanService.ScanMultipleShipment(scanList);
         }
+        
+        public async Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+        {
+            return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
+        }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
         {

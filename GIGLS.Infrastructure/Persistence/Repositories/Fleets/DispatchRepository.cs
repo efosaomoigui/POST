@@ -179,6 +179,41 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             _context = context;
         }
 
+        public Task<List<MovementDispatchDTO>> GetMovementmanifestDispatchForPartner(string userId)
+        {
+            try
+            {
+                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null);
+
+                var dispatchDto = (from r in dispatchs
+                                   join m in _context.MovementManifestNumberMapping on r.MovementManifestNumber equals m.MovementManifestCode
+                                   select new MovementDispatchDTO
+                                   {
+                                       DispatchId = r.DispatchId,
+                                       RegistrationNumber = r.RegistrationNumber,
+                                       MovementManifestNumber = r.MovementManifestNumber,
+                                       Amount = r.Amount,
+                                       RescuedDispatchId = r.RescuedDispatchId,
+                                       DriverDetail = r.DriverDetail,
+                                       DispatchedBy = r.DispatchedBy,
+                                       ServiceCentreId = r.ServiceCentreId,
+                                       DepartureId = r.DepartureId,
+                                       DestinationId = r.DestinationId,
+                                       DateCreated = r.DateCreated,
+                                       DateModified = r.DateModified,
+                                       DepartureServiceCenterId = r.DepartureServiceCenterId,
+                                       DestinationServiceCenterId = r.DestinationServiceCenterId,
+                                       IsSuperManifest = r.IsSuperManifest
+                                   }).ToList();
+
+                return Task.FromResult(dispatchDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<MovementDispatchDTO>> GetDispatchAsync(int[] serviceCentreIds)
         {
             try
