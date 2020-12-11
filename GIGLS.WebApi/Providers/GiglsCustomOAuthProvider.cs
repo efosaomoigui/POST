@@ -145,7 +145,8 @@ namespace GIGLS.WebApi.Providers
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
                     { "IsInternational", user.IsInternational.ToString()},
-                    { "BVN", userBVN}
+                    { "BVN", userBVN},
+                    { "ReferralCode", user.RegistrationReferrercode},
                 };
 
                 //get claims for the user
