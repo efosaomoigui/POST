@@ -51,6 +51,7 @@ namespace GIGLS.WebApi.Providers
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
+            var userBVN = String.Empty;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
@@ -119,8 +120,9 @@ namespace GIGLS.WebApi.Providers
                 {
                     var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                     user.Organisation = ecommerce.Name;
-                    user.FirstName = ecommerce.Name;
-                    user.LastName = ecommerce.Name;
+                    user.FirstName = ecommerce.FirstName;
+                    user.LastName = ecommerce.LastName;
+                    userBVN = ecommerce.BVN;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -142,7 +144,8 @@ namespace GIGLS.WebApi.Providers
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
-                    { "IsInternational", user.IsInternational.ToString()}
+                    { "IsInternational", user.IsInternational.ToString()},
+                    { "BVN", userBVN}
                 };
 
                 //get claims for the user

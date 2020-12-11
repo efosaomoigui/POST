@@ -745,13 +745,27 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Invalid payload";
                     return result;
                 }
+
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
                     result.Message = $"User code or rank not provided";
                     return result;
                 }
+
+
                 var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //make the BVN compulsory
+                    if (String.IsNullOrEmpty(userValidationDTO.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"User BVN not provided";
+                        return result;
+                    }
+                    company.BVN = userValidationDTO.BVN;
+                }
                 if (company == null)
                 {
                     result.Succeeded = false;
@@ -759,6 +773,7 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
                 company.Rank = userValidationDTO.Rank;
+                company.BVN = userValidationDTO.BVN;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
                 _uow.Complete();
                 result.Message = "User Rank Update Successful";
