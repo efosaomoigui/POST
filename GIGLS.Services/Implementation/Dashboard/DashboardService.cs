@@ -1045,7 +1045,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                var threeMonthsAgo = DateTime.Now.AddMonths(-3);  //One (1) Months ago
+                var threeMonthsAgo = DateTime.Now.AddMonths(-2);  //One (1) Months ago
                 startDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
@@ -1141,7 +1141,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -1155,9 +1156,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
             int currentMonth = DateTime.Now.Month;
 
-            if(dashboardDTO.DashboardAccess)
+            if (dashboardDTO.DashboardAccess)
             {
-                var threeMonthsAgo = DateTime.Now.AddMonths(-3);
+                var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                 currentMonth = threeMonthsAgo.Month;
             }
 
@@ -1209,10 +1210,72 @@ namespace GIGLS.Services.Implementation.Dashboard
 
         }
 
+        private async Task PopulateGraphDataByDateGlobal(DashboardDTO dashboardDTO, DateTime startDate, DateTime endDate)
+        {
+            var graphDataList = new List<GraphDataDTO>();
+            var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
+
+            dashboardDTO.CurrentMonthGraphData = new GraphDataDTO();
+
+            //use this date as the next year of when we launched Agility to cater for
+            //month we have not launch agility that will be empty
+            int year = 2018;
+            int startMonth = startDate.Month;
+            int endMonth = endDate.Month;
+
+            //fill GraphDataDTO by month
+            foreach (DateTime date in EachMonth(startDate, endDate))
+            {
+                var month = date.Month;
+
+                var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
+                    s => s.DateCreated.Month == month && s.IsFromMobile == false);
+
+                var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
+                if (firstDataToGetYear != null)
+                {
+                    year = firstDataToGetYear.DateCreated.Year;
+                }
+                else if (dashboardDTO.ServiceCentre != null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.ServiceCentre.DateCreated.Year;
+                }
+                else if (dashboardDTO.Station != null && dashboardDTO.ServiceCentre == null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.Station.DateCreated.Year;
+                }
+
+                var graphData = new GraphDataDTO
+                {
+                    CalculationDay = 1,
+                    ShipmentMonth = month,
+                    ShipmentYear = year,
+                    TotalShipmentByMonth = thisMonthShipments.Count(),
+                    TotalSalesByMonth = (from a in thisMonthShipments
+                                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
+                };
+
+                graphDataList.Add(graphData);
+
+                dashboardDTO.CurrentMonthGraphData.TotalShipmentByMonth += graphData.TotalShipmentByMonth;
+                dashboardDTO.CurrentMonthGraphData.TotalSalesByMonth += graphData.TotalSalesByMonth;
+            }
+
+            dashboardDTO.GraphData = graphDataList;
+            await Task.FromResult(0);
+
+        }
+
+        private IEnumerable<DateTime> EachMonth(DateTime from, DateTime thru)
+        {
+            for (var month = from.Date; month.Date <= thru.Date; month = month.AddMonths(1))
+                yield return month;
+        }
+
         private async Task PopulateGraphDataByDateInMagaya(DashboardDTO dashboardDTO)
         {
             var graphDataList = new List<GraphDataDTO>();
-            var shipmentsOrderedByServiceCenter =  dashboardDTO.MagayaShipmentOrdered;
+            var shipmentsOrderedByServiceCenter = dashboardDTO.MagayaShipmentOrdered;
             int currentMonth = DateTime.Now.Month;
 
             //month we have not launch agility that will be empty
