@@ -914,6 +914,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var station = await _stationService.GetStationById(destinationServiceCenter.StationId);
 
+                List<IntlShipmentRequestItem> intlShipmentRequestItems = new List<IntlShipmentRequestItem>();
+
                 // update details
                 existingRequest.PickupOptions = shipmentDTO.PickupOptions;
                 existingRequest.ReceiverAddress = shipmentDTO.ReceiverAddress;
@@ -926,7 +928,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 existingRequest.Value = shipmentDTO.Value;
                 existingRequest.GrandTotal = shipmentDTO.GrandTotal;
                 existingRequest.SenderState = shipmentDTO.SenderState;
-                existingRequest.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight;
+                existingRequest.ApproximateItemsWeight = 0;
                 existingRequest.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId;
                 existingRequest.DestinationServiceCentre = destinationServiceCenter;
                 existingRequest.DestinationCountryId = shipmentDTO.DestinationCountryId;
@@ -940,9 +942,54 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     var requestItem = await _uow.IntlShipmentRequestItem.GetAsync(s => s.IntlShipmentRequestItemId == shipmentRequestItemDTO.IntlShipmentRequestItemId && s.IntlShipmentRequestId == shipmentDTO.IntlShipmentRequestId);
                     if (requestItem == null)
                     {
-                        throw new GenericException("International Shipment Request Item does not exist", $"{(int)HttpStatusCode.NotFound}");
+                        //throw new GenericException("International Shipment Request Item does not exist", $"{(int)HttpStatusCode.NotFound}");
+                        var newShipmentRequestItem = new IntlShipmentRequestItem()
+                        {
+                            Description = shipmentRequestItemDTO.Description,
+                            storeName = shipmentRequestItemDTO.storeName,
+                            TrackingId = shipmentRequestItemDTO.TrackingId,
+                            ItemName = shipmentRequestItemDTO.ItemName,
+                            ShipmentType = shipmentRequestItemDTO.ShipmentType,
+                            Weight = shipmentRequestItemDTO.Weight,
+                            Nature = shipmentRequestItemDTO.Nature,
+                            Price = shipmentRequestItemDTO.Price,
+                            Quantity = shipmentRequestItemDTO.Quantity,
+                            SerialNumber = shipmentRequestItemDTO.SerialNumber,
+                            IsVolumetric = shipmentRequestItemDTO.IsVolumetric,
+                            Length = shipmentRequestItemDTO.Length,
+                            Width = shipmentRequestItemDTO.Width,
+                            Height = shipmentRequestItemDTO.Height,
+                            RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance,
+                            ItemValue = shipmentRequestItemDTO.ItemValue,
+                            IntlShipmentRequestId = existingRequest.IntlShipmentRequestId
+                        };
+                      
+                        var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
+                            (newShipmentRequestItem.ItemValue == "") ? 0 : decimal.Parse(newShipmentRequestItem.ItemValue) : newShipmentRequestItem.ItemValue;
+
+                        if (newShipmentRequestItem.RequiresInsurance)
+                        {
+                            if (intValue <= 0)
+                            {
+                                throw new Exception("After indicating that you require insurance, item value must be greater than zero!");
+                            }
+                        }
+
+                        //check for volumetric weight
+                        if (newShipmentRequestItem.IsVolumetric)
+                        {
+                            double volume = (newShipmentRequestItem.Length * newShipmentRequestItem.Height * newShipmentRequestItem.Width) / 5000;
+                            double Weight = newShipmentRequestItem.Weight > volume ? newShipmentRequestItem.Weight : volume;
+                            existingRequest.ApproximateItemsWeight += Weight;
+                           
+                        }
+                        else
+                        {
+                            existingRequest.ApproximateItemsWeight += newShipmentRequestItem.Weight;
+                        }
+                        intlShipmentRequestItems.Add(newShipmentRequestItem);
                     }
-                    if (requestItem != null)
+                    else
                     {
                         requestItem.Description = shipmentRequestItemDTO.Description;
                         requestItem.storeName = shipmentRequestItemDTO.storeName;
@@ -960,9 +1007,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         requestItem.Width = shipmentRequestItemDTO.Width;
                         requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
                         requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
+
+                        //check for volumetric weight
+                        if (requestItem.IsVolumetric)
+                        {
+                            double volume = (requestItem.Length * requestItem.Height * requestItem.Width) / 5000;
+                            double Weight = requestItem.Weight > volume ? requestItem.Weight : volume;
+                            existingRequest.ApproximateItemsWeight += Weight;
+
+                        }
+                        else
+                        {
+                            existingRequest.ApproximateItemsWeight += requestItem.Weight;
+                        }
                     }
                 }
-
+                _uow.IntlShipmentRequestItem.AddRange(intlShipmentRequestItems);
                 await _uow.CompleteAsync();
                 return true;
             }
