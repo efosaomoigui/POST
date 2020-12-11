@@ -263,6 +263,7 @@ namespace GIGLS.Services.Implementation.User
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
             user.UserName = userDto.Username;
+            user.RegistrationReferrercode = userDto.RegistrationReferrercode;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
