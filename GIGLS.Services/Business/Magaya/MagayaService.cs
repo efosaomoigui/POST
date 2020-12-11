@@ -413,7 +413,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             {
                                 waybillNumber = mDto.WarehouseReceipt.Number,
                                 action = "pay for shipment"
-                            }
+                            },
+                            MesageActions = MessageAction.PAYFORWAYBILL
                         };
 
                         client.BaseAddress = new Uri(apiBaseUri);
