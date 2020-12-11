@@ -888,5 +888,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getcodshipments")]
+        public async Task<IServiceResponse<List<CODShipmentDTO>>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCODShipments(baseFilterCriteria);
+                return new ServiceResponse<List<CODShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
     }
 }

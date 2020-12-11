@@ -871,6 +871,107 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         }
 
+        public async Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO)
+        {
+            try
+            {
+                if (shipmentDTO == null)
+                {
+                    throw new GenericException("NULL INPUT");
+                }
+
+                //validate the input
+                if (!shipmentDTO.ShipmentRequestItems.Any())
+                {
+                    throw new GenericException("Items cannot be empty");
+                }
+
+                var existingRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == requestNumber);
+                if (existingRequest == null)
+                {
+                    throw new GenericException("International Shipment Request does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else
+                {
+                    var currentUserId = await _userService.GetCurrentUserId();
+
+                    if (existingRequest.UserId != currentUserId)
+                    {
+                        throw new GenericException("This International Shipment Request was not created by this user", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
+                    if (existingRequest.IsProcessed)
+                    {
+                        throw new GenericException("International Shipment Request already processed", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
+                var station = await _stationService.GetStationById(shipmentDTO.StationId);
+
+                var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
+                if(destinationServiceCenter == null)
+                {
+                    throw new GenericException("Destination Service Center does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                // update details
+                existingRequest.PickupOptions = shipmentDTO.PickupOptions;
+                existingRequest.ReceiverAddress = shipmentDTO.ReceiverAddress;
+                existingRequest.ReceiverCity = shipmentDTO.ReceiverCity;
+                existingRequest.ReceiverName = shipmentDTO.ReceiverName;
+                existingRequest.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber;
+                existingRequest.ReceiverEmail = shipmentDTO.ReceiverEmail;
+                existingRequest.ReceiverState = shipmentDTO.ReceiverState;
+                existingRequest.ReceiverCountry = shipmentDTO.ReceiverCountry;
+                existingRequest.Value = shipmentDTO.Value;
+                existingRequest.GrandTotal = shipmentDTO.GrandTotal;
+                existingRequest.SenderState = shipmentDTO.SenderState;
+                existingRequest.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight;
+                existingRequest.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId;
+                existingRequest.DestinationServiceCentre = destinationServiceCenter;
+                existingRequest.DestinationCountryId = shipmentDTO.DestinationCountryId;
+                existingRequest.ReceiverCountry = station.Country;
+                existingRequest.DestinationCountryId = Convert.ToInt32(station.Country);
+                existingRequest.ReceiverCountry = shipmentDTO.ReceiverCountry;
+
+
+                foreach (var shipmentRequestItemDTO in shipmentDTO.ShipmentRequestItems)
+                {
+                    var requestItem = await _uow.IntlShipmentRequestItem.GetAsync(s => s.IntlShipmentRequestItemId == shipmentRequestItemDTO.IntlShipmentRequestItemId && s.IntlShipmentRequestId == shipmentRequestItemDTO.IntlShipmentRequestId);
+                    if (requestItem == null)
+                    {
+                        throw new GenericException("International Shipment Request Item does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    }
+                    if (requestItem != null)
+                    {
+                        requestItem.Description = shipmentRequestItemDTO.Description;
+                        requestItem.storeName = shipmentRequestItemDTO.storeName;
+                        requestItem.TrackingId = shipmentRequestItemDTO.TrackingId;
+                        requestItem.ItemName = shipmentRequestItemDTO.ItemName;
+                        requestItem.ShipmentType = shipmentRequestItemDTO.ShipmentType;
+                        requestItem.Weight = shipmentRequestItemDTO.Weight;
+                        requestItem.Nature = shipmentRequestItemDTO.Nature;
+                        requestItem.Price = shipmentRequestItemDTO.Price;
+                        requestItem.Quantity = shipmentRequestItemDTO.Quantity;
+                        requestItem.SerialNumber = shipmentRequestItemDTO.SerialNumber;
+                        requestItem.IsVolumetric = shipmentRequestItemDTO.IsVolumetric;
+                        requestItem.Length = shipmentRequestItemDTO.Length;
+                        requestItem.Height = shipmentRequestItemDTO.Height;
+                        requestItem.Width = shipmentRequestItemDTO.Width;
+                        requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
+                        requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
+                    }
+                }
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IntlShipmentRequest> MapIntlShipmentRequest(IntlShipmentRequestDTO r)
         {
             var serviceCenters = await _uow.ServiceCentre.GetServiceCentresByStationId(r.StationId);

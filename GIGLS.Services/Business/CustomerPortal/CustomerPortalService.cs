@@ -2804,10 +2804,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
-            if (waybill.Contains("AWR"))
-            {
-                throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            }
+            //if (waybill.Contains("AWR"))
+            //{
+            //    throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            //}
 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
@@ -2969,6 +2969,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
+
+        public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+
+            return requests;
+        }
+
 
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
