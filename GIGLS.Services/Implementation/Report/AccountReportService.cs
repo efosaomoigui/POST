@@ -14,6 +14,7 @@ using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -276,9 +277,9 @@ namespace GIGLS.Services.Implementation.Report
             }
             var earnings = new List<FinancialReportDTO>();
 
-            if(accountFilter.CompanyType == ReportSource.Intl.ToString())
+            if (accountFilter.ServiceCenterId == 3)
             {
-                earnings = await _uow.FinancialReport.GetIntlReportBreakdown(accountFilter);
+                earnings = await _uow.FinancialReport.GetFinancialReportBreakdownForDemurrage(accountFilter);
             }
             else
             {
@@ -286,6 +287,15 @@ namespace GIGLS.Services.Implementation.Report
             }
 
             return earnings;
+
+        }
+
+        //Get Each Wallet Payment Breakdown
+        public async Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            var result = await _uow.WalletPaymentLog.GetWalletPaymentLogBreakdown(dashboardFilter);
+
+            return result;
 
         }
 
