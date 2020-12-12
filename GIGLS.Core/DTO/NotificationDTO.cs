@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO
 {
@@ -9,5 +10,6 @@ namespace GIGLS.Core.DTO
         public string Message { get; set; }
         public string UserId { get; set; }
         public bool IsRead { get; set; }
+        public MessageAction MesageActions { get; set; }
     }
 }
