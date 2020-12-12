@@ -636,7 +636,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         foreach (var item in shipmentReq.ShipmentRequestItems)
                         {
                             var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
-                            var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
+                            //var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
+                            var intValue = item.ItemValue;
                             totalInsuranceCharge += (intValue) * (percentVal / 100);
                         }
                     }
@@ -837,8 +838,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
-                    var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String") ?
-                        (shipmentItem.ItemValue == "") ? 0 : decimal.Parse(shipmentItem.ItemValue) : shipmentItem.ItemValue;
+                    //var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String") ?
+                    //    (shipmentItem.ItemValue == "") ? 0 : decimal.Parse(shipmentItem.ItemValue) : shipmentItem.ItemValue;
+
+                    var intValue = shipmentItem.ItemValue;
 
                     if (shipmentItem.RequiresInsurance)
                     {
@@ -855,7 +858,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                         newShipment.ApproximateItemsWeight += Weight;
                         newShipment.GrandTotal += shipmentItem.Price;
-                        //itemName += shipmentItem.ItemName + " ";
                     }
                     else
                     {
@@ -1040,6 +1042,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ReceiverEmail = r.ReceiverEmail,
                 ReceiverName = r.ReceiverName,
                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                ItemSenderfullName = r.ItemSenderfullName,
                 UserId = r.UserId,
                 Value = r.Value,
                 GrandTotal = r.GrandTotal,

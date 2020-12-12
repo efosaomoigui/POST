@@ -242,6 +242,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int IntlShipmentRequestId { get; set; }
 
         public string RequestNumber { get; set; }
+        public string ItemSenderfullName { get; set; }
 
         //General Details comes with role user 
         public string UserId { get; set; }
@@ -316,6 +317,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
+        public int ItemValue { get; set; }
     }
 
 

@@ -53,6 +53,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual IntlShipmentRequest Shipment { get; set; }
 
         public bool RequiresInsurance { get; set; } 
-        public dynamic ItemValue { get; set; } 
+        public int ItemValue { get; set; } 
     }
 }
