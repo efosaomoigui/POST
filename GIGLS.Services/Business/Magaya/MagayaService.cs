@@ -1001,9 +1001,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             ItemValue = shipmentRequestItemDTO.ItemValue,
                             IntlShipmentRequestId = existingRequest.IntlShipmentRequestId
                         };
-                      
-                        var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
-                            (newShipmentRequestItem.ItemValue == "") ? 0 : decimal.Parse(newShipmentRequestItem.ItemValue) : newShipmentRequestItem.ItemValue;
+
+                        //var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
+                        //    (newShipmentRequestItem.ItemValue == "") ? 0 : decimal.Parse(newShipmentRequestItem.ItemValue) : newShipmentRequestItem.ItemValue;
+                        var intValue = newShipmentRequestItem.ItemValue;
 
                         if (newShipmentRequestItem.RequiresInsurance)
                         {
