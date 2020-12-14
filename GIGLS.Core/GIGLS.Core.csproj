@@ -537,6 +537,7 @@
     <Compile Include="Enums\MaintenanceType.cs" />
     <Compile Include="Enums\ManifestStatus.cs" />
     <Compile Include="Enums\ManifestType.cs" />
+    <Compile Include="Enums\MessageAction.cs" />
     <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\MessagingLogStatus.cs" />
     <Compile Include="Enums\MobilePickUpRequestStatus.cs" />
