@@ -59,6 +59,7 @@
         ISTC, //International Shipments Terms and Condition shown on the App
         AISN, //International Shipment Arrive Nigeria (Paid)
         AISNU,  //International Shipment Arrive Nigeria (UnPaid)
-        NODESMS //International Shipments Terms and Condition shown on the App
+        NODESMS, //International Shipments Terms and Condition shown on the App
+        IDH //International Shipment Departs Hub
     } 
 }
