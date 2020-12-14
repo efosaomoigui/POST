@@ -4105,6 +4105,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
 
+                //For Corporate Customers, Pay for their shipments through wallet immediately
+                if (CustomerType.Company.ToString() == shipmentDTO.CustomerType)
+                {
+                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                    var wallet = walletEnumeration.FirstOrDefault();
+
+                    if (wallet != null)
+                    {
+                        await _paymentService.ProcessPayment(new PaymentTransactionDTO()
+                        {
+                            PaymentType = PaymentType.Wallet,
+                            TransactionCode = wallet.WalletNumber,
+                            Waybill = newShipment.Waybill
+                        });
+                    }
+                }
+
                 return newShipment;
             }
             catch (Exception ex)
