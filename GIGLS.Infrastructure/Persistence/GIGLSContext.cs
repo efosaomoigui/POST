@@ -333,21 +333,21 @@ namespace GIGLS.Infrastructure.Persistence
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        var currentDateTime = DateTime.UtcNow;
+                        var currentDateTime = DateTime.Now;
                         entry.Entity.DateCreated = currentDateTime;
                         entry.Entity.DateModified = currentDateTime;
                         entry.Entity.IsDeleted = false;
                         break;
 
                     case EntityState.Modified:
-                        entry.Entity.DateModified = DateTime.UtcNow;
+                        entry.Entity.DateModified = DateTime.Now;
                         //entry.Property(e => e.RowVersion).OriginalValue =
                         //    entry.Property(e => e.RowVersion).CurrentValue;
                         break;
 
                     case EntityState.Deleted:
                         entry.State = EntityState.Modified;
-                        entry.Entity.DateModified = DateTime.UtcNow;
+                        entry.Entity.DateModified = DateTime.Now;
                         entry.Entity.IsDeleted = true;
                         break;
                 }

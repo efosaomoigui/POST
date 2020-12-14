@@ -59,9 +59,9 @@ namespace GIGLS.Core.DTO.DHL
     {
         public int NumberOfPieces { get; set; }
         public string Description { get; set; }
-        public string CountryOfManufacture { get; set; }
-        public int Quantity { get; set; }
-        public int UnitPrice { get; set; }
+        //public string CountryOfManufacture { get; set; }
+        //public int Quantity { get; set; }
+        //public int UnitPrice { get; set; }
         public int CustomsValue { get; set; }
     }
 

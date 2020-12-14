@@ -3955,7 +3955,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Add DHL International shipment 
-        public async Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
@@ -3997,8 +3997,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.IsInternational = true;
 
                 //4. Add the Shipment to Agility
-                await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
-                return shipmentDTO;
+                var createdShipment = await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
+                return createdShipment;
             }
             catch (Exception ex)
             {
@@ -4058,6 +4058,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //Get Approximate Items Weight
+                foreach (var item in shipmentDTO.ShipmentItems)
+                {
+                    shipmentDTO.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight + item.Weight; 
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
@@ -4106,7 +4112,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
         private async Task<ShipmentDTO> CreateInternationalShipmentOnAgility(ShipmentDTO shipmentDTO)
         {

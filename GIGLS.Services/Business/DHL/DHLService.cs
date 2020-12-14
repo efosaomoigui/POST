@@ -135,7 +135,7 @@ namespace GIGLS.Services.Business.DHL
         private ShipmentRequestedPayload GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var shipmentPayload = new ShipmentRequestedPayload();
-            var shipmentInfo = GetShipmentInfo(shipmentDTO);
+            var shipmentInfo = GetShipmentInfo();
             var internationalDetail = GetInternationalDetail(shipmentDTO);
             var packages = GetPackages(shipmentDTO);
             string timeStamp = GetShipTimeStamp();
@@ -188,7 +188,7 @@ namespace GIGLS.Services.Business.DHL
 
                 RequestedPackagesDTO requestedPackagesDTO = new RequestedPackagesDTO
                 {
-                    CustomerReferences = item.Description_s,
+                    CustomerReferences = "Piece "  + count, // item.Description_s,
                     number = count,
                     Weight = (decimal)item.Weight,
                     Dimensions = dimensions
@@ -211,7 +211,7 @@ namespace GIGLS.Services.Business.DHL
             return internationalDetail;
         }
 
-        private ShipmentInfoDTO GetShipmentInfo(InternationalShipmentDTO shipmentDTO)
+        private ShipmentInfoDTO GetShipmentInfo()
         {
             ShipmentInfoDTO shipmentInfo = new ShipmentInfoDTO
             {
@@ -228,7 +228,7 @@ namespace GIGLS.Services.Business.DHL
             {
                 Description = shipmentDTO.Description,
                 NumberOfPieces = shipmentDTO.ShipmentItems.Count,
-                Quantity = (int)shipmentDTO.ApproximateItemsWeight,
+                //Quantity = (int)shipmentDTO.ApproximateItemsWeight,
                 CustomsValue = (int)shipmentDTO.DeclarationOfValueCheck
             };
             return commodity;

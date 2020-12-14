@@ -80,7 +80,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
 
-        Task<InternationalShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
+        Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
         Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
     }
 

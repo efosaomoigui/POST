@@ -907,12 +907,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("addinternationalshipment")]
-        public async Task<IServiceResponse<InternationalShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        public async Task<IServiceResponse<ShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _service.AddInternationalShipment(shipmentDTO);
-                return new ServiceResponse<InternationalShipmentDTO>
+                return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
                 };
