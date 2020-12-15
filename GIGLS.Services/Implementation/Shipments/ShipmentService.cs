@@ -4133,8 +4133,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<ShipmentDTO> CreateInternationalShipmentOnAgility(ShipmentDTO shipmentDTO)
         {
             //Make GIGGO as Destination Service centre or Create a new service centre for this
-            var destiantion = await _userService.GetGIGGOServiceCentre();
-            shipmentDTO.DestinationServiceCentreId = destiantion.ServiceCentreId;
+            var destination = await _userService.GetInternationalOutBoundServiceCentre();
+            shipmentDTO.DestinationServiceCentreId = destination.ServiceCentreId;
 
             //set HOME SERVICE ON-FORWARDING LOS (LPPO) as default Delivery option for international shipment
             shipmentDTO.DeliveryOptionId = 6;
@@ -4214,34 +4214,10 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.Vat = shipmentDTO.vatvalue_display;
             newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
 
-            ////--start--///Set the DepartureCountryId and DestinationCountryId
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
-            //var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
-
-            //check if the shipment contains cod
-            //if (newShipment.IsCashOnDelivery == true)
-            //{
-            //    //collect the cods and add to CashOnDeliveryRegisterAccount()
-            //    var cashondeliveryentity = new CashOnDeliveryRegisterAccount
-            //    {
-            //        Amount = newShipment.CashOnDeliveryAmount ?? 0,
-            //        CODStatusHistory = CODStatushistory.Created,
-            //        Description = "Cod From Sales",
-            //        ServiceCenterId = 0,
-            //        Waybill = newShipment.Waybill,
-            //        UserId = newShipment.UserId,
-            //        DepartureServiceCenterId = newShipment.DepartureServiceCentreId,
-            //        DestinationCountryId = destinationCountry.CountryId
-            //    };
-
-            //    _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
-            //}
-
             newShipment.DepartureCountryId = departureCountry.CountryId;
-            //newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
-            ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             //Make GiGo Shipments not available for grouping
             if (shipmentDTO.IsGIGGOExtension)
@@ -4263,8 +4239,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //set before returning
             shipmentDTO.DepartureCountryId = departureCountry.CountryId;
-          //  shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
-
             return shipmentDTO;
         }
     }
