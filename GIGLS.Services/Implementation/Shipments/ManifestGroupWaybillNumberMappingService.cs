@@ -476,8 +476,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var message = new MovementManifestMessageDTO
                 {
                     MovementManifestCode = movementmanifestCode,
-                    DepartureServiceCentre = currentServiceCentre[0],
-                    DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
+                    DepartureServiceCentre = currentServiceCentre[0]
+                    //DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
                 };
 
                 //message.QRCode = deliveryNumber.SenderCode;
