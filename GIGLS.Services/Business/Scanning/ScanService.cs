@@ -159,11 +159,10 @@ namespace GIGLS.Services.Business.Scanning
                             await UpdateShipmentPackageForServiceCenter(shipment);
                         }
 
-                        //Send SMS When Intl Shipment arrives Nigeria
-                        if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && shipment.IsInternational == true)
+                        //Intl Shipments Emails 
+                        if (shipment.IsInternational == true)
                         {
                             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
-
                             var messageDTO = new ShipmentDTO
                             {
                                 CustomerType = shipment.CustomerType,
@@ -172,6 +171,7 @@ namespace GIGLS.Services.Business.Scanning
                                 Waybill = shipment.Waybill,
                                 PickupOptions = shipment.PickupOptions,
                                 ReceiverEmail = shipment.ReceiverEmail,
+                                GrandTotal = shipment.GrandTotal,
                                 CustomerDetails = new CustomerDTO
                                 {
                                     PhoneNumber = shipment.ReceiverPhoneNumber,
@@ -179,7 +179,7 @@ namespace GIGLS.Services.Business.Scanning
                                 },
                                 DepartureServiceCentre = new ServiceCentreDTO
                                 {
-                                    
+
                                 },
                                 DestinationServiceCentre = new ServiceCentreDTO
                                 {
@@ -187,15 +187,26 @@ namespace GIGLS.Services.Business.Scanning
                                 }
                             };
 
-                            if (invoice.PaymentStatus == PaymentStatus.Paid)
-                            {
-                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISN);
-                            }
-                            else
+                            //Send Email When Intl Shipment arrives Nigeria
+                            if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && invoice.PaymentStatus != PaymentStatus.Paid)
                             {
                                 await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISNU);
-                            }
 
+                            }
+                            else if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
+                            {
+                                var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == scan.WaybillNumber);
+                                messageDTO.SenderCode = shipment.PickupOptions == PickupOptions.HOMEDELIVERY ? deliveryCode.ReceiverCode : deliveryCode.SenderCode;
+
+                                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                                {
+                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDHD);
+                                }
+                                else
+                                {
+                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDSC);
+                                }
+                            }
                         }
 
                         return true;
@@ -257,9 +268,9 @@ namespace GIGLS.Services.Business.Scanning
             var manifest = await _manifestService.GetManifestCodeForScan(scan.WaybillNumber);
 
             //Enter only if manifest in super manifest is not found
-            if(scan.ShipmentScanStatus == ShipmentScanStatus.MNT && manifest != null)
+            if (scan.ShipmentScanStatus == ShipmentScanStatus.MNT && manifest != null)
             {
-                if(manifest.HasSuperManifest == true)
+                if (manifest.HasSuperManifest == true)
                 {
                     manifest.SuperManifestStatus = SuperManifestStatus.Pending;
                     manifest.SuperManifestCode = null;
@@ -274,7 +285,7 @@ namespace GIGLS.Services.Business.Scanning
             else if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC && manifest != null)
             {
                 //do this for super flow 
-                await ScanACCForManifest(scan.WaybillNumber,scan, scan.ShipmentScanStatus.ToString());
+                await ScanACCForManifest(scan.WaybillNumber, scan, scan.ShipmentScanStatus.ToString());
                 await CheckAndCreateManifestEntriesForSuperManifest(manifest);
 
             }
@@ -751,7 +762,7 @@ namespace GIGLS.Services.Business.Scanning
 
 
 
-            
+
         }
 
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
@@ -1145,7 +1156,7 @@ namespace GIGLS.Services.Business.Scanning
             //}
 
             manifest.DepartureServiceCentreId = currentUserSercentreId;
-           // manifest.DestinationServiceCentreId = dispatch.DestinationServiceCenterId;
+            // manifest.DestinationServiceCentreId = dispatch.DestinationServiceCenterId;
             manifest.SuperManifestStatus = SuperManifestStatus.ArrivedScan;
             manifest.DispatchedById = null;
             manifest.HasSuperManifest = false;
@@ -1192,7 +1203,7 @@ namespace GIGLS.Services.Business.Scanning
                     //use it when creating the shipment
                     var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentPackagePriceId);
                     var serviceCenterPackage = await _uow.ServiceCenterPackage.GetAsync(x => x.ShipmentPackageId == shipmentPackage.ShipmentPackagePriceId && x.ServiceCenterId == currentServiceCenterId);
-                    
+
                     if (serviceCenterPackage == null)
                     {
                         var newshipmentPackage = new ServiceCenterPackage
@@ -1208,7 +1219,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         serviceCenterPackage.InventoryOnHand += shipmentItem.Quantity;
                     }
-                    
+
                     var newInflow = new ShipmentPackagingTransactions
                     {
                         ServiceCenterId = currentServiceCenterId,
@@ -1218,7 +1229,7 @@ namespace GIGLS.Services.Business.Scanning
                         UserId = user,
                         PackageTransactionType = PackageTransactionType.InflowToServiceCentre
                     };
-                   
+
                     packageInflow.Add(newInflow);
                 }
 
