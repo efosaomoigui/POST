@@ -565,9 +565,22 @@ namespace GIGLS.Services.Implementation.Shipments
             return filteredRegionalManagers;
         }
 
-        //Send email to customer when international shipment has arrived Nigeria
+        //Send email to sender when international shipment has arrived Nigeria
         public async Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType)
         {
+            if(messageType == MessageType.AISNU)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+                shipmentDTO.CustomerDetails.Email = customerObj.Email;
+                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
+            }
+
             //send message
             await _messageSenderService.SendGenericEmailMessage(messageType, shipmentDTO);
 

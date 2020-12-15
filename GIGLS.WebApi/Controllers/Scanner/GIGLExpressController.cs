@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
@@ -47,10 +48,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IPaymentService _paymentService;
         private readonly ICustomerPortalService _portalService;
         private readonly IShipmentCollectionService _shipmentCollectionService;
+        private readonly IServiceCentreService _serviceCentreService;
+        private readonly IUserService _userService;
+        private readonly ICountryService _countryService;
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService) : base(nameof(MobileScannerController))
+            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -61,6 +65,9 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _paymentService = paymentService;
             _portalService = portalService;
             _shipmentCollectionService = shipmentCollectionService;
+            _serviceCentreService = serviceCentreService;
+            _userService = userService;
+            _countryService = countryService;
 
         }
 
@@ -354,8 +361,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpPut]
         [Route("releaseshipment")]
-        public async Task<IServiceResponse<bool>> ReleaseShipment(ShipmentCollectionDTO shipmentCollection)
+        public async Task<IServiceResponse<bool>> ReleaseShipment(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
+
+            //map to real shipmentdto
+            var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
             shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
             if (shipmentCollection.IsComingFromDispatch)
             {
@@ -370,6 +380,40 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
+        [HttpGet]
+        [Route("destinationcountry")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetDestinationCountry()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries = await _countryService.GetActiveCountries();
+
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = countries
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecenterbycountry/{countryId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresWithoutHUBForNonLagosStation(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //2. priviledged users service centres
+                var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+
+                var centres = await _serviceCentreService.GetServiceCentresWithoutHUBForNonLagosStation(usersServiceCentresId[0], countryId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+
 
     }
 }
