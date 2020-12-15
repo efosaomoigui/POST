@@ -172,6 +172,10 @@ namespace GIGLS.Services.Business.Scanning
                                 PickupOptions = shipment.PickupOptions,
                                 ReceiverEmail = shipment.ReceiverEmail,
                                 GrandTotal = shipment.GrandTotal,
+                                DepartureCountryId = shipment.DepartureCountryId,
+                                DestinationCountryId = shipment.DestinationCountryId,
+                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
                                 CustomerDetails = new CustomerDTO
                                 {
                                     PhoneNumber = shipment.ReceiverPhoneNumber,
