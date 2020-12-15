@@ -78,6 +78,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ReleaseMovementManifest(string movementmanifestcode, string code);
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
+        Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria);
+        Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs);
 
     }
 
