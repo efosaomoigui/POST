@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
@@ -266,6 +267,22 @@ namespace GIGLS.WebApi.Controllers.Report
                 return new ServiceResponse<List<FinancialReportDTO>>
                 {
                     Object = financialreport
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("walletfundingbreakdown")]
+        public async Task<IServiceResponse<List<WalletPaymentLogView>>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _accountService.GetWalletPaymentLogBreakdown(dashboardFilter);
+
+                return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = report
                 };
             });
         }
