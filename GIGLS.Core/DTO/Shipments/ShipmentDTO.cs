@@ -325,4 +325,20 @@ namespace GIGLS.Core.DTO.Shipments
         public string ShipmentStatus { get; set; }
         public string ShipmentScanStatus { get; set; }
     }
+
+
+    public class CargoMagayaShipmentDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public decimal Total { get; set; }
+        public decimal GrandTotal { get; set; }
+        public double ApproximateItemsWeight { get; set; }
+        public string CustomerType { get; set; }
+        public string UserName { get; set; }
+        public bool IsCargoed { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+    }
 }

@@ -3934,7 +3934,48 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        public async Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var shipments = await _uow.Shipment.GetCargoMagayaShipments(baseFilterCriteria);
+                return shipments;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+        public async Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO>  cargoMagayaShipmentDTOs)
+        {
+            bool result = true;
+            try
+            {
+                if (cargoMagayaShipmentDTOs.Any())
+                {
+                    var waybills = cargoMagayaShipmentDTOs.Select(x => x.Waybill);
+                    var waybillInfo = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    foreach (var item in cargoMagayaShipmentDTOs)
+                    {
+                        // update shipment to cargoed
+                        var shipmentItem = waybillInfo.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
+                        shipmentItem.IsCargoed = true;
+                        shipmentItem.DateModified = DateTime.Now;
+                        var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
+                        //send an email to receiver
+                        _shipmentTrackingService.SendEmailToCustomerForIntlShipment(shipmentDTO, MessageType.REQMAIL);
+                    }
+                    _uow.Complete();
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                throw;
+            }
+        }
 
     }
 }

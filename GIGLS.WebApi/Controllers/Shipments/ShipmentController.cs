@@ -902,5 +902,33 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getmagayashipmentstocargo")]
+        public async Task<IServiceResponse<List<CargoMagayaShipmentDTO>>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCargoMagayaShipments(baseFilterCriteria);
+                return new ServiceResponse<List<CargoMagayaShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("cargomagayashipments")]
+        public async Task<IServiceResponse<bool>> GetCargoMagayaShipments(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCargoed = await _service.MarkMagayaShipmentsAsCargoed(cargoMagayaShipmentDTOs);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipmentCargoed
+                };
+            });
+        }
     }
 }
