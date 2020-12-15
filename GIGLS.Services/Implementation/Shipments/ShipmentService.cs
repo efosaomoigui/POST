@@ -3962,9 +3962,35 @@ namespace GIGLS.Services.Implementation.Shipments
                         var shipmentItem = waybillInfo.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
-                        var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
+                        var messageDTO = new ShipmentDTO
+                        {
+                            CustomerType = shipmentItem.CustomerType,
+                            CustomerId = shipmentItem.CustomerId,
+                            ReceiverName = shipmentItem.ReceiverName,
+                            Waybill = shipmentItem.Waybill,
+                            PickupOptions = shipmentItem.PickupOptions,
+                            ReceiverEmail = shipmentItem.ReceiverEmail,
+                            GrandTotal = shipmentItem.GrandTotal,
+                            DepartureCountryId = shipmentItem.DepartureCountryId,
+                            DepartureServiceCentreId = shipmentItem.DepartureServiceCentreId,
+                            DestinationCountryId = shipmentItem.DestinationCountryId,
+                            DestinationServiceCentreId = shipmentItem.DestinationServiceCentreId,
+                            CustomerDetails = new CustomerDTO
+                            {
+                                PhoneNumber = shipmentItem.ReceiverPhoneNumber,
+                                Email = shipmentItem.ReceiverEmail
+                            },
+                            DepartureServiceCentre = new ServiceCentreDTO
+                            {
+
+                            },
+                            DestinationServiceCentre = new ServiceCentreDTO
+                            {
+
+                            }
+                        };
                         //send an email to receiver
-                        _shipmentTrackingService.SendEmailToCustomerForIntlShipment(shipmentDTO, MessageType.REQMAIL);
+                        await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IDH);
                     }
                     _uow.Complete();
                 }
