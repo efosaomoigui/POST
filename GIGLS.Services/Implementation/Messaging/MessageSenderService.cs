@@ -1028,7 +1028,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "GrandTotal",
                     "CurrencySymbol",
                     "Departure",
-                    "Destination"
+                    "Destination",
+                    "DeliveryCode"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1053,6 +1054,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[8] = DateTime.Now.AddDays(14).ToString("dd/MM/yyyy");
                 strArray[9] = intlDTO.PickupOptions.ToString();
                 strArray[10] = intlDTO.GrandTotal.ToString();
+                strArray[14] = intlDTO.SenderCode;
                
 
                 if(intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
