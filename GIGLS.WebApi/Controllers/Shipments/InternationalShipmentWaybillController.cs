@@ -23,7 +23,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
-        [Route("")]
+        [Route("datefilter")]
         public async Task<IServiceResponse<List<InternationalShipmentWaybillDTO>>> GetInternationalShipmentWaybills(DateFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
