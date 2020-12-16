@@ -16,16 +16,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
-        public ServiceCentreService()
+        public ServiceCentreService(IUnitOfWork uow)
         {
-
-        }
-        public ServiceCentreService(IGlobalPropertyService globalPropertyService, IUnitOfWork uow)
-        {
-            _globalPropertyService = globalPropertyService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -208,6 +202,27 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 if (centre == null)
                 {
                     throw new GenericException("Error: A GIGGO Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre()
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(s => s.Code.ToLower() == "iob", "Station");
+                if (centre == null)
+                {
+                    throw new GenericException("Error: International Out Bound Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
