@@ -652,7 +652,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsDeleted = false;
                 newCompany.DateCreated = DateTime.UtcNow;
                 newCompany.DateModified = DateTime.UtcNow;
-                newCompany.IsInternational = true;
+                newCompany.IsInternational = company.isInternational;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
                 newCompany.CompanyType = CompanyType.Ecommerce;
