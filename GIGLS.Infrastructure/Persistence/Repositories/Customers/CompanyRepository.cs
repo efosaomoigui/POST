@@ -186,7 +186,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             try
             {
                 var companies = Context.Company.Where(x => x.CompanyType == companyType && 
-                (   x.Name.Contains(searchOption.SearchData) || x.PhoneNumber.Contains(searchOption.SearchData) || x.Email.Contains(searchOption.SearchData))).ToList();
+                (   x.Name.Contains(searchOption.SearchData) || x.PhoneNumber.Contains(searchOption.SearchData) || x.Email.Contains(searchOption.SearchData) || x.CustomerCode.Contains(searchOption.SearchData))).ToList();
                 var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
                 return Task.FromResult(companiesDto);
             }

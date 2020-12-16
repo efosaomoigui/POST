@@ -413,7 +413,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpPost]
+        [Route("getshipmentprice")]
+        public async Task<IServiceResponse<NewShipmentDTO>> GetShipmentPrice(NewShipmentDTO newShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var userCountryId = await _pricing.GetUserCountryId();
+                newShipmentDTO.DepartureCountryId = userCountryId;
+                var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
 
+                return new ServiceResponse<NewShipmentDTO>
+                {
+                    Object = price
+                };
+            });
+        }
 
     }
 }
