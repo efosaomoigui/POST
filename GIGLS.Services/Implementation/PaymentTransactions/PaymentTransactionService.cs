@@ -35,7 +35,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IFinancialReportService _financialReportService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, 
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
         {
             _uow = uow;
@@ -161,19 +161,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
             await _uow.CompleteAsync();
 
-            //Add to Financial Reports
-            var financialReport = new FinancialReportDTO
-            {
-                Source = ReportSource.Agility,
-                Waybill = shipment.Waybill,
-                PartnerEarnings = 0.0M,
-                GrandTotal = invoiceEntity.Amount,
-                Earnings = invoiceEntity.Amount,
-                Demurrage = 0.00M,
-                CountryId = invoiceEntity.CountryId
-            };
-            await _financialReportService.AddReport(financialReport);
-
             //QR Code
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
@@ -183,6 +170,46 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 Waybill = shipment.Waybill,
                 QRCode = deliveryNumber.SenderCode
             };
+
+            if(shipment.DepartureCountryId == 1)
+            {
+                //Add to Financial Reports
+                var financialReport = new FinancialReportDTO
+                {
+                    Source = ReportSource.Agility,
+                    Waybill = shipment.Waybill,
+                    PartnerEarnings = 0.0M,
+                    GrandTotal = invoiceEntity.Amount,
+                    Earnings = invoiceEntity.Amount,
+                    Demurrage = 0.00M,
+                    CountryId = invoiceEntity.CountryId
+                };
+                await _financialReportService.AddReport(financialReport);
+            }
+            else
+            {
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
+
+                double amountToDebitDouble = (double)invoiceEntity.Amount * countryRateConversion.Rate;
+
+                var amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+
+                //Add to Financial Reports
+                var financialReport = new FinancialReportDTO
+                {
+                    Source = ReportSource.Intl,
+                    Waybill = shipment.Waybill,
+                    PartnerEarnings = 0.0M,
+                    GrandTotal = amountToDebit,
+                    Earnings = amountToDebit,
+                    Demurrage = 0.00M,
+                    ConversionRate = countryRateConversion.Rate,
+                    CountryId = shipment.DestinationCountryId
+                };
+                await _financialReportService.AddReport(financialReport);
+
+            }
+
 
             if (shipment.DepartureServiceCentreId == 309)
             {
@@ -428,7 +455,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             result = true;
             return result;
-            
+
         }
 
         private async Task<decimal> GetEcommerceWalletLimit(Shipment shipment)

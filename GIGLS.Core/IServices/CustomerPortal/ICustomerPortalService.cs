@@ -25,6 +25,7 @@ using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.CustomerPortal
@@ -199,5 +200,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> SendMessage(NewMessageDTO obj);
         Task<UserDTO> GetUserByEmail(string email);
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
+        Task<ResponseDTO> VerifyBVNNo(string bvnNo);
     }
 }

@@ -12,16 +12,20 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Report;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
     public class WalletPaymentLogRepository : Repository<WalletPaymentLog, GIGLSContext>, IWalletPaymentLogRepository
     {
         private GIGLSContextForView _GIGLSContextForView;
+        private GIGLSContext _context;
 
         public WalletPaymentLogRepository(GIGLSContext context) : base(context)
         {
             _GIGLSContextForView = new GIGLSContextForView();
+            _context = context;
         }
 
         public Task<List<WalletPaymentLogDTO>> GetWalletPaymentLogs()
@@ -192,6 +196,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             }
 
             return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public async Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+
+            //If No Date Supplied
+            if (!dashboardFilter.StartDate.HasValue && !dashboardFilter.EndDate.HasValue)
+            {
+                var OneMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
+                startDate = new DateTime(OneMonthAgo.Year, OneMonthAgo.Month, 1);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+            else
+            {
+                var queryDate = dashboardFilter.getStartDateAndEndDate();
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
+
+
+            //declare parameters for the stored procedure
+            SqlParameter startDates = new SqlParameter("@StartDate", startDate);
+            SqlParameter endDates = new SqlParameter("@EndDate", endDate);
+            SqlParameter type = new SqlParameter("@Type", dashboardFilter.ActiveCountryId);
+
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                    startDates,
+                    endDates,
+                    type
+            };
+
+            var summary = await _context.Database.SqlQuery<WalletPaymentLogView>("WalletPaymentLogBreakdown " +
+               "@StartDate, @EndDate, @Type",
+               param).ToListAsync();
+
+            return await Task.FromResult(summary);
         }
     }
 }

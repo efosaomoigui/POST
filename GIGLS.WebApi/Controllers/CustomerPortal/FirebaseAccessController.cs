@@ -338,6 +338,39 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("verifybvn/{bvnNo}")]
+        public async Task<IServiceResponse<ResponseDTO>> VerifyBVN(string bvnNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<ResponseDTO>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var result = await _portalService.VerifyBVNNo(bvnNo);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+
 
     }
 
