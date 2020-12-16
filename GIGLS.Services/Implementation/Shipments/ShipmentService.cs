@@ -911,6 +911,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("Destination Service Center Longitude and Latitude details not found");
 
                     }
+                    shipment.ReceiverAddress = $"GIGL {receieverServiceCenter.FormattedServiceCentreName} SERVICE CENTER ({shipment.ReceiverAddress})";
                 }
 
                 if(shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
@@ -991,7 +992,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var departureId = serviceCenterIds[0];
 
                 var senderInfo = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == departureId);
-                shipment.SenderAddress = senderInfo.Address;
+                shipment.SenderAddress = $"GIGL {senderInfo.FormattedServiceCentreName} SERVICE CENTER ({senderInfo.Address})";
                 shipment.SenderLocation = new LocationDTO()
                 {
                     Latitude = senderInfo.Latitude,
@@ -3607,7 +3608,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (preShipment.PickupOptions == PickupOptions.SERVICECENTER)
                 {
                     var receieverServiceCenter = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipment.DestinationServiceCentreId);
-                    preShipment.ReceiverAddress = receieverServiceCenter.Address;
+                    preShipment.ReceiverAddress = $"GIGL {receieverServiceCenter.FormattedServiceCentreName} SERVICE CENTER ({receieverServiceCenter.Address})";
                     preShipment.ReceiverLocation = new LocationDTO
                     {
                         Latitude = (double)receieverServiceCenter.Latitude,
