@@ -388,6 +388,16 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         shipment.ShipmentScanStatus = scanStatus; 
                     }
+
+                    //update the international table for those waybill that has been dispatch
+                    if(shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                    {
+                        var internationalShipment = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == item);
+                        if(internationalShipment != null)
+                        {
+                            internationalShipment.InternationalShipmentStatus = InternationalShipmentStatus.Processing;
+                        }
+                    }
                 }
             }
         }

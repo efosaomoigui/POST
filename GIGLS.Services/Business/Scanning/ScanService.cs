@@ -145,13 +145,21 @@ namespace GIGLS.Services.Business.Scanning
 
                     if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     {
+                        //To handle the DHL International from Sending message at arrive final destination
+                        TrackingType trackingType = TrackingType.InBound;
+                        if(shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                        {
+                            trackingType = TrackingType.OutBound;
+                        }
+
                         var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                         {
                             DateTime = DateTime.Now,
                             Status = scanStatus,
                             Waybill = scan.WaybillNumber,
-                            isInternalShipment = shipment.isInternalShipment
-                        }, scan.ShipmentScanStatus);
+                            isInternalShipment = shipment.isInternalShipment,
+                            TrackingType = trackingType
+                        }, scan.ShipmentScanStatus); ;
 
                         //For Store Shipment Arrive Final Destination
                         if (shipment.isInternalShipment == true && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
@@ -236,11 +244,19 @@ namespace GIGLS.Services.Business.Scanning
                         var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.Waybill, scanStatus);
                         if (!checkTrack)
                         {
+                            //To handle the DHL International from Sending message at arrive final destination
+                            TrackingType trackingType = TrackingType.InBound;
+                            if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                            {
+                                trackingType = TrackingType.OutBound;
+                            }
+
                             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                             {
                                 DateTime = DateTime.Now,
                                 Status = scanStatus,
                                 Waybill = groupShipment.Waybill,
+                                TrackingType = trackingType
                             }, scan.ShipmentScanStatus);
                         }
 
@@ -276,7 +292,6 @@ namespace GIGLS.Services.Business.Scanning
                 //do this for super flow 
                 await ScanACCForManifest(scan.WaybillNumber,scan, scan.ShipmentScanStatus.ToString());
                 await CheckAndCreateManifestEntriesForSuperManifest(manifest);
-
             }
             else
             {
@@ -315,12 +330,21 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 if (groupShipment.WaybillNumbers.Count > 0)
                                 {
+                                    //add DHL shipment to list in order to exclude send message to customer
+                                    var internationalShipmentList = new List<string>();
+
                                     ////// ManifestCheck  - CheckIfUserIsAtShipmentFinalDestination
                                     if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                                     {
                                         foreach (var waybill in groupShipment.WaybillNumbers)
                                         {
                                             var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
+
+                                            if(shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
+                                            {
+                                                internationalShipmentList.Add(shipmentItem.Waybill);
+                                            }
+
                                             // For Shipment Check if user has rights to this action
                                             await CheckIfUserIsAtShipmentFinalDestination(scan, shipmentItem.DestinationServiceCentreId);
                                         }
@@ -335,11 +359,19 @@ namespace GIGLS.Services.Business.Scanning
                                         if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AST)
                                             || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.ARP) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.APT))
                                         {
+                                            //To handle the DHL International from Sending message at arrive final destination
+                                            TrackingType trackingType = TrackingType.InBound;
+                                            if (internationalShipmentList.Contains(waybill))
+                                            {
+                                                trackingType = TrackingType.OutBound;
+                                            }
+
                                             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                                             {
                                                 DateTime = DateTime.Now,
                                                 Status = scanStatus,
                                                 Waybill = waybill,
+                                                TrackingType = trackingType
                                             }, scan.ShipmentScanStatus);
                                         }
 

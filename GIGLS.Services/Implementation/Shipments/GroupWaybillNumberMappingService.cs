@@ -253,44 +253,16 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = shipmentDTO.Waybill,
                         DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
                         DepartureServiceCentre = departureServiceCentre,
-                        //DepartureServiceCentre = new ServiceCentreDTO()
-                        //{
-                        //    Name = shipmentDTO.DepartureServiceCentreName,
-                        //    Code = shipmentDTO.DepartureServiceCentreCode,
-                        //    ServiceCentreId = shipmentDTO.DepartureServiceCentreId
-                        //},
-
                         DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
                         DestinationServiceCentre = destinationServiceCentre,
-                        //DestinationServiceCentre = new ServiceCentreDTO()
-                        //{
-                        //    Name = shipmentDTO.DestinationServiceCentreName,
-                        //    Code = shipmentDTO.DestinationServiceCentreCode,
-                        //    ServiceCentreId = shipmentDTO.DestinationServiceCentreId
-                        //},
-
+                        InternationalShipmentType = shipmentDTO.InternationalShipmentType,
                         //use shipment DateCreated to represent Date Mapped
                         DateCreated = groupWaybillNumberMapping.DateMapped,
-
                         //use userId to represent who mapped the waybill to group
                         UserId = userName
                     });
 
                     waybills.Add(shipmentDTO.Waybill);
-
-                    //departureServiceCentre = new ServiceCentreDTO()
-                    //{
-                    //    Name = shipmentDTO.DepartureServiceCentreName,
-                    //    Code = shipmentDTO.DepartureServiceCentreCode,
-                    //    ServiceCentreId = shipmentDTO.DepartureServiceCentreId
-                    //};
-                    //destinationServiceCentre = new ServiceCentreDTO()
-                    //{
-                    //    Name = shipmentDTO.DestinationServiceCentreName,
-                    //    Code = shipmentDTO.DestinationServiceCentreCode,
-                    //    ServiceCentreId = shipmentDTO.DestinationServiceCentreId
-                    //};
-                    
                 }
 
                 var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO

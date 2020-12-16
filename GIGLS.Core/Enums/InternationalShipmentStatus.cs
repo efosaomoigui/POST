@@ -4,6 +4,7 @@
     {
         Created,
         Processing,
+        Arrived,
         OnwardDelivery,
         Delivered,
         Cancelled
