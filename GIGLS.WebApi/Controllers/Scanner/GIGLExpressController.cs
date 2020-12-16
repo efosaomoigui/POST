@@ -247,15 +247,15 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [HttpGet]
-        [Route("customer/{phonenumber}")]
-        public async Task<IServiceResponse<IndividualCustomerDTO>> GetCustomerByPhoneNumber(string phonenumber)
+        [HttpPost]
+        [Route("customer/{customerType}")]
+        public async Task<IServiceResponse<object>> GetCustomerByPhoneNumber(string customerType, SearchOption option)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var customerObj = await _customerService.GetCustomerByPhoneNumber(phonenumber);
+                var customerObj = await _customerService.GetCustomerBySearchParam(customerType, option);
 
-                return new ServiceResponse<IndividualCustomerDTO>
+                return new ServiceResponse<object>
                 {
                     Object = customerObj
                 };
