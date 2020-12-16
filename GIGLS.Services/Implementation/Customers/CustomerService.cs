@@ -503,7 +503,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     search.CustomerType = FilterCustomerType.Corporate;
                     var coporate = await _companyService.GetCompanies(CompanyType.Corporate, search);
-                    result = coporate;
+                    result = coporate.FirstOrDefault();
                 }
                 else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
                 {
