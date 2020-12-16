@@ -832,7 +832,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -901,7 +902,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -965,7 +967,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -1219,7 +1222,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             //use this date as the next year of when we launched Agility to cater for
             //month we have not launch agility that will be empty
-            int year = 2018;
+            int year = startDate.Year;
             int startMonth = startDate.Month;
             int endMonth = endDate.Month;
 

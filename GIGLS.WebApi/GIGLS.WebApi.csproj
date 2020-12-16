@@ -333,6 +333,7 @@
     <Compile Include="Controllers\Shipments\InternationalShipmentWaybillController.cs" />
     <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
     <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
+    <Compile Include="Controllers\Wallet\WalletPaymentLogForAllController.cs" />
     <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
