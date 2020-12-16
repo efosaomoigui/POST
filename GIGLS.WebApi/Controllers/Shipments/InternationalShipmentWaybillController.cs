@@ -50,5 +50,65 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("OnwardDelivery")]
+        public async Task<IServiceResponse<List<InternationalShipmentWaybillDTO>>> GetInternationalShipmentOnwardDeliveryWaybills()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GetInternationalShipmentOnwardDeliveryWaybills();
+                return new ServiceResponse<List<InternationalShipmentWaybillDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("Arrived")]
+        public async Task<IServiceResponse<List<InternationalShipmentWaybillDTO>>> GetInternationalShipmentArrivedWaybills()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GetInternationalShipmentArrivedWaybills();
+                return new ServiceResponse<List<InternationalShipmentWaybillDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("UpdateToEnrouteDelivery")]
+        public async Task<IServiceResponse<bool>> UpdateToEnrouteDelivery(List<string> waybills)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.UpdateToEnrouteDelivery(waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("UpdateToDelivered")]
+        public async Task<IServiceResponse<bool>> UpdateToDelivered(List<string> waybills)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.UpdateToDelivered(waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipments
+                };
+            });
+        }
     }
 }

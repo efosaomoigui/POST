@@ -9,5 +9,9 @@ namespace GIGLS.Core.IServices.Shipments
     {
         Task<List<InternationalShipmentWaybillDTO>> GetInternationalWaybills(DateFilterCriteria dateFilterCriteria);
         Task<InternationalShipmentWaybillDTO> GetInternationalWaybill(string waybill);
+        Task<List<InternationalShipmentWaybillDTO>> GetInternationalShipmentOnwardDeliveryWaybills();
+        Task<List<InternationalShipmentWaybillDTO>> GetInternationalShipmentArrivedWaybills();
+        Task<bool> UpdateToEnrouteDelivery(List<string> waybills);
+        Task<bool> UpdateToDelivered(List<string> waybills);
     }
 }
