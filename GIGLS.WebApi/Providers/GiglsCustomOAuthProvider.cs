@@ -53,12 +53,11 @@ namespace GIGLS.WebApi.Providers
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             var userBVN = String.Empty;
             var rank = String.Empty;
+            bool isInternational = false;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
-
-                bool isInternational = user.IsInternational;
 
                 if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
@@ -69,6 +68,7 @@ namespace GIGLS.WebApi.Providers
                         context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
                         return;
                     }
+                    isInternational = user.IsInternational;
 
                     int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
