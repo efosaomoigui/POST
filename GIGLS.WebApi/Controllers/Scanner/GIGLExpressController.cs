@@ -415,7 +415,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpPost]
         [Route("getshipmentprice")]
-        public async Task<IServiceResponse<NewShipmentDTO>> GetShipmentPrice(NewShipmentDTO newShipmentDTO)
+        public async Task<IServiceResponse<NewPricingDTO>> GetShipmentPrice(NewShipmentDTO newShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -423,7 +423,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 newShipmentDTO.DepartureCountryId = userCountryId;
                 var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
 
-                return new ServiceResponse<NewShipmentDTO>
+                return new ServiceResponse<NewPricingDTO>
                 {
                     Object = price
                 };

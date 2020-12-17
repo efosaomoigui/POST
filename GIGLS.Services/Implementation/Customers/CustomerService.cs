@@ -497,19 +497,41 @@ namespace GIGLS.Services.Implementation.Customers
                 if (customerType.ToLower() == "individual")
                 {
                     var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(option.Option);
-                    result = individualCustomerDTO;
+                    result = individualCustomerDTO.FirstOrDefault();
                 }
                 else if (customerType.ToLower() == CompanyType.Corporate.ToString().ToLower())
                 {
                     search.CustomerType = FilterCustomerType.Corporate;
-                    var coporate = await _companyService.GetCompanies(CompanyType.Corporate, search);
-                    result = coporate.FirstOrDefault();
+                    var coporates = await _companyService.GetCompanies(CompanyType.Corporate, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate; 
+                    }
                 }
                 else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
                 {
                     search.CustomerType = FilterCustomerType.Corporate;
-                    var coporate = await _companyService.GetCompanies(CompanyType.Ecommerce, search);
-                    result = coporate.FirstOrDefault();
+                    var coporates = await _companyService.GetCompanies(CompanyType.Ecommerce, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate;
+                    }
                 }
                 else
                 {
