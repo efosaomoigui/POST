@@ -327,6 +327,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var shipmentReq = await GetShipmentRequest(requestNo);
                 var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
                 mDto.IntlShipmentRequest = shipmentDTlMapped;
+
+                //more information for magaya use
+                magayaShipmentDTO.Shipper.Address.ContactEmail = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.Address.ContactPhone = shipmentDTlMapped.CustomerPhoneNumber;
+
+                magayaShipmentDTO.Shipper.BillingAddress.ContactEmail = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.BillingAddress.ContactPhone = shipmentDTlMapped.CustomerPhoneNumber;
+
+                magayaShipmentDTO.Shipper.Email = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.Phone = shipmentDTlMapped.CustomerPhoneNumber;
+
             }
 
             //2. initialize type of shipment and flag
