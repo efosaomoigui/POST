@@ -152,8 +152,7 @@ namespace GIGLS.WebApi.Providers
                     { "IsInternational", isInternational.ToString()},
                     { "BVN", userBVN},
                     { "Rank", rank},
-                    { "ReferralCode", user.RegistrationReferrercode},
-                    { "Rank", rank},
+                    { "ReferralCode", user.RegistrationReferrercode}
                 };
 
                 //get claims for the user
