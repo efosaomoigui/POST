@@ -1154,8 +1154,9 @@ namespace GIGLS.Services.Business.Pricing
             return shipment;
         }
 
-        public async Task<NewShipmentDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
+        public async Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
         {
+            NewPricingDTO newPricingDTO = new NewPricingDTO();
             if (newShipmentDTO == null)
             {
                 throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
@@ -1209,12 +1210,11 @@ namespace GIGLS.Services.Business.Pricing
             decimal insurance = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
             grandTotal +=  insurance;
 
-            newShipmentDTO.Vat = vatDTO.Value;
-            newShipmentDTO.Insurance = insuranceDTO.Value;
-            newShipmentDTO.Total = totalPrice;
-            newShipmentDTO.GrandTotal = grandTotal;
-
-            return newShipmentDTO;
+            newPricingDTO.Vat = vatDTO.Value;
+            newPricingDTO.Insurance = insuranceDTO.Value;
+            newPricingDTO.Total = totalPrice;
+            newPricingDTO.GrandTotal = grandTotal;
+            return newPricingDTO;
         }
 
     }
