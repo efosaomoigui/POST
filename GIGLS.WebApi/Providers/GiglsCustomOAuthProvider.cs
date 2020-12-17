@@ -52,6 +52,7 @@ namespace GIGLS.WebApi.Providers
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             var userBVN = String.Empty;
+            var rank = String.Empty;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
@@ -123,6 +124,7 @@ namespace GIGLS.WebApi.Providers
                     user.FirstName = ecommerce.FirstName;
                     user.LastName = ecommerce.LastName;
                     userBVN = ecommerce.BVN;
+                    rank = ecommerce.Rank.ToString();
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -147,6 +149,7 @@ namespace GIGLS.WebApi.Providers
                     { "IsInternational", user.IsInternational.ToString()},
                     { "BVN", userBVN},
                     { "ReferralCode", user.RegistrationReferrercode},
+                    { "Rank", rank},
                 };
 
                 //get claims for the user

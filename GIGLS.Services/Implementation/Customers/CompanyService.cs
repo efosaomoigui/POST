@@ -660,6 +660,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.CustomerCategory = CustomerCategory.Normal;
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
+                newCompany.Rank = Rank.Basic;
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
