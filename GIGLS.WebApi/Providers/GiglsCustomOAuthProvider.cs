@@ -58,6 +58,8 @@ namespace GIGLS.WebApi.Providers
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
+                bool isInternational = user.IsInternational;
+
                 if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
                     //Global Property PasswordExpireDaysCount
@@ -125,6 +127,7 @@ namespace GIGLS.WebApi.Providers
                     user.LastName = ecommerce.LastName;
                     userBVN = ecommerce.BVN;
                     rank = ecommerce.Rank.ToString();
+                    isInternational = ecommerce.IsInternational;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -146,8 +149,9 @@ namespace GIGLS.WebApi.Providers
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
-                    { "IsInternational", user.IsInternational.ToString()},
+                    { "IsInternational", isInternational.ToString()},
                     { "BVN", userBVN},
+                    { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
                     { "Rank", rank},
                 };
