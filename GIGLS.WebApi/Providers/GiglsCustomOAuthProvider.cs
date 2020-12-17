@@ -52,10 +52,13 @@ namespace GIGLS.WebApi.Providers
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             var userBVN = String.Empty;
+            var rank = String.Empty;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
+
+                bool isInternational = user.IsInternational;
 
                 if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
@@ -123,6 +126,8 @@ namespace GIGLS.WebApi.Providers
                     user.FirstName = ecommerce.FirstName;
                     user.LastName = ecommerce.LastName;
                     userBVN = ecommerce.BVN;
+                    rank = ecommerce.Rank.ToString();
+                    isInternational = ecommerce.IsInternational;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -144,8 +149,9 @@ namespace GIGLS.WebApi.Providers
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
-                    { "IsInternational", user.IsInternational.ToString()},
+                    { "IsInternational", isInternational.ToString()},
                     { "BVN", userBVN},
+                    { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
                 };
 
