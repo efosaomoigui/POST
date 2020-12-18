@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -33,7 +34,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybillForAccounts(string waybill);
         Task<List<ManifestWaybillMappingDTO>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
-        Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForDispatch();
+        Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForDispatch(); 
     }
 
 

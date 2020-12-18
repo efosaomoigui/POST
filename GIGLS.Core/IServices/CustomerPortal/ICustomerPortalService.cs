@@ -204,6 +204,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<ResponseDTO> VerifyBVNNo(string bvnNo);
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
-        Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForMovementDispatch();
+        Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
     }
 }

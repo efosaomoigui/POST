@@ -46,7 +46,10 @@ namespace GIGLS.Core.DTO.Shipments
         public ServiceCentre DestinationServiceCentre { get; set; }
 
         public List<string> ManifestNumbers { get; set; } 
-        public List<object> ManifestNumbersWithDate { get; set; } 
+        public List<object> ManifestNumbersWithDate { get; set; }
+
+        public string DriverCode { get; set; }
+        public string DestinationServiceCentreCode { get; set; } 
     }
 
     public class ReleaseMovementManifestDto

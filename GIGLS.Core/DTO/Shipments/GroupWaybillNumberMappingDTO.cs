@@ -45,6 +45,8 @@ namespace GIGLS.CORE.DTO.Shipments
         public virtual ServiceCentre DepartureServiceCentre { get; set; }
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentre DestinationServiceCentre { get; set; }
+        public string DestinationScCode { get; set; } 
+
     }
 
     public class MovementManifestNumberMappingDTOTwo : BaseDomain

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
@@ -643,13 +644,13 @@ namespace GIGLS.WebApi.Controllers.GIGGo
 
         [HttpGet]
         [Route("getManifestsinmovementmanifestformovementdispatch")]
-        public async Task<IServiceResponse<List<MovementManifestNumberMappingDTO>>> GetManifestsInMovementManifestForMovementDispatch()
+        public async Task<IServiceResponse<List<MovementDispatchDTO>>> GetManifestsInMovementManifestForMovementDispatch()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var groupWaybillNumbersInManifest = await _portalService.GetManifestsInMovementManifestForMovementDispatch();
 
-                return new ServiceResponse<List<MovementManifestNumberMappingDTO>>
+                return new ServiceResponse<List<MovementDispatchDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
                 };

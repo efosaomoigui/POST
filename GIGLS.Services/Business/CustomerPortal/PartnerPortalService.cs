@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -138,7 +139,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetScanStatus();
         }
 
-        public async Task<List<MovementManifestNumberMappingDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch()  
         {
             return await _portalService.GetManifestsInMovementManifestForMovementDispatch();
         }
