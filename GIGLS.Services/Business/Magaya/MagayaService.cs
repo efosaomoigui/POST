@@ -1140,7 +1140,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Width = c.Width,
                     Height = c.Height,
                     RequiresInsurance = c.RequiresInsurance,
-                    ItemValue = c.ItemValue
+                    ItemValue = c.ItemValue, 
+                    ItemSenderfullName = c.ItemSenderfullName
                 }).ToList()
             };
 

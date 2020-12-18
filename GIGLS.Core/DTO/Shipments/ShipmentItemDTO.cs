@@ -67,6 +67,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double Width { get; set; }
         public double Height { get; set; }
 
+        public string ItemSenderfullName { get; set; }
+
         //Foreign key information
         public int IntlShipmentRequestId { get; set; }
 

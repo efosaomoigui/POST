@@ -46,7 +46,9 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsVolumetric { get; set; }
         public double Length { get; set; }
         public double Width { get; set; }
-        public double Height { get; set; } 
+        public double Height { get; set; }
+
+        public string ItemSenderfullName { get; set; }
 
         //Foreign key information
         public int IntlShipmentRequestId { get; set; } 
