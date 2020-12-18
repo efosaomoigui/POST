@@ -18,8 +18,6 @@
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <NameOfLastUsedPublishProfile>agilitysystemapidevm-staging - Web Deploy</NameOfLastUsedPublishProfile>
-    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
-    <NameOfLastUsedPublishProfile>agilitysystemapidevm - Web Deploy</NameOfLastUsedPublishProfile>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <ActiveDebugTarget />
   </PropertyGroup>
