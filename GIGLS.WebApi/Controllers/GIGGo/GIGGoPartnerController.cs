@@ -51,7 +51,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
         public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
