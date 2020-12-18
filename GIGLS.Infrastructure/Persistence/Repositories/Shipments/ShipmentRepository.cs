@@ -1125,7 +1125,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             SenderState = a.SenderState,
                             ApproximateItemsWeight = a.ApproximateItemsWeight,
                             DestinationCountryId = a.DestinationCountryId,
-                            IsProcessed = a.IsProcessed
+                            IsProcessed = a.IsProcessed,
+                            ItemSenderfullName = b.ItemSenderfullName,
+                            ItemValue = b.ItemValue,
+
 
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
@@ -1192,7 +1195,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            SenderState = a.SenderState,
                                            ApproximateItemsWeight = a.ApproximateItemsWeight,
                                            DestinationCountryId = a.DestinationCountryId,
-                                           IsProcessed = a.IsProcessed
+                                           IsProcessed = a.IsProcessed,
+                                           ItemSenderfullName = a.ItemSenderfullName,
+                                           ItemValue = a.ItemValue,
 
                                        }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1253,10 +1258,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        SenderState = a.SenderState,
                                        ApproximateItemsWeight = a.ApproximateItemsWeight,
                                        DestinationCountryId = a.DestinationCountryId,
-                                       IsProcessed = a.IsProcessed
+                                       IsProcessed = a.IsProcessed,
+                                       ItemSenderfullName = a.ItemSenderfullName,
+                                       ItemValue = a.ItemValue,
 
                                    }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
-                                   || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue)).ToList();
+                                   || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue || s.ItemSenderfullName == filterValue || s.storeName == filterValue )).ToList();
 
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
@@ -1369,7 +1376,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   SenderState = r.SenderState,
                                                   ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                   DestinationCountryId = r.DestinationCountryId,
-                                                  IsProcessed = r.IsProcessed
+                                                  IsProcessed = r.IsProcessed,
+                                                  ItemSenderfullName = r.ItemSenderfullName,
 
                                               }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1408,7 +1416,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               SenderState = r.SenderState,
                                               ApproximateItemsWeight = r.ApproximateItemsWeight,
                                               DestinationCountryId = r.DestinationCountryId,
-                                              IsProcessed = r.IsProcessed
+                                              IsProcessed = r.IsProcessed,
+                                              ItemSenderfullName = r.ItemSenderfullName,
 
                                           }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
 
@@ -1778,7 +1787,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             Height = x.Height,
                                                                             RequiresInsurance = x.RequiresInsurance,
                                                                             IntlShipmentRequestId = x.IntlShipmentRequestId,
-                                                                            SerialNumber = x.SerialNumber
+                                                                            SerialNumber = x.SerialNumber ,
+                                                                            ItemValue = x.ItemValue,
+                                                                            ItemSenderfullName = x.ItemSenderfullName,
                                                                         }).ToList()
                                                 }).ToList();
 
