@@ -383,13 +383,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpGet]
         [Route("destinationcountry")]
-        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetDestinationCountry()
+        public async Task<IServiceResponse<IEnumerable<NewCountryDTO>>> GetDestinationCountry()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var countries = await _countryService.GetActiveCountries();
+                var countries = await _portalService.GetActiveCountries();
 
-                return new ServiceResponse<IEnumerable<CountryDTO>>
+                return new ServiceResponse<IEnumerable<NewCountryDTO>>
                 {
                     Object = countries
                 };
@@ -405,7 +405,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 //2. priviledged users service centres
                 var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
 
-                var centres = await _serviceCentreService.GetServiceCentresWithoutHUBForNonLagosStation(usersServiceCentresId[0], countryId);
+                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
