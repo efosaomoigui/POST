@@ -405,7 +405,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 //2. priviledged users service centres
                 var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
 
-                var centres = await _serviceCentreService.GetServiceCentresWithoutHUBForNonLagosStation(usersServiceCentresId[0], countryId);
+                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres

@@ -1179,6 +1179,7 @@ namespace GIGLS.Services.Business.Pricing
                 priceDTO.ShipmentType = item.ShipmentType;
                 priceDTO.SpecialPackageId = item.SpecialPackageId.Value;
                 priceDTO.Width = Convert.ToDecimal(item.Width);
+                priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
 
                 if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Regular.ToString().ToLower())
                 {
@@ -1210,8 +1211,23 @@ namespace GIGLS.Services.Business.Pricing
             decimal insurance = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
             grandTotal +=  insurance;
 
-            newPricingDTO.Vat = vatDTO.Value;
-            newPricingDTO.Insurance = insuranceDTO.Value;
+            if (newShipmentDTO.CustomerType.ToLower() == "individual")
+            {
+                //round up to the nearest whole number
+                var rem = grandTotal - Math.Truncate(grandTotal);
+                if (rem >= 50)
+                {
+                    grandTotal = Math.Floor(grandTotal);
+                }
+                else
+                {
+                    var factor = Convert.ToDecimal(Math.Pow(10, 0));
+                    grandTotal = Math.Round(grandTotal * factor) / factor;
+                }
+            }
+
+            newPricingDTO.Vat = vatForItems;
+            newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
             newPricingDTO.GrandTotal = grandTotal;
             return newPricingDTO;
