@@ -383,13 +383,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpGet]
         [Route("destinationcountry")]
-        public async Task<IServiceResponse<IEnumerable<NewCountryDTO>>> GetDestinationCountry()
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetDestinationCountry()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var countries = await _portalService.GetActiveCountries();
+                var countries = await _countryService.GetActiveCountries();
 
-                return new ServiceResponse<IEnumerable<NewCountryDTO>>
+                return new ServiceResponse<IEnumerable<CountryDTO>>
                 {
                     Object = countries
                 };
