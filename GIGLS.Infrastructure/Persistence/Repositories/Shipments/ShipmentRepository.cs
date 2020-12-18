@@ -1561,7 +1561,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             SenderState = a.SenderState,
                             ApproximateItemsWeight = a.ApproximateItemsWeight,
                             DestinationCountryId = a.DestinationCountryId,
-                            IsProcessed = a.IsProcessed
+                            IsProcessed = a.IsProcessed,
+                            ItemSenderfullName = a.ItemSenderfullName,
 
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
@@ -1625,11 +1626,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            SenderState = a.SenderState,
                                            ApproximateItemsWeight = a.ApproximateItemsWeight,
                                            DestinationCountryId = a.DestinationCountryId,
-                                           IsProcessed = a.IsProcessed
+                                           IsProcessed = a.IsProcessed,
+                                           ItemSenderfullName = a.ItemSenderfullName,
 
                                        }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue 
                                        || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue 
-                                       || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue || s.storeName == dateFilterCriteria.FilterValue || s.ItemSenderfullName == dateFilterCriteria.FilterValue )).OrderByDescending(x => x.DateCreated).ToList();
+                                       || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue || s.storeName.ToLower() == dateFilterCriteria.FilterValue.ToLower() || s.ItemSenderfullName.ToLower() == dateFilterCriteria.FilterValue.ToLower() )).OrderByDescending(x => x.DateCreated).ToList();
                     count = intlShipmentDTO.Count();
                     return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
                 }
