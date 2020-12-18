@@ -153,7 +153,6 @@ namespace GIGLS.WebApi.Providers
                     { "BVN", userBVN},
                     { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
-                    { "Rank", rank},
                 };
 
                 //get claims for the user
