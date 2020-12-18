@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -78,7 +79,11 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<bool> CheckReleaseMovementManifest(string movementManifestCode);
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
+        Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria);
+        Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs);
 
+        Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
+        Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

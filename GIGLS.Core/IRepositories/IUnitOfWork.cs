@@ -203,6 +203,7 @@ namespace GIGLS.Core
         IShipmentContactRepository ShipmentContact { get; set; }
         IShipmentContactHistoryRepository ShipmentContactHistory { get; set; }
         IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
+        IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

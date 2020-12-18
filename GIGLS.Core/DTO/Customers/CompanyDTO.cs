@@ -105,5 +105,6 @@ namespace GIGLS.Core.DTO.Customers
         public string IdentificationImageUrl { get; set; }
         public IdentificationType IdentificationType { get; set; }
         public Rank Rank { get; set; }
+        public bool isInternational { get; set; }
     }
 }

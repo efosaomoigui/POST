@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
 using GIGLS.Core.Domain;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -480,6 +481,68 @@ namespace GIGLS.Services.Implementation.Customers
                 }
             }
             return shipmentActivity;
+        }
+
+        public async Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option)
+        {
+            try
+            {
+                var result = new object();
+                if (option.Option.StartsWith("0"))
+                {
+                    option.Option = option.Option.Remove(0, 1);
+                }
+                CustomerSearchOption search = new CustomerSearchOption();
+                search.SearchData = option.Option;
+                if (customerType.ToLower() == "individual")
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(option.Option);
+                    result = individualCustomerDTO.FirstOrDefault();
+                }
+                else if (customerType.ToLower() == CompanyType.Corporate.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Corporate, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate; 
+                    }
+                }
+                else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Ecommerce, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate;
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"Invalid customer type");
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

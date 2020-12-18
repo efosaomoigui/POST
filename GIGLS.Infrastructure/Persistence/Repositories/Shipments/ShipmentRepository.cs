@@ -136,10 +136,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 shipment = shipment.Where(s => s.IsCancelled == false);
 
                 //filter by Local or International Shipment
-                if (filterOptionsDto.IsInternational != null)
-                {
-                    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
-                }
+                //if (filterOptionsDto.IsInternational != null)
+                //{
+                //    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                //}
 
                 var count = 0;
 
@@ -1022,6 +1022,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
+        public async Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+                var startDate1 = queryDate.Item1;
+                var endDate1 = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
+                SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+                };
+
+                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
+                   "@StartDate, @EndDate",
+                   param).ToList();
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
@@ -1753,6 +1785,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-    
     }
 }

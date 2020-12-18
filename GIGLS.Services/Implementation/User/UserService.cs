@@ -828,6 +828,12 @@ namespace GIGLS.Services.Implementation.User
             return gigGOServiceCenter;
         }
 
+        public async Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetInternationalOutBoundServiceCentre();
+            return gigGOServiceCenter;
+        }
+
 
         //change user password by Admin
         public async Task<IdentityResult> ResetPassword(string userid, string password)

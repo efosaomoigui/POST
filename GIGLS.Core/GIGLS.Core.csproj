@@ -159,6 +159,7 @@
     <Compile Include="Domain\Demurrage.cs" />
     <Compile Include="Domain\Devices\Device.cs" />
     <Compile Include="Domain\Devices\DeviceManagement.cs" />
+    <Compile Include="Domain\DHL\InternationalShipmentWaybill.cs" />
     <Compile Include="Domain\Dispatch.cs" />
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
@@ -332,6 +333,17 @@
     <Compile Include="DTO\DeliveryLocationDTO.cs" />
     <Compile Include="DTO\Devices\DeviceDTO.cs" />
     <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
+    <Compile Include="DTO\DHL\AddressPayload.cs" />
+    <Compile Include="DTO\DHL\Dimensions.cs" />
+    <Compile Include="DTO\DHL\Enum\Content.cs" />
+    <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
+    <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentWaybillDTO.cs" />
+    <Compile Include="DTO\DHL\RateRequestPayload.cs" />
+    <Compile Include="DTO\DHL\RateRequestResponse.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
+    <Compile Include="DTO\DHL\TotalNetResult.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
@@ -540,6 +552,8 @@
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />
     <Compile Include="Enums\IncrementType.cs" />
+    <Compile Include="Enums\InternationalShipmentStatus.cs" />
+    <Compile Include="Enums\InternationalShipmentType.cs" />
     <Compile Include="Enums\InventoryType.cs" />
     <Compile Include="Enums\JobCardMaintenanceStatus.cs" />
     <Compile Include="Enums\JobCardStatus.cs" />
@@ -675,6 +689,7 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalShipmentWaybillRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
@@ -770,6 +785,7 @@
     <Compile Include="IServices\Dashboard\IDashboardService.cs" />
     <Compile Include="IServices\Devices\IDeviceManagementService.cs" />
     <Compile Include="IServices\Devices\IDeviceService.cs" />
+    <Compile Include="IServices\DHL\IDHLService.cs" />
     <Compile Include="IServices\Expenses\IExpenseTypeService.cs" />
     <Compile Include="IServices\Fleets\IDispatchActivityService.cs" />
     <Compile Include="IServices\Fleets\IDispatchService.cs" />
@@ -831,6 +847,7 @@
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
     <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
+    <Compile Include="IServices\Shipments\IInternationalShipmentWaybillService.cs" />
     <Compile Include="IServices\Shipments\IMobileGroupCodeWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
