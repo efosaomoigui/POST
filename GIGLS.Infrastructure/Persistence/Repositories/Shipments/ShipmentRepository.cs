@@ -1561,9 +1561,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             SenderState = a.SenderState,
                             ApproximateItemsWeight = a.ApproximateItemsWeight,
                             DestinationCountryId = a.DestinationCountryId,
-                            IsProcessed = a.IsProcessed,
+                            IsProcessed = a.IsProcessed ,
                             ItemSenderfullName = a.ItemSenderfullName,
-
+                            ItemValue = b.ItemValue,
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
 
@@ -1628,7 +1628,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            DestinationCountryId = a.DestinationCountryId,
                                            IsProcessed = a.IsProcessed,
                                            ItemSenderfullName = a.ItemSenderfullName,
-
+                                           ItemValue = a.ItemValue,
                                        }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue 
                                        || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue 
                                        || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue || s.storeName.ToLower() == dateFilterCriteria.FilterValue.ToLower() || s.ItemSenderfullName.ToLower() == dateFilterCriteria.FilterValue.ToLower() )).OrderByDescending(x => x.DateCreated).ToList();
@@ -1701,7 +1701,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            SenderState = a.SenderState,
                                            ApproximateItemsWeight = a.ApproximateItemsWeight,
                                            DestinationCountryId = a.DestinationCountryId,
-                                           IsProcessed = a.IsProcessed
+                                           IsProcessed = a.IsProcessed,
+                                           ItemSenderfullName = a.ItemSenderfullName,
+                                           ItemValue = a.ItemValue,
 
                                        }).Where(b => b.IsProcessed == false && b.DateCreated >= startDate && b.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
                 }
