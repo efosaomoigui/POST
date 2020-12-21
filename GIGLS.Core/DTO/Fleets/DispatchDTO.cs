@@ -1,7 +1,9 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Fleets
 {
@@ -63,6 +65,8 @@ namespace GIGLS.Core.DTO.Fleets
         public int? DestinationId { get; set; }
         public StationDTO Destination { get; set; }
 
+        public MovementManifestNumberDTO MovementManifestDetails { get; set; }
+
         //Added for TransitManifest
         public ManifestType ManifestType { get; set; }
 
@@ -70,7 +74,7 @@ namespace GIGLS.Core.DTO.Fleets
         public int DepartureServiceCenterId { get; set; }
         public ServiceCentreDTO DepartureService { get; set; }
         public int DestinationServiceCenterId { get; set; }
-        public ServiceCentreDTO DestinationService { get; set; }
+        public ServiceCentreDTO DestinationService { get; set; } 
         public bool IsSuperManifest { get; set; }
     }
 }

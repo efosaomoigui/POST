@@ -160,6 +160,22 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("deliveryno/{deliveryNo}")]
+        public async Task<IServiceResponse<DeliveryNumberDTO>> GetDeliveryNoByWaybill(string deliveryNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _service.GetDeliveryNoByWaybill(deliveryNo);
+
+                return new ServiceResponse<DeliveryNumberDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("shipmentactivities/{waybill}")]
         public async Task<IServiceResponse<List<ShipmentActivityDTO>>> GetShipmentActivities(string waybill)
         {
@@ -174,20 +190,8 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("deliveryno/{deliveryNo}")]
-        public async Task<IServiceResponse<DeliveryNumberDTO>> GetDeliveryNoByWaybill(string deliveryNo)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var item = await _service.GetDeliveryNoByWaybill(deliveryNo);
 
-                return new ServiceResponse<DeliveryNumberDTO>
-                {
-                    Object = item
-                };
-            });
-        }
+
+
     }
 }

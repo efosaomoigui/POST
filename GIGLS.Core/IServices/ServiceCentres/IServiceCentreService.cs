@@ -28,5 +28,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task ServiceCentreViewState(int serviceCentreId, bool ispublic);
         Task<IEnumerable<ServiceCentreDTO>> GetActiveServiceCentres();
+        Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
     }
 }

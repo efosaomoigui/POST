@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -7,6 +8,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using Microsoft.AspNet.Identity;
@@ -19,10 +21,12 @@ namespace GIGLS.Services.Business.CustomerPortal
     public class PartnerPortalService : IPartnerPortalService
     {
         private readonly ICustomerPortalService _portalService;
+        private readonly IShipmentService _shipmentService;
 
-        public PartnerPortalService(ICustomerPortalService portalService)
+        public PartnerPortalService(ICustomerPortalService portalService, IShipmentService shipmentService)
         {
             _portalService = portalService;
+            _shipmentService = shipmentService;
         }
 
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
@@ -135,7 +139,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetScanStatus();
         }
 
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch()  
+        {
+            return await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch() 
         {
             return await _portalService.GetWaybillsInManifestForDispatch();
         }
@@ -220,6 +229,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
         {
             return await _portalService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
+        }
+
+        public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
+        {
+            return await _shipmentService.ReleaseMovementManifest(valMovementManifest);
         }
 
     }

@@ -41,6 +41,7 @@ using PaymentType = GIGLS.Core.Enums.PaymentType;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Node;
+using GIGLS.CORE.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -3272,6 +3273,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
 
+                        if(preshipmentmobile.IsFromAgility)
+                        {
+                            var trackingDTO = new ShipmentTrackingDTO
+                            {
+                                Waybill = preshipmentmobile.Waybill,
+                                User = userId,
+                                ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                                Location = defaultServiceCenter.Name,
+                            };
+                            await UpdateShipmentToDelivered(trackingDTO);
+                        }
 
                         //Add to Financial Reports
                         var financialReport = new FinancialReportDTO
@@ -4940,7 +4952,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         CustomerId = customerid,
                                         UserId = user,
                                         PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
-                                      //  PickupOptions = PickupOptions.HOMEDELIVERY,
+                                        //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                                         ApproximateItemsWeight = 0.00,
@@ -6124,5 +6136,87 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        private async Task<object> UpdateShipmentToDelivered(ShipmentTrackingDTO trackingDTO)
+        {
+            try
+            {
+                object Id = null;
+                string scanStatus = ShipmentScanStatus.ARF.ToString();
+                trackingDTO.Status = scanStatus;
+
+                bool shipmentTrackingExists = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(trackingDTO.Waybill) && x.Status.Equals(scanStatus));
+
+                if (!shipmentTrackingExists)
+                {
+                    if (trackingDTO.User == null)
+                    {
+                        trackingDTO.User = await _userService.GetCurrentUserId();
+                    }
+
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(trackingDTO.Waybill));
+                    shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
+
+                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                    {
+                        //add service centre
+                        var newShipmentCollection = new ShipmentCollection
+                        {
+                            Waybill = trackingDTO.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.ARF,
+                            DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                            DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                            IsCashOnDelivery = shipment.IsCashOnDelivery
+                        };
+
+                        _uow.ShipmentCollection.Add(newShipmentCollection);
+                    }
+
+                    var newShipmentTracking = new ShipmentTracking
+                    {
+                        Waybill = trackingDTO.Waybill,
+                        Location = trackingDTO.Location,
+                        Status = trackingDTO.Status,
+                        DateTime = DateTime.Now,
+                        UserId = trackingDTO.User,
+                        ServiceCentreId = trackingDTO.ServiceCentreId
+                    };
+                    _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                    Id = newShipmentTracking.ShipmentTrackingId;
+
+                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                    {
+                        var messageType = MessageType.ShipmentCreation;
+                        foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+                        {
+                            if (item.ToString() == scanStatus.ToString())
+                            {
+                                messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                                break;
+                            }
+                        }
+
+                        //send message
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
+                    }
+
+                }
+                else
+                {
+                    throw new GenericException($"Shipment with waybill: {trackingDTO.Waybill} already scan as 'SHIPMENT ARRIVED FINAL DESTINATION'");
+                }
+
+                await _uow.CompleteAsync();
+                return new { Id };
+            }
+   
+            catch(Exception ex)
+            {
+                throw;
+            }
+
+        }
+
     }
-}
+};
