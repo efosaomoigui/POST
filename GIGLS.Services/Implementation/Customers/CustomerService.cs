@@ -60,8 +60,7 @@ namespace GIGLS.Services.Implementation.Customers
                         //var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
                         //|| c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
-                        var CompanyByName = await _uow.Company.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber 
-                        || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                        var CompanyByName = await _uow.Company.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email);
                         companyId = CompanyByName.CompanyId;
                     }
                     else
