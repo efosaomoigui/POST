@@ -371,6 +371,38 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addwalletpaymentlog")]
+        public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var result = await _portalService.AddWalletPaymentLogAnonymousUser(walletPaymentLogDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
 
     }
 
