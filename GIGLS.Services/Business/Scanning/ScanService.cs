@@ -176,6 +176,7 @@ namespace GIGLS.Services.Business.Scanning
                                 DestinationCountryId = shipment.DestinationCountryId,
                                 DestinationServiceCentreId = shipment.DestinationServiceCentreId,
                                 DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                                ReceiverAddress = shipment.ReceiverAddress,
                                 CustomerDetails = new CustomerDTO
                                 {
                                     PhoneNumber = shipment.ReceiverPhoneNumber,
@@ -200,7 +201,7 @@ namespace GIGLS.Services.Business.Scanning
                             else if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
                             {
                                 var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == scan.WaybillNumber);
-                                messageDTO.SenderCode = shipment.PickupOptions == PickupOptions.HOMEDELIVERY ? deliveryCode.ReceiverCode : deliveryCode.SenderCode;
+                                messageDTO.SenderCode = deliveryCode.SenderCode;
 
                                 if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
                                 {
