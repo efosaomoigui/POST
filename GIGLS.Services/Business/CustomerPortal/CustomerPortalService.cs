@@ -217,6 +217,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return walletPaymentLog;
         }
 
+        public async Task<object> AddWalletPaymentLogAnonymousUser(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLogAnonymousUser(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
         public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.InitiatePaymentUsingUSSD(walletPaymentLogDto);
