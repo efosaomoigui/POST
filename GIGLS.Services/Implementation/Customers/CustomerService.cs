@@ -58,13 +58,12 @@ namespace GIGLS.Services.Implementation.Customers
 
                     if(companyByCode == null)
                     {
-                        var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
-                        || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                        //var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                        //|| c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
-                        foreach (var item in CompanyByName)
-                        {
-                            companyId = item.CompanyId;
-                        }
+                        var CompanyByName = await _uow.Company.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber 
+                        || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                        companyId = CompanyByName.CompanyId;
                     }
                     else
                     {
