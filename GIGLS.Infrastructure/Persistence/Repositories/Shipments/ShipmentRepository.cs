@@ -1419,7 +1419,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               IsProcessed = r.IsProcessed,
                                               ItemSenderfullName = r.ItemSenderfullName,
 
-                                          }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName.ToLower() == filterValue.ToLower())).ToList();
+                                          }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName == filterValue)).ToList();
 
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
