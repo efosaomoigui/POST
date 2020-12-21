@@ -90,6 +90,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResponse.Status;
                 result.Message = verifyResponse.Message;
                 result.data.Reference = reference;
+                result.data.Authorization.AuthorizationCode = verifyResponse.Data.Authorization.AuthorizationCode;
+                result.data.Authorization.Bin = verifyResponse.Data.Authorization.Bin;
+                result.data.Authorization.Last4 = verifyResponse.Data.Authorization.Last4;
+                result.data.Authorization.ExpMonth = verifyResponse.Data.Authorization.ExpMonth;
+                result.data.Authorization.ExpYear = verifyResponse.Data.Authorization.ExpYear;
+                result.data.Authorization.Channel = verifyResponse.Data.Authorization.Channel;
+                result.data.Authorization.CardType = verifyResponse.Data.Authorization.CardType;
+                result.data.Authorization.Bank = verifyResponse.Data.Authorization.Bank;
+                result.data.Authorization.CountryCode = verifyResponse.Data.Authorization.CountryCode;
+                result.data.Authorization.Reusable = verifyResponse.Data.Authorization.Reusable;
 
                 if (verifyResponse.Status)
                 {
@@ -252,6 +262,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 

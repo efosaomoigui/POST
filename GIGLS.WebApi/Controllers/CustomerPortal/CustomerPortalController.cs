@@ -184,7 +184,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
                 var result = await _portalService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
