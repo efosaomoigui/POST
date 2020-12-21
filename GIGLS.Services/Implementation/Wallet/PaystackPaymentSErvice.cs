@@ -35,20 +35,18 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IMessageSenderService _messageSenderService;
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly INodeService _nodeService;
 
 
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
-            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, INodeService nodeService)
+            IMessageSenderService messageSenderService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _messageSenderService = messageSenderService;
-            _globalPropertyService = globalPropertyService;
             _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
@@ -148,6 +146,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -313,7 +313,6 @@ namespace GIGLS.Services.Implementation.Wallet
             WalletPaymentLogDTO paymentLog = new WalletPaymentLogDTO();
             WalletTransactionDTO transaction = new WalletTransactionDTO();
 
-
             var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
 
             var SecKey = string.Format("Bearer {0}", "sk_test_75eb63768f05426fa4f4c2ae68cd451dc10b4ac4");
@@ -435,8 +434,6 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-
-
         public async Task<ResponseDTO> VerifyBVN(string bvnNo)
         {
 
@@ -473,7 +470,6 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return result;
         }
-
 
         //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
@@ -512,6 +508,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -595,6 +593,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
