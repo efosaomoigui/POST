@@ -1126,7 +1126,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             ApproximateItemsWeight = a.ApproximateItemsWeight,
                             DestinationCountryId = a.DestinationCountryId,
                             IsProcessed = a.IsProcessed,
-                            ItemSenderfullName = a.ItemSenderfullName,
+                            ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
 
 
@@ -1359,7 +1359,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       IsVolumetric = x.IsVolumetric,
                                                       Length = x.Length,
                                                       Width = x.Width,
-                                                      Height = x.Height
+                                                      Height = x.Height,
+                                                      ItemSenderfullName = x.ItemSenderfullName
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -1562,7 +1563,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             ApproximateItemsWeight = a.ApproximateItemsWeight,
                             DestinationCountryId = a.DestinationCountryId,
                             IsProcessed = a.IsProcessed ,
-                            ItemSenderfullName = a.ItemSenderfullName,
+                            ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
 
                         }
