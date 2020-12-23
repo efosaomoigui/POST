@@ -16,6 +16,7 @@ using System;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -54,7 +55,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<api_session_error>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
+        public async Task<IServiceResponse<Tuple<api_session_error, string, string>>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -65,10 +66,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
+                var result = _service.SetTransactions(access_key, MagayaShipmentDTO); 
 
                 //4. Pass the return to the view or caller
-                return new ServiceResponse<api_session_error>()
+                return new ServiceResponse<Tuple<api_session_error, string, string>>()
                 {
                     Object = await result
                 };
@@ -86,7 +87,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-
                 //1. initialize the access key variable
                 int access_key = 0;
 
@@ -308,11 +308,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetMagayaWaybillNo")]
-        public async Task<IServiceResponse<string>> GetMagayaWaybillNo() 
+        public async Task<IServiceResponse<string>> GetMagayaWaybillNo([FromUri] NumberGeneratorType numbertype = NumberGeneratorType.MagayaWb) 
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.GetMagayaWayBillNumber();
+                var _result = _service.GetMagayaWayBillNumber(numbertype);
 
                 return new ServiceResponse<string>()
                 {

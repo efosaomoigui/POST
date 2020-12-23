@@ -21,6 +21,9 @@ using System.Security.Cryptography;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
 using System.Net;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -219,6 +222,49 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             else
             {
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
+
+            //Send Email to Sender when Payment for International Shipment has being made
+            if(invoiceEntity.IsInternational == true && paymentTransaction.PaymentType == PaymentType.Wallet)
+            {
+                var shipmentDTO = new ShipmentDTO
+                {
+                    CustomerType = shipment.CustomerType,
+                    CustomerId = shipment.CustomerId,
+                    ReceiverName = shipment.ReceiverName,
+                    Waybill = shipment.Waybill,
+                    PickupOptions = shipment.PickupOptions,
+                    ReceiverEmail = shipment.ReceiverEmail,
+                    GrandTotal = shipment.GrandTotal,
+                    DepartureCountryId = shipment.DepartureCountryId,
+                    DestinationCountryId = shipment.DestinationCountryId,
+                    DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                    DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                    CustomerDetails = new CustomerDTO
+                    {
+                    },
+                    DepartureServiceCentre = new ServiceCentreDTO
+                    {
+
+                    },
+                    DestinationServiceCentre = new ServiceCentreDTO
+                    {
+
+                    }
+                };
+
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+                shipmentDTO.CustomerDetails.Email = customerObj.Email;
+                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
+                //Send mail to chinalu and peter
             }
 
             result = true;

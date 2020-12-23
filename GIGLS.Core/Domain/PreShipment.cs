@@ -57,6 +57,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
 
         //Shipment Items
         public virtual List<PreShipmentItem> PreShipmentItems { get; set; }

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
@@ -46,6 +47,20 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 return new ServiceResponse<SignResponseDTO>
                 {
                     Object = signUp
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReleaseMovementManifest(movementManifestVals);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
                 };
             });
         }
@@ -621,6 +636,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 var groupWaybillNumbersInManifest = await _portalService.GetWaybillsInManifestForDispatch();
 
                 return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getManifestsinmovementmanifestformovementdispatch")]
+        public async Task<IServiceResponse<List<MovementDispatchDTO>>> GetManifestsInMovementManifestForMovementDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+
+                return new ServiceResponse<List<MovementDispatchDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
                 };
