@@ -174,7 +174,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -294,7 +294,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -535,7 +535,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -626,7 +626,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
