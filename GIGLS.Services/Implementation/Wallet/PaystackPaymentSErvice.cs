@@ -21,7 +21,6 @@ using System.Text;
 using System.Collections.Generic;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO;
-using GIGLS.Core.IServices.Utility;
 using System.Linq;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
@@ -175,9 +174,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
-                    if(userPayload != null)
+                    if (userPayload != null)
                     {
                         await _nodeService.WalletNotification(userPayload);
                     }
@@ -295,7 +294,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -536,7 +535,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -627,11 +626,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
-                       await _nodeService.WalletNotification(userPayload);
+                        await _nodeService.WalletNotification(userPayload);
                     }
                 }
             }
