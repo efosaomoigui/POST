@@ -264,7 +264,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
-                //Send mail to chinalu and peter
+
+                //Send email to Chinalu and Peter
+                var mails = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.IntlShipmentPaymentMonitoringEmails.ToString() && s.CountryId == 1);
+
+                if (mails != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] paymentEmails = mails.Value.Split(',').ToArray();
+
+                    foreach (string email in paymentEmails)
+                    {
+                        // send email message for payment notification
+                        shipmentDTO.CustomerDetails.Email = email;
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
+                    }
+                }
             }
 
             result = true;
