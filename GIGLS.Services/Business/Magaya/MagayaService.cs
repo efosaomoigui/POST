@@ -395,6 +395,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
+                        if(shipmentDto.GrandTotal > 0)
+                        {
+                            shipmentDto.GrandTotal = Math.Round(shipmentDto.GrandTotal, 2);
+                        }
                         // send email message for payment notification
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
 
