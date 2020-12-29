@@ -68,6 +68,7 @@
         HighValueShipment,
         MagayaAppMessagePush,
         MagayaInAppMessage,
-        IntlShipmentPaymentMonitoringEmails
+        IntlShipmentPaymentMonitoringEmails,
+        InternationalAdditionalPrice
     }
 }
