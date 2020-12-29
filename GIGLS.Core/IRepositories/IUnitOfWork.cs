@@ -28,6 +28,8 @@ using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
+using GIGLS.Core.IServices.RouteServices;
+using GIGLS.Core.IRepositories.Routes;
 
 namespace GIGLS.Core
 {
@@ -192,6 +194,9 @@ namespace GIGLS.Core
         IServiceCenterPackageRepository ServiceCenterPackage { get; set; }
         IFinancialReportRepository FinancialReport { get; set; }
 
+        //Route Section
+        IRouteRepository Routes { get; set; }
+
         //Mpvement Manifest
         IMovementManifestNumberRepository MovementManifestNumber { get; set; }
         IMovementManifestNumberMappingRepository MovementManifestNumberMapping { get; set; }
@@ -203,4 +208,5 @@ namespace GIGLS.Core
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }
+
 }

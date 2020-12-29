@@ -18,6 +18,7 @@ using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.Domain.Expenses;
+using GIGLS.Core.Domain.Route;
 using GIGLS.Core.Domain.DHL;
 
 namespace GIGLS.Infrastructure.Persistence
@@ -293,6 +294,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
         public DbSet<ShipmentTimeMonitor> ShipmentTimeMonitor { get; set; }
         public DbSet<InternationalShipmentWaybill> InternationalShipmentWaybill { get; set; }
+
+        //routes
+        public DbSet<Route> Routes { get; }
 
         #endregion
 

@@ -52,6 +52,8 @@ namespace GIGLS.WebApi.Providers
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             var userBVN = String.Empty;
+            var rank = String.Empty;
+            bool isInternational = false;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
@@ -66,6 +68,7 @@ namespace GIGLS.WebApi.Providers
                         context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
                         return;
                     }
+                    isInternational = user.IsInternational;
 
                     int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
@@ -120,9 +123,11 @@ namespace GIGLS.WebApi.Providers
                 {
                     var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                     user.Organisation = ecommerce.Name;
-                    user.FirstName = ecommerce.FirstName;
-                    user.LastName = ecommerce.LastName;
+                    user.FirstName = ecommerce.FirstName == null ? user.FirstName : ecommerce.FirstName;
+                    user.LastName = ecommerce.LastName == null ? user.LastName : ecommerce.LastName;
                     userBVN = ecommerce.BVN;
+                    rank = ecommerce.Rank.ToString();
+                    isInternational = ecommerce.IsInternational;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -144,8 +149,9 @@ namespace GIGLS.WebApi.Providers
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
-                    { "IsInternational", user.IsInternational.ToString()},
+                    { "IsInternational", isInternational.ToString()},
                     { "BVN", userBVN},
+                    { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
                 };
 

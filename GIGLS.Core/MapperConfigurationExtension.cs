@@ -39,6 +39,7 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
+using ThirdParty.WebServices.Business;
 using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.DTO.DHL;
 
@@ -451,6 +452,11 @@ namespace GIGLS.Core
 
                 config.CreateMap<FinancialReport, FinancialReportDTO>();
                 config.CreateMap<FinancialReportDTO, FinancialReport>();
+
+                config.CreateMap<IntlShipmentRequestDTL, IntlShipmentRequestDTO>();
+                config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequestDTL>();
+                config.CreateMap<ShipmentDTO, NewShipmentDTO>();
+                config.CreateMap<NewShipmentDTO, ShipmentDTO>();
 
                 config.CreateMap<InternationalShipmentDTO, ShipmentDTO>();
 

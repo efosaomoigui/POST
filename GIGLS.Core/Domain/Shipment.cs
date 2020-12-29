@@ -155,6 +155,8 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsFromMobile { get; set; }
 
         public bool isInternalShipment { get; set; }
+        public bool IsCargoed { get; set; }
+
         public InternationalShipmentType InternationalShipmentType { get; set; }
 
     }
@@ -199,6 +201,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(50)]
         public string CustomerState { get; set; }
+
+        [MaxLength(150)]
+        public string ItemSenderfullName { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -260,6 +265,8 @@ namespace GIGL.GIGLS.Core.Domain
         public string SenderState { get; set; }
 
         public bool IsProcessed { get; set; }
+
+        public bool IsMobile { get; set; }
     } 
 
 }

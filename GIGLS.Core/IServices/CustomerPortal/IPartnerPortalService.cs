@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -53,5 +54,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateDeliveryNumberV2(MobileShipmentNumberDTO detail);
         Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
+        Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
+        Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch(); 
     }
 }

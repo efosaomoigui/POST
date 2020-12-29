@@ -652,7 +652,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && serviceCenters.Contains(x.DestinationServiceCentreId)
                     && (x.DateCreated <= overdueDate)).ToList();
 
                 shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
@@ -741,7 +741,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
 
                 var shipmentCollectionObj = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && (x.DateCreated <= overdueDate));
 
                 if (serviceCenters.Length > 0)
                 {
@@ -827,7 +827,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
 
                 var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && (x.DateCreated <= overdueDate));
 
                 if (serviceCenters.Length > 0)
                 {

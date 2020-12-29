@@ -4,6 +4,7 @@ using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using System;
 
 namespace GIGLS.Core.IServices.Customers
 {
@@ -20,5 +21,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<IndividualCustomerDTO> GetCustomerByCode(string customerCode);
         Task<List<ShipmentActivityDTO>> GetShipmentActivities(string waybill);
         Task<DeliveryNumberDTO> GetDeliveryNoByWaybill(string waybill);
+        Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option);
     }
 }

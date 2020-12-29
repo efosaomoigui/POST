@@ -255,6 +255,7 @@
     <Compile Include="Implementation\Report\AdminReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
     <Compile Include="Implementation\RiderDeliveryService.cs" />
+    <Compile Include="Implementation\Routes\RouteService.cs" />
     <Compile Include="Implementation\ServiceCentres\LGAService.cs" />
     <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />

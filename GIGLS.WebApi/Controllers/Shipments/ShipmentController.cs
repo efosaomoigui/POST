@@ -131,6 +131,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
+                ShipmentDTO.ShipmentScanStatus = ShipmentScanStatus.CRT;
                 if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
                 {
                     ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;
@@ -402,11 +403,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
-        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(string movementmanifestcode, string code)
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.ReleaseMovementManifest(movementmanifestcode, code);
+                var centres = await _service.ReleaseMovementManifest(movementManifestVals);
                 return new ServiceResponse<bool>
                 {
                     Object = centres
@@ -900,6 +901,34 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<CODShipmentDTO>>
                 {
                     Object = codShipments
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getmagayashipmentstocargo")]
+        public async Task<IServiceResponse<List<CargoMagayaShipmentDTO>>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCargoMagayaShipments(baseFilterCriteria);
+                return new ServiceResponse<List<CargoMagayaShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("cargomagayashipments")]
+        public async Task<IServiceResponse<bool>> GetCargoMagayaShipments(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCargoed = await _service.MarkMagayaShipmentsAsCargoed(cargoMagayaShipmentDTOs);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipmentCargoed
                 };
             });
         }

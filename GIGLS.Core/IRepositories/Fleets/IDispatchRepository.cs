@@ -17,6 +17,8 @@ namespace GIGLS.Core.IRepositories.Fleets
     public interface IMovementDispatchRepository : IRepository<MovementDispatch>   
     {
         Task<List<MovementDispatchDTO>> GetDispatchAsync(int[] serviceCentreIds);
+        Task<List<MovementDispatchDTO>> GetMovementmanifestDispatchForPartner(string userId);
+
         //Task<List<MovementDispatchDTO>> CheckForOutstandingDispatch(string driverId); 
     }
 }
