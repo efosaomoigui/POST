@@ -330,7 +330,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("{customerwaybill}/waybill")]
+        [Route("customerwaybill/{waybill}")]
         public async Task<IServiceResponse<ShipmentDTO>> GetShipment(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
