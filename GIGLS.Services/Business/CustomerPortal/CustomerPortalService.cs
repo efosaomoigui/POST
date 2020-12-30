@@ -2914,7 +2914,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
             user.IsInternational = true;
             user.IdentificationType = intlUserProfiler.IdentificationType;
-            await _uow.User.UpdateUser(currentUserId, user);
+           // await _uow.User.UpdateUser(currentUserId, user);
+            //also update company table
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.IsInternational = true;
+                company.IdentificationImageUrl = intlUserProfiler.IdentificationImage;
+                company.IdentificationNumber = intlUserProfiler.IdentificationNumber;
+                company.IdentificationType = intlUserProfiler.IdentificationType;
+            }
+            _uow.Complete();
             return true;
         }
 
