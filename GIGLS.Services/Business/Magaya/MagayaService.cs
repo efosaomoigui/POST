@@ -384,9 +384,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                //result2 = error_code;
+                result2 = error_code;
 
-                result = api_session_error.no_error;
+                //result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
                 {
@@ -837,11 +837,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var station = await _stationService.GetStationById(shipmentDTO.StationId);
                 var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
 
-                //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
-                //{
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
-                //}
 
                 var newShipment = await MapIntlShipmentRequest(shipmentDTO);
                 newShipment.ReceiverCountry = station.Country;
@@ -854,9 +851,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
-                    //var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String") ?
-                    //    (shipmentItem.ItemValue == "") ? 0 : decimal.Parse(shipmentItem.ItemValue) : shipmentItem.ItemValue;
-
                     var intValue = shipmentItem.ItemValue;
 
                     if (shipmentItem.RequiresInsurance)
@@ -921,7 +915,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 throw;
             }
-
         }
 
         public async Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO)
