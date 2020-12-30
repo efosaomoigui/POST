@@ -117,6 +117,7 @@ namespace GIGLS.WebApi.Providers
                 if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
                 {
                     context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                    isInternational = user.IsInternational;
                 }
 
                 if(user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
