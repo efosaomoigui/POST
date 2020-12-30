@@ -244,7 +244,7 @@ namespace GIGLS.Services.Business.Scanning
                 var groupShipmentList = groupMappingShipmentList.Shipments;
 
                 //In case no shipment attached to the group waybill  
-                if (groupShipmentList.Count > 0)
+                if (groupShipmentList.Any())
                 {
                     ////// GroupShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
                     foreach (var item in groupShipmentList)
@@ -262,7 +262,7 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             //To handle the DHL International from Sending message at arrive final destination
                             TrackingType trackingType = TrackingType.InBound;
-                            if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                            if (groupShipment.InternationalShipmentType == InternationalShipmentType.DHL)
                             {
                                 trackingType = TrackingType.OutBound;
                             }
@@ -328,12 +328,12 @@ namespace GIGLS.Services.Business.Scanning
                         var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
 
                         //In case no shipment attached to the manifest  
-                        if (groupWaybillInManifestList.Count > 0)
+                        if (groupWaybillInManifestList.Any())
                         {
                             //block scanning if any of the waybill has been collected
                             foreach (var groupShipment in groupWaybillInManifestList)
                             {
-                                if (groupShipment.WaybillNumbers.Count > 0)
+                                if (groupShipment.WaybillNumbers.Any())
                                 {
                                     foreach (var waybill in groupShipment.WaybillNumbers)
                                     {
@@ -344,7 +344,7 @@ namespace GIGLS.Services.Business.Scanning
 
                             foreach (var groupShipment in groupWaybillInManifestList)
                             {
-                                if (groupShipment.WaybillNumbers.Count > 0)
+                                if (groupShipment.WaybillNumbers.Any())
                                 {
                                     //add DHL shipment to list in order to exclude send message to customer
                                     var internationalShipmentList = new List<string>();
@@ -431,7 +431,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
 
-                        if (waybillInManifestList.Count > 0)
+                        if (waybillInManifestList.Any())
                         {
                             //block scanning if any of the waybill has been collected
                             //foreach (var item in waybillInManifestList)
@@ -509,7 +509,7 @@ namespace GIGLS.Services.Business.Scanning
                     if (manifest.ManifestType == ManifestType.HUB)
                     {
                         var waybillInHUBManifestList = await _hubmanifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
-                        if (waybillInHUBManifestList.Count > 0)
+                        if (waybillInHUBManifestList.Any())
                         {
                             List<string> waybills = new List<string>();
 
@@ -944,14 +944,14 @@ namespace GIGLS.Services.Business.Scanning
         {
             if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
             {
-                if (waybillsInManifest.Count() > 0)
+                if (waybillsInManifest.Any())
                 {
                     foreach (var waybill in waybillsInManifest)
                     {
                         await CompleteWaybillInTransit(waybill);
                     }
                 }
-                else if (waybillsInGroupWaybill.Count() > 0)
+                else if (waybillsInGroupWaybill.Any())
                 {
                     foreach (var waybill in waybillsInGroupWaybill)
                     {

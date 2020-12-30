@@ -123,8 +123,8 @@ namespace GIGLS.WebApi.Providers
                 {
                     var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                     user.Organisation = ecommerce.Name;
-                    user.FirstName = ecommerce.FirstName;
-                    user.LastName = ecommerce.LastName;
+                    user.FirstName = ecommerce.FirstName == null ? user.FirstName : ecommerce.FirstName;
+                    user.LastName = ecommerce.LastName == null ? user.LastName : ecommerce.LastName;
                     userBVN = ecommerce.BVN;
                     rank = ecommerce.Rank.ToString();
                     isInternational = ecommerce.IsInternational;

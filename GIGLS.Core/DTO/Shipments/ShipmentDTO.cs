@@ -319,7 +319,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
-        public int ItemValue { get; set; }
+        public decimal ItemValue { get; set; }
     }
 
     public class InternationalShipmentDTO : BaseDomainDTO
