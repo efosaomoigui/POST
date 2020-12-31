@@ -477,19 +477,19 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //Get Ecommerce limit weight from GlobalProperty
-            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
-
-            decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
-
+            //var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
+            //decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
+            var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
+            
             decimal PackagePrice;
 
-            if (pricingDto.Weight > weightLimit)
+            if (pricingDto.Weight > activeWeightLimit.Weight)
             {
-                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, weightLimit, zone.ZoneId, pricingDto.CountryId);
+                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
             }
             else
             {
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
             }
 
             return PackagePrice + deliveryOptionPrice;
@@ -512,7 +512,7 @@ namespace GIGLS.Services.Business.Pricing
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
 
-            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            if (!pricingDto.DeliveryOptionIds.Any())
             {
                 throw new GenericException("Delivery Option can not be empty");
             }
@@ -544,7 +544,7 @@ namespace GIGLS.Services.Business.Pricing
             }
             else
             {
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
             }
 
             return PackagePrice + deliveryOptionPrice;
@@ -562,7 +562,7 @@ namespace GIGLS.Services.Business.Pricing
 
             decimal weightLimitPrice = (weightDifferent / additionalWeight) * weightlimitZonePrice;
 
-            decimal PackagePrice = await _regular.GetDomesticZonePrice(zoneId, activeWeightLimit, RegularEcommerceType.Ecommerce, countryId);
+            decimal PackagePrice = await _regular.GetDomesticZonePrice(zoneId, activeWeightLimit, RegularEcommerceType.Regular, countryId);
 
             decimal shipmentTotalPrice = PackagePrice + weightLimitPrice;
 
@@ -1004,8 +1004,6 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetMobileSpecialPrice(PricingDTO pricingDto)
         {
-            decimal deliveryOptionPriceTemp = 0;
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
             if (zone != null)
             {
@@ -1025,13 +1023,9 @@ namespace GIGLS.Services.Business.Pricing
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array
-            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
-
-
+            decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
-
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
-
             return shipmentTotalPrice;
         }
 
