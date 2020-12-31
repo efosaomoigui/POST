@@ -2218,7 +2218,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DriverCode == valMovementManifest.code)
+                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
                         await _uow.CompleteAsync();
@@ -2232,10 +2232,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
                 {
-                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.DestinationServiceCentreCode == valMovementManifest.movementManifestCode);
+                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
+                    if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
                         await _uow.CompleteAsync();
