@@ -52,7 +52,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         }
 
         [HttpPost]
-        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        [Route("releaseMovementManifest")]
         public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
             return await HandleApiOperationAsync(async () =>

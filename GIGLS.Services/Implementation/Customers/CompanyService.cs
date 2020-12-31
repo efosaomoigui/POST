@@ -725,6 +725,7 @@ namespace GIGLS.Services.Implementation.Customers
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
+                    IsInternational = newCompany.IsInternational,
                 });
                 //complete
                 _uow.Complete();
