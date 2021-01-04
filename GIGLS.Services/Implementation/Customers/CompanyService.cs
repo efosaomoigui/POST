@@ -622,6 +622,17 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Phone Number already exist";
                     return result;
                 }
+
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    if (String.IsNullOrEmpty(company.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Exist = false;
+                        result.Message = $"BVN number not provided for class customer";
+                        return result;
+                    }
+                }
                 var industry = string.Join(",", company.Industry);
                 var productType = string.Join(",", company.ProductType);
 
@@ -641,7 +652,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsDeleted = false;
                 newCompany.DateCreated = DateTime.UtcNow;
                 newCompany.DateModified = DateTime.UtcNow;
-                newCompany.IsInternational = true;
+                newCompany.IsInternational = company.isInternational;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
                 newCompany.CompanyType = CompanyType.Ecommerce;
