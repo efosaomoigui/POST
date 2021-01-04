@@ -439,5 +439,20 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(types);
         }
 
+        [HttpPost]
+        [Route("processpartialpayment")]
+        public async Task<IServiceResponse<bool>> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
