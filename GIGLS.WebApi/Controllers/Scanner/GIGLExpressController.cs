@@ -430,5 +430,14 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpGet]
+        [Route("paymenttypes")]
+        public IHttpActionResult GetPaymentTypes()
+        {
+            var types = EnumExtensions.GetValues<PaymentType>();
+           // types.RemoveAt(3);
+            return Ok(types);
+        }
+
     }
 }

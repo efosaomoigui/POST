@@ -97,6 +97,8 @@ namespace GIGLS.CORE.DTO.Shipments
 
         public string ReceiverArea { get; set; }
         public string DeliveryNumber { get; set; }
+        //Demurrage Information
+        public NewDemurrageDTO Demurrage { get; set; }
 
     }
 }
