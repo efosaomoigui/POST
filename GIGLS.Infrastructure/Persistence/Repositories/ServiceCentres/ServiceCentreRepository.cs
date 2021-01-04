@@ -322,7 +322,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         CountryCode = c.CountryCode,
                                         CountryName = c.CountryName,
                                         CurrencySymbol = c.CurrencySymbol                                        
-                                    }
+                                    },
+                                    Longitude = s.Longitude,
+                                    Latitude = s.Latitude
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }
