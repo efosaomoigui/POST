@@ -180,6 +180,7 @@
   <ItemGroup>
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\CustomerPortal\PartnerPortalService.cs" />
+    <Compile Include="Business\DHL\DHLService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
     <Compile Include="Business\Node\NodeService.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="Implementation\Report\AdminReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
     <Compile Include="Implementation\RiderDeliveryService.cs" />
+    <Compile Include="Implementation\Routes\RouteService.cs" />
     <Compile Include="Implementation\ServiceCentres\LGAService.cs" />
     <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
@@ -263,6 +265,7 @@
     <Compile Include="Implementation\ShipmentScan\MobileScanStatusService.cs" />
     <Compile Include="Implementation\ShipmentScan\ScanStatusService.cs" />
     <Compile Include="Implementation\Shipments\AzureBlobServiceUtil.cs" />
+    <Compile Include="Implementation\Shipments\InternationalShipmentWaybillService.cs" />
     <Compile Include="Implementation\Shipments\MobileGroupCodeWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />

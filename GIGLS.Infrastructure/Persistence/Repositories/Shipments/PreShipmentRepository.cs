@@ -74,6 +74,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     IsAgent = r.IsAgent,                                                    
                                                     DepartureStationId = r.DepartureStationId,
                                                     DestinationStationId = r.DestinationStationId,
+                                                    DestinationServiceCenterId = r.DestinationServiceCenterId,
                                                     PreShipmentItems = _context.PreShipmentItem.Where(s => s.PreShipmentId == r.PreShipmentId)
                                                                         .Select(x => new PreShipmentItemDTO
                                                                         {

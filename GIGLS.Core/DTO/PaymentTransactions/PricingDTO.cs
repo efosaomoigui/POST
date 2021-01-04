@@ -27,4 +27,14 @@ namespace GIGLS.Core.DTO.PaymentTransactions
 
         public int CountryId { get; set; }
     }
+
+    public class NewPricingDTO
+    {
+      
+        //To handle volumetric weight
+        public decimal Total { get; set; } = 0;
+        public decimal GrandTotal { get; set; } = 0;
+        public decimal Vat { get; set; } = 0;
+        public decimal Insurance { get; set; } = 0;
+    }
 }
