@@ -2221,6 +2221,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
+                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
                         retVal =  true;
                     }
@@ -2238,6 +2239,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
+                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
                         retVal =  true;
                     }

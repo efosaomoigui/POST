@@ -185,6 +185,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             {
                 var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null);
 
+                //Note:: === Update movement manifest number field with MovementStatus = ProcessEnded(To be done!)
                 var dispatchDto = (from r in dispatchs
                                    join m in _context.MovementManifestNumber on r.MovementManifestNumber equals m.MovementManifestCode
                                    select new MovementDispatchDTO
