@@ -1125,7 +1125,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.CustomerCode);
                     preShipment.UserId = userDTO.Id;
-                    //var user = await _userService.GetUserById(currentUserId);
                 }
                 else
                 {
@@ -1150,7 +1149,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
 
-                //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
                     if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
@@ -1174,6 +1172,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     var userChannelCode = await _userService.GetUserChannelCode();
+                    preShipment.CustomerCode = userChannelCode;
                     var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
                     if (userChannel != null)
                     {
@@ -1204,7 +1203,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Weight = preShipmentItem.Weight,
                         SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                         ShipmentType = preShipmentItem.ShipmentType,
-                        CountryId = preShipment.CountryId  //Nigeria
+                        CountryId = preShipment.CountryId,
+                        CustomerCode = preShipment.CustomerCode
                     };
 
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
@@ -1360,16 +1360,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 decimal pickuprice = 0.0M;  //await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
                 decimal pickupValue = 0.0M; // Convert.ToDecimal(pickuprice);
-
                 decimal mainCharge = basePriceBikeValue + amount;
-
                 decimal percentage = 0.0M;
 
                 //Get the customer Types
                 if (preShipment.IsFromAgility)
                 {
                     var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
-
                     if (userChannel != null)
                     {
                         if (userChannel.CompanyType == CompanyType.Ecommerce)
@@ -1382,6 +1379,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preShipment.Shipmentype = await GetEcommerceCustomerShipmentType(preShipment.Shipmentype);
                 }
+
+                //Get Discount based on Customer Rank
+                var priceDTO = new PricingDTO
+                {
+                    CountryId = preShipment.CountryId,
+                    CustomerCode = preShipment.CustomerCode
+                };
+                mainCharge = await _pricingService.CalculateCustomerRankPrice(priceDTO, mainCharge);
 
                 var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
                 percentage = Convert.ToDecimal(discountPercent.Value);
@@ -1397,7 +1402,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
                 var percentageTobeUsed = ((100M - percentage) / 100M);
-
                 var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
                 calculatedTotal = Math.Round(calculatedTotal);
                 preShipment.DeliveryPrice = (decimal)calculatedTotal;
@@ -5110,6 +5114,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     //2. multiply the remaining distance with the additional pate
                     price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
+
+                //Get Discount based on Customer Rank
+                var customerCode = await _userService.GetUserChannelCode();
+                var priceDTO = new PricingDTO
+                {
+                    CountryId = country.CountryId,
+                    CustomerCode = customerCode
+                };
+                price = await _pricingService.CalculateCustomerRankPrice(priceDTO, price);
 
                 return new MobilePriceDTO
                 {
