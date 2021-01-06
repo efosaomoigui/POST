@@ -898,7 +898,7 @@ namespace GIGLS.Services.Business.Pricing
 
             PackagePrice = PackagePrice + deliveryOptionPrice;
             PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
-            return PackagePrice + deliveryOptionPrice;
+            return PackagePrice;
         }
 
         public async Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto)
