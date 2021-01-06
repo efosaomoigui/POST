@@ -42,6 +42,33 @@ namespace GIGLS.Services.Business.Node
             try
             {
                 var nodeResponse = new NodeResponse();
+                var nodeURL = ConfigurationManager.AppSettings["NodeMerchartBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodeWalletLoaded"];
+                nodeURL = nodeURL + nodePostShipment;
+
+                using (var client = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(user);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(nodeURL, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
+                    nodeResponse = jObject;
+                }
+
+                return nodeResponse;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public static async Task<NodeResponse> ProcessWalletNotificationOld(UserPayload user)
+        {
+            try
+            {
+                var nodeResponse = new NodeResponse();
 
                 var nodeURL = ConfigurationManager.AppSettings["NodeMerchartBaseUrl"];
                 var nodePostShipment = ConfigurationManager.AppSettings["NodeWalletLoaded"];
@@ -60,7 +87,6 @@ namespace GIGLS.Services.Business.Node
                     var response = await client.PostAsync(nodeURL, data);
                     string result = await response.Content.ReadAsStringAsync();
                     var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
-
                     nodeResponse = jObject;
                 }
 
@@ -72,12 +98,11 @@ namespace GIGLS.Services.Business.Node
             }
         }
 
-
-        public static async Task<NodeResponse> ProcessShipmentCreation(CreateShipmentNodeDTO nodePayload)
+        public static async Task<string> ProcessShipmentCreation(CreateShipmentNodeDTO nodePayload)
         {
             try
             {
-                var nodeResponse = new NodeResponse();
+                string result = "";
 
                 var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
                 var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
@@ -88,12 +113,10 @@ namespace GIGLS.Services.Business.Node
                     var json = JsonConvert.SerializeObject(nodePayload);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(nodeURL, data);
-                    string result = await response.Content.ReadAsStringAsync();
-                    var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
-                    nodeResponse = jObject;
+                    result = await response.Content.ReadAsStringAsync();
                 }
 
-                return nodeResponse;
+                return result;
             }
             catch (Exception)
             {

@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.DHL.Enum;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -152,12 +153,16 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public int TimeInSeconds { get; set; }
+
+        public InternationalShipmentType InternationalShipmentType { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
     {
         //Shipment Information 
         public int IntlShipmentRequestId { get; set; }
+        //IntlShipmentRequest
 
         public string RequestNumber { get; set; }
 
@@ -173,6 +178,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerPhoneNumber { get; set; }
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
+        public string ItemSenderfullName { get; set; }  
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -229,6 +235,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
+
+        public bool IsMobile { get; set; }
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
@@ -236,6 +244,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int IntlShipmentRequestId { get; set; }
 
         public string RequestNumber { get; set; }
+        public string ItemSenderfullName { get; set; }
 
         //General Details comes with role user 
         public string UserId { get; set; }
@@ -310,5 +319,202 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string URL { get; set; }
         public string ItemDetails { get; set; }
+        public decimal ItemValue { get; set; }
+    }
+
+    public class InternationalShipmentDTO : BaseDomainDTO
+    {
+        //Shipment Information
+        //public int ShipmentId { get; set; }
+        //public string SealNumber { get; set; }
+        //public string Waybill { get; set; }
+
+        //Senders' Information
+        //public decimal Value { get; set; }
+       // public DateTime? DeliveryTime { get; set; }
+      //  public PaymentStatus PaymentStatus { get; set; }
+        //public string CustomerType { get; set; }
+        //public int CustomerId { get; set; }
+        //public string CompanyType { get; set; }
+        //public string CustomerCode { get; set; }
+
+        //Receivers Information
+       // public int DepartureServiceCentreId { get; set; }
+       // public int DestinationServiceCentreId { get; set; }
+
+        public string ReceiverName { get; set; }
+        public string ReceiverCompanyName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverCity { get; set; }
+        public string ReceiverState { get; set; }
+        public string ReceiverCountry { get; set; }
+        public string ReceiverPostalCode { get; set; }
+        public string ReceiverStreetLines { get; set; }
+        public string ReceiverStateOrProvinceCode { get; set; }
+        public string ReceiverCountryCode { get; set; }
+
+        //Delivery Options
+        //public int DeliveryOptionId { get; set; } = 1;
+        //public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+
+        //PickUp Options
+        // public PickupOptions PickupOptions { get; set; }
+
+        //General but optional
+        //public DateTime? ExpectedDateOfArrival { get; set; }
+        //public DateTime? ActualDateOfArrival { get; set; }
+
+        //Shipment Items
+        public List<ShipmentItemDTO> ShipmentItems { get; set; }
+        public double ApproximateItemsWeight { get; set; }
+        public decimal GrandTotal { get; set; }
+
+        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+      //  public bool IsCashOnDelivery { get; set; }
+      //  public decimal? CashOnDeliveryAmount { get; set; } = 0;
+
+        //public decimal? ExpectedAmountToCollect { get; set; } = 0;
+        //public decimal? ActualAmountCollected { get; set; } = 0;
+
+        //General Details comes with role user
+      //  public string UserId { get; set; }
+        public CustomerDTO CustomerDetails { get; set; }
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
+
+        //discount information
+     //   public decimal? AppliedDiscount { get; set; } = 0;
+      //  public decimal? DiscountValue { get; set; } = 0;
+        //public decimal? Insurance { get; set; } = 0;
+        //public decimal? Vat { get; set; } = 0;
+        //public decimal? Total { get; set; } = 0;
+
+        public decimal ShipmentPackagePrice { get; set; }
+
+        public decimal ShipmentPickupPrice { get; set; }
+
+        //wallet information
+     //   public string WalletNumber { get; set; }
+
+        //from client
+        //public decimal? vatvalue_display { get; set; } = 0;
+        //public decimal? InvoiceDiscountValue_display { get; set; } = 0;
+        //public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
+
+        //payment method
+        public string PaymentMethod { get; set; }
+     //   public bool IsInternational { get; set; } = true;
+
+        public string Description { get; set; }
+
+        //public int DepositStatus { get; set; }
+
+        public bool ReprintCounterStatus { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+        public string SenderState { get; set; }
+        public bool IsFromMobile { get; set; }
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+      //  public decimal CurrencyRatio { get; set; }
+      //  public string ShipmentHash { get; set; }
+
+        public List<int> PackageOptionIds { get; set; } = new List<int>();
+        public string VehicleType { get; set; }
+        //public string SenderCode { get; set; }
+     //   public bool IsGIGGOExtension { get; set; }
+
+        //public string RequestNumber { get; set; }
+        //public string URL { get; set; }
+        public string ItemDetails { get; set; }
+        public Content Content { get; set; }
+        public PaymentType PaymentType { get; set; }
+    }
+
+
+    public class CODShipmentDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public decimal CODAmount { get; set; }
+        public bool IsCOD { get; set; }
+        public string ShipmentStatus { get; set; }
+        public string ShipmentScanStatus { get; set; }
+        public string CompanyName { get; set; }
+    }
+
+
+    public class NewShipmentDTO 
+    {
+        //Shipment Information
+        public int ShipmentId { get; set; }
+        public string Waybill { get; set; }
+        //Senders' Information
+        public decimal Value { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public string CustomerType { get; set; }
+        public int CustomerId { get; set; }
+        public string CustomerCode { get; set; }
+
+        //Receivers Information
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverState { get; set; }
+
+        //Delivery Options
+        public int DeliveryOptionId { get; set; } = 1;
+        public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        //Shipment Items
+        public List<NewShipmentItemDTO> ShipmentItems { get; set; }
+        public decimal GrandTotal { get; set; }
+
+        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+        public bool IsCashOnDelivery { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; } = 0;
+        public List<NewCustomerDTO> Customer { get; set; }
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
+        public decimal? DiscountValue { get; set; } = 0;
+        public decimal? Insurance { get; set; } = 0;
+        public decimal? Vat { get; set; } = 0;
+        public decimal? Total { get; set; } = 0;
+        //from client
+        public decimal? vatvalue_display { get; set; } = 0;
+        public decimal? InvoiceDiscountValue_display { get; set; } = 0;
+        public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
+        public string Description { get; set; }
+        public bool IsFromMobile { get; set; }
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public List<int> PackageOptionIds { get; set; } = new List<int>();
+        public int TimeInSeconds { get; set; }
+
+    }
+    public class CargoMagayaShipmentDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public decimal Total { get; set; }
+        public decimal GrandTotal { get; set; }
+        public double ApproximateItemsWeight { get; set; }
+        public string CustomerType { get; set; }
+        public string UserName { get; set; }
+        public bool IsCargoed { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
     }
 }

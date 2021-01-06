@@ -47,6 +47,11 @@ namespace GIGLS.Services.Implementation.Utility
                     number = long.Parse(numberCode) + 1;
                     numberStr = number.ToString("00");
                 }
+                else if (numberGeneratorType == NumberGeneratorType.MagayaWbM)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00");
+                }
                 else if (numberGeneratorType == NumberGeneratorType.MovementManifestNumber)
                 {
                     number = long.Parse(numberCode) + 1;
@@ -91,6 +96,9 @@ namespace GIGLS.Services.Implementation.Utility
                 if (numberGeneratorType == NumberGeneratorType.MagayaWb)
                 {
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
+                }else if (numberGeneratorType == NumberGeneratorType.MagayaWbM)
+                {
+                    numberGenerated = "MWR-" + ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + numberStr;
                 }
 
                 if (numberGeneratorType == NumberGeneratorType.RequestNumber)

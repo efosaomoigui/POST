@@ -60,6 +60,7 @@ using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -104,6 +105,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
+        private readonly IShipmentService _shipmentService; 
+        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;   
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -116,7 +119,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService)
+            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService) 
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -157,6 +160,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
             _companyService = companyService;
+            _shipmentService  = shipmentService;
+            _movementManifestService = movementManifestService;
             MapperConfig.Initialize();
         }
 
@@ -209,6 +214,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
+        public async Task<object> AddWalletPaymentLogAnonymousUser(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLogAnonymousUser(walletPaymentLogDto);
             return walletPaymentLog;
         }
 
@@ -2614,11 +2625,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
                 existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
-                existingPreShipment.SenderCity = existingPreShipment.SenderCity;
-                existingPreShipment.Value = existingPreShipment.Value;
-                existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
-                existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                existingPreShipment.SenderCity = preShipmentDTO.SenderCity;
+                existingPreShipment.Value = preShipmentDTO.Value;
+                existingPreShipment.DepartureStationId = preShipmentDTO.DepartureStationId;
+                existingPreShipment.DestinationStationId = preShipmentDTO.DestinationStationId;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
+                existingPreShipment.DestinationServiceCenterId = preShipmentDTO.DestinationServiceCenterId;
 
                 if (existingPreShipment.IsAgent)
                 {
@@ -2769,6 +2781,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _scanService.ScanMultipleShipment(scanList);
         }
+        
+        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+        {
+            return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
+        }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
         {
@@ -2804,10 +2821,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
-            if (waybill.Contains("AWR"))
-            {
-                throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            }
+            //if (waybill.Contains("AWR"))
+            //{
+            //    throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            //}
 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
@@ -2903,7 +2920,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
             user.IsInternational = true;
             user.IdentificationType = intlUserProfiler.IdentificationType;
-            await _uow.User.UpdateUser(currentUserId, user);
+           // await _uow.User.UpdateUser(currentUserId, user);
+            //also update company table
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.IsInternational = true;
+                company.IdentificationImageUrl = intlUserProfiler.IdentificationImage;
+                company.IdentificationNumber = intlUserProfiler.IdentificationNumber;
+                company.IdentificationType = intlUserProfiler.IdentificationType;
+            }
+            _uow.Complete();
             return true;
         }
 
@@ -2969,6 +2996,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.Store.GetStoresByCountryId(countryId);
         }
+
+        public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+
+            return requests;
+        }
+
 
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
@@ -3060,11 +3098,19 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _walletService.ChargeWallet(chargeWalletDTO);
         }
 
+        public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
+        {
+           return await  _shipmentService.ReleaseMovementManifest(valMovementManifest);
+        }
+
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await _movementManifestService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+        }
+
         public async Task<ResponseDTO> VerifyBVNNo(string bvnNo)
         {
             return await _paystackPaymentService.VerifyBVN(bvnNo);
         }
-
-
     }
 }

@@ -181,7 +181,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 RowVersion = mgw.RowVersion, 
                                                 MovementStatus = mgw.MovementStatus,
                                                 DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
-
         }; 
 
             return movementManifestNumberDto.ToList();

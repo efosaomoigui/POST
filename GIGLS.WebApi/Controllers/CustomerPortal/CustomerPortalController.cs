@@ -41,6 +41,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation.Utility;
 using GIGLS.Core.DTO.Stores;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -84,6 +85,49 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("intlshipmentrequest/{requestNumber}")]
+        public async Task<IServiceResponse<object>> UpdateIntlShipmentRequest(string requestNumber,IntlShipmentRequestDTO transactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _magayaService.UpdateIntlShipmentRequest(requestNumber,transactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReleaseMovementManifest(movementManifestVals);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("movementmanifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<MovementManifestNumberDTO>>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var MovementmanifestNumberMappings = await _portalService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<MovementManifestNumberDTO>>
+                {
+                    Object = MovementmanifestNumberMappings
                 };
             });
         }
@@ -170,7 +214,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
                 var result = await _portalService.VerifyAndValidatePayment(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
@@ -2178,6 +2221,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<MessageDTO>
                 {
                     Object = message
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("intlshipmentrequests")]
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var requests = await _portalService.GetIntlShipmentRequestsForUser(filterCriteria);
+
+                return new ServiceResponse<List<IntlShipmentRequestDTO>>
+                {
+                    Object = requests
                 };
             });
         }

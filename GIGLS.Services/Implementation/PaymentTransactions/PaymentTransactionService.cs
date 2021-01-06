@@ -20,6 +20,10 @@ using System.Text;
 using System.Security.Cryptography;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using System.Net;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -34,7 +38,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IFinancialReportService _financialReportService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, 
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
         {
             _uow = uow;
@@ -160,19 +164,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
             await _uow.CompleteAsync();
 
-            //Add to Financial Reports
-            var financialReport = new FinancialReportDTO
-            {
-                Source = ReportSource.Agility,
-                Waybill = shipment.Waybill,
-                PartnerEarnings = 0.0M,
-                GrandTotal = invoiceEntity.Amount,
-                Earnings = invoiceEntity.Amount,
-                Demurrage = 0.00M,
-                CountryId = invoiceEntity.CountryId
-            };
-            await _financialReportService.AddReport(financialReport);
-
             //QR Code
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
@@ -183,6 +174,46 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 QRCode = deliveryNumber.SenderCode
             };
 
+            if(shipment.DepartureCountryId == 1)
+            {
+                //Add to Financial Reports
+                var financialReport = new FinancialReportDTO
+                {
+                    Source = ReportSource.Agility,
+                    Waybill = shipment.Waybill,
+                    PartnerEarnings = 0.0M,
+                    GrandTotal = invoiceEntity.Amount,
+                    Earnings = invoiceEntity.Amount,
+                    Demurrage = 0.00M,
+                    CountryId = invoiceEntity.CountryId
+                };
+                await _financialReportService.AddReport(financialReport);
+            }
+            else
+            {
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
+
+                double amountToDebitDouble = (double)invoiceEntity.Amount * countryRateConversion.Rate;
+
+                var amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+
+                //Add to Financial Reports
+                var financialReport = new FinancialReportDTO
+                {
+                    Source = ReportSource.Intl,
+                    Waybill = shipment.Waybill,
+                    PartnerEarnings = 0.0M,
+                    GrandTotal = amountToDebit,
+                    Earnings = amountToDebit,
+                    Demurrage = 0.00M,
+                    ConversionRate = countryRateConversion.Rate,
+                    CountryId = shipment.DestinationCountryId
+                };
+                await _financialReportService.AddReport(financialReport);
+
+            }
+
+
             if (shipment.DepartureServiceCentreId == 309)
             {
                 await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
@@ -191,6 +222,64 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             else
             {
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
+
+            //Send Email to Sender when Payment for International Shipment has being made
+            if(invoiceEntity.IsInternational == true && paymentTransaction.PaymentType == PaymentType.Wallet)
+            {
+                var shipmentDTO = new ShipmentDTO
+                {
+                    CustomerType = shipment.CustomerType,
+                    CustomerId = shipment.CustomerId,
+                    ReceiverName = shipment.ReceiverName,
+                    Waybill = shipment.Waybill,
+                    PickupOptions = shipment.PickupOptions,
+                    ReceiverEmail = shipment.ReceiverEmail,
+                    GrandTotal = shipment.GrandTotal,
+                    DepartureCountryId = shipment.DepartureCountryId,
+                    DestinationCountryId = shipment.DestinationCountryId,
+                    DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                    DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                    CustomerDetails = new CustomerDTO
+                    {
+                    },
+                    DepartureServiceCentre = new ServiceCentreDTO
+                    {
+
+                    },
+                    DestinationServiceCentre = new ServiceCentreDTO
+                    {
+
+                    }
+                };
+
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+                shipmentDTO.CustomerDetails.Email = customerObj.Email;
+                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
+
+                //Send email to Chinalu and Peter
+                var mails = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.IntlShipmentPaymentMonitoringEmails.ToString() && s.CountryId == 1);
+
+                if (mails != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] paymentEmails = mails.Value.Split(',').ToArray();
+
+                    foreach (string email in paymentEmails)
+                    {
+                        // send email message for payment notification
+                        shipmentDTO.CustomerDetails.Email = email;
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
+                    }
+                }
             }
 
             result = true;
@@ -427,7 +516,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             result = true;
             return result;
-            
+
         }
 
         private async Task<decimal> GetEcommerceWalletLimit(Shipment shipment)
@@ -484,6 +573,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
             }
 
+            //check if the customer country is same as the country in the user table
+            var user = await _uow.User.GetUserByChannelCode(shipment.CustomerCode);
+            if(user != null)
+            {
+                if(user.UserActiveCountryId != customerCountryId)
+                {
+                    throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
+                }
+            }
+
             //2. If the customer country !== Departure Country, Convert the payment
             if (customerCountryId != shipment.DepartureCountryId)
             {
@@ -492,6 +591,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
                 amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            //if the shipment is International Shipment & Payment was initiated before the shipment get to Nigeria
+            //5% discount should be give to the customer
+            if (shipment.IsInternational)
+            {
+                //check if the shipment has a scan of AISN in Tracking Table, 
+                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                && x.Status == ShipmentScanStatus.AISN.ToString());
+
+                if (!isPresent)
+                {
+                    amountToDebit = amountToDebit * 0.95m;
+                }                
             }
 
             return amountToDebit;

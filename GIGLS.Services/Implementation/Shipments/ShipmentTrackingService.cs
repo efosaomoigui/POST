@@ -61,7 +61,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     //Get shipment Details
-                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == tracking.Waybill);
                     shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
 
                     //add service centre
@@ -75,6 +75,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
 
                     _uow.ShipmentCollection.Add(newShipmentCollection);
+
+                    //set international shipmet to arrived
+                    if(shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                    {
+                        var internationalShipment = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == tracking.Waybill);
+                        if(internationalShipment != null)
+                        {
+                            internationalShipment.InternationalShipmentStatus = InternationalShipmentStatus.Arrived;
+                        }
+                    }
                 }
 
                 //check if the waybill has not been scan for the status before
@@ -99,13 +109,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     //send sms and email
                     if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
                     {
-                        if (tracking.isInternalShipment)
+                        if(tracking.TrackingType == TrackingType.InBound)
                         {
-                            await SendEmailToStoreKeeper(tracking, scanStatus);
-                        }
-                        else
-                        {
-                            await sendSMSEmail(tracking, scanStatus);
+                            if (tracking.isInternalShipment)
+                            {
+                                await SendEmailToStoreKeeper(tracking, scanStatus);
+                            }
+                            else
+                            {
+                                await sendSMSEmail(tracking, scanStatus);
+                            }
                         }
                     }
                 }
@@ -565,9 +578,22 @@ namespace GIGLS.Services.Implementation.Shipments
             return filteredRegionalManagers;
         }
 
-        //Send email to customer when international shipment has arrived Nigeria
+        //Send email to sender when international shipment has arrived Nigeria
         public async Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType)
         {
+            if(messageType == MessageType.AISNU)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+                shipmentDTO.CustomerDetails.Email = customerObj.Email;
+                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
+            }
+
             //send message
             await _messageSenderService.SendGenericEmailMessage(messageType, shipmentDTO);
 

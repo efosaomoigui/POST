@@ -233,7 +233,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if(messageDTO.MessageType == MessageType.ARF)
+                    if(messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                         if(deliveryNumber != null)
@@ -1026,7 +1026,10 @@ namespace GIGLS.Services.Implementation.Messaging
                     "ETA",
                     "PickupOptions",
                     "GrandTotal",
-                    "CurrencySymbol"
+                    "CurrencySymbol",
+                    "Departure",
+                    "Destination",
+                    "DeliveryCode"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1048,17 +1051,25 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[5] = intlDTO.DepartureServiceCentre.Name;
                 strArray[6] = intlDTO.DestinationServiceCentre.Name;
                 strArray[7] = intlDTO.ItemDetails;
-                strArray[8] = DateTime.Now.AddDays(10).ToString("dd/MM/yyyy");
+                strArray[8] = DateTime.Now.AddDays(14).ToString("dd/MM/yyyy");
                 strArray[9] = intlDTO.PickupOptions.ToString();
                 strArray[10] = intlDTO.GrandTotal.ToString();
+                strArray[14] = intlDTO.SenderCode;
+               
 
                 if(intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     strArray[9] = " and is ready to be delivered to your location";
+                    strArray[13] = intlDTO.ReceiverAddress;
                 }
                 else if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
                 {
                     strArray[9] = " and is ready for pickup";
+                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DestinationServiceCentreId);
+                    var destcountry = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DestinationCountryId);
+                    
+                    strArray[13] = $"GIGL {destination.FormattedServiceCentreName} service center, {destcountry.CountryName}";
+                    
                 }
 
                 var countryId = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DepartureCountryId);
@@ -1066,6 +1077,9 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     strArray[11] = countryId.CurrencySymbol;
                 }
+
+                var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
+                strArray[12] = departure.Name;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

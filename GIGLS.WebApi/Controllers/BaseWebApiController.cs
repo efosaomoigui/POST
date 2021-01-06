@@ -143,6 +143,7 @@ namespace GIGLS.WebApi.Controllers
 
                 List<string> errorList = new List<string>();
                 errorList.Add(ex.Message);
+                errorList.Add(ex.StackTrace);
                 if(ex.InnerException != null) errorList.Add(ex.InnerException?.Message);
                 if(ex.InnerException?.InnerException != null) errorList.Add(ex.InnerException?.InnerException?.Message);
                 if(ex.InnerException?.InnerException?.InnerException != null) errorList.Add(ex.InnerException?.InnerException?.InnerException?.Message);
