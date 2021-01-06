@@ -198,7 +198,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var customerObj = await GetCustomer(invoice.CustomerId, customerType);
 
                     var currentUserId = await _userService.GetCurrentUserId();
-                    var currentUser = await _userService.GetUserById(currentUserId);                    
+                    var currentUser = await _userService.GetUserById(currentUserId);
                     var userActiveCountryId = currentUser.UserActiveCountryId;
 
                     //Get DemurrageDayCount from GlobalProperty
@@ -243,7 +243,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     }
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
+                    if (messageDTO.MessageType == MessageType.ARF &&invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -287,7 +287,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     }
 
                     //C. added for Email sent for Store Keeper Shipment when scan is ArrivedFinalDestination
-                    if(messageDTO.MessageType == MessageType.ARF && invoice.isInternalShipment)
+                    if (messageDTO.MessageType == MessageType.ARF && invoice.isInternalShipment)
                     {
                         MessageDTO storeMessageDTO = null;
                         var emailMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.ARFS);
@@ -299,7 +299,7 @@ namespace GIGLS.Services.Implementation.Messaging
                             messageDTO.Body = storeMessageDTO.Body;
                             messageDTO.To = storeMessageDTO.To;
                             messageDTO.SMSSenderPlatform = storeMessageDTO.SMSSenderPlatform;
-                        }                        
+                        }
                     }
 
                     //B. decode url parameter
@@ -448,7 +448,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //populate the message template
                 messageDTO.FinalBody =
                     string.Format(messageDTO.Body, strArray);
-                               
+
                 messageDTO.ToEmail = messageObj.gigMail;
             }
 
@@ -520,7 +520,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                 //C. populate the message subject
-                messageDTO.Subject =  string.Format(messageDTO.Subject, strArray);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
 
                 //populate the message template
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
@@ -557,7 +557,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                 //C. populate the message subject
-                messageDTO.Subject =  string.Format(messageDTO.Subject, strArray);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
 
                 //populate the message template
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
@@ -645,7 +645,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "CurrencySymbol",
                     "Departure",
                     "Destination",
-                    "DeliveryCode"
+                    "DeliveryCode",
+                    "PaymentLink"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -697,6 +698,18 @@ namespace GIGLS.Services.Implementation.Messaging
                 var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
                 strArray[12] = departure.Name;
 
+                //Check if it is from mobile or not
+                if (intlDTO.Waybill.Contains("MWR"))
+                {
+                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
+                    strArray[15] = link.Value;
+                }
+                else
+                {
+                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+                    strArray[15] = $"{link.Value}{intlDTO.Waybill}";
+                }
+
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -733,7 +746,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (company != null)
                     {
                         customerDTO.CustomerType = CustomerType.Company;
-                    }                    
+                    }
                     return customerDTO;
                 }
                 else
@@ -743,7 +756,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
 
                     //get all countries and set the country name
-                    if(customer != null)
+                    if (customer != null)
                     {
                         var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
                         individual.UserActiveCountryName = userCountry?.CountryName;
@@ -797,10 +810,11 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw new Exception(ex.Message);
             }
-                
+
             return true;
         }
 
@@ -998,7 +1012,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
-            
+
             //4 obj is MobileMessageDTO
             if (obj is MobileMessageDTO)
             {
@@ -1032,7 +1046,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
             }
-            
+
             //4. obj is PasswordMessageDTO
             if (obj is PasswordMessageDTO)
             {
@@ -1110,8 +1124,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Reciever Name",
                     "Waybill",
                     "URL",
-                    "Request Number", 
-                    "Departure", 
+                    "Request Number",
+                    "Departure",
                     "Destination",
                     "Items Details",
                     "ETA",
@@ -1120,7 +1134,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "CurrencySymbol",
                     "Departure",
                     "Destination",
-                    "DeliveryCode"
+                    "DeliveryCode",
+                    "PaymentLink"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1137,7 +1152,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = customerObj.CustomerName;
                 strArray[1] = intlDTO.ReceiverName;
                 strArray[2] = intlDTO.Waybill;
-                strArray[3] = intlDTO.URL; 
+                strArray[3] = intlDTO.URL;
                 strArray[4] = intlDTO.RequestNumber;
                 strArray[5] = intlDTO.DepartureServiceCentre.Name;
                 strArray[6] = intlDTO.DestinationServiceCentre.Name;
@@ -1146,31 +1161,44 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[9] = intlDTO.PickupOptions.ToString();
                 strArray[10] = intlDTO.GrandTotal.ToString();
                 strArray[14] = intlDTO.SenderCode;
-               
 
-                if(intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+
+                if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     strArray[9] = " and is ready to be delivered to your location";
                     strArray[13] = intlDTO.ReceiverAddress;
                 }
-                else if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
+                else if (intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
                 {
                     strArray[9] = " and is ready for pickup";
                     var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DestinationServiceCentreId);
                     var destcountry = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DestinationCountryId);
-                    
+
                     strArray[13] = $"GIGL {destination.FormattedServiceCentreName} service center, {destcountry.CountryName}";
-                    
+
                 }
 
                 var countryId = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DepartureCountryId);
-                if(countryId != null)
+                if (countryId != null)
                 {
                     strArray[11] = countryId.CurrencySymbol;
                 }
 
                 var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
                 strArray[12] = departure.Name;
+
+                //Check if it is from mobile or not
+                if (intlDTO.Waybill.Contains("MWR"))
+                {
+                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
+                    strArray[15] = link.Value;
+                }
+                else
+                {
+                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+                    strArray[15] = $"{link.Value}{intlDTO.Waybill}";
+                }
+
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -1190,7 +1218,7 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             //8. obj is IntlShipmentRequestDTO 
-            if (obj is IntlShipmentRequestDTO) 
+            if (obj is IntlShipmentRequestDTO)
             {
                 var strArray = new string[]
                 {
@@ -1226,7 +1254,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[6] = intlDTO.ItemDetails;
                 strArray[7] = "International Shipment Items";
 
-                if(intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
+                if (intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
                 {
                     strArray[8] = "Pick Up At GIGL Center";
                 }
