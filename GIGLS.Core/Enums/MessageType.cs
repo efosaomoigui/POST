@@ -63,6 +63,7 @@
         NODESMS, //International Shipments Terms and Condition shown on the App
         IDH, //International Shipment Departs Hub
         IPC, //International Shipment Payment Confirmation
-        USP //Unsuccessful Wallet Funding Email Notification
+        USP, //Unsuccessful Wallet Funding Email Notification
+        ESEAS //ECOMMERCE SIGNUP EMAIL AND SMS
     } 
 }

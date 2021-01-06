@@ -806,6 +806,11 @@ namespace GIGLS.Services.Implementation.Customers
                         return result;
                     }
                     company.BVN = userValidationDTO.BVN;
+                    company.isCodNeeded = true;
+                }
+                if (userValidationDTO.Rank == Rank.Basic)
+                {
+                    company.isCodNeeded = false;
                 }
                 if (company == null)
                 {
