@@ -592,6 +592,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
                 shipmentDTO.CustomerDetails.Email = customerObj.Email;
                 shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
+
+                //SEND SMS
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, shipmentDTO);
             }
 
             //send message

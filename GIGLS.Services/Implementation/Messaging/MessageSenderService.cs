@@ -626,6 +626,97 @@ namespace GIGLS.Services.Implementation.Messaging
                 }
             }
 
+            //7. obj is IntlShipmentDTO 
+            if (obj is ShipmentDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Customer Name",
+                    "Reciever Name",
+                    "Waybill",
+                    "URL",
+                    "Request Number",
+                    "Departure",
+                    "Destination",
+                    "Items Details",
+                    "ETA",
+                    "PickupOptions",
+                    "GrandTotal",
+                    "CurrencySymbol",
+                    "Departure",
+                    "Destination",
+                    "DeliveryCode"
+                };
+
+                var intlDTO = (ShipmentDTO)obj;
+
+                //get CustomerDetails (
+                if (intlDTO.CustomerType.Contains("Individual"))
+                {
+                    intlDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), intlDTO.CustomerType);
+                var customerObj = await GetCustomer(intlDTO.CustomerId, customerType);
+
+                //A. map the array
+                strArray[0] = customerObj.CustomerName;
+                strArray[1] = intlDTO.ReceiverName;
+                strArray[2] = intlDTO.Waybill;
+                strArray[3] = intlDTO.URL;
+                strArray[4] = intlDTO.RequestNumber;
+                strArray[5] = intlDTO.DepartureServiceCentre.Name;
+                strArray[6] = intlDTO.DestinationServiceCentre.Name;
+                strArray[7] = intlDTO.ItemDetails;
+                strArray[8] = DateTime.Now.AddDays(14).ToString("dd/MM/yyyy");
+                strArray[9] = intlDTO.PickupOptions.ToString();
+                strArray[10] = intlDTO.GrandTotal.ToString();
+                strArray[14] = intlDTO.SenderCode;
+
+
+                if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    strArray[9] = " and is ready to be delivered to your location";
+                    strArray[13] = intlDTO.ReceiverAddress;
+                }
+                else if (intlDTO.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    strArray[9] = " and is ready for pickup";
+                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DestinationServiceCentreId);
+                    var destcountry = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DestinationCountryId);
+
+                    strArray[13] = $"GIGL {destination.FormattedServiceCentreName} service center, {destcountry.CountryName}";
+
+                }
+
+                var countryId = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.DepartureCountryId);
+                if (countryId != null)
+                {
+                    strArray[11] = countryId.CurrencySymbol;
+                }
+
+                var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
+                strArray[12] = departure.Name;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = intlDTO.CustomerDetails.PhoneNumber;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+            }
+
             return await Task.FromResult(true);
         }
 
