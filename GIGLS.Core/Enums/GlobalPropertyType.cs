@@ -70,6 +70,8 @@
         MagayaInAppMessage,
         IntlShipmentPaymentMonitoringEmails,
         BasicRankPercentage,
-        ClassRankPercentage
+        ClassRankPercentage,
+        RedirectLinkForApps,
+        PaymentLinkCustomerPortal
     }
 }
