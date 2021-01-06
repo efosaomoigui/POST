@@ -123,22 +123,33 @@ namespace GIGLS.Services.Business.Node
                 throw;
             }
         }
-    }
 
-    public class NodeResponse
-    {
-        public NodeResponse()
+        public async Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill)
         {
-            data = new NodeDataResponse();
+            try
+            {
+                var nodeResponse = new NewNodeResponse();
+
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
+                nodeURL = $"{nodeURL}{nodePostShipment}/{waybill}";
+                using (var client = new HttpClient())
+                {
+                    var response = await client.DeleteAsync(nodeURL);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<NewNodeResponse>(result);
+                    nodeResponse = jObject;
+                }
+                return nodeResponse;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
-        public int statusCode { get; set; }
-        public string message { get; set; }
-        public NodeDataResponse data { get; set; }
     }
 
-    public class NodeDataResponse
-    {
-        public string message { get; set; }
-    }
+
+   
 
 }
