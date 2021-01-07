@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using System;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -1151,6 +1152,85 @@ namespace GIGLS.Services.Business.Pricing
             shipment.GrandTotal = shipment.GrandTotal * countryCurrencyRatio;
 
             return shipment;
+        }
+
+        public async Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
+        {
+            NewPricingDTO newPricingDTO = new NewPricingDTO();
+            if (newShipmentDTO == null)
+            {
+                throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (!newShipmentDTO.ShipmentItems.Any())
+            {
+                throw new GenericException("No shipment item", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            decimal totalPrice = 0;
+            decimal grandTotal = 0;
+
+             //get total price for shipment items
+            foreach (var item in newShipmentDTO.ShipmentItems)
+            {
+                var priceDTO = JObject.FromObject(newShipmentDTO).ToObject<PricingDTO>();
+                priceDTO.Weight = Convert.ToDecimal(item.Weight);
+                priceDTO.Length = Convert.ToDecimal(item.Length);
+                priceDTO.IsVolumetric = item.IsVolumetric;
+                priceDTO.Height = Convert.ToDecimal(item.Height);
+                priceDTO.ShipmentType = item.ShipmentType;
+                priceDTO.SpecialPackageId = item.SpecialPackageId.Value;
+                priceDTO.Width = Convert.ToDecimal(item.Width);
+                priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
+
+                if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Regular.ToString().ToLower())
+                {
+                    var itemPrice = await GetRegularPrice(priceDTO);
+                    totalPrice += itemPrice;
+                }
+                else if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Special.ToString().ToLower())
+                {
+                    var itemPrice = await GetSpecialPrice(priceDTO);
+                    totalPrice += itemPrice;
+                }
+                else if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Ecommerce.ToString().ToLower())
+                {
+                    var itemPrice = await GetEcommercePrice(priceDTO);
+                    totalPrice += itemPrice;
+                }
+            }
+
+           
+            //calculate the vat
+            var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
+            decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+            var vatForItems = totalPrice * vat;
+            var vatValue = totalPrice + vatForItems;
+            grandTotal += vatValue;
+
+            //calculate insurance
+            var insuranceDTO = await _uow.Insurance.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
+            decimal insurance = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
+            grandTotal +=  insurance;
+
+            if (newShipmentDTO.CustomerType.ToLower() == "individual")
+            {
+                //round up to the nearest whole number
+                var rem = grandTotal - Math.Truncate(grandTotal);
+                if (rem >= 50)
+                {
+                    grandTotal = Math.Floor(grandTotal);
+                }
+                else
+                {
+                    var factor = Convert.ToDecimal(Math.Pow(10, 0));
+                    grandTotal = Math.Round(grandTotal * factor) / factor;
+                }
+            }
+
+            newPricingDTO.Vat = vatForItems;
+            newPricingDTO.Insurance = insurance;
+            newPricingDTO.Total = totalPrice;
+            newPricingDTO.GrandTotal = grandTotal;
+            return newPricingDTO;
         }
 
     }

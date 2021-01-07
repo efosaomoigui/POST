@@ -19,4 +19,11 @@ namespace GIGLS.Core.DTO.Shipments
 
         public CountryDTO Country { get; set; }
     }
+
+    public class NewShipmentPackagePriceDTO : BaseDomainDTO
+    {
+        public int ShipmentPackagePriceId { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+    }
 }

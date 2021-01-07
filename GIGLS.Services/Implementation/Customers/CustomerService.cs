@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
 using GIGLS.Core.Domain;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -57,13 +58,11 @@ namespace GIGLS.Services.Implementation.Customers
 
                     if(companyByCode == null)
                     {
-                        var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
-                        || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                        //var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                        //|| c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
-                        foreach (var item in CompanyByName)
-                        {
-                            companyId = item.CompanyId;
-                        }
+                        var CompanyByName = await _uow.Company.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email);
+                        companyId = CompanyByName.CompanyId;
                     }
                     else
                     {
@@ -468,7 +467,7 @@ namespace GIGLS.Services.Implementation.Customers
                     };
                     if (item.StatusCode == "200")
                     {
-                        obj.ActionResult = "SUCCESSFUL"; 
+                        obj.ActionResult = "SUCCESSFUL";
                     }
                     else
                     {
@@ -477,9 +476,71 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.PhoneNo = partnerPhoneNo;
                     obj.Waybill = waybill;
                     shipmentActivity.Add(obj);
-                } 
+                }
             }
             return shipmentActivity;
+        }
+
+        public async Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option)
+        {
+            try
+            {
+                var result = new object();
+                if (option.Option.StartsWith("0"))
+                {
+                    option.Option = option.Option.Remove(0, 1);
+                }
+                CustomerSearchOption search = new CustomerSearchOption();
+                search.SearchData = option.Option;
+                if (customerType.ToLower() == "individual")
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(option.Option);
+                    result = individualCustomerDTO.FirstOrDefault();
+                }
+                else if (customerType.ToLower() == CompanyType.Corporate.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Corporate, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate; 
+                    }
+                }
+                else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Ecommerce, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                        }
+                        result = coporate;
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"Invalid customer type");
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

@@ -5,6 +5,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
@@ -316,9 +317,29 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return;
         }
 
-        public async Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
+        public async Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
+            
+            if (mDto.RequestNumber != null)
+            {
+                var requestNo = mDto.RequestNumber;
+                var shipmentReq = await GetShipmentRequest(requestNo);
+                var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
+                mDto.IntlShipmentRequest = shipmentDTlMapped;
+
+                //more information for magaya use
+                magayaShipmentDTO.Shipper.Address.ContactEmail = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.Address.ContactPhone = shipmentDTlMapped.CustomerPhoneNumber;
+
+                magayaShipmentDTO.Shipper.BillingAddress.ContactEmail = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.BillingAddress.ContactPhone = shipmentDTlMapped.CustomerPhoneNumber;
+
+                magayaShipmentDTO.Shipper.Email = shipmentDTlMapped.CustomerEmail;
+                magayaShipmentDTO.Shipper.Phone = shipmentDTlMapped.CustomerPhoneNumber;
+
+            }
+
             //2. initialize type of shipment and flag
             string type = "WH";
 
@@ -343,10 +364,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             setMagayaShipmentCharges(magayaShipmentDTO);
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
-
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
             var errval = string.Empty;
+            var result2 = string.Empty;
             api_session_error result = api_session_error.no_error;
 
             //5. initialize the serializer object
@@ -363,6 +384,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                result2 = error_code;
+
                 //result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
@@ -372,6 +395,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
+                        if(shipmentDto.GrandTotal > 0)
+                        {
+                            shipmentDto.GrandTotal = Math.Round(shipmentDto.GrandTotal, 2);
+                        }
                         // send email message for payment notification
                         await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
 
@@ -461,7 +488,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    throw new Exception("Error Creating Shipment: ");
+                    throw new Exception("Error Creating Shipment ---" + result2);
                 }
 
                 errval = error_code;
@@ -469,8 +496,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             catch (Exception ex)
             {
                 errval = ex.Message;
+                throw new Exception("Error Creating Shipment ---" + result2 + "----" + errval);
             }
-            return result;
+
+            return new Tuple<api_session_error, string, string>(result, errval, result2);
         }
 
         public List<ShipmentItemDTO> getShipmentItems(WarehouseReceipt magayaShipmentDTO)
@@ -546,6 +575,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
         public async Task<ShipmentDTO> CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
         {
+            //var requestDetails = 
             var magayaShipmentDTO = mDto.WarehouseReceipt;
             try
             {
@@ -568,7 +598,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                 }
 
-                var serviceCenter = await _centreService.GetServiceCentreById(int.Parse(claimValue[1]));
+                if (claimValue[1] == "Global")
+                {
+                    throw new Exception("Global Privilegde Cannot Create Shipment Here");
+                }
+
+                var idVal = int.Parse(claimValue[1]);
+                var serviceCenter = await _centreService.GetServiceCentreById(idVal);
                 var shipmentItems = getShipmentItems(magayaShipmentDTO);
 
                 var shipmentDTO = new ShipmentDTO();
@@ -596,27 +632,39 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Delivery Options
                 shipmentDTO.DeliveryOptionId = 1;
-
-                //Insurance
-                var requestDtoJson = mDto.IntlShipmentRequest?.ShipmentRequestItems;
                 decimal totalInsuranceCharge = 0;
 
-                if (requestDtoJson != null)
-                {
-                    for (int i = 0; i < requestDtoJson.Count; i++)
-                    {
-                        var ob = requestDtoJson[i].ToString();
-                        var resultJson = JsonConvert.DeserializeObject<IntlShipmentRequestItemDTO>(ob);
+                var user = new UserDTO();
+                var resultJson2 = new IntlShipmentRequestDTO();
+                var customer = new CustomerDTO();
 
-                        if (resultJson.RequiresInsurance == true)
+                //Insurance
+                if (mDto.RequestNumber != null)
+                {
+                    var shipmentReq = await GetShipmentRequest(mDto.IntlShipmentRequest.RequestNumber);
+                    var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
+                    mDto.IntlShipmentRequest = shipmentDTlMapped;
+
+                    var requestDto = mDto.IntlShipmentRequest.ShipmentRequestItems;
+
+                    if (requestDto != null)
+                    {
+                        foreach (var item in shipmentReq.ShipmentRequestItems)
                         {
                             var percentVal = int.Parse(ConfigurationManager.AppSettings["InsuranceCharge"]);
-                            var intValue = (resultJson.ItemValue.GetType().ToString() == "System.String") ? 
-                                (resultJson.ItemValue == "") ? 0:decimal.Parse(resultJson.ItemValue) : resultJson.ItemValue;
-                            totalInsuranceCharge += (resultJson.ItemValue) * (percentVal / 100);
+                            //var intValue = (item.ItemValue == null) ? 0 : decimal.Parse(item.ItemValue);
+                            var intValue = item.ItemValue;
+                            totalInsuranceCharge += (intValue) * (percentVal / 100);
                         }
+                    }
 
-                    };
+                    if (shipmentDTlMapped != null)
+                    {
+                        var ob1 = shipmentDTlMapped;
+                        var customerUserId = ob1.UserId;
+                        user = await _userService.GetUserById(customerUserId);
+                        customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+                    }
                 }
 
                 //PickUp Options
@@ -641,7 +689,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                          tetCustomerDetails(magayaShipmentDTO)
                     };
 
+                shipmentDTO.Customer[0].UserActiveCountryId = customer.UserActiveCountryId;
+
                 shipmentDTO.CustomerDetails = tetCustomerDetails(magayaShipmentDTO);
+                shipmentDTO.CustomerDetails.UserActiveCountryId = customer.UserActiveCountryId;
                 shipmentDTO.IsdeclaredVal = false;
                 shipmentDTO.DeclarationOfValueCheck = 0;
 
@@ -674,7 +725,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.SenderState = magayaShipmentDTO.ShipperAddress.State;
                 shipmentDTO.IsFromMobile = false;
                 shipmentDTO.isInternalShipment = false;
-
+                 
                 //Country info
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
@@ -786,11 +837,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var station = await _stationService.GetStationById(shipmentDTO.StationId);
                 var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
 
-                //if (string.IsNullOrEmpty(shipmentDTO.RequestNumber))
-                //{
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
-                //}
 
                 var newShipment = await MapIntlShipmentRequest(shipmentDTO);
                 newShipment.ReceiverCountry = station.Country;
@@ -803,8 +851,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
-                    var intValue = (shipmentItem.ItemValue.GetType().ToString() == "System.String")? 
-                        (shipmentItem.ItemValue == "") ? 0 : decimal.Parse(shipmentItem.ItemValue) : shipmentItem.ItemValue;
+                    var intValue = shipmentItem.ItemValue;
 
                     if (shipmentItem.RequiresInsurance)
                     {
@@ -821,7 +868,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
                         newShipment.ApproximateItemsWeight += Weight;
                         newShipment.GrandTotal += shipmentItem.Price;
-                        //itemName += shipmentItem.ItemName + " ";
                     }
                     else
                     {
@@ -869,7 +915,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 throw;
             }
-
         }
 
         public async Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO)
@@ -908,7 +953,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
 
                 var destinationServiceCenter = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == shipmentDTO.DestinationServiceCentreId);
-                if(destinationServiceCenter == null)
+                if (destinationServiceCenter == null)
                 {
                     throw new GenericException("Destination Service Center does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
@@ -964,9 +1009,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             ItemValue = shipmentRequestItemDTO.ItemValue,
                             IntlShipmentRequestId = existingRequest.IntlShipmentRequestId
                         };
-                      
-                        var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
-                            (newShipmentRequestItem.ItemValue == "") ? 0 : decimal.Parse(newShipmentRequestItem.ItemValue) : newShipmentRequestItem.ItemValue;
+
+                        //var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
+                        //    (newShipmentRequestItem.ItemValue == "") ? 0 : decimal.Parse(newShipmentRequestItem.ItemValue) : newShipmentRequestItem.ItemValue;
+                        var intValue = newShipmentRequestItem.ItemValue;
 
                         if (newShipmentRequestItem.RequiresInsurance)
                         {
@@ -1066,6 +1112,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ReceiverEmail = r.ReceiverEmail,
                 ReceiverName = r.ReceiverName,
                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                ItemSenderfullName = r.ItemSenderfullName,
                 UserId = r.UserId,
                 Value = r.Value,
                 GrandTotal = r.GrandTotal,
@@ -1090,16 +1137,27 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Width = c.Width,
                     Height = c.Height,
                     RequiresInsurance = c.RequiresInsurance,
-                    ItemValue = c.ItemValue
+                    ItemValue = c.ItemValue, 
+                    ItemSenderfullName = c.ItemSenderfullName
                 }).ToList()
             };
 
             return varEntity;
         }
 
-        public async Task<string> GetMagayaWayBillNumber()
+        public async Task<string> GetMagayaWayBillNumber(NumberGeneratorType numbertype)
         {
-            var mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+            var mwaybill = String.Empty;
+
+            if (numbertype == NumberGeneratorType.MagayaWbM)
+            {
+                mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWbM, "MG");
+            }
+            else
+            {
+                mwaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MagayaWb, "MG");
+            }
+
             return mwaybill;
         }
 
@@ -1276,7 +1334,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (shipment == null)
                 {
-                    throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    return new IntlShipmentRequestDTO()
+                    {
+                        RequestNumber = "",
+                        DestinationServiceCentre = new ServiceCentreDTO(),
+                        ShipmentRequestItems = new List<IntlShipmentRequestItemDTO>()
+                    };
+                    //throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return await GetShipmentRequest(shipment.IntlShipmentRequestId);

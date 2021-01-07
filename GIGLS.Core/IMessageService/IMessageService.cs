@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using System.Threading.Tasks;
@@ -13,5 +14,6 @@ namespace GIGLS.Core.IMessageService
         Task SendEcommerceRegistrationNotificationAsync(MessageDTO messageDTO);
         Task SendPaymentNotificationAsync(MessageDTO messageDTO);
         Task<MessageDTO> GetMessageByType(MessageType messageType);
+        Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
     }
 }
