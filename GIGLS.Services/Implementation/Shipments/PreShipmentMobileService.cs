@@ -42,6 +42,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Node;
 using GIGLS.CORE.Domain;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -6237,6 +6238,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
 
+        }
+
+        public async Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill)
+        {
+            try
+            {
+                var result = await _nodeService.RemoveShipmentFromQueue(waybill);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
     }
