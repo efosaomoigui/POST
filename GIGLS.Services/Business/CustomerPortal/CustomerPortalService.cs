@@ -3082,8 +3082,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
-            return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
+           // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
+            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
