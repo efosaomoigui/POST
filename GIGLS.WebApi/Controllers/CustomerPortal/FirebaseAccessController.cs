@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
@@ -26,7 +27,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         public FirebaseAccessController(ICustomerPortalService portalService) : base(nameof(FirebaseAccessController))
         {
-
             _portalService = portalService;
         }
 
@@ -304,7 +304,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [AllowAnonymous]
         [HttpPut]
         [Route("chargewallet")]
@@ -336,7 +335,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return response;
             });
         }
-
 
         [AllowAnonymous]
         [HttpGet]
@@ -370,7 +368,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [AllowAnonymous]
         [HttpPost]
         [Route("addwalletpaymentlog")]
@@ -389,6 +386,38 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         var result = await _portalService.AddWalletPaymentLogAnonymousUser(walletPaymentLogDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("verifypayment/{referenceCode}")]
+        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet(string referenceCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<PaymentResponse>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var result = await _portalService.VerifyAndValidatePayment(referenceCode);
                         response.Object = result;
                     }
                     else
