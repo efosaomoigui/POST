@@ -294,6 +294,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
         public DbSet<ShipmentTimeMonitor> ShipmentTimeMonitor { get; set; }
         public DbSet<InternationalShipmentWaybill> InternationalShipmentWaybill { get; set; }
+        public DbSet<RankHistory> RankHistory { get; set; }
 
         //routes
         public DbSet<Route> Routes { get; }

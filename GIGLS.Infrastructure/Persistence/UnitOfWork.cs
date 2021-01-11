@@ -31,6 +31,7 @@ using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
 using GIGLS.Core.IRepositories.Routes;
+using GIGLS.INFRASTRUCTURE.Persistence.Repositories;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -505,6 +506,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
+
+        [Inject]
+        public IRankHistoryRepository RankHistory { get; set; }
 
         public int Complete()
         {
