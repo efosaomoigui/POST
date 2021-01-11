@@ -65,7 +65,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = co.CurrencyCode,
                                            PhoneNumberCode = co.PhoneNumberCode
                                        },
-                                       UserActiveCountryName = co.CountryName
+                                       UserActiveCountryName = co.CountryName,
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }
@@ -128,7 +129,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = co.CurrencyCode,
                                            PhoneNumberCode = co.PhoneNumberCode
                                        },
-                                       UserActiveCountryName = co.CountryName
+                                       UserActiveCountryName = co.CountryName,
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }
@@ -249,7 +251,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        }).FirstOrDefault(),
                                        AccountName = c.AccountName,
                                        AccountNumber = c.AccountNumber,
-                                       BankName = c.BankName
+                                       BankName = c.BankName,
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -347,7 +350,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencySymbol = x.CurrencySymbol,
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
-                                       }).FirstOrDefault()
+                                       }).FirstOrDefault(),
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -395,7 +399,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencySymbol = x.CurrencySymbol,
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
-                                       }).FirstOrDefault()
+                                       }).FirstOrDefault(),
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -478,7 +483,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = co.CurrencyCode,
                                            PhoneNumberCode = co.PhoneNumberCode
                                        },
-                                       UserActiveCountryName = co.CountryName
+                                       UserActiveCountryName = co.CountryName,
+                                       Rank = c.Rank
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }
