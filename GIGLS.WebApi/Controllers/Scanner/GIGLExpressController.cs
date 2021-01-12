@@ -120,6 +120,18 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
 
+                    //ADD SERVICECENTRE OBJ
+                    var centreId = await _userService.GetPriviledgeServiceCenters(user.Id);
+                    if (centreId != null)
+                    {
+                        var centreInfo =  await _serviceCentreService.GetServiceCentreById(centreId[0]);
+                        if (centreInfo != null)
+                        {
+                            var centreInfoJson = JObject.FromObject(centreInfo);
+                            jObject.Add(new JProperty("ServiceCentre", centreInfoJson));
+                        }
+                    }
+
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
