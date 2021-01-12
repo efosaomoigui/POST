@@ -87,6 +87,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number);
         Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners();
         Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
+        Task<bool> AddShipmentToQueue(string waybill);
 
     }
 }
