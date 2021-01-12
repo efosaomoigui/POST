@@ -6241,5 +6241,24 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
+        public async Task<bool> AddShipmentToQueue(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (preShipment == null)
+                {
+                    throw new GenericException($"Wabill number -- {waybill} not found ", $"{(int)HttpStatusCode.NotFound}");
+                }
+                await NodeApiCreateShipment(preShipment);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 };
