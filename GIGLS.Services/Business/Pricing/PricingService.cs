@@ -898,16 +898,14 @@ namespace GIGLS.Services.Business.Pricing
 
             PackagePrice = PackagePrice + deliveryOptionPrice;
             PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
-            return PackagePrice + deliveryOptionPrice;
+            return PackagePrice;
         }
 
         public async Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto)
         {
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
 
             //get the deliveryOptionPrice from an array
-
             decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
 
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
@@ -932,7 +930,10 @@ namespace GIGLS.Services.Business.Pricing
             {
                 PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
             }
-            return PackagePrice + deliveryOptionPrice;
+
+            PackagePrice = PackagePrice + deliveryOptionPrice;
+            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            return PackagePrice;
         }
 
         public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
@@ -1043,20 +1044,15 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto)
         {
-            decimal deliveryOptionPriceTemp = 0;
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array
-            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
-
-
-            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
-
+            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+            //decimal deliveryOptionPrice = deliveryOptionPriceTemp;
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
-
+            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
             return shipmentTotalPrice;
         }
 

@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -158,5 +159,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("removefromqueue/{waybill}")]
+        public async Task<IServiceResponse<NewNodeResponse>> RemoveShipmentFromQueue(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.RemoveShipmentFromQueue(waybill);
+                return new ServiceResponse<NewNodeResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
     }
 }

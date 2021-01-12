@@ -8,5 +8,6 @@ namespace GIGLS.Core.IServices.Node
     {
         Task WalletNotification(UserPayload user);
         Task CreateShipment(CreateShipmentNodeDTO nodePayload);
+        Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
     }
 }

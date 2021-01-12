@@ -5,4 +5,13 @@
         Basic,
         Class
     }
+
+
+    public enum RankType
+    {
+        Downgrade,
+        Upgrade,
+        Cancel
+    }
 }
+
