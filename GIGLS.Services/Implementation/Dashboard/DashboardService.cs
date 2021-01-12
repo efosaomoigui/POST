@@ -814,7 +814,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //get customer 
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate);
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= endDate);
             int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
             int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
 
@@ -881,7 +881,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated <= endDate);
             int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
             dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
@@ -945,7 +945,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated <= endDate);
             int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
             dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
@@ -1079,7 +1079,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
 
                 //customers
-                var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
+                var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= endDate && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
                 int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
                 dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
