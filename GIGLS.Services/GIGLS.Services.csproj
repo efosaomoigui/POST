@@ -303,6 +303,7 @@
     <Compile Include="Implementation\Stocks\StockSupplyDetailsService.cs" />
     <Compile Include="Implementation\Stores\StoreService.cs" />
     <Compile Include="Implementation\SubCategoryService.cs" />
+    <Compile Include="Implementation\User\RankHistoryService.cs" />
     <Compile Include="Implementation\User\UserService.cs" />
     <Compile Include="Implementation\Utility\EnumExtensions.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
