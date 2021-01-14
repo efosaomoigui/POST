@@ -821,6 +821,14 @@ namespace GIGLS.Services.Implementation.Customers
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new Core.Domain.RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = userValidationDTO.RankType,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                });
                 _uow.Complete();
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
