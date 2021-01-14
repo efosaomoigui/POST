@@ -873,7 +873,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
-
+                    //UPDATE ITEM COUNT
+                    shipmentItem.ItemCount = $"{serialNumber} of {newShipment.ShipmentRequestItems}";
+                    shipmentItem.Received = false;
                     itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
                 }
@@ -1007,7 +1009,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             Height = shipmentRequestItemDTO.Height,
                             RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance,
                             ItemValue = shipmentRequestItemDTO.ItemValue,
-                            IntlShipmentRequestId = existingRequest.IntlShipmentRequestId
+                            IntlShipmentRequestId = existingRequest.IntlShipmentRequestId,
+                            ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {shipmentDTO.ShipmentRequestItems}",
+                            Received = shipmentRequestItemDTO.Received,
+                            ReceivedBy = shipmentRequestItemDTO.ReceivedBy
                         };
 
                         //var intValue = (newShipmentRequestItem.ItemValue.GetType().ToString() == "System.String") ?
@@ -1054,6 +1059,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         requestItem.Width = shipmentRequestItemDTO.Width;
                         requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
                         requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
+                        requestItem.ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {shipmentDTO.ShipmentRequestItems}";
+                        requestItem.Received = shipmentRequestItemDTO.Received;
+                        requestItem.ReceivedBy = shipmentRequestItemDTO.ReceivedBy;
 
                         //check for volumetric weight
                         if (requestItem.IsVolumetric)
@@ -1120,6 +1128,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 SenderState = r.SenderState,
                 ApproximateItemsWeight = r.ApproximateItemsWeight,
                 DestinationCountryId = r.DestinationCountryId,
+                Consolidated = r.Consolidated,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
@@ -1138,7 +1147,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Height = c.Height,
                     RequiresInsurance = c.RequiresInsurance,
                     ItemValue = c.ItemValue, 
-                    ItemSenderfullName = c.ItemSenderfullName
+                    ItemSenderfullName = c.ItemSenderfullName,
+                    ItemCount = c.ItemCount,
+                    Received = c.Received,
+                    ReceivedBy = c.ReceivedBy
                 }).ToList()
             };
 

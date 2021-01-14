@@ -267,6 +267,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsProcessed { get; set; }
 
         public bool IsMobile { get; set; }
+        public bool Consolidated { get; set; }
     } 
 
 }

@@ -1128,6 +1128,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             IsProcessed = a.IsProcessed,
                             ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
+                            Consolidated = a.Consolidated,
+                            Received = b.Received,
+                            ReceivedBy = b.ReceivedBy,
+                            ItemCount = b.ItemCount
 
 
                         }
@@ -1360,7 +1364,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       Length = x.Length,
                                                       Width = x.Width,
                                                       Height = x.Height,
-                                                      ItemSenderfullName = x.ItemSenderfullName
+                                                      ItemSenderfullName = x.ItemSenderfullName,
+                                                      Received = x.Received,
+                                                      ReceivedBy = x.ReceivedBy,
+                                                      ItemCount = x.ItemCount
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -1379,7 +1386,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   DestinationCountryId = r.DestinationCountryId,
                                                   IsProcessed = r.IsProcessed,
                                                   ItemSenderfullName = r.ItemSenderfullName,
-
+                                                  Consolidated = r.Consolidated
+  
                                               }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentRequestDTO.Count();
@@ -1419,7 +1427,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               DestinationCountryId = r.DestinationCountryId,
                                               IsProcessed = r.IsProcessed,
                                               ItemSenderfullName = r.ItemSenderfullName,
-
+                                              Consolidated = r.Consolidated,
+                                            
                                           }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName == filterValue)).ToList();
 
                 //filter
@@ -1565,6 +1574,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             IsProcessed = a.IsProcessed ,
                             ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
+                            Consolidated = a.Consolidated,
+                            Received = b.Received,
+                            ReceivedBy = b.ReceivedBy,
+                            ItemCount = b.ItemCount
 
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
@@ -1775,6 +1788,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     Value = r.Value,
                                                     IsProcessed = r.IsProcessed,
                                                     PickupOptions = r.PickupOptions,
+                                                    Consolidated = r.Consolidated,
                                                     ShipmentRequestItems = _context.IntlShipmentRequestItem.Where(s => s.IntlShipmentRequestId == r.IntlShipmentRequestId)
                                                                         .Select(x => new IntlShipmentRequestItemDTO
                                                                         {
@@ -1797,6 +1811,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             SerialNumber = x.SerialNumber ,
                                                                             ItemValue = x.ItemValue,
                                                                             ItemSenderfullName = x.ItemSenderfullName,
+                                                                            Received = x.Received,
+                                                                            ReceivedBy = x.ReceivedBy,
+                                                                            ItemCount = x.ItemCount
                                                                         }).ToList()
                                                 }).ToList();
 
