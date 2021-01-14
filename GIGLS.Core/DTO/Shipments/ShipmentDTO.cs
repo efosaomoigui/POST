@@ -238,6 +238,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public bool IsMobile { get; set; }
         public bool Consolidated { get; set; }
+        public bool FullyReceived { get; set; }
     }
 
     public class IntlShipmentDTO : BaseDomainDTO

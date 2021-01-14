@@ -135,7 +135,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _service.CheckForConsolidation(requestNumber);
+                var shipment = await _service.GetShipmentRequest(requestNumber);
                 return new ServiceResponse<IntlShipmentRequestDTO>
                 {
                     Object = shipment
