@@ -64,7 +64,8 @@ namespace GIGLS.Core.DTO.Customers
         public IdentificationType IdentificationType { get; set; }
         public string IdentifictionNumber { get; set; }
         public string IdentificationImage { get; set; } 
-        public string IdentificationNumber { get; set; }  
+        public string IdentificationNumber { get; set; }
+        public Rank Rank { get; set; }
 
     }
 

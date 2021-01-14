@@ -6,6 +6,7 @@
         public int DestinationServiceCentreId { get; set; }
         public int Haulageid { get; set; }
         public int CountryId { get; set; }
+        public string CustomerCode { get; set; }
     }
     public class HaulagePriceDTO
     {

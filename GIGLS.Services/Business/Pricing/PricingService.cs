@@ -101,12 +101,10 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
-
             if (!pricingDto.DeliveryOptionIds.Any())
             {
                 throw new GenericException("Delivery Option can not be empty", $"{(int)HttpStatusCode.NotFound}");
@@ -120,9 +118,10 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
-
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
 
+            //Calculate Rank Price for the customer
+            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
             return shipmentTotalPrice;
         }
 
@@ -155,6 +154,7 @@ namespace GIGLS.Services.Business.Pricing
                 price = await GetRegularPriceInternational(pricingDto);
             }
 
+            price = await CalculateCustomerRankPrice(pricingDto, price);
             return price;
         }
 
@@ -345,8 +345,6 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
         {
-            decimal price = 0;
-
             var departureServiceCentreId = haulagePricingDto.DepartureServiceCentreId;
             var destinationServiceCentreId = haulagePricingDto.DestinationServiceCentreId;
             var haulageid = haulagePricingDto.Haulageid;
@@ -380,11 +378,16 @@ namespace GIGLS.Services.Business.Pricing
                 distance = 1;
             }
 
-            //Get Haulage Maximum Fixed Distance
-            var userActiveCountryId = await GetUserCountryId();
-            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
+            //Get Haulage Maximum Fixed Distance            
+            if(haulagePricingDto.CountryId == 0)
+            {
+                var userActiveCountryId = await GetUserCountryId();
+                haulagePricingDto.CountryId = userActiveCountryId;
+            }
+            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, haulagePricingDto.CountryId);
             int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
 
+            decimal price = 0;
             //calculate price for the haulage
             if (distance <= maximumFixedDistance)
             {
@@ -400,6 +403,12 @@ namespace GIGLS.Services.Business.Pricing
                 price = fixedRate + distance * haulage.AdditionalRate;
             }
 
+            var priceDTO = new PricingDTO
+            {
+                CountryId = haulagePricingDto.CountryId,
+                CustomerCode = haulagePricingDto.CustomerCode
+            };
+            price = await CalculateCustomerRankPrice(priceDTO, price);
             return price;
         }
 
@@ -433,6 +442,7 @@ namespace GIGLS.Services.Business.Pricing
                 price = await GetEcommercePriceInternational(pricingDto);
             }
 
+            price = await CalculateCustomerRankPrice(pricingDto, price);
             return price;
         }
 
@@ -683,9 +693,10 @@ namespace GIGLS.Services.Business.Pricing
             // War Surcharge calculation
             var warSurchargePrice = await WarSurcharge(pricingDto.DestinationServiceCentreId);
 
+            PackagePrice = PackagePrice + percentagePrice + warSurchargePrice;
 
-            // return PackagePrice + deliveryOptionPrice;
-            return (PackagePrice + percentagePrice + warSurchargePrice);
+            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            return PackagePrice;
         }
 
         // War Surcharge calculation
@@ -815,7 +826,8 @@ namespace GIGLS.Services.Business.Pricing
                         Length = decimal.Parse(item.Length.ToString()),
                         Height = decimal.Parse(item.Height.ToString()),
                         IsVolumetric = item.IsVolumetric,
-                        CountryId = pricingDto.CountryId
+                        CountryId = pricingDto.CountryId,
+                        CustomerCode = shipment.CustomerCode
                     });
 
                     //unit price based on quantity
@@ -831,7 +843,6 @@ namespace GIGLS.Services.Business.Pricing
                 //set totalPrice and GrandTotal for reroute
                 shipment.Total = totalPrice;
                 shipment.GrandTotal = totalPrice;
-
             }
 
             //update departure and destination
@@ -842,13 +853,11 @@ namespace GIGLS.Services.Business.Pricing
 
             ///////Added for Country Ratio Price //////
             //shipment = await UpdateShipmentPriceBasedOnCountryCurrencyRatio(shipment);
-
             return shipment;
         }
 
         public async Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto)
         {
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
             if (zone != null)
             {
@@ -863,9 +872,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //get the deliveryOptionPrice from an array
-
             decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
-
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //check for volumetric weight
@@ -888,16 +895,17 @@ namespace GIGLS.Services.Business.Pricing
             {
                 PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
             }
-            return PackagePrice + deliveryOptionPrice;
+
+            PackagePrice = PackagePrice + deliveryOptionPrice;
+            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            return PackagePrice;
         }
 
         public async Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto)
         {
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
 
             //get the deliveryOptionPrice from an array
-
             decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
 
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
@@ -922,7 +930,10 @@ namespace GIGLS.Services.Business.Pricing
             {
                 PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
             }
-            return PackagePrice + deliveryOptionPrice;
+
+            PackagePrice = PackagePrice + deliveryOptionPrice;
+            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            return PackagePrice;
         }
 
         public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
@@ -1026,25 +1037,22 @@ namespace GIGLS.Services.Business.Pricing
             decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
+
+            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
             return shipmentTotalPrice;
         }
 
         public async Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto)
         {
-            decimal deliveryOptionPriceTemp = 0;
-
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array
-            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
-
-
-            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
-
+            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+            //decimal deliveryOptionPrice = deliveryOptionPriceTemp;
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
-
+            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
             return shipmentTotalPrice;
         }
 
@@ -1227,5 +1235,46 @@ namespace GIGLS.Services.Business.Pricing
             return newPricingDTO;
         }
 
+        public async Task<decimal> CalculateCustomerRankPrice(PricingDTO pricingDto, decimal price)
+        {
+            if (!string.IsNullOrWhiteSpace(pricingDto.CustomerCode))
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == pricingDto.CustomerCode);
+
+                if(customer != null)
+                {
+                    if(customer.CompanyType == CompanyType.Ecommerce)
+                    {
+                        if (customer.Rank == Rank.Class)
+                        {
+                            price = await CalculateClassRankPrice(pricingDto.CountryId, price);
+                        }
+                        else
+                        {
+                            price = await CalculateBasicRankPrice(pricingDto.CountryId, price);
+                        }
+                    }
+                }
+            }
+            return price;
+        }
+
+        private async Task<decimal> CalculateClassRankPrice(int countryId, decimal price)
+        {
+            var classrank = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ClassRankPercentage, countryId);
+            decimal classRankPercentage = decimal.Parse(classrank.Value);
+            decimal classRankValue = ((100M - classRankPercentage) / 100M);
+            price = price * classRankValue;
+            return price;
+        }
+
+        private async Task<decimal> CalculateBasicRankPrice(int countryId, decimal price)
+        {
+            var classrank = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BasicRankPercentage, countryId);
+            decimal classRankPercentage = decimal.Parse(classrank.Value);
+            decimal classRankValue = ((100M - classRankPercentage) / 100M);
+            price = price * classRankValue;
+            return price;
+        }
     }
 }

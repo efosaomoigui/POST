@@ -226,36 +226,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{ShipmentId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(ShipmentId);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{ShipmentId:int}")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(ShipmentId);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{waybill}/waybill")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(waybill);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{waybill}/waybill")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(waybill);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]

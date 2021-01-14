@@ -120,6 +120,18 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
 
+                    //ADD SERVICECENTRE OBJ
+                    var centreId = await _userService.GetPriviledgeServiceCenters(user.Id);
+                    if (centreId != null)
+                    {
+                        var centreInfo =  await _serviceCentreService.GetServiceCentreById(centreId[0]);
+                        if (centreInfo != null)
+                        {
+                            var centreInfoJson = JObject.FromObject(centreInfo);
+                            jObject.Add(new JProperty("ServiceCentre", centreInfoJson));
+                        }
+                    }
+
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
@@ -426,6 +438,30 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<NewPricingDTO>
                 {
                     Object = price
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("paymenttypes")]
+        public IHttpActionResult GetPaymentTypes()
+        {
+            var types = EnumExtensions.GetValues<PaymentType>();
+           // types.RemoveAt(3);
+            return Ok(types);
+        }
+
+        [HttpPost]
+        [Route("processpartialpayment")]
+        public async Task<IServiceResponse<bool>> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
                 };
             });
         }
