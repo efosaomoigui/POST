@@ -6,6 +6,7 @@ using System.Web.Http;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
+using System;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
@@ -44,6 +45,33 @@ namespace GIGLS.WebApi.Controllers.Business
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _scan.ScanMultipleShipment(scanList);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("multiple2")]
+        public async Task<IServiceResponse<bool>> ScanMultipleShipment2(List<ScanDTO> scanList)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                List<ScanDTO> multipleWaybillList = new List<ScanDTO>();
+                string[] ArrWaybills = scanList[0].WaybillNumber.Split(new[] { Environment.NewLine },StringSplitOptions.None);
+
+                foreach (var waybill in ArrWaybills)
+                {
+                    ScanDTO nItem = new ScanDTO();
+                    nItem.WaybillNumber = waybill;
+                    nItem.ShipmentScanStatus = scanList[1].ShipmentScanStatus;
+                    multipleWaybillList.Add(nItem);
+                }
+
+                var result = await _scan.ScanMultipleShipment(multipleWaybillList);
 
                 return new ServiceResponse<bool>
                 {
