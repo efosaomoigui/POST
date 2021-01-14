@@ -6246,7 +6246,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (preShipment == null)
                 {
                     throw new GenericException($"Wabill number -- {waybill} not found ", $"{(int)HttpStatusCode.NotFound}");
