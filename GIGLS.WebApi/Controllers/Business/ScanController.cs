@@ -56,18 +56,18 @@ namespace GIGLS.WebApi.Controllers.Business
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("multiple2")]
-        public async Task<IServiceResponse<bool>> ScanMultipleShipment2(List<ScanDTO> scanList)
+        public async Task<IServiceResponse<bool>> ScanMultipleShipment2(ScanDTO2 scanList)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 List<ScanDTO> multipleWaybillList = new List<ScanDTO>();
-                string[] ArrWaybills = scanList[0].WaybillNumber.Split(new[] { Environment.NewLine },StringSplitOptions.None);
+                //string[] ArrWaybills = scanList.WaybillNumber.Split(new[] { "\n" }, StringSplitOptions.None);
 
-                foreach (var waybill in ArrWaybills)
+                foreach (var waybill in scanList.WaybillNumber)
                 {
                     ScanDTO nItem = new ScanDTO();
                     nItem.WaybillNumber = waybill;
-                    nItem.ShipmentScanStatus = scanList[1].ShipmentScanStatus;
+                    nItem.ShipmentScanStatus = scanList.ShipmentScanStatus;
                     multipleWaybillList.Add(nItem);
                 }
 
