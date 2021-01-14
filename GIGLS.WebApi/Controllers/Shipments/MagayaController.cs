@@ -135,7 +135,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _service.GetShipmentRequest(requestNumber);
+                var shipment = await _service.CheckForConsolidation(requestNumber);
                 return new ServiceResponse<IntlShipmentRequestDTO>
                 {
                     Object = shipment
@@ -560,6 +560,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
 
+        }
+
+
+        [HttpGet]
+        [Route("confirmreceipt/{itemID}")]
+        public async Task<IServiceResponse<bool>> GetShipmentActivities(int ItemID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.UpdateReceived(ItemID);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+                };
+            });
         }
     }
 }
