@@ -1352,9 +1352,46 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         DestinationServiceCentre = new ServiceCentreDTO(),
                         ShipmentRequestItems = new List<IntlShipmentRequestItemDTO>()
                     };
+
+                    //CHECK IF 
                     //throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<IntlShipmentRequestDTO> CheckForConsolidation(string requestNumber)
+        {
+            try
+            {
+                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber.Equals(requestNumber));
+
+                if (shipment == null)
+                {
+                    return new IntlShipmentRequestDTO()
+                    {
+                        RequestNumber = "",
+                        DestinationServiceCentre = new ServiceCentreDTO(),
+                        ShipmentRequestItems = new List<IntlShipmentRequestItemDTO>()
+                    };
+                   
+                    //throw new GenericException($"Shipment with request Number: {requestNumber} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                //CHECK IF ITEMS HAS BEEN FULLY RECEIVED IF CONSOLIDATED
+                if (shipment.Consolidated)
+                {
+                    var notReceived = shipment.ShipmentRequestItems.Any(x => x.Received == false);
+                    if (notReceived)
+                    {
+                      throw new GenericException($"Shipment with request Number: {requestNumber} is consolidated and not fully received", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                }
                 return await GetShipmentRequest(shipment.IntlShipmentRequestId);
             }
             catch (Exception)
@@ -1984,6 +2021,29 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var TupleResult = Tuple.Create<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList>(listOfWarehousereceipt, listOfShipment, listOfInvoice, listOfPayment);
                 more_results = 0;
                 return TupleResult;
+            }
+        }
+
+        public async Task<bool> UpdateReceived(int shipmentItemRequestId)
+        {
+            try
+            {
+                var shipmentItem = await _uow.IntlShipmentRequestItem.GetAsync(x => x.IntlShipmentRequestItemId == shipmentItemRequestId);
+                if (shipmentItem == null)
+                {
+                    throw new GenericException("Shipment Item Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                var userId = await _userService.GetCurrentUserId();
+                var userInfo = await _userService.GetUserById(userId);
+
+                shipmentItem.Received = true;
+                shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
+                _uow.Complete();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

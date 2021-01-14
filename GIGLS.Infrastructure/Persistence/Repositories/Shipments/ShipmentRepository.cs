@@ -1644,6 +1644,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsProcessed = a.IsProcessed,
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
+                                           Consolidated = a.Consolidated,
+                                           Received = a.Received,
+                                           ReceivedBy = a.ReceivedBy,
+                                           ItemCount = a.ItemCount
 
                                        }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue 
                                        || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue 
@@ -1720,6 +1724,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsProcessed = a.IsProcessed,
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
+                                           Consolidated = a.Consolidated,
+                                           Received = a.Received,
+                                           ReceivedBy = a.ReceivedBy,
+                                           ItemCount = a.ItemCount
 
                                        }).Where(b => b.IsProcessed == false && b.DateCreated >= startDate && b.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
                 }

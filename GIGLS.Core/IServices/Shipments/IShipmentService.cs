@@ -124,6 +124,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
         Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO);
+        Task<bool> UpdateReceived(int shipmentItemRequestId);
+        Task<IntlShipmentRequestDTO> CheckForConsolidation(string requestNumber);
 
     }
 
