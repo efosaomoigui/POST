@@ -126,5 +126,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Transaction_Ref { get; set; }
     }
     
+    public class BonusAddOn
+    {
+        public string Description { get; set; }
+        public decimal Amount { get; set; }
+    }
 
 }
