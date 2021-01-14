@@ -1365,39 +1365,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-
-        public async Task<IntlShipmentRequestDTO> CheckForConsolidation(string requestNumber)
-        {
-            try
-            {
-                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber.Equals(requestNumber));
-
-                if (shipment == null)
-                {
-                    return new IntlShipmentRequestDTO()
-                    {
-                        RequestNumber = "",
-                        DestinationServiceCentre = new ServiceCentreDTO(),
-                        ShipmentRequestItems = new List<IntlShipmentRequestItemDTO>()
-                    };                   
-                }
-                //CHECK IF ITEMS HAS BEEN FULLY RECEIVED IF CONSOLIDATED
-                if (shipment.Consolidated)
-                {
-                    var notReceived = shipment.ShipmentRequestItems.Any(x => x.Received == false);
-                    if (notReceived)
-                    {
-                      throw new GenericException($"Shipment with request Number: {requestNumber} is consolidated and not fully received", $"{(int)HttpStatusCode.BadRequest}");
-                    }
-                }
-                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId)
         {
             try
@@ -1409,6 +1376,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
 
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+                //CHECK IF ITEMS HAS BEEN FULLY RECEIVED IF CONSOLIDATED
+                if (shipmentDto.Consolidated)
+                {
+                    shipmentDto.FullyReceived = true;
+                    var notReceived = shipmentDto.ShipmentRequestItems.Any(x => x.Received == false);
+                    if (notReceived)
+                    {
+                        shipmentDto.FullyReceived = false;
+                        //throw new GenericException($"Shipment with request Number: {requestNumber} is consolidated and not fully received", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                }
 
                 // get ServiceCentre
                 var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
