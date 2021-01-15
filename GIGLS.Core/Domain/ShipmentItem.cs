@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -56,8 +57,10 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool RequiresInsurance { get; set; } 
         public decimal ItemValue { get; set; }
+        [MaxLength(128)]
         public string ItemCount { get; set; }
         public bool Received { get; set; }
+        [MaxLength (128)]
         public string ReceivedBy { get; set; }
 
     }

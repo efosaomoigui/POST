@@ -239,6 +239,8 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsMobile { get; set; }
         public bool Consolidated { get; set; }
         public bool FullyReceived { get; set; }
+        public string ConsolidationId { get; set; }
+
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
@@ -247,6 +249,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string RequestNumber { get; set; }
         public bool Consolidated { get; set; }
+        public string ConsolidationId { get; set; }
         public string ItemSenderfullName { get; set; }
 
         //General Details comes with role user 

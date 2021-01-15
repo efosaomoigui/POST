@@ -803,6 +803,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var currentUserId = shipmentDTO.UserId; // await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
                 var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+                int count = 0;
 
                 if (customer.CustomerType == CustomerType.Company)
                 {
@@ -840,6 +841,21 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
 
+                if (shipmentDTO.Consolidated)
+                {
+                    //get count of all unprocessed consolited item
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                    count = consolidated.Count + 1;
+                    if (count < 1)
+                    {
+                        shipmentDTO.ConsolidationId = Guid.NewGuid().ToString();
+                    }
+                    else
+                    {
+                        shipmentDTO.ConsolidationId = consolidated.FirstOrDefault().ConsolidationId;
+                    }
+                }
+
                 var newShipment = await MapIntlShipmentRequest(shipmentDTO);
                 newShipment.ReceiverCountry = station.Country;
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
@@ -874,7 +890,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
                     //UPDATE ITEM COUNT
-                    shipmentItem.ItemCount = $"{serialNumber} of {newShipment.ShipmentRequestItems.Count}";
+                    shipmentItem.ItemCount = $"{serialNumber} of {count}";
                     shipmentItem.Received = false;
                     itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
@@ -961,6 +977,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
 
                 var station = await _stationService.GetStationById(destinationServiceCenter.StationId);
+                int count = 0;
+
+                if (shipmentDTO.Consolidated)
+                {
+                    //get count of all unprocessed consolited item
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                    count = consolidated.IndexOf(existingRequest);
+
+
+                }
 
                 List<IntlShipmentRequestItem> intlShipmentRequestItems = new List<IntlShipmentRequestItem>();
 
@@ -1010,7 +1036,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance,
                             ItemValue = shipmentRequestItemDTO.ItemValue,
                             IntlShipmentRequestId = existingRequest.IntlShipmentRequestId,
-                            ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {shipmentDTO.ShipmentRequestItems.Count}",
+                            ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}",
                             Received = shipmentRequestItemDTO.Received,
                             ReceivedBy = shipmentRequestItemDTO.ReceivedBy
                         };
@@ -1059,7 +1085,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         requestItem.Width = shipmentRequestItemDTO.Width;
                         requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
                         requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
-                        requestItem.ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {shipmentDTO.ShipmentRequestItems.Count}";
+                        requestItem.ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}";
                         requestItem.Received = shipmentRequestItemDTO.Received;
                         requestItem.ReceivedBy = shipmentRequestItemDTO.ReceivedBy;
 
@@ -1129,6 +1155,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ApproximateItemsWeight = r.ApproximateItemsWeight,
                 DestinationCountryId = r.DestinationCountryId,
                 Consolidated = r.Consolidated,
+                ConsolidationId = r.ConsolidationId,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
@@ -1380,11 +1407,19 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (shipmentDto.Consolidated)
                 {
                     shipmentDto.FullyReceived = true;
-                    var notReceived = shipmentDto.ShipmentRequestItems.Any(x => x.Received == false);
-                    if (notReceived)
+                    var consolidated = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.ConsolidationId == shipment.ConsolidationId).ToList();
+
+                    if (consolidated.Any())
                     {
-                        shipmentDto.FullyReceived = false;
-                        //throw new GenericException($"Shipment with request Number: {requestNumber} is consolidated and not fully received", $"{(int)HttpStatusCode.BadRequest}");
+                        foreach (var item in consolidated)
+                        {
+                            var notReceived = item.ShipmentRequestItems.Any(x => x.Received == false);
+                            if (notReceived)
+                            {
+                                shipmentDto.FullyReceived = false;
+                                break;
+                            }  
+                        }
                     }
                 }
 
@@ -2022,6 +2057,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 throw;
             }
         }
+        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser()
+        {
+            try                                                             
+            {
+                var userId =await _userService.GetCurrentUserId();
+                var shipmentDtos = new List<IntlShipmentRequestDTO>();
+                var shipments =  _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);               
+                return shipmentDtos;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
     }
 
