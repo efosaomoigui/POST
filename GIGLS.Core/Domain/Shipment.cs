@@ -268,6 +268,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool IsMobile { get; set; }
         public bool Consolidated { get; set; }
-    } 
+        [MaxLength(128)]
+        public string ConsolidationId { get; set; }
+
+    }
 
 }
