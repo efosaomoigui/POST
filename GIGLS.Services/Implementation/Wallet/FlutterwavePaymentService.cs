@@ -421,13 +421,16 @@ namespace GIGLS.Services.Implementation.Wallet
                             }
                         }
 
+                        //if pay was done using Master VIsa card, give some discount
+                        var bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
                         //update the wallet
                         await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                         {
                             WalletId = paymentLog.WalletId,
-                            Amount = verifyResult.data.Amount,
+                            Amount = bonusAddon.Amount,
                             CreditDebitType = CreditDebitType.Credit,
-                            Description = "Funding made through online payment",
+                            Description = bonusAddon.Description,
                             PaymentType = PaymentType.Online,
                             PaymentTypeReference = paymentLog.Reference,
                             UserId = customerId
@@ -681,6 +684,56 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return response;
+        }
+
+        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(FlutterWebhookDTO verifyResult, int countryId)
+        {
+            BonusAddOn result = new BonusAddOn
+            {
+                Description = "Funding made through debit card.",
+                Amount = verifyResult.data.Amount
+            };
+
+            if (verifyResult.data.Authorization.CardType.Contains("visa"))
+            {
+                bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                if (isPresent)
+                {
+                    result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                }
+            }
+            return result;
+        }
+
+        private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
+        {
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                decimal bonusPercentage = decimal.Parse(global.Value);
+                decimal bonusValue = bonusPercentage / 100M;
+                decimal price = amount * bonusValue;
+                amount = amount + price;
+            }
+            return amount;
+        }
+
+        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        {
+            bool result = false;
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                int.TryParse(bin, out int binInt);
+
+                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+                if (visaList.Contains(binInt))
+                {
+                    result = true;
+                }
+            }
+            return result;
         }
     }
 }

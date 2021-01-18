@@ -103,6 +103,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public FlutterResponseData()
         {
             validateInstructions = new ValidateInstructions();
+            Card = new Card();
         }
         public string Status { get; set; }
         public int Id { get; set; }
@@ -119,6 +120,29 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ChargeCode { get; set; }
         public string Processor_Response { get; set; }
         public ValidateInstructions validateInstructions { get; set; }
+        public Card Card { get; set; }
+    }
+
+    public class Card
+    {
+        [JsonProperty("expirymonth")]
+        public string ExpiryMonth { get; set; }
+
+        [JsonProperty("expiryyear")]
+        public string ExpiryYear { get; set; }
+
+        [JsonProperty("cardBIN")]
+        public string CardBIN { get; set; }
+
+        [JsonProperty("last4digits")]
+        public string Last4Digits { get; set; }
+
+        [JsonProperty("brand")]
+        public string Brand { get; set; }
+
+        [JsonProperty("type")]
+        public string CardType { get; set; }
+
     }
 
     public class ValidateInstructions
