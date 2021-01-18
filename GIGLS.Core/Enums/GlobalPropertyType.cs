@@ -71,6 +71,7 @@
         IntlShipmentPaymentMonitoringEmails,
         BasicRankPercentage,
         ClassRankPercentage,
+        VisaBusinessCardList,
         VisaBusinessCardBonus
     }
 }

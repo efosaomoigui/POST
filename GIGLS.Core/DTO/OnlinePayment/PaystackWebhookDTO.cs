@@ -34,22 +34,31 @@ namespace GIGLS.Core.DTO.OnlinePayment
     {
         [JsonProperty("authorization_code")]
         public string AuthorizationCode { get; set; }
+
         [JsonProperty("card_type")]
         public string CardType { get; set; }
+
         [JsonProperty("last4")]
         public string Last4 { get; set; }
+
         [JsonProperty("exp_month")]
         public string ExpMonth { get; set; }
+
         [JsonProperty("exp_year")]
         public string ExpYear { get; set; }
+
         [JsonProperty("bin")]
         public string Bin { get; set; }
+
         [JsonProperty("bank")]
         public string Bank { get; set; }
+
         [JsonProperty("channel")]
         public string Channel { get; set; }
+
         [JsonProperty("reusable")]
         public bool? Reusable { get; set; }
+
         [JsonProperty("country_code")]
         public string CountryCode { get; set; }
     }

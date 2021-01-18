@@ -845,18 +845,21 @@ namespace GIGLS.Services.Implementation.Wallet
                 Amount = verifyResult.data.Amount
             };
 
-            if (verifyResult.data.Authorization.CardType == "Master Visa Card")
+            if (verifyResult.data.Authorization.CardType.Contains("visa"))
             {
-                result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                result.Description = $"{result.Description}.  Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                if (isPresent)
+                {
+                    result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                }
             }
-
             return result;
         }
 
         private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
         {
-            var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
             if (global != null)
             {
                 decimal bonusPercentage = decimal.Parse(global.Value);
@@ -865,6 +868,23 @@ namespace GIGLS.Services.Implementation.Wallet
                 amount = amount + price;
             }
             return amount;
+        }
+
+        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        {
+            bool result = false;
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                int.TryParse(bin, out int binInt);
+
+                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+                if (visaList.Contains(binInt))
+                {
+                    result = true;
+                }
+            }
+            return result;
         }
     }
 }
