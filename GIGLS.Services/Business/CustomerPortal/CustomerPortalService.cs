@@ -2974,8 +2974,20 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
-
+            int count = 0;
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+            if (requests.Any())
+            {
+                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
+                if (consolidated.Any())
+                {
+                    foreach (var item in consolidated)
+                    {
+                       count++;
+                        item.ItemCount = $"{count} of {count}";
+                    } 
+                }
+            }
 
             return requests;
         }

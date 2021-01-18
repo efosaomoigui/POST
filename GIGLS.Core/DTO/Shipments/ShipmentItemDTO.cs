@@ -74,5 +74,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public bool RequiresInsurance { get; set; } 
         public decimal ItemValue { get; set; }
+        public string ItemCount { get; set; }
+        public bool Received { get; set; }
+        public string ReceivedBy { get; set; }
     }
 }
