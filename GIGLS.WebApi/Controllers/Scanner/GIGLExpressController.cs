@@ -51,10 +51,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IServiceCentreService _serviceCentreService;
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
+        private readonly ILGAService _lgaService;
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService) : base(nameof(MobileScannerController))
+            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -68,6 +69,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _serviceCentreService = serviceCentreService;
             _userService = userService;
             _countryService = countryService;
+            _lgaService = lgaService;
 
         }
 
@@ -462,6 +464,20 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<bool>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("lga")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetLGAs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var lga = await _lgaService.GetLGAs();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = lga
                 };
             });
         }
