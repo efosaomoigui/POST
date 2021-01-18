@@ -1361,6 +1361,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //set the customerCode in the shipment
             var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
             shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
+            shipmentDTO.IsClassShipment = currentCustomerObject.Rank == Rank.Class ? true : false;
 
             return createdObject;
         }
