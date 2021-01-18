@@ -240,6 +240,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool Consolidated { get; set; }
         public bool FullyReceived { get; set; }
         public string ConsolidationId { get; set; }
+        public string ItemCount { get; set; }
 
     }
 
