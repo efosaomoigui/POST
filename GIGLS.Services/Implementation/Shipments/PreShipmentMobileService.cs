@@ -2843,11 +2843,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Null INPUT");
                 }
 
+                var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill);
+                if (preshipment == null)
+                {
+                    throw new GenericException($"Error processing shipment. This Shipment does not exist", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 //Block Process for any cancelled shipment
                 var shipmentCancelled = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString());
                 if (shipmentCancelled != null)
                 {
                     throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                if (preshipment.shipmentstatus.ToLower() == "shipment created" && pickuprequest.Status.ToLower() == MobilePickUpRequestStatus.Rejected.ToString().ToLower())
+                {
+                    return true;
                 }
 
                 var userId = await _userService.GetCurrentUserId();
@@ -2861,6 +2872,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     throw new GenericException($"Your App version is Old, Kindly update to the latest version.", $"{(int)HttpStatusCode.Forbidden}");
                 }
+
+           
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
                     await DeliveredMobilePickupRequest(pickuprequest, userId);
@@ -6246,7 +6259,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (preShipment == null)
                 {
                     throw new GenericException($"Wabill number -- {waybill} not found ", $"{(int)HttpStatusCode.NotFound}");
