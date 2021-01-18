@@ -11,6 +11,8 @@ namespace GIGLS.Core.DTO.User
     {
         public Rank Rank { get; set; }
         public string UserCode { get; set; }
+        public string BVN { get; set; }
+        public RankType RankType { get; set; }
     }
 
     public class UserValidationNewDTO

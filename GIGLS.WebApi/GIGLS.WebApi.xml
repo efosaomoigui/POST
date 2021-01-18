@@ -74,7 +74,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetMagayaWaybillNo">
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetMagayaWaybillNo(GIGLS.Core.Enums.NumberGeneratorType)">
             <summary>
             
             </summary>

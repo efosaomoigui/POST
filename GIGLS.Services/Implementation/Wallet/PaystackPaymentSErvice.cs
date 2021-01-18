@@ -21,7 +21,6 @@ using System.Text;
 using System.Collections.Generic;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO;
-using GIGLS.Core.IServices.Utility;
 using System.Linq;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
@@ -35,20 +34,18 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IMessageSenderService _messageSenderService;
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly INodeService _nodeService;
 
 
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
-            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, INodeService nodeService)
+            IMessageSenderService messageSenderService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _messageSenderService = messageSenderService;
-            _globalPropertyService = globalPropertyService;
             _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
@@ -90,6 +87,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResponse.Status;
                 result.Message = verifyResponse.Message;
                 result.data.Reference = reference;
+                result.data.Authorization.AuthorizationCode = verifyResponse.Data.Authorization.AuthorizationCode;
+                result.data.Authorization.Bin = verifyResponse.Data.Authorization.Bin;
+                result.data.Authorization.Last4 = verifyResponse.Data.Authorization.Last4;
+                result.data.Authorization.ExpMonth = verifyResponse.Data.Authorization.ExpMonth;
+                result.data.Authorization.ExpYear = verifyResponse.Data.Authorization.ExpYear;
+                result.data.Authorization.Channel = verifyResponse.Data.Authorization.Channel;
+                result.data.Authorization.CardType = verifyResponse.Data.Authorization.CardType;
+                result.data.Authorization.Bank = verifyResponse.Data.Authorization.Bank;
+                result.data.Authorization.CountryCode = verifyResponse.Data.Authorization.CountryCode;
+                result.data.Authorization.Reusable = verifyResponse.Data.Authorization.Reusable;
 
                 if (verifyResponse.Status)
                 {
@@ -138,6 +145,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -165,9 +174,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
-                    if(userPayload != null)
+                    if (userPayload != null)
                     {
                         await _nodeService.WalletNotification(userPayload);
                     }
@@ -252,6 +261,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -283,7 +294,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -300,7 +311,6 @@ namespace GIGLS.Services.Implementation.Wallet
             PaystackWebhookDTO result = new PaystackWebhookDTO();
             WalletPaymentLogDTO paymentLog = new WalletPaymentLogDTO();
             WalletTransactionDTO transaction = new WalletTransactionDTO();
-
 
             var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
 
@@ -423,6 +433,43 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        public async Task<ResponseDTO> VerifyBVN(string bvnNo)
+        {
+
+            var response = new HttpResponseMessage();
+            var result = new ResponseDTO();
+            var url = "https://api.paystack.co/bank/resolve_bvn/";
+            url = $"{url}{bvnNo}";
+            var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            try
+            {
+                await Task.Run(async () =>
+                   {
+                       HttpClient client = new HttpClient();
+                       client.BaseAddress = new Uri(url);
+                       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                       client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                       response = await client.GetAsync(url);
+                   });
+
+                string jObject = await response.Content.ReadAsStringAsync();
+                var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
+               
+                result.Succeeded = content.Status;
+                result.Exist = content.Status;
+                result.Message = content.Message;
+                result.Entity = content.Data;
+             
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            return result;
+        }
+
         //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
@@ -460,6 +507,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -486,7 +535,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 await _uow.CompleteAsync();
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -543,6 +592,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
 
@@ -575,11 +626,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResult.data.Status;
 
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
-                       await _nodeService.WalletNotification(userPayload);
+                        await _nodeService.WalletNotification(userPayload);
                     }
                 }
             }

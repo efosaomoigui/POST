@@ -176,5 +176,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("homedeliverycheck")]
+        public async Task<IServiceResponse<bool>> CheckHomeDeliveryAllowed(int lgaID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _lgaService.CheckHomeDeliveryAllowed(lgaID);
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+
+                };
+            });
+        }
+
     }
 }

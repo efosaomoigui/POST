@@ -263,6 +263,7 @@ namespace GIGLS.Services.Implementation.User
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
             user.UserName = userDto.Username;
+            user.RegistrationReferrercode = userDto.RegistrationReferrercode;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
@@ -824,6 +825,12 @@ namespace GIGLS.Services.Implementation.User
         public async Task<ServiceCentreDTO> GetGIGGOServiceCentre()
         {
             var gigGOServiceCenter = await _serviceCentreService.GetGIGGOServiceCentre();
+            return gigGOServiceCenter;
+        }
+
+        public async Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetInternationalOutBoundServiceCentre();
             return gigGOServiceCenter;
         }
 

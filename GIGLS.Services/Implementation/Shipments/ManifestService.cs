@@ -125,6 +125,28 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<MovementManifestNumberDTO> GetMovementManifestByCode(string movementmanifest)
+        {
+            try
+            {
+                var manifestObj = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode.Equals(movementmanifest));
+
+                if (manifestObj == null)
+                {
+                    throw new GenericException($"No Movement Manifest exists for this code: {movementmanifest}");
+                }
+
+                var manifestDTO = Mapper.Map<MovementManifestNumberDTO>(manifestObj);
+                //manifestDTO.DispatchedBy = manifestObj.DispatchedById;
+                //manifestDTO.ReceiverBy = manifestObj.ReceiverById;
+                return manifestDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //Get ManifestCode of Pickup Manifest
         public async Task<PickupManifestDTO> GetPickupManifestByCode(string manifest)
         {

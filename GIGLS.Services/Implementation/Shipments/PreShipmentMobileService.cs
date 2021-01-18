@@ -41,6 +41,8 @@ using PaymentType = GIGLS.Core.Enums.PaymentType;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Node;
+using GIGLS.CORE.Domain;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -1124,7 +1126,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var userDTO = await _userService.GetUserUsingCustomerForCustomerPortal(preShipment.CustomerCode);
                     preShipment.UserId = userDTO.Id;
-                    //var user = await _userService.GetUserById(currentUserId);
                 }
                 else
                 {
@@ -1149,7 +1150,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
 
-                //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
                     if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
@@ -1173,6 +1173,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     var userChannelCode = await _userService.GetUserChannelCode();
+                    preShipment.CustomerCode = userChannelCode;
                     var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
                     if (userChannel != null)
                     {
@@ -1203,14 +1204,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         Weight = preShipmentItem.Weight,
                         SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                         ShipmentType = preShipmentItem.ShipmentType,
-                        CountryId = preShipment.CountryId  //Nigeria
+                        CountryId = preShipment.CountryId,
+                        CustomerCode = preShipment.CustomerCode
                     };
 
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                         {
-                            PriceDTO.DeliveryOptionId = 4;
+                            //PriceDTO.DeliveryOptionId = 4;
                         }
 
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
@@ -1224,18 +1226,22 @@ namespace GIGLS.Services.Implementation.Shipments
                             throw new GenericException("Item weight cannot be zero");
                         }
 
-                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
-                        {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                        }
-                        else
-                        {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                        }
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+
+                        //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        //{
+                        //    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        //}
+                        //else
+                        //{
+                        //    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        //}
                     }
 
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
@@ -1256,10 +1262,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        if (preShipment.Shipmentype != ShipmentType.Ecommerce)
-                        {
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
-                        }
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                        //if (preShipment.Shipmentype != ShipmentType.Ecommerce)
+                        //{
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                        //}
                     }
 
                     preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
@@ -1354,16 +1361,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 decimal pickuprice = 0.0M;  //await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
                 decimal pickupValue = 0.0M; // Convert.ToDecimal(pickuprice);
-
                 decimal mainCharge = basePriceBikeValue + amount;
-
                 decimal percentage = 0.0M;
 
                 //Get the customer Types
                 if (preShipment.IsFromAgility)
                 {
                     var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == preShipment.CustomerCode);
-
                     if (userChannel != null)
                     {
                         if (userChannel.CompanyType == CompanyType.Ecommerce)
@@ -1377,19 +1381,28 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.Shipmentype = await GetEcommerceCustomerShipmentType(preShipment.Shipmentype);
                 }
 
-                if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                //Get Discount based on Customer Rank
+                var priceDTO = new PricingDTO
                 {
-                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
-                    percentage = Convert.ToDecimal(discountPercent.Value);
-                }
-                else
-                {
-                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
-                    percentage = Convert.ToDecimal(discountPercent.Value);
-                }
+                    CountryId = preShipment.CountryId,
+                    CustomerCode = preShipment.CustomerCode
+                };
+                mainCharge = await _pricingService.CalculateCustomerRankPrice(priceDTO, mainCharge);
+
+                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
+                percentage = Convert.ToDecimal(discountPercent.Value);
+                //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                //{
+                //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
+                //    percentage = Convert.ToDecimal(discountPercent.Value);
+                //}
+                //else
+                //{
+                //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
+                //    percentage = Convert.ToDecimal(discountPercent.Value);
+                //}
 
                 var percentageTobeUsed = ((100M - percentage) / 100M);
-
                 var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
                 calculatedTotal = Math.Round(calculatedTotal);
                 preShipment.DeliveryPrice = (decimal)calculatedTotal;
@@ -1407,7 +1420,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.GrandTotal = grandTotal;
                 }
 
-                var countOfItems = preShipment.PreShipmentItems.Count();
+                var countOfItems = preShipment.PreShipmentItems.Count;
                 var individualPrice = grandTotal / countOfItems;
 
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
@@ -1483,27 +1496,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
 
-                //No need for Drop off
-                //if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
-                //{
-                //    if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
-                //    {
-                //        int ShipmentCount = preShipment.PreShipmentItems.Count;
-
-                //        amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                //        IndividualPrice = (amount / ShipmentCount);
-                //    }
-                //}
-
-                int deliveryOption = 0;
-
+                int deliveryOption = 10;
                 if (preShipment.IsHomeDelivery)
                 {
                     deliveryOption = 2;
-                }
-                else
-                {
-                    deliveryOption = 10;
                 }
 
                 //Get the customer Type
@@ -1514,7 +1510,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (userChannel.CompanyType == CompanyType.Ecommerce)
                     {
-                        deliveryOption = 4;
+                        //deliveryOption = 4;
                         preShipment.Shipmentype = ShipmentType.Ecommerce;
                     }
                 }
@@ -1538,16 +1534,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                         ShipmentType = preShipmentItem.ShipmentType,
                         DeliveryOptionId = deliveryOption,
-                        CountryId = preShipment.CountryId  //Nigeria
+                        CountryId = preShipment.CountryId,
+                        CustomerCode = userChannelCode
                     };
 
 
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
-                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
-                        {
-                            PriceDTO.DeliveryOptionId = 4;
-                        }
+                        //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        //{
+                        //    PriceDTO.DeliveryOptionId = 4;
+                        //}
 
                         preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
@@ -1560,18 +1557,22 @@ namespace GIGLS.Services.Implementation.Shipments
                             throw new GenericException("Item weight cannot be zero");
                         }
 
-                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
-                        {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetEcommerceDropOffPrice(PriceDTO);
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                        }
-                        else
-                        {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffRegularPriceForIndividual(PriceDTO);
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                        }
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffRegularPriceForIndividual(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+
+                        //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        //{
+                        //    preShipmentItem.CalculatedPrice = await _pricingService.GetEcommerceDropOffPrice(PriceDTO);
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        //}
+                        //else
+                        //{
+                        //    preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffRegularPriceForIndividual(PriceDTO);
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        //}
                     }
 
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
@@ -3272,6 +3273,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
 
+                        if(preshipmentmobile.IsFromAgility)
+                        {
+                            var trackingDTO = new ShipmentTrackingDTO
+                            {
+                                Waybill = preshipmentmobile.Waybill,
+                                User = userId,
+                                ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                                Location = defaultServiceCenter.Name,
+                            };
+                            await UpdateShipmentToDelivered(trackingDTO);
+                        }
 
                         //Add to Financial Reports
                         var financialReport = new FinancialReportDTO
@@ -4737,25 +4749,26 @@ namespace GIGLS.Services.Implementation.Shipments
                 var PickUpPrice = 0.0M;
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                 {
-                    if (string.IsNullOrWhiteSpace(UserId))
-                    {
-                        PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
-                    }
-                    else
-                    {
+                    PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
 
-                        var user = await _userService.GetUserById(UserId);
-                        var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
-                        if (user.UserChannelType == UserChannelType.Ecommerce || exists)
-                        {
-                            PickUpPrice = await GetPickUpPriceForEcommerce(vehicleType, CountryId);
-                        }
-                        else
-                        {
-                            PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
-                        }
-                    }
-
+                    //if (string.IsNullOrWhiteSpace(UserId))
+                    //{
+                    //    PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
+                    //}
+                    //else
+                    //{
+                    //    PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
+                    //    var user = await _userService.GetUserById(UserId);
+                    //    var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                    //    if (user.UserChannelType == UserChannelType.Ecommerce || exists)
+                    //    {
+                    //        PickUpPrice = await GetPickUpPriceForEcommerce(vehicleType, CountryId);
+                    //    }
+                    //    else
+                    //    {
+                    //        PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
+                    //    }
+                    //}
                 }
                 return PickUpPrice;
             }
@@ -4940,7 +4953,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         CustomerId = customerid,
                                         UserId = user,
                                         PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
-                                      //  PickupOptions = PickupOptions.HOMEDELIVERY,
+                                        //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                                         ApproximateItemsWeight = 0.00,
@@ -5090,6 +5103,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     //2. multiply the remaining distance with the additional pate
                     price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
+
+                //Get Discount based on Customer Rank
+                var customerCode = await _userService.GetUserChannelCode();
+                var priceDTO = new PricingDTO
+                {
+                    CountryId = country.CountryId,
+                    CustomerCode = customerCode
+                };
+                price = await _pricingService.CalculateCustomerRankPrice(priceDTO, price);
 
                 return new MobilePriceDTO
                 {
@@ -5825,7 +5847,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} is not currently assigned to this {request.Waybill}", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString() && formerpickup.Status != "Enroute Pickup")
+                if (formerpickup.Status != MobilePickUpRequestStatus.Accepted.ToString() && formerpickup.Status != "Enroute Pickup" && formerpickup.Status != MobilePickUpRequestStatus.Arrived.ToString())
                 {
                     throw new GenericException($"Partner {currentPartnerData.PartnerName} status has to be Accepted", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -6124,5 +6146,119 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        private async Task<object> UpdateShipmentToDelivered(ShipmentTrackingDTO trackingDTO)
+        {
+            try
+            {
+                object Id = null;
+                string scanStatus = ShipmentScanStatus.ARF.ToString();
+                trackingDTO.Status = scanStatus;
+
+                bool shipmentTrackingExists = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(trackingDTO.Waybill) && x.Status.Equals(scanStatus));
+
+                if (!shipmentTrackingExists)
+                {
+                    if (trackingDTO.User == null)
+                    {
+                        trackingDTO.User = await _userService.GetCurrentUserId();
+                    }
+
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(trackingDTO.Waybill));
+                    shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
+
+                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                    {
+                        //add service centre
+                        var newShipmentCollection = new ShipmentCollection
+                        {
+                            Waybill = trackingDTO.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.ARF,
+                            DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                            DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                            IsCashOnDelivery = shipment.IsCashOnDelivery
+                        };
+
+                        _uow.ShipmentCollection.Add(newShipmentCollection);
+                    }
+
+                    var newShipmentTracking = new ShipmentTracking
+                    {
+                        Waybill = trackingDTO.Waybill,
+                        Location = trackingDTO.Location,
+                        Status = trackingDTO.Status,
+                        DateTime = DateTime.Now,
+                        UserId = trackingDTO.User,
+                        ServiceCentreId = trackingDTO.ServiceCentreId
+                    };
+                    _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                    Id = newShipmentTracking.ShipmentTrackingId;
+
+                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                    {
+                        var messageType = MessageType.ShipmentCreation;
+                        foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+                        {
+                            if (item.ToString() == scanStatus.ToString())
+                            {
+                                messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                                break;
+                            }
+                        }
+
+                        //send message
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
+                    }
+
+                }
+                else
+                {
+                    throw new GenericException($"Shipment with waybill: {trackingDTO.Waybill} already scan as 'SHIPMENT ARRIVED FINAL DESTINATION'");
+                }
+
+                await _uow.CompleteAsync();
+                return new { Id };
+            }
+   
+            catch(Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill)
+        {
+            try
+            {
+                var result = await _nodeService.RemoveShipmentFromQueue(waybill);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> AddShipmentToQueue(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
+                if (preShipment == null)
+                {
+                    throw new GenericException($"Wabill number -- {waybill} not found ", $"{(int)HttpStatusCode.NotFound}");
+                }
+                await NodeApiCreateShipment(preShipment);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
-}
+};

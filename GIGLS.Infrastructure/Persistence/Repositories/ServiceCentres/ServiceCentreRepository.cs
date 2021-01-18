@@ -356,11 +356,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     IsDefault = s.IsDefault,
                                     IsHUB = s.IsHUB,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                    IsPublic = s.IsPublic,
                                     Latitude = s.Latitude,
                                     Longitude = s.Longitude,
-                                    SupperServiceCentreId = sc.SuperServiceCentreId
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    SupperServiceCentreId = sc.SuperServiceCentreId,
+                                    IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -421,6 +421,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
+                                join t in _context.LGA on s.LGAId equals t.LGAId
                                 where countryIds.Contains(c.CountryId)
                                 select new ServiceCentreDTO
                                 {
@@ -443,7 +444,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                    IsPublic = s.IsPublic
+                                    IsPublic = s.IsPublic,
+                                    HomeDeliveryStatus = t.HomeDeliveryStatus
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }

@@ -19,6 +19,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
+using GIGLS.Core.IServices;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -30,10 +31,11 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IPasswordGenerator _codegenerator;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -41,6 +43,7 @@ namespace GIGLS.Services.Implementation.Customers
             _userService = userService;
             _globalPropertyService = globalPropertyService;
             _messageSenderService = messageSenderService;
+            _codegenerator = codegenerator;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -619,6 +622,17 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Phone Number already exist";
                     return result;
                 }
+
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    if (String.IsNullOrEmpty(company.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Exist = false;
+                        result.Message = $"BVN number not provided for class customer";
+                        return result;
+                    }
+                }
                 var industry = string.Join(",", company.Industry);
                 var productType = string.Join(",", company.ProductType);
 
@@ -638,7 +652,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsDeleted = false;
                 newCompany.DateCreated = DateTime.UtcNow;
                 newCompany.DateModified = DateTime.UtcNow;
-                newCompany.IsInternational = true;
+                newCompany.IsInternational = company.isInternational;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
                 newCompany.CompanyType = CompanyType.Ecommerce;
@@ -646,6 +660,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.CustomerCategory = CustomerCategory.Normal;
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
+                newCompany.Rank = Rank.Basic;
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -710,9 +725,35 @@ namespace GIGLS.Services.Implementation.Customers
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
+                    IsInternational = newCompany.IsInternational,
                 });
                 //complete
                 _uow.Complete();
+
+                //generate user refferal code
+                var userDTO = await _userService.GetUserByChannelCode(newCompany.CustomerCode);
+                var code = await _codegenerator.Generate(5);
+                var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == userDTO.UserChannelCode);
+                if (ReferrerCodeExists == null)
+                {
+                    var referrerCodeDTO = new ReferrerCodeDTO
+                    {
+                        Referrercode = code,
+                        UserId = userDTO.Id,
+                        UserCode = userDTO.UserChannelCode
+                    };
+                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                    _uow.ReferrerCode.Add(referrercode);
+                    await _uow.CompleteAsync();
+                    userDTO.Referrercode = referrercode.Referrercode;
+                    userDTO.RegistrationReferrercode = referrercode.Referrercode;
+                }
+                else
+                {
+                    userDTO.Referrercode = ReferrerCodeExists.Referrercode;
+                    userDTO.RegistrationReferrercode = ReferrerCodeExists.Referrercode;
+                }
+                await _userService.UpdateUser(userDTO.Id,userDTO);
 
                 // add customer to a wallet
                 await _walletService.AddWallet(new WalletDTO
@@ -745,13 +786,32 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Invalid payload";
                     return result;
                 }
+
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
                     result.Message = $"User code or rank not provided";
                     return result;
                 }
+
+
                 var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //make the BVN compulsory
+                    if (String.IsNullOrEmpty(userValidationDTO.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"User BVN not provided";
+                        return result;
+                    }
+                    company.BVN = userValidationDTO.BVN;
+                    company.isCodNeeded = true;
+                }
+                if (userValidationDTO.Rank == Rank.Basic)
+                {
+                    company.isCodNeeded = false;
+                }
                 if (company == null)
                 {
                     result.Succeeded = false;
@@ -759,7 +819,16 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
                 company.Rank = userValidationDTO.Rank;
+                company.BVN = userValidationDTO.BVN;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new Core.Domain.RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = userValidationDTO.RankType,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                });
                 _uow.Complete();
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;

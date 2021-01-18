@@ -67,6 +67,9 @@
         ChairmanEmail,
         HighValueShipment,
         MagayaAppMessagePush,
-        MagayaInAppMessage
+        MagayaInAppMessage,
+        IntlShipmentPaymentMonitoringEmails,
+        BasicRankPercentage,
+        ClassRankPercentage
     }
 }

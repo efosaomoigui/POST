@@ -30,6 +30,8 @@ using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
+using GIGLS.Core.IRepositories.Routes;
+using GIGLS.INFRASTRUCTURE.Persistence.Repositories;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -486,6 +488,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IEcommerceAgreementRepository EcommerceAgreement { get; set; }
 
         [Inject]
+        public IRouteRepository Routes { get; set; }
+
+        [Inject]
         public IShipmentPackagingTransactionsRepository ShipmentPackagingTransactions { get; set; }
 
         [Inject]
@@ -498,6 +503,12 @@ namespace GIGLS.Infrastructure.Persistence
         public IFinancialReportRepository FinancialReport { get; set; }
         [Inject]
         public IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
+
+        [Inject]
+        public IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
+
+        [Inject]
+        public IRankHistoryRepository RankHistory { get; set; }
 
         public int Complete()
         {

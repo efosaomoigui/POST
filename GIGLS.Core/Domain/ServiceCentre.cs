@@ -45,6 +45,7 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(128)]
         public string FormattedServiceCentreName { get; set; }
         public bool IsPublic { get; set; }
+        public int LGAId { get; set; }
 
     }
 }

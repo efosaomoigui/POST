@@ -39,6 +39,9 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
+using ThirdParty.WebServices.Business;
+using GIGLS.Core.Domain.DHL;
+using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.Core
 {
@@ -303,8 +306,8 @@ namespace GIGLS.Core
                 config.CreateMap<CustomerView, CustomerDTO>();
                 config.CreateMap<CustomerDTO, CustomerView>();
 
-                config.CreateMap<Notification, NotificationDTO>();
-                config.CreateMap<NotificationDTO, Notification>();
+                config.CreateMap<Domain.Notification, NotificationDTO>();
+                config.CreateMap<NotificationDTO, Domain.Notification>();
 
                 config.CreateMap<LogVisitReason, LogVisitReasonDTO>();
                 config.CreateMap<LogVisitReasonDTO, LogVisitReason>();
@@ -450,10 +453,15 @@ namespace GIGLS.Core
                 config.CreateMap<FinancialReport, FinancialReportDTO>();
                 config.CreateMap<FinancialReportDTO, FinancialReport>();
 
+                config.CreateMap<IntlShipmentRequestDTL, IntlShipmentRequestDTO>();
+                config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequestDTL>();
                 config.CreateMap<ShipmentDTO, NewShipmentDTO>();
                 config.CreateMap<NewShipmentDTO, ShipmentDTO>();
 
+                config.CreateMap<InternationalShipmentDTO, ShipmentDTO>();
 
+                config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
+                config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
 
             });
 
