@@ -174,6 +174,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("addtoqueue/{waybill}")]
+        public async Task<IServiceResponse<bool>>AddPreShipmentMobileToQueue(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.AddShipmentToQueue(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
 
     }
 }
