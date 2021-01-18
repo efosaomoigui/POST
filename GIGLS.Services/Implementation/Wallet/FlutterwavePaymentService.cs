@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -694,13 +695,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 Amount = verifyResult.data.Amount
             };
 
-            if (verifyResult.data.Authorization.CardType.Contains("visa"))
+            if (verifyResult.data.Card.CardType.Contains("visa"))
             {
-                bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
                 if (isPresent)
                 {
                     result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Card.Brand}";
                 }
             }
             return result;
