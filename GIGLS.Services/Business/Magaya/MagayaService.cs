@@ -984,8 +984,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     //get count of all unprocessed consolited item
                     var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
                     count = consolidated.IndexOf(existingRequest);
-
-
+                }
+                if (shipmentDTO.Consolidated == false)
+                {
+                    existingRequest.Consolidated = false;
+                    existingRequest.ConsolidationId = null;
                 }
 
                 List<IntlShipmentRequestItem> intlShipmentRequestItems = new List<IntlShipmentRequestItem>();
@@ -1009,7 +1012,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 existingRequest.ReceiverCountry = station.Country;
                 existingRequest.DestinationCountryId = Convert.ToInt32(station.Country);
                 existingRequest.ReceiverCountry = shipmentDTO.ReceiverCountry;
-
 
                 foreach (var shipmentRequestItemDTO in shipmentDTO.ShipmentRequestItems)
                 {
