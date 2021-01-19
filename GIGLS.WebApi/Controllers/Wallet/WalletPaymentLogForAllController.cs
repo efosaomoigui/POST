@@ -14,6 +14,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
 {
+    [Authorize]
     [RoutePrefix("api/walletpaymentlogforall")]
     public class WalletPaymentLogForAllController : BaseWebApiController
     {
@@ -40,22 +41,6 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletPaymentLog = await _walletPaymentLogService.AddWalletPaymentLog(walletPaymentLogDTO);
-
-                return new ServiceResponse<object>
-                {
-                    Object = walletPaymentLog
-                };
-            });
-        }
-
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{walletPaymentLogId:int}")]
@@ -72,39 +57,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{walletPaymentLogId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteWalletPaymentLog(int walletPaymentLogId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _walletPaymentLogService.RemoveWalletPaymentLog(walletPaymentLogId);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("{reference}")]
-        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _walletPaymentLogService.UpdateWalletPaymentLog(reference, walletPaymentLogDTO);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [HttpGet]
+         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet([FromUri]  string referenceCode)
         {

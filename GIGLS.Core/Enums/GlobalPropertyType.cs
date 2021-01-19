@@ -72,6 +72,8 @@
         BasicRankPercentage,
         ClassRankPercentage,
         RedirectLinkForApps,
-        PaymentLinkCustomerPortal
+        PaymentLinkCustomerPortal,
+        VisaBusinessCardList,
+        VisaBusinessCardBonus
     }
 }
