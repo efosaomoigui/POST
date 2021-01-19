@@ -527,5 +527,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCargoed { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverCity { get; set; }
+
     }
 }
