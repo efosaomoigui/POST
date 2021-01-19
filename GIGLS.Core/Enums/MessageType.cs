@@ -64,6 +64,11 @@
         IDH, //International Shipment Departs Hub
         IPC, //International Shipment Payment Confirmation
         USP, //Unsuccessful Wallet Funding Email Notification
-        ESEAS //ECOMMERCE SIGNUP EMAIL AND SMS
+        ESEAS, //ECOMMERCE SIGNUP EMAIL AND SMS
+        ESCA, //ECOMMERCE SIGN UP CLASS APP
+        ESCW, //ECOMMERCE SIGN UP CLASS WEBSITE
+        ESBA, //ECOMMERCE SIGN UP BASIC APP
+        ESBW, //ECOMMERCE SIGN UP BASIC WEBSITE
+        ISA // INDIVIDUAL SIGN UP APP
     } 
 }
