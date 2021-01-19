@@ -74,6 +74,7 @@
         RedirectLinkForApps,
         PaymentLinkCustomerPortal,
         VisaBusinessCardList,
-        VisaBusinessCardBonus
+        VisaBusinessCardBonus,
+        VisaBonusEmail
     }
 }
