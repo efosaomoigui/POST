@@ -767,6 +767,34 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
+
+                //SEND EMAIL TO NEW SIGNEE
+                bool message = false;
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+
+               
+                if (company.IsFromMobile && company.Rank == Rank.Class)
+                {
+                  message = await _messageSenderService.SendMessage(MessageType.ESCA,EmailSmsType.Email, companyMessagingDTO);
+                }
+                else if (!company.IsFromMobile && company.Rank == Rank.Class)
+                {
+                    message = await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, companyMessagingDTO);
+                }
+
+                else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                {
+                    message = await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, companyMessagingDTO);
+                }
+
+                else if (!company.IsFromMobile && company.Rank == Rank.Basic)
+                {
+                    message = await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, companyMessagingDTO);
+                }
+
                 return result;
             }
             catch (Exception)
