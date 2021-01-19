@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -190,7 +191,38 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("intlcustomers/{email}/")]
+        public async Task<IServiceResponse<UserDTO>> GetCustomer(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customerObj = await _service.GetInternationalUser(email);
 
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = customerObj
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("deactivateintlcustomer/{email}/")]
+        public async Task<IServiceResponse<bool>> ActivateUser(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.DeactivateInternationalUser(email);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
 
 
     }
