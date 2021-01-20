@@ -56,10 +56,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             return Task.FromResult(partnerDto.ToList());
         }
 
-        public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode)
+        public Task<List<VehicleTypeDTO>> GetPartnersAsync(string fleetCode, bool? isActivated)
         {
-            var partners = _context.Partners.AsQueryable().Where(x => x.IsActivated == true);
+            var partners = _context.Partners.AsQueryable();
 
+            if(isActivated != null)
+            {
+                partners.Where(x => x.IsActivated == isActivated);
+            }
             if (fleetCode != null)
             {
                 partners = partners.Where(x => x.FleetPartnerCode == fleetCode);
