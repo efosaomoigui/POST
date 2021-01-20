@@ -502,10 +502,10 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("shipmenttypes")]
-        public IHttpActionResult GetShipmentTypes()
+        [Route("natureofgoods")]
+        public IHttpActionResult GetNatureOfGoods()
         {
-            var types = EnumExtensions.GetValues<ShipmentType>();
+            var types = EnumExtensions.GetValues<NatureOfGoods>();
             return Ok(types);
         }
 
