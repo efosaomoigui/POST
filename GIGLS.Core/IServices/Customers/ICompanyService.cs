@@ -31,5 +31,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetCompaniesBy(List<string> codes);
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
+        Task SendMessageToNewSignUps(object obj);
     }
 }

@@ -769,32 +769,14 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Entity = entity;
 
                 //SEND EMAIL TO NEW SIGNEE
-                bool message = false;
                 var companyMessagingDTO = new CompanyMessagingDTO();
                 companyMessagingDTO.Name = company.Name;
                 companyMessagingDTO.Email = company.Email;
                 companyMessagingDTO.PhoneNumber = company.PhoneNumber;
-
-               
-                if (company.IsFromMobile && company.Rank == Rank.Class)
-                {
-                  message = await _messageSenderService.SendMessage(MessageType.ESCA,EmailSmsType.Email, companyMessagingDTO);
-                }
-                else if (!company.IsFromMobile && company.Rank == Rank.Class)
-                {
-                    message = await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, companyMessagingDTO);
-                }
-
-                else if (company.IsFromMobile && company.Rank == Rank.Basic)
-                {
-                    message = await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, companyMessagingDTO);
-                }
-
-                else if (!company.IsFromMobile && company.Rank == Rank.Basic)
-                {
-                    message = await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, companyMessagingDTO);
-                }
-
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsFromMobile;
+                companyMessagingDTO.UserChannelType = userChannelType;
+                await SendMessageToNewSignUps(companyMessagingDTO);
                 return result;
             }
             catch (Exception)
@@ -868,6 +850,52 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task SendMessageToNewSignUps(object obj)
+        {
+            try
+            {
+                if (obj is CompanyMessagingDTO)
+                {
+                    var company = (CompanyMessagingDTO)obj;
+                    if (company.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+
+                    }
+                    else if (company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                    }
+                    else if (!company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                    }
+
+                    else if (!company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
         
 }
