@@ -481,6 +481,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverState { get; set; }
+        public string ReceiverCity { get; set; }
 
         //Delivery Options
         public int DeliveryOptionId { get; set; } = 1;
