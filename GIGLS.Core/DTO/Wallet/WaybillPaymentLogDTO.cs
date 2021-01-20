@@ -32,6 +32,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Email { get; set; }
         public string NetworkProvider { get; set; }
         public string GatewayCode { get; set; }
+        public int PaymentCountryId { get; set; }
 
         public FlutterWaveDTO FlutterWaveData { get; set; }
     }

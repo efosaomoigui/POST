@@ -49,11 +49,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var response = new PaystackWebhookDTO();
 
-            if (waybillPaymentLog.UserId == null)
-            {
-                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
-            }
-
             //check if any transaction on the waybill is successful
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
                 .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
@@ -68,6 +63,13 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
+                //check the country
+                //redirect based on the country that is initiating the process
+                if (waybillPaymentLog.UserId == null)
+                {
+                    waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                }
+
                 if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
                 {
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
