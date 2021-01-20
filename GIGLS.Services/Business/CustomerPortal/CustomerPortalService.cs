@@ -764,6 +764,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.Email = user.Email.Trim().ToLower();
             }
+            if (!String.IsNullOrEmpty(user.PhoneNumber))
+            {
+                user.PhoneNumber = user.PhoneNumber.Trim();
+            }
 
             //validate email
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
