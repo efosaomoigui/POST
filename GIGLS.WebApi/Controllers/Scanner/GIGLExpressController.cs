@@ -52,10 +52,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
         private readonly ILGAService _lgaService;
+        private readonly ISpecialDomesticPackageService _specialPackageService;
+
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService) : base(nameof(MobileScannerController))
+            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService,
+            ISpecialDomesticPackageService specialPackageService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -70,6 +73,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _userService = userService;
             _countryService = countryService;
             _lgaService = lgaService;
+            _specialPackageService = specialPackageService;
 
         }
 
@@ -481,6 +485,30 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
+        [HttpGet]
+        [Route("activespecialpackage")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetActiveSpecialDomesticPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _specialPackageService.GetActiveSpecialDomesticPackages();
+
+                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("shipmenttypes")]
+        public IHttpActionResult GetShipmentTypes()
+        {
+            var types = EnumExtensions.GetValues<ShipmentType>();
+            return Ok(types);
+        }
+
 
     }
 }

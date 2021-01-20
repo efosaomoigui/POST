@@ -501,7 +501,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int DestinationCountryId { get; set; }
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public int TimeInSeconds { get; set; }
-
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {
