@@ -444,9 +444,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var response = new HttpResponseMessage();
             var result = new ResponseDTO();
-            var url = "https://api.paystack.co/bank/resolve_bvn/";
+            var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
             url = $"{url}{bvnNo}";
-            var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
