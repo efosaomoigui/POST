@@ -709,21 +709,41 @@ namespace GIGLS.Services.Implementation.Messaging
                     var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
                     strArray[15] = $"{link.Value}{intlDTO.Waybill}";
                 }
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.To = intlDTO.CustomerDetails.PhoneNumber;
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
+            }
+            if (obj is CompanyMessagingDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Customer Name",
+                 };
+
+                var companyMessagingDTO = (CompanyMessagingDTO)obj;
+                //map the array
+                strArray[0] = companyMessagingDTO.Name;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                 //C. populate the message subject
-                messageDTO.Subject =
-                    string.Format(messageDTO.Subject, strArray);
 
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
 
                 //populate the message template
-                messageDTO.FinalBody =
-                    string.Format(messageDTO.Body, strArray);
-
-
-                messageDTO.To = intlDTO.CustomerDetails.PhoneNumber;
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.To = companyMessagingDTO.PhoneNumber;
+                messageDTO.ToEmail = companyMessagingDTO.Email;
 
                 //Set default country as Nigeria for GIG Go APP
                 //prepare message format base on country code
