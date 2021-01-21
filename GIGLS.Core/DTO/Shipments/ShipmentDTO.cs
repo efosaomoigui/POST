@@ -471,6 +471,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverState { get; set; }
+        public string ReceiverCity { get; set; }
+        public string CompanyType { get; set; }
 
         //Delivery Options
         public int DeliveryOptionId { get; set; } = 1;
@@ -502,7 +504,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int DestinationCountryId { get; set; }
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public int TimeInSeconds { get; set; }
-
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {
@@ -517,5 +518,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCargoed { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverCity { get; set; }
+
     }
 }
