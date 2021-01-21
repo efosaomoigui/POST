@@ -188,9 +188,11 @@ namespace GIGLS.Services.Implementation.Partnership
             return partnersTransaction;
         }
 
-        public async Task<IEnumerable<VehicleTypeDTO>> GetUnVerifiedPartners(string fleetCode)
+        public async Task<IEnumerable<VehicleTypeDTO>> GetUnVerifiedPartners(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var partners = await _uow.Partner.GetPartnersAsync(fleetCode, false);
+            string fleetCode = null;
+
+            var partners = await _uow.Partner.GetPartnersAsync(fleetCode, false, filterCriteria);
             return partners;
         }
 

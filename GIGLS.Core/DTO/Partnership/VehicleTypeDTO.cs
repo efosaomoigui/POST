@@ -1,9 +1,10 @@
 ﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 
 namespace GIGLS.Core.DTO.Partnership
 {
-    public class VehicleTypeDTO
+    public class VehicleTypeDTO: BaseDomainDTO
     {
         public int VehicleTypeId { get; set; }
         public string Partnercode { get; set; }

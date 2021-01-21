@@ -10,6 +10,7 @@ using System.Data.Entity;
 using GIGLS.Core.DTO;
 using System;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 {
@@ -56,11 +57,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             return Task.FromResult(partnerDto.ToList());
         }
 
-        public Task<List<VehicleTypeDTO>> GetPartnersAsync(string fleetCode, bool? isActivated)
+        private IQueryable<Partner> GetPartners(string fleetCode, bool? isActivated)
         {
             var partners = _context.Partners.AsQueryable();
 
-            if(isActivated != null)
+            if (isActivated != null)
             {
                 partners.Where(x => x.IsActivated == isActivated);
             }
@@ -68,7 +69,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             {
                 partners = partners.Where(x => x.FleetPartnerCode == fleetCode);
             }
+            return partners;
+        }
 
+        public Task<List<VehicleTypeDTO>> GetPartnersAsync(string fleetCode, bool? isActivated)
+        {
+
+            var partners = GetPartners(fleetCode, isActivated);
             var partnerDto = from partner in partners
                              join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
                              select new VehicleTypeDTO
@@ -91,6 +98,44 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  }).FirstOrDefault(),
                              };
             return Task.FromResult(partnerDto.OrderByDescending(x => x.ActivityDate).ToList());
+        }
+
+        public Task<List<VehicleTypeDTO>> GetPartnersAsync(string fleetCode, bool? isActivated, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var partners = GetPartners(fleetCode, isActivated);
+
+
+            //get startDate and endDate
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            partners = partners.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
+
+
+            var partnerDto = from partner in partners
+                             join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
+                             select new VehicleTypeDTO
+                             {
+                                 PartnerName = partner.PartnerName,
+                                 Vehicletype = vehicle.Vehicletype,
+                                 Partnercode = vehicle.Partnercode,
+                                 PartnerEmail = partner.Email,
+                                 PartnerFirstName = partner.FirstName,
+                                 PartnerLastName = partner.LastName,
+                                 PartnerPhoneNumber = partner.PhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 ActivityStatus = partner.ActivityStatus,
+                                 ActivityDate = partner.ActivityDate,
+                                 DateCreated = partner.DateCreated,
+                                 EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
+                                 .Select(x => new FleetPartnerDTO
+                                 {
+                                     FirstName = x.FirstName,
+                                     LastName = x.LastName
+                                 }).FirstOrDefault(),
+                             };
+            return Task.FromResult(partnerDto.ToList());
         }
 
         public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)
