@@ -159,6 +159,8 @@ namespace GIGL.GIGLS.Core.Domain
 
         public InternationalShipmentType InternationalShipmentType { get; set; }
 
+        public bool IsClassShipment { get; set; }
+
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable

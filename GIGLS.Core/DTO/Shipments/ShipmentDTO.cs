@@ -156,6 +156,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int TimeInSeconds { get; set; }
 
         public InternationalShipmentType InternationalShipmentType { get; set; }
+        public bool IsClassShipment { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
