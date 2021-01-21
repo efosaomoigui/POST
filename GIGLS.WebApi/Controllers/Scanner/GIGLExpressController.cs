@@ -10,6 +10,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Customers;
@@ -51,10 +52,15 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IServiceCentreService _serviceCentreService;
         private readonly IUserService _userService;
         private readonly ICountryService _countryService;
+        private readonly ILGAService _lgaService;
+        private readonly ISpecialDomesticPackageService _specialPackageService;
+        private readonly IInvoiceService _invoiceService;
+
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService) : base(nameof(MobileScannerController))
+            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService,
+            ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -68,6 +74,9 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _serviceCentreService = serviceCentreService;
             _userService = userService;
             _countryService = countryService;
+            _lgaService = lgaService;
+            _specialPackageService = specialPackageService;
+            _invoiceService = invoiceService;
 
         }
 
@@ -119,6 +128,18 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
+
+                    //ADD SERVICECENTRE OBJ
+                    var centreId = await _userService.GetPriviledgeServiceCenters(user.Id);
+                    if (centreId != null)
+                    {
+                        var centreInfo =  await _serviceCentreService.GetServiceCentreById(centreId[0]);
+                        if (centreInfo != null)
+                        {
+                            var centreInfoJson = JObject.FromObject(centreInfo);
+                            jObject.Add(new JProperty("ServiceCentre", centreInfoJson));
+                        }
+                    }
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -288,6 +309,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 //map to real shipmentdto
                 var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
+
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
@@ -304,8 +326,18 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 ShipmentDTO.ShipmentCancel = null;
                 ShipmentDTO.ShipmentReroute = null;
                 ShipmentDTO.DeliveryOption = null;
+                ShipmentDTO.IsFromMobile = false;
 
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
+                if (!String.IsNullOrEmpty(shipment.Waybill))
+                {
+                    var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
+                    if (invoiceObj != null)
+                    {
+                        invoiceObj.Shipment = null;
+                        shipment.Invoice = invoiceObj;
+                    }
+                }
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -330,7 +362,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("{customerwaybill}/waybill")]
+        [Route("customerwaybill/{waybill}")]
         public async Task<IServiceResponse<ShipmentDTO>> GetShipment(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
@@ -429,6 +461,68 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
+        [HttpGet]
+        [Route("paymenttypes")]
+        public IHttpActionResult GetPaymentTypes()
+        {
+            var types = EnumExtensions.GetValues<PaymentType>();
+           // types.RemoveAt(3);
+            return Ok(types);
+        }
+
+        [HttpPost]
+        [Route("processpartialpayment")]
+        public async Task<IServiceResponse<bool>> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("lga")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetLGAs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var lga = await _lgaService.GetLGAs();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = lga
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("activespecialpackage")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetActiveSpecialDomesticPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _specialPackageService.GetActiveSpecialDomesticPackages();
+
+                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("natureofgoods")]
+        public IHttpActionResult GetNatureOfGoods()
+        {
+            var types = EnumExtensions.GetValues<NatureOfGoods>();
+            return Ok(types);
+        }
+
 
     }
 }
