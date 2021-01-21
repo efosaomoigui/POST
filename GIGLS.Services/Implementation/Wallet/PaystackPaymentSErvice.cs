@@ -960,16 +960,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 Amount = verifyResult.data.Amount
             };
 
-            if (verifyResult.data.Authorization.CardType.Contains("visa"))
+            if (verifyResult.data.Authorization.CardType != null)
             {
-                bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
-                if (isPresent)
+                if (verifyResult.data.Authorization.CardType.Contains("visa"))
                 {
-                    result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
-                    result.BonusAdded = true;
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                        result.BonusAdded = true;
+                    }
                 }
             }
+
             return result;
         }
 
