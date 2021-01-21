@@ -306,6 +306,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 //map to real shipmentdto
                 var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
+
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
@@ -322,8 +323,14 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 ShipmentDTO.ShipmentCancel = null;
                 ShipmentDTO.ShipmentReroute = null;
                 ShipmentDTO.DeliveryOption = null;
+                ShipmentDTO.IsFromMobile = false;
 
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
+                if (!String.IsNullOrEmpty(shipment.Waybill))
+                {
+                   var invoiceObj = await _shipmentService.GetShipment(shipment.Waybill);
+                    shipment = invoiceObj;
+                }
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -502,10 +509,10 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("shipmenttypes")]
-        public IHttpActionResult GetShipmentTypes()
+        [Route("natureofgoods")]
+        public IHttpActionResult GetNatureOfGoods()
         {
-            var types = EnumExtensions.GetValues<ShipmentType>();
+            var types = EnumExtensions.GetValues<NatureOfGoods>();
             return Ok(types);
         }
 

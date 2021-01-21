@@ -1197,6 +1197,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 await GenerateReferrerCode(user);
             }
 
+            ////SEND EMAIL TO NEW SIGNEE
+            var companyMessagingDTO = new CompanyMessagingDTO();
+            companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            companyMessagingDTO.Email = user.Email;
+            companyMessagingDTO.PhoneNumber = user.PhoneNumber;
+            companyMessagingDTO.Rank = Rank.Basic;
+            companyMessagingDTO.IsFromMobile = user.IsRegisteredFromMobile;
+            companyMessagingDTO.UserChannelType = user.UserChannelType;
+            await _companyService.SendMessageToNewSignUps(companyMessagingDTO);
+
             return result;
         }
 
