@@ -1218,7 +1218,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
 
-            if (newShipmentDTO.CustomerType.ToLower() == "individual" && newShipmentDTO.CustomerType.ToLower() == "client")
+            if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
             {
                 var factor = Convert.ToDecimal(Math.Pow(10, 0));
                 grandTotal = Math.Round(grandTotal * factor) / factor;
