@@ -589,6 +589,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("{waybill}/waybillbyservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetWaybillForServiceCentre(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetWaybillForServiceCentre(waybill);
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("warehouseservicecentre")]
         public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetAllWarehouseServiceCenters()
         {
