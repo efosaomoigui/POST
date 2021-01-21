@@ -306,6 +306,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 //map to real shipmentdto
                 var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
+
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
@@ -324,6 +325,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 ShipmentDTO.DeliveryOption = null;
 
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
+                if (!String.IsNullOrEmpty(shipment.Waybill))
+                {
+                   var invoiceObj = await _shipmentService.GetShipment(shipment.Waybill);
+                    shipment = invoiceObj;
+                }
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
