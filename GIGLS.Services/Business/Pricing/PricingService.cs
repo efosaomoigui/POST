@@ -1220,7 +1220,7 @@ namespace GIGLS.Services.Business.Pricing
 
             if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, 0));
+                var factor = Convert.ToDecimal(Math.Pow(10, -2));
                 grandTotal = Math.Round(grandTotal * factor) / factor;
             }
 

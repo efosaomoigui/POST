@@ -323,6 +323,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 ShipmentDTO.ShipmentCancel = null;
                 ShipmentDTO.ShipmentReroute = null;
                 ShipmentDTO.DeliveryOption = null;
+                ShipmentDTO.IsFromMobile = false;
 
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
                 if (!String.IsNullOrEmpty(shipment.Waybill))
