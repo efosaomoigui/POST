@@ -10,6 +10,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Customers;
@@ -53,12 +54,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly ICountryService _countryService;
         private readonly ILGAService _lgaService;
         private readonly ISpecialDomesticPackageService _specialPackageService;
+        private readonly IInvoiceService _invoiceService;
 
 
         public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
             IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
             IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService,
-            ISpecialDomesticPackageService specialPackageService) : base(nameof(MobileScannerController))
+            ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService) : base(nameof(MobileScannerController))
         {
             _deliveryOptionPriceService = deliveryOptionPriceService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
@@ -74,6 +76,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _countryService = countryService;
             _lgaService = lgaService;
             _specialPackageService = specialPackageService;
+            _invoiceService = invoiceService;
 
         }
 
@@ -328,8 +331,12 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
                 if (!String.IsNullOrEmpty(shipment.Waybill))
                 {
-                   var invoiceObj = await _shipmentService.GetShipment(shipment.ShipmentId);
-                    shipment = invoiceObj;
+                    var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
+                    if (invoiceObj != null)
+                    {
+                        invoiceObj.Shipment = null;
+                        shipment.Invoice = invoiceObj;
+                    }
                 }
                 return new ServiceResponse<ShipmentDTO>
                 {
