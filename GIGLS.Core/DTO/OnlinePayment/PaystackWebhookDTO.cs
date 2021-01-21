@@ -163,6 +163,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
     {
         public string Description { get; set; }
         public decimal Amount { get; set; }
+        public bool BonusAdded { get; set; }
     }
 
 }
