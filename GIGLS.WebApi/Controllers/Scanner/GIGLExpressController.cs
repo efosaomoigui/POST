@@ -328,7 +328,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 var shipment = await _shipmentService.AddShipment(ShipmentDTO);
                 if (!String.IsNullOrEmpty(shipment.Waybill))
                 {
-                   var invoiceObj = await _shipmentService.GetShipment(shipment.Waybill);
+                   var invoiceObj = await _shipmentService.GetShipment(shipment.ShipmentId);
                     shipment = invoiceObj;
                 }
                 return new ServiceResponse<ShipmentDTO>
