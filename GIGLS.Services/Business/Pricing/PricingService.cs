@@ -1300,7 +1300,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 //Ghana
                 var ghanaValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckGhana"];
-                minimumDeclareValueCheck = 428m;
+                minimumDeclareValueCheck = Convert.ToDecimal(ghanaValue); ;
             }
 
             if(minimumDeclareValueCheck > declarationValue)
