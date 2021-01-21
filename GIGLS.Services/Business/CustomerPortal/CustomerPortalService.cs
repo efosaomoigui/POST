@@ -106,7 +106,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
         private readonly IShipmentService _shipmentService; 
-        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;   
+        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;       
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -119,7 +120,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService) 
+            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService,
+            IWaybillPaymentLogService waybillPaymentLogService) 
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -162,6 +164,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _companyService = companyService;
             _shipmentService  = shipmentService;
             _movementManifestService = movementManifestService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -214,6 +217,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
+        public async Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _waybillPaymentLogService.AddWaybillPaymentLogFromApp(walletPaymentLogDto);
             return walletPaymentLog;
         }
 

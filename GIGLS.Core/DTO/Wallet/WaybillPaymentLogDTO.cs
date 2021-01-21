@@ -13,7 +13,6 @@ namespace GIGLS.Core.DTO.Wallet
         }
 
         public int WaybillPaymentLogId { get; set; }
-
         public string Waybill { get; set; }
         public string Reference { get; set; }
         public decimal Amount { get; set; }
