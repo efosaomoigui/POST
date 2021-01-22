@@ -631,11 +631,20 @@ namespace GIGLS.Services.Implementation.Messaging
                 var strArray = new string[]
                  {
                      "Customer Name",
+                     "GIG Mail"
                  };
 
                 var companyMessagingDTO = (CompanyMessagingDTO)obj;
                 //map the array
                 strArray[0] = companyMessagingDTO.Name;
+
+                //For the Official GIG Mail
+                if(companyMessagingDTO.UserChannelType == UserChannelType.Partner)
+                {
+                    var email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+                    var gigmail = email.Value;
+                    strArray[1] = gigmail;
+                }
                
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

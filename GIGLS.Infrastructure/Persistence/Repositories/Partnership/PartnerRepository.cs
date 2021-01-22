@@ -128,6 +128,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  ActivityStatus = partner.ActivityStatus,
                                  ActivityDate = partner.ActivityDate,
                                  DateCreated = partner.DateCreated,
+                                 Contacted = partner.Contacted,
                                  EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
                                  .Select(x => new FleetPartnerDTO
                                  {
