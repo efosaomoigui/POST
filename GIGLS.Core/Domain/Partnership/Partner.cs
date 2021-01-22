@@ -66,5 +66,7 @@ namespace GIGLS.Core.Domain.Partnership
         public ActivityStatus ActivityStatus { get; set; }
 
         public DateTime ActivityDate { get; set; }
+
+        public bool Contacted { get; set; }
     }
 }
