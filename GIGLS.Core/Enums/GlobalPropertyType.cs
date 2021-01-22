@@ -72,6 +72,7 @@
         BasicRankPercentage,
         ClassRankPercentage,
         VisaBusinessCardList,
-        VisaBusinessCardBonus
+        VisaBusinessCardBonus,
+        VisaBonusEmail
     }
 }

@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners(string fleetCode)
         {
-            var partners = await _uow.Partner.GetVerifiedPartnersAsync(fleetCode);
+            var partners = await _uow.Partner.GetPartnersAsync(fleetCode, true);
             return partners;
         }
 
@@ -186,6 +186,14 @@ namespace GIGLS.Services.Implementation.Partnership
             var partnersTransaction = await _uow.PartnerTransactions.GetExternalPartnerTransactionsForPayment(shipmentCollectionFilterCriteria);
 
             return partnersTransaction;
+        }
+
+        public async Task<IEnumerable<VehicleTypeDTO>> GetUnVerifiedPartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            string fleetCode = null;
+
+            var partners = await _uow.Partner.GetPartnersAsync(fleetCode, false, filterCriteria);
+            return partners;
         }
 
     }
