@@ -589,8 +589,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{waybill}/waybillbyservicecentre")]
-        public async Task<IServiceResponse<DailySalesDTO>> GetWaybillForServiceCentre(string waybill)
+        [Route("dailysalebywaybillforservicecentre/{waybill}")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySaleByWaybillForServiceCentre(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
