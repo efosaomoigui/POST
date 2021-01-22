@@ -196,5 +196,15 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
+        //Send a mail to a partner that has not yet been verified
+        public async Task<bool> ContactUnverifiedPartner(string email)
+        {
+            var partner = await _uow.Partner.GetAsync(x => x.Email == email);
+
+            //Send Mail
+
+            return true;
+        }
+
     }
 }
