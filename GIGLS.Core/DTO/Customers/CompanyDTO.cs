@@ -107,4 +107,18 @@ namespace GIGLS.Core.DTO.Customers
         public Rank Rank { get; set; }
         public bool isInternational { get; set; }
     }
+
+    public class CompanyMessagingDTO
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool IsFromMobile { get; set; }
+        public Rank Rank { get; set; }
+        public UserChannelType UserChannelType { get; set; }
+
+
+
+
+    }
 }

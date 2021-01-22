@@ -767,6 +767,16 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
+
+                //SEND EMAIL TO NEW SIGNEE
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsFromMobile;
+                companyMessagingDTO.UserChannelType = userChannelType;
+                await SendMessageToNewSignUps(companyMessagingDTO);
                 return result;
             }
             catch (Exception)
@@ -840,6 +850,52 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task SendMessageToNewSignUps(object obj)
+        {
+            try
+            {
+                if (obj is CompanyMessagingDTO)
+                {
+                    var company = (CompanyMessagingDTO)obj;
+                    if (company.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+
+                    }
+                    else if (company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                    }
+                    else if (!company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                    }
+
+                    else if (!company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
         
 }
