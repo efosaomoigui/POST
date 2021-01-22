@@ -1053,6 +1053,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
+        //Get info about Shipment Waybill that belongs to Service Center
+        public Task<List<InvoiceViewDTO>> GetWaybillForServiceCentre(string waybill, int[] serviceCentreIds)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false && s.Waybill == waybill);
+
+            //filter by service center of the login user
+            if (serviceCentreIds.Length > 0)
+            {
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join u in Context.Users on s.UserId equals u.Id
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               UserName = u.FirstName + " " + u.LastName,
+                                               CompanyType = s.CompanyType,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
+            return Task.FromResult(resultDto);
+        }
+
 
     }
 

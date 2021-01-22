@@ -20,5 +20,6 @@ namespace GIGLS.Core.IServices.Business
         Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto);
         Task<decimal> GetEcommerceDropOffPrice(PricingDTO pricingDto);
         Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO);
+        Task<decimal> CalculateCustomerRankPrice(PricingDTO pricingDto, decimal price);
     }
 }

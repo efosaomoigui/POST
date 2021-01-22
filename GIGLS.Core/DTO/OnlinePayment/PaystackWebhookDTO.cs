@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.OnlinePayment
 {
@@ -16,12 +17,50 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class Data
     {
+        public Data()
+        {
+            Authorization = new Authorization();
+        }
         public string Status { get; set; }
         public string Reference { get; set; }
         public decimal Amount { get; set; }
         public string Gateway_Response { get; set; }
         public string Display_Text { get; set; }
         public string Message { get; set; }
+        public Authorization Authorization { get; set; }
+    }
+
+    public class Authorization
+    {
+        [JsonProperty("authorization_code")]
+        public string AuthorizationCode { get; set; }
+
+        [JsonProperty("card_type")]
+        public string CardType { get; set; }
+
+        [JsonProperty("last4")]
+        public string Last4 { get; set; }
+
+        [JsonProperty("exp_month")]
+        public string ExpMonth { get; set; }
+
+        [JsonProperty("exp_year")]
+        public string ExpYear { get; set; }
+
+        [JsonProperty("bin")]
+        public string Bin { get; set; }
+
+        [JsonProperty("bank")]
+        public string Bank { get; set; }
+
+        [JsonProperty("channel")]
+        public string Channel { get; set; }
+
+        [JsonProperty("reusable")]
+        public bool? Reusable { get; set; }
+
+        [JsonProperty("country_code")]
+        public string CountryCode { get; set; }
     }
 
     public class PaymentResponse
@@ -64,6 +103,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public FlutterResponseData()
         {
             validateInstructions = new ValidateInstructions();
+            Card = new Card();
         }
         public string Status { get; set; }
         public int Id { get; set; }
@@ -80,6 +120,29 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ChargeCode { get; set; }
         public string Processor_Response { get; set; }
         public ValidateInstructions validateInstructions { get; set; }
+        public Card Card { get; set; }
+    }
+
+    public class Card
+    {
+        [JsonProperty("expirymonth")]
+        public string ExpiryMonth { get; set; }
+
+        [JsonProperty("expiryyear")]
+        public string ExpiryYear { get; set; }
+
+        [JsonProperty("cardBIN")]
+        public string CardBIN { get; set; }
+
+        [JsonProperty("last4digits")]
+        public string Last4Digits { get; set; }
+
+        [JsonProperty("brand")]
+        public string Brand { get; set; }
+
+        [JsonProperty("type")]
+        public string CardType { get; set; }
+
     }
 
     public class ValidateInstructions
@@ -96,5 +159,11 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Transaction_Ref { get; set; }
     }
     
+    public class BonusAddOn
+    {
+        public string Description { get; set; }
+        public decimal Amount { get; set; }
+        public bool BonusAdded { get; set; }
+    }
 
 }

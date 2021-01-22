@@ -335,5 +335,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getunverifiedpartners")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetUnVerfiedPartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetUnVerifiedPartners(filterCriteria);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
     }
 }

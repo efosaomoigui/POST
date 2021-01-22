@@ -19,5 +19,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<IEnumerable<LGADTO>> GetLGAByState(int stateId);
         Task UpdateHomeDeliveryLocation(int lgaId, bool status);
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
+        Task<bool> CheckHomeDeliveryAllowed(int lgaID);
     }
 }

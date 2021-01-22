@@ -217,6 +217,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return walletPaymentLog;
         }
 
+        public async Task<object> AddWalletPaymentLogAnonymousUser(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLogAnonymousUser(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
         public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.InitiatePaymentUsingUSSD(walletPaymentLogDto);
@@ -757,6 +763,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 user.Email = user.Email.Trim().ToLower();
+            }
+            if (!String.IsNullOrEmpty(user.PhoneNumber))
+            {
+                user.PhoneNumber = user.PhoneNumber.Trim();
             }
 
             //validate email
@@ -1745,39 +1755,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            //bool disableShipmentCreation = bool.Parse(isDisable);
-
-            //bool allowTestUser = await AllowTestingUserToCreateShipment();
-
-            //if (allowTestUser)
-            //{
-            //    disableShipmentCreation = false;
-            //}
-
-            //if (disableShipmentCreation)
-            //{
-            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            //}
-
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
         }
 
         public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            //var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
-            //bool disableShipmentCreation = bool.Parse(isDisable);
-            //bool allowTestUser = await AllowTestingUserToCreateShipment();
-
-            //if (allowTestUser)
-            //{
-            //    disableShipmentCreation = false;
-            //}
-
-            //if (disableShipmentCreation)
-            //{
-            //    throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            //}
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
             var userDTO = Mapper.Map<UserDTO>(user);
@@ -1790,7 +1772,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             transactionSummary.Status = status;
             return transactionSummary;
         }
-
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
@@ -1818,10 +1799,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 return await _preShipmentMobileService.GetPrice(preShipment);
             }
         }
+
         public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForDropOff(preShipment);
         }
+
         public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
@@ -3076,8 +3059,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-            var msgType = (MessageType)Enum.Parse(typeof(MessageType), "FPEmail");
-            return await _messageSenderService.SendMessage(msgType, newMessageDTO.EmailSmsType,newMessageDTO);
+           // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
+            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType,newMessageDTO);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)

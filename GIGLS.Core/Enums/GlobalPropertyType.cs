@@ -69,6 +69,11 @@
         MagayaAppMessagePush,
         MagayaInAppMessage,
         IntlShipmentPaymentMonitoringEmails,
+        BasicRankPercentage,
+        ClassRankPercentage,
+        VisaBusinessCardList,
+        VisaBusinessCardBonus,
+        VisaBonusEmail,
         InternationalAdditionalPrice
     }
 }

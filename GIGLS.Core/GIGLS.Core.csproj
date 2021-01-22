@@ -210,6 +210,7 @@
     <Compile Include="Domain\MissingShipment.cs" />
     <Compile Include="Domain\PreShipment.cs" />
     <Compile Include="Domain\PreShipmentMobile.cs" />
+    <Compile Include="Domain\RankHistory.cs" />
     <Compile Include="Domain\ReferrerCode.cs" />
     <Compile Include="Domain\Region.cs" />
     <Compile Include="Domain\RegionServiceCentreMapping.cs" />
@@ -386,6 +387,7 @@
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\Node\NodeResponse.cs" />
     <Compile Include="DTO\Node\UserPayload.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
@@ -501,6 +503,7 @@
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
     <Compile Include="DTO\User\IntertnationalUserProfilerDTO.cs" />
+    <Compile Include="DTO\User\RankHistoryDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
     <Compile Include="DTO\User\UserValidationDTO.cs" />
@@ -734,6 +737,7 @@
     <Compile Include="IRepositories\Stores\IShipmentPackagingTransactionsRepository.cs" />
     <Compile Include="IRepositories\Stores\IServiceCenterPackageRepository.cs" />
     <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
+    <Compile Include="IRepositories\User\IRankHistoryRepository.cs" />
     <Compile Include="IRepositories\User\IUserRepository.cs" />
     <Compile Include="IRepositories\Utility\IQRAndBarcodeRepository.cs" />
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
@@ -883,6 +887,7 @@
     <Compile Include="IServices\Stocks\IStockSupplyDetailsService.cs" />
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
+    <Compile Include="IServices\User\IRankHistoryService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
     <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />
     <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />

@@ -42,6 +42,33 @@ namespace GIGLS.Services.Business.Node
             try
             {
                 var nodeResponse = new NodeResponse();
+                var nodeURL = ConfigurationManager.AppSettings["NodeMerchartBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodeWalletLoaded"];
+                nodeURL = nodeURL + nodePostShipment;
+
+                using (var client = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(user);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(nodeURL, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
+                    nodeResponse = jObject;
+                }
+
+                return nodeResponse;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public static async Task<NodeResponse> ProcessWalletNotificationOld(UserPayload user)
+        {
+            try
+            {
+                var nodeResponse = new NodeResponse();
 
                 var nodeURL = ConfigurationManager.AppSettings["NodeMerchartBaseUrl"];
                 var nodePostShipment = ConfigurationManager.AppSettings["NodeWalletLoaded"];
@@ -60,7 +87,6 @@ namespace GIGLS.Services.Business.Node
                     var response = await client.PostAsync(nodeURL, data);
                     string result = await response.Content.ReadAsStringAsync();
                     var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
-
                     nodeResponse = jObject;
                 }
 
@@ -97,22 +123,33 @@ namespace GIGLS.Services.Business.Node
                 throw;
             }
         }
-    }
 
-    public class NodeResponse
-    {
-        public NodeResponse()
+        public async Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill)
         {
-            data = new NodeDataResponse();
+            try
+            {
+                var nodeResponse = new NewNodeResponse();
+
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
+                nodeURL = $"{nodeURL}{nodePostShipment}/{waybill}";
+                using (var client = new HttpClient())
+                {
+                    var response = await client.DeleteAsync(nodeURL);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<NewNodeResponse>(result);
+                    nodeResponse = jObject;
+                }
+                return nodeResponse;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
-        public int statusCode { get; set; }
-        public string message { get; set; }
-        public NodeDataResponse data { get; set; }
     }
 
-    public class NodeDataResponse
-    {
-        public string message { get; set; }
-    }
+
+   
 
 }

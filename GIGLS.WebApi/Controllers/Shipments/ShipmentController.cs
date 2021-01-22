@@ -226,36 +226,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{ShipmentId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(ShipmentId);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{ShipmentId:int}")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(ShipmentId);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{waybill}/waybill")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(waybill);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{waybill}/waybill")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(waybill);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
@@ -583,6 +583,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySalesByServiceCentre
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{waybill}/waybillbyservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySaleByWaybillForServiceCentre(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetWaybillForServiceCentre(waybill);
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = shipment
                 };
             });
         }

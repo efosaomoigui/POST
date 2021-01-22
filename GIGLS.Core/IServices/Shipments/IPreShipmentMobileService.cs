@@ -12,6 +12,7 @@ using GIGLS.Core.DTO.Zone;
 using System;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -85,6 +86,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam);
         Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number);
         Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners();
+        Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
+        Task<bool> AddShipmentToQueue(string waybill);
 
     }
 }

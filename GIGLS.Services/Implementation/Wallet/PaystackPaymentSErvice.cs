@@ -21,7 +21,6 @@ using System.Text;
 using System.Collections.Generic;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO;
-using GIGLS.Core.IServices.Utility;
 using System.Linq;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
@@ -35,20 +34,18 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly IMessageSenderService _messageSenderService;
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly INodeService _nodeService;
 
 
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
-            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, INodeService nodeService)
+            IMessageSenderService messageSenderService, INodeService nodeService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _messageSenderService = messageSenderService;
-            _globalPropertyService = globalPropertyService;
             _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
@@ -90,6 +87,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResponse.Status;
                 result.Message = verifyResponse.Message;
                 result.data.Reference = reference;
+                result.data.Authorization.AuthorizationCode = verifyResponse.Data.Authorization.AuthorizationCode;
+                result.data.Authorization.Bin = verifyResponse.Data.Authorization.Bin;
+                result.data.Authorization.Last4 = verifyResponse.Data.Authorization.Last4;
+                result.data.Authorization.ExpMonth = verifyResponse.Data.Authorization.ExpMonth;
+                result.data.Authorization.ExpYear = verifyResponse.Data.Authorization.ExpYear;
+                result.data.Authorization.Channel = verifyResponse.Data.Authorization.Channel;
+                result.data.Authorization.CardType = verifyResponse.Data.Authorization.CardType;
+                result.data.Authorization.Bank = verifyResponse.Data.Authorization.Bank;
+                result.data.Authorization.CountryCode = verifyResponse.Data.Authorization.CountryCode;
+                result.data.Authorization.Reusable = verifyResponse.Data.Authorization.Reusable;
 
                 if (verifyResponse.Status)
                 {
@@ -117,7 +124,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (paymentLog == null)
                     return result;
 
+                bool sendPaymentNotification = false;
+                var walletDto = new WalletDTO();
                 var userPayload = new UserPayload();
+                var bonusAddon = new BonusAddOn();
 
                 //2. if the payment successful
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
@@ -126,7 +136,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     string customerId = null;  //set customer id to null
 
                     //get wallet detail to get customer code
-                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+                    walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
                     if (walletDto != null)
                     {
@@ -138,21 +148,27 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
+
+                    //if pay was done using Master VIsa card, give some discount
+                    bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                     //update the wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO() {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount,
+                        Amount = bonusAddon.Amount,
                         CreditDebitType = CreditDebitType.Credit,
-                        Description = "Funding made through debit card",
+                        Description = bonusAddon.Description,
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
 
-                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    //await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    sendPaymentNotification = true;
                 }
 
                 //3. update the wallet payment log
@@ -164,10 +180,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
 
-                //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (sendPaymentNotification)
                 {
-                    if(userPayload != null)
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                }
+
+                if (bonusAddon.BonusAdded)
+                {
+                    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                }
+
+                //Call Node API for subscription process
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
+                {
+                    if (userPayload != null)
                     {
                         await _nodeService.WalletNotification(userPayload);
                     }
@@ -231,7 +257,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                bool sendPaymentNotification = false;
+                var walletDto = new WalletDTO();
                 var userPayload = new UserPayload();
+                var bonusAddon = new BonusAddOn();
 
                 //2. if the payment successful
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
@@ -240,7 +269,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     string customerId = null;  //set customer id to null
 
                     //get wallet detail to get customer code
-                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+                    walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
                     if (walletDto != null)
                     {
@@ -252,22 +281,28 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
+
+                    //if pay was done using Master VIsa card, give some discount
+                    bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                     //update the wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                     {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount,
+                        Amount = bonusAddon.Amount,
                         CreditDebitType = CreditDebitType.Credit,
-                        Description = "Funding made through debit card",
+                        Description = bonusAddon.Description,
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
 
-                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    //await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    sendPaymentNotification = true;
                 }
 
                 //3. update the wallet payment log
@@ -282,8 +317,18 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.GatewayResponse = verifyResult.data.Gateway_Response;
                 result.Status = verifyResult.data.Status;
 
+                if (sendPaymentNotification)
+                {
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                }
+
+                if (bonusAddon.BonusAdded)
+                {
+                    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                }
+
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -300,7 +345,6 @@ namespace GIGLS.Services.Implementation.Wallet
             PaystackWebhookDTO result = new PaystackWebhookDTO();
             WalletPaymentLogDTO paymentLog = new WalletPaymentLogDTO();
             WalletTransactionDTO transaction = new WalletTransactionDTO();
-
 
             var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
 
@@ -423,16 +467,14 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-
-
         public async Task<ResponseDTO> VerifyBVN(string bvnNo)
         {
 
             var response = new HttpResponseMessage();
             var result = new ResponseDTO();
-            var url = "https://api.paystack.co/bank/resolve_bvn/";
+            var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
             url = $"{url}{bvnNo}";
-            var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
@@ -462,7 +504,6 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-
         //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
@@ -471,7 +512,9 @@ namespace GIGLS.Services.Implementation.Wallet
             //1. verify the payment 
             var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
 
+            var walletDto = new WalletDTO();
             var userPayload = new UserPayload();
+            var bonusAddon = new BonusAddOn();
 
             if (verifyResult.Status)
             {
@@ -488,7 +531,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     string customerId = null;  //set customer id to null
 
                     //get wallet detail to get customer code
-                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+                    walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
                     if (walletDto != null)
                     {
@@ -500,16 +543,21 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = webhook.data.Reference;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
+
+                    //if pay was done using Master VIsa card, give some discount
+                    bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                     //update the wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                     {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount,
+                        Amount = bonusAddon.Amount,
                         CreditDebitType = CreditDebitType.Credit,
-                        Description = "Funding made through online payment",
+                        Description = bonusAddon.Description,
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
@@ -525,8 +573,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
 
+                if (bonusAddon.BonusAdded)
+                {
+                    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                }
+
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
@@ -551,7 +604,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 Message = verifyResult.Message
             };
 
+            bool sendPaymentNotification = false;
+            var walletDto = new WalletDTO();
             var userPayload = new UserPayload();
+            var bonusAddon = new BonusAddOn();
 
             if (verifyResult.Status)
             {
@@ -571,7 +627,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     string customerId = null;  //set customer id to null
 
                     //get wallet detail to get customer code
-                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+                    walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
                     if (walletDto != null)
                     {
@@ -583,22 +639,28 @@ namespace GIGLS.Services.Implementation.Wallet
                             customerId = user.Id;
                             userPayload.Email = user.Email;
                             userPayload.UserId = user.Id;
+                            userPayload.Reference = referenceCode;
+                            userPayload.Authorization = verifyResult.data.Authorization;
                         }
                     }
+
+                    //if pay was done using Master VIsa card, give some discount
+                    bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                     //update the wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                     {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount,
+                        Amount = bonusAddon.Amount,
                         CreditDebitType = CreditDebitType.Credit,
-                        Description = "Funding made through online payment",
+                        Description = bonusAddon.Description,
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
 
-                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    //await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    sendPaymentNotification = true;
                 }
 
                 //3. update the wallet payment log
@@ -614,12 +676,22 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.GatewayResponse = verifyResult.data.Gateway_Response;
                 result.Status = verifyResult.data.Status;
 
+                if (sendPaymentNotification)
+                {
+                    await SendPaymentNotificationAsync(walletDto, paymentLog);
+                }
+
+                if (bonusAddon.BonusAdded)
+                {
+                    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                }
+
                 //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && verifyResult.data.Status.Equals("success") && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     if (userPayload != null)
                     {
-                       await _nodeService.WalletNotification(userPayload);
+                        await _nodeService.WalletNotification(userPayload);
                     }
                 }
             }
@@ -777,6 +849,44 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             if (walletDto != null)
             {
+                walletDto.Balance = walletDto.Balance + paymentLog.Amount;
+
+                var message = new MessageDTO()
+                {
+                    CustomerCode = walletDto.CustomerCode,
+                    CustomerName = walletDto.CustomerName,
+                    ToEmail = walletDto.CustomerEmail,
+                    To = walletDto.CustomerEmail,
+                    Currency = walletDto.Country.CurrencySymbol,
+                    Body = walletDto.Balance.ToString("N"),
+                    Amount = paymentLog.Amount.ToString("N"),
+                    Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                };
+
+                //send mail to customer
+                await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        message.ToEmail = email;
+                        await _messageSenderService.SendPaymentNotificationAsync(message);
+                    }
+                }
+            }
+        }
+
+        private async Task SendPaymentNotificationAsyncOld(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
                 var walletBalance = await _uow.Wallet.GetAsync(x => x.WalletId == walletDto.WalletId);
 
                 if (walletBalance != null)
@@ -799,7 +909,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //send a copy to chairman
                     var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-                    if(chairmanEmail != null)
+                    if (chairmanEmail != null)
                     {
                         //seperate email by comma and send message to those email
                         string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
@@ -812,6 +922,89 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
+        }
+
+        private async Task SendVisaBonusNotificationAsync(BonusAddOn bonusAddon, PaystackWebhookDTO verifyResult, WalletDTO walletDto)
+        {
+            string body = $"{bonusAddon.Description} / Bin {verifyResult.data.Authorization.Bin} / Ref code {verifyResult.data.Reference}  / Bank {verifyResult.data.Authorization.Bank}";
+
+            var message = new MessageDTO()
+            {
+                Subject = "Visa Business Card Bonus",
+                CustomerCode = walletDto.CustomerEmail,  
+                CustomerName = walletDto.CustomerName,
+                Body = body                
+            };
+
+            //send a copy to chairman
+            var visaBonusEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBonusEmail.ToString() && s.CountryId == 1);
+
+            if (visaBonusEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] emails = visaBonusEmail.Value.Split(',').ToArray();
+
+                foreach (string email in emails)
+                {
+                    message.ToEmail = email;
+                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+                }
+            }
+        }
+
+        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(PaystackWebhookDTO verifyResult, int countryId)
+        {
+            BonusAddOn result = new BonusAddOn
+            {
+                Description = "Funding made through debit card.",
+                Amount = verifyResult.data.Amount
+            };
+
+            if (verifyResult.data.Authorization.CardType != null)
+            {
+                if (verifyResult.data.Authorization.CardType.Contains("visa"))
+                {
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                        result.BonusAdded = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
+        {
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                decimal bonusPercentage = decimal.Parse(global.Value);
+                decimal bonusValue = bonusPercentage / 100M;
+                decimal price = amount * bonusValue;
+                amount = amount + price;
+            }
+            return amount;
+        }
+
+        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        {
+            bool result = false;
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                int.TryParse(bin, out int binInt);
+
+                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+                if (visaList.Contains(binInt))
+                {
+                    result = true;
+                }
+            }
+            return result;
         }
     }
 }
