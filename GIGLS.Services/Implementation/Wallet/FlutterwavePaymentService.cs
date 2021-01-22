@@ -715,16 +715,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 Amount = verifyResult.data.Amount
             };
 
-            if (verifyResult.data.Card.CardType.Contains("visa"))
+            if(verifyResult.data.Card.CardType != null)
             {
-                bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
-                if (isPresent)
+                if (verifyResult.data.Card.CardType.Contains("visa"))
                 {
-                    result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Card.Brand}";
-                    result.BonusAdded = true;
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Card.Brand}";
+                        result.BonusAdded = true;
+                    }
                 }
             }
+
             return result;
         }
 

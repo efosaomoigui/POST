@@ -472,9 +472,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var response = new HttpResponseMessage();
             var result = new ResponseDTO();
-            var url = "https://api.paystack.co/bank/resolve_bvn/";
+            var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
             url = $"{url}{bvnNo}";
-            var liveSecretKey = "sk_live_7b183fa191d0fddf1d0682346a5ceeeed66a52e9";
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
@@ -960,16 +960,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 Amount = verifyResult.data.Amount
             };
 
-            if (verifyResult.data.Authorization.CardType.Contains("visa"))
+            if (verifyResult.data.Authorization.CardType != null)
             {
-                bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
-                if (isPresent)
+                if (verifyResult.data.Authorization.CardType.Contains("visa"))
                 {
-                    result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                    result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
-                    result.BonusAdded = true;
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Authorization.Bin, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                        result.BonusAdded = true;
+                    }
                 }
             }
+
             return result;
         }
 
