@@ -863,6 +863,10 @@ namespace GIGLS.Services.Implementation.Customers
                         await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
 
                     }
+                    else if (company.UserChannelType == UserChannelType.Partner)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
+                    }
                     else if (company.IsFromMobile && company.Rank == Rank.Class)
                     {
                        await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
