@@ -1227,6 +1227,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 var discount = newShipmentDTO.DiscountValue / 100m;
                 decimal distValue = grandTotal * discount.Value;
+                newPricingDTO.DiscountedValue = distValue;
                 grandTotal = grandTotal - distValue;
             }
 
