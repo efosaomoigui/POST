@@ -656,5 +656,118 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
+        public async Task<List<WalletDTO>> GetUserWallets(WalletSearchOption searchOption)
+        {
+            try
+            {
+                List<WalletDTO> walletsDto = new List<WalletDTO>();
+                List<int> customerIds = new List<int>();
+
+
+                var companyIds  = _uow.Company.GetAllAsQueryable().Where(x => x.Email == searchOption.SearchData).ToList();
+                var individualIds  = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.Email == searchOption.SearchData).ToList();
+                var partnerIds  = _uow.Partner.GetAllAsQueryable().Where(x => x.Email == searchOption.SearchData).ToList();
+                customerIds.AddRange(companyIds.Select(x => x.CompanyId));
+                customerIds.AddRange(individualIds.Select(x => x.IndividualCustomerId));
+                customerIds.AddRange(partnerIds.Select(x => x.PartnerId));
+
+                var wallets = _uow.Wallet.GetWalletsAsQueryable().Where(x => customerIds.Contains(x.CustomerId)).ToList();
+                var walletDTO = Mapper.Map<List<WalletDTO>>(wallets.ToList());
+                ////set the customer name
+                foreach (var item in walletDTO)
+                {
+                    // handle Company customers
+                    if (CustomerType.Company == item.CustomerType)
+                    {
+                        if (companyIds.Any())
+                        {
+                            var company = companyIds.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+
+                            if (company != null)
+                            {
+                                item.CustomerName = company.Name;
+                                item.CustomerPhoneNumber = company.PhoneNumber;
+                                item.CustomerEmail = company.Email;
+                                item.UserActiveCountryId = company.UserActiveCountryId;
+                                walletsDto.Add(item);
+                            }
+                        }
+                       
+                    }
+                    if(CustomerType.IndividualCustomer == item.CustomerType)
+                    {
+                        // handle IndividualCustomers
+                        if (individualIds.Any())
+                        {
+                            var individual = individualIds.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+
+                            if (individual != null)
+                            {
+                                item.CustomerName = string.Format($"{individual.FirstName} " + $"{individual.LastName}");
+                                item.CustomerPhoneNumber = individual.PhoneNumber;
+                                item.CustomerEmail = individual.Email;
+                                item.UserActiveCountryId = individual.UserActiveCountryId;
+                                walletsDto.Add(item);
+                            }
+                        }
+                       
+                    }
+                    if(CustomerType.Partner == item.CustomerType)
+                    {
+                        // handle Partner
+                        if (partnerIds.Any())
+                        {
+                            var partner = partnerIds.Where(x => x.PartnerCode == item.CustomerCode).FirstOrDefault();
+                            if (partner != null)
+                            {
+                                item.CustomerName = string.Format($"{partner.FirstName} " + $"{partner.LastName}");
+                                item.CustomerPhoneNumber = partner.PhoneNumber;
+                                item.CustomerEmail = partner.Email;
+                                item.UserActiveCountryId = partner.UserActiveCountryId;
+                                walletsDto.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return walletsDto.OrderBy(x => x.CustomerName).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ChargeUserWallet(WalletDTO walletDTO)
+        {
+            try
+            {
+                if (walletDTO == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (walletDTO.Balance < walletDTO.AmountToCharge)
+                {
+                    throw new GenericException("Insufficient fund", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var walletTransaction = new WalletTransactionDTO();
+                walletTransaction.Amount = walletDTO.AmountToCharge;
+                walletTransaction.Waybill = walletDTO.Reason;
+                walletTransaction.UserId = await _userService.GetCurrentUserId();
+                walletTransaction.PaymentTypeReference = walletDTO.Reason;
+                walletTransaction.PaymentType = PaymentType.Cash;
+                walletTransaction.DateOfEntry = DateTime.Now;
+                walletTransaction.CreditDebitType = CreditDebitType.Debit;
+                await UpdateWallet(walletDTO.WalletId,walletTransaction,false);
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
     }
 }
