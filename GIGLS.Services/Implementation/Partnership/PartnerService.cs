@@ -13,6 +13,9 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using System.Linq;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.IServices.Customers;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -21,13 +24,15 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IUnitOfWork _uow;
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly ICompanyService _companyService;
 
         public PartnerService(IUnitOfWork uow, IWalletService walletService, 
-            INumberGeneratorMonitorService numberGeneratorMonitorService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService)
         {
             _uow = uow;
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _companyService = companyService;
             MapperConfig.Initialize();
         }
 
@@ -194,6 +199,32 @@ namespace GIGLS.Services.Implementation.Partnership
 
             var partners = await _uow.Partner.GetPartnersAsync(fleetCode, false, filterCriteria);
             return partners;
+        }
+
+        //Send a mail to a partner that has not yet been verified
+        public async Task ContactUnverifiedPartner(string email)
+        {
+            var partner = await _uow.Partner.GetAsync(x => x.Email == email);
+
+            if(partner == null)
+            {
+                throw new GenericException($"Partner with email {email} does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //Send Mail
+            var messageDTO = new CompanyMessagingDTO
+            {
+                Email = partner.Email,
+                Name = partner.PartnerName,
+                UserChannelType = UserChannelType.Partner,
+                PhoneNumber = partner.PhoneNumber
+            };
+
+            await _companyService.SendMessageToNewSignUps(messageDTO);
+            partner.Contacted = true;
+
+            await _uow.CompleteAsync();
+
         }
 
     }

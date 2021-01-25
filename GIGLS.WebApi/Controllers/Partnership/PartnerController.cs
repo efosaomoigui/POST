@@ -351,5 +351,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("contactpartner/{email}/")]
+        public async Task<IServiceResponse<bool>> SendWelcomeMailToPartner(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerService.ContactUnverifiedPartner(email);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }
