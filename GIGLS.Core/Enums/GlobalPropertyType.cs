@@ -75,6 +75,8 @@
         PaymentLinkCustomerPortal,
         VisaBusinessCardList,
         VisaBusinessCardBonus,
-        VisaBonusEmail
+        VisaBonusEmail,
+        ClassCustomerDiscount,
+        NormalCustomerDiscount
     }
 }

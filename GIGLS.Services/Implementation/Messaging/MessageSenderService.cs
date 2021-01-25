@@ -1164,7 +1164,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Departure",
                     "Destination",
                     "DeliveryCode",
-                    "PaymentLink"
+                    "PaymentLink",
+                    "Discount"
                 };
 
                 var intlDTO = (ShipmentDTO)obj;
@@ -1228,6 +1229,25 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[15] = $"{link.Value}{intlDTO.Waybill}";
                 }
 
+
+                //To get bonus Details
+                if (customerObj.Rank == Rank.Class)
+                {
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == 1);
+
+                    if (discount != null)
+                    {
+                        strArray[16] = discount.Value;
+                    }
+                } else if (customerObj.Rank == Rank.Basic)
+                {
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.NormalCustomerDiscount.ToString() && s.CountryId == 1);
+
+                    if (discount != null)
+                    {
+                        strArray[16] = discount.Value;
+                    }
+                }
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
