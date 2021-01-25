@@ -129,6 +129,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
                 _uow.WaybillPaymentLog.Add(newPaymentLog);
                 await _uow.CompleteAsync();
+
+                response.Status = true;
+                response.Message = $"{waybillPaymentLog.Reference}";
+                response.data = null;
             }
 
             return response;

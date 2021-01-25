@@ -63,6 +63,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
         {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
             if (refCode.StartsWith("wb"))
             {
                 return WaybillWalletPaymentType.Waybill;

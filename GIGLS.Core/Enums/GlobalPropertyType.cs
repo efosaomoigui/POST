@@ -76,6 +76,7 @@
         VisaBusinessCardList,
         VisaBusinessCardBonus,
         VisaBonusEmail,
+        InternationalAdditionalPrice,
         ClassCustomerDiscount,
         NormalCustomerDiscount
     }
