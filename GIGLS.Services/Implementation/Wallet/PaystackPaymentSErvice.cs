@@ -36,7 +36,6 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IMessageSenderService _messageSenderService;
         private readonly INodeService _nodeService;
 
-
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
@@ -440,6 +439,26 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
         public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
+        {
+            var result = new PaymentResponse();
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                result = await VerifyAndProcessPaymentForWaybill(reference);               
+            }
+            else
+            {
+                result = await VerifyAndProcessPaymentForWallet(reference);
+            }
+            var webhook = ManageReturnResponse(result);
+            return webhook;
+        }
+
+
+        //This handle Ghana for both Waybill & Wallet
+        private async Task<PaystackWebhookDTO> VerifyAndValidateMobilePaymentGhana(string reference)
         {
             var webhook = await VerifyGhanaPayment(reference);
 
@@ -1198,5 +1217,22 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return await Task.FromResult(result);
         }
+
+        private PaystackWebhookDTO ManageReturnResponse(PaymentResponse result)
+        {
+            var response = new PaystackWebhookDTO
+            {
+                Message = result.Message,
+                Status = result.Result,
+                data = new Core.DTO.OnlinePayment.Data
+                {
+                    Status = result.Status,
+                    Gateway_Response = result.GatewayResponse
+                }
+            };
+
+            return response;
+        }
+
     }
 }
