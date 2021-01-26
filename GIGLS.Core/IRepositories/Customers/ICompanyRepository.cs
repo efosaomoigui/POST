@@ -1,6 +1,7 @@
 using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
@@ -21,5 +22,7 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria);
         Task<EcommerceAgreementDTO> GetPendingEcommerceRequestById(int companyId);
         Task<List<CompanyDTO>> GetCompaniesByCodes(List<string> codes);
+        Task<List<CompanyDTO>> GetCompanies(Rank rank, ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank);
     }
 }
