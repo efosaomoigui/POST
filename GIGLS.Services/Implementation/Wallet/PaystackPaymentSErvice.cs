@@ -36,7 +36,6 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IMessageSenderService _messageSenderService;
         private readonly INodeService _nodeService;
 
-
         private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService,
@@ -141,7 +140,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (walletDto != null)
                     {
                         //use customer code to get customer id
-                      var  user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
 
                         if (user != null)
                         {
@@ -157,7 +156,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                     //update the wallet
-                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO() {
+                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                    {
                         WalletId = paymentLog.WalletId,
                         Amount = bonusAddon.Amount,
                         CreditDebitType = CreditDebitType.Credit,
@@ -207,14 +207,31 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaymentResponse> VerifyAndProcessPayment(string referenceCode)
         {
-            PaymentResponse result = new PaymentResponse();            
+            PaymentResponse result = new PaymentResponse();
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(referenceCode);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                result = await VerifyAndProcessPaymentForWaybill(referenceCode);
+            }
+            else
+            {
+                result = await VerifyAndProcessPaymentForWallet(referenceCode);
+            }
+
+            return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndProcessPaymentForWallet(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
 
             //1. Get PaymentLog
             var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
 
-            if(paymentLog != null)
+            if (paymentLog != null)
             {
-                if(paymentLog.PaymentCountryId == 76)
+                if (paymentLog.PaymentCountryId == 76)
                 {
                     //process for Ghana
                     result = await ProcessPaymentForWallet(referenceCode);
@@ -411,7 +428,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.data.Reference);
 
-            if(waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
                 await ProcessPaymentForWaybill(webhook);
             }
@@ -423,22 +440,61 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
         {
+            var result = new PaymentResponse();
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                result = await VerifyAndProcessPaymentForWaybill(reference);               
+            }
+            else
+            {
+                result = await VerifyAndProcessPaymentForWallet(reference);
+            }
+            var webhook = ManageReturnResponse(result);
+            return webhook;
+        }
+
+
+        //This handle Ghana for both Waybill & Wallet
+        private async Task<PaystackWebhookDTO> VerifyAndValidateMobilePaymentGhana(string reference)
+        {
             var webhook = await VerifyGhanaPayment(reference);
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
 
             if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-               await ProcessPaymentForWaybill(webhook);
+                await ProcessPaymentForWaybill(webhook);
             }
             else
             {
-               await ProcessPaymentForWallet(webhook);
+                await ProcessPaymentForWallet(webhook);
             }
 
             return webhook;
         }
-        
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePaymentOld(string reference)
+        {
+            var webhook = await VerifyGhanaPayment(reference);
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                await ProcessPaymentForWaybill(webhook);
+            }
+            else
+            {
+                await ProcessPaymentForWallet(webhook);
+            }
+
+            return webhook;
+        }
+
+
         private async Task<PaystackWebhookDTO> VerifyGhanaPayment(string reference)
         {
             string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
@@ -479,22 +535,22 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 await Task.Run(async () =>
-                   {
-                       HttpClient client = new HttpClient();
-                       client.BaseAddress = new Uri(url);
-                       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                       client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
-                       response = await client.GetAsync(url);
-                   });
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                    response = await client.GetAsync(url);
+                });
 
                 string jObject = await response.Content.ReadAsStringAsync();
                 var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
-               
+
                 result.Succeeded = content.Status;
                 result.Exist = content.Status;
                 result.Message = content.Message;
                 result.Entity = content.Data;
-             
+
             }
             catch (Exception ex)
             {
@@ -712,7 +768,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //1. verify the payment 
             var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
-            
+
             if (verifyResult.Status)
             {
                 //get wallet payment log by reference code
@@ -728,7 +784,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
                     {
                         Waybill = paymentLog.Waybill,
-                        PaymentType  = PaymentType.Online,
+                        PaymentType = PaymentType.Online,
                         TransactionCode = paymentLog.Reference,
                         UserId = paymentLog.UserId
                     };
@@ -751,10 +807,15 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return await Task.FromResult(result);
         }
-        
-        private WaybillWalletPaymentType GetPackagePaymentType(string refCode){
 
-            if(refCode.StartsWith("wb"))
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
+        {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
+            if (refCode.StartsWith("wb"))
             {
                 return WaybillWalletPaymentType.Waybill;
             }
@@ -807,7 +868,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return await Task.FromResult(verifyResult);
         }
-        
+
         private async Task<PaystackWebhookDTO> SubmitPinForPayment(string reference, string pin)
         {
             try
@@ -824,13 +885,13 @@ namespace GIGLS.Services.Implementation.Wallet
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payStackSecretGhana);
-                    
+
                     var dic = new Dictionary<string, string>
                     {
                         { "otp",  pin},
                         { "reference", reference }
                     };
-                    
+
                     var json = JsonConvert.SerializeObject(dic);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(payStackChargeAPI, data);
@@ -931,9 +992,9 @@ namespace GIGLS.Services.Implementation.Wallet
             var message = new MessageDTO()
             {
                 Subject = "Visa Business Card Bonus",
-                CustomerCode = walletDto.CustomerEmail,  
+                CustomerCode = walletDto.CustomerEmail,
                 CustomerName = walletDto.CustomerName,
-                Body = body                
+                Body = body
             };
 
             //send a copy to chairman
@@ -1006,5 +1067,172 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return result;
         }
+
+        private async Task<PaymentResponse> VerifyAndProcessPaymentForWaybill(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if (paymentLog != null)
+            {
+                if (paymentLog.PaymentCountryId == 76)
+                {
+                    //process for Ghana
+                    result = await ProcessPaymentForGhanaWaybill(referenceCode);
+                }
+                else
+                {
+                    //Process for Nigeria
+                    result = await ProcessPaymentForNigeriaWaybill(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Waybill Payment Log Information does not exist";
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private async Task<PaymentResponse> ProcessPaymentForGhanaWaybill(string referenceCode)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(referenceCode);
+
+            PaymentResponse result = new PaymentResponse()
+            {
+                Result = verifyResult.Status,
+                Message = verifyResult.Message
+            };
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog == null)
+                {
+                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
+                    return result;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                    }
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWaybillSettled = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+
+                result.GatewayResponse = verifyResult.data.Gateway_Response;
+                result.Status = verifyResult.data.Status;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private async Task<PaymentResponse> ProcessPaymentForNigeriaWaybill(string referenceCode)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyPayment(referenceCode);
+
+            PaymentResponse result = new PaymentResponse
+            {
+                Result = verifyResult.Status,
+                Message = verifyResult.Message
+            };
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog == null)
+                {
+                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
+                    return result;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                    }
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWaybillSettled = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+
+                result.GatewayResponse = verifyResult.data.Gateway_Response;
+                result.Status = verifyResult.data.Status;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private PaystackWebhookDTO ManageReturnResponse(PaymentResponse result)
+        {
+            var response = new PaystackWebhookDTO
+            {
+                Message = result.Message,
+                Status = result.Result,
+                data = new Core.DTO.OnlinePayment.Data
+                {
+                    Status = result.Status,
+                    Gateway_Response = result.GatewayResponse
+                }
+            };
+
+            return response;
+        }
+
     }
 }

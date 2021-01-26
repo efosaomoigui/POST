@@ -19,10 +19,12 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletPaymentLogForAllController : BaseWebApiController
     {
         private readonly IWalletPaymentLogService _walletPaymentLogService;
+        private readonly IWalletService _walletService;
 
-        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService) : base(nameof(WalletPaymentLogController))
+        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService, IWalletService walletService) : base(nameof(WalletPaymentLogController))
         {
             _walletPaymentLogService = walletPaymentLogService;
+            _walletService = walletService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -96,6 +98,36 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 var result = await _walletPaymentLogService.GetFromWalletPaymentLogViewBySearchParameter(searchDTO.searchItem);
 
                 return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getuserwallets")]
+        public async Task<IServiceResponse<List<WalletDTO>>> GetUserWallets(WalletSearchOption searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletService.GetUserWallets(searchDTO);
+
+                return new ServiceResponse<List<WalletDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("chargeuserwallet")]
+        public async Task<IServiceResponse<bool>> ChargeUserWallets(WalletDTO walletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletService.ChargeUserWallet(walletDTO);
+
+                return new ServiceResponse<bool>
                 {
                     Object = result
                 };
