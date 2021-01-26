@@ -24,6 +24,8 @@ namespace GIGLS.Core.IServices.Wallet
         Task<WalletDTO> GetWalletBalanceWithName();
         Task<List<WalletDTO>> GetOutstaningCorporatePayments();
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
+        Task<List<WalletDTO>> GetUserWallets(WalletSearchOption searchOption);
+        Task<bool> ChargeUserWallet(WalletDTO walletDTO);
     }
 
 }
