@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
@@ -19,6 +20,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Zone;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Infrastructure;
@@ -140,70 +142,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
                             jObject.Add(new JProperty("ServiceCentre", centreInfoJson));
                         }
                     }
-
-                    getTokenResponse = jObject.GetValue("access_token").ToString();
-
-                    return new ServiceResponse<JObject>
-                    {
-                        Object = jObject
-                    };
-                }
-            });
-        }
-
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("agentlogin")]
-        public async Task<IServiceResponse<JObject>> LoginForAgentApp(UserloginDetailsModel userLoginModel)
-        {
-            var user = await _portalService.CheckDetailsForAgentApp(userLoginModel.username);
-
-            if (user.Username != null)
-            {
-                user.Username = user.Username.Trim();
-            }
-
-            if (userLoginModel.Password != null)
-            {
-                userLoginModel.Password = userLoginModel.Password.Trim();
-            }
-
-            if (user.SystemUserRole != "FastTrack Agent")
-            {
-                throw new GenericException("You are not authorized to use this application. You can download the GIGGO customer app and make shipment request", $"{(int)System.Net.HttpStatusCode.Forbidden}");
-            }
-
-            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-            string getTokenResponse;
-
-            return await HandleApiOperationAsync(async () =>
-            {
-                using (var client = new HttpClient())
-                {
-                    //setup client
-                    client.BaseAddress = new Uri(apiBaseUri);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    //setup login data
-                    var formContent = new FormUrlEncodedContent(new[]
-                    {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", userLoginModel.Password),
-                     });
-
-                    //setup login data
-                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
-
-                    if (!responseMessage.IsSuccessStatusCode)
-                    {
-                        throw new GenericException("Incorrect Login Details");
-                    }
-
-                    //get access token from response body
-                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -522,6 +460,67 @@ namespace GIGLS.WebApi.Controllers.Scanner
             var types = EnumExtensions.GetValues<NatureOfGoods>();
             return Ok(types);
         }
+
+        [HttpGet]
+        [Route("preshipment/{code}")]
+        public async Task<IServiceResponse<ShipmentDTO>> GetDropOffShipment(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _shipmentService.GetDropOffShipmentForProcessing(code);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("waybillbyservicecentre/{waybill}")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySaleByWaybillForServiceCentre(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _shipmentService.GetWaybillForServiceCentre(waybill);
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dailysalesforservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)
+        {
+            //map to real shipmentdto
+            var accountFilterCriteria = JObject.FromObject(dateFilterCriteria).ToObject<AccountFilterCriteria>();
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dailySales = await _shipmentService.GetSalesForServiceCentre(accountFilterCriteria);
+
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = dailySales
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForDropOff(preshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
 
 
     }
