@@ -641,7 +641,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //For the Official GIG Mail
                 if(companyMessagingDTO.UserChannelType == UserChannelType.Partner)
                 {
-                    var email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+                    var email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPartnerEmail, 1);
                     var gigmail = email.Value;
                     strArray[1] = gigmail;
                 }
