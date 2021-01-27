@@ -991,8 +991,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var message = new MessageDTO()
             {
-                Subject = "Visa Business Card Bonus",
-                CustomerCode = walletDto.CustomerEmail,
+                Subject = "Visa Commercial Card Bonus",
+                CustomerCode = walletDto.CustomerEmail,  
                 CustomerName = walletDto.CustomerName,
                 Body = body
             };
@@ -1029,7 +1029,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (isPresent)
                     {
                         result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                        result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
                         result.BonusAdded = true;
                     }
                 }

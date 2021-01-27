@@ -37,5 +37,6 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public decimal GrandTotal { get; set; } = 0;
         public decimal Vat { get; set; } = 0;
         public decimal Insurance { get; set; } = 0;
+        public decimal DiscountedValue { get; set; } = 0;
     }
 }

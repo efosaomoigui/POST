@@ -20,6 +20,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -544,11 +545,11 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank)
         {
             try
             {
-                return _uow.Company.GetCompanyByEmail(email);
+                return _uow.Company.GetCompanyByEmail(email, rank);
             }
             catch (Exception)
             {
@@ -767,6 +768,16 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
+
+                //SEND EMAIL TO NEW SIGNEE
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsFromMobile;
+                companyMessagingDTO.UserChannelType = userChannelType;
+                await SendMessageToNewSignUps(companyMessagingDTO);
                 return result;
             }
             catch (Exception)
@@ -820,6 +831,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
+                company.RankModificationDate = DateTime.Now;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
                 _uow.RankHistory.Add(new Core.Domain.RankHistory
                 {
@@ -840,6 +852,61 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task SendMessageToNewSignUps(object obj)
+        {
+            try
+            {
+                if (obj is CompanyMessagingDTO)
+                {
+                    var company = (CompanyMessagingDTO)obj;
+                    if (company.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+
+                    }
+                    else if (company.UserChannelType == UserChannelType.Partner)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
+                    }
+                    else if (company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                    }
+                    else if (!company.IsFromMobile && company.Rank == Rank.Class)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                    }
+
+                    else if (!company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                       await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await _uow.Company.GetCompanies(Rank.Class, filterCriteria);
+        }
+
+
     }
         
 }
