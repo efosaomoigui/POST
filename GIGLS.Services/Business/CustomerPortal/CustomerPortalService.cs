@@ -316,7 +316,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     result.Result = false;
                     result.Message = "";
-                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
                 }
             }
             else
