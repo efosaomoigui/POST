@@ -313,5 +313,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+
+        [HttpPost]
+        [Route("arrivedshipment")]
+        public async Task<IServiceResponse<List<ShipmentCollectionDTOForArrived>>> GetShipmentContacts(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcontacts = await _service.GetArrivedShipmentCollection(baseFilterCriteria);
+                return new ServiceResponse<List<ShipmentCollectionDTOForArrived>>
+                {
+                    Object = shipmentcontacts
+                };
+            });
+        }
+
+
     }
 }
