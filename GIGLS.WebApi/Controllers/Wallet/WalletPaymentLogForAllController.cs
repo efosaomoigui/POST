@@ -14,14 +14,17 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
 {
+    [Authorize]
     [RoutePrefix("api/walletpaymentlogforall")]
     public class WalletPaymentLogForAllController : BaseWebApiController
     {
         private readonly IWalletPaymentLogService _walletPaymentLogService;
+        private readonly IWalletService _walletService;
 
-        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService) : base(nameof(WalletPaymentLogController))
+        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService, IWalletService walletService) : base(nameof(WalletPaymentLogController))
         {
             _walletPaymentLogService = walletPaymentLogService;
+            _walletService = walletService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -36,22 +39,6 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 {
                     Object = await walletTuple.Item1,
                     Total = walletTuple.Item2
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletPaymentLog = await _walletPaymentLogService.AddWalletPaymentLog(walletPaymentLogDTO);
-
-                return new ServiceResponse<object>
-                {
-                    Object = walletPaymentLog
                 };
             });
         }
@@ -72,39 +59,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{walletPaymentLogId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteWalletPaymentLog(int walletPaymentLogId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _walletPaymentLogService.RemoveWalletPaymentLog(walletPaymentLogId);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("{reference}")]
-        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _walletPaymentLogService.UpdateWalletPaymentLog(reference, walletPaymentLogDTO);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [HttpGet]
+         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet([FromUri]  string referenceCode)
         {
@@ -143,6 +98,36 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 var result = await _walletPaymentLogService.GetFromWalletPaymentLogViewBySearchParameter(searchDTO.searchItem);
 
                 return new ServiceResponse<List<WalletPaymentLogView>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getuserwallets")]
+        public async Task<IServiceResponse<List<WalletDTO>>> GetUserWallets(WalletSearchOption searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletService.GetUserWallets(searchDTO);
+
+                return new ServiceResponse<List<WalletDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("chargeuserwallet")]
+        public async Task<IServiceResponse<bool>> ChargeUserWallets(WalletDTO walletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletService.ChargeUserWallet(walletDTO);
+
+                return new ServiceResponse<bool>
                 {
                     Object = result
                 };

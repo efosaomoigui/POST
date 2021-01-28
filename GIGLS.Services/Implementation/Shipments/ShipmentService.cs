@@ -1361,6 +1361,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //set the customerCode in the shipment
             var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
             shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
+            shipmentDTO.IsClassShipment = currentCustomerObject.Rank == Rank.Class ? true : false;
 
             return createdObject;
         }
@@ -3040,6 +3041,35 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,
                 EndDate = (DateTime)accountFilterCriteria.EndDate,
+                Invoices = invoices,
+                SalesCount = invoices.Count,
+                TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
+            };
+
+            return dailySalesDTO;
+        }
+
+        public async Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill)
+        {
+
+            int[] serviceCenterIds = null;
+            serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+
+            var invoices = await _uow.Shipment.GetWaybillForServiceCentre(waybill, serviceCenterIds);
+
+            //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+            foreach (var item in invoices)
+            {
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
+            var dailySalesDTO = new DailySalesDTO()
+            {
                 Invoices = invoices,
                 SalesCount = invoices.Count,
                 TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),

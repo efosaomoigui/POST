@@ -764,6 +764,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.Email = user.Email.Trim().ToLower();
             }
+            if (!String.IsNullOrEmpty(user.PhoneNumber))
+            {
+                user.PhoneNumber = user.PhoneNumber.Trim();
+            }
 
             //validate email
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
@@ -1196,6 +1200,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Id = registeredUser.Id;
                 await GenerateReferrerCode(user);
             }
+
+            ////SEND EMAIL TO NEW SIGNEE
+            var companyMessagingDTO = new CompanyMessagingDTO();
+            companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            companyMessagingDTO.Email = user.Email;
+            companyMessagingDTO.PhoneNumber = user.PhoneNumber;
+            companyMessagingDTO.Rank = Rank.Basic;
+            companyMessagingDTO.IsFromMobile = user.IsRegisteredFromMobile;
+            companyMessagingDTO.UserChannelType = user.UserChannelType;
+            await _companyService.SendMessageToNewSignUps(companyMessagingDTO);
 
             return result;
         }

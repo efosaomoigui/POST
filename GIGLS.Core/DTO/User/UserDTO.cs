@@ -96,5 +96,6 @@ namespace GIGLS.Core.DTO.User
         public bool IsMagaya { get; set; }
         public bool DashboardAccess { get; set; }
         public bool IsInternational { get; set; }
+        public string IdentificationImage { get; set; }
     }
 }

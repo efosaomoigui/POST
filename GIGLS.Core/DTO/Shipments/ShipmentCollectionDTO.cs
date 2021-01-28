@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.CORE.DTO.Shipments
 {
@@ -97,6 +98,22 @@ namespace GIGLS.CORE.DTO.Shipments
 
         public string ReceiverArea { get; set; }
         public string DeliveryNumber { get; set; }
+        //Demurrage Information
+        public NewDemurrageDTO Demurrage { get; set; }
 
+    }
+
+    public class ShipmentCollectionDTOForArrived
+    {
+        public string Waybill { get; set; }
+        public string UserId { get; set; }
+        public DateTime ShipmentCreatedDate { get; set; }
+        public DateTime ShipmentArrivedDate { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public int Age { get; set; }
+        public int ShipmentStatus { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
     }
 }
