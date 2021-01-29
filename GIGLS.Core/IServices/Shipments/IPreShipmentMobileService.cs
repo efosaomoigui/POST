@@ -88,6 +88,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners();
         Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
         Task<bool> AddShipmentToQueue(string waybill);
-
+        Task<object> GetGIGGOProgressReport();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentCreated();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked();
     }
 }

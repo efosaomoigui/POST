@@ -6274,20 +6274,66 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<bool> GetGIGGOProgressReport(string waybill)
+        public async Task<object> GetGIGGOProgressReport()
         {
             try
             {
-                var date = DateTime.Now.AddHours(-2);
+                //1.After 2 hours agility should show exception reports of all shipments created that has not been picked up.
+                //2.After 3 hours agility should show an exception report of all shipments assigned for picked - up and not pick up.
+                //3.After 3 hours agility should show an exception report of all shipments picked up but not delivered.
 
-                //var preShipment = await _uow.PreShipmentMobile.GetAsync(x => x.DateCreated < date);
-                var preShipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.DateCreated < date).Count();
-                if (preShipment == null)
+               var dateFor2Hours = DateTime.Now.AddHours(-2);
+               var dateFor3Hours = DateTime.Now.AddHours(-2);
+                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).Count();
+                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).Count();
+                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).Count();
+
+                return new
                 {
-                    throw new GenericException($"Wabill number -- {waybill} not found ", $"{(int)HttpStatusCode.NotFound}");
-                }
-                await NodeApiCreateShipment(preShipment);
-                return true;
+                    shipmentCreate = preShipmentCreated,
+                    shipmentAssigned = preShipmentAssigned,
+                    shipmentPick = preShipmentPicked
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentCreated()
+        {
+            try
+            {
+                var dateFor2Hours = DateTime.Now.AddHours(-2);
+                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentCreated);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned()
+        {
+            try
+            {
+                var dateFor3Hours = DateTime.Now.AddHours(-3);
+                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked()
+        {
+            try
+            {
+                var dateFor3Hours = DateTime.Now.AddHours(-3);
+                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentPicked);
             }
             catch (Exception ex)
             {

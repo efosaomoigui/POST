@@ -294,18 +294,5 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return shipmentDto;
         }
 
-        public Task<GIGGOProgressReport> GetGIGGOProgressReport()
-        {
-            var shipments = _context.PresShipmentMobile.AsQueryable().Where(s => s.DateCreated > s.DateCreated.AddHours(-2) && s.shipmentstatus == MobilePickUpRequestStatus.Cr);
-            int shipmentCount = shipments.Count();
-
-            var shipmentAssignedForPickUP = _context.PresShipmentMobile.AsQueryable().Where(s => s.DateCreated > s.DateCreated.AddHours(-2));
-            int shipmentAssigned = shipmentAssignedForPickUP.Count();
-
-            var shipmentPickUp = _context.PresShipmentMobile.AsQueryable().Where(s => s.DateCreated > s.DateCreated.AddHours(-2));
-            int shipmentPicked = shipments.Count();
-
-        }
-
     }
 }
