@@ -61,6 +61,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
         Task<object> AddWalletPaymentLogAnonymousUser(WalletPaymentLogDTO walletPaymentLogDTO);
+        Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto);
         Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
