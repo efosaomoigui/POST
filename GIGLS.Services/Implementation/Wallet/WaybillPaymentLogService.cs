@@ -8,17 +8,16 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,11 +48,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var response = new PaystackWebhookDTO();
 
-            if (waybillPaymentLog.UserId == null)
-            {
-                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
-            }
-
             //check if any transaction on the waybill is successful
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
                 .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
@@ -68,6 +62,17 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
+                //check the country
+                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
+                waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+
+                //if the country is not Nigeria or Ghana, block it
+                if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
+                {
+                    throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
                 {
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
@@ -85,6 +90,51 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
                             
+            return response;
+        }
+
+        public async Task<PaystackWebhookDTO> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            var response = new PaystackWebhookDTO();
+
+            //check if any transaction on the waybill is successful
+            var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
+
+            if (paymentLog != null)
+            {
+                response.Status = false;
+                response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Status = "failed";
+                return response;
+            }
+            else
+            {
+                //check the country
+                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
+                waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+
+                //if the country is not Nigeria or Ghana, block it
+                if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
+                {
+                    throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                var country = await _uow.Country.GetAsync(x => x.CountryId == waybillPaymentLog.PaymentCountryId);
+                waybillPaymentLog.Currency = country.CurrencyCode;
+                waybillPaymentLog.PhoneNumber = user.PhoneNumber;
+                waybillPaymentLog.Email = user.Email;
+                var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
+                _uow.WaybillPaymentLog.Add(newPaymentLog);
+                await _uow.CompleteAsync();
+
+                response.Status = true;
+                response.Message = $"{waybillPaymentLog.Reference}";
+                response.data = null;
+            }
+
             return response;
         }
 
@@ -138,12 +188,11 @@ namespace GIGLS.Services.Implementation.Wallet
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
-
             return refCode;
         }
 
         private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
-        {    
+        {
             waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
             //3. send the request to paystack gateway
