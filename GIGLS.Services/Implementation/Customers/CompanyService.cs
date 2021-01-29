@@ -20,6 +20,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -544,11 +545,11 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank)
         {
             try
             {
-                return _uow.Company.GetCompanyByEmail(email);
+                return _uow.Company.GetCompanyByEmail(email, rank);
             }
             catch (Exception)
             {
@@ -830,6 +831,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
+                company.RankModificationDate = DateTime.Now;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
                 _uow.RankHistory.Add(new Core.Domain.RankHistory
                 {
@@ -897,6 +899,11 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        public async Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await _uow.Company.GetCompanies(Rank.Class, filterCriteria);
         }
 
 

@@ -290,29 +290,61 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             PaymentResponse result = new PaymentResponse();
 
-            //1. Get PaymentLog
-            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(referenceCode);
 
-            if (paymentLog != null)
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
                 {
-                    result = await VerifyAndValidateUSSDPayment(referenceCode);
-                }
-                else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
-                {
-                    result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                    {
+                        result = await VerifyAndValidateUSSDPayment(referenceCode);
+                    }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                    {
+                        result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    }
+                    else
+                    {
+                        result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    }
                 }
                 else
                 {
-                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    result.Result = false;
+                    result.Message = "";
+                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
                 }
             }
             else
             {
-                result.Result = false;
-                result.Message = "";
-                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                    {
+                        result = await VerifyAndValidateUSSDPayment(referenceCode);
+                    }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                    {
+                        result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    }
+                    else
+                    {
+                        result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    }
+                }
+                else
+                {
+                    result.Result = false;
+                    result.Message = "";
+                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                }
             }
 
             return result;
@@ -3119,6 +3151,21 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> VerifyBVNNo(string bvnNo)
         {
             return await _paystackPaymentService.VerifyBVN(bvnNo);
+        }
+
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
+        {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
+            if (refCode.StartsWith("wb"))
+            {
+                return WaybillWalletPaymentType.Waybill;
+            }
+
+            return WaybillWalletPaymentType.Wallet;
         }
     }
 }

@@ -86,16 +86,23 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Status = verifyResponse.Status;
                 result.Message = verifyResponse.Message;
                 result.data.Reference = reference;
-                result.data.Authorization.AuthorizationCode = verifyResponse.Data.Authorization.AuthorizationCode;
-                result.data.Authorization.Bin = verifyResponse.Data.Authorization.Bin;
-                result.data.Authorization.Last4 = verifyResponse.Data.Authorization.Last4;
-                result.data.Authorization.ExpMonth = verifyResponse.Data.Authorization.ExpMonth;
-                result.data.Authorization.ExpYear = verifyResponse.Data.Authorization.ExpYear;
-                result.data.Authorization.Channel = verifyResponse.Data.Authorization.Channel;
-                result.data.Authorization.CardType = verifyResponse.Data.Authorization.CardType;
-                result.data.Authorization.Bank = verifyResponse.Data.Authorization.Bank;
-                result.data.Authorization.CountryCode = verifyResponse.Data.Authorization.CountryCode;
-                result.data.Authorization.Reusable = verifyResponse.Data.Authorization.Reusable;
+
+                if(verifyResponse.Data != null)
+                {
+                    if(verifyResponse.Data.Authorization != null)
+                    {
+                        result.data.Authorization.AuthorizationCode = verifyResponse.Data.Authorization.AuthorizationCode;
+                        result.data.Authorization.Bin = verifyResponse.Data.Authorization.Bin;
+                        result.data.Authorization.Last4 = verifyResponse.Data.Authorization.Last4;
+                        result.data.Authorization.ExpMonth = verifyResponse.Data.Authorization.ExpMonth;
+                        result.data.Authorization.ExpYear = verifyResponse.Data.Authorization.ExpYear;
+                        result.data.Authorization.Channel = verifyResponse.Data.Authorization.Channel;
+                        result.data.Authorization.CardType = verifyResponse.Data.Authorization.CardType;
+                        result.data.Authorization.Bank = verifyResponse.Data.Authorization.Bank;
+                        result.data.Authorization.CountryCode = verifyResponse.Data.Authorization.CountryCode;
+                        result.data.Authorization.Reusable = verifyResponse.Data.Authorization.Reusable;
+                    }
+                }
 
                 if (verifyResponse.Status)
                 {
@@ -991,8 +998,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var message = new MessageDTO()
             {
-                Subject = "Visa Business Card Bonus",
-                CustomerCode = walletDto.CustomerEmail,
+                Subject = "Visa Commercial Card Bonus",
+                CustomerCode = walletDto.CustomerEmail,  
                 CustomerName = walletDto.CustomerName,
                 Body = body
             };
@@ -1029,7 +1036,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (isPresent)
                     {
                         result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                        result.Description = $"{result.Description}. Bonus Added for Using {verifyResult.data.Authorization.CardType}";
+                        result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
                         result.BonusAdded = true;
                     }
                 }
