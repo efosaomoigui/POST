@@ -1208,7 +1208,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         item.Age = (int)ts.TotalHours; 
                     }
                 }
-                return shipmentCollectionDTO.OrderByDescending(x => x.Age).ToList();
+                return shipmentCollectionDTO.OrderBy(x => x.Age).ToList();
             }
             catch (Exception)
             {
