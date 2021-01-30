@@ -175,7 +175,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        AccountName = c.AccountName,
                                        AccountNumber = c.AccountNumber,
                                        BankName = c.BankName,
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                        RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -274,7 +275,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                       RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -323,7 +325,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                       RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }

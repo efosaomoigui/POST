@@ -88,6 +88,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.RankModificationDate = DateTime.UtcNow;
 
                 //Enable Eligibility so that the customer can create shipment on GIGGO APP
                 newCompany.IsEligible = true;
@@ -662,6 +663,8 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                 newCompany.Rank = Rank.Basic;
+                newCompany.RankModificationDate = DateTime.UtcNow;
+
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -833,7 +836,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.BVN = userValidationDTO.BVN;
                 company.RankModificationDate = DateTime.Now;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
-                _uow.RankHistory.Add(new Core.Domain.RankHistory
+                _uow.RankHistory.Add(new RankHistory
                 {
                     CustomerName = companyDTO.Name,
                     CustomerCode = companyDTO.CustomerCode,
