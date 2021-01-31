@@ -498,7 +498,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 var dailySales = await _shipmentService.GetSalesForServiceCentre(accountFilterCriteria);
-
+                if (dailySales.TotalSales > 0)
+                {
+                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                    dailySales.TotalSales = Math.Round(dailySales.TotalSales * factor) / factor;
+                }
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySales
