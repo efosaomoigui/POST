@@ -1218,11 +1218,11 @@ namespace GIGLS.Services.Business.Pricing
             }
 
 
-            if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
-            {
+            //if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
+            //{
                 var factor = Convert.ToDecimal(Math.Pow(10, -2));
                 grandTotal = Math.Round(grandTotal * factor) / factor;
-            }
+           // }
             if (newShipmentDTO.DiscountValue > 0)
             {
                 var discount = newShipmentDTO.DiscountValue / 100m;
