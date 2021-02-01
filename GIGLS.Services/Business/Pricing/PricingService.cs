@@ -1312,7 +1312,7 @@ namespace GIGLS.Services.Business.Pricing
                 minimumDeclareValueCheck = Convert.ToDecimal(ghanaValue); ;
             }
 
-            if(minimumDeclareValueCheck > declarationValue)
+            if(declarationValue > minimumDeclareValueCheck)
             {
                 var insuranceDTO = await _uow.Insurance.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
                 decimal insuranceValue = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
