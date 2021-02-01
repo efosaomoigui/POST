@@ -4,6 +4,7 @@ using GIGLS.Core.Domain;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -70,5 +71,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string IdentificationImageUrl { get; set; }
         public IdentificationType IdentificationType { get; set; }
         public bool IsInternational { get; set; }
+        public DateTime RankModificationDate { get; set; }
     }
 }
