@@ -845,6 +845,17 @@ namespace GIGLS.Services.Implementation.Customers
                     DateModified = DateTime.Now
                 });
                 _uow.Complete();
+                //send email for upgrade customers
+                //SEND EMAIL TO NEW SIGNEE
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                companyMessagingDTO.UserChannelType = company.CompanyType.ToString();
+                await SendMessageToNewSignUps(companyMessagingDTO);
+
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
