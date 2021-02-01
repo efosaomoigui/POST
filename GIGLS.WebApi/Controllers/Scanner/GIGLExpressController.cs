@@ -314,6 +314,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
                     shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
                     shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+
+                    foreach(var item in shipment.ShipmentItems)
+                    {
+                        item.Price = Math.Round(item.Price * factor) / factor;
+                    }
                 }
                 return new ServiceResponse<ShipmentDTO>
                 {

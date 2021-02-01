@@ -1168,6 +1168,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 throw new GenericException("No shipment item", $"{(int)HttpStatusCode.BadRequest}");
             }
+
             decimal totalPrice = 0;
             decimal grandTotal = 0;
 
@@ -1217,9 +1218,6 @@ namespace GIGLS.Services.Business.Pricing
                 grandTotal = grandTotal + insurance;
             }
 
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                grandTotal = Math.Round(grandTotal * factor) / factor;
-
             if (newShipmentDTO.DiscountValue > 0)
             {
                 var discount = newShipmentDTO.DiscountValue / 100m;
@@ -1228,10 +1226,11 @@ namespace GIGLS.Services.Business.Pricing
                 grandTotal = grandTotal - distValue;
             }
 
+            var factor = Convert.ToDecimal(Math.Pow(10, -2));
             newPricingDTO.Vat = vatForItems;
             newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
-            newPricingDTO.GrandTotal = grandTotal;
+            newPricingDTO.GrandTotal = Math.Round(grandTotal * factor) / factor;
             return newPricingDTO;
         }
 
