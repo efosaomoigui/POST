@@ -1302,6 +1302,12 @@ namespace GIGLS.Services.Business.Pricing
                         minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
                     }
                 }
+                else
+                {
+                    //all customer in Nigeria
+                    var basicValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckBasic"];
+                    minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
+                }
             }
             else
             {
