@@ -306,6 +306,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _shipmentService.GetShipment(waybill);
+                if (shipment.GrandTotal > 0)
+                {
+                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                    shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
+                }
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -321,7 +326,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 var shipmentCollection = await _shipmentCollectionService.GetShipmentCollectionById(waybill);
-
                 return new ServiceResponse<ShipmentCollectionDTO>
                 {
                     Object = shipmentCollection
