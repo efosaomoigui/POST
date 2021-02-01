@@ -1214,15 +1214,12 @@ namespace GIGLS.Services.Business.Pricing
             if (newShipmentDTO.DeclarationOfValueCheck > 0)
             {
                 insurance = await CalculateInsurance(newShipmentDTO);
-                grandTotal += insurance;
+                grandTotal = grandTotal + insurance;
             }
 
-
-            //if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
-            //{
                 var factor = Convert.ToDecimal(Math.Pow(10, -2));
                 grandTotal = Math.Round(grandTotal * factor) / factor;
-           // }
+
             if (newShipmentDTO.DiscountValue > 0)
             {
                 var discount = newShipmentDTO.DiscountValue / 100m;

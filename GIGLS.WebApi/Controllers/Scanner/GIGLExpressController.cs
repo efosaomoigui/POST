@@ -310,6 +310,10 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 {
                     var factor = Convert.ToDecimal(Math.Pow(10, -2));
                     shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
+                    shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
+                    shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
+                    shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
+                    shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
                 }
                 return new ServiceResponse<ShipmentDTO>
                 {
