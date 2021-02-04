@@ -746,16 +746,22 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                if (walletDTO.Balance < walletDTO.AmountToCharge)
+                var wallet = await _uow.Wallet.GetAsync(walletDTO.WalletId);
+                if (wallet == null)
+                {
+                    throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
+                }
+                if (wallet.Balance < walletDTO.AmountToCharge)
                 {
                     throw new GenericException("Insufficient fund", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 var walletTransaction = new WalletTransactionDTO();
                 walletTransaction.Amount = walletDTO.AmountToCharge;
-                walletTransaction.Waybill = walletDTO.Reason;
+                walletTransaction.Waybill = String.Empty;
                 walletTransaction.UserId = await _userService.GetCurrentUserId();
-                walletTransaction.PaymentTypeReference = walletDTO.Reason;
+                walletTransaction.Description = walletDTO.Reason;
                 walletTransaction.PaymentType = PaymentType.Cash;
+                walletTransaction.PaymentTypeReference = String.Empty;
                 walletTransaction.DateOfEntry = DateTime.Now;
                 walletTransaction.CreditDebitType = CreditDebitType.Debit;
                 await UpdateWallet(walletDTO.WalletId,walletTransaction,false);
