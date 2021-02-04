@@ -13,6 +13,7 @@ using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -767,7 +768,26 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-
+        public async Task TopUpWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
+        {
+            try
+            {
+                if (walletTransactionDTO.CreditDebitType == CreditDebitType.Credit)
+                {
+                    //check if user is authorized
+                    var passKey = ConfigurationManager.AppSettings["Pass4sureGIG"];
+                    if (passKey != walletTransactionDTO.PassKey)
+                    {
+                        throw new GenericException("You are not authorized to perform this action", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+                await UpdateWallet(walletId, walletTransactionDTO, hasServiceCentre);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
     }
 }
