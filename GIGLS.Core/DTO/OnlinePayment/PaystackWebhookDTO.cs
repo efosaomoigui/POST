@@ -13,6 +13,9 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Message { get; set; }
         public bool Status { get; set; }
         public Data data { get; set; }
+
+        //waybill Grand Total
+        public decimal Amount { get; set; }
     }
 
     public class Data
