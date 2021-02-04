@@ -63,6 +63,7 @@ using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -110,24 +111,54 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         }
 
-        public Task<ShipmentDTO> AddShipment(ShipmentDTO shipment)
+        public async Task<ShipmentDTO> AddShipment(NewShipmentDTO newShipmentDTO)
         {
-            throw new NotImplementedException();
+            //map to real shipmentdto
+            var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
+            //Update SenderAddress for corporate customers
+            ShipmentDTO.SenderAddress = null;
+            ShipmentDTO.SenderState = null;
+            if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
+            {
+                ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;
+                ShipmentDTO.SenderState = ShipmentDTO.Customer[0].State;
+            }
+
+            //set some data to null
+            ShipmentDTO.ShipmentCollection = null;
+            ShipmentDTO.Demurrage = null;
+            ShipmentDTO.Invoice = null;
+            ShipmentDTO.ShipmentCancel = null;
+            ShipmentDTO.ShipmentReroute = null;
+            ShipmentDTO.DeliveryOption = null;
+            ShipmentDTO.IsFromMobile = false;
+            var shipment = await _shipmentService.AddShipment(ShipmentDTO);
+            if (!String.IsNullOrEmpty(shipment.Waybill))
+            {
+                var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
+                if (invoiceObj != null)
+                {
+                    invoiceObj.Shipment = null;
+                    shipment.Invoice = invoiceObj;
+                }
+            }
+            return shipment;
         }
 
-        public Task<IEnumerable<CountryDTO>> GetActiveCountries()
+       
+        public async Task<IEnumerable<CountryDTO>> GetActiveCountries()
         {
-            throw new NotImplementedException();
+            return await _countryService.GetActiveCountries();
         }
 
-        public Task<IEnumerable<SpecialDomesticPackageDTO>> GetActiveSpecialDomesticPackages()
+        public async Task<IEnumerable<SpecialDomesticPackageDTO>> GetActiveSpecialDomesticPackages()
         {
-            throw new NotImplementedException();
+            return await _specialPackageService.GetActiveSpecialDomesticPackages();
         }
 
-        public Task<object> GetCustomerBySearchParam(string customerType, SearchOption option)
+        public async Task<object> GetCustomerBySearchParam(string customerType, SearchOption option)
         {
-            throw new NotImplementedException();
+            return await _customerService.GetCustomerBySearchParam(customerType, option);
         }
 
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
@@ -135,54 +166,74 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _deliveryOptionPriceService.GetDeliveryOptionPrices();
         }
 
-        public Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
+        public async Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
         {
-            throw new NotImplementedException();
+            return await _shipmentService.GetDropOffShipmentForProcessing(code);
         }
 
-        public Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
+        public async Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
         {
-            throw new NotImplementedException();
+           return await _pricing.GetGrandPriceForShipment(newShipmentDTO);
         }
 
-        public Task<InvoiceDTO> GetInvoiceByWaybill(string waybill)
+
+        public async Task<IEnumerable<LGADTO>> GetLGAs()
         {
-            throw new NotImplementedException();
+            return await _lgaService.GetLGAs();
         }
 
-        public Task<IEnumerable<LGADTO>> GetLGAs()
+        public async Task<decimal> GetPrice(PricingDTO pricingDto)
         {
-            throw new NotImplementedException();
+            return await _pricing.GetPrice(pricingDto);
         }
 
-        public Task<decimal> GetPrice(PricingDTO pricingDto)
+        public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
         {
-            throw new NotImplementedException();
+            return await _portalService.GetPriceForDropOff(preshipmentMobile);
         }
 
-        public Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment)
+        public async Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)
         {
-            throw new NotImplementedException();
+            var accountFilterCriteria = JObject.FromObject(dateFilterCriteria).ToObject<AccountFilterCriteria>();
+            var dailySales = await _shipmentService.GetSalesForServiceCentre(accountFilterCriteria);
+            if (dailySales.TotalSales > 0)
+            {
+                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                dailySales.TotalSales = Math.Round(dailySales.TotalSales * factor) / factor;
+            }
+            return dailySales;
         }
 
-        public Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria)
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
         {
-            throw new NotImplementedException();
+            //2. priviledged users service centres
+            var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+            return await _portalService.GetServiceCentresBySingleCountry(countryId);
         }
 
-        public Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        public async Task<ShipmentDTO> GetShipment(string waybill)
         {
-            throw new NotImplementedException();
+            var shipment = await _shipmentService.GetShipment(waybill);
+            if (shipment.GrandTotal > 0)
+            {
+                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
+                shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
+                shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
+                shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
+                shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+
+                foreach (var item in shipment.ShipmentItems)
+                {
+                    item.Price = Math.Round(item.Price * factor) / factor;
+                }
+            }
+            return shipment;
         }
 
-        public Task<ShipmentDTO> GetShipment(string waybill)
+        public async Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill)
-        {
-            throw new NotImplementedException();
+            return await _shipmentCollectionService.GetShipmentCollectionById(waybill);
         }
 
         public async Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePrices()
@@ -190,9 +241,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _packagePriceService.GetShipmentPackagePrices();
         }
 
-        public Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill)
+        public async Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill)
         {
-            throw new NotImplementedException();
+            return await _shipmentService.GetWaybillForServiceCentre(waybill);
         }
 
         public async Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination)
@@ -200,19 +251,25 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _domesticRouteZoneMapService.GetZone(departure, destination);
         }
 
-        public Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto)
+        public async Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto)
         {
-            throw new NotImplementedException();
+          return  await _paymentService.ProcessPayment(paymentDto);
         }
 
-        public Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        public async Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
-            throw new NotImplementedException();
+            return await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
         }
 
-        public Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        public async Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
-            throw new NotImplementedException();
+            var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
+            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            if (shipmentCollection.IsComingFromDispatch)
+            {
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+            }
+            await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }
     }
 }

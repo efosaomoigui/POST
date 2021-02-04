@@ -21,13 +21,12 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePrices();
         Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option);
         Task<decimal> GetPrice(PricingDTO pricingDto);
-        Task<ShipmentDTO> AddShipment(ShipmentDTO shipment);
-        Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
+        Task<ShipmentDTO> AddShipment(NewShipmentDTO shipment);
         Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto);
         Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO);
         Task<ShipmentDTO> GetShipment(string waybill);
         Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill);
-        Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection);
+        Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto);
         Task<IEnumerable<CountryDTO>> GetActiveCountries();
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO);
@@ -35,7 +34,7 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetActiveSpecialDomesticPackages();
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
-        Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
+        Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria);
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
     }
 }
