@@ -773,7 +773,18 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Entity = entity;
 
                 //SEND EMAIL TO NEW SIGNEE
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
                 var companyMessagingDTO = new CompanyMessagingDTO();
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    foreach (string email in chairmanEmails)
+                    {
+                        companyMessagingDTO.Emails.Add(email);
+                    }
+                }
                 companyMessagingDTO.Name = company.Name;
                 companyMessagingDTO.Email = company.Email;
                 companyMessagingDTO.PhoneNumber = company.PhoneNumber;
@@ -846,15 +857,30 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 _uow.Complete();
                 //send email for upgrade customers
-                //SEND EMAIL TO NEW SIGNEE
-                var companyMessagingDTO = new CompanyMessagingDTO();
-                companyMessagingDTO.Name = company.Name;
-                companyMessagingDTO.Email = company.Email;
-                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
-                companyMessagingDTO.Rank = company.Rank;
-                companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
-                companyMessagingDTO.UserChannelType = company.CompanyType.ToString();
-                await SendMessageToNewSignUps(companyMessagingDTO);
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    //send a copy to chairman
+                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+                    if (chairmanEmail != null)
+                    {
+                        //seperate email by comma and send message to those email
+                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                        foreach (string email in chairmanEmails)
+                        {
+                           companyMessagingDTO.Emails.Add(email);
+                        }
+                    }
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    await SendMessageToNewSignUps(companyMessagingDTO); 
+                }
 
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
@@ -883,13 +909,22 @@ namespace GIGLS.Services.Implementation.Customers
                     {
                         await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
                     }
-                    else if (company.IsFromMobile && company.Rank == Rank.Class)
+                    else if (company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == false)
                     {
                        await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
                     }
-                    else if (!company.IsFromMobile && company.Rank == Rank.Class)
+                    else if (!company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == false)
                     {
                        await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                    }
+
+                    else if (company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == true)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
+                    }
+                    else if (!company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == true)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
                     }
 
                     else if (company.IsFromMobile && company.Rank == Rank.Basic)
