@@ -184,6 +184,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<decimal> GetPrice(PricingDTO pricingDto)
         {
+            var userCountryId = await _pricing.GetUserCountryId();
+            pricingDto.CountryId = userCountryId;
             return await _pricing.GetPrice(pricingDto);
         }
 
@@ -270,6 +272,23 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
             }
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
+        }
+
+        public async Task<ServiceCentreDTO> GetServiceCentreById(int centreid)
+        {
+            
+            return await _serviceCentreService.GetServiceCentreById(centreid);
+        }
+
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+
+            return await _portalService.CheckDetailsForMobileScanner(user);
+        }
+
+        public async Task<int[]> GetPriviledgeServiceCenters(string userId)
+        {
+            return await _userService.GetPriviledgeServiceCenters(userId);
         }
     }
 }

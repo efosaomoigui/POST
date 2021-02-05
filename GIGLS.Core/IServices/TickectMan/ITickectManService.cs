@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
@@ -36,5 +37,8 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
         Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria);
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        Task<ServiceCentreDTO> GetServiceCentreById(int centreid);
+        Task<UserDTO> CheckDetailsForMobileScanner(string user);
+        Task<int[]> GetPriviledgeServiceCenters(string userId);
     }
 }
