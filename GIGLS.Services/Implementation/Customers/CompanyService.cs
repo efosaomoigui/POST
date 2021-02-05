@@ -808,41 +808,40 @@ namespace GIGLS.Services.Implementation.Customers
                 if (userValidationDTO == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Invalid payload";
+                    result.Message = "Invalid payload";
                     return result;
                 }
 
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"User code or rank not provided";
+                    result.Message = "User code or rank not provided";
                     return result;
                 }
 
+                var company = await  _uow.Company.GetAsync(x => x.CustomerCode == userValidationDTO.UserCode);
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Company information does not exist";
+                    return result;
+                }
 
-                var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
                 if (userValidationDTO.Rank == Rank.Class)
                 {
                     //make the BVN compulsory
                     if (String.IsNullOrEmpty(userValidationDTO.BVN))
                     {
                         result.Succeeded = false;
-                        result.Message = $"User BVN not provided";
+                        result.Message = "User BVN not provided";
                         return result;
                     }
-                    company.BVN = userValidationDTO.BVN;
                     company.isCodNeeded = true;
                 }
-                if (userValidationDTO.Rank == Rank.Basic)
                 {
                     company.isCodNeeded = false;
                 }
-                if (company == null)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"Company information does not exist";
-                    return result;
-                }
+                
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
                 company.RankModificationDate = DateTime.Now;
@@ -851,11 +850,10 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     CustomerName = companyDTO.Name,
                     CustomerCode = companyDTO.CustomerCode,
-                    RankType = userValidationDTO.RankType,
-                    DateCreated = DateTime.Now,
-                    DateModified = DateTime.Now
+                    RankType = userValidationDTO.RankType
                 });
-                _uow.Complete();
+                await _uow.CompleteAsync();
+
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
@@ -879,6 +877,7 @@ namespace GIGLS.Services.Implementation.Customers
                     companyMessagingDTO.Rank = company.Rank;
                     companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
                     companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
                     await SendMessageToNewSignUps(companyMessagingDTO); 
                 }
 
@@ -903,45 +902,41 @@ namespace GIGLS.Services.Implementation.Customers
                     if (company.UserChannelType == UserChannelType.IndividualCustomer)
                     {
                         await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
-
                     }
                     else if (company.UserChannelType == UserChannelType.Partner)
                     {
                         await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
                     }
-                    else if (company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == false)
+                    else if (company.IsFromMobile)
                     {
-                       await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                        }
                     }
-                    else if (!company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == false)
+                    else
                     {
-                       await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                        }
                     }
-
-                    else if (company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == true)
-                    {
-                        await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
-                    }
-                    else if (!company.IsFromMobile && company.Rank == Rank.Class && company.IsUpdate == true)
-                    {
-                        await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
-                    }
-
-                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
-                    {
-                       await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
-                    }
-
-                    else if (!company.IsFromMobile && company.Rank == Rank.Basic)
-                    {
-                       await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
-                    }
-
-                    else if (company.IsFromMobile && company.Rank == Rank.Basic)
-                    {
-                        await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
-                    }
-
                 }
             }
             catch (Exception)
