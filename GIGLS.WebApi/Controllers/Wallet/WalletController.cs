@@ -89,7 +89,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _walletService.UpdateWallet(walletId, walletTransactionDTO);
+                await _walletService.TopUpWallet(walletId, walletTransactionDTO);
                 return new ServiceResponse<object>
                 {
                     Object = true

@@ -1168,6 +1168,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 throw new GenericException("No shipment item", $"{(int)HttpStatusCode.BadRequest}");
             }
+
             decimal totalPrice = 0;
             decimal grandTotal = 0;
 
@@ -1214,15 +1215,9 @@ namespace GIGLS.Services.Business.Pricing
             if (newShipmentDTO.DeclarationOfValueCheck > 0)
             {
                 insurance = await CalculateInsurance(newShipmentDTO);
-                grandTotal += insurance;
+                grandTotal = grandTotal + insurance;
             }
 
-
-            //if (newShipmentDTO.CompanyType.ToLower() == "individual" || newShipmentDTO.CompanyType.ToLower() == "client")
-            //{
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                grandTotal = Math.Round(grandTotal * factor) / factor;
-           // }
             if (newShipmentDTO.DiscountValue > 0)
             {
                 var discount = newShipmentDTO.DiscountValue / 100m;
@@ -1231,10 +1226,11 @@ namespace GIGLS.Services.Business.Pricing
                 grandTotal = grandTotal - distValue;
             }
 
+            var factor = Convert.ToDecimal(Math.Pow(10, -2));
             newPricingDTO.Vat = vatForItems;
             newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
-            newPricingDTO.GrandTotal = grandTotal;
+            newPricingDTO.GrandTotal = Math.Round(grandTotal * factor) / factor;
             return newPricingDTO;
         }
 
@@ -1302,6 +1298,12 @@ namespace GIGLS.Services.Business.Pricing
                         minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
                     }
                 }
+                else
+                {
+                    //all customer in Nigeria
+                    var basicValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckBasic"];
+                    minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
+                }
             }
             else
             {
@@ -1310,7 +1312,7 @@ namespace GIGLS.Services.Business.Pricing
                 minimumDeclareValueCheck = Convert.ToDecimal(ghanaValue); ;
             }
 
-            if(minimumDeclareValueCheck > declarationValue)
+            if(declarationValue > minimumDeclareValueCheck)
             {
                 var insuranceDTO = await _uow.Insurance.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
                 decimal insuranceValue = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
