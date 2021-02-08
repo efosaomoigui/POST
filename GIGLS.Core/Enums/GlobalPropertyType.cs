@@ -71,8 +71,13 @@
         IntlShipmentPaymentMonitoringEmails,
         BasicRankPercentage,
         ClassRankPercentage,
+        RedirectLinkForApps,
+        PaymentLinkCustomerPortal,
         VisaBusinessCardList,
         VisaBusinessCardBonus,
-        VisaBonusEmail
+        VisaBonusEmail,
+        InternationalAdditionalPrice,
+        ClassCustomerDiscount,
+        NormalCustomerDiscount
     }
 }

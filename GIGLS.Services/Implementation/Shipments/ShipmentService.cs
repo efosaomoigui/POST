@@ -2220,9 +2220,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DriverCode == valMovementManifest.code)
+                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
+                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
                         retVal =  true;
                     }
@@ -2234,12 +2235,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
                 {
-                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.DestinationServiceCentreCode == valMovementManifest.movementManifestCode);
+                    var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
+                    if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
+                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
                         retVal =  true;
                     }
@@ -4080,12 +4082,38 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                return await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+                var result =  await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+                return await GetTotalPriceBreakDown(result, shipmentDTO);
             }
             catch (Exception ex)
             {
                 throw;
             }
+        }
+
+        private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
+        {
+            var countryId = await _userService.GetUserActiveCountryId();
+
+            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
+            var additionalAmount = Convert.ToDecimal(aditionalPrice.Value);
+            total.Amount = total.Amount + additionalAmount;
+
+            var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
+            decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+            total.VAT = total.Amount * vat;
+
+            total.GrandTotal = total.Amount + total.VAT;
+
+            //Get Insurance
+            if(shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
+            {
+                decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
+                total.GrandTotal = total.GrandTotal + insurance;
+                total.Insurance = insurance;
+            }
+
+            return total;
         }
 
         //Add DHL International shipment 
@@ -4096,8 +4124,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. Get the Price
                 var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
 
+                //update price to contain VAT, INSURANCE ETC
+                var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
+
                 //validate the different from DHL
-                if (shipmentDTO.GrandTotal != price.Amount)
+                if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
                 {
                     throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
                 }
@@ -4114,8 +4145,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.CustomerDetails = shipment.CustomerDetails;
 
                 //update price to contain VAT, INSURANCE ETC
-                shipment.Total = price.Amount;
-               
+                shipment.Total = priceUpdate.Amount;
+                shipment.GrandTotal = priceUpdate.GrandTotal;
+                shipment.Insurance = priceUpdate.Insurance;
+                shipment.Vat = priceUpdate.VAT;
+
                 //Block account that has been suspended/pending from create shipment
                 if (shipment.CustomerDetails.CustomerType == CustomerType.Company)
                 {

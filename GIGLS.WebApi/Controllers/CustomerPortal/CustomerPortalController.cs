@@ -2254,5 +2254,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("consolidatedintlshipments")]
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _magayaService.GetConsolidatedShipmentRequestForUser();
+
+                return new ServiceResponse<List<IntlShipmentRequestDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

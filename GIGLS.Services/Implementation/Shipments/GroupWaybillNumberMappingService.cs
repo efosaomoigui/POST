@@ -359,7 +359,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
                 var getWaybillNotAvailableForGrouping = newWaybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x));
 
-                if (getWaybillNotAvailableForGrouping.Count() > 0)
+                if (getWaybillNotAvailableForGrouping.Any())
                 {
                     throw new GenericException($"Error: The following waybills [{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
                         $" can not be added to this group because they are not available to you. Remove them from the list to proceed");

@@ -23,6 +23,11 @@ namespace GIGLS.CORE.DTO.Report
 
     }
 
+    public class DateFilterForDropOff
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
     public class AccountFilterCriteria2
     {
         public DateTime? StartDate { get; set; }

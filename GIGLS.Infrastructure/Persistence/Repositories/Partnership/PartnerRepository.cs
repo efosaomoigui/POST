@@ -136,7 +136,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                      LastName = x.LastName
                                  }).FirstOrDefault(),
                              };
-            return Task.FromResult(partnerDto.ToList());
+            return Task.FromResult(partnerDto.OrderByDescending(s => s.DateCreated).ToList());
         }
 
         public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)

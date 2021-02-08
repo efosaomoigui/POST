@@ -32,6 +32,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                {
                                    Id = s.Id,
                                    DateCreated = s.DateCreated,
+                                   DateModified = s.DateModified,
                                    Waybill= s.Waybill,
                                    ShipmentIdentificationNumber = s.ShipmentIdentificationNumber,
                                    PackageResult = s.PackageResult
