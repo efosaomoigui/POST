@@ -838,6 +838,7 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     company.isCodNeeded = true;
                 }
+                else
                 {
                     company.isCodNeeded = false;
                 }
