@@ -814,11 +814,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //get customer 
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= endDate);
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
             int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
             int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
 
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
             dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
             dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
@@ -881,8 +881,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated <= endDate);
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
             dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
             int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
@@ -945,8 +945,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated <= endDate);
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
             dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
             int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
@@ -1079,8 +1079,8 @@ namespace GIGLS.Services.Implementation.Dashboard
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
 
                 //customers
-                var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= endDate && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
-                int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
+                var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
+                int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
                 dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
 
                 //get customer 
