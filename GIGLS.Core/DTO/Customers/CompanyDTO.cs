@@ -113,12 +113,18 @@ namespace GIGLS.Core.DTO.Customers
 
     public class CompanyMessagingDTO
     {
+        public CompanyMessagingDTO()
+        {
+            Emails = new List<string>();
+        }
         public string Name { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public bool IsFromMobile { get; set; }
         public Rank Rank { get; set; }
         public UserChannelType UserChannelType { get; set; }
+        public List<string> Emails { get; set; }
+        public bool IsUpdate { get; set; } = false;
 
 
 

@@ -753,6 +753,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
                 messageDTO.To = companyMessagingDTO.PhoneNumber;
                 messageDTO.ToEmail = companyMessagingDTO.Email;
+                messageDTO.Emails = companyMessagingDTO.Emails;
 
                 //Set default country as Nigeria for GIG Go APP
                 //prepare message format base on country code

@@ -586,7 +586,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //2. If the customer country !== Departure Country, Convert the payment
             if (customerCountryId != shipment.DepartureCountryId)
             {
-                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(customerCountryId, shipment.DepartureCountryId);
 
                 double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
