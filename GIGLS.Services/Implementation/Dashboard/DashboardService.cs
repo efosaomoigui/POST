@@ -801,31 +801,26 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && serviceCenterId == s.DepartureServiceCentreId && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
-            //get customer 
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
-            int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
-            int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
-
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-            dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
+            //get customers data
+            var customersData = await GetCustomerData(dashboardFilterCriteria);
+            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
 
             dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
             {
-                Individual = individualCustomer,
-                EcommerceBasic = ecommerceBasic,
-                EcommerceClass = ecommerceClass,
+                Individual = customersData.CustomerBreakdownDTO.Individual,
+                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
+                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
             };
 
             // MostRecentOrder
@@ -865,34 +860,27 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
-
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
 
-            // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
-            //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-            dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
-
-            int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
-            int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
+            //Get customers data
+            var customersData = await GetCustomerData(dashboardFilterCriteria);
+            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
 
             dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
             {
-                Individual = individualCustomer,
-                EcommerceBasic = ecommerceBasic,
-                EcommerceClass = ecommerceClass,
+                Individual = customersData.CustomerBreakdownDTO.Individual,
+                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
+                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
             };
 
             // MostRecentOrder
@@ -929,35 +917,29 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
             //customers
-            var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-            dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
-
-            int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
-            int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
-            dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
+            var customersData = await GetCustomerData(dashboardFilterCriteria);
+            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
 
             dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
             {
-                Individual = individualCustomer,
-                EcommerceBasic = ecommerceBasic,
-                EcommerceClass = ecommerceClass,
+                Individual = customersData.CustomerBreakdownDTO.Individual,
+                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
+                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
             };
 
             // MostRecentOrder
@@ -1062,13 +1044,13 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             int[] serviceCenterIds = { };   // empty array
             var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
-            s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
+            s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
 
             //filter by country
             var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
                 s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid
                 && s.DateCreated >= startDate
-                && s.DateCreated < endDate);
+                && s.DateCreated <= endDate);
 
             if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
             {
@@ -1079,19 +1061,14 @@ namespace GIGLS.Services.Implementation.Dashboard
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
 
                 //customers
-                var accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated <= DateTime.Now && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId);
-                int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated <= DateTime.Now && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-                dashboardDTO.TotalCustomers = accountCustomer.Count() + individualCustomer;
-
-                //get customer 
-                int ecommerceBasic = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Basic).Count();
-                int ecommerceClass = accountCustomer.Where(c => c.CompanyType == CompanyType.Ecommerce && c.Rank == Rank.Class).Count();
+                var customersData = await GetCustomerData(dashboardFilterCriteria);
+                dashboardDTO.TotalCustomers = customersData.TotalCustomers;
 
                 dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
                 {
-                    Individual = individualCustomer,
-                    EcommerceBasic = ecommerceBasic,
-                    EcommerceClass = ecommerceClass,
+                    Individual = customersData.CustomerBreakdownDTO.Individual,
+                    EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
+                    EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
                 };
 
                 //Update the ActiveCountryId in the User entity
@@ -1399,6 +1376,50 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return earningsBreakdownDTO;
 
+        }
+
+        //Get Data about Shipment Created, Shipment Ordered, Invoice for service center, station or region
+        private async Task<DashboardDTO> GetShipmentData(Tuple<DateTime, DateTime> queryDate, int[] serviceCenterIds, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
+            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+           
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid 
+                                                    && s.DateCreated >= startDate && s.DateCreated <= endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            
+            return dashboardDTO;
+        }
+
+        //Get Breakdown of types of customers
+        private async Task<DashboardDTO> GetCustomerData(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get customer 
+            var result = await _uow.Company.GetNoOfBasicAndClassCustomers(dashboardFilterCriteria);
+            int individualCustomer = await _uow.IndividualCustomer.GetCountOfIndividualCustomers(dashboardFilterCriteria);
+            dashboardDTO.TotalCustomers = result.EcommerceClass + result.EcommerceBasic + individualCustomer;
+
+            dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
+            {
+                Individual = individualCustomer,
+                EcommerceBasic = result.EcommerceBasic,
+                EcommerceClass = result.EcommerceClass,
+            };
+
+            return dashboardDTO;
         }
     }
 }
