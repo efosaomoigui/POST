@@ -94,7 +94,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 }
             };
         }
-        
+
         public async Task UpdateStation(int stationId, StationDTO stationDto)
         {
             await _stateService.GetStateById(stationDto.StateId);
@@ -153,7 +153,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             return stationDto;
         }
 
-            public async Task<IEnumerable<StationDTO>> GetStations()
+        public async Task<IEnumerable<StationDTO>> GetStations()
         {
             var stations = await _uow.Station.GetStationsAsync();
 
@@ -161,7 +161,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             foreach (var st in stations)
             {
-                var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == st.SuperServiceCentreId);
+                //var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == st.SuperServiceCentreId);
+                var serviceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == st.SuperServiceCentreId);
                 ServiceCentreDTO superServiceCentreDTO = null;
                 if (serviceCentre != null)
                 {
@@ -187,7 +188,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
             return stationDto.OrderBy(x => x.StationName).ToList();
         }
-        
+
         public async Task<List<StationDTO>> GetLocalStations()
         {
             var countryIds = await _userService.GetPriviledgeCountryIds();
