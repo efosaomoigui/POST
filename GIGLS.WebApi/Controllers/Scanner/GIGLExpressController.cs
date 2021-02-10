@@ -438,7 +438,83 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpGet]
+        [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
+        public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _tickectMan.GetShipmentDetailsFromDeliveryNumber(deliverynumber);
+                return new ServiceResponse<PreShipmentSummaryDTO>
+                {
+                    Object = preshipment
+                };
+            });
+        }
 
+        [HttpPost]
+        [Route("approveshipment")]
+        public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.ApproveShipment(detail);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecenterbystation/{stationId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _tickectMan.GetServiceCentreByStation(stationId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicletypes")]
+        public IHttpActionResult GetVehicleTypes()
+        {
+            var types = EnumExtensions.GetValues<Vehicletype>();
+            return Ok(types);
+        }
+
+        [HttpPost]
+        [Route("giggoextension")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddGIGGOShipmentFromAgility(PreShipmentMobileFromAgilityDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.AddAgilityShipmentToGIGGo(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getgiggoprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _tickectMan.GetGIGGOPrice(preshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = price,
+                };
+            });
+        }
 
     }
 }

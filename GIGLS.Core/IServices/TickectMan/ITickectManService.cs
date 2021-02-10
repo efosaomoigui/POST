@@ -40,5 +40,11 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<ServiceCentreDTO> GetServiceCentreById(int centreid);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<int[]> GetPriviledgeServiceCenters(string userId);
+        Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
+        Task<IEnumerable<ServiceCentreDTO>> GetServiceCentreByStation(int stationId);
+        Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
+        Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
     }
 }
+                                                                                  
