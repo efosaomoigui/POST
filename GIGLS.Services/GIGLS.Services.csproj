@@ -188,6 +188,7 @@
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />
     <Compile Include="Business\ThirdPartyAPI\ThirdPartyAPIService.cs" />
+    <Compile Include="Business\TickectMan\TickectManService.cs" />
     <Compile Include="Business\Tracking\ShipmentTrackService.cs" />
     <Compile Include="Implementation\Account\ExpenditureService.cs" />
     <Compile Include="Implementation\Account\FinancialReportService.cs" />

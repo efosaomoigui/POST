@@ -18,6 +18,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.CORE.DTO.Report;
@@ -42,44 +43,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
     [RoutePrefix("api/giglexpress")]
     public class GIGLExpressController : BaseWebApiController
     {
-        private readonly IDeliveryOptionPriceService _deliveryOptionPriceService;
-        private readonly IDomesticRouteZoneMapService _domesticRouteZoneMapService;
-        private readonly IShipmentService _shipmentService;
-        private readonly IShipmentPackagePriceService _packagePriceService;
-        private readonly ICustomerService _customerService;
-        private readonly IPricingService _pricing;
-        private readonly IPaymentService _paymentService;
-        private readonly ICustomerPortalService _portalService;
-        private readonly IShipmentCollectionService _shipmentCollectionService;
-        private readonly IServiceCentreService _serviceCentreService;
-        private readonly IUserService _userService;
-        private readonly ICountryService _countryService;
-        private readonly ILGAService _lgaService;
-        private readonly ISpecialDomesticPackageService _specialPackageService;
-        private readonly IInvoiceService _invoiceService;
+        private readonly ITickectManService _tickectMan;
+       // private readonly ICustomerPortalService _portalService;
 
-
-        public GIGLExpressController(IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
-            IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
-            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService,ICountryService countryService,ILGAService lgaService,
-            ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService) : base(nameof(MobileScannerController))
+        public GIGLExpressController(ITickectManService tickectMan, ICustomerPortalService portalService) : base(nameof(GIGLExpressController))
         {
-            _deliveryOptionPriceService = deliveryOptionPriceService;
-            _domesticRouteZoneMapService = domesticRouteZoneMapService;
-            _shipmentService = shipmentService;
-            _packagePriceService = packagePriceService;
-            _customerService = customerService;
-            _pricing = pricing;
-            _paymentService = paymentService;
-            _portalService = portalService;
-            _shipmentCollectionService = shipmentCollectionService;
-            _serviceCentreService = serviceCentreService;
-            _userService = userService;
-            _countryService = countryService;
-            _lgaService = lgaService;
-            _specialPackageService = specialPackageService;
-            _invoiceService = invoiceService;
-
+            _tickectMan = tickectMan;
+           // _portalService = portalService;
         }
 
         [AllowAnonymous]
@@ -87,7 +57,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            var user = await _portalService.CheckDetailsForMobileScanner(userLoginModel.username);
+            var user = await _tickectMan.CheckDetailsForMobileScanner(userLoginModel.username);
 
             if (user.Username != null)
             {
@@ -132,10 +102,10 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var jObject = JObject.Parse(responseJson);
 
                     //ADD SERVICECENTRE OBJ
-                    var centreId = await _userService.GetPriviledgeServiceCenters(user.Id);
+                    var centreId = await _tickectMan.GetPriviledgeServiceCenters(user.Id);
                     if (centreId != null)
                     {
-                        var centreInfo =  await _serviceCentreService.GetServiceCentreById(centreId[0]);
+                        var centreInfo =  await _tickectMan.GetServiceCentreById(centreId[0]);
                         if (centreInfo != null)
                         {
                             var centreInfoJson = JObject.FromObject(centreInfo);
@@ -159,7 +129,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var deliveryOptionPrices = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
+                var deliveryOptionPrices = await _tickectMan.GetDeliveryOptionPrices();
 
                 return new ServiceResponse<IEnumerable<DeliveryOptionPriceDTO>>
                 {
@@ -174,7 +144,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var zone = await _domesticRouteZoneMapService.GetZone(departure, destination);
+                var zone = await _tickectMan.GetZone(departure, destination);
 
                 return new ServiceResponse<DomesticRouteZoneMapDTO>
                 {
@@ -197,7 +167,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentPackagePrices = await _packagePriceService.GetShipmentPackagePrices();
+                var shipmentPackagePrices = await _tickectMan.GetShipmentPackagePrices();
 
                 return new ServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>
                 {
@@ -212,7 +182,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var customerObj = await _customerService.GetCustomerBySearchParam(customerType, option);
+                var customerObj = await _tickectMan.GetCustomerBySearchParam(customerType, option);
 
                 return new ServiceResponse<object>
                 {
@@ -227,9 +197,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var userCountryId = await _pricing.GetUserCountryId();
-                pricingDto.CountryId = userCountryId;
-                var price = await _pricing.GetPrice(pricingDto);
+                var price = await _tickectMan.GetPrice(pricingDto);
 
                 return new ServiceResponse<decimal>
                 {
@@ -245,37 +213,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //map to real shipmentdto
-                var ShipmentDTO = JObject.FromObject(newShipmentDTO).ToObject<ShipmentDTO>();
-
-                //Update SenderAddress for corporate customers
-                ShipmentDTO.SenderAddress = null;
-                ShipmentDTO.SenderState = null;
-                if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
-                {
-                    ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;
-                    ShipmentDTO.SenderState = ShipmentDTO.Customer[0].State;
-                }
-
-                //set some data to null
-                ShipmentDTO.ShipmentCollection = null;
-                ShipmentDTO.Demurrage = null;
-                ShipmentDTO.Invoice = null;
-                ShipmentDTO.ShipmentCancel = null;
-                ShipmentDTO.ShipmentReroute = null;
-                ShipmentDTO.DeliveryOption = null;
-                ShipmentDTO.IsFromMobile = false;
-
-                var shipment = await _shipmentService.AddShipment(ShipmentDTO);
-                if (!String.IsNullOrEmpty(shipment.Waybill))
-                {
-                    var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
-                    if (invoiceObj != null)
-                    {
-                        invoiceObj.Shipment = null;
-                        shipment.Invoice = invoiceObj;
-                    }
-                }
+                 var shipment = await _tickectMan.AddShipment(newShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -290,7 +228,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _paymentService.ProcessPayment(paymentDto);
+                var result = await _tickectMan.ProcessPayment(paymentDto);
 
                 return new ServiceResponse<bool>
                 {
@@ -305,21 +243,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _shipmentService.GetShipment(waybill);
-                if (shipment.GrandTotal > 0)
-                {
-                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                    shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
-                    shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
-                    shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
-                    shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
-                    shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
-
-                    foreach(var item in shipment.ShipmentItems)
-                    {
-                        item.Price = Math.Round(item.Price * factor) / factor;
-                    }
-                }
+                var shipment = await _tickectMan.GetShipment(waybill);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -334,7 +258,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollection = await _shipmentCollectionService.GetShipmentCollectionById(waybill);
+                var shipmentCollection = await _tickectMan.GetShipmentCollectionById(waybill);
                 return new ServiceResponse<ShipmentCollectionDTO>
                 {
                     Object = shipmentCollection
@@ -346,17 +270,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("releaseshipment")]
         public async Task<IServiceResponse<bool>> ReleaseShipment(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
-
-            //map to real shipmentdto
-            var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
-            if (shipmentCollection.IsComingFromDispatch)
-            {
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
-            }
-
             return await HandleApiOperationAsync(async () => {
-                await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
+                await _tickectMan.ReleaseShipmentForCollection(shipmentCollectionforDto);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -370,7 +285,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var countries = await _countryService.GetActiveCountries();
+                var countries = await _tickectMan.GetActiveCountries();
 
                 return new ServiceResponse<IEnumerable<CountryDTO>>
                 {
@@ -385,10 +300,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //2. priviledged users service centres
-                var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-
-                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
+                var centres = await _tickectMan.GetServiceCentresBySingleCountry(countryId);
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
@@ -402,10 +314,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var userCountryId = await _pricing.GetUserCountryId();
-                newShipmentDTO.DepartureCountryId = userCountryId;
-                var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
-
+                var price = await _tickectMan.GetGrandPriceForShipment(newShipmentDTO);
                 return new ServiceResponse<NewPricingDTO>
                 {
                     Object = price
@@ -428,7 +337,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
+                var result = await _tickectMan.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
 
                 return new ServiceResponse<bool>
                 {
@@ -443,7 +352,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var lga = await _lgaService.GetLGAs();
+                var lga = await _tickectMan.GetLGAs();
                 return new ServiceResponse<IEnumerable<LGADTO>>
                 {
                     Object = lga
@@ -457,8 +366,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var packages = await _specialPackageService.GetActiveSpecialDomesticPackages();
-
+                var packages = await _tickectMan.GetActiveSpecialDomesticPackages();
                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
                 {
                     Object = packages
@@ -480,7 +388,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _shipmentService.GetDropOffShipmentForProcessing(code);
+                var shipment = await _tickectMan.GetDropOffShipmentForProcessing(code);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -494,7 +402,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _shipmentService.GetWaybillForServiceCentre(waybill);
+                var shipment = await _tickectMan.GetWaybillForServiceCentre(waybill);
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = shipment
@@ -506,16 +414,9 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("dailysalesforservicecentre")]
         public async Task<IServiceResponse<DailySalesDTO>> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)
         {
-            //map to real shipmentdto
-            var accountFilterCriteria = JObject.FromObject(dateFilterCriteria).ToObject<AccountFilterCriteria>();
             return await HandleApiOperationAsync(async () =>
             {
-                var dailySales = await _shipmentService.GetSalesForServiceCentre(accountFilterCriteria);
-                if (dailySales.TotalSales > 0)
-                {
-                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                    dailySales.TotalSales = Math.Round(dailySales.TotalSales * factor) / factor;
-                }
+                var dailySales = await _tickectMan.GetSalesForServiceCentre(dateFilterCriteria);
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySales
@@ -529,8 +430,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var Price = await _portalService.GetPriceForDropOff(preshipmentMobile);
-
+                var Price = await _tickectMan.GetPriceForDropOff(preshipmentMobile);
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = Price,
