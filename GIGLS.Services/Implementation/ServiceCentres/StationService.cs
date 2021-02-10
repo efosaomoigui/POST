@@ -74,7 +74,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw new GenericException("STATION INFORMATION DOES NOT EXIST");
             }
 
-            var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
+            var serviceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == station.SuperServiceCentreId);
             return new StationDTO
             {
                 StationId = station.StationId,
@@ -137,7 +137,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         public async Task<List<StationDTO>> GetStationsByStationName(string name)
         {
             List<StationDTO> stationDto = new List<StationDTO>();
-            var st = _uow.Station.GetAll().Where(s => s.StationName == name).FirstOrDefault();
+           //var st = _uow.Station.GetAll().Where(s => s.StationName == name).FirstOrDefault();
+            var st = await _uow.Station.GetAsync(s => s.StationName == name);
 
             stationDto.Add(new StationDTO
             {
@@ -155,22 +156,24 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
         public async Task<IEnumerable<StationDTO>> GetStations()
         {
-            var stations = await _uow.Station.GetStationsAsync();
-
             List<StationDTO> stationDto = new List<StationDTO>();
+            var stations = await _uow.Station.GetStationsAsync();
 
             foreach (var st in stations)
             {
-                //var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == st.SuperServiceCentreId);
-                var serviceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == st.SuperServiceCentreId);
                 ServiceCentreDTO superServiceCentreDTO = null;
-                if (serviceCentre != null)
+
+                if(st.SuperServiceCentreId > 0)
                 {
-                    superServiceCentreDTO = new ServiceCentreDTO()
+                    var serviceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == st.SuperServiceCentreId);
+                    if (serviceCentre != null)
                     {
-                        Code = serviceCentre?.Code,
-                        Name = serviceCentre?.Name
-                    };
+                        superServiceCentreDTO = new ServiceCentreDTO()
+                        {
+                            Code = serviceCentre?.Code,
+                            Name = serviceCentre?.Name
+                        };
+                    }
                 }
 
                 stationDto.Add(new StationDTO
