@@ -108,15 +108,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
                 SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
+                SqlParameter destinationCentreId = new SqlParameter("@destinationCentreId", baseFilterCriteria.DestinationServiceCentreId);
+                SqlParameter departureCentreId = new SqlParameter("@departureCentreId", baseFilterCriteria.DepartureServiceCentreId);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
-                    endDate
+                    endDate,
+                    destinationCentreId,
+                    departureCentreId
                 };
 
                 var result = _context.Database.SqlQuery<ShipmentCollectionDTOForArrived>("ArrivedShipment " +
-                   "@StartDate, @EndDate",
+                   "@StartDate, @EndDate, @destinationCentreId, @departureCentreId",
                    param).ToList();
 
 
