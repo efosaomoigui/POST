@@ -31808,7 +31808,10 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         [XmlElement(ElementName = "itemNo")]
         public string ItemNo { get; set; }
         [XmlElement(ElementName = "description")]
-        public string Description { get; set; }
+        public string Description { get; set; } 
+
+        [XmlElement(ElementName = "minimum")]
+        public double Minimum { get; set; }
     }
 
     [XmlRoot(ElementName = "Description")]
