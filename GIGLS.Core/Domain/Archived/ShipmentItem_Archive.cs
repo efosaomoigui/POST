@@ -1,9 +1,11 @@
 ﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.Archived
 {
     public class ShipmentItem_Archive : BaseDomain_Archive
     {
+        [Key]
         public int ShipmentItemId { get; set; }
         public string Description { get; set; }
         public string Description_s { get; set; }

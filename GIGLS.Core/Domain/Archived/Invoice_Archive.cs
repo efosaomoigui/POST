@@ -6,6 +6,7 @@ namespace GIGLS.Core.Domain.Archived
 {
     public class Invoice_Archive : BaseDomain_Archive
     {
+        [Key]
         public int InvoiceId { get; set; }
 
         [MaxLength(100)]

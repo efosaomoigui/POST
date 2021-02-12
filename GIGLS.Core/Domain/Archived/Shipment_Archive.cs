@@ -30,10 +30,10 @@ namespace GIGLS.Core.Domain.Archived
         [MaxLength(100)]
         public string CustomerCode { get; set; }
         public int DepartureServiceCentreId { get; set; }
-        public virtual ServiceCentre DepartureServiceCentre { get; set; }
+        //public virtual ServiceCentre DepartureServiceCentre { get; set; }
 
         public int DestinationServiceCentreId { get; set; }
-        public virtual ServiceCentre DestinationServiceCentre { get; set; }
+        //public virtual ServiceCentre DestinationServiceCentre { get; set; }
 
         [MaxLength(200)]
         public string ReceiverName { get; set; }
