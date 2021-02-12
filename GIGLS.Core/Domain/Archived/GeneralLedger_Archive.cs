@@ -11,7 +11,6 @@ namespace GIGLS.Core.Domain.Archived
         public int GeneralLedgerId { get; set; }
         public DateTime DateOfEntry { get; set; }
         public int ServiceCentreId { get; set; }
-        public virtual ServiceCentre ServiceCentre { get; set; }
 
         [MaxLength(128)]
         public string UserId { get; set; }

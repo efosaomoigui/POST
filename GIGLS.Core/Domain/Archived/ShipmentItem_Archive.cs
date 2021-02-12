@@ -22,6 +22,5 @@ namespace GIGLS.Core.Domain.Archived
         public double Width { get; set; }
         public double Height { get; set; }
         public int ShipmentId { get; set; }
-        public virtual Shipment_Archive Shipment { get; set; }
     }
 }

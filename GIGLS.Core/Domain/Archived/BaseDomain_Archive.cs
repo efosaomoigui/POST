@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain.Archived
 {
@@ -9,7 +10,8 @@ namespace GIGLS.Core.Domain.Archived
         public DateTime DateModified { get; set; }
         public bool IsDeleted { get; set; }
 
-        [MaxLength(20)]
+        [Column(TypeName = "VARCHAR")]
+        [StringLength(50)]
         public string RowVersion { get; set; }
     }
 }

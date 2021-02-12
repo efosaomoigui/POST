@@ -1,5 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -53,13 +52,9 @@ namespace GIGLS.Core.Domain.Archived
         [MaxLength(50)]
         public string ReceiverCountry { get; set; }
         public int DeliveryOptionId { get; set; }
-        public virtual DeliveryOption DeliveryOption { get; set; }
         public PickupOptions PickupOptions { get; set; }
-
         public DateTime? ExpectedDateOfArrival { get; set; }
         public DateTime? ActualDateOfArrival { get; set; }
-
-        public virtual List<ShipmentItem_Archive> ShipmentItems { get; set; }
         public double ApproximateItemsWeight { get; set; }
         public decimal GrandTotal { get; set; }
         public bool IsCashOnDelivery { get; set; }
@@ -97,7 +92,9 @@ namespace GIGLS.Core.Domain.Archived
 
         [MaxLength(50)]
         public string SenderState { get; set; }
-        public ShipmentReroute ShipmentReroute { get; set; }
+
+        [MaxLength(100)]
+        public string ShipmentReroute_WaybillNew { get; set; }
         public bool IsCODPaidOut { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
         public bool IsGrouped { get; set; }
