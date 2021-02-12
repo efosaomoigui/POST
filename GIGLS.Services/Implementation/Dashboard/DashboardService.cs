@@ -813,16 +813,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
             //get customers data
-            var customersData = await GetCustomerData(dashboardFilterCriteria);
-            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
-
-            dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
-            {
-                Individual = customersData.CustomerBreakdownDTO.Individual,
-                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
-                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
-            };
-
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
@@ -873,16 +864,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
             //Get customers data
-            var customersData = await GetCustomerData(dashboardFilterCriteria);
-            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
-
-            dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
-            {
-                Individual = customersData.CustomerBreakdownDTO.Individual,
-                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
-                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
-            };
-
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
@@ -932,15 +914,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
             //customers
-            var customersData = await GetCustomerData(dashboardFilterCriteria);
-            dashboardDTO.TotalCustomers = customersData.TotalCustomers;
-
-            dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
-            {
-                Individual = customersData.CustomerBreakdownDTO.Individual,
-                EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
-                EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
-            };
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
@@ -1060,16 +1034,8 @@ namespace GIGLS.Services.Implementation.Dashboard
                 TotalShipmentDeliveredQueryable = TotalShipmentDeliveredQueryable.Where(s =>
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
 
-                //customers
-                var customersData = await GetCustomerData(dashboardFilterCriteria);
-                dashboardDTO.TotalCustomers = customersData.TotalCustomers;
-
-                dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
-                {
-                    Individual = customersData.CustomerBreakdownDTO.Individual,
-                    EcommerceBasic = customersData.CustomerBreakdownDTO.EcommerceBasic,
-                    EcommerceClass = customersData.CustomerBreakdownDTO.EcommerceClass
-                };
+                //customers and service center
+                var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
 
                 //Update the ActiveCountryId in the User entity
                 string currentUserId = await _userService.GetCurrentUserId();
@@ -1403,10 +1369,8 @@ namespace GIGLS.Services.Implementation.Dashboard
         }
 
         //Get Breakdown of types of customers
-        private async Task<DashboardDTO> GetCustomerData(DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<DashboardDTO> GetCustomerAndServiceCentreData(DashboardFilterCriteria dashboardFilterCriteria, DashboardDTO dashboardDTO)
         {
-            var dashboardDTO = new DashboardDTO();
-
             //get customer 
             var result = await _uow.Company.GetNoOfBasicAndClassCustomers(dashboardFilterCriteria);
             int individualCustomer = await _uow.IndividualCustomer.GetCountOfIndividualCustomers(dashboardFilterCriteria);
@@ -1419,7 +1383,25 @@ namespace GIGLS.Services.Implementation.Dashboard
                 EcommerceClass = result.EcommerceClass,
             };
 
+            var serviceCenters = await GetServiceCentersData(dashboardFilterCriteria);
+
+            dashboardDTO.ServiceCentreBreakdownDTO = new ServiceCentreBreakdownDTO
+            {
+                WalkIn = serviceCenters.WalkIn,
+                Hub = serviceCenters.Hub,
+                Gateway = serviceCenters.Gateway,
+                Total = serviceCenters.Total
+            };
+
             return dashboardDTO;
+        }
+
+        //Get Breakdown of Service Centers
+        private async Task<ServiceCentreBreakdownDTO> GetServiceCentersData(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.ServiceCentre.GetServiceCentresData((int)dashboardFilterCriteria.ActiveCountryId);
+
+            return result;
         }
     }
 }
