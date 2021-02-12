@@ -138,7 +138,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
                 if (invoiceObj != null)
                 {
-                    invoiceObj.Shipment = null;
                     shipment.Invoice = invoiceObj;
                 }
             }
