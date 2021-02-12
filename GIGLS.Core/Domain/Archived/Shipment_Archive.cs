@@ -30,10 +30,7 @@ namespace GIGLS.Core.Domain.Archived
         [MaxLength(100)]
         public string CustomerCode { get; set; }
         public int DepartureServiceCentreId { get; set; }
-        //public virtual ServiceCentre DepartureServiceCentre { get; set; }
-
         public int DestinationServiceCentreId { get; set; }
-        //public virtual ServiceCentre DestinationServiceCentre { get; set; }
 
         [MaxLength(200)]
         public string ReceiverName { get; set; }
@@ -58,22 +55,20 @@ namespace GIGLS.Core.Domain.Archived
         public int DeliveryOptionId { get; set; }
         public virtual DeliveryOption DeliveryOption { get; set; }
         public PickupOptions PickupOptions { get; set; }
+
         public DateTime? ExpectedDateOfArrival { get; set; }
         public DateTime? ActualDateOfArrival { get; set; }
 
+        public virtual List<ShipmentItem_Archive> ShipmentItems { get; set; }
         public double ApproximateItemsWeight { get; set; }
-
         public decimal GrandTotal { get; set; }
-
         public bool IsCashOnDelivery { get; set; }
         public decimal? CashOnDeliveryAmount { get; set; }
         public decimal? ExpectedAmountToCollect { get; set; }
         public decimal? ActualAmountCollected { get; set; }
 
-        //General Details comes with role user
         [MaxLength(128)]
         public string UserId { get; set; }
-
         public bool IsdeclaredVal { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; }
         public decimal? AppliedDiscount { get; set; }
@@ -86,16 +81,14 @@ namespace GIGLS.Core.Domain.Archived
         public decimal? vatvalue_display { get; set; }
         public decimal? InvoiceDiscountValue_display { get; set; }
         public decimal? offInvoiceDiscountvalue_display { get; set; }
+
         [MaxLength(20)]
         public string PaymentMethod { get; set; }
-
-        //Cancelled shipment
         public bool IsCancelled { get; set; }
         public bool IsInternational { get; set; }
 
         [MaxLength(500)]
         public string Description { get; set; }
-
         public DepositStatus DepositStatus { get; set; }
         public bool ReprintCounterStatus { get; set; }
 
@@ -104,16 +97,14 @@ namespace GIGLS.Core.Domain.Archived
 
         [MaxLength(50)]
         public string SenderState { get; set; }
-
         public ShipmentReroute ShipmentReroute { get; set; }
         public bool IsCODPaidOut { get; set; }
-
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
-
         public bool IsGrouped { get; set; }
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
         public decimal CurrencyRatio { get; set; }
+
         [MaxLength(20)]
         public string DeliveryNumber { get; set; }
         public bool IsFromMobile { get; set; }
@@ -121,7 +112,6 @@ namespace GIGLS.Core.Domain.Archived
         public bool IsCargoed { get; set; }
         public InternationalShipmentType InternationalShipmentType { get; set; }
         public bool IsClassShipment { get; set; }
-
-        public virtual List<ShipmentItem_Archive> ShipmentItems { get; set; }
     }
+
 }
