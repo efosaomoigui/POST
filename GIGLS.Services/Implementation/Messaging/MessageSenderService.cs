@@ -1219,16 +1219,16 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[12] = departure.Name;
 
                 //Check if it is from mobile or not
-                if (intlDTO.Waybill.Contains("MWR"))
-                {
-                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
-                    strArray[15] = link.Value;
-                }
-                else
-                {
-                    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
-                    strArray[15] = $"{link.Value}{intlDTO.Waybill}";
-                }
+                //if (intlDTO.Waybill.Contains("MWR"))
+                //{
+                //    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
+                //    strArray[15] = link.Value;
+                //}
+                //else
+                //{
+                //    var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+                //    strArray[15] = $"{link.Value}{intlDTO.Waybill}";
+                //}
 
 
                 //To get bonus Details
