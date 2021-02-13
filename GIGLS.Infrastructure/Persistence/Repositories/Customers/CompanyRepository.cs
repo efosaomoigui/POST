@@ -12,6 +12,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Dashboard;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
@@ -483,6 +485,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                    RankModificationDate = c.RankModificationDate
                                };
             return Task.FromResult(companiesDto.ToList());
+        }
+
+        public async Task<CustomerBreakdownDTO> GetNoOfBasicAndClassCustomers(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new CustomerBreakdownDTO
+                {
+                    EcommerceBasic = 0,
+                    EcommerceClass = 0
+                };
+
+                var date = DateTime.Now;
+
+                //declare parameters for the stored procedure
+                SqlParameter endDate = new SqlParameter("@EndDate", date);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<CustomerBreakdownDTO>("EcommerceCustomers " +
+                   "@EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result.EcommerceBasic = summary.EcommerceBasic;
+                    result.EcommerceClass = summary.EcommerceClass;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

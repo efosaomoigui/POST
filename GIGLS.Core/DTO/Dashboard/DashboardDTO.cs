@@ -37,6 +37,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public WalletBreakdown WalletBreakdown { get; set; }
         public bool DashboardAccess { get; set; }  
         public CustomerBreakdownDTO CustomerBreakdownDTO { get; set; }
+        public ServiceCentreBreakdownDTO ServiceCentreBreakdownDTO { get; set; }
     }
 
     public class CustomerBreakdownDTO
@@ -45,6 +46,14 @@ namespace GIGLS.Core.DTO.Dashboard
         public int EcommerceBasic { get; set; }
         public int EcommerceClass { get; set; }
         public int Corporate { get; set; }
+    }
+
+    public class ServiceCentreBreakdownDTO
+    {
+        public int WalkIn { get; set; }
+        public int Hub { get; set; }
+        public int Gateway { get; set; }
+        public int Total { get; set; }
     }
 
 }
