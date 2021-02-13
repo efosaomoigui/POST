@@ -11,8 +11,6 @@ namespace GIGL.GIGLS.Core.Domain
 
     public class Shipment : BaseDomain, IAuditable
     {
-
-        //Shipment Information
         [Key]
         public int ShipmentId { get; set; }
 
@@ -40,10 +38,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }
-        public virtual ServiceCentre DepartureServiceCentre { get; set; }
-
         public int DestinationServiceCentreId { get; set; }
-        public virtual ServiceCentre DestinationServiceCentre { get; set; }
 
         [MaxLength(200)]
         public string ReceiverName { get; set; }
@@ -73,8 +68,6 @@ namespace GIGL.GIGLS.Core.Domain
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
 
-        //General but optional
-        //public bool IsDomestic { get; set; }
         public DateTime? ExpectedDateOfArrival { get; set; }
         public DateTime? ActualDateOfArrival { get; set; }
 

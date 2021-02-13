@@ -140,6 +140,11 @@
     <Compile Include="Common\Helpers\PagedList.cs" />
     <Compile Include="Domain\ActivationCampaignEmail.cs" />
     <Compile Include="Domain\AppRole.cs" />
+    <Compile Include="Domain\Archived\GeneralLedger_Archive.cs" />
+    <Compile Include="Domain\Archived\Invoice_Archive.cs" />
+    <Compile Include="Domain\Archived\BaseDomain_Archive.cs" />
+    <Compile Include="Domain\Archived\ShipmentItem_Archive.cs" />
+    <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
     <Compile Include="Domain\Bank.cs" />
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
