@@ -139,6 +139,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (invoiceObj != null)
                 {
                     shipment.Invoice = invoiceObj;
+                    shipment.DepartureServiceCentre = invoiceObj.Shipment.DepartureServiceCentre;
+                    shipment.DestinationServiceCentre = invoiceObj.Shipment.DestinationServiceCentre;
                 }
             }
             return shipment;
