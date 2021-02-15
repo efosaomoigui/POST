@@ -671,7 +671,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.magaya.com/XMLSchema/V1")]
     [System.Xml.Serialization.XmlRootAttribute("AirShipment", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
-    public partial class MagayaShipment 
+    public partial class MagayaShipment
     {
 
         private System.DateTime createdOn;
@@ -4977,7 +4977,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     public partial class Carrier
     {
 
-        private MethodType Code; 
+        private MethodType Code;
 
         private string iATAAccountNumber;
 
@@ -5265,7 +5265,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private WeightValue pieceWeight;
         //unit volume
         private VolumeValue pieceVolume;
-        
+
         private bool containedPiecesWeightIncluded;
 
         private bool containedPiecesWeightIncludedSpecified;
@@ -8090,7 +8090,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item item;
 
-        private bool itemSpecified; 
+        private bool itemSpecified;
 
         private string partNumber;
 
@@ -28277,9 +28277,50 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.magaya.com/XMLSchema/V1")]
+    [System.Xml.Serialization.XmlRootAttribute("TheChargeCombo", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
+    public partial class TheChargeCombo
+    {
+
+        private ChargeList charges;
+        private Item[] items;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("Charge")]
+        public ChargeList Charges
+        {
+            get
+            {
+                return this.charges;
+            }
+            set
+            {
+                this.charges = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayItemAttribute("Item", IsNullable = false)]
+        public Item[] Items
+        {
+            get
+            {
+                return this.items;
+            }
+            set
+            {
+                this.items = value;
+            }
+        }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.33440")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.magaya.com/XMLSchema/V1")]
     [System.Xml.Serialization.XmlRootAttribute("TheWarehouseReceiptCombo", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
-    public partial class TheWarehouseReceiptCombo 
-    { 
+    public partial class TheWarehouseReceiptCombo
+    {
         private WarehouseReceipt warehouseReceipt;
         private string actualAmountCollected;
         private string expectedAmountToCollect;
@@ -28290,7 +28331,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private int serviceCenterId;
 
-        public int ServiceCenterId 
+        public int ServiceCenterId
         {
             get { return serviceCenterId; }
             set { serviceCenterId = value; }
@@ -28314,52 +28355,52 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         [System.Xml.Serialization.XmlElementAttribute("ActualAmountCollected")]
         public string ActualAmountCollected
         {
-            get 
+            get
             {
-                return this.actualAmountCollected; 
+                return this.actualAmountCollected;
             }
-            set 
-            { 
-                this.actualAmountCollected = value; 
+            set
+            {
+                this.actualAmountCollected = value;
             }
         }
 
         [System.Xml.Serialization.XmlElementAttribute("ExpectedAmountToCollect")]
         public string ExpectedAmountToCollect
         {
-            get 
-            { 
-                return expectedAmountToCollect; 
+            get
+            {
+                return expectedAmountToCollect;
             }
-            set 
-            { 
-                expectedAmountToCollect = value; 
+            set
+            {
+                expectedAmountToCollect = value;
             }
         }
 
         [System.Xml.Serialization.XmlElementAttribute("MagayaPaymentOption")]
         public string MagayaPaymentOption
         {
-            get 
-            { 
-                return magayaPaymentOption; 
+            get
+            {
+                return magayaPaymentOption;
             }
-            set 
-            { 
-                magayaPaymentOption = value; 
+            set
+            {
+                magayaPaymentOption = value;
             }
         }
 
         [System.Xml.Serialization.XmlElementAttribute("MagayaPaymentType")]
         public string MagayaPaymentType
         {
-            get 
-            { 
-                return magayaPaymentType; 
+            get
+            {
+                return magayaPaymentType;
             }
-            set 
-            { 
-                magayaPaymentType = value; 
+            set
+            {
+                magayaPaymentType = value;
             }
         }
 
@@ -31808,7 +31849,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         [XmlElement(ElementName = "itemNo")]
         public string ItemNo { get; set; }
         [XmlElement(ElementName = "description")]
-        public string Description { get; set; } 
+        public string Description { get; set; }
 
         [XmlElement(ElementName = "minimum")]
         public double Minimum { get; set; }
@@ -31855,7 +31896,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         public WarehouseReceiptList warehousereceipt { get; set; }
         public ShipmentList shipmentlist { get; set; }
         public InvoiceList invoicelist { get; set; }
-        public PaymentList paymentlist { get; set; } 
+        public PaymentList paymentlist { get; set; }
 
     }
 }
