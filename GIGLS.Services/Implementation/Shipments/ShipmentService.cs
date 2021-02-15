@@ -436,7 +436,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverPhoneNumber = shipment.ReceiverPhoneNumber,
                     ReceiverAddress = shipment.ReceiverAddress,
                     ReceiverCity = shipment.ReceiverCity,
-                    DestinationServiceCentreId = shipment.DestinationServiceCenterId
+                    DestinationServiceCentreId = shipment.DestinationServiceCenterId,
+                    LGA = shipment.LGA
+                    
                 };
 
                 if (shipment.IsAgent)
