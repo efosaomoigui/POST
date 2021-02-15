@@ -45,7 +45,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DateCreated = mgw.DateCreated,
                                                      DateModified = mgw.DateModified,
                                                      IsDeleted = mgw.IsDeleted,
-                                                     RowVersion = mgw.RowVersion,
                                                      ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
                                                      Select(p => new ManifestDTO
                                                      {
@@ -79,7 +78,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DateCreated = mgw.DateCreated,
                                                      DateModified = mgw.DateModified,
                                                      IsDeleted = mgw.IsDeleted,
-                                                     RowVersion = mgw.RowVersion,
                                                      ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
                                                      Select(p => new ManifestDTO
                                                      {
@@ -128,7 +126,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DateCreated = mgw.DateCreated,
                                                      DateModified = mgw.DateModified,
                                                      IsDeleted = mgw.IsDeleted,
-                                                     RowVersion = mgw.RowVersion,
                                                      ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
                                                      Select(p => new ManifestDTO
                                                      {
@@ -178,10 +175,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 DateCreated = mgw.DateCreated,
                                                 DateModified = mgw.DateModified,
                                                 IsDeleted = mgw.IsDeleted,
-                                                RowVersion = mgw.RowVersion, 
                                                 MovementStatus = mgw.MovementStatus,
                                                 DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
-        }; 
+                                            }; 
 
             return movementManifestNumberDto.ToList();
         }
@@ -213,7 +209,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       DateCreated = mgw.DateCreated,
                                                       DateModified = mgw.DateModified,
                                                       IsDeleted = mgw.IsDeleted,
-                                                      RowVersion = mgw.RowVersion,
                                                       IsDispatched = mgw.IsDispatched,
                                                       IsReceived = mgw.IsReceived,
                                                       DispatchedBy = Context.Users.Where(d => d.Id == mgw.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),

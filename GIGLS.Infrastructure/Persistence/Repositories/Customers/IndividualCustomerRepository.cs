@@ -9,6 +9,9 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Dashboard;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
@@ -125,6 +128,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        }).FirstOrDefault()
                                    };
                 return Task.FromResult(individualDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> GetCountOfIndividualCustomers(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var date = DateTime.Now;
+                int result = 0;
+
+                //declare parameters for the stored procedure
+                SqlParameter endDate = new SqlParameter("@EndDate", date);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<int>("IndividualCustomers " +
+                   "@EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = summary;
+                }
+
+                return await Task.FromResult(result);
             }
             catch (Exception)
             {

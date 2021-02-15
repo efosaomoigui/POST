@@ -345,7 +345,6 @@
     <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
     <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
     <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
-    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\AdminReportController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
@@ -382,7 +381,6 @@
     <Compile Include="Controllers\Shipments\ShipmentRerouteController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
     <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
-    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\Sla\SLAController.cs" />
     <Compile Include="Controllers\StateController.cs" />
@@ -407,7 +405,6 @@
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitPriceController.cs" />
     <Compile Include="Controllers\Zone\ZoneController.cs" />
-    <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Filters\Configuration\HttpRequestMessageExtensions.cs" />
     <Compile Include="Filters\Configuration\IPAddressElement.cs" />

@@ -1494,8 +1494,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //do not save the child objects
-            newShipment.DepartureServiceCentre = null;
-            newShipment.DestinationServiceCentre = null;
+            //newShipment.DepartureServiceCentre = null;
+            //newShipment.DestinationServiceCentre = null;
             newShipment.DeliveryOption = null;
 
             //save the display value of Insurance and Vat
@@ -1631,8 +1631,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //do not save the child objects
-            newShipment.DepartureServiceCentre = null;
-            newShipment.DestinationServiceCentre = null;
+            //newShipment.DepartureServiceCentre = null;
+            //newShipment.DestinationServiceCentre = null;
             newShipment.DeliveryOption = null;
 
             //save the display value of Insurance and Vat
@@ -4374,8 +4374,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //do not save the child objects
-            newShipment.DepartureServiceCentre = null;
-            newShipment.DestinationServiceCentre = null;
+            //newShipment.DepartureServiceCentre = null;
+            //newShipment.DestinationServiceCentre = null;
             newShipment.DeliveryOption = null;
 
             //save the display value of Insurance and Vat

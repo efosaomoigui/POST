@@ -8,6 +8,7 @@ using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Dashboard;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
@@ -321,7 +322,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         CountryId = c.CountryId,
                                         CountryCode = c.CountryCode,
                                         CountryName = c.CountryName,
-                                        CurrencySymbol = c.CurrencySymbol                                        
+                                        CurrencySymbol = c.CurrencySymbol
                                     },
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude
@@ -407,7 +408,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
-        
+
         public Task<List<ServiceCentreDTO>> GetServiceCentres(int[] countryIds, bool excludeHub)
         {
             try
@@ -467,32 +468,32 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
-                                where c.CountryId == countryId 
-                                    select new ServiceCentreDTO
-                                    {
-                                        Name = s.Name,
-                                        Address = s.Address,
-                                        City = s.City,
-                                        Email = s.Email,
-                                        PhoneNumber = s.PhoneNumber,
-                                        ServiceCentreId = s.ServiceCentreId,
-                                        Code = s.Code,
-                                        IsActive = s.IsActive,
-                                        TargetAmount = s.TargetAmount,
-                                        TargetOrder = s.TargetOrder,
-                                        StationId = s.StationId,
-                                        StationName = sc.StationName,
-                                        StationCode = sc.StationCode,
-                                        CountryId = c.CountryId,
-                                        Country = c.CountryName,
-                                        IsDefault = s.IsDefault,
-                                        Longitude = s.Longitude,
-                                        Latitude = s.Latitude,
-                                        FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                        IsPublic = s.IsPublic
-                                    };
-                    return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
-              
+                                where c.CountryId == countryId
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    StationName = sc.StationName,
+                                    StationCode = sc.StationCode,
+                                    CountryId = c.CountryId,
+                                    Country = c.CountryName,
+                                    IsDefault = s.IsDefault,
+                                    Longitude = s.Longitude,
+                                    Latitude = s.Latitude,
+                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                    IsPublic = s.IsPublic
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+
             }
             catch (Exception)
             {
@@ -529,6 +530,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsPublic = s.IsPublic
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<ServiceCentreBreakdownDTO> GetServiceCentresData(int countryId)
+        {
+            try
+            {
+                var result = new ServiceCentreBreakdownDTO();
+
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsPublic == true);
+
+                var centresData = from s in centres
+                                  join sc in _context.Station on s.StationId equals sc.StationId
+                                  join st in _context.State on sc.StateId equals st.StateId
+                                  join c in _context.Country on st.CountryId equals c.CountryId
+                                  where c.CountryId == countryId
+                                  select s;
+
+                var walkInCenters = centresData.Where(x => x.IsHUB == false && !(x.Name.EndsWith("GTWAY"))).Count();
+                var hubs = centresData.Where(x => x.IsHUB == true && !(x.Name.EndsWith("GTWAY"))).Count();
+                var gateway = centresData.Where(x => x.Name.EndsWith("GTWAY")).Count();
+
+                result.Total = centresData.Count();
+                result.WalkIn = walkInCenters;
+                result.Hub = hubs;
+                result.Gateway = gateway;
+
+                return Task.FromResult(result);
             }
             catch (Exception)
             {
