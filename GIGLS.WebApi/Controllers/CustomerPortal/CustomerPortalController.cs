@@ -50,13 +50,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
-        private readonly IPaystackPaymentService _paymentService;
+        //private readonly IPaystackPaymentService _paymentService;
         private readonly IMagayaService _magayaService;
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
-            _paymentService = paymentService;
+            //_paymentService = paymentService;
             _magayaService = magayaService;
         }
 
@@ -146,7 +146,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [HttpPost]
         [Route("addwalletpaymentlog")]
         public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
@@ -154,6 +153,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = walletPaymentLog
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addwaybillpaymentlog")]
+        public async Task<IServiceResponse<object>> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletPaymentLog = await _portalService.AddWaybillPaymentLogFromApp(walletPaymentLogDTO);
 
                 return new ServiceResponse<object>
                 {
@@ -2236,6 +2250,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<IntlShipmentRequestDTO>>
                 {
                     Object = requests
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("consolidatedintlshipments")]
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _magayaService.GetConsolidatedShipmentRequestForUser();
+
+                return new ServiceResponse<List<IntlShipmentRequestDTO>>
+                {
+                    Object = result
                 };
             });
         }

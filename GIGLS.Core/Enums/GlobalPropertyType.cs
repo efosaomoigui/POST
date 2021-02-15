@@ -70,6 +70,14 @@
         MagayaInAppMessage,
         IntlShipmentPaymentMonitoringEmails,
         BasicRankPercentage,
-        ClassRankPercentage
+        ClassRankPercentage,
+        RedirectLinkForApps,
+        PaymentLinkCustomerPortal,
+        VisaBusinessCardList,
+        VisaBusinessCardBonus,
+        VisaBonusEmail,
+        InternationalAdditionalPrice,
+        ClassCustomerDiscount,
+        NormalCustomerDiscount
     }
 }

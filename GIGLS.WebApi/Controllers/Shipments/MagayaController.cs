@@ -55,7 +55,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<Tuple<api_session_error, string, string>>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
+        public async Task<IServiceResponse<Tuple<api_session_error, string, string>>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -66,7 +66,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.SetTransactions(access_key, MagayaShipmentDTO); 
+                var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
 
                 //4. Pass the return to the view or caller
                 return new ServiceResponse<Tuple<api_session_error, string, string>>()
@@ -112,7 +112,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddEntityInternational")]
-        public async Task<IServiceResponse<string>> AddEntityInternational(CustomerDTO custDTo)  
+        public async Task<IServiceResponse<string>> AddEntityInternational(CustomerDTO custDTo)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -131,7 +131,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("internationalShipmentRequest/{requestNumber}")]
-        public async Task<IServiceResponse<IntlShipmentRequestDTO>> GetShipment(string requestNumber) 
+        public async Task<IServiceResponse<IntlShipmentRequestDTO>> GetShipment(string requestNumber)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -139,6 +139,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IntlShipmentRequestDTO>
                 {
                     Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getMagayaCharge")]
+        public async Task<IServiceResponse<Dictionary<string, double>>> getMagayaCharge(TheChargeCombo chargecombo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var charge = await _service.retMagayaShipmentCharges(chargecombo);
+                return new ServiceResponse<Dictionary<string, double>>
+                {
+                    Object = charge
                 };
             });
         }
@@ -181,7 +196,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetIntltransactionRequest")]
-        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri]FilterOptionsDto filterOptionsDto) 
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntltransactionRequest([FromUri] FilterOptionsDto filterOptionsDto)
         {
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
@@ -273,7 +288,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.LargeQueryLog(access_key, querydto); 
+                var result = _service.LargeQueryLog(access_key, querydto);
 
                 //3. Pass the return to the view or caller
                 return new ServiceResponse<TransactionResults>()
@@ -308,7 +323,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetMagayaWaybillNo")]
-        public async Task<IServiceResponse<string>> GetMagayaWaybillNo([FromUri] NumberGeneratorType numbertype = NumberGeneratorType.MagayaWb) 
+        public async Task<IServiceResponse<string>> GetMagayaWaybillNo([FromUri] NumberGeneratorType numbertype = NumberGeneratorType.MagayaWb)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -342,7 +357,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [HttpGet]
         [Route("GetDestinationServiceCenters")]
-        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetDestinationServiceCenters()  
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetDestinationServiceCenters()
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -542,7 +557,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
                 string xmlTransList;
                 int more_results;
-                var _result = _service.GetNextTransByDate2(access_key, out  more_results, ref cookies, type);
+                var _result = _service.GetNextTransByDate2(access_key, out more_results, ref cookies, type);
 
                 var transactions = new TransactionResults()
                 {
@@ -556,10 +571,26 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 {
                     Object = transactions,
                     Cookies = cookies,
-                    more_reults= more_results
+                    more_reults = more_results
                 };
             });
 
+        }
+
+
+        [HttpGet]
+        [Route("confirmreceipt/{itemID}")]
+        public async Task<IServiceResponse<bool>> GetShipmentActivities(int ItemID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.UpdateReceived(ItemID);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+                };
+            });
         }
     }
 }

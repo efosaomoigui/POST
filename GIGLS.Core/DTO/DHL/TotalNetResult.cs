@@ -4,5 +4,8 @@
     {
         public string Currency { get; set; }
         public decimal Amount { get; set; }
+        public decimal VAT { get; set; }
+        public decimal Insurance { get; set; }
+        public decimal GrandTotal { get; set; }
     }
 }

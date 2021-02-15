@@ -1053,6 +1053,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
+        //Get info about Shipment Waybill that belongs to Service Center
+        public Task<List<InvoiceViewDTO>> GetWaybillForServiceCentre(string waybill, int[] serviceCentreIds)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false && s.Waybill == waybill);
+
+            //filter by service center of the login user
+            if (serviceCentreIds.Length > 0)
+            {
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join u in Context.Users on s.UserId equals u.Id
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               UserName = u.FirstName + " " + u.LastName,
+                                               CompanyType = s.CompanyType,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
+            return Task.FromResult(resultDto);
+        }
+
 
     }
 
@@ -1128,6 +1168,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             IsProcessed = a.IsProcessed,
                             ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
+                            Consolidated = a.Consolidated,
+                            Received = b.Received,
+                            ReceivedBy = b.ReceivedBy,
+                            ItemCount = b.ItemCount
 
 
                         }
@@ -1360,7 +1404,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       Length = x.Length,
                                                       Width = x.Width,
                                                       Height = x.Height,
-                                                      ItemSenderfullName = x.ItemSenderfullName
+                                                      ItemSenderfullName = x.ItemSenderfullName,
+                                                      Received = x.Received,
+                                                      ReceivedBy = x.ReceivedBy,
+                                                      ItemCount = x.ItemCount
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -1379,7 +1426,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   DestinationCountryId = r.DestinationCountryId,
                                                   IsProcessed = r.IsProcessed,
                                                   ItemSenderfullName = r.ItemSenderfullName,
-
+                                                  Consolidated = r.Consolidated
+  
                                               }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentRequestDTO.Count();
@@ -1419,7 +1467,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               DestinationCountryId = r.DestinationCountryId,
                                               IsProcessed = r.IsProcessed,
                                               ItemSenderfullName = r.ItemSenderfullName,
-
+                                              Consolidated = r.Consolidated,
+                                            
                                           }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName == filterValue)).ToList();
 
                 //filter
@@ -1565,6 +1614,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             IsProcessed = a.IsProcessed ,
                             ItemSenderfullName = b.ItemSenderfullName,
                             ItemValue = b.ItemValue,
+                            Consolidated = a.Consolidated,
+                            Received = b.Received,
+                            ReceivedBy = b.ReceivedBy,
+                            ItemCount = b.ItemCount
 
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
@@ -1631,7 +1684,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsProcessed = a.IsProcessed,
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
-
+                                           Consolidated = a.Consolidated,
+                                           Received = a.Received,
+                                           ReceivedBy = a.ReceivedBy,
+                                           ItemCount = a.ItemCount
                                        }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue 
                                        || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue 
                                        || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue || s.storeName == dateFilterCriteria.FilterValue || s.ItemSenderfullName == dateFilterCriteria.FilterValue )).OrderByDescending(x => x.DateCreated).ToList();
@@ -1707,6 +1763,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsProcessed = a.IsProcessed,
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
+                                           Consolidated = a.Consolidated,
+                                           Received = a.Received,
+                                           ReceivedBy = a.ReceivedBy,
+                                           ItemCount = a.ItemCount
 
                                        }).Where(b => b.IsProcessed == false && b.DateCreated >= startDate && b.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
                 }
@@ -1775,6 +1835,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     Value = r.Value,
                                                     IsProcessed = r.IsProcessed,
                                                     PickupOptions = r.PickupOptions,
+                                                    Consolidated = r.Consolidated,
                                                     ShipmentRequestItems = _context.IntlShipmentRequestItem.Where(s => s.IntlShipmentRequestId == r.IntlShipmentRequestId)
                                                                         .Select(x => new IntlShipmentRequestItemDTO
                                                                         {
@@ -1797,6 +1858,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             SerialNumber = x.SerialNumber ,
                                                                             ItemValue = x.ItemValue,
                                                                             ItemSenderfullName = x.ItemSenderfullName,
+                                                                            Received = x.Received,
+                                                                            ReceivedBy = x.ReceivedBy,
+                                                                            ItemCount = x.ItemCount
                                                                         }).ToList()
                                                 }).ToList();
 

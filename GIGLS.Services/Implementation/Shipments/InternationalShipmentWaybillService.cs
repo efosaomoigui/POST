@@ -51,6 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return await _uow.InternationalShipmentWaybill.GetInternationalWaybills(dateFilterCriteria);
         }
+        
         public async Task<List<InternationalShipmentWaybillDTO>> GetInternationalShipmentOnwardDeliveryWaybills()
         {
             var shipment = await _uow.InternationalShipmentWaybill.FindAsync(x => x.InternationalShipmentStatus == InternationalShipmentStatus.OnwardDelivery);
@@ -88,6 +89,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //update the status
             isWaybillArrived.ForEach(x => x.InternationalShipmentStatus = InternationalShipmentStatus.OnwardDelivery);
+
+            //add tracking history
+
             await _uow.CompleteAsync();       
             return true;
         }
@@ -119,6 +123,7 @@ namespace GIGLS.Services.Implementation.Shipments
             isWaybillArrived.ForEach(x => x.InternationalShipmentStatus = InternationalShipmentStatus.Delivered);
 
             //release those shipment  too 
+            //add tracking history
             await _uow.CompleteAsync();
             return true;
         }

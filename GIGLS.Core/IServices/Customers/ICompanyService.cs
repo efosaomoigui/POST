@@ -1,5 +1,6 @@
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
@@ -24,12 +25,14 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption);
         Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId);
         Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria);
-        Task<List<CompanyDTO>> GetCompanyByEmail(string email);
+        Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank);
         Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId);
         Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria);
         Task<EcommerceAgreementDTO> GetCustomerPendingRequestsById(int companyId);
         Task<List<CompanyDTO>> GetCompaniesBy(List<string> codes);
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
+        Task SendMessageToNewSignUps(object obj);
+        Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

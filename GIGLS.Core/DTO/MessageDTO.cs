@@ -1,10 +1,15 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO
 {
     public class MessageDTO : BaseDomainDTO
     {
+        public MessageDTO()
+        {
+            Emails = new List<string>();
+        }
         public int MessageId { get; set; }
         public string Body { get; set; }
         public string Subject { get; set; }
@@ -24,6 +29,7 @@ namespace GIGLS.Core.DTO
         public string Date { get; set; }
         public string Amount { get; set; }
         public string Currency { get; set; }
+        public List<string> Emails { get; set; }
 
 
         public SMSSenderPlatform SMSSenderPlatform { get; set; }

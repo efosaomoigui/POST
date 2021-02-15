@@ -106,7 +106,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
         private readonly IShipmentService _shipmentService; 
-        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;   
+        private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;       
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -119,7 +120,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService) 
+            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService,
+            IWaybillPaymentLogService waybillPaymentLogService) 
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -162,6 +164,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _companyService = companyService;
             _shipmentService  = shipmentService;
             _movementManifestService = movementManifestService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -214,6 +217,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
+        public async Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _waybillPaymentLogService.AddWaybillPaymentLogFromApp(walletPaymentLogDto);
             return walletPaymentLog;
         }
 
@@ -281,29 +290,61 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             PaymentResponse result = new PaymentResponse();
 
-            //1. Get PaymentLog
-            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(referenceCode);
 
-            if (paymentLog != null)
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
                 {
-                    result = await VerifyAndValidateUSSDPayment(referenceCode);
-                }
-                else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
-                {
-                    result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                    {
+                        result = await VerifyAndValidateUSSDPayment(referenceCode);
+                    }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                    {
+                        result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    }
+                    else
+                    {
+                        result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    }
                 }
                 else
                 {
-                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    result.Result = false;
+                    result.Message = "";
+                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
                 }
             }
             else
             {
-                result.Result = false;
-                result.Message = "";
-                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                    {
+                        result = await VerifyAndValidateUSSDPayment(referenceCode);
+                    }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                    {
+                        result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    }
+                    else
+                    {
+                        result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                    }
+                }
+                else
+                {
+                    result.Result = false;
+                    result.Message = "";
+                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                }
             }
 
             return result;
@@ -764,6 +805,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.Email = user.Email.Trim().ToLower();
             }
+            if (!String.IsNullOrEmpty(user.PhoneNumber))
+            {
+                user.PhoneNumber = user.PhoneNumber.Trim();
+            }
 
             //validate email
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
@@ -1196,6 +1241,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Id = registeredUser.Id;
                 await GenerateReferrerCode(user);
             }
+
+            ////SEND EMAIL TO NEW SIGNEE
+            var companyMessagingDTO = new CompanyMessagingDTO();
+            companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            companyMessagingDTO.Email = user.Email;
+            companyMessagingDTO.PhoneNumber = user.PhoneNumber;
+            companyMessagingDTO.Rank = Rank.Basic;
+            companyMessagingDTO.IsFromMobile = user.IsRegisteredFromMobile;
+            companyMessagingDTO.UserChannelType = user.UserChannelType;
+            await _companyService.SendMessageToNewSignUps(companyMessagingDTO);
 
             return result;
         }
@@ -2974,8 +3029,20 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
-
+            int count = 0;
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
+            if (requests.Any())
+            {
+                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
+                if (consolidated.Any())
+                {
+                    foreach (var item in consolidated)
+                    {
+                       count++;
+                        item.ItemCount = $"{count} of {count}";
+                    } 
+                }
+            }
 
             return requests;
         }
@@ -3084,6 +3151,21 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> VerifyBVNNo(string bvnNo)
         {
             return await _paystackPaymentService.VerifyBVN(bvnNo);
+        }
+
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
+        {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
+            if (refCode.StartsWith("wb"))
+            {
+                return WaybillWalletPaymentType.Waybill;
+            }
+
+            return WaybillWalletPaymentType.Wallet;
         }
     }
 }

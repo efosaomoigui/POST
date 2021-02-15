@@ -239,6 +239,11 @@ namespace GIGLS.Core.DTO.Shipments
         public string ItemDetails { get; set; }
 
         public bool IsMobile { get; set; }
+        public bool Consolidated { get; set; }
+        public bool FullyReceived { get; set; }
+        public string ConsolidationId { get; set; }
+        public string ItemCount { get; set; }
+
     }
 
     public class IntlShipmentDTO : BaseDomainDTO
@@ -246,6 +251,8 @@ namespace GIGLS.Core.DTO.Shipments
         public int IntlShipmentRequestId { get; set; }
 
         public string RequestNumber { get; set; }
+        public bool Consolidated { get; set; }
+        public string ConsolidationId { get; set; }
         public string ItemSenderfullName { get; set; }
 
         //General Details comes with role user 
@@ -322,6 +329,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string URL { get; set; }
         public string ItemDetails { get; set; }
         public decimal ItemValue { get; set; }
+        public string ItemCount { get; set; }
+        public bool Received { get; set; }
+        public string ReceivedBy { get; set; }
     }
 
     public class InternationalShipmentDTO : BaseDomainDTO
@@ -472,6 +482,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverState { get; set; }
+        public string ReceiverCity { get; set; }
+        public string CompanyType { get; set; }
 
         //Delivery Options
         public int DeliveryOptionId { get; set; } = 1;
@@ -503,7 +515,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int DestinationCountryId { get; set; }
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public int TimeInSeconds { get; set; }
-
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {
@@ -518,5 +529,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCargoed { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverCity { get; set; }
+
     }
 }

@@ -329,11 +329,6 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
-    <Compile Include="Controllers\Shipments\InternationalShipmentWaybillController.cs" />
-    <Compile Include="Controllers\Shipments\SuperManifestController.cs" />
-    <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />
-    <Compile Include="Controllers\Wallet\WalletPaymentLogForAllController.cs" />
-    <Compile Include="Helper\DbExtensions.cs" />
     <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
@@ -368,6 +363,7 @@
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\HUBManifestWaybillMappingController.cs" />
+    <Compile Include="Controllers\Shipments\InternationalShipmentWaybillController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
     <Compile Include="Controllers\Shipments\MagayaController.cs" />
     <Compile Include="Controllers\Shipments\ManifestController.cs" />
@@ -396,6 +392,7 @@
     <Compile Include="Controllers\Wallet\CashOnDeliveryBalanceController.cs" />
     <Compile Include="Controllers\Wallet\WalletController.cs" />
     <Compile Include="Controllers\Wallet\WalletPaymentLogController.cs" />
+    <Compile Include="Controllers\Wallet\WalletPaymentLogForAllController.cs" />
     <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />
     <Compile Include="Controllers\Wallet\WaybillPaymentLogController.cs" />
     <Compile Include="Controllers\Zone\CountryRouteZoneMapController.cs" />

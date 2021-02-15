@@ -1195,5 +1195,32 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var shipmentCollectionDTO = await _uow.ShipmentCollection.GetArrivedShipmentCollection(baseFilterCriteria);
+                if (shipmentCollectionDTO.Any())
+                {
+                    foreach (var item in shipmentCollectionDTO)
+                    {
+                        TimeSpan ts = item.ShipmentArrivedDate - item.ShipmentCreatedDate;
+                        item.Age = (int)ts.TotalHours;
+                        if (item.Age < 1)
+                        {
+                            item.Age = 1;
+                        }
+                    }
+                }
+                return shipmentCollectionDTO.OrderBy(x => x.Age).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
     }
 }

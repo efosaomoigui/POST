@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.Shipments;
 using System;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using System.Configuration;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -613,7 +614,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+            decimal deliveryOptionPrice = 0.0M; //await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
 
             //Get Ecommerce Return limit weight from GlobalProperty
             var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceReturnWeightLimit, pricingDto.CountryId);
@@ -1167,6 +1168,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 throw new GenericException("No shipment item", $"{(int)HttpStatusCode.BadRequest}");
             }
+
             decimal totalPrice = 0;
             decimal grandTotal = 0;
 
@@ -1182,6 +1184,7 @@ namespace GIGLS.Services.Business.Pricing
                 priceDTO.SpecialPackageId = item.SpecialPackageId.Value;
                 priceDTO.Width = Convert.ToDecimal(item.Width);
                 priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
+                priceDTO.CustomerCode = newShipmentDTO.CustomerCode;
 
                 if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Regular.ToString().ToLower())
                 {
@@ -1199,8 +1202,7 @@ namespace GIGLS.Services.Business.Pricing
                     totalPrice += itemPrice;
                 }
             }
-
-           
+                                                          
             //calculate the vat
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
@@ -1209,29 +1211,26 @@ namespace GIGLS.Services.Business.Pricing
             grandTotal += vatValue;
 
             //calculate insurance
-            var insuranceDTO = await _uow.Insurance.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
-            decimal insurance = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
-            grandTotal +=  insurance;
-
-            if (newShipmentDTO.CustomerType.ToLower() == "individual")
+            decimal insurance = 0.0m;
+            if (newShipmentDTO.DeclarationOfValueCheck > 0)
             {
-                //round up to the nearest whole number
-                var rem = grandTotal - Math.Truncate(grandTotal);
-                if (rem >= 50)
-                {
-                    grandTotal = Math.Floor(grandTotal);
-                }
-                else
-                {
-                    var factor = Convert.ToDecimal(Math.Pow(10, 0));
-                    grandTotal = Math.Round(grandTotal * factor) / factor;
-                }
+                insurance = await CalculateInsurance(newShipmentDTO);
+                grandTotal = grandTotal + insurance;
             }
 
+            if (newShipmentDTO.DiscountValue > 0)
+            {
+                var discount = newShipmentDTO.DiscountValue / 100m;
+                decimal distValue = grandTotal * discount.Value;
+                newPricingDTO.DiscountedValue = distValue;
+                grandTotal = grandTotal - distValue;
+            }
+
+            var factor = Convert.ToDecimal(Math.Pow(10, -2));
             newPricingDTO.Vat = vatForItems;
             newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
-            newPricingDTO.GrandTotal = grandTotal;
+            newPricingDTO.GrandTotal = Math.Round(grandTotal * factor) / factor;
             return newPricingDTO;
         }
 
@@ -1275,6 +1274,51 @@ namespace GIGLS.Services.Business.Pricing
             decimal classRankValue = ((100M - classRankPercentage) / 100M);
             price = price * classRankValue;
             return price;
+        }
+
+        private async Task<decimal> CalculateInsurance(NewShipmentDTO newShipmentDTO)
+        {
+            decimal insurance = 0.0m;
+            decimal minimumDeclareValueCheck = 0.0m;
+            decimal declarationValue = Convert.ToDecimal(newShipmentDTO.DeclarationOfValueCheck);
+            if (newShipmentDTO.DepartureCountryId == 1)
+            {
+                var customerInfo = await _uow.Company.GetAsync(x => x.CustomerCode == newShipmentDTO.CustomerCode);
+                if (customerInfo != null)
+                {
+                    if (customerInfo.Rank == Rank.Class)
+                    {
+                        var classValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckClass"];
+                        minimumDeclareValueCheck = Convert.ToDecimal(classValue);
+                    }
+                    else
+                    {
+                        //all customer in Nigeria
+                        var basicValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckBasic"];
+                        minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
+                    }
+                }
+                else
+                {
+                    //all customer in Nigeria
+                    var basicValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckBasic"];
+                    minimumDeclareValueCheck = Convert.ToDecimal(basicValue);
+                }
+            }
+            else
+            {
+                //Ghana
+                var ghanaValue = ConfigurationManager.AppSettings["MinimumDeclareValueCheckGhana"];
+                minimumDeclareValueCheck = Convert.ToDecimal(ghanaValue); ;
+            }
+
+            if(declarationValue > minimumDeclareValueCheck)
+            {
+                var insuranceDTO = await _uow.Insurance.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
+                decimal insuranceValue = (insuranceDTO != null) ? (insuranceDTO.Value / 100) : (1M / 100);
+                insurance = declarationValue * insuranceValue;
+            }
+            return insurance;
         }
     }
 }

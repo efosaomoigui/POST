@@ -8,6 +8,7 @@ using System.Web.Http;
 using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -200,7 +201,7 @@ namespace GIGLS.WebApi.Controllers.Customers
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var company = await _service.GetCompanyByEmail(searchDTO.searchItem);
+                var company = await _service.GetCompanyByEmail(searchDTO.searchItem, searchDTO.rank);
 
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -233,6 +234,21 @@ namespace GIGLS.WebApi.Controllers.Customers
             {
                 var companies = await _service.GetCustomerPendingRequestsById(companyId);
                 return new ServiceResponse<EcommerceAgreementDTO>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("classcustomers")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetClassCustomers(filterCriteria);
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies
                 };

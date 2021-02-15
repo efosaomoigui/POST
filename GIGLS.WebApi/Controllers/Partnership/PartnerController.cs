@@ -335,5 +335,36 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getunverifiedpartners")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetUnVerfiedPartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetUnVerifiedPartners(filterCriteria);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("contactpartner/{email}/")]
+        public async Task<IServiceResponse<bool>> SendWelcomeMailToPartner(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerService.ContactUnverifiedPartner(email);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }

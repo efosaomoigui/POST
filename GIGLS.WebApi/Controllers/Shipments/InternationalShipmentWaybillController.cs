@@ -82,7 +82,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPut]
         [Route("UpdateToEnrouteDelivery")]
         public async Task<IServiceResponse<bool>> UpdateToEnrouteDelivery(List<string> waybills)
         {
@@ -97,7 +97,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPut]
         [Route("UpdateToDelivered")]
         public async Task<IServiceResponse<bool>> UpdateToDelivered(List<string> waybills)
         {

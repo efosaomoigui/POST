@@ -11,6 +11,9 @@ using AutoMapper;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Dashboard;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
@@ -27,48 +30,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                var companies = _context.Company;
-                var companiesDto = from c in companies
-                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
-                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
-                                   select new CompanyDTO
-                                   {
-                                       CompanyId = c.CompanyId,
-                                       Name = c.Name,
-                                       RcNumber = c.RcNumber,
-                                       Email = c.Email,
-                                       City = c.City,
-                                       State = c.State,
-                                       Address = c.Address,
-                                       isCodNeeded = c.isCodNeeded,
-                                       PhoneNumber = c.PhoneNumber,
-                                       Industry = c.Industry,
-                                       CompanyType = c.CompanyType,
-                                       CompanyStatus = c.CompanyStatus,
-                                       Discount = c.Discount,
-                                       SettlementPeriod = c.SettlementPeriod,
-                                       CustomerCode = c.CustomerCode,
-                                       CustomerCategory = c.CustomerCategory,
-                                       ReturnOption = c.ReturnOption,
-                                       ReturnServiceCentre = c.ReturnServiceCentre,
-                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
-                                       ReturnAddress = c.ReturnAddress,
-                                       DateCreated = c.DateCreated,
-                                       DateModified = c.DateModified,
-                                       WalletBalance = w.Balance,
-                                       UserActiveCountryId = c.UserActiveCountryId,
-                                       Country = new CountryDTO
-                                       {
-                                           CountryId = co.CountryId,
-                                           CountryName = co.CountryName,
-                                           CurrencySymbol = co.CurrencySymbol,
-                                           CurrencyCode = co.CurrencyCode,
-                                           PhoneNumberCode = co.PhoneNumberCode
-                                       },
-                                       UserActiveCountryName = co.CountryName,
-                                       Rank = c.Rank
-                                   };
-                return Task.FromResult(companiesDto.ToList());
+                var companies = _context.Company.AsQueryable();
+                var companiesDto = GetListOfCompany(companies);
+                return companiesDto;
             }
             catch (Exception)
             {
@@ -91,48 +55,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
 
-                var companies = Context.Company.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
-                var companiesDto = from c in companies
-                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
-                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
-                                   select new CompanyDTO
-                                   {
-                                       CompanyId = c.CompanyId,
-                                       Name = c.Name,
-                                       RcNumber = c.RcNumber,
-                                       Email = c.Email,
-                                       City = c.City,
-                                       State = c.State,
-                                       Address = c.Address,
-                                       isCodNeeded = c.isCodNeeded,
-                                       PhoneNumber = c.PhoneNumber,
-                                       Industry = c.Industry,
-                                       CompanyType = c.CompanyType,
-                                       CompanyStatus = c.CompanyStatus,
-                                       Discount = c.Discount,
-                                       SettlementPeriod = c.SettlementPeriod,
-                                       CustomerCode = c.CustomerCode,
-                                       CustomerCategory = c.CustomerCategory,
-                                       ReturnOption = c.ReturnOption,
-                                       ReturnServiceCentre = c.ReturnServiceCentre,
-                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
-                                       ReturnAddress = c.ReturnAddress,
-                                       DateCreated = c.DateCreated,
-                                       DateModified = c.DateModified,
-                                       WalletBalance = w.Balance,
-                                       UserActiveCountryId = c.UserActiveCountryId,
-                                       Country = new CountryDTO
-                                       {
-                                           CountryId = co.CountryId,
-                                           CountryName = co.CountryName,
-                                           CurrencySymbol = co.CurrencySymbol,
-                                           CurrencyCode = co.CurrencyCode,
-                                           PhoneNumberCode = co.PhoneNumberCode
-                                       },
-                                       UserActiveCountryName = co.CountryName,
-                                       Rank = c.Rank
-                                   };
-                return Task.FromResult(companiesDto.ToList());
+                var companies = _context.Company.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+                var companiesDto = GetListOfCompany(companies);
+                return companiesDto;
             }
             catch (Exception)
             {
@@ -252,7 +177,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        AccountName = c.AccountName,
                                        AccountNumber = c.AccountNumber,
                                        BankName = c.BankName,
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                        RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -351,7 +277,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                       RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -400,7 +327,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
-                                       Rank = c.Rank
+                                       Rank = c.Rank,
+                                       RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -446,47 +374,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                     email = email.ToLower();
 
                 var companies = _context.Company.Where(x => x.Email.ToLower() == email || x.CustomerCode.ToLower() == email || x.Name.Contains(email) || x.PhoneNumber.Contains(email));
-                var companiesDto = from c in companies
-                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
-                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
-                                   select new CompanyDTO
-                                   {
-                                       CompanyId = c.CompanyId,
-                                       Name = c.Name,
-                                       RcNumber = c.RcNumber,
-                                       Email = c.Email,
-                                       City = c.City,
-                                       State = c.State,
-                                       Address = c.Address,
-                                       isCodNeeded = c.isCodNeeded,
-                                       PhoneNumber = c.PhoneNumber,
-                                       Industry = c.Industry,
-                                       CompanyType = c.CompanyType,
-                                       CompanyStatus = c.CompanyStatus,
-                                       Discount = c.Discount,
-                                       SettlementPeriod = c.SettlementPeriod,
-                                       CustomerCode = c.CustomerCode,
-                                       CustomerCategory = c.CustomerCategory,
-                                       ReturnOption = c.ReturnOption,
-                                       ReturnServiceCentre = c.ReturnServiceCentre,
-                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
-                                       ReturnAddress = c.ReturnAddress,
-                                       DateCreated = c.DateCreated,
-                                       DateModified = c.DateModified,
-                                       WalletBalance = w.Balance,
-                                       UserActiveCountryId = c.UserActiveCountryId,
-                                       Country = new CountryDTO
-                                       {
-                                           CountryId = co.CountryId,
-                                           CountryName = co.CountryName,
-                                           CurrencySymbol = co.CurrencySymbol,
-                                           CurrencyCode = co.CurrencyCode,
-                                           PhoneNumberCode = co.PhoneNumberCode
-                                       },
-                                       UserActiveCountryName = co.CountryName,
-                                       Rank = c.Rank
-                                   };
-                return Task.FromResult(companiesDto.ToList());
+                var companiesDto = GetListOfCompany(companies);
+                return companiesDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank)
+        {
+            try
+            {
+                if (email != null)
+                    email = email.ToLower();
+
+                var companies = _context.Company.Where(x => x.Email.ToLower() == email || x.CustomerCode.ToLower() == email || x.Name.Contains(email) || x.PhoneNumber.Contains(email));
+
+                if(rank != null)
+                {
+                    companies = companies.Where(x => x.Rank == rank);
+                }
+                var companiesDto = GetListOfCompany(companies);
+                return companiesDto;
             }
             catch (Exception)
             {
@@ -501,6 +412,114 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companies = Context.Company.Where(x => codes.Contains(x.CustomerCode)).ToList();
                 var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
                 return Task.FromResult(companiesDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CompanyDTO>> GetCompanies(Rank rank, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            try
+            {
+                var company = _context.Company.Where(x => x.Rank == rank).AsQueryable();
+
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                company = company.Where(s => s.RankModificationDate >= startDate && s.RankModificationDate < endDate);
+                var companiesDto = GetListOfCompany(company);
+
+                return companiesDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private Task<List<CompanyDTO>> GetListOfCompany(IQueryable<Company> companies)
+        {
+            var companiesDto = from c in companies
+                               join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                               join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                               select new CompanyDTO
+                               {
+                                   CompanyId = c.CompanyId,
+                                   Name = c.Name,
+                                   RcNumber = c.RcNumber,
+                                   Email = c.Email,
+                                   City = c.City,
+                                   State = c.State,
+                                   Address = c.Address,
+                                   isCodNeeded = c.isCodNeeded,
+                                   PhoneNumber = c.PhoneNumber,
+                                   Industry = c.Industry,
+                                   CompanyType = c.CompanyType,
+                                   CompanyStatus = c.CompanyStatus,
+                                   Discount = c.Discount,
+                                   SettlementPeriod = c.SettlementPeriod,
+                                   CustomerCode = c.CustomerCode,
+                                   CustomerCategory = c.CustomerCategory,
+                                   ReturnOption = c.ReturnOption,
+                                   ReturnServiceCentre = c.ReturnServiceCentre,
+                                   ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
+                                   ReturnAddress = c.ReturnAddress,
+                                   DateCreated = c.DateCreated,
+                                   DateModified = c.DateModified,
+                                   WalletBalance = w.Balance,
+                                   UserActiveCountryId = c.UserActiveCountryId,
+                                   Country = new CountryDTO
+                                   {
+                                       CountryId = co.CountryId,
+                                       CountryName = co.CountryName,
+                                       CurrencySymbol = co.CurrencySymbol,
+                                       CurrencyCode = co.CurrencyCode,
+                                       PhoneNumberCode = co.PhoneNumberCode
+                                   },
+                                   UserActiveCountryName = co.CountryName,
+                                   Rank = c.Rank,
+                                   RankModificationDate = c.RankModificationDate
+                               };
+            return Task.FromResult(companiesDto.ToList());
+        }
+
+        public async Task<CustomerBreakdownDTO> GetNoOfBasicAndClassCustomers(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new CustomerBreakdownDTO
+                {
+                    EcommerceBasic = 0,
+                    EcommerceClass = 0
+                };
+
+                var date = DateTime.Now;
+
+                //declare parameters for the stored procedure
+                SqlParameter endDate = new SqlParameter("@EndDate", date);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<CustomerBreakdownDTO>("EcommerceCustomers " +
+                   "@EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result.EcommerceBasic = summary.EcommerceBasic;
+                    result.EcommerceClass = summary.EcommerceClass;
+                }
+
+                return await Task.FromResult(result);
             }
             catch (Exception)
             {

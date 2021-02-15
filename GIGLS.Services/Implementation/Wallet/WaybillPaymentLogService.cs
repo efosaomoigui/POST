@@ -7,18 +7,18 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.IServices.Zone;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,9 +32,11 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IPaystackPaymentService _paystackService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly IUssdService _ussdService;
+        private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
         public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
-            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, IUssdService ussdService)
+            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, IUssdService ussdService,
+            ICountryRouteZoneMapService countryRouteZoneMapService)
         {
             _uow = uow;
             _userService = userService;
@@ -42,17 +44,13 @@ namespace GIGLS.Services.Implementation.Wallet
             _paystackService = paystackService;
             _flutterwavePaymentService = flutterwavePaymentService;
             _ussdService = ussdService;
+            _countryRouteZoneMapService = countryRouteZoneMapService;
             MapperConfig.Initialize();
         }
 
         public async Task<PaystackWebhookDTO> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
             var response = new PaystackWebhookDTO();
-
-            if (waybillPaymentLog.UserId == null)
-            {
-                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
-            }
 
             //check if any transaction on the waybill is successful
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
@@ -68,6 +66,17 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
+                //check the country
+                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
+                waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+
+                //if the country is not Nigeria or Ghana, block it
+                if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
+                {
+                    throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
                 {
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
@@ -85,6 +94,72 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
                             
+            return response;
+        }
+
+        public async Task<PaystackWebhookDTO> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            var response = new PaystackWebhookDTO();
+
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybillPaymentLog.Waybill);
+            if (invoice == null)
+            {
+                throw new GenericException($"Waybill {waybillPaymentLog.Waybill}  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                response.Status = false;
+                response.Message = $"Payment already made for the Shipment {waybillPaymentLog.Waybill}";
+                response.data.Message = $"Payment already made for the Shipment {waybillPaymentLog.Waybill}";
+                response.data.Status = "failed";
+                return response;
+            }
+            else
+            {
+                //check if any transaction on the waybill is successful
+                var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                    .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
+
+                if (paymentLog != null)
+                {
+                    response.Status = false;
+                    response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                    response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                    response.data.Status = "failed";
+                    return response;
+                }
+                else
+                {               
+                    //check the country
+                    waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                    var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
+                    waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                                        
+                    //if the country is not Nigeria or Ghana, block it
+                    if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
+                    {
+                        throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
+                    decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
+
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == waybillPaymentLog.PaymentCountryId);
+                    waybillPaymentLog.Currency = country.CurrencyCode;
+                    waybillPaymentLog.PhoneNumber = user.PhoneNumber;
+                    waybillPaymentLog.Email = user.Email;
+                    waybillPaymentLog.Amount = amountToDebit;
+                    var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
+                    _uow.WaybillPaymentLog.Add(newPaymentLog);
+                    await _uow.CompleteAsync();
+
+                    response.Amount = amountToDebit;
+                    response.Status = true;
+                    response.Message = $"{waybillPaymentLog.Reference}";
+                    response.data = null;
+                }
+            }
+
             return response;
         }
 
@@ -138,12 +213,11 @@ namespace GIGLS.Services.Implementation.Wallet
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
-
             return refCode;
         }
 
         private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
-        {    
+        {
             waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
             //3. send the request to paystack gateway
@@ -552,5 +626,28 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return await _ussdService.GetGatewayCode();
         }
+
+        private async Task<decimal> GetActualAmountToDebit(string waybill, int customerCountryId)
+        {
+            decimal amountToDebit = 0.00M;
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipment == null)
+            {
+                throw new GenericException($"Waybill {waybill}  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            amountToDebit = shipment.GrandTotal;
+
+            //2. If the customer country !== Departure Country, Convert the payment
+            if (customerCountryId != shipment.DepartureCountryId)
+            {
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(customerCountryId, shipment.DepartureCountryId);
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            return amountToDebit;
+        }
+
     }
 }

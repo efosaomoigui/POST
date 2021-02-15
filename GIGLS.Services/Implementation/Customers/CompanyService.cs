@@ -20,6 +20,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -87,6 +88,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.RankModificationDate = DateTime.UtcNow;
 
                 //Enable Eligibility so that the customer can create shipment on GIGGO APP
                 newCompany.IsEligible = true;
@@ -544,11 +546,11 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank)
         {
             try
             {
-                return _uow.Company.GetCompanyByEmail(email);
+                return _uow.Company.GetCompanyByEmail(email, rank);
             }
             catch (Exception)
             {
@@ -661,6 +663,8 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                 newCompany.Rank = Rank.Basic;
+                newCompany.RankModificationDate = DateTime.UtcNow;
+
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -767,6 +771,27 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
+
+                //SEND EMAIL TO NEW SIGNEE
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    foreach (string email in chairmanEmails)
+                    {
+                        companyMessagingDTO.Emails.Add(email);
+                    }
+                }
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsFromMobile;
+                companyMessagingDTO.UserChannelType = userChannelType;
+                await SendMessageToNewSignUps(companyMessagingDTO);
                 return result;
             }
             catch (Exception)
@@ -783,53 +808,80 @@ namespace GIGLS.Services.Implementation.Customers
                 if (userValidationDTO == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Invalid payload";
+                    result.Message = "Invalid payload";
                     return result;
                 }
 
                 if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"User code or rank not provided";
+                    result.Message = "User code or rank not provided";
                     return result;
                 }
 
+                var company = await  _uow.Company.GetAsync(x => x.CustomerCode == userValidationDTO.UserCode);
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Company information does not exist";
+                    return result;
+                }
 
-                var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
                 if (userValidationDTO.Rank == Rank.Class)
                 {
                     //make the BVN compulsory
                     if (String.IsNullOrEmpty(userValidationDTO.BVN))
                     {
                         result.Succeeded = false;
-                        result.Message = $"User BVN not provided";
+                        result.Message = "User BVN not provided";
                         return result;
                     }
-                    company.BVN = userValidationDTO.BVN;
                     company.isCodNeeded = true;
                 }
-                if (userValidationDTO.Rank == Rank.Basic)
+                else
                 {
                     company.isCodNeeded = false;
                 }
-                if (company == null)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"Company information does not exist";
-                    return result;
-                }
+                
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
+                company.RankModificationDate = DateTime.Now;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
-                _uow.RankHistory.Add(new Core.Domain.RankHistory
+                _uow.RankHistory.Add(new RankHistory
                 {
                     CustomerName = companyDTO.Name,
                     CustomerCode = companyDTO.CustomerCode,
-                    RankType = userValidationDTO.RankType,
-                    DateCreated = DateTime.Now,
-                    DateModified = DateTime.Now
+                    RankType = userValidationDTO.RankType
                 });
-                _uow.Complete();
+                await _uow.CompleteAsync();
+
+                //send email for upgrade customers
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    //send a copy to chairman
+                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+                    if (chairmanEmail != null)
+                    {
+                        //seperate email by comma and send message to those email
+                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                        foreach (string email in chairmanEmails)
+                        {
+                           companyMessagingDTO.Emails.Add(email);
+                        }
+                    }
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO); 
+                }
+
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
@@ -840,6 +892,66 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task SendMessageToNewSignUps(object obj)
+        {
+            try
+            {
+                if (obj is CompanyMessagingDTO)
+                {
+                    var company = (CompanyMessagingDTO)obj;
+                    if (company.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+                    }
+                    else if (company.UserChannelType == UserChannelType.Partner)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
+                    }
+                    else if (company.IsFromMobile)
+                    {
+                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                        }
+                    }
+                    else
+                    {
+                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await _uow.Company.GetCompanies(Rank.Class, filterCriteria);
+        }
+
+
     }
         
 }

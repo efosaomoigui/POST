@@ -15,6 +15,8 @@ using Newtonsoft.Json;
 using System.Linq;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
+using System.Net;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -31,7 +33,7 @@ namespace GIGLS.Services.Implementation.Customers
             _companyService = companyService;
             MapperConfig.Initialize();
         }
-        
+
         private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
         {
             var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
@@ -132,7 +134,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public async Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO) 
+        public async Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO)
         {
             try
             {
@@ -248,7 +250,7 @@ namespace GIGLS.Services.Implementation.Customers
                     customerDTO.CustomerType = CustomerType.Company;
 
                     return customerDTO;
-                }                
+                }
                 else
                 {
                     // handle IndividualCustomers
@@ -432,7 +434,7 @@ namespace GIGLS.Services.Implementation.Customers
             var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
             var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
             nodeURL = $"{nodeURL}{url}?waybillNumber={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
-         
+
             HttpResponseMessage response = await client.GetAsync(nodeURL);
             response.EnsureSuccessStatusCode();
             string jObject = await response.Content.ReadAsStringAsync();
@@ -443,7 +445,7 @@ namespace GIGLS.Services.Implementation.Customers
                 foreach (var item in result.Data.ApiList)
                 {
                     //get actions performed on shipment
-                   int actionIndx = item.Url.LastIndexOf('/');
+                    int actionIndx = item.Url.LastIndexOf('/');
                     actionIndx++;
                     var action = item.Url.Substring(actionIndx);
                     var partnerName = String.Empty;
@@ -454,7 +456,7 @@ namespace GIGLS.Services.Implementation.Customers
                         if (partnerInfo != null)
                         {
                             partnerName = partnerInfo.PartnerName;
-                            partnerPhoneNo = partnerInfo.PhoneNumber; 
+                            partnerPhoneNo = partnerInfo.PhoneNumber;
                         }
                     }
                     var obj = new ShipmentActivityDTO
@@ -511,7 +513,7 @@ namespace GIGLS.Services.Implementation.Customers
                                 throw new GenericException($"Customer is suspended or pending");
                             }
                         }
-                        result = coporate; 
+                        result = coporate;
                     }
                 }
                 else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
@@ -541,6 +543,40 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        private async Task<GIGL.GIGLS.Core.Domain.User> GetInternationalCustomer(string email)
+        {
+            var user = await _uow.User.GetUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+            else if (user.IsInternational == false)
+            {
+                throw new GenericException($"{user.Email} is not an International User", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return user;
+        }
+
+        public async Task<UserDTO> GetInternationalUser(string email)
+        {
+            var user = await GetInternationalCustomer(email); 
+
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<bool> DeactivateInternationalUser(string email)
+        {
+            var user = await GetInternationalCustomer(email);
+
+
+            user.IsInternational = false;
+            await _uow.User.UpdateUser(user.Id, user);
+            return true;
+
         }
 
     }

@@ -13,7 +13,6 @@ namespace GIGLS.Core.DTO.Wallet
         }
 
         public int WaybillPaymentLogId { get; set; }
-
         public string Waybill { get; set; }
         public string Reference { get; set; }
         public decimal Amount { get; set; }
@@ -32,6 +31,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Email { get; set; }
         public string NetworkProvider { get; set; }
         public string GatewayCode { get; set; }
+        public int PaymentCountryId { get; set; }
 
         public FlutterWaveDTO FlutterWaveData { get; set; }
     }

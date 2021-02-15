@@ -97,5 +97,41 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         }
 
 
+        public async Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+                var startDate1 = queryDate.Item1;
+                var endDate1 = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
+                SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
+                SqlParameter destinationCentreId = new SqlParameter("@destinationCentreId", baseFilterCriteria.DestinationServiceCentreId);
+                SqlParameter departureCentreId = new SqlParameter("@departureCentreId", baseFilterCriteria.DepartureServiceCentreId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    destinationCentreId,
+                    departureCentreId
+                };
+
+                var result = _context.Database.SqlQuery<ShipmentCollectionDTOForArrived>("ArrivedShipment " +
+                   "@StartDate, @EndDate, @destinationCentreId, @departureCentreId",
+                   param).ToList();
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
