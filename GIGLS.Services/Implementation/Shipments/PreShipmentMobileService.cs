@@ -43,6 +43,7 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Node;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.DTO.Node;
+using Newtonsoft.Json;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -6320,6 +6321,19 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var dateFor3Hours = DateTime.Now.AddHours(-3);
                 var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).ToList();
+                //GET ASSIGNED PARTNER
+                HttpClient client = new HttpClient();
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
+                foreach (var item in preShipmentAssigned)
+                {
+                    nodeURL = $"{nodeURL}{url}?waybillNumber={item.Waybill}";
+                    HttpResponseMessage response = await client.GetAsync(nodeURL);
+                    response.EnsureSuccessStatusCode();
+                    string jObject = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<DataResponse>(jObject);
+
+                }
                 return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
             }
             catch (Exception ex)

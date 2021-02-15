@@ -52,5 +52,6 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public string PartnerId { get; set; }
         public string waybillNumber { get; set; }
+        public string assignedPartner { get; set; }
     }
 }
