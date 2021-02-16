@@ -280,7 +280,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsHUB = s.IsHUB,
                                     IsPublic = s.IsPublic,
                                     IsGateway = s.IsGateway
-
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -558,9 +557,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                   where c.CountryId == countryId
                                   select s;
 
-                var walkInCenters = centresData.Where(x => x.IsHUB == false && !(x.Name.EndsWith("GTWAY"))).Count();
-                var hubs = centresData.Where(x => x.IsHUB == true && !(x.Name.EndsWith("GTWAY"))).Count();
-                var gateway = centresData.Where(x => x.Name.EndsWith("GTWAY")).Count();
+                var walkInCenters = centresData.Where(x => x.IsHUB == false && x.IsGateway == false).Count();
+                var hubs = centresData.Where(x => x.IsHUB == true && x.IsGateway == false).Count();
+                var gateway = centresData.Where(x => x.IsGateway == true && x.IsHUB == false).Count();
 
                 result.Total = centresData.Count();
                 result.WalkIn = walkInCenters;
