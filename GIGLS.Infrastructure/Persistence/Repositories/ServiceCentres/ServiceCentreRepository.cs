@@ -320,6 +320,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     DateModified = s.DateModified,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
                                     IsHUB = s.IsHUB,
+                                    IsGateway = s.IsGateway,
                                     IsPublic = s.IsPublic,
                                     CountryDTO = new CountryDTO
                                     {
