@@ -4,6 +4,7 @@ namespace GIGLS.Core.Domain.Archived
 {
     public  class TransitWaybillNumber_Archive : BaseDomain_Archive
     {
+        [Key]
         public int TransitWaybillNumberId { get; set; }
 
         [MaxLength(100)]
