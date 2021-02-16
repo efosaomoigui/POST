@@ -138,8 +138,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
                 if (invoiceObj != null)
                 {
-                    invoiceObj.Shipment = null;
                     shipment.Invoice = invoiceObj;
+                    shipment.DepartureServiceCentre = invoiceObj.Shipment.DepartureServiceCentre;
+                    shipment.DestinationServiceCentre = invoiceObj.Shipment.DestinationServiceCentre;
                 }
             }
             return shipment;
@@ -163,7 +164,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
-            return await _deliveryOptionPriceService.GetDeliveryOptionPrices();
+            var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
+            deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+            return deliveryOption;
         }
 
         public async Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
