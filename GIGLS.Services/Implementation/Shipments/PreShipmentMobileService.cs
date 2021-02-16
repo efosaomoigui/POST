@@ -6324,14 +6324,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 //GET ASSIGNED PARTNER
                 HttpClient client = new HttpClient();
                 var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
+                var url = ConfigurationManager.AppSettings["NodePostShipment"];
                 foreach (var item in preShipmentAssigned)
                 {
-                    nodeURL = $"{nodeURL}{url}?waybillNumber={item.Waybill}";
+                  //  nodeURL = $"{nodeURL}/api/{url}?waybillNumber=1349053812";
+                    nodeURL = $"http://nodeapi.gigl-go.com/api/shipment/1349034538";
                     HttpResponseMessage response = await client.GetAsync(nodeURL);
-                    response.EnsureSuccessStatusCode();
-                    string jObject = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<DataResponse>(jObject);
+                    // response.EnsureSuccessStatusCode();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jObject = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<DataResponse>(jObject); 
+                    }
+                    else
+                    {
+                        continue;
+                    }
 
                 }
                 return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
