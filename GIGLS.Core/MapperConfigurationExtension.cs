@@ -470,6 +470,7 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentItem_Archive, ShipmentItemDTO>();
                 config.CreateMap<GeneralLedger_Archive, GeneralLedgerDTO>();
                 config.CreateMap<Invoice_Archive, InvoiceDTO>();
+                config.CreateMap<TransitWaybillNumber_Archive, TransitWaybillNumberDTO>();
 
             });
 
