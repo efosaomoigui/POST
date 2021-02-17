@@ -6321,28 +6321,9 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var dateFor3Hours = DateTime.Now.AddHours(-3);
                 var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).ToList();
-                //GET ASSIGNED PARTNER
-                HttpClient client = new HttpClient();
-                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
-                var url = ConfigurationManager.AppSettings["NodePostShipment"];
-                foreach (var item in preShipmentAssigned)
-                {
-                  //  nodeURL = $"{nodeURL}/api/{url}?waybillNumber=1349053812";
-                    nodeURL = $"http://nodeapi.gigl-go.com/api/shipment/1349034538";
-                    HttpResponseMessage response = await client.GetAsync(nodeURL);
-                    // response.EnsureSuccessStatusCode();
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string jObject = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<DataResponse>(jObject); 
-                    }
-                    else
-                    {
-                        continue;
-                    }
-
-                }
-                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
+                var dtos = Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
+                dtos = await AssignPartnerInfo(dtos);
+                return dtos;
             }
             catch (Exception ex)
             {
@@ -6355,7 +6336,55 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var dateFor3Hours = DateTime.Now.AddHours(-3);
                 var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).ToList();
-                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentPicked);
+                var dtos = Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentPicked);
+                dtos = await AssignPartnerInfo(dtos);
+                return dtos;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<List<PreShipmentMobileDTO>> AssignPartnerInfo(List<PreShipmentMobileDTO> preShipmentMobiles)
+        {
+            try
+            {
+                if (preShipmentMobiles == null)
+                {
+                    throw new GenericException("Invalid payload");
+                }
+                //GET ASSIGNED PARTNER
+                HttpClient client = new HttpClient();
+                foreach (var item in preShipmentMobiles)
+                {
+                    var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                    var url = ConfigurationManager.AppSettings["NodePostShipment"];
+                    nodeURL = $"{nodeURL}/api/{url}/waybillNumber={item.Waybill}";
+                    //   nodeURL = $"http://nodeapi.gigl-go.com/api/shipment/1349034538";
+                    HttpResponseMessage response = await client.GetAsync(nodeURL);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jObject = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<DataInfo>(jObject);
+                        if (result.PartnerInfo.assignedPartner != null)
+                        {
+                            var partnerInfo = await _uow.Partner.GetPartnerByUserId(result.PartnerInfo.assignedPartner);
+                            if (partnerInfo != null)
+                            {
+                                item.PartnerFirstName = partnerInfo.PartnerName;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                return preShipmentMobiles;
+
             }
             catch (Exception ex)
             {
