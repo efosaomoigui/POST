@@ -3167,5 +3167,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return WaybillWalletPaymentType.Wallet;
         }
+
+
+        public async Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            return await _companyService.UpgradeToEcommerce(newCompanyDTO);
+
+        }
     }
 }

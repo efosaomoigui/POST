@@ -2275,5 +2275,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("upgradetoecommerce")]
+        public async Task<IServiceResponse<CompanyDTO>> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _portalService.UpgradeToEcommerce(newCompanyDTO);
+                return new ServiceResponse<CompanyDTO>
+                {
+                    Object = company
+                };
+            });
+        }
+
     }
 }

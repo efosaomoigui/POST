@@ -130,4 +130,13 @@ namespace GIGLS.Core.DTO.Customers
 
 
     }
+
+    public class UpgradeToEcommerce
+    {
+        public string Name { get; set; }
+        public string[] Industry { get; set; }
+        public string[] ProductType { get; set; }
+        private CustomerCategory CustomerCategory { get; set; }
+        public string ReturnAddress { get; set; }
+    }
 }

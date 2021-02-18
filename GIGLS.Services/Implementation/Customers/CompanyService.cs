@@ -951,7 +951,69 @@ namespace GIGLS.Services.Implementation.Customers
             return await _uow.Company.GetCompanies(Rank.Class, filterCriteria);
         }
 
+        public async Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            CompanyDTO companyDTO = new CompanyDTO();
+            if (UserChannelType.IndividualCustomer.ToString().ToLower() == user.UserChannelType.ToString().ToLower())
+            {
+                var individualInfo = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (individualInfo == null)
+                {
+                    throw new GenericException("This user is not an Individual customer");
+                }
+                var industry = string.Join(",", newCompanyDTO.Industry);
+                var productType = string.Join(",", newCompanyDTO.ProductType);
+                var company = new Company()
+                {
+                    CompanyStatus = CompanyStatus.Active,
+                    CustomerCode = user.UserChannelCode,
+                    Rank = Rank.Basic,
+                    RankModificationDate = DateTime.Now,
+                    IsEligible = true,
+                    IsDeleted = false,
+                   // IsInternational = newCompanyDTO.isInternational,
+                    ProductType = productType,
+                    Industry = industry,
+                    CompanyType = CompanyType.Ecommerce,
+                    CustomerCategory = CustomerCategory.Normal,
+                    ReturnOption = PickupOptions.HOMEDELIVERY.ToString(),
+                    Name = newCompanyDTO.Name,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    City = individualInfo.City,
+                    State = individualInfo.State,
+                    Address = individualInfo.Address,
+                    UserActiveCountryId = user.UserActiveCountryId,
+                    isCodNeeded = false,
+                    IsRegisteredFromMobile = individualInfo.IsRegisteredFromMobile,
 
+                };
+                if (!String.IsNullOrEmpty(user.FirstName))
+                {
+                    CompanyContactPersonDTO personDto = new CompanyContactPersonDTO();
+                    personDto.FirstName = user.FirstName;
+                    personDto.LastName = user.LastName;
+                    personDto.Email = user.Email;
+                    personDto.PhoneNumber = user.PhoneNumber;
+                    var person = Mapper.Map<CompanyContactPerson>(personDto);
+                    person.CompanyId = company.CompanyId;
+                    _uow.CompanyContactPerson.Add(person);
+                }
+                user.UserChannelType = UserChannelType.Ecommerce;
+               _uow.Company.Add(company);
+                await _uow.CompleteAsync();
+                companyDTO = Mapper.Map<CompanyDTO>(company);
+            }
+            return companyDTO;
+        }
     }
         
 }
