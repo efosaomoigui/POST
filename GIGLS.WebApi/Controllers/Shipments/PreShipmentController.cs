@@ -188,6 +188,58 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("GetGIGGOProgressReport")]
+        public async Task<IServiceResponse<object>> GetGIGGOProgressReport()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReport();
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentCreated")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentCreated()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentCreated();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentAssigned")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentAssigned()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentAssigned();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentPicked")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentPicked()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentPicked();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
 
     }
 }
