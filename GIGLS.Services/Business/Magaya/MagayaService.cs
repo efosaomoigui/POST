@@ -1053,6 +1053,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     if (count < 1)
                     {
                         shipmentDTO.ConsolidationId = Guid.NewGuid().ToString();
+                        count = count + 1;
                     }
                     else
                     {
