@@ -1049,7 +1049,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     //get count of all unprocessed consolited item
                     var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
-                    count = consolidated.Count + 1;
+                    count = consolidated.Count;
                     if (count < 1)
                     {
                         shipmentDTO.ConsolidationId = Guid.NewGuid().ToString();
