@@ -5124,6 +5124,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
 
+                //VAT
+                var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == country.CountryId);
+                decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+
+                var vatForPreshipment = price * vat;
+                price += vatForPreshipment;
+
                 //Get Discount based on Customer Rank
                 var customerCode = await _userService.GetUserChannelCode();
                 var priceDTO = new PricingDTO
