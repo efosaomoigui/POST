@@ -40,5 +40,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public CountryDTO CountryDTO { get; set; }
         public bool IsPublic { get; set; }
         public bool HomeDeliveryStatus { get; set; }
+        public bool IsGateway { get; set; }
     }
 }
