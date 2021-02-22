@@ -1275,13 +1275,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
 
-                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                //Remove discount for Truck
-                var percentage = Convert.ToDecimal(discountPercent.Value);
-                if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                decimal percentage = 0.00M;
+                if (!string.IsNullOrWhiteSpace(preShipment.VehicleType))
                 {
-                    percentage = 0.00M;
+                    if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                    {
+                        percentage = 0.00M;
+                    }
+                    else
+                    {
+                        var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                        percentage = Convert.ToDecimal(discountPercent.Value);
+                    }
                 }
+
                 var percentageTobeUsed = ((100M - percentage) / 100M);
                 decimal estimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * percentageTobeUsed;
