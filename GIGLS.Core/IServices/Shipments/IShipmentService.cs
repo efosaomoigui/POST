@@ -43,7 +43,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
         Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
-        Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria); 
+        Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria);
 
         Task<Object[]> GetShipmentCreatedByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<Object[]> GetShipmentCreatedByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
@@ -89,10 +89,11 @@ namespace GIGLS.Core.IServices.Shipments
 
     public interface IMagayaService : IServiceDependencyMarker
     {
-        bool OpenConnection(out int access_key); 
+        bool OpenConnection(out int access_key);
         string CloseConnection(int access_key);
         //Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo magayaShipmentDTO);
         Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto);
+        Task<Dictionary<string, double>> retMagayaShipmentCharges(TheChargeCombo magayaShipmentDTO);
         string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
         string SetEntity(int access_key, EntityDto entitydto);
         EntityList GetEntities(int access_key, string startwithstring);
@@ -112,7 +113,7 @@ namespace GIGLS.Core.IServices.Shipments
         bool GetNextTransByDate(int access_key, ref string cookie, out string trans_list_xml, out int more_results);
         bool GetFirstTransByDate(int access_key, QuerylogDt0 querydto, out string cookie, out int more_results);
         //ShipmentList GetShipmentRangeByDate(int access_key, QuerylogDt0 querydto);
-        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type);
+        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results, ref string cookie, string type);
         TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
         Task<string> GetMagayaWayBillNumber(NumberGeneratorType numbertype);
         EntityList GetEntityObect();

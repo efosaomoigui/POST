@@ -1251,14 +1251,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
-                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
-                        {
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
-                        }
-                        else
-                        {
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
-                        }
+                        //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        //{
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        //}
+                        //else
+                        //{
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                        //}
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
                         preShipment.IsdeclaredVal = true;
                     }
                     else
@@ -1274,12 +1275,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
 
-                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
-                var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                decimal EstimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
-                preShipment.DeliveryPrice = Price * PercentageTobeUsed;
-                preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
+                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                //Remove discount for Truck
+                var percentage = Convert.ToDecimal(discountPercent.Value);
+                if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                {
+                    percentage = 0.00M;
+                }
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+                decimal estimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
+                preShipment.DeliveryPrice = Price * percentageTobeUsed;
+                preShipment.InsuranceValue = (estimatedDeclaredPrice * 0.01M);
                 //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
                 preShipment.CalculatedTotal = (double)(Price);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
@@ -5083,12 +5089,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Destination Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
-                var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
-                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
-
-                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
-                var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                var discount = (1 - PercentageTobeUsed);
+                var isWithinProcessingTime = await WithinProcessingTime(country.CountryId);
+                //var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
+                //var percentage = Convert.ToDecimal(discountPercent.Value);
+                var percentage = 0.00M;
+                
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+                var discount = (1 - percentageTobeUsed);
 
                 //get the distance based on the stations
                 var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(haulagePricingDto.DepartureStationId, haulagePricingDto.DestinationStationId);
@@ -5118,6 +5125,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
 
+                //VAT
+                var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == country.CountryId);
+                decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+
+                var vatForPreshipment = price * vat;
+                price += vatForPreshipment;
+
                 //Get Discount based on Customer Rank
                 var customerCode = await _userService.GetUserChannelCode();
                 var priceDTO = new PricingDTO
@@ -5130,10 +5144,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 return new MobilePriceDTO
                 {
                     DeliveryPrice = price,
-                    GrandTotal = Math.Round(price * PercentageTobeUsed),
+                    GrandTotal = Math.Round(price * percentageTobeUsed),
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
-                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    IsWithinProcessingTime = isWithinProcessingTime,
                     Discount = Math.Round(price * discount)
                 };
             }
