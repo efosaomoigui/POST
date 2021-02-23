@@ -21,4 +21,9 @@ namespace GIGLS.Core.DTO.User
         public string Email { get; set; }
         public string BusinessName { get; set; }
     }
+
+    public class UserValidationFor3rdParty
+    {
+        public string PhoneNumber { get; set; }
+    }
 }
