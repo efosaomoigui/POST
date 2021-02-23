@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ThirdPartyAPI;
 using GIGLS.Infrastructure;
@@ -332,6 +333,22 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("userdetail")]
+        public async Task<IServiceResponse<UserDTO>> GetUserDetail(UserValidationFor3rdParty user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.CheckUserPhoneNo(user);
+
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = result
                 };
             });
         }

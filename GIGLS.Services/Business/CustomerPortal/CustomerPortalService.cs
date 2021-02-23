@@ -3168,7 +3168,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return WaybillWalletPaymentType.Wallet;
         }
 
-        public async Task<UserDTO> CheckUser(UserValidationFor3rdParty user)
+        public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
         {
          
             var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
