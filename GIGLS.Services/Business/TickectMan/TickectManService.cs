@@ -209,11 +209,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return dailySales;
         }
 
-        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
         {
             //2. priviledged users service centres
             var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            return await _portalService.GetServiceCentresBySingleCountry(countryId);
+            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId);
         }
 
         public async Task<ShipmentDTO> GetShipment(string waybill)
@@ -227,6 +227,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
                 shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
                 shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+                shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
 
                 foreach (var item in shipment.ShipmentItems)
                 {

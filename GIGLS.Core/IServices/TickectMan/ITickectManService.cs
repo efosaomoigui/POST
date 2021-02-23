@@ -29,7 +29,7 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill);
         Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto);
         Task<IEnumerable<CountryDTO>> GetActiveCountries();
-        Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId);
         Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO);
         Task<IEnumerable<LGADTO>> GetLGAs();
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetActiveSpecialDomesticPackages();
