@@ -209,11 +209,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return dailySales;
         }
 
-        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
         {
             //2. priviledged users service centres
             var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            return await _portalService.GetServiceCentresBySingleCountry(countryId);
+            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId);
         }
 
         public async Task<ShipmentDTO> GetShipment(string waybill)
