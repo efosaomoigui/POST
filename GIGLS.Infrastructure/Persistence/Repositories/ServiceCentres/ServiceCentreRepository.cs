@@ -474,6 +474,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
+                                join t in _context.LGA on s.LGAId equals t.LGAId
                                 where c.CountryId == countryId
                                 select new ServiceCentreDTO
                                 {
@@ -496,7 +497,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                    IsPublic = s.IsPublic
+                                    IsPublic = s.IsPublic,
+                                    HomeDeliveryStatus = t.HomeDeliveryStatus
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
 
