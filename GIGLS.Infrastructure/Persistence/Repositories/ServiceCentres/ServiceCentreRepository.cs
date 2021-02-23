@@ -549,7 +549,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             {
                 var result = new ServiceCentreBreakdownDTO();
 
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsPublic == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
 
                 var centresData = from s in centres
                                   join sc in _context.Station on s.StationId equals sc.StationId
