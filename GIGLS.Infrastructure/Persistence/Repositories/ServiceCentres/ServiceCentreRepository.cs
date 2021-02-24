@@ -606,7 +606,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                   where c.CountryId == countryId
                                   select s;
 
-                var walkInCenters = centresData.Where(x => x.IsHUB == false && x.IsGateway == false && x.IsActive == true).Count();
+                var walkInCenters = centresData.Where(x => x.IsHUB == false && x.IsGateway == false && x.IsActive == true && x.IsPublic == true).Count();
                 var hubs = centresData.Where(x => x.IsHUB == true && x.IsGateway == false).Count();
                 var gateway = centresData.Where(x => x.IsGateway == true && x.IsHUB == false).Count();
 
