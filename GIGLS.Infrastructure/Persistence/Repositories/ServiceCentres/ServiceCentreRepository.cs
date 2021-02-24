@@ -564,7 +564,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var hubs = centresData.Where(x => x.IsHUB == true && x.IsGateway == false).Count();
                 var gateway = centresData.Where(x => x.IsGateway == true && x.IsHUB == false).Count();
 
-                result.Total = centresData.Count();
+                result.Total = walkInCenters + hubs + gateway;
                 result.WalkIn = walkInCenters;
                 result.Hub = hubs;
                 result.Gateway = gateway;
