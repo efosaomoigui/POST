@@ -248,7 +248,6 @@ namespace GIGLS.Services.Implementation.Customers
                     var companyDTO = await _companyService.GetCompanyById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(companyDTO);
                     customerDTO.CustomerType = CustomerType.Company;
-
                     return customerDTO;
                 }
                 else
@@ -257,7 +256,6 @@ namespace GIGLS.Services.Implementation.Customers
                     var individualCustomerDTO = await _individualCustomerService.GetCustomerById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
                     customerDTO.CustomerType = CustomerType.IndividualCustomer;
-
                     return customerDTO;
                 }
             }

@@ -27,7 +27,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
         Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria);
         Task<List<InvoiceViewDTO>> GetWaybillForServiceCentre(string waybill, int[] serviceCentreIds);
-
+        Task<ShipmentDTO> GetShipment(string waybill);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

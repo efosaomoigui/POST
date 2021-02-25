@@ -7,7 +7,6 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.DHL.Enum;
 
 namespace GIGLS.Core.DTO.Shipments
