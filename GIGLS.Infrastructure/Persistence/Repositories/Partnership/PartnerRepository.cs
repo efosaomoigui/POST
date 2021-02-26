@@ -81,6 +81,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                              select new VehicleTypeDTO
                              {
                                  PartnerName = partner.PartnerName,
+                                 PartnerId = partner.PartnerId,
                                  Vehicletype = vehicle.Vehicletype,
                                  Partnercode = vehicle.Partnercode,
                                  PartnerEmail = partner.Email,
