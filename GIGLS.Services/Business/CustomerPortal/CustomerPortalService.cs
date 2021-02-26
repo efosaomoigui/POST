@@ -3175,7 +3175,16 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
         {
-            return await _countryService.GetIntlShipingCountries();
+            var countries = await _countryService.GetIntlShipingCountries();
+            countries.ToList();
+            if (countries.Any())
+            {
+                foreach (var item in countries)
+                {
+                    item.States = null;
+                }
+            }
+            return countries;
         }
     }
 }

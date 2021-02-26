@@ -2274,7 +2274,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [HttpGet]
         [Route("intlshippingcountries")]
         public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetIntlShippingCountries()
