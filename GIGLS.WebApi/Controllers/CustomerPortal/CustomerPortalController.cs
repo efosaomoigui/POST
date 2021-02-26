@@ -2276,7 +2276,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("{intlshippingcountries}")]
+        [Route("intlshippingcountries")]
         public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetIntlShippingCountries()
         {
             return await HandleApiOperationAsync(async () =>
