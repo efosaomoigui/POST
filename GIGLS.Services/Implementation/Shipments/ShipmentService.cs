@@ -262,6 +262,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                // get ServiceCentre
+                var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDto.DepartureServiceCentreId);
+                var destinationServiceCentre = await _centreService.GetServiceCentreById(shipmentDto.DestinationServiceCentreId);
+                shipmentDto.DepartureServiceCentre = departureServiceCentre;
+                shipmentDto.DestinationServiceCentre = destinationServiceCentre;
+
                 //get CustomerDetails
                 if (shipmentDto.CustomerType.Contains("Individual"))
                 {

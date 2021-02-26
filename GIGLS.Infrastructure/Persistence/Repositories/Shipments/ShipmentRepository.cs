@@ -1111,19 +1111,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Description = r.DeliveryOption.Description
                                            },
                                            DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                           DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                           {
-                                               Code = x.Code,
-                                               Name = x.Name,
-                                                Address = x.Address
-                                           }).FirstOrDefault(),
                                            DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                           DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                           {
-                                               Code = x.Code,
-                                               Name = x.Name,
-                                               Address = x.Address
-                                           }).FirstOrDefault(),
                                            PaymentStatus = r.PaymentStatus,
                                            ReceiverAddress = r.ReceiverAddress,
                                            ReceiverCity = r.ReceiverCity,
