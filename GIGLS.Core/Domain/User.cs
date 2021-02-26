@@ -54,6 +54,7 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(100)]
         public string IdentificationNumber { get; set; }
         public bool DashboardAccess { get; set; }
+        public string CountryType { get; set; }
 
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)

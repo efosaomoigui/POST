@@ -61,6 +61,7 @@ using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
+using System.Web.Http;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -3019,9 +3020,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Get International Shipments Terms and Conditions
-        public async Task<MessageDTO> GetIntlMessageForApp()
+        public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
@@ -3170,6 +3171,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return WaybillWalletPaymentType.Wallet;
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
+        {
+            return await _countryService.GetIntlShipingCountries();
         }
     }
 }

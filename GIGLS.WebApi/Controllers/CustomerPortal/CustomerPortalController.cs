@@ -2232,11 +2232,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("intlshipmentsmessage")]
-        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp()
+        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp(int countryId = 0)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var message = await _portalService.GetIntlMessageForApp();
+                var message = await _portalService.GetIntlMessageForApp(countryId);
 
                 return new ServiceResponse<MessageDTO>
                 {
@@ -2274,6 +2274,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("{intlshippingcountries}")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetIntlShippingCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetIntlShipingCountries();
+
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
 
     }
 }

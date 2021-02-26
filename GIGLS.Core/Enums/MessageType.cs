@@ -73,6 +73,7 @@
         PSU, //PARTNER SIGN UP
         EUCA, //ECOMMERCE UPDATE UP CLASS APP
         EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
+        ISTC219, //International Shipments Terms and Condition shown on the App for UK
 
     } 
 }

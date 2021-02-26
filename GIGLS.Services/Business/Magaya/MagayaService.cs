@@ -1070,6 +1070,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+               
+                if (shipmentDTO.RequestProcessingCountryId <= 0)
+                {
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+                    if (country != null)
+                    {
+                        newShipment.RequestProcessingCountryId = country.CountryId;
+                    }
+                }
                 string itemName = "";
 
                 var serialNumber = 1;
@@ -1368,6 +1377,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 DestinationCountryId = r.DestinationCountryId,
                 Consolidated = r.Consolidated,
                 ConsolidationId = r.ConsolidationId,
+                RequestProcessingCountryId = r.RequestProcessingCountryId,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
