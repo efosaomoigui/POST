@@ -1275,13 +1275,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
 
-                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                //Remove discount for Truck
-                var percentage = Convert.ToDecimal(discountPercent.Value);
-                if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                decimal percentage = 0.00M;
+                if (!string.IsNullOrWhiteSpace(preShipment.VehicleType))
                 {
-                    percentage = 0.00M;
+                    if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                    {
+                        percentage = 0.00M;
+                    }
+                    else
+                    {
+                        var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                        percentage = Convert.ToDecimal(discountPercent.Value);
+                    }
                 }
+
                 var percentageTobeUsed = ((100M - percentage) / 100M);
                 decimal estimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * percentageTobeUsed;
@@ -6321,7 +6328,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var dateFor2Hours = DateTime.Now.AddHours(-2);
-                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).OrderBy(x =>x.DateCreated).ToList();
+                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).OrderByDescending(x =>x.DateCreated).ToList();
                 return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentCreated);
             }
             catch (Exception ex)
@@ -6334,7 +6341,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var dateFor3Hours = DateTime.Now.AddHours(-3);
-                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).OrderBy(x => x.DateCreated).ToList();
+                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).OrderByDescending(x => x.DateCreated).ToList();
                 return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
             }
             catch (Exception ex)
@@ -6347,7 +6354,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var dateFor3Hours = DateTime.Now.AddHours(-3);
-                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).OrderBy(x => x.DateCreated).ToList();
+                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).OrderByDescending(x => x.DateCreated).ToList();
                 return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentPicked);
             }
             catch (Exception ex)

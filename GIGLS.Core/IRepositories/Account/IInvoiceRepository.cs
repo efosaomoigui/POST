@@ -2,6 +2,7 @@
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
@@ -44,5 +45,6 @@ namespace GIGLS.Core.IRepositories.Account
         Task<List<object>> SalesPerServiceCenter(List<InvoiceView> invoice);
         Task<List<object>> MostShippedItemsByWeight(List<InvoiceView> invoice);
         Task<List<object>> CountOfCustomers(List<InvoiceView> invoice);
+        Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
     }
 }

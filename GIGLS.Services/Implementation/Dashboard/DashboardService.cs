@@ -1063,6 +1063,9 @@ namespace GIGLS.Services.Implementation.Dashboard
                         var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
                         dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
                     }
+
+                    dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
+                    dashboardDTO.TotalDailyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
                 }
                 _uow.Complete();
             }
@@ -1400,6 +1403,16 @@ namespace GIGLS.Services.Implementation.Dashboard
         private async Task<ServiceCentreBreakdownDTO> GetServiceCentersData(DashboardFilterCriteria dashboardFilterCriteria)
         {
             var result = await _uow.ServiceCentre.GetServiceCentresData((int)dashboardFilterCriteria.ActiveCountryId);
+
+            return result;
+        }
+
+        //Get Number of Monthly 0r Daily Shipments Created
+        private async Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+             
+            var result = await  _uow.Invoice.GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, shipmentReportType);
+           
 
             return result;
         }
