@@ -38,6 +38,8 @@ namespace GIGLS.Core.DTO.Dashboard
         public bool DashboardAccess { get; set; }  
         public CustomerBreakdownDTO CustomerBreakdownDTO { get; set; }
         public ServiceCentreBreakdownDTO ServiceCentreBreakdownDTO { get; set; }
+        public int TotalMonthlyShipmentOrdered { get; set; }
+        public int TotalDailyShipmentOrdered { get; set; }
     }
 
     public class CustomerBreakdownDTO

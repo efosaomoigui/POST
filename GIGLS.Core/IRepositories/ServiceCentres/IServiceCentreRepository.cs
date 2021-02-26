@@ -22,5 +22,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
         Task<ServiceCentreBreakdownDTO> GetServiceCentresData(int countryId);
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId);
     }
 }
