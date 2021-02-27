@@ -627,6 +627,7 @@
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
     <Compile Include="IRepositories\Account\IVATRepository.cs" />
+    <Compile Include="IRepositories\Archived\IShipmentArchiveRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\IBankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="IRepositories\BankSettlement\IBankRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\ICODSettlementSheetRepository.cs" />
