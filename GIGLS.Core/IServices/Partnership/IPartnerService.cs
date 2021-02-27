@@ -20,5 +20,7 @@ namespace GIGLS.Core.IServices.Partnership
         Task<PartnerDTO> GetPartnerByCode(string partnerCode);
         Task<IEnumerable<VehicleTypeDTO>> GetUnVerifiedPartners(ShipmentCollectionFilterCriteria filterCriteria);
         Task ContactUnverifiedPartner(string email);
+        Task<IEnumerable<VehicleTypeDTO>> GetVerifiedByRangePartners(ShipmentCollectionFilterCriteria filterCriteria);
+        Task DeactivatePartner(int partnerId);
     }
 }

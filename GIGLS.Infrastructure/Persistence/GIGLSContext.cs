@@ -308,6 +308,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentItem_Archive> ShipmentItem_Archive { get; set; }
         public DbSet<Invoice_Archive> Invoice_Archive { get; set; }
         public DbSet<GeneralLedger_Archive> GeneralLedger_Archive { get; set; }
+        public DbSet<TransitWaybillNumber_Archive> TransitWaybillNumber_Archive { get; set; }
 
         #endregion
 

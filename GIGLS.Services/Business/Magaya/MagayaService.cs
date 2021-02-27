@@ -1009,7 +1009,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     //get count of all unprocessed consolited item
                     var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
-                    count = consolidated.Count + 1;
+                    count = consolidated.Count;
                     if (count < 1)
                     {
                         shipmentDTO.ConsolidationId = Guid.NewGuid().ToString();
@@ -1018,6 +1018,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         shipmentDTO.ConsolidationId = consolidated.FirstOrDefault().ConsolidationId;
                     }
+                    count = count + 1;
                 }
                 else if (!shipmentDTO.Consolidated)
                 {
@@ -1058,7 +1059,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
                     //UPDATE ITEM COUNT
-                    shipmentItem.ItemCount = $"{serialNumber} of {count}";
+                    shipmentItem.ItemCount = $"Item {count}";
                     shipmentItem.Received = false;
                     itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
@@ -1207,7 +1208,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance,
                             ItemValue = shipmentRequestItemDTO.ItemValue,
                             IntlShipmentRequestId = existingRequest.IntlShipmentRequestId,
-                            ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}",
+                            ItemCount = $"Item {count}",
                             Received = shipmentRequestItemDTO.Received,
                             ReceivedBy = shipmentRequestItemDTO.ReceivedBy
                         };
@@ -1256,7 +1257,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         requestItem.Width = shipmentRequestItemDTO.Width;
                         requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
                         requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
-                        requestItem.ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}";
+                        requestItem.ItemCount = $"Item {count}";
                         requestItem.Received = shipmentRequestItemDTO.Received;
                         requestItem.ReceivedBy = shipmentRequestItemDTO.ReceivedBy;
 

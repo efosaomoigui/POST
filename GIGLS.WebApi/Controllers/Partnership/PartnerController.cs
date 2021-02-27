@@ -366,5 +366,35 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getverifiedpartnersbyrange")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerifiedByRangePartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetVerifiedByRangePartners(filterCriteria);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("deactivatepartner/{partnerId:int}")]
+        public async Task<IServiceResponse<bool>> DeactivatePartner(int partnerId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerService.DeactivatePartner(partnerId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }

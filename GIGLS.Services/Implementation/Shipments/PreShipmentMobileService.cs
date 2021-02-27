@@ -43,6 +43,7 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Node;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.DTO.Node;
+using Newtonsoft.Json;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -1250,14 +1251,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
-                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
-                        {
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
-                        }
-                        else
-                        {
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
-                        }
+                        //if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        //{
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        //}
+                        //else
+                        //{
+                        //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                        //}
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
                         preShipment.IsdeclaredVal = true;
                     }
                     else
@@ -1273,12 +1275,24 @@ namespace GIGLS.Services.Implementation.Shipments
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
 
-                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
-                var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                decimal EstimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
-                preShipment.DeliveryPrice = Price * PercentageTobeUsed;
-                preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
+                decimal percentage = 0.00M;
+                if (!string.IsNullOrWhiteSpace(preShipment.VehicleType))
+                {
+                    if (preShipment.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                    {
+                        percentage = 0.00M;
+                    }
+                    else
+                    {
+                        var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                        percentage = Convert.ToDecimal(discountPercent.Value);
+                    }
+                }
+
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+                decimal estimatedDeclaredPrice = preShipment.IsFromAgility ? Convert.ToDecimal(preShipment.Value): Convert.ToDecimal(DeclaredValue);
+                preShipment.DeliveryPrice = Price * percentageTobeUsed;
+                preShipment.InsuranceValue = (estimatedDeclaredPrice * 0.01M);
                 //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
                 preShipment.CalculatedTotal = (double)(Price);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
@@ -5082,12 +5096,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Destination Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
-                var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
-                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
-
-                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
-                var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                var discount = (1 - PercentageTobeUsed);
+                var isWithinProcessingTime = await WithinProcessingTime(country.CountryId);
+                //var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
+                //var percentage = Convert.ToDecimal(discountPercent.Value);
+                var percentage = 0.00M;
+                
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+                var discount = (1 - percentageTobeUsed);
 
                 //get the distance based on the stations
                 var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(haulagePricingDto.DepartureStationId, haulagePricingDto.DestinationStationId);
@@ -5117,6 +5132,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
 
+                //VAT
+                var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == country.CountryId);
+                decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+
+                var vatForPreshipment = price * vat;
+                price += vatForPreshipment;
+
                 //Get Discount based on Customer Rank
                 var customerCode = await _userService.GetUserChannelCode();
                 var priceDTO = new PricingDTO
@@ -5129,10 +5151,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 return new MobilePriceDTO
                 {
                     DeliveryPrice = price,
-                    GrandTotal = Math.Round(price * PercentageTobeUsed),
+                    GrandTotal = Math.Round(price * percentageTobeUsed),
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
-                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    IsWithinProcessingTime = isWithinProcessingTime,
                     Discount = Math.Round(price * discount)
                 };
             }
@@ -6266,6 +6288,74 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 await NodeApiCreateShipment(preShipment);
                 return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<object> GetGIGGOProgressReport()
+        {
+            try
+            {
+                //1.After 2 hours agility should show exception reports of all shipments created that has not been picked up.
+                //2.After 3 hours agility should show an exception report of all shipments assigned for picked - up and not pick up.
+                //3.After 3 hours agility should show an exception report of all shipments picked up but not delivered.
+
+               var dateFor2Hours = DateTime.Now.AddHours(-2);
+               var dateFor3Hours = DateTime.Now.AddHours(-2);
+                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).Count();
+                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).Count();
+                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x =>x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).Count();
+
+                return new
+                {
+                    shipmentCreate = preShipmentCreated,
+                    shipmentAssigned = preShipmentAssigned,
+                    shipmentPick = preShipmentPicked
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentCreated()
+        {
+            try
+            {
+                var dateFor2Hours = DateTime.Now.AddHours(-2);
+                var preShipmentCreated = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Shipment created" && x.DateCreated < dateFor2Hours).OrderByDescending(x =>x.DateCreated).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentCreated);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned()
+        {
+            try
+            {
+                var dateFor3Hours = DateTime.Now.AddHours(-3);
+                var preShipmentAssigned = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "Assigned for Pickup" && x.DateModified < dateFor3Hours).OrderByDescending(x => x.DateCreated).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentAssigned);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked()
+        {
+            try
+            {
+                var dateFor3Hours = DateTime.Now.AddHours(-3);
+                var preShipmentPicked = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.shipmentstatus == "PickedUp" && x.DateModified < dateFor3Hours).OrderByDescending(x => x.DateCreated).ToList();
+                return Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentPicked);
             }
             catch (Exception ex)
             {

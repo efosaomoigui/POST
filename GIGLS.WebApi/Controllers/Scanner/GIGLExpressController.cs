@@ -300,7 +300,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _tickectMan.GetServiceCentresBySingleCountry(countryId);
+                var centres = await _tickectMan.GetActiveServiceCentresBySingleCountry(countryId);
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
