@@ -407,7 +407,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
 
-                magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
+                if (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20)
+                {
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 20;
+                    magayaShipmentDTO.Charges.Charge[i].PriceInCurrency.Value = 20;
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
+                    itemChargeableWeight = 1;
+                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+
+                //magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
 
                 totalChargeAmount += magayaShipmentDTO.Charges.Charge[i].Amount.Value;
 
