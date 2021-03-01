@@ -365,7 +365,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
 
                 //var itemChargeableWeight = (totalVolumeWeight > totalWeight) ? totalVolumeWeight : totalWeight;
-                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value; /// 1738; //Convert volume to ft3
+                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
                 var weight = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight.Value;
                 var volumeweight = volume / 166 * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
@@ -445,7 +445,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     Pieces = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces,
                     Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = weight },
-                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = volume / 1738 },
+                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = volume / 1728 },
                     ChargeableWeight = new WeightValue()
                     {
                         Unit = WeightUnitType.lb,
