@@ -1038,7 +1038,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     endDate
                 };
 
-                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
+                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo_Archive " +
                    "@StartDate, @EndDate",
                    param).ToList();
 
@@ -1101,6 +1101,45 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 DateTime dt = DateTime.Today;
                 var beginningDate = dt;
                 var endingDate = DateTime.Now;
+
+                if (shipmentReportType == ShipmentReportType.Monthly)
+                {
+                    beginningDate = new DateTime(dt.Year, dt.Month, 1);
+                }
+                else if (shipmentReportType == ShipmentReportType.Daily)
+                {
+                    beginningDate = dt;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await Context.Database.SqlQuery<double?>("TotalMonthlyWeight " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = (double)summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<ShipmentDTO> GetShipment(string waybill)
         {
             var shipment = _context.Shipment.Where(x => x.Waybill == waybill);
@@ -1173,26 +1212,26 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            vatvalue_display = r.vatvalue_display,
                                            ReprintCounterStatus = r.ReprintCounterStatus,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
-                                            {
-                                                ShipmentId = x.ShipmentId,
-                                                DateCreated = x.DateCreated,
-                                                DateModified = x.DateModified,
-                                                Description = x.Description,
-                                                Description_s = x.Description_s,
-                                                Height = x.Height,
-                                                IsVolumetric = x.IsVolumetric,
-                                                Length = x.Length,
-                                                Nature = x.Nature,
-                                                PackageQuantity = x.PackageQuantity,
-                                                Price = x.Price,
-                                                Quantity = x.Quantity,
-                                                SerialNumber = x.SerialNumber,
-                                                ShipmentItemId = x.ShipmentItemId,
-                                                ShipmentPackagePriceId = x.ShipmentPackagePriceId,
-                                                ShipmentType = x.ShipmentType,
-                                                Weight = x.Weight,
-                                                Width = x.Width
-                                            }).ToList(),        
+                                           {
+                                               ShipmentId = x.ShipmentId,
+                                               DateCreated = x.DateCreated,
+                                               DateModified = x.DateModified,
+                                               Description = x.Description,
+                                               Description_s = x.Description_s,
+                                               Height = x.Height,
+                                               IsVolumetric = x.IsVolumetric,
+                                               Length = x.Length,
+                                               Nature = x.Nature,
+                                               PackageQuantity = x.PackageQuantity,
+                                               Price = x.Price,
+                                               Quantity = x.Quantity,
+                                               SerialNumber = x.SerialNumber,
+                                               ShipmentItemId = x.ShipmentItemId,
+                                               ShipmentPackagePriceId = x.ShipmentPackagePriceId,
+                                               ShipmentType = x.ShipmentType,
+                                               Weight = x.Weight,
+                                               Width = x.Width
+                                           }).ToList(),
                                            Invoice = Context.Invoice.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
                                            {
                                                Amount = i.Amount,
@@ -1218,44 +1257,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);
-        }
-
-                if (shipmentReportType == ShipmentReportType.Monthly)
-                {
-                    beginningDate = new DateTime(dt.Year, dt.Month, 1);
-                }
-                else if (shipmentReportType == ShipmentReportType.Daily)
-                {
-                    beginningDate = dt;
-                }
-
-                //declare parameters for the stored procedure
-                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
-                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
-                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
-
-                SqlParameter[] param = new SqlParameter[]
-                {
-                    startDate,
-                    endDate,
-                    countryId
-                };
-
-                var summary = await Context.Database.SqlQuery<double?>("TotalMonthlyWeight " +
-                   "@StartDate, @EndDate, @CountryId",
-                   param).FirstOrDefaultAsync();
-
-                if (summary != null)
-                {
-                    result = (double)summary;
-                }
-
-                return await Task.FromResult(result);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
         }
     }
 

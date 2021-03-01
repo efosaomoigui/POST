@@ -4,12 +4,15 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Archived;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -828,14 +831,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
 
         public IQueryable<Shipment_Archive> ShipmentsAsQueryable()
         {
-            var shipments = _context.Shipment.AsQueryable();
+            var shipments = _context.Shipment_Archive.AsQueryable();
             return shipments;
         }
 
         //Basic shipment details
         public Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
         {
-            var shipment = _context.Shipment.Where(x => x.Waybill == waybill);
+            var shipment = _context.Shipment_Archive.Where(x => x.Waybill == waybill);
 
             ShipmentDTO shipmentDto = (from r in shipment
                                        select new ShipmentDTO
@@ -847,11 +850,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                            DateCreated = r.DateCreated,
                                            DateModified = r.DateModified,
                                            DeliveryOptionId = r.DeliveryOptionId,
-                                           DeliveryOption = new DeliveryOptionDTO
+                                           DeliveryOption = Context.DeliveryOption.Where(c => c.DeliveryOptionId == r.DeliveryOptionId).Select(x => new DeliveryOptionDTO
                                            {
-                                               Code = r.DeliveryOption.Code,
-                                               Description = r.DeliveryOption.Description
-                                           },
+                                               Code = x.Code,
+                                               Description = x.Description
+                                           }).FirstOrDefault(),
                                            DepartureServiceCentreId = r.DepartureServiceCentreId,
                                            DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                            {
@@ -897,8 +900,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                            ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                            {
                                                CancelReason = x.CancelReason
-                                           }).FirstOrDefault(),
-
+                                           }).FirstOrDefault()
                                        }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);
@@ -911,7 +913,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
             // filter by cancelled shipments
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+            var shipments = _context.Shipment_Archive.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
             //filter by service center of the login user
             if (serviceCentreIds.Length > 0)
@@ -959,11 +961,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             return Task.FromResult(resultDto);
         }
 
-        public Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
         {
             try
@@ -984,14 +981,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                     endDate
                 };
 
-                var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments " +
+                var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments_Archive " +
                    "@ServiceCentreId,@StartDate, @EndDate",
                    param).ToList();
 
 
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
