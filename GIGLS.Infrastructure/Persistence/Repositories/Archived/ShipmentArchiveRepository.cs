@@ -192,7 +192,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                        {
                                            CancelReason = x.CancelReason
                                        }).FirstOrDefault(),
-                                       Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
+                                       Invoice = Context.Invoice_Archive.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
                                            InvoiceId = x.InvoiceId,
                                            InvoiceNo = x.InvoiceNo,
@@ -556,10 +556,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             DateTime EndDate = f_Criteria.EndDate?.Date ?? StartDate;
 
             //filter by service center
-            var shipments = _context.Shipment.AsQueryable();
+            var shipments = _context.Shipment_Archive.AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                shipments = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
             //filter by cancelled shipments
@@ -626,11 +626,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                                  DateCreated = r.DateCreated,
                                                  DateModified = r.DateModified,
                                                  DeliveryOptionId = r.DeliveryOptionId,
-                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 DeliveryOption = Context.DeliveryOption.Where(c => c.DeliveryOptionId == r.DeliveryOptionId).Select(x => new DeliveryOptionDTO
                                                  {
-                                                     Code = r.DeliveryOption.Code,
-                                                     Description = r.DeliveryOption.Description
-                                                 },
+                                                     Code = x.Code,
+                                                     Description = x.Description
+                                                 }).FirstOrDefault(),
                                                  DeliveryTime = r.DeliveryTime,
                                                  DepartureServiceCentreId = r.DepartureServiceCentreId,
                                                  DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
@@ -645,7 +645,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                                      Code = x.Code,
                                                      Name = x.Name
                                                  }).FirstOrDefault(),
-
                                                  ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                  PaymentStatus = r.PaymentStatus,
                                                  ReceiverAddress = r.ReceiverAddress,
@@ -687,7 +686,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             DateTime EndDate = f_Criteria.EndDate?.Date ?? StartDate;
 
             //filter by service center
-            var shipments = _context.Shipment.AsQueryable();
+            var shipments = _context.Shipment_Archive.AsQueryable();
 
             //filter by cancelled shipments
             shipments = shipments.Where(s => s.IsCancelled == false);
@@ -772,11 +771,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                                  DateCreated = r.DateCreated,
                                                  DateModified = r.DateModified,
                                                  DeliveryOptionId = r.DeliveryOptionId,
-                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 DeliveryOption = Context.DeliveryOption.Where(c => c.DeliveryOptionId == r.DeliveryOptionId).Select(x => new DeliveryOptionDTO
                                                  {
-                                                     Code = r.DeliveryOption.Code,
-                                                     Description = r.DeliveryOption.Description
-                                                 },
+                                                     Code = x.Code,
+                                                     Description = x.Description
+                                                 }).FirstOrDefault(),
                                                  DeliveryTime = r.DeliveryTime,
                                                  DepartureServiceCentreId = r.DepartureServiceCentreId,
                                                  DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
@@ -791,7 +790,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                                      Code = x.Code,
                                                      Name = x.Name
                                                  }).FirstOrDefault(),
-
                                                  ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                  PaymentStatus = r.PaymentStatus,
                                                  ReceiverAddress = r.ReceiverAddress,
@@ -934,7 +932,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             }
 
             List<InvoiceViewDTO> result = (from s in shipments
-                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join i in Context.Invoice_Archive on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
                                            join u in Context.Users on s.UserId equals u.Id
@@ -984,8 +982,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                 var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments_Archive " +
                    "@ServiceCentreId,@StartDate, @EndDate",
                    param).ToList();
-
-
                 return result;
             }
             catch (Exception)
@@ -1012,14 +1008,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                     endDate
                 };
 
-                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
+                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo_Archive " +
                    "@StartDate, @EndDate",
                    param).ToList();
-
-
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1029,7 +1023,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
         public Task<List<InvoiceViewDTO>> GetWaybillForServiceCentre(string waybill, int[] serviceCentreIds)
         {
             // filter by cancelled shipments
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false && s.Waybill == waybill);
+            var shipments = _context.Shipment_Archive.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false && s.Waybill == waybill);
 
             //filter by service center of the login user
             if (serviceCentreIds.Length > 0)
@@ -1038,7 +1032,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
             }
 
             List<InvoiceViewDTO> result = (from s in shipments
-                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join i in Context.Invoice_Archive on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
                                            join u in Context.Users on s.UserId equals u.Id
@@ -1067,7 +1061,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
 
         public Task<ShipmentDTO> GetShipment(string waybill)
         {
-            var shipment = _context.Shipment.Where(x => x.Waybill == waybill);
+            var shipment = _context.Shipment_Archive.Where(x => x.Waybill == waybill);
 
             ShipmentDTO shipmentDto = (from r in shipment
                                        select new ShipmentDTO
@@ -1079,11 +1073,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                            DateCreated = r.DateCreated,
                                            DateModified = r.DateModified,
                                            DeliveryOptionId = r.DeliveryOptionId,
-                                           DeliveryOption = new DeliveryOptionDTO
+                                           DeliveryOption = Context.DeliveryOption.Where(c => c.DeliveryOptionId == r.DeliveryOptionId).Select(x => new DeliveryOptionDTO
                                            {
-                                               Code = r.DeliveryOption.Code,
-                                               Description = r.DeliveryOption.Description
-                                           },
+                                               Code = x.Code,
+                                               Description = x.Description
+                                           }).FirstOrDefault(),
                                            DepartureServiceCentreId = r.DepartureServiceCentreId,
                                            DestinationServiceCentreId = r.DestinationServiceCentreId,
                                            PaymentStatus = r.PaymentStatus,
@@ -1136,7 +1130,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                            PaymentMethod = r.PaymentMethod,
                                            vatvalue_display = r.vatvalue_display,
                                            ReprintCounterStatus = r.ReprintCounterStatus,
-                                           ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
+                                           ShipmentItems = Context.ShipmentItem_Archive.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
                                                DateCreated = x.DateCreated,
@@ -1157,7 +1151,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                                Weight = x.Weight,
                                                Width = x.Width
                                            }).ToList(),
-                                           Invoice = Context.Invoice.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
+                                           Invoice = Context.Invoice_Archive.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
                                            {
                                                Amount = i.Amount,
                                                Waybill = i.Waybill,

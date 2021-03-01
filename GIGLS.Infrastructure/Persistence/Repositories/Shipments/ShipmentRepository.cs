@@ -32,7 +32,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipment = _context.Shipment.AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                shipment = shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
             //filter by cancelled shipments
@@ -123,7 +123,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var shipment = _context.Shipment.AsQueryable();
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
                 }
 
                 //filter by country Id
@@ -344,7 +344,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var shipment = _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false);
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
                 }
 
                 //filter by Local or International Shipment
@@ -578,7 +578,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipments = _context.Shipment.AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                shipments = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
             ////
 
@@ -980,11 +980,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);
-        }
-
-        public Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
