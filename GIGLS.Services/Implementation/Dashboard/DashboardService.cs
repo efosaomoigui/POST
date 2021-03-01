@@ -1066,6 +1066,9 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
                     dashboardDTO.TotalDailyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
+
+                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
+                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
                 }
                 _uow.Complete();
             }
@@ -1410,11 +1413,16 @@ namespace GIGLS.Services.Implementation.Dashboard
         //Get Number of Monthly 0r Daily Shipments Created
         private async Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
         {
-             
             var result = await  _uow.Invoice.GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, shipmentReportType);
-           
-
             return result;
         }
+
+        //Get Sum  of Monthly 0r Daily Weight of Shipments Created
+        private async Task<double> GetSumOfMonthlyOrDailyWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            var result = await _uow.Shipment.GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, shipmentReportType);
+            return result;
+        }
+
     }
 }

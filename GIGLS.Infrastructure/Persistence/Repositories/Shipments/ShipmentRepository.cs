@@ -987,8 +987,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             throw new NotImplementedException();
         }
 
-
-
         public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
         {
             try
@@ -1093,7 +1091,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
+        //Get Sum  of Monthly 0r Daily Weight of Shipments Created
+        public async Task<double> GetSumOfMonthlyOrDailyWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            try
+            {
+                double result = 0.0D;
 
+                DateTime dt = DateTime.Today;
+                var beginningDate = dt;
+                var endingDate = DateTime.Now;
+
+                if (shipmentReportType == ShipmentReportType.Monthly)
+                {
+                    beginningDate = new DateTime(dt.Year, dt.Month, 1);
+                }
+                else if (shipmentReportType == ShipmentReportType.Daily)
+                {
+                    beginningDate = dt;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await Context.Database.SqlQuery<double?>("TotalMonthlyWeight " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = (double)summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
