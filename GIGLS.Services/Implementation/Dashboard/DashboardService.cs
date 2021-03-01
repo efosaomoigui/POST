@@ -1067,8 +1067,8 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
                     dashboardDTO.TotalDailyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
 
-                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
-                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
+                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
+                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
                 }
                 _uow.Complete();
             }
