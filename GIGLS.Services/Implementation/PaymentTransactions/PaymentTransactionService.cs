@@ -168,7 +168,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
             //send sms to the customer
-            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            var smsData = new ShipmentTrackingDTO
             {
                 Waybill = shipment.Waybill,
                 QRCode = deliveryNumber.SenderCode
@@ -210,9 +210,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     CountryId = shipment.DestinationCountryId
                 };
                 await _financialReportService.AddReport(financialReport);
-
             }
-
 
             if (shipment.DepartureServiceCentreId == 309)
             {
@@ -240,17 +238,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     DestinationCountryId = shipment.DestinationCountryId,
                     DestinationServiceCentreId = shipment.DestinationServiceCentreId,
                     DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                    CustomerDetails = new CustomerDTO
-                    {
-                    },
-                    DepartureServiceCentre = new ServiceCentreDTO
-                    {
-
-                    },
-                    DestinationServiceCentre = new ServiceCentreDTO
-                    {
-
-                    }
+                    CustomerDetails = new CustomerDTO { },
+                    DepartureServiceCentre = new ServiceCentreDTO { },
+                    DestinationServiceCentre = new ServiceCentreDTO { }
                 };
 
                 if (shipmentDTO.CustomerType.Contains("Individual"))
@@ -563,10 +553,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         {
             //1. Get Customer Country detail
             int customerCountryId = 0;
+            Rank rank = Rank.Basic;
 
             if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
             {
-                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                //customerCountryId = _uow.Company.GetAllAsQueryable()
+                //    .Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+
+                var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
+                if(customer != null)
+                {
+                    customerCountryId = customer.UserActiveCountryId;
+                    rank = customer.Rank;
+                }
             }
             else
             {
@@ -603,11 +602,25 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 if (!isPresent)
                 {
-                    amountToDebit = amountToDebit * 0.95m;
+                    //amountToDebit = amountToDebit * 0.95m;
+                    var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
+                    amountToDebit = amountToDebit * discount;
                 }                
             }
 
             return amountToDebit;
+        }
+
+        private decimal GetDiscountForInternationalShipmentBasedOnRank(Rank rank)
+        {
+            decimal discount = 0.95m;
+
+            if (rank == Rank.Class)
+            {
+                discount = 0.90m;
+            }
+
+            return discount;
         }
 
         private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
