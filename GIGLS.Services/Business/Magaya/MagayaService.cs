@@ -233,6 +233,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
 
             magayaShipmentDTO.TotalWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight };
+            totalChargeWeight += totalWeight;
+
             return;
         }
 
@@ -441,7 +443,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].ShowInDocumentsSpecified = true;
 
                 magayaShipmentDTO.Charges.Charge[i].CreatedAt = retNewGuiItem(magayaShipmentDTO);
-                totalChargeWeight += weight;
 
                 magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge()
                 {
