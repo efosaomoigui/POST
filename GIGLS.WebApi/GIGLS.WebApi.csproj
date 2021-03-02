@@ -451,6 +451,7 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />

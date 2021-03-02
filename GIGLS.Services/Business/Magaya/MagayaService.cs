@@ -251,6 +251,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
         double totalChargeAmount = 0.00; //total cost of shipment cost
+        double totalChargeWeight = 0.00;
 
         public async Task<Dictionary<string, double>> retMagayaShipmentCharges(TheChargeCombo magayaShipmentDTO)
         {
@@ -367,7 +368,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //var itemChargeableWeight = (totalVolumeWeight > totalWeight) ? totalVolumeWeight : totalWeight;
                 var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
                 var weight = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight.Value;
-                var volumeweight = volume / 166 * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
+                var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
 
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
@@ -394,17 +395,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Rate)
                 {
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
                 else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum)
                 {
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
                 else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum)
                 {
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
 
                 if (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20)
@@ -413,7 +414,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     magayaShipmentDTO.Charges.Charge[i].PriceInCurrency.Value = 20;
                     magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
 
                 //magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
@@ -440,6 +441,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].ShowInDocumentsSpecified = true;
 
                 magayaShipmentDTO.Charges.Charge[i].CreatedAt = retNewGuiItem(magayaShipmentDTO);
+                totalChargeWeight += weight;
 
                 magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge()
                 {
@@ -564,7 +566,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (result == api_session_error.no_error)
                 {
                     var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
-                    await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
+                    shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
+                    await _uow.CompleteAsync();
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
