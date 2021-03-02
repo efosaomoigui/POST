@@ -5,11 +5,13 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Archived;
 using GIGLS.Core.View;
+using GIGLS.Core.View.AdminReportView;
 using GIGLS.Core.View.Archived;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -315,7 +317,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
 
             return await Task.FromResult(listCreated);
         }
-
 
         //Shipent Monitors Expected
         //Stored Procedure version
@@ -806,20 +807,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Archived
                                               Weight = weight.Key,
                                               WeightCount = weight.Count()
                                           }).OrderByDescending(i => i.WeightCount).Take(5).ToList();
-
-            var results = result.ToList();
-            return await Task.FromResult(results);
-        }
-
-        public async Task<List<object>> CountOfCustomers(List<InvoiceView> invoice)
-        {
-            IEnumerable<object> result = (from s in invoice
-                                          group s by s.CustomerCode into customers
-                                          select new
-                                          {
-                                              CustomerCode = customers.Key,
-                                              Count = customers.Count()
-                                          }).OrderByDescending(i => i.Count).ToList();
 
             var results = result.ToList();
             return await Task.FromResult(results);

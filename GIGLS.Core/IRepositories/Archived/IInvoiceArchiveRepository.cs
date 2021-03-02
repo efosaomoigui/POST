@@ -19,13 +19,13 @@ namespace GIGLS.Core.IRepositories.Archived
         Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
-        IQueryable<InvoiceArchiveView> GetAllFromInvoiceArchiveView();
+        IQueryable<InvoiceArchiveView> GetAllFromInvoiceView();
         
         IQueryable<InvoiceArchiveView> GetInvoicesForReminderAsync();
-        IQueryable<InvoiceArchiveView> GetAllFromInvoiceAndShipments();
-        IQueryable<InvoiceArchiveView> GetAllInvoiceShipments();
-        IQueryable<InvoiceArchiveView> GetCustomerTransactions();
-        IQueryable<InvoiceArchiveView> GetCustomerInvoices();
+        IQueryable<InvoiceView> GetAllFromInvoiceAndShipments();
+        IQueryable<InvoiceView> GetAllInvoiceShipments();
+        IQueryable<InvoiceView> GetCustomerTransactions();
+        IQueryable<InvoiceView> GetCustomerInvoices();
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
@@ -42,10 +42,9 @@ namespace GIGLS.Core.IRepositories.Archived
         IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
         IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
         IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
-        IQueryable<InvoiceArchiveView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
+        IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<object>> SalesPerServiceCenter(List<InvoiceArchiveView> invoice);
         Task<List<object>> MostShippedItemsByWeight(List<InvoiceArchiveView> invoice);
-        Task<List<object>> CountOfCustomers(List<InvoiceArchiveView> invoice);
-        Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
+         Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
     }
 }
