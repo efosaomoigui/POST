@@ -78,6 +78,14 @@
         VisaBonusEmail,
         InternationalAdditionalPrice,
         ClassCustomerDiscount,
-        NormalCustomerDiscount
+        NormalCustomerDiscount,
+        OthersUK,
+        OthersLessThan20KgUK,
+        NewGadgets,
+        ChildrenGadgets,
+        UsedGadgets,
+        UsedGadgetsLessThan6Kg,
+        Perfumes,
+        PerfumesLessThan6Kg
     }
 }
