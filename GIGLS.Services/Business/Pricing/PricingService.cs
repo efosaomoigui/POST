@@ -1394,7 +1394,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString()).FirstOrDefault();
                 //get itemCategory where is others and less than 20kg
-                for (int i = 1; i <= pricingDto.Weight; i++)
+                for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }
@@ -1403,7 +1403,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersUK.ToString()).FirstOrDefault();
                 //get itemCategory where is others and greater or equal to 20kg
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }

@@ -1338,7 +1338,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 intlShipmentDTO = intlShipmentDTO.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 count = intlShipmentDTO.Count();
-                intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId).ToList();
+                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0)
+                {
+                    intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId).ToList(); 
+                }
                 return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
             }
             catch (Exception)
@@ -1358,6 +1361,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 if (serviceCentreIds.Length > 0)
                 {
                     shipmentRequest = _context.IntlShipmentRequest.Where(s => s.IsProcessed == false);
+                }
+                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0)
+                {
+                    shipmentRequest = shipmentRequest.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId);
                 }
 
                 var count = 0;
@@ -1433,7 +1440,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   Consolidated = r.Consolidated,
                                                   RequestProcessingCountryId = r.RequestProcessingCountryId,
 
-                                              }).Where(b => b.IsProcessed == false && b.RequestProcessingCountryId == filterOptionsDto.CountryId).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+                                              }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
                     count = intlShipmentRequestDTO.Count();
                     var retVal = new Tuple<List<IntlShipmentRequestDTO>, int>(intlShipmentRequestDTO, count);
@@ -1475,7 +1482,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               Consolidated = r.Consolidated,
                                               RequestProcessingCountryId = r.RequestProcessingCountryId,
 
-                                          }).Where(b => b.IsProcessed == false && b.RequestProcessingCountryId == filterOptionsDto.CountryId).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName == filterValue)).ToList();
+                                          }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue || s.ItemSenderfullName == filterValue)).ToList();
 
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
@@ -1632,7 +1639,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           RequestProcessingCountryId = a.RequestProcessingCountryId,
 
                       }
-                  ).Where(b => b.IsProcessed == false && b.RequestProcessingCountryId == dateFilterCriteria.CountryId).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
+                  ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
                                        || s.TrackingId == dateFilterCriteria.FilterValue || s.CustomerEmail == dateFilterCriteria.FilterValue
                                        || s.CustomerFirstName == dateFilterCriteria.FilterValue || s.CustomerLastName == dateFilterCriteria.FilterValue || s.storeName == dateFilterCriteria.FilterValue || s.ItemSenderfullName == dateFilterCriteria.FilterValue)).OrderByDescending(x => x.DateCreated).ToList();
                 }
@@ -1716,10 +1723,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                            RequestProcessingCountryId = a.RequestProcessingCountryId,
 
                        }
-                   ).Where(a => a.IsProcessed == false && a.RequestProcessingCountryId == dateFilterCriteria.CountryId && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                   ).Where(a => a.IsProcessed == false && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
                 }
 
                 count = intlShipmentDTO.Count();
+                if (dateFilterCriteria.CountryId != null && dateFilterCriteria.CountryId > 0)
+                {
+                    intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == dateFilterCriteria.CountryId).ToList();
+                }
                 return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
             }
             catch (Exception)
