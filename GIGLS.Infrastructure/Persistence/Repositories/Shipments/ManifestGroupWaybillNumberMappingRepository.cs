@@ -1,14 +1,12 @@
-﻿using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Core.Domain;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IRepositories.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Core.DTO.Shipments;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -177,7 +175,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 IsDeleted = mgw.IsDeleted,
                                                 MovementStatus = mgw.MovementStatus,
                                                 DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
-                                            }; 
+                                            };
 
             return movementManifestNumberDto.ToList();
         }
@@ -216,6 +214,31 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   };
 
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
+        }
+
+        public async Task<List<GroupWaybillAndWaybillDTO>> GetWaybillDataInGroupWaybillManifestMapping(string manifestCode)
+        {
+            var manifest = _context.Manifest.Where(x => x.ManifestCode == manifestCode);
+
+            var result = from s in manifest
+                         join sc in _context.ManifestGroupWaybillNumberMapping on s.ManifestCode equals sc.ManifestCode
+                         join st in _context.GroupWaybillNumberMapping on sc.GroupWaybillNumber equals st.GroupWaybillNumber
+                         select new GroupWaybillAndWaybillDTO
+                         {
+                             GroupWaybillCode = sc.GroupWaybillNumber,
+                             WaybillsDTO = _context.Shipment.Where(x => x.Waybill == st.WaybillNumber)
+                                       .Select(x => new WaybillInGroupWaybillDTO
+                                       {
+                                           Value = x.Value,
+                                           Description = x.Description,
+                                           Waybill = x.Waybill,
+                                           Weight = x.ApproximateItemsWeight,
+                                           DepartureServiceCentre = _context.ServiceCentre.Where(d => d.ServiceCentreId == x.DepartureServiceCentreId).Select(y => y.Name).FirstOrDefault(),
+                                           DestinationServiceCentre = _context.ServiceCentre.Where(d => d.ServiceCentreId == x.DestinationServiceCentreId).Select(y => y.Name).FirstOrDefault()
+                                       }).ToList()
+                         };
+
+            return await Task.FromResult(result.ToList());
         }
 
     }

@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ThirdPartyAPI;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -311,6 +312,38 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 var result = await _thirdPartyAPIService.GetPreShipmentMobileByWaybill(waybillNumber);
 
                 return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("manifests")]
+        public async Task<IServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetManifestsInServiceCenter(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifests/{manifestCode}")]
+        public async Task<IServiceResponse<List<GroupWaybillAndWaybillDTO>>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetGroupWaybillDataInManifest(manifestCode);
+
+                return new ServiceResponse<List<GroupWaybillAndWaybillDTO>>
                 {
                     Object = result
                 };

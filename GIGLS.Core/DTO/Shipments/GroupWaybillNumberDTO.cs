@@ -60,4 +60,20 @@ namespace GIGLS.Core.DTO.Shipments
         public string userid { get; set; }
         public MovementManifestActivationTypes  flag { get; set; } 
     }
+
+    public class GroupWaybillAndWaybillDTO 
+    {
+        public string GroupWaybillCode { get; set; }
+        public List<WaybillInGroupWaybillDTO> WaybillsDTO { get; set; }
+    }
+
+    public class WaybillInGroupWaybillDTO
+    {
+        public string Waybill { get; set; }
+        public decimal Value { get; set; }
+        public string Description { get; set; }
+        public double Weight { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+    }
 }

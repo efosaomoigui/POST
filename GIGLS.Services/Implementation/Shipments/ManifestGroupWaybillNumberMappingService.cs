@@ -918,5 +918,28 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.ShipmentTracking.AddRange(data);
             await _uow.CompleteAsync();
         }
+
+        //Get Waybill Info In Group Waybill Usin manifest
+        public async Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifest)
+        {
+            try
+            {
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest);
+
+                if (manifestObj == null)
+                {
+                    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                }
+
+                var resultList = await _uow.ManifestGroupWaybillNumberMapping.GetWaybillDataInGroupWaybillManifestMapping(manifest);
+
+                return resultList;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
