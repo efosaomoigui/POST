@@ -4469,6 +4469,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == shipmentDTO.RequestNumber).FirstOrDefault();
                 var intlRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == shipmentDTO.RequestNumber);
                 intlRequest.IsProcessed = true;
                 foreach (var item in intlRequest.ShipmentRequestItems)
