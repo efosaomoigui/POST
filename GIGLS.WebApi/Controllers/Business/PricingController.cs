@@ -99,7 +99,7 @@ namespace GIGLS.WebApi.Controllers.Business
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("getpriceuk")]
-        public async Task<IServiceResponse<decimal>> GetPriceForUK(PricingDTO pricingDto)
+        public async Task<IServiceResponse<decimal>> GetPriceForUK(UKPricingDTO pricingDto)
         {
             return await HandleApiOperationAsync(async () =>
             {

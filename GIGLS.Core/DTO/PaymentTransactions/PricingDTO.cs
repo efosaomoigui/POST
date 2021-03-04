@@ -27,7 +27,36 @@ namespace GIGLS.Core.DTO.PaymentTransactions
 
         public int CountryId { get; set; }
         public string CustomerCode { get; set; }
-        public GlobalPropertyType Description { get; set; }
+        public string Description { get; set; }
+        public int Quantity { get; set; }
+    }
+
+
+    public class UKPricingDTO : BaseDomainDTO
+    {
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public int DeliveryOptionId { get; set; }
+        public List<int> DeliveryOptionIds { get; set; }
+        public decimal Weight { get; set; }
+        public ShipmentType ShipmentType { get; set; }
+        public int SpecialPackageId { get; set; }
+        public bool IsInternationalDocument { get; set; }
+
+        //To handle volumetric weight
+        public bool IsVolumetric { get; set; }
+        public decimal Length { get; set; } = 0;
+        public decimal Width { get; set; } = 0;
+        public decimal Height { get; set; } = 0;
+
+        //Added for ThirdParty API
+        public int DepartureStationId { get; set; }
+        public int DestinationStationId { get; set; }
+
+        public int CountryId { get; set; }
+        public string CustomerCode { get; set; }
+        public GlobalPropertyType ItemCategory { get; set; }
+        public string Description { get; set; }
         public int Quantity { get; set; }
     }
 

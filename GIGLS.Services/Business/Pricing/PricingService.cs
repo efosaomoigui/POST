@@ -1322,7 +1322,7 @@ namespace GIGLS.Services.Business.Pricing
             }
             return insurance;
         }
-        public async Task<decimal> GetPriceForUK(PricingDTO pricingDto)
+        public async Task<decimal> GetPriceForUK(UKPricingDTO pricingDto)
         {
             //get country by service centre
             try
@@ -1349,7 +1349,7 @@ namespace GIGLS.Services.Business.Pricing
                         decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 6000;
                         pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
                     }
-                    switch (pricingDto.Description)
+                    switch (pricingDto.ItemCategory)
                     {
                         case GlobalPropertyType.NewGadgets:
                             return await GetPriceForNewGadgetsUK(pricingDto, globalProperties);
@@ -1384,7 +1384,7 @@ namespace GIGLS.Services.Business.Pricing
             }
         }
 
-        private async Task<decimal> GetPriceForOthersUK(PricingDTO pricingDto,List<GlobalProperty> globalProperties)
+        private async Task<decimal> GetPriceForOthersUK(UKPricingDTO pricingDto,List<GlobalProperty> globalProperties)
         {
             //get country by service centre
             var price = 0.0m;
@@ -1411,12 +1411,12 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
-        private async Task<decimal> GetPriceForNewGadgetsUK(PricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        private async Task<decimal> GetPriceForNewGadgetsUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
         {
             //get country by service centre
             var price = 0.0m;
             // check if categories is new gadgets adult then use flat rate of 50pounds
-             if (pricingDto.Description == GlobalPropertyType.NewGadgets)
+             if (pricingDto.ItemCategory == GlobalPropertyType.NewGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.NewGadgets.ToString()).FirstOrDefault();
                 for (int i = 1; i <= pricingDto.Weight; i++)
@@ -1425,7 +1425,7 @@ namespace GIGLS.Services.Business.Pricing
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }
             }
-            else if (pricingDto.Description == GlobalPropertyType.ChildrenGadgets)
+            else if (pricingDto.ItemCategory == GlobalPropertyType.ChildrenGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.ChildrenGadgets.ToString()).FirstOrDefault();
                 for (int i = 1; i <= pricingDto.Weight; i++)
@@ -1437,7 +1437,7 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
-        private async Task<decimal> GetPriceForUsedGadgetsUK(PricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        private async Task<decimal> GetPriceForUsedGadgetsUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
         {
             //get country by service centre
             var price = 0.0m;
@@ -1463,7 +1463,7 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
-        private async Task<decimal> GetPriceForPerfumesUK(PricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        private async Task<decimal> GetPriceForPerfumesUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
         {
             //get country by service centre
             var price = 0.0m;
