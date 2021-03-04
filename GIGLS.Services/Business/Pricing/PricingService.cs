@@ -1419,7 +1419,7 @@ namespace GIGLS.Services.Business.Pricing
              if (pricingDto.ItemCategory == GlobalPropertyType.NewGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.NewGadgets.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Weight; i++)
+                for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
                     //get itemCategory where is new gadgets
                     price = price + Convert.ToDecimal(itemCategory.Value);
@@ -1428,7 +1428,7 @@ namespace GIGLS.Services.Business.Pricing
             else if (pricingDto.ItemCategory == GlobalPropertyType.ChildrenGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.ChildrenGadgets.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Weight; i++)
+                for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
                     //get itemCategory where is children gadgets
                     price = price + Convert.ToDecimal(itemCategory.Value);
