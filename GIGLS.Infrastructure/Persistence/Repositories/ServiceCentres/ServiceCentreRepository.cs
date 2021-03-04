@@ -469,37 +469,73 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             try
             {
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == false && s.IsPublic == true);
-
-                var centreDto = from s in centres
-                                join sc in _context.Station on s.StationId equals sc.StationId
-                                join st in _context.State on sc.StateId equals st.StateId
-                                join c in _context.Country on st.CountryId equals c.CountryId
-                                join t in _context.LGA on s.LGAId equals t.LGAId
-                                where c.CountryId == countryId
-                                select new ServiceCentreDTO
-                                {
-                                    Name = s.Name,
-                                    Address = s.Address,
-                                    City = s.City,
-                                    Email = s.Email,
-                                    PhoneNumber = s.PhoneNumber,
-                                    ServiceCentreId = s.ServiceCentreId,
-                                    Code = s.Code,
-                                    IsActive = s.IsActive,
-                                    TargetAmount = s.TargetAmount,
-                                    TargetOrder = s.TargetOrder,
-                                    StationId = s.StationId,
-                                    StationName = sc.StationName,
-                                    StationCode = sc.StationCode,
-                                    CountryId = c.CountryId,
-                                    Country = c.CountryName,
-                                    IsDefault = s.IsDefault,
-                                    Longitude = s.Longitude,
-                                    Latitude = s.Latitude,
-                                    FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                    IsPublic = s.IsPublic,
-                                    HomeDeliveryStatus = t.HomeDeliveryStatus
-                                };
+              var centreDto = new List<ServiceCentreDTO>();
+                if (countryId == 1)
+                {
+                    var centreDtos = from s in centres
+                                     join sc in _context.Station on s.StationId equals sc.StationId
+                                     join st in _context.State on sc.StateId equals st.StateId
+                                     join c in _context.Country on st.CountryId equals c.CountryId
+                                     join t in _context.LGA on s.LGAId equals t.LGAId
+                                     where c.CountryId == countryId
+                                     select new ServiceCentreDTO
+                                     {
+                                         Name = s.Name,
+                                         Address = s.Address,
+                                         City = s.City,
+                                         Email = s.Email,
+                                         PhoneNumber = s.PhoneNumber,
+                                         ServiceCentreId = s.ServiceCentreId,
+                                         Code = s.Code,
+                                         IsActive = s.IsActive,
+                                         TargetAmount = s.TargetAmount,
+                                         TargetOrder = s.TargetOrder,
+                                         StationId = s.StationId,
+                                         StationName = sc.StationName,
+                                         StationCode = sc.StationCode,
+                                         CountryId = c.CountryId,
+                                         Country = c.CountryName,
+                                         IsDefault = s.IsDefault,
+                                         Longitude = s.Longitude,
+                                         Latitude = s.Latitude,
+                                         FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                         IsPublic = s.IsPublic,
+                                         HomeDeliveryStatus = t.HomeDeliveryStatus
+                                     };
+                    centreDto = centreDtos.ToList();
+                }
+                else
+                {
+                    var centreDtos = from s in centres
+                                     join sc in _context.Station on s.StationId equals sc.StationId
+                                     join st in _context.State on sc.StateId equals st.StateId
+                                     join c in _context.Country on st.CountryId equals c.CountryId
+                                     where c.CountryId == countryId
+                                     select new ServiceCentreDTO
+                                     {
+                                         Name = s.Name,
+                                         Address = s.Address,
+                                         City = s.City,
+                                         Email = s.Email,
+                                         PhoneNumber = s.PhoneNumber,
+                                         ServiceCentreId = s.ServiceCentreId,
+                                         Code = s.Code,
+                                         IsActive = s.IsActive,
+                                         TargetAmount = s.TargetAmount,
+                                         TargetOrder = s.TargetOrder,
+                                         StationId = s.StationId,
+                                         StationName = sc.StationName,
+                                         StationCode = sc.StationCode,
+                                         CountryId = c.CountryId,
+                                         Country = c.CountryName,
+                                         IsDefault = s.IsDefault,
+                                         Longitude = s.Longitude,
+                                         Latitude = s.Latitude,
+                                         FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                         IsPublic = s.IsPublic,
+                                     };
+                    centreDto = centreDtos.ToList();
+                }
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
 
             }

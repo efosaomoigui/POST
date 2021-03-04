@@ -1343,6 +1343,12 @@ namespace GIGLS.Services.Business.Pricing
                 var globalProperties = _uow.GlobalProperty.GetAllAsQueryable().Where(x => x.CountryId == departureCountry.CountryId && x.IsActive == true).ToList();
                 if (pricingDto != null)
                 {
+                    //check for volumetric weight
+                    if (pricingDto.IsVolumetric)
+                    {
+                        decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 6000;
+                        pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+                    }
                     switch (pricingDto.Description)
                     {
                         case GlobalPropertyType.NewGadgets:
@@ -1388,7 +1394,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString()).FirstOrDefault();
                 //get itemCategory where is others and less than 20kg
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }
@@ -1413,7 +1419,7 @@ namespace GIGLS.Services.Business.Pricing
              if (pricingDto.Description == GlobalPropertyType.NewGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.NewGadgets.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     //get itemCategory where is new gadgets
                     price = price + Convert.ToDecimal(itemCategory.Value);
@@ -1422,7 +1428,7 @@ namespace GIGLS.Services.Business.Pricing
             else if (pricingDto.Description == GlobalPropertyType.ChildrenGadgets)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.ChildrenGadgets.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     //get itemCategory where is children gadgets
                     price = price + Convert.ToDecimal(itemCategory.Value);
@@ -1449,7 +1455,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 //get itemCategory where is used gadgets greater than 6kg
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.UsedGadgets.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }
@@ -1466,7 +1472,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 //get itemCategory where is perfumes less than 6kg
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.PerfumesLessThan6Kg.ToString()).FirstOrDefault();
-                for (int i = 1; i <= pricingDto.Quantity; i++)
+                for (int i = 1; i <= pricingDto.Weight; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
                 }

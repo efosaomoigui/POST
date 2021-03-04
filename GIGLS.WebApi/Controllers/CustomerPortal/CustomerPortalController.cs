@@ -2157,7 +2157,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             types.RemoveAt(3);
             return Ok(types);
         }
-        
+       
         [HttpGet]
         [Route("servicecentresbycountry/{countryId}")]
         public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
@@ -2171,7 +2171,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        
         [HttpGet]
         [Route("storesbycountry/{countryId}")]
         public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
