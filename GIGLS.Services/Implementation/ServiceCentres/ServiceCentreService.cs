@@ -125,6 +125,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centreDto.StationName = centre.Station.StationName;
                 centreDto.StationCode = centre.Station.StationCode;
                 centreDto.FormattedServiceCentreName = centre.FormattedServiceCentreName;
+                centreDto.SupperServiceCentreId = centre.Station.SuperServiceCentreId;
                 return centreDto;
             }
             catch (Exception)
