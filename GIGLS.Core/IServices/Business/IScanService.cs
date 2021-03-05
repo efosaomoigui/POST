@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Business
         Task<bool> ScanShipment(ScanDTO scan);
         Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
         Task<bool> ScanSignOffDeliveryManifest(string manifest);
+        Task ItemShippedFromUKScan(string manifestCode);
     }
 }

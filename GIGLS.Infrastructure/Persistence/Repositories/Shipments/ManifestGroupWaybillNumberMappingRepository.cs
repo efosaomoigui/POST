@@ -216,30 +216,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
         }
 
-        public async Task<List<GroupWaybillAndWaybillDTO>> GetWaybillDataInGroupWaybillManifestMapping(string manifestCode)
-        {
-            var manifest = _context.Manifest.Where(x => x.ManifestCode == manifestCode);
-
-            var result = from s in manifest
-                         join sc in _context.ManifestGroupWaybillNumberMapping on s.ManifestCode equals sc.ManifestCode
-                         join st in _context.GroupWaybillNumberMapping on sc.GroupWaybillNumber equals st.GroupWaybillNumber
-                         select new GroupWaybillAndWaybillDTO
-                         {
-                             GroupWaybillCode = sc.GroupWaybillNumber,
-                             WaybillsDTO = _context.Shipment.Where(x => x.Waybill == st.WaybillNumber)
-                                       .Select(x => new WaybillInGroupWaybillDTO
-                                       {
-                                           Value = x.Value,
-                                           Description = x.Description,
-                                           Waybill = x.Waybill,
-                                           Weight = x.ApproximateItemsWeight,
-                                           DepartureServiceCentre = _context.ServiceCentre.Where(d => d.ServiceCentreId == x.DepartureServiceCentreId).Select(y => y.Name).FirstOrDefault(),
-                                           DestinationServiceCentre = _context.ServiceCentre.Where(d => d.ServiceCentreId == x.DestinationServiceCentreId).Select(y => y.Name).FirstOrDefault()
-                                       }).ToList()
-                         };
-
-            return await Task.FromResult(result.ToList());
-        }
-
     }
 }

@@ -11,6 +11,9 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
+using System;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -20,13 +23,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IQRAndBarcodeService _qrandbarcodeService;
         private readonly IUnitOfWork _uow;
         private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
+        private readonly IScanService _scanService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
-                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService)
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
             _manifestGroupWaybillNumberMappingService = manifestGroupWaybillNumberMappingService;
+            _scanService = scanService;
             _uow = uow;
         }
 
@@ -122,9 +127,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _manifestGroupWaybillNumberMappingService.GetGroupWaybillDataInManifest(manifestCode);
         }
 
-        public async Task ItemShippedFromUKScan (string manifestCode)
+        public async Task<bool> ItemShippedFromUKScan(string manifestCode)
         {
-
+            await _scanService.ItemShippedFromUKScan(manifestCode);
+            return true;
         }
 
         //Price API

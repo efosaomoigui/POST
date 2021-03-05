@@ -39,5 +39,6 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         //Manifests
         Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria);
         Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode);
+        Task<bool> ItemShippedFromUKScan(string manifestCode);
     }
 }
