@@ -451,13 +451,16 @@ namespace GIGLS.Services.Implementation.Wallet
                         }, false);
 
                         sendPaymentNotification = true;
+
+                        //3. update the wallet payment log
+                        paymentLog.IsWalletCredited = true;
                     }
 
                     //3. update the wallet payment log
-                    if (verifyResult.data.Status.Equals("successful"))
-                    {
-                        paymentLog.IsWalletCredited = true;
-                    }
+                    //if (verifyResult.data.Status.Equals("successful"))
+                    //{
+                    //    paymentLog.IsWalletCredited = true;
+                    //}
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;

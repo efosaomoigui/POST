@@ -633,7 +633,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             {
                 var result = new ServiceCentreBreakdownDTO();
 
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
+                var centres = _context.ServiceCentre;
 
                 var centresData = from s in centres
                                   join sc in _context.Station on s.StationId equals sc.StationId
@@ -642,11 +642,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                   where c.CountryId == countryId
                                   select s;
 
-                var walkInCenters = centresData.Where(x => x.IsHUB == false && x.IsGateway == false).Count();
+                var walkInCenters = centresData.Where(x => x.IsHUB == false && x.IsGateway == false && x.IsActive == true && x.IsPublic == true).Count();
                 var hubs = centresData.Where(x => x.IsHUB == true && x.IsGateway == false).Count();
                 var gateway = centresData.Where(x => x.IsGateway == true && x.IsHUB == false).Count();
 
-                result.Total = centresData.Count();
+                result.Total = walkInCenters + hubs + gateway;
                 result.WalkIn = walkInCenters;
                 result.Hub = hubs;
                 result.Gateway = gateway;

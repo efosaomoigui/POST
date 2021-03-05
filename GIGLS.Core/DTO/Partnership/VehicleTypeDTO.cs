@@ -8,7 +8,7 @@ namespace GIGLS.Core.DTO.Partnership
     {
         public int VehicleTypeId { get; set; }
         public string Partnercode { get; set; }
-
+        public int PartnerId { get; set; }
         public string Vehicletype { get; set; }
         public string PartnerName { get; set; }
         public string PartnerPhoneNumber { get; set; }
@@ -26,5 +26,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string VehicleParticularsDetails { get; set; }
         public bool IsVerified { get; set; }
         public bool Contacted { get; set; }
+        public bool Active { get; set; }
     }
 }

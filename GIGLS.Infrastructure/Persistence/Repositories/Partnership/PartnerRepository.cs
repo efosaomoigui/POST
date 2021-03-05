@@ -81,6 +81,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                              select new VehicleTypeDTO
                              {
                                  PartnerName = partner.PartnerName,
+                                 PartnerId = partner.PartnerId,
                                  Vehicletype = vehicle.Vehicletype,
                                  Partnercode = vehicle.Partnercode,
                                  PartnerEmail = partner.Email,
@@ -90,6 +91,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  PartnerType = partner.PartnerType,
                                  ActivityStatus = partner.ActivityStatus,
                                  ActivityDate = partner.ActivityDate,
+                                 IsVerified = partner.IsActivated,
                                  EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
                                  .Select(x => new FleetPartnerDTO
                                  {
@@ -117,6 +119,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                              join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
                              select new VehicleTypeDTO
                              {
+                                 PartnerId = partner.PartnerId,
                                  PartnerName = partner.PartnerName,
                                  Vehicletype = vehicle.Vehicletype,
                                  Partnercode = vehicle.Partnercode,
@@ -129,6 +132,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  ActivityDate = partner.ActivityDate,
                                  DateCreated = partner.DateCreated,
                                  Contacted = partner.Contacted,
+                                 IsVerified = partner.IsActivated,
                                  EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
                                  .Select(x => new FleetPartnerDTO
                                  {
