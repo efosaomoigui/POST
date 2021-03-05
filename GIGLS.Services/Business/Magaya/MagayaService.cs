@@ -2286,6 +2286,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var userCountry = await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
+                var country = Mapper.Map<CountryDTO>(userCountry);
                 var shipmentDtos = new List<IntlShipmentRequestDTO>();
                 var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
                 shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);
@@ -2301,6 +2304,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             var centre = centres.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).FirstOrDefault();
                             var centreDTO = Mapper.Map<ServiceCentreDTO>(centre);
                             item.DestinationServiceCentre = centreDTO;
+                        }
+
+                        var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
+                        if (deptCentre.Any())
+                        {
+                            item.DepartureServiceCentre = deptCentre.FirstOrDefault();
+                            item.DepartureCountry = country;
                         }
                     }
 

@@ -3034,19 +3034,25 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var userCountry =  await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
+            var country = Mapper.Map<CountryDTO>(userCountry);
             int count = 0;
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
-                if (consolidated.Any())
+                var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
+                //var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
+                foreach (var item in requests)
                 {
-                    foreach (var item in consolidated)
+                    if (deptCentre.Any())
                     {
-                       count++;
-                        item.ItemCount = $"{count} of {count}";
-                    } 
-                }
+                        item.DepartureServiceCentre = deptCentre.FirstOrDefault();
+                        item.DepartureCountry = country;
+                    }
+                    count++;
+                    item.ItemCount = $"{count} of {count}";
+                } 
             }
 
             return requests;

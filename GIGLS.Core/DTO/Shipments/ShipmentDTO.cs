@@ -190,6 +190,8 @@ namespace GIGLS.Core.DTO.Shipments
         //Receivers Information
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public virtual ServiceCentreDTO DepartureServiceCentre { get; set; }
+        public virtual CountryDTO DepartureCountry { get; set; }
         public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }
