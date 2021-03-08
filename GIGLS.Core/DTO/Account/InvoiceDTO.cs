@@ -36,5 +36,6 @@ namespace GIGLS.Core.DTO.Account
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
         public bool IsHighValue { get; set; }
+        public int ETA { get; set; }
     }
 }
