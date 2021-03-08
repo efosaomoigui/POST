@@ -2273,7 +2273,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     var countryIds = shipmentDtos.Select(x => x.RequestProcessingCountryId).ToList();
                     var country = await _uow.Country.GetAsync(x => x.CountryId == countryID);
-                    var countryDTO = Mapper.Map<CountryDTO>(country);
+                    var countryDTO = Mapper.Map<NewCountryDTO>(country);
                     //GET ALL SERVICE CENTRE
                     var centreIds = shipments.Select(x => x.DestinationServiceCentreId).ToList();
                     var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId));

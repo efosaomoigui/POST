@@ -3050,7 +3050,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     var country = countries.Where(x => x.CountryId == item.RequestProcessingCountryId).FirstOrDefault();
                     if (country != null)
                     {
-                        var countryDTO = Mapper.Map<CountryDTO>(country);
+                        var countryDTO = Mapper.Map<NewCountryDTO>(country);
                         item.DepartureCountry = countryDTO; 
                     }
                     count++;
