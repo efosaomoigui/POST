@@ -2244,7 +2244,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [HttpPost]
         [Route("intlshipmentrequests")]
         public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
@@ -2260,13 +2259,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
         [HttpGet]
         [Route("consolidatedintlshipments")]
-        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments()
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments(int countryID = 0)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _magayaService.GetConsolidatedShipmentRequestForUser();
+                var result = await _magayaService.GetConsolidatedShipmentRequestForUser(countryID);
 
                 return new ServiceResponse<List<IntlShipmentRequestDTO>>
                 {

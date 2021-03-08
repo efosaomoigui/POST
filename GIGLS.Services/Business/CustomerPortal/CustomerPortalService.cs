@@ -3033,22 +3033,25 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
-            var currentUserId = await _userService.GetCurrentUserId();
-            var user = await _userService.GetUserById(currentUserId);
-            var userCountry =  await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
-            var country = Mapper.Map<CountryDTO>(userCountry);
             int count = 0;
+            var currentUserId = await _userService.GetCurrentUserId();
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
-                //var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
+                var countryIds =  requests.Select(x => x.RequestProcessingCountryId).ToList();
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
                 foreach (var item in requests)
                 {
-                    if (deptCentre.Any())
+                    //untill users updated apps
+                    if (item.RequestProcessingCountryId == 0)
                     {
-                        item.DepartureServiceCentre = deptCentre.FirstOrDefault();
-                        item.DepartureCountry = country;
+                        item.RequestProcessingCountryId = 207;
+                    }
+                    var country = countries.Where(x => x.CountryId == item.RequestProcessingCountryId).FirstOrDefault();
+                    if (country != null)
+                    {
+                        var countryDTO = Mapper.Map<CountryDTO>(country);
+                        item.DepartureCountry = countryDTO; 
                     }
                     count++;
                     item.ItemCount = $"{count} of {count}";

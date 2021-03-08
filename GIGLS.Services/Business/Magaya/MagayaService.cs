@@ -2256,19 +2256,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 throw;
             }
         }
-        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser()
+        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID)
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(userId);
-                var userCountry = await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
-                var country = Mapper.Map<CountryDTO>(userCountry);
                 var shipmentDtos = new List<IntlShipmentRequestDTO>();
-                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                if (countryID == 0)
+                {
+                    countryID = 207;
+                }
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == countryID).OrderBy(x => x.DateCreated).ToList();
                 shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);
                 if (shipmentDtos.Any())
                 {
+                    var countryIds = shipmentDtos.Select(x => x.RequestProcessingCountryId).ToList();
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == countryID);
+                    var countryDTO = Mapper.Map<CountryDTO>(country);
                     //GET ALL SERVICE CENTRE
                     var centreIds = shipments.Select(x => x.DestinationServiceCentreId).ToList();
                     var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId));
@@ -2281,12 +2286,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             item.DestinationServiceCentre = centreDTO;
                         }
 
-                        var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
-                        if (deptCentre.Any())
+                        //untill users updated apps
+                        if (item.RequestProcessingCountryId == 0)
                         {
-                            item.DepartureServiceCentre = deptCentre.FirstOrDefault();
-                            item.DepartureCountry = country;
+                            item.RequestProcessingCountryId = countryID;
                         }
+                        if (country != null)
+                        {
+                            item.DepartureCountry = countryDTO;
+                        }
+
+
                     }
 
                 }
