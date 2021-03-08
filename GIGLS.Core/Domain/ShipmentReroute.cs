@@ -17,6 +17,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(128)]
         public string RerouteBy { get; set; }
+
+        [MaxLength(500)]
         public string RerouteReason { get; set; }
 
         public ShipmentRerouteInitiator ShipmentRerouteInitiator { get; set; }
