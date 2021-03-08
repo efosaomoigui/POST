@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Stores
 {
-    public interface IStoreService
+    public interface IStoreService : IServiceDependencyMarker
     {
         Task<StoreDTO> GetStores();
         Task<StoreDTO> GetStoreById(int storeId);
