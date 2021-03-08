@@ -357,15 +357,17 @@ namespace GIGLS.Services.Implementation.Account
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybill)
         {
             var shipment = await _shipmentService.GetShipment(waybill);
+
+            //Get the ETA for the shipment
+            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId
+                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
+            shipment.ETA = eta;
+
             var invoice = shipment.Invoice;
             invoice.Shipment = shipment;
             invoice.Customer = shipment.CustomerDetails;
 
-            //Get the EXT for the shipment
-            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
-                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId 
-                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
-            invoice.ETA = eta;
 
             ///// Partial Payments, if invoice status is pending
             if (invoice.PaymentStatus == PaymentStatus.Pending)
