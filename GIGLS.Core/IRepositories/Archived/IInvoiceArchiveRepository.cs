@@ -35,16 +35,7 @@ namespace GIGLS.Core.IRepositories.Archived
         Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaitingForCollection_NotGrouped(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
 
         //Admin Report 
-        IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();
-        IQueryable<Report_BusiestRoute> GetBusiestRoute();
-        IQueryable<Report_CustomerRevenue> GetCustomerRevenue();
-        IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight();
-        IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
-        IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
-        IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
         IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
-        Task<List<object>> SalesPerServiceCenter(List<InvoiceArchiveView> invoice);
-        Task<List<object>> MostShippedItemsByWeight(List<InvoiceArchiveView> invoice);
-         Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
+        
     }
 }
