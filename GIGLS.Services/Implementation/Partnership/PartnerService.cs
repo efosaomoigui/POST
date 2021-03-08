@@ -245,11 +245,11 @@ namespace GIGLS.Services.Implementation.Partnership
                 var today = DateTime.Now;
                 foreach (var item in partners)
                 {
-                   var months = 12 * (today.Year - item.ActivityDate.Year) + today.Month - item.ActivityDate.Month;
+                    var months = 12 * (today.Year - item.ActivityDate.Year) + today.Month - item.ActivityDate.Month;
                   var monthsApart = Math.Abs(months);
-                    if (monthsApart >= 2)
+                    if (monthsApart <= 1)
                     {
-                        item.Active = false;
+                        item.Active = true;
                     }
                 }
 

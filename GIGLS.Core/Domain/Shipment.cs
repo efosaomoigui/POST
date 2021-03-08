@@ -265,6 +265,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool Consolidated { get; set; }
         [MaxLength(128)]
         public string ConsolidationId { get; set; }
+        public int RequestProcessingCountryId { get; set; }
 
     }
 

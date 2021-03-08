@@ -268,6 +268,8 @@
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
     <Content Include="Images\GIGLogisticsLogo.png" />
+    <Content Include="Images\ukflag.png" />
+    <Content Include="Images\usflag.png" />
     <Content Include="MagayaDirectory\commoditytypes.xml" />
     <Content Include="MagayaDirectory\Locations.xml" />
     <Content Include="MagayaDirectory\transactiontypes.xml" />
@@ -451,6 +453,7 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />

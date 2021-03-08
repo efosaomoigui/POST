@@ -189,6 +189,8 @@ namespace GIGLS.Core.DTO.Shipments
         //Receivers Information
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public virtual ServiceCentreDTO DepartureServiceCentre { get; set; }
+        public virtual CountryDTO DepartureCountry { get; set; }
         public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }
@@ -242,6 +244,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool FullyReceived { get; set; }
         public string ConsolidationId { get; set; }
         public string ItemCount { get; set; }
+        public int RequestProcessingCountryId { get; set; }
 
     }
 
@@ -331,6 +334,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ItemCount { get; set; }
         public bool Received { get; set; }
         public string ReceivedBy { get; set; }
+        public int RequestProcessingCountryId { get; set; }
     }
 
     public class InternationalShipmentDTO : BaseDomainDTO
@@ -445,6 +449,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ItemDetails { get; set; }
         public Content Content { get; set; }
         public PaymentType PaymentType { get; set; }
+        public int RequestProcessingCountryId { get; set; }
     }
 
 

@@ -1428,9 +1428,19 @@ namespace GIGLS.Services.Implementation.Messaging
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
 
-        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        public async Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId)
         {
-            var message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+            var message = new Message();
+            if (countryId > 0)
+            {
+                var mt = $"{messageType}{countryId}";
+                var newMessageType = (MessageType)Enum.Parse(typeof(MessageType), mt);
+                message = await _uow.Message.GetAsync(x => x.MessageType == newMessageType); 
+            }
+            else
+            {
+                message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+            }
 
             if (message == null)
             {

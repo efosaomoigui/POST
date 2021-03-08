@@ -61,6 +61,7 @@ using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
+using System.Web.Http;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -3019,9 +3020,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Get International Shipments Terms and Conditions
-        public async Task<MessageDTO> GetIntlMessageForApp()
+        public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
@@ -3033,19 +3034,25 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var userCountry =  await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
+            var country = Mapper.Map<CountryDTO>(userCountry);
             int count = 0;
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
-                if (consolidated.Any())
+                var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
+                //var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
+                foreach (var item in requests)
                 {
-                    foreach (var item in consolidated)
+                    if (deptCentre.Any())
                     {
-                       count++;
-                        item.ItemCount = $"{count} of {count}";
-                    } 
-                }
+                        item.DepartureServiceCentre = deptCentre.FirstOrDefault();
+                        item.DepartureCountry = country;
+                    }
+                    count++;
+                    item.ItemCount = $"{count} of {count}";
+                } 
             }
 
             return requests;
@@ -3170,6 +3177,20 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return WaybillWalletPaymentType.Wallet;
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
+        {
+            var countries = await _countryService.GetIntlShipingCountries();
+            countries.ToList();
+            if (countries.Any())
+            {
+                foreach (var item in countries)
+                {
+                    item.States = null;
+                }
+            }
+            return countries;
         }
     }
 }

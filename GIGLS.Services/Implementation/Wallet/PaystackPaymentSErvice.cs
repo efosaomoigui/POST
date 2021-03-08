@@ -327,13 +327,17 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     //await SendPaymentNotificationAsync(walletDto, paymentLog);
                     sendPaymentNotification = true;
-                }
 
-                //3. update the wallet payment log
-                if (verifyResult.data.Status != null)
-                {
+                    //3. update the wallet payment log
                     paymentLog.IsWalletCredited = true;
                 }
+
+                ////3. update the wallet payment log
+                //if (verifyResult.data.Status != null)
+                //{
+                //    paymentLog.IsWalletCredited = true;
+                //}
+
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
@@ -532,7 +536,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<ResponseDTO> VerifyBVN(string bvnNo)
         {
-
             var response = new HttpResponseMessage();
             var result = new ResponseDTO();
             var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
@@ -625,13 +628,16 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
+
+                    paymentLog.IsWalletCredited = true;
                 }
 
                 //3. update the wallet payment log
-                if (verifyResult.data.Status != null)
-                {
-                    paymentLog.IsWalletCredited = true;
-                }
+                //if (verifyResult.data.Status != null)
+                //{
+                //    paymentLog.IsWalletCredited = true;
+                //}
+
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
@@ -724,13 +730,16 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     //await SendPaymentNotificationAsync(walletDto, paymentLog);
                     sendPaymentNotification = true;
+
+                    //3. update the wallet payment log
+                    paymentLog.IsWalletCredited = true;
                 }
 
                 //3. update the wallet payment log
-                if (verifyResult.data.Status != null)
-                {
-                    paymentLog.IsWalletCredited = true;
-                }
+                //if (verifyResult.data.Status != null)
+                //{
+                //    paymentLog.IsWalletCredited = true;
+                //}
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();

@@ -233,6 +233,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
 
             magayaShipmentDTO.TotalWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight };
+            totalChargeWeight += totalWeight;
+
             return;
         }
 
@@ -251,6 +253,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
         double totalChargeAmount = 0.00; //total cost of shipment cost
+        double totalChargeWeight = 0.00;
 
         public async Task<Dictionary<string, double>> retMagayaShipmentCharges(TheChargeCombo magayaShipmentDTO)
         {
@@ -365,9 +368,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
 
                 //var itemChargeableWeight = (totalVolumeWeight > totalWeight) ? totalVolumeWeight : totalWeight;
-                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value; /// 1738; //Convert volume to ft3
+                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
                 var weight = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight.Value;
-                var volumeweight = volume / 166 * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
+                var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
 
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
@@ -394,17 +397,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Rate)
                 {
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
                 else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum)
                 {
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
                 else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum)
                 {
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
 
                 if (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20)
@@ -413,7 +416,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     magayaShipmentDTO.Charges.Charge[i].PriceInCurrency.Value = 20;
                     magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
                     itemChargeableWeight = 1;
-                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
                 }
 
                 //magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
@@ -445,7 +448,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     Pieces = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces,
                     Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = weight },
-                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = volume / 1738 },
+                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = volume / 1728 },
                     ChargeableWeight = new WeightValue()
                     {
                         Unit = WeightUnitType.lb,
@@ -564,7 +567,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (result == api_session_error.no_error)
                 {
                     var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
-                    await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
+                    shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
+                    await _uow.CompleteAsync();
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
@@ -1039,6 +1045,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+               
+                if (shipmentDTO.RequestProcessingCountryId <= 0)
+                {
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+                    if (country != null)
+                    {
+                        newShipment.RequestProcessingCountryId = country.CountryId;
+                    }
+                }
                 string itemName = "";
 
                 var serialNumber = 1;
@@ -1337,6 +1352,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 DestinationCountryId = r.DestinationCountryId,
                 Consolidated = r.Consolidated,
                 ConsolidationId = r.ConsolidationId,
+                RequestProcessingCountryId = r.RequestProcessingCountryId,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
@@ -2245,6 +2261,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var userCountry = await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
+                var country = Mapper.Map<CountryDTO>(userCountry);
                 var shipmentDtos = new List<IntlShipmentRequestDTO>();
                 var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
                 shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);
@@ -2260,6 +2279,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             var centre = centres.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).FirstOrDefault();
                             var centreDTO = Mapper.Map<ServiceCentreDTO>(centre);
                             item.DestinationServiceCentre = centreDTO;
+                        }
+
+                        var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
+                        if (deptCentre.Any())
+                        {
+                            item.DepartureServiceCentre = deptCentre.FirstOrDefault();
+                            item.DepartureCountry = country;
                         }
                     }
 
