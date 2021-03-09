@@ -50,13 +50,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
-        //private readonly IPaystackPaymentService _paymentService;
         private readonly IMagayaService _magayaService;
 
         public CustomerPortalController(ICustomerPortalService portalService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
-            //_paymentService = paymentService;
             _magayaService = magayaService;
         }
 
