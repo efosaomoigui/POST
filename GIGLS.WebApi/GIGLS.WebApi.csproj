@@ -278,6 +278,7 @@
     <Content Include="Images\homebase.png" />
     <Content Include="Images\marksspencers.png" />
     <Content Include="Images\matalan.png" />
+    <Content Include="Images\next.png" />
     <Content Include="Images\oldnavy.png" />
     <Content Include="Images\tesco.png" />
     <Content Include="Images\ukflag.png" />
