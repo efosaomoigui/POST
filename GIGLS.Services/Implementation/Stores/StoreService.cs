@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
@@ -7,6 +10,7 @@ using GIGLS.Core;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IServices.Stores;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.Services.Implementation.Stores
 {
@@ -29,9 +33,14 @@ namespace GIGLS.Services.Implementation.Stores
                 }
 
                 //save image to blob
-                var filename = $"{store.StoreName}.png";
-                // var blobname = await AzureBlobServiceUtil.UploadAsync(imageByte, filename);
+                using (WebClient webClient = new WebClient())
+                {
+                    byte[] data = webClient.DownloadData(store.URL);
+                    var filename = $"{store.StoreName}.png";
+                    var imgurl = await AzureBlobServiceUtil.UploadAsync(data, filename);
+                    store.storeImage = imgurl;
 
+                }
                 var newstore = Mapper.Map<Store>(store);
                _uow.Store.Add(newstore);
                 await _uow.CompleteAsync();
@@ -101,7 +110,7 @@ namespace GIGLS.Services.Implementation.Stores
                storetoModify.State = store.State;
                storetoModify.URL = store.URL;
                storetoModify.CountryId = store.CountryId;
-               storetoModify.storeImage = store.storeImage;
+              // storetoModify.storeImage = store.storeImage;
                 _uow.Complete();
             }
             catch (Exception)
