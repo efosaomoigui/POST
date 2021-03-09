@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
-
     public class Shipment : BaseDomain, IAuditable
     {
         [Key]

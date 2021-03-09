@@ -6,6 +6,7 @@ using GIGLS.Core.Domain.Wallet;
 using System.Configuration;
 using System;
 using GIGLS.Core.View.AdminReportView;
+using GIGLS.Core.View.Archived;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -44,6 +45,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<Report_RevenuePerServiceCentre> Report_RevenuePerServiceCentre { get; set; }
         public DbSet<Report_TotalServiceCentreByState> Report_TotalServiceCentreByState { get; set; }
         public DbSet<Report_TotalOrdersDelivered> Report_TotalOrdersDelivered { get; set; }
+
+
+        //Archive
+        public DbSet<InvoiceArchiveView> InvoiceArchiveView { get; set; }
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

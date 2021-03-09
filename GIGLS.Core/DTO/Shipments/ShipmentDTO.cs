@@ -7,7 +7,6 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Account;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.DHL.Enum;
 
 namespace GIGLS.Core.DTO.Shipments
@@ -158,6 +157,7 @@ namespace GIGLS.Core.DTO.Shipments
         public InternationalShipmentType InternationalShipmentType { get; set; }
         public bool IsClassShipment { get; set; }
         public string LGA { get; set; }
+        public int ETA { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 
@@ -191,7 +191,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentreDTO DestinationServiceCentre { get; set; }
         public virtual ServiceCentreDTO DepartureServiceCentre { get; set; }
-        public virtual CountryDTO DepartureCountry { get; set; }
+        public virtual NewCountryDTO DepartureCountry { get; set; }
         public int DestinationCountryId { get; set; }
 
         public string ReceiverName { get; set; }

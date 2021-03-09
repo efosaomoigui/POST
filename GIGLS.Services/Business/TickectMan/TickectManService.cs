@@ -219,6 +219,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ShipmentDTO> GetShipment(string waybill)
         {
             var shipment = await _shipmentService.GetShipment(waybill);
+
+            //Get the ETA for the shipment
+            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId
+                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
+            shipment.ETA = eta;
+
             if (shipment.GrandTotal > 0)
             {
                 var factor = Convert.ToDecimal(Math.Pow(10, -2));
