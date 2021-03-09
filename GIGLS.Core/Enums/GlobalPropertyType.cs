@@ -86,6 +86,7 @@
         UsedGadgets,
         UsedGadgetsLessThan6Kg,
         Perfumes,
-        PerfumesLessThan6Kg
+        PerfumesLessThan6Kg,
+        OthersMinUK
     }
 }
