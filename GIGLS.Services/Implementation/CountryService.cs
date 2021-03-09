@@ -113,12 +113,19 @@ namespace GIGLS.Services.Implementation
                 country.ContactEmail = countryDto.ContactEmail;
                 country.TermAndConditionAmount = countryDto.TermAndConditionAmount;
                 country.TermAndConditionCountry = countryDto.TermAndConditionCountry;
+                country.IsInternationalShippingCountry = countryDto.IsInternationalShippingCountry;
                 _uow.Complete();
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
+        {
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsInternationalShippingCountry == true);
+            return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
         }
     }
 }

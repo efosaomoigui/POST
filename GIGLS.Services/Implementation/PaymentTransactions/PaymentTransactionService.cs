@@ -143,6 +143,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //settlement by wallet
             if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
+                paymentTransaction.TransactionCode = shipment.CustomerCode;
                 await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
@@ -393,6 +394,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 //I used transaction code to represent wallet number when processing for wallet
+                if (string.IsNullOrWhiteSpace(paymentTransaction.TransactionCode))
+                {
+                    paymentTransaction.TransactionCode = shipment.CustomerCode;
+                }
                 var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
 
                 //Additions for Ecommerce customers (Max wallet negative payment limit)

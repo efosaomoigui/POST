@@ -557,6 +557,7 @@
     <Compile Include="Enums\EmailSmsType.cs" />
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
+    <Compile Include="Enums\CountryType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />
@@ -627,6 +628,8 @@
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
     <Compile Include="IRepositories\Account\IVATRepository.cs" />
+    <Compile Include="IRepositories\Archived\IInvoiceArchiveRepository.cs" />
+    <Compile Include="IRepositories\Archived\IShipmentArchiveRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\IBankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="IRepositories\BankSettlement\IBankRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\ICODSettlementSheetRepository.cs" />
@@ -928,6 +931,7 @@
     <Compile Include="MapperConfigurationExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="View\AdminReportView\AllTimeSalesByCountry.cs" />
+    <Compile Include="View\Archived\InvoiceArchiveView.cs" />
     <Compile Include="View\CustomerView.cs" />
     <Compile Include="View\InvoiceView.cs" />
     <Compile Include="View\ShipmentTrackingView.cs" />

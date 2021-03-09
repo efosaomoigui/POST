@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Zone;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
 using System.Net;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -31,10 +32,7 @@ namespace GIGLS.Services.Implementation.Zone
             //check if any of the station exist before mapping
             await _service.GetStationById(routeZoneMapDTO.DestinationId);
             await _service.GetStationById(routeZoneMapDTO.DepartureId);
-
-            var routeZoneMap = Mapper.Map<DomesticRouteZoneMap>(routeZoneMapDTO);
-
-            var mapExists = await _unitOfWork.DomesticRouteZoneMap.ExistAsync(d => d.DepartureId == routeZoneMap.DepartureId && d.DestinationId == routeZoneMap.DestinationId);
+            var mapExists = await _unitOfWork.DomesticRouteZoneMap.ExistAsync(d => d.DepartureId == routeZoneMapDTO.DepartureId && d.DestinationId == routeZoneMapDTO.DestinationId);
 
             if (mapExists == true)
             {
@@ -43,16 +41,14 @@ namespace GIGLS.Services.Implementation.Zone
 
             var Mapping = new DomesticRouteZoneMap
             {
-                DepartureId = routeZoneMap.DepartureId,
-                DestinationId = routeZoneMap.DestinationId,
-                ZoneId = routeZoneMap.ZoneId,
-                Status = true
+                DepartureId = routeZoneMapDTO.DepartureId,
+                DestinationId = routeZoneMapDTO.DestinationId,
+                ZoneId = routeZoneMapDTO.ZoneId,
+                Status = true,
+                ETA = routeZoneMapDTO.ETA
             };
-
             _unitOfWork.DomesticRouteZoneMap.Add(Mapping);
-
             await _unitOfWork.CompleteAsync();
-
             return new { Id = Mapping.DomesticRouteZoneMapId };
         }
 
@@ -114,7 +110,7 @@ namespace GIGLS.Services.Implementation.Zone
             zoneMap.DestinationId = routeZoneMap.DestinationId;
             zoneMap.ZoneId = routeZoneMap.ZoneId;
             zoneMap.Status = routeZoneMap.Status;
-
+            zoneMap.ETA = routeZoneMap.ETA;
             await _unitOfWork.CompleteAsync();
         }
 
@@ -129,7 +125,6 @@ namespace GIGLS.Services.Implementation.Zone
             await _unitOfWork.CompleteAsync();
         }
        
-
         public async Task<DomesticRouteZoneMapDTO> GetZoneMobile(int departure, int destination)
         {
             var routeZoneMap = await _unitOfWork.DomesticRouteZoneMap.GetAsync(r =>
@@ -139,6 +134,14 @@ namespace GIGLS.Services.Implementation.Zone
                 throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
+        }
+
+        public async Task<int> GetZoneETA(int departure, int destination)
+        {
+            int eta = _unitOfWork.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == departure && x.DestinationId == destination).Select(x => x.ETA).FirstOrDefault();
+
+            return await Task.FromResult(eta);
         }
     }
 }

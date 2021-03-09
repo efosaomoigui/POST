@@ -17,6 +17,8 @@ using System;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
+using GIGLS.Core.Domain.Utility;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -1319,6 +1321,172 @@ namespace GIGLS.Services.Business.Pricing
                 insurance = declarationValue * insuranceValue;
             }
             return insurance;
+        }
+        public async Task<decimal> GetPriceForUK(UKPricingDTO pricingDto)
+        {
+            //get country by service centre
+            try
+            {
+                var price = 0.0m;
+                if (pricingDto.DepartureServiceCentreId <= 0)
+                {
+                    // use currentUser login servicecentre
+                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                    if (serviceCenters.Length > 1)
+                    {
+                        throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    pricingDto.DepartureServiceCentreId = serviceCenters[0];
+                }
+                var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+                var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+                var globalProperties = _uow.GlobalProperty.GetAllAsQueryable().Where(x => x.CountryId == departureCountry.CountryId && x.IsActive == true).ToList();
+                if (pricingDto != null)
+                {
+                    //check for volumetric weight
+                    if (pricingDto.IsVolumetric)
+                    {
+                        decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 6000;
+                        pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+                    }
+                    switch (pricingDto.ItemCategory)
+                    {
+                        case GlobalPropertyType.NewGadgets:
+                            return await GetPriceForNewGadgetsUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.ChildrenGadgets:
+                            return await GetPriceForNewGadgetsUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.UsedGadgets:
+                            return await GetPriceForUsedGadgetsUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.UsedGadgetsLessThan6Kg:
+                            return await GetPriceForUsedGadgetsUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.Perfumes:
+                            return await GetPriceForPerfumesUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.PerfumesLessThan6Kg:
+                            return await GetPriceForPerfumesUK(pricingDto, globalProperties);
+
+                        case GlobalPropertyType.OthersUK:
+                            return await GetPriceForOthersUK(pricingDto, globalProperties);
+                        default:
+                            break;
+                    }
+                }
+                return price;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task<decimal> GetPriceForOthersUK(UKPricingDTO pricingDto,List<GlobalProperty> globalProperties)
+        {
+            //get country by service centre
+            var price = 0.0m;
+            // check if categories is others, and weight is less than 20kg use flat rate of 20kg else use 5kg 
+            //check if the weight less than 20kg
+            if (pricingDto.Weight < 20)
+            {
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString()).FirstOrDefault();
+                //get itemCategory where is others and less than 20kg
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            else
+            {
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersUK.ToString()).FirstOrDefault();
+                //get itemCategory where is others and greater or equal to 20kg
+                for (int i = 1; i <= pricingDto.Weight; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            return price;
+        }
+
+        private async Task<decimal> GetPriceForNewGadgetsUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        {
+            //get country by service centre
+            var price = 0.0m;
+            // check if categories is new gadgets adult then use flat rate of 50pounds
+             if (pricingDto.ItemCategory == GlobalPropertyType.NewGadgets)
+            {
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.NewGadgets.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    //get itemCategory where is new gadgets
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            else if (pricingDto.ItemCategory == GlobalPropertyType.ChildrenGadgets)
+            {
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.ChildrenGadgets.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    //get itemCategory where is children gadgets
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            return price;
+        }
+
+        private async Task<decimal> GetPriceForUsedGadgetsUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        {
+            //get country by service centre
+            var price = 0.0m;
+            // check if categories is new gadgets adult then use flat rate of 50pounds
+            if (pricingDto.Weight < 6)
+            {
+                //get itemCategory where is used gadgets less than 6kg
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.UsedGadgetsLessThan6Kg.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            else
+            {
+                //get itemCategory where is used gadgets greater than 6kg
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.UsedGadgets.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Weight; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            return price;
+        }
+
+        private async Task<decimal> GetPriceForPerfumesUK(UKPricingDTO pricingDto, List<GlobalProperty> globalProperties)
+        {
+            //get country by service centre
+            var price = 0.0m;
+            // check if categories is new gadgets adult then use flat rate of 50pounds
+            if (pricingDto.Weight < 6)
+            {
+                //get itemCategory where is perfumes less than 6kg
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.PerfumesLessThan6Kg.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Weight; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            else
+            {
+                //get itemCategory where is perfumes greater than 6kg
+                var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.PerfumesLessThan6Kg.ToString()).FirstOrDefault();
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            return price;
         }
     }
 }

@@ -154,6 +154,7 @@ namespace GIGLS.WebApi.Providers
                     { "BVN", userBVN},
                     { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
+                    { "CountryType", user.CountryType},
                 };
 
                 //get claims for the user

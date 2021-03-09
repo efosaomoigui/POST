@@ -13,7 +13,7 @@ namespace GIGLS.Core.IMessageService
         Task SendVoiceMessageAsync(string userId);
         Task SendEcommerceRegistrationNotificationAsync(MessageDTO messageDTO);
         Task SendPaymentNotificationAsync(MessageDTO messageDTO);
-        Task<MessageDTO> GetMessageByType(MessageType messageType);
+        Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
     }
 }

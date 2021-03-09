@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices
         Task UpdateCountry(int countryId, CountryDTO countryDto);
         Task DeleteCountry(int countryId);
         Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries();
+        Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
     }
 }

@@ -263,7 +263,10 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
                 config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
-                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>();
+                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>(); 
+
+                config.CreateMap<GIGLS.Core.Domain.Country, NewCountryDTO>();
+                config.CreateMap<NewCountryDTO, GIGLS.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();

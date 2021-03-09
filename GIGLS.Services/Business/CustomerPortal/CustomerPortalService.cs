@@ -61,6 +61,7 @@ using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
+using System.Web.Http;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -3019,33 +3020,44 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Get International Shipments Terms and Conditions
-        public async Task<MessageDTO> GetIntlMessageForApp()
+        public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
         {
-            return await _uow.Store.GetStoresByCountryId(countryId);
+            var stores = await _uow.Store.GetStoresByCountryId(countryId);
+            stores = stores.OrderByDescending(x => x.storeImage).ToList();
+            return stores;
         }
 
         public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
-            var currentUserId = await _userService.GetCurrentUserId();
             int count = 0;
+            var currentUserId = await _userService.GetCurrentUserId();
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
-                if (consolidated.Any())
+                var countryIds =  requests.Select(x => x.RequestProcessingCountryId).ToList();
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
+                foreach (var item in requests)
                 {
-                    foreach (var item in consolidated)
+                    //untill users updated apps
+                    if (item.RequestProcessingCountryId == 0)
                     {
-                       count++;
-                        item.ItemCount = $"{count} of {count}";
-                    } 
-                }
+                        item.RequestProcessingCountryId = 207;
+                    }
+                    var country = countries.Where(x => x.CountryId == item.RequestProcessingCountryId).FirstOrDefault();
+                    if (country != null)
+                    {
+                        var countryDTO = Mapper.Map<NewCountryDTO>(country);
+                        item.DepartureCountry = countryDTO; 
+                    }
+                    count++;
+                    item.ItemCount = $"{count} of {count}";
+                } 
             }
 
             return requests;
@@ -3170,6 +3182,20 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return WaybillWalletPaymentType.Wallet;
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
+        {
+            var countries = await _countryService.GetIntlShipingCountries();
+            countries.ToList();
+            if (countries.Any())
+            {
+                foreach (var item in countries)
+                {
+                    item.States = null;
+                }
+            }
+            return countries;
         }
     }
 }

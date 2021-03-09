@@ -273,7 +273,7 @@ namespace GIGLS.Services.Implementation.Account
             return invoiceDTO;
         }
 
-        public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl)
+        public async Task<InvoiceDTO> GetInvoiceByWaybillOld(string waybl)
         {
             var invoice = await _uow.Invoice.GetAsync(e => e.Waybill == waybl);
 
@@ -352,6 +352,52 @@ namespace GIGLS.Services.Implementation.Account
             }
 
             return invoiceDTO;
+        }
+
+        public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybill)
+        {
+            var shipment = await _shipmentService.GetShipment(waybill);
+
+            //Get the ETA for the shipment
+            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId
+                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
+            shipment.ETA = eta;
+
+            var invoice = shipment.Invoice;
+            invoice.Shipment = shipment;
+            invoice.Customer = shipment.CustomerDetails;
+
+
+            ///// Partial Payments, if invoice status is pending
+            if (invoice.PaymentStatus == PaymentStatus.Pending)
+            {
+                var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill == waybill);
+
+                if (partialTransactionsForWaybill.Any())
+                {
+                    invoice.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
+                    {
+                        Waybill = waybill,
+                        PaymentPartialTransactions = Mapper.Map<List<PaymentPartialTransactionDTO>>(partialTransactionsForWaybill)
+                    };
+                }
+            }
+
+            //get country details
+            var country = await _uow.Country.GetAsync(invoice.CountryId);
+            invoice.Country = Mapper.Map<CountryDTO>(country);
+
+            //get high value amount
+            var highValue = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HighValueShipment, invoice.CountryId);
+            decimal highValueAmount = Convert.ToDecimal(highValue?.Value);
+
+            if (shipment.DeclarationOfValueCheck >= highValueAmount)
+            {
+                invoice.IsHighValue = true;
+            }
+
+            return invoice;
         }
 
         public async Task<object> AddInvoice(InvoiceDTO invoiceDto)
