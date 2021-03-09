@@ -316,7 +316,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                             //Demurage should be exclude from Company customer. Only individual customer should have demurage
                             //HomeDelivery shipments should not have demurrage for Individual Shipments
-                            if (customerType != CustomerType.Company || shipmentDto.PickupOptions != PickupOptions.HOMEDELIVERY)
+                            if (customerType != CustomerType.Company && shipmentDto.PickupOptions != PickupOptions.HOMEDELIVERY)
                             {
                                 //get Demurrage information for Individual customer
                                 await GetDemurrageInformation(shipmentDto);
