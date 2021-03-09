@@ -3,63 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core;
 using System.Linq;
-using AutoMapper;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
-using Microsoft.AspNet.Identity;
 using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
 using System;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
-using GIGLS.Core.View;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IServices.Utility;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IMessageService;
-using System.Text.RegularExpressions;
-using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Core.IServices.Partnership;
-using System.Configuration;
-using System.Security.Cryptography;
-using System.Text;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using System.Net;
-using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.DTO.Stores;
-using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
@@ -280,10 +241,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
             var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
             if (shipmentCollection.IsComingFromDispatch)
             {
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }
