@@ -1389,7 +1389,8 @@ namespace GIGLS.Services.Business.Pricing
             //get country by service centre
             var price = 0.0m;
             // check if categories is others, and weight is less than 20kg use flat rate of 20kg else use 5kg 
-            //check if the weight less than 20kg
+            //check if the weight less than 20kg,get minimum weight
+            var min = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString());
             if (pricingDto.Weight < 20)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString()).FirstOrDefault();
