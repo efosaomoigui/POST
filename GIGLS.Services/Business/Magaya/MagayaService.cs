@@ -1099,6 +1099,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
                 castObj.ItemDetails = itemName;
                 castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
