@@ -1323,7 +1323,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
                     var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
-                    messageDTO.Subject = $"{messageDTO.Subject} for {country.CountryName}";
+                    messageDTO.Subject = $"{messageDTO.Subject} ({country.CountryName})";
                     strArray[4] = departure.Name;
                 }
 
