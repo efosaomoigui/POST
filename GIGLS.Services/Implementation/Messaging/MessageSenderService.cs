@@ -1317,7 +1317,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     intlDTO.RequestProcessingCountryId = 207;
                     var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
                     strArray[4] = "Houston, United States";
-                    messageDTO.Subject = $"{messageDTO.Subject} for {country.CountryName}";
+                    messageDTO.Subject = $"{messageDTO.Subject} ({country.CountryName})";
                 }
                 else
                 {
