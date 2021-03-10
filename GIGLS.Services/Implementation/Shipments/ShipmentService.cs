@@ -4537,9 +4537,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.SenderAddress = shipmentDTO.Customer[0].Address;
                 shipmentDTO.SenderState = shipmentDTO.Customer[0].State;
             }
+            var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == shipmentDTO.RequestNumber).FirstOrDefault();
+            var intlRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == shipmentDTO.RequestNumber);
+            if (intlRequest.RequestProcessingCountryId == 0)
+            {
+                shipmentDTO.DepartureCountryId = 207;
+            }
+            else
+            {
+                shipmentDTO.DepartureCountryId = intlRequest.RequestProcessingCountryId;
+            }
+            var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.DepartureCountryId);
+            if (centre.Any())
+            {
+                shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+            }
 
             //set some data to null
-           shipmentDTO.ShipmentCollection = null;
+            shipmentDTO.ShipmentCollection = null;
            shipmentDTO.Demurrage = null;
            shipmentDTO.Invoice = null;
            shipmentDTO.ShipmentCancel = null;
@@ -4557,8 +4572,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DestinationServiceCentre = dest;
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
-                  //  shipment.ItemDetails = shipment.ShipmentItems;
-                    // send email message for payment notification
+              
                     await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
 
                     //Send an email to Chairman
@@ -4582,8 +4596,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
-                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == shipmentDTO.RequestNumber).FirstOrDefault();
-                var intlRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == shipmentDTO.RequestNumber);
                 intlRequest.IsProcessed = true;
                 foreach (var item in intlRequest.ShipmentRequestItems)
                 {

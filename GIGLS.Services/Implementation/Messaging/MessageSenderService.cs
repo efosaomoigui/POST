@@ -1299,7 +1299,6 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = intlDTO.ReceiverName;
                 strArray[2] = intlDTO.URL;
                 strArray[3] = intlDTO.RequestNumber;
-                strArray[4] = "Houston, United States";
                 strArray[5] = intlDTO.DestinationServiceCentre.Name;
                 strArray[6] = intlDTO.ItemDetails;
                 strArray[7] = "International Shipment Items";
@@ -1311,6 +1310,21 @@ namespace GIGLS.Services.Implementation.Messaging
                 else if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     strArray[8] = "Home Delivery";
+                }
+
+                if (intlDTO.RequestProcessingCountryId == 0 || intlDTO.RequestProcessingCountryId == 207)
+                {
+                    intlDTO.RequestProcessingCountryId = 207;
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
+                    strArray[4] = "Houston, United States";
+                    messageDTO.Subject = $"{messageDTO.Subject} for {country.CountryName}";
+                }
+                else
+                {
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
+                    var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
+                    messageDTO.Subject = $"{messageDTO.Subject} for {country.CountryName}";
+                    strArray[4] = departure.Name;
                 }
 
                 //B. decode url parameter
