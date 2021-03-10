@@ -138,7 +138,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          SuperManifestCode = p.SuperManifestCode,
                                                          SuperManifestStatus = p.SuperManifestStatus,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                         CargoStatus = p.CargoStatus
                                                      }).FirstOrDefault()
                                                  };
 

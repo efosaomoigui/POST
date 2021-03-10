@@ -1330,6 +1330,7 @@ namespace GIGLS.Services.Business.Scanning
                         }
                     }
                 }
+                manifest.CargoStatus = CargoStatus.Cargoed;
                 _uow.ShipmentTracking.AddRange(shipmentTracking);
                 await _uow.CompleteAsync();
             }
