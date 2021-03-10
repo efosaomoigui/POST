@@ -35,7 +35,7 @@ namespace GIGLS.Services.Implementation.Stores
                 //save image to blob
                 using (WebClient webClient = new WebClient())
                 {
-                    byte[] data = webClient.DownloadData(store.URL);
+                    byte[] data = webClient.DownloadData(store.storeImage);
                     var filename = $"{store.StoreName}.png";
                     var imgurl = await AzureBlobServiceUtil.UploadAsync(data, filename);
                     store.storeImage = imgurl;
@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Stores
                 await _uow.CompleteAsync();
                 return new { Id = newstore.StoreId };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -74,7 +74,7 @@ namespace GIGLS.Services.Implementation.Stores
         {
             try
             {
-                var store = await _uow.Store.GetAsync(storeId);
+                var store = await _uow.Store.GetStoreById(storeId);
                 if (store == null)
                 {
                     throw new GenericException("Store Not Exist");
@@ -89,10 +89,10 @@ namespace GIGLS.Services.Implementation.Stores
             }
         }
 
-        public Task<IEnumerable<StoreDTO>> GetStores()
+        public async Task<List<StoreDTO>> GetStores()
         {
-            var stores =  _uow.Store.GetAll();
-            return Task.FromResult(Mapper.Map<IEnumerable<StoreDTO>>(stores));
+            var stores = await _uow.Store.GetStores();
+            return Mapper.Map<List<StoreDTO>>(stores);
         }
 
         public async Task UpdateStore(int storeId, StoreDTO store)
@@ -110,7 +110,7 @@ namespace GIGLS.Services.Implementation.Stores
                storetoModify.State = store.State;
                storetoModify.URL = store.URL;
                storetoModify.CountryId = store.CountryId;
-              // storetoModify.storeImage = store.storeImage;
+               storetoModify.storeImage = store.storeImage;
                 _uow.Complete();
             }
             catch (Exception)

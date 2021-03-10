@@ -44,5 +44,62 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Stores
                 throw;
             }
         }
+
+        public Task<List<StoreDTO>> GetStores()
+        {
+            try
+            {
+                var stores = _context.Store;
+
+                var storesDTO = from s in stores
+                                join c in Context.Country on s.CountryId equals c.CountryId
+                                select new StoreDTO
+                                {
+                                    StoreName = s.StoreName,
+                                    StoreId = s.StoreId,
+                                    URL = s.URL,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    storeImage = s.storeImage,
+                                    CountryName = c.CountryName,
+                                    CountryId = c.CountryId,
+                                };
+                return Task.FromResult(storesDTO.OrderBy(x => x.StoreName).ToList());
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public  Task <StoreDTO> GetStoreById(int storeId)
+        {
+            try
+            {
+                var stores = _context.Store;
+
+                var storesDTO = from s in stores
+                                join c in Context.Country on s.CountryId equals c.CountryId
+                                where s.StoreId == storeId
+                                select new StoreDTO
+                                {
+                                    StoreName = s.StoreName,
+                                    StoreId = s.StoreId,
+                                    URL = s.URL,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    storeImage = s.storeImage,
+                                    CountryName = c.CountryName,
+                                    CountryId = c.CountryId,
+                                };
+                return Task.FromResult(storesDTO.FirstOrDefault());
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
