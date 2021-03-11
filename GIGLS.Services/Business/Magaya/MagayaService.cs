@@ -1019,11 +1019,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
-
                 if (shipmentDTO.RequestProcessingCountryId == 0)
                 {
                     shipmentDTO.RequestProcessingCountryId = 207;
                 }
+                var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.RequestProcessingCountryId);
+                if (centre.Any())
+                {
+                    shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+                }
+
                 if (shipmentDTO.Consolidated)
                 {
                     //get count of all unprocessed consolited item
@@ -1049,6 +1054,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+               
                
                 string itemName = "";
 
@@ -1092,6 +1098,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentre = destinationServiceCenter;
                 var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
                 castObj.ItemDetails = itemName;
+                castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
