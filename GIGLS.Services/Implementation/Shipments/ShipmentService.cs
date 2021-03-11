@@ -3503,6 +3503,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
                     shipmentexists.PickupOptions = shipment.PickupOptions;
+                    shipmentexists.IsClassShipment = shipment.IsClassShipment;
 
                     if (shipment.PackageOptionIds.Any())
                     {
