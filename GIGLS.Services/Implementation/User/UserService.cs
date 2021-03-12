@@ -1316,6 +1316,7 @@ namespace GIGLS.Services.Implementation.User
 
                 //set countryId
                 user.UserActiveCountryId = country.CountryId;
+                user.CountryType = country.CountryCode;
                 await _unitOfWork.CompleteAsync();
                 result = true;
             }

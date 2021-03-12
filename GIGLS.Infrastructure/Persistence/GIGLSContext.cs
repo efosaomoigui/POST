@@ -20,6 +20,7 @@ using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.Domain.Expenses;
 using GIGLS.Core.Domain.Route;
 using GIGLS.Core.Domain.DHL;
+using GIGLS.Core.Domain.Archived;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -301,6 +302,15 @@ namespace GIGLS.Infrastructure.Persistence
 
         #endregion
 
+
+        #region Archive Entities
+        public DbSet<Shipment_Archive> Shipment_Archive { get; set; }
+        public DbSet<ShipmentItem_Archive> ShipmentItem_Archive { get; set; }
+        public DbSet<Invoice_Archive> Invoice_Archive { get; set; }
+        public DbSet<GeneralLedger_Archive> GeneralLedger_Archive { get; set; }
+        public DbSet<TransitWaybillNumber_Archive> TransitWaybillNumber_Archive { get; set; }
+
+        #endregion
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

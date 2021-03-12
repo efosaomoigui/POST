@@ -42,6 +42,7 @@ using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Business;
 using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.Domain.Archived;
 
 namespace GIGLS.Core
 {
@@ -262,7 +263,10 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
                 config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
-                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>();
+                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>(); 
+
+                config.CreateMap<GIGLS.Core.Domain.Country, NewCountryDTO>();
+                config.CreateMap<NewCountryDTO, GIGLS.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
@@ -462,6 +466,14 @@ namespace GIGLS.Core
 
                 config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
                 config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
+
+                //Archived Marking
+                config.CreateMap<Shipment_Archive, ShipmentDTO>();
+                config.CreateMap<ShipmentItem_Archive, ShipmentItem>();
+                config.CreateMap<ShipmentItem_Archive, ShipmentItemDTO>();
+                config.CreateMap<GeneralLedger_Archive, GeneralLedgerDTO>();
+                config.CreateMap<Invoice_Archive, InvoiceDTO>();
+                config.CreateMap<TransitWaybillNumber_Archive, TransitWaybillNumberDTO>();
 
             });
 

@@ -33,7 +33,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Stores
                                     StoreName = s.StoreName,
                                     URL = s.URL,
                                     Address = s.Address,
-                                    City = s.City
+                                    City = s.City,
+                                    storeImage = s.storeImage
                                 };
                 return Task.FromResult(storesDTO.OrderBy(x => x.StoreName).ToList());
 

@@ -15,6 +15,8 @@ namespace GIGLS.Core.Domain
         public string DriverId { get; set; }
 
         public decimal CostOfDelivery { get; set; }
+
+        [MaxLength(500)]
         public string Address { get; set; }
         public DateTime DeliveryDate { get; set; }
 

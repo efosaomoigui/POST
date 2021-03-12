@@ -11,6 +11,7 @@ namespace GIGLS.Core.DTO.Stores
         public string City { get; set; }
         public string State { get; set; }
         public string URL { get; set; }
+        public string storeImage { get; set; }
         public int CountryId { get; set; }
     }
 }

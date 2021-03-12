@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {

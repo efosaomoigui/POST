@@ -186,6 +186,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         double totalVolume = 0.00;
         double totalWeight = 0.00;
         double totalVolumeWeight = 0.00;
+        double minimum = 0.00;
         Guid guid = Guid.NewGuid();
 
         private void setMagayaShipmentItems(WarehouseReceipt magayaShipmentDTO)
@@ -201,15 +202,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Items[i].Length = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Length.Value };
                 magayaShipmentDTO.Items[i].Width = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Width.Value };
                 magayaShipmentDTO.Items[i].Height = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Height.Value };
-                magayaShipmentDTO.Items[i].Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = magayaShipmentDTO.Items[i].Length.Value };
+                magayaShipmentDTO.Items[i].Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = magayaShipmentDTO.Items[i].Weight.Value };
                 magayaShipmentDTO.Items[i].ContainedPiecesWeightIncluded = true;
+
                 var volume = magayaShipmentDTO.Items[i].Length.Value * magayaShipmentDTO.Items[i].Width.Value * magayaShipmentDTO.Items[i].Height.Value;
+                var desc = magayaShipmentDTO.Items[i].Description;
 
                 magayaShipmentDTO.Items[i].VolumeWeight = new VolumeWeightValue()
                 {
                     Unit = VolumeWeightUnitType.vlb,
                     Value = volume / 166 * Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces)
                 };
+
+                totalPiece += Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
+                totalVolume += volume;
+                totalWeight += (Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces) * magayaShipmentDTO.Items[i].Weight.Value);
+                totalVolumeWeight += magayaShipmentDTO.Items[i].VolumeWeight.Value;
 
                 magayaShipmentDTO.Items[i].Package = magayaShipmentDTO.Items[i].Package;
                 magayaShipmentDTO.Items[i].OutShipmentGUID = guid.ToString();
@@ -222,26 +230,149 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Items[i].IsOverstock = false;
                 magayaShipmentDTO.Items[i].NotLoaded = false;
                 magayaShipmentDTO.Items[i].EntryDate = todaysDate;
-
-                totalPiece += Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
-                totalWeight += magayaShipmentDTO.Items[i].PieceWeight.Value * Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
-                totalVolume += volume;
-                totalVolumeWeight += magayaShipmentDTO.Items[i].VolumeWeight.Value;
             }
+
             magayaShipmentDTO.TotalWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight };
+            totalChargeWeight += totalWeight;
+
             return;
         }
 
+        public DescriptionType searchCommodityDescription(string description)
+        {
+            var xmlobj = CommodityDescription(description);
+            for (int i = 0; i < xmlobj.DescriptionType.Count; i++)
+            {
+                if (xmlobj.DescriptionType[i].Description == description)
+                {
+                    return xmlobj.DescriptionType[i];
+                }
+            }
+
+            return new DescriptionType();
+        }
+
         double totalChargeAmount = 0.00; //total cost of shipment cost
+        double totalChargeWeight = 0.00;
+
+        public async Task<Dictionary<string, double>> retMagayaShipmentCharges(TheChargeCombo magayaShipmentDTO)
+        {
+            var cc = retCurrencyType();
+            var resultList = new Dictionary<string, double>();
+            //magayaShipmentDTO.Charges.Charge = new Charge[magayaShipmentDTO.Items.Length];
+            magayaShipmentDTO.Charges.Charge = new Charge[1];
+
+            for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++) 
+            {
+                magayaShipmentDTO.Charges.Charge[i] = new Charge();
+                magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge();
+            }
+
+            for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++)
+            {
+
+                var volume = magayaShipmentDTO.Items[i].Length.Value * magayaShipmentDTO.Items[i].Width.Value * magayaShipmentDTO.Items[i].Height.Value;
+                magayaShipmentDTO.Items[i].VolumeWeight = new VolumeWeightValue()
+                {
+                    Unit = VolumeWeightUnitType.vlb,
+                    Value = volume / 166 * Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces)
+                };
+
+                //determine the price value
+                var itemTotalWeight = magayaShipmentDTO.Items[i].PieceWeight.Value * Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
+                var itemChargeableWeight = (itemTotalWeight > magayaShipmentDTO.Items[i].VolumeWeight.Value) ? itemTotalWeight : magayaShipmentDTO.Items[i].VolumeWeight.Value;
+
+                magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
+                    Currency = "USD"
+                };
+
+                magayaShipmentDTO.Charges.Charge[i].Amount = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value : 0.00,
+                    Currency = "USD"
+                };
+
+                var srchObj = searchCommodityDescription(magayaShipmentDTO.Items[i].Description);
+
+                if (srchObj.Minimum > 0.00 && itemChargeableWeight <= 6)
+                {
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = srchObj.Minimum;
+                }
+                else if (srchObj.Minimum == 0.00 && itemChargeableWeight <= 6)
+                {
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 20;
+                }
+                else if (srchObj.Minimum > 0.00 && itemChargeableWeight > 6 && srchObj.Description == "PERFUMES")
+                {
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Rate;
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 6;
+                }
+                else if (srchObj.Minimum > 0.00 && itemChargeableWeight > 6 && srchObj.Description == "EXTREMELY HAZARDOUS  ITEM")
+                {
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Rate;
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 12;
+                }
+                else
+                {
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Rate;
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 3.49;
+                }
+
+                magayaShipmentDTO.Charges.Charge[i].PriceInCurrency = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
+                    Currency = "USD"
+                };
+
+                if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Rate)
+                {
+                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+                else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum)
+                {
+                    itemChargeableWeight = 1;
+                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+                else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum)
+                {
+                    itemChargeableWeight = 1;
+                    magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+
+                magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
+
+                totalChargeAmount += magayaShipmentDTO.Charges.Charge[i].Amount.Value;
+
+                magayaShipmentDTO.Charges.Charge[i].AmountInCurrency = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value : 0.00,
+                    Currency = "USD"
+                };
+
+                resultList[magayaShipmentDTO.Items[i].Description] = (magayaShipmentDTO.Charges.Charge[i].Amount.Value);
+            }
+
+            return resultList;
+        }
         private void setMagayaShipmentCharges(WarehouseReceipt magayaShipmentDTO)
         {
             var cc = retCurrencyType();
-            totalWeight = (totalWeight > totalVolumeWeight) ? totalWeight : totalVolumeWeight;
 
             for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++)
             {
                 magayaShipmentDTO.Charges.Charge[i].TaxDefinition = null;
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
+
+                //var itemChargeableWeight = (totalVolumeWeight > totalWeight) ? totalVolumeWeight : totalWeight;
+                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
+                var weight = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight.Value;
+                var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
+                var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
+
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
                 {
                     Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
@@ -264,9 +395,31 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Currency = "USD"
                 };
 
-                magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum ||
-                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum) ?
-                    magayaShipmentDTO.Charges.Charge[i].Price.Value : totalWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Rate)
+                {
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+                else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum)
+                {
+                    itemChargeableWeight = 1;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+                else if (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum)
+                {
+                    itemChargeableWeight = 1;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+
+                if (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20)
+                {
+                    magayaShipmentDTO.Charges.Charge[i].Price.Value = 20;
+                    magayaShipmentDTO.Charges.Charge[i].PriceInCurrency.Value = 20;
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags = ChargeFlagsType.Minimum;
+                    itemChargeableWeight = 1;
+                    //magayaShipmentDTO.Charges.Charge[i].Amount.Value = itemChargeableWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
+                }
+
+                //magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].Amount.Value <= 20) ? 20 : magayaShipmentDTO.Charges.Charge[i].Amount.Value;
 
                 totalChargeAmount += magayaShipmentDTO.Charges.Charge[i].Amount.Value;
 
@@ -284,7 +437,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].Units = "";
                 magayaShipmentDTO.Charges.Charge[i].IsCredit = false;
                 magayaShipmentDTO.Charges.Charge[i].IsPrepaid = true;
-                magayaShipmentDTO.Charges.Charge[i].Quantity = totalWeight;
+                magayaShipmentDTO.Charges.Charge[i].Quantity = itemChargeableWeight;
                 magayaShipmentDTO.Charges.Charge[i].Type = ChargeDesc.Freight;
                 magayaShipmentDTO.Charges.Charge[i].ShowInDocuments = true;
                 magayaShipmentDTO.Charges.Charge[i].ShowInDocumentsSpecified = true;
@@ -293,13 +446,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge()
                 {
-                    Pieces = totalPiece,
-                    Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight },
-                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = totalVolume / 1738 },
+                    Pieces = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces,
+                    Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = weight },
+                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = volume / 1728 },
                     ChargeableWeight = new WeightValue()
                     {
                         Unit = WeightUnitType.lb,
-                        Value = (totalWeight > totalVolumeWeight) ? totalWeight : totalVolumeWeight
+                        //Value = (totalWeight > totalVolumeWeight) ? totalWeight : totalVolumeWeight
+                        Value = itemChargeableWeight
                     },
                     UseGrossWeight = false,
                     Flags = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags,
@@ -313,6 +467,29 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].ModeOfTransportation = magayaShipmentDTO.ModeOfTransportation;
                 magayaShipmentDTO.Charges.Charge[i].PointOfOrigin = magayaShipmentDTO.OriginPort;
                 magayaShipmentDTO.Charges.Charge[i].PointOfDestination = magayaShipmentDTO.DestinationPort;
+
+                magayaShipmentDTO.Charges.Charge[i].ChargeDefinition = new ChargeDefinition()
+                {
+                    Type = ChargeDefType.Freight,
+                    Description = "Air Freight Service",
+                    Code = "AIRFGT-INC",
+                    Notes = "",
+                    AccountDefinition = new AccountDefinition()
+                    {
+                        Type = ThirdParty.WebServices.Magaya.Business.New.AccountType.Income,
+                        Name = "Air Freight Income",
+                        Currency = cc,
+                    },
+                    Currency = cc,
+                    TaxDefinition = null,
+                    ResellCharge = null,
+                    AssetAccount = null,
+                    PrioritySortingOrder = 0,
+                    Enforce3rdPartyBilling = true,
+                    Amount = magayaShipmentDTO.Charges.Charge[i].Amount,
+
+                };
+
             }
             return;
         }
@@ -320,7 +497,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public async Task<Tuple<api_session_error, string, string>> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
-            
+
             if (mDto.RequestNumber != null)
             {
                 var requestNo = mDto.RequestNumber;
@@ -337,7 +514,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 magayaShipmentDTO.Shipper.Email = shipmentDTlMapped.CustomerEmail;
                 magayaShipmentDTO.Shipper.Phone = shipmentDTlMapped.CustomerPhoneNumber;
-
             }
 
             //2. initialize type of shipment and flag
@@ -391,11 +567,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (result == api_session_error.no_error)
                 {
                     var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
-                    await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
+                    var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
+                    shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
+                    await _uow.CompleteAsync();
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
-                        if(shipmentDto.GrandTotal > 0)
+                        if (shipmentDto.GrandTotal > 0)
                         {
                             shipmentDto.GrandTotal = Math.Round(shipmentDto.GrandTotal, 2);
                         }
@@ -725,7 +904,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.SenderState = magayaShipmentDTO.ShipperAddress.State;
                 shipmentDTO.IsFromMobile = false;
                 shipmentDTO.isInternalShipment = false;
-                 
+
                 //Country info
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
@@ -840,12 +1019,21 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
+                if (shipmentDTO.RequestProcessingCountryId == 0)
+                {
+                    shipmentDTO.RequestProcessingCountryId = 207;
+                }
+                var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.RequestProcessingCountryId);
+                if (centre.Any())
+                {
+                    shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+                }
 
                 if (shipmentDTO.Consolidated)
                 {
                     //get count of all unprocessed consolited item
-                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
-                    count = consolidated.Count + 1;
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == shipmentDTO.RequestProcessingCountryId).OrderBy(x => x.DateCreated).ToList();
+                    count = consolidated.Count;
                     if (count < 1)
                     {
                         shipmentDTO.ConsolidationId = Guid.NewGuid().ToString();
@@ -854,6 +1042,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         shipmentDTO.ConsolidationId = consolidated.FirstOrDefault().ConsolidationId;
                     }
+                    count = count + 1;
+                }
+                else if (!shipmentDTO.Consolidated)
+                {
+                    count = count + 1;
                 }
 
                 var newShipment = await MapIntlShipmentRequest(shipmentDTO);
@@ -861,6 +1054,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
+               
+               
                 string itemName = "";
 
                 var serialNumber = 1;
@@ -890,7 +1085,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                     }
                     //UPDATE ITEM COUNT
-                    shipmentItem.ItemCount = $"{serialNumber} of {count}";
+                    shipmentItem.ItemCount = $"Item {count}";
                     shipmentItem.Received = false;
                     itemName += shipmentItem.ItemName + " ";
                     serialNumber++;
@@ -903,6 +1098,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentre = destinationServiceCenter;
                 var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
                 castObj.ItemDetails = itemName;
+                castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
@@ -979,16 +1177,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var station = await _stationService.GetStationById(destinationServiceCenter.StationId);
                 int count = 0;
 
+                if (existingRequest.RequestProcessingCountryId == 0)
+                {
+                    existingRequest.RequestProcessingCountryId = 207;
+                }
+
                 if (shipmentDTO.Consolidated)
                 {
                     //get count of all unprocessed consolited item
-                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == existingRequest.RequestProcessingCountryId).OrderBy(x => x.DateCreated).ToList();
                     count = consolidated.IndexOf(existingRequest);
                 }
                 if (shipmentDTO.Consolidated == false)
                 {
                     existingRequest.Consolidated = false;
                     existingRequest.ConsolidationId = null;
+                    count = count + 1;
                 }
 
                 List<IntlShipmentRequestItem> intlShipmentRequestItems = new List<IntlShipmentRequestItem>();
@@ -1038,7 +1242,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance,
                             ItemValue = shipmentRequestItemDTO.ItemValue,
                             IntlShipmentRequestId = existingRequest.IntlShipmentRequestId,
-                            ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}",
+                            ItemCount = $"Item {count}",
                             Received = shipmentRequestItemDTO.Received,
                             ReceivedBy = shipmentRequestItemDTO.ReceivedBy
                         };
@@ -1061,7 +1265,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             double volume = (newShipmentRequestItem.Length * newShipmentRequestItem.Height * newShipmentRequestItem.Width) / 5000;
                             double Weight = newShipmentRequestItem.Weight > volume ? newShipmentRequestItem.Weight : volume;
                             existingRequest.ApproximateItemsWeight += Weight;
-                           
+
                         }
                         else
                         {
@@ -1087,7 +1291,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         requestItem.Width = shipmentRequestItemDTO.Width;
                         requestItem.RequiresInsurance = shipmentRequestItemDTO.RequiresInsurance;
                         requestItem.ItemValue = shipmentRequestItemDTO.ItemValue;
-                        requestItem.ItemCount = $"{shipmentRequestItemDTO.SerialNumber} of {count}";
+                        requestItem.ItemCount = $"Item {count}";
                         requestItem.Received = shipmentRequestItemDTO.Received;
                         requestItem.ReceivedBy = shipmentRequestItemDTO.ReceivedBy;
 
@@ -1158,6 +1362,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 DestinationCountryId = r.DestinationCountryId,
                 Consolidated = r.Consolidated,
                 ConsolidationId = r.ConsolidationId,
+                RequestProcessingCountryId = r.RequestProcessingCountryId,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
@@ -1175,7 +1380,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Width = c.Width,
                     Height = c.Height,
                     RequiresInsurance = c.RequiresInsurance,
-                    ItemValue = c.ItemValue, 
+                    ItemValue = c.ItemValue,
                     ItemSenderfullName = c.ItemSenderfullName,
                     ItemCount = c.ItemCount,
                     Received = c.Received,
@@ -1404,11 +1609,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+                shipmentDto.FullyReceived = true;
                 //CHECK IF ITEMS HAS BEEN FULLY RECEIVED IF CONSOLIDATED
                 if (shipmentDto.Consolidated)
                 {
-                    shipmentDto.FullyReceived = true;
                     var consolidated = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.ConsolidationId == shipment.ConsolidationId).ToList();
 
                     if (consolidated.Any())
@@ -1420,7 +1626,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             {
                                 shipmentDto.FullyReceived = false;
                                 break;
-                            }  
+                            }
                         }
                     }
                 }
@@ -1737,6 +1943,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     var Dtype = new DescriptionType();
                     Dtype.Description = description;
                     Dtype.ItemNo = "29";
+                    Dtype.Minimum = 0.0;
                     objectOfXml.DescriptionType.Add(Dtype);
                 }
 
@@ -2059,14 +2266,50 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 throw;
             }
         }
-        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser()
+        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID)
         {
-            try                                                             
+            try
             {
-                var userId =await _userService.GetCurrentUserId();
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
                 var shipmentDtos = new List<IntlShipmentRequestDTO>();
-                var shipments =  _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
-                shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);               
+                if (countryID == 0)
+                {
+                    countryID = 207;
+                }
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == countryID).OrderBy(x => x.DateCreated).ToList();
+                shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);
+                if (shipmentDtos.Any())
+                {
+                    var countryIds = shipmentDtos.Select(x => x.RequestProcessingCountryId).ToList();
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == countryID);
+                    var countryDTO = Mapper.Map<NewCountryDTO>(country);
+                    //GET ALL SERVICE CENTRE
+                    var centreIds = shipments.Select(x => x.DestinationServiceCentreId).ToList();
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId));
+                    foreach (var item in shipmentDtos)
+                    {
+                        if (item.DestinationServiceCentreId > 0)
+                        {
+                            var centre = centres.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).FirstOrDefault();
+                            var centreDTO = Mapper.Map<ServiceCentreDTO>(centre);
+                            item.DestinationServiceCentre = centreDTO;
+                        }
+
+                        //untill users updated apps
+                        if (item.RequestProcessingCountryId == 0)
+                        {
+                            item.RequestProcessingCountryId = countryID;
+                        }
+                        if (country != null)
+                        {
+                            item.DepartureCountry = countryDTO;
+                        }
+
+
+                    }
+
+                }
                 return shipmentDtos;
             }
             catch (Exception ex)

@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int SupperServiceCentreId { get; set; } 
         public string StationCode { get; set; }
         public int CountryId { get; set; }
+        public int LGAId { get; set; }
         public string Country { get; set; }
         public StationDTO Station { get; set; }
         public List<UserDTO> Users { get; set; }
@@ -40,5 +41,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public CountryDTO CountryDTO { get; set; }
         public bool IsPublic { get; set; }
         public bool HomeDeliveryStatus { get; set; }
+        public bool IsGateway { get; set; }
     }
 }

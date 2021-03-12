@@ -3,63 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core;
 using System.Linq;
-using AutoMapper;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
-using Microsoft.AspNet.Identity;
 using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
 using System;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
-using GIGLS.Core.View;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IServices.Utility;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IMessageService;
-using System.Text.RegularExpressions;
-using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Core.IServices.Partnership;
-using System.Configuration;
-using System.Security.Cryptography;
-using System.Text;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using System.Net;
-using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.DTO.Stores;
-using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
@@ -138,8 +99,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
                 if (invoiceObj != null)
                 {
-                    invoiceObj.Shipment = null;
                     shipment.Invoice = invoiceObj;
+                    shipment.DepartureServiceCentre = invoiceObj.Shipment.DepartureServiceCentre;
+                    shipment.DestinationServiceCentre = invoiceObj.Shipment.DestinationServiceCentre;
                 }
             }
             return shipment;
@@ -163,7 +125,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
-            return await _deliveryOptionPriceService.GetDeliveryOptionPrices();
+            var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
+            deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+            return deliveryOption;
         }
 
         public async Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
@@ -206,16 +170,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             return dailySales;
         }
 
-        public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
         {
             //2. priviledged users service centres
             var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            return await _portalService.GetServiceCentresBySingleCountry(countryId);
+            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId);
         }
 
         public async Task<ShipmentDTO> GetShipment(string waybill)
         {
             var shipment = await _shipmentService.GetShipment(waybill);
+
+            //Get the ETA for the shipment
+            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId
+                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
+            shipment.ETA = eta;
+
             if (shipment.GrandTotal > 0)
             {
                 var factor = Convert.ToDecimal(Math.Pow(10, -2));
@@ -224,6 +195,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
                 shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
                 shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+                shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
 
                 foreach (var item in shipment.ShipmentItems)
                 {
@@ -266,10 +241,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
             var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
             if (shipmentCollection.IsComingFromDispatch)
             {
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }

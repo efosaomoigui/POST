@@ -226,6 +226,47 @@ namespace GIGLS.Services.Implementation.Partnership
             await _uow.CompleteAsync();
 
         }
+        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedByRangePartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            string fleetCode = null;
+            List<VehicleTypeDTO> partners = new List<VehicleTypeDTO>();
 
+           if (filterCriteria.StartDate != null)
+            {
+                partners = await _uow.Partner.GetPartnersAsync(fleetCode, true, filterCriteria); 
+            }
+            else
+            {
+                partners = await _uow.Partner.GetPartnersAsync(fleetCode, true);
+            }
+            partners = partners.Where(x => x.IsVerified == true).ToList();
+            if (partners.Any())
+            {
+                var today = DateTime.Now;
+                foreach (var item in partners)
+                {
+                    var months = 12 * (today.Year - item.ActivityDate.Year) + today.Month - item.ActivityDate.Month;
+                  var monthsApart = Math.Abs(months);
+                    if (monthsApart <= 1)
+                    {
+                        item.Active = true;
+                    }
+                }
+
+            }
+            return partners.OrderByDescending(x => x.DateModified);
+        }
+
+        public async Task DeactivatePartner(int partnerId)
+        {
+            var existingPartner = await _uow.Partner.GetAsync(partnerId);
+
+            if (existingPartner == null)
+            {
+                throw new GenericException("PARTNER_NOT_EXIST");
+            }
+            existingPartner.IsActivated = false;
+            await _uow.CompleteAsync();
+        }
     }
 }

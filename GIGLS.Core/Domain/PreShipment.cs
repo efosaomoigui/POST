@@ -51,6 +51,9 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(100)]
         public string ReceiverCity { get; set; }
 
+        [MaxLength(100)]
+        public string LGA { get; set; }
+
         public PickupOptions PickupOptions { get; set; }
 
         public decimal Value { get; set; }

@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -23,11 +24,11 @@ namespace GIGLS.Core.IRepositories.Shipments
         IQueryable<Shipment> ShipmentsAsQueryable();
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
-        Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
         Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria);
         Task<List<CargoMagayaShipmentDTO>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria);
         Task<List<InvoiceViewDTO>> GetWaybillForServiceCentre(string waybill, int[] serviceCentreIds);
-
+        Task<double> GetSumOfMonthlyOrDailyWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
+        Task<ShipmentDTO> GetShipment(string waybill);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

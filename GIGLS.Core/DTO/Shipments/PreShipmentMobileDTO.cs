@@ -366,4 +366,11 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? PickUpCharge { get; set; }
         
     }
+
+    public class GIGGOProgressReport
+    {
+        public int ShipmentCreated { get; set; }
+        public int ShipmentAssignedForPickedUp { get; set; }
+        public int ShipmentPickedUp { get; set; }
+    }
 }
