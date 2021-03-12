@@ -955,7 +955,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 var dest = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DestinationServiceCentreId);
                                 var newWaybillInfo = new WaybillInGroupWaybillDTO()
                                 {
-                                    Value = shipment.Value,
+                                    Value = (decimal)shipment.DeclarationOfValueCheck,
                                     Weight = shipment.ApproximateItemsWeight,
                                     Waybill = shipment.Waybill,
                                     Description = shipment.Description,
