@@ -4924,10 +4924,16 @@ namespace GIGLS.Services.Implementation.Shipments
                                 if (preshipmentmobile.IsApproved != true)
                                 {
                                     int customerid = 0;
+                                    bool isClassShipment = false;
                                     var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                                     if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
+
+                                        if(companyid.Rank == Rank.Class)
+                                        {
+                                            isClassShipment = true;
+                                        }
                                     }
                                     else
                                     {
@@ -4970,8 +4976,13 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ReceiverAddress = preshipmentmobile.ReceiverAddress,
                                         DeliveryOptionId = 2,
                                         GrandTotal = preshipmentmobile.GrandTotal,
+<<<<<<< HEAD
                                         Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
                                         Vat = preshipmentmobile.Vat,
+=======
+                                        Insurance = preshipmentmobile.InsuranceValue,
+                                        Vat = preshipmentmobile.Vat == null ? 0 : preshipmentmobile.Vat,
+>>>>>>> 7f8883b344d46f363fdcfc2359285855c60ec27a
                                         SenderAddress = preshipmentmobile.SenderAddress,
                                         IsCashOnDelivery = false,
                                         CustomerCode = preshipmentmobile.CustomerCode,
@@ -4994,6 +5005,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
                                         PackageOptionIds = detail.PackageOptionIds,
+                                        IsClassShipment = isClassShipment,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -5002,7 +5014,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                             Nature = s.ItemType,
                                             Price = (decimal)s.CalculatedPrice,
                                             Quantity = s.Quantity
-
                                         }).ToList()
                                     };
 

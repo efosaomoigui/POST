@@ -1019,13 +1019,18 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
+                if (shipmentDTO.RequestProcessingCountryId == 0)
+                {
+                    shipmentDTO.RequestProcessingCountryId = 207;
+                }
+                var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.RequestProcessingCountryId);
+                if (centre.Any())
+                {
+                    shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+                }
 
                 if (shipmentDTO.Consolidated)
                 {
-                    if (shipmentDTO.RequestProcessingCountryId == 0)
-                    {
-                        shipmentDTO.RequestProcessingCountryId = 207;
-                    }
                     //get count of all unprocessed consolited item
                     var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == shipmentDTO.RequestProcessingCountryId).OrderBy(x => x.DateCreated).ToList();
                     count = consolidated.Count;
@@ -1050,14 +1055,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
                
-                if (shipmentDTO.RequestProcessingCountryId <= 0)
-                {
-                    var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
-                    if (country != null)
-                    {
-                        newShipment.RequestProcessingCountryId = country.CountryId;
-                    }
-                }
+               
                 string itemName = "";
 
                 var serialNumber = 1;
@@ -1100,6 +1098,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentre = destinationServiceCenter;
                 var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
                 castObj.ItemDetails = itemName;
+                castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);

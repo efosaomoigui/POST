@@ -17,7 +17,13 @@ namespace GIGLS.Services.Business.Node
         {
             try
             {
-                await ProcessWalletNotification(user);
+                if(user != null)
+                {
+                    if(user.UserId != null)
+                    {
+                        await ProcessWalletNotification(user);
+                    }
+                }
             }
             catch (Exception)
             {

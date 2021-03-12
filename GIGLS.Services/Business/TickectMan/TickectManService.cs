@@ -265,5 +265,35 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _userService.GetPriviledgeServiceCenters(userId);
         }
+        public Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)
+        {
+            return _portalService.GetShipmentDetailsFromDeliveryNumber(DeliveryNumber);
+        }
+        public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
+        {
+            return await _portalService.ApproveShipment(detail);
+        }
+
+        public async Task<IEnumerable<ServiceCentreDTO>> GetServiceCentreByStation(int stationId)
+        {
+
+            return await _serviceCentreService.GetServiceCentresByStationId(stationId);
+        }
+
+        public async Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment)
+        {
+
+            return await _shipmentService.AddAgilityShipmentToGIGGo(shipment);
+        }
+
+        public async Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment)
+        {
+            preShipment.IsFromAgility = true;
+            if (preShipment.Value > 0)
+            {
+                preShipment.PreShipmentItems[0].Value = preShipment.Value.ToString();
+            }
+            return await _shipmentService.GetGIGGOPrice(preShipment);
+        }
     }
 }
