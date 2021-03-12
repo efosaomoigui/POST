@@ -327,6 +327,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.TargetOrder = service.TargetOrder;
                 centre.IsHUB = service.IsHUB;
                 centre.IsGateway = service.IsGateway;
+                centre.LGAId = service.LGAId;
                 centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
                 _uow.Complete();
             }
