@@ -5006,6 +5006,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }).ToList()
                                     };
 
+                                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                                    MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
