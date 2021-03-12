@@ -158,6 +158,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsClassShipment { get; set; }
         public string LGA { get; set; }
         public int ETA { get; set; }
+        public string DestinationServiceCentreName { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO 

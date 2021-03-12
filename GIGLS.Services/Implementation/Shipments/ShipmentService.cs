@@ -650,6 +650,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentDto.DestinationServiceCentreId = serviceCentres.ServiceCentreId;
                     }
                 }
+                //get service centre info
+                var destCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId);
+                if (destCentre != null)
+                {
+                    shipmentDto.DestinationServiceCentreName = destCentre.Name;
+                }
+
 
                 return shipmentDto;
             }
