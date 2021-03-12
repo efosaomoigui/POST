@@ -4970,7 +4970,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ReceiverAddress = preshipmentmobile.ReceiverAddress,
                                         DeliveryOptionId = 2,
                                         GrandTotal = preshipmentmobile.GrandTotal,
-                                        Insurance = preshipmentmobile.InsuranceValue,
+                                        Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
                                         Vat = preshipmentmobile.Vat,
                                         SenderAddress = preshipmentmobile.SenderAddress,
                                         IsCashOnDelivery = false,
