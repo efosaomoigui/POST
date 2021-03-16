@@ -174,7 +174,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             //2. priviledged users service centres
             var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId);
+            var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId[0]);
+
+            int stationId = 0;
+            if (serviceCenterIds.StationId == 4)
+            {
+                stationId = serviceCenterIds.StationId;
+            }
+
+            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId, stationId);
         }
 
         public async Task<ShipmentDTO> GetShipment(string waybill)
