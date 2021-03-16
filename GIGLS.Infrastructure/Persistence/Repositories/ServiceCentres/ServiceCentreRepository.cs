@@ -415,7 +415,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
-        public Task<List<ServiceCentreDTO>> GetServiceCentres(int[] countryIds, bool excludeHub)
+        public Task<List<ServiceCentreDTO>> GetServiceCentres(int[] countryIds, bool excludeHub, int stationId)
         {
             try
             {
@@ -424,6 +424,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 if(excludeHub == true)
                 {
                     centres = centres.Where(x => x.IsHUB == false);
+                }
+
+                if(stationId > 0)
+                {
+                    centres = centres.Where(x => x.StationId != stationId);
                 }
 
                 var centreDto = from s in centres
