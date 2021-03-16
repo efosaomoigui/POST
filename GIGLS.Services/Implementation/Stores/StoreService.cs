@@ -33,14 +33,14 @@ namespace GIGLS.Services.Implementation.Stores
                 }
 
                 //save image to blob
-                using (WebClient webClient = new WebClient())
-                {
-                    byte[] data = webClient.DownloadData(store.storeImage);
-                    var filename = $"{store.StoreName}.png";
-                    var imgurl = await AzureBlobServiceUtil.UploadAsync(data, filename);
-                    store.storeImage = imgurl;
+                //using (WebClient webClient = new WebClient())
+                //{
+                //    byte[] data = webClient.DownloadData(store.storeImage);
+                //    var filename = $"{store.StoreName}.png";
+                //    var imgurl = await AzureBlobServiceUtil.UploadAsync(data, filename);
+                //    store.storeImage = imgurl;
 
-                }
+                //}
                 var newstore = Mapper.Map<Store>(store);
                _uow.Store.Add(newstore);
                 await _uow.CompleteAsync();
