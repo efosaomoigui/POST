@@ -517,8 +517,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [HttpPost]
-        [Route("waybillbyservicecentre")]
+        [HttpGet]
+        [Route("unpaidwaybillbyservicecentre")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetInvoiceByServiceCentre()
         {
             return await HandleApiOperationAsync(async () =>

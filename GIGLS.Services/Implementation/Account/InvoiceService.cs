@@ -461,18 +461,27 @@ namespace GIGLS.Services.Implementation.Account
                 {
                     throw new GenericException("Invalid payment type", $"{(int)HttpStatusCode.BadRequest}");
                 }
+                if (String.IsNullOrEmpty(refNo) && paymentType == PaymentType.Pos)
+                {
+                    throw new GenericException($"No reference number provided for this payment", $"{(int)HttpStatusCode.BadRequest}");
+                }
                 var shipments = _uow.Invoice.GetAllAsQueryable().Where(y => waybills.Contains(y.Waybill));
+                if (shipments.Any())
+                {
+                    foreach (var w in shipments)
+                    {
+                        if (w.PaymentStatus == PaymentStatus.Paid)
+                        {
+                            throw new GenericException($"this waybill no - {w.Waybill} has been paid for", $"{(int)HttpStatusCode.BadRequest}");
+                        }
+                    } 
+                }
                 foreach (var item in waybills)
                 {
                     //check if invoice has been paid for
                     var waybill = shipments.Where(x => x.Waybill == item).FirstOrDefault();
                     if (waybill != null)
                     {
-                        if (waybill.PaymentStatus == PaymentStatus.Paid)
-                        {
-                            throw new GenericException($"this waybill no - {waybill.Waybill} has been paid for", $"{(int)HttpStatusCode.BadRequest}");
-                        }
-
                         var paymentDTO = new PaymentTransactionDTO();
                         paymentDTO.Waybill = item;
                         paymentDTO.TransactionCode = refNo;
@@ -485,10 +494,6 @@ namespace GIGLS.Services.Implementation.Account
                         }
                         else if (paymentType == PaymentType.Pos)
                         {
-                            if (String.IsNullOrEmpty(refNo))
-                            {
-                                throw new GenericException($"No reference number provided for this payment", $"{(int)HttpStatusCode.BadRequest}");
-                            }
                             paymentDTO.PaymentType = PaymentType.Pos;
                         }
                         var res = await _paymentService.ProcessPayment(paymentDTO);
