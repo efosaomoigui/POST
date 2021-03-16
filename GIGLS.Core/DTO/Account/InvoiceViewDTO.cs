@@ -45,6 +45,7 @@ namespace GIGLS.Core.DTO.Account
 
         //Receiver Information
         public string ReceiverName { get; set; }
+        public string SenderName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }

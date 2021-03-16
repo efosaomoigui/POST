@@ -295,5 +295,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return await _shipmentService.GetGIGGOPrice(preShipment);
         }
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre()
+        {
+            var serviceCentreId = await _userService.GetPriviledgeServiceCenters();
+            return await _invoiceService.GetInvoiceByServiceCentre(serviceCentreId[0]);
+        }
+        public async Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentType, string refNo)
+        {
+            return await _invoiceService.ProcessBulkPaymentforWaybills(waybills,paymentType,refNo);
+        }
     }
 }

@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -45,6 +46,8 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<IEnumerable<ServiceCentreDTO>> GetServiceCentreByStation(int stationId);
         Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
         Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
+        Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre();
+        Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentType, string refNo);
     }
 }
                                                                                   

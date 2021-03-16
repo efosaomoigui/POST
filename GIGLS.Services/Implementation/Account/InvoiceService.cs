@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -31,9 +32,10 @@ namespace GIGLS.Services.Implementation.Account
         private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IPaymentService _paymentService;
 
         public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,  IShipmentService shipmentService,    IMessageSenderService messageSenderService,
-            IUserService userService, IWalletService walletService,  IGlobalPropertyService globalPropertyService)
+            IUserService userService, IWalletService walletService,  IGlobalPropertyService globalPropertyService, IPaymentService paymentService)
         {
             _uow = uow;
             _service = service;
@@ -42,6 +44,7 @@ namespace GIGLS.Services.Implementation.Account
             _walletService = walletService;
             _messageSenderService = messageSenderService;
             _globalPropertyService = globalPropertyService;
+            _paymentService = paymentService;
             MapperConfig.Initialize();
         }
 
@@ -439,6 +442,64 @@ namespace GIGLS.Services.Implementation.Account
             }
             _uow.Invoice.Remove(invoice);
             await _uow.CompleteAsync();
+        }
+
+
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre( int serviceCentreId)
+        {
+           return await _uow.Shipment.GetUnPaidWaybillForServiceCentre(serviceCentreId);
+        }
+
+        public async Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentMethod, string refNo)
+        {
+            if (waybills.Any())
+            {
+                var paymentType = (PaymentType)Enum.Parse(typeof(PaymentType), paymentMethod);
+                var currentUserId = await _userService.GetCurrentUserId();
+                if (paymentType != null && paymentType != PaymentType.Cash && paymentType != PaymentType.Pos)
+                {
+                    throw new GenericException("Invalid payment type", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var shipments = _uow.Invoice.GetAllAsQueryable().Where(y => waybills.Contains(y.Waybill));
+                foreach (var item in waybills)
+                {
+                    //check if invoice has been paid for
+                    var waybill = shipments.Where(x => x.Waybill == item).FirstOrDefault();
+                    if (waybill != null)
+                    {
+                        if (waybill.PaymentStatus == PaymentStatus.Paid)
+                        {
+                            throw new GenericException($"this waybill no - {waybill.Waybill} has been paid for", $"{(int)HttpStatusCode.BadRequest}");
+                        }
+
+                        var paymentDTO = new PaymentTransactionDTO();
+                        paymentDTO.Waybill = item;
+                        paymentDTO.TransactionCode = refNo;
+                        paymentDTO.PaymentStatus = waybill.PaymentStatus;
+                        paymentDTO.UserId = currentUserId;
+                        paymentDTO.FromApp = false;
+                        if (paymentType == PaymentType.Cash)
+                        {
+                            paymentDTO.PaymentType = PaymentType.Cash;
+                        }
+                        else if (paymentType == PaymentType.Pos)
+                        {
+                            if (String.IsNullOrEmpty(refNo))
+                            {
+                                throw new GenericException($"No reference number provided for this payment", $"{(int)HttpStatusCode.BadRequest}");
+                            }
+                            paymentDTO.PaymentType = PaymentType.Pos;
+                        }
+                        var res = await _paymentService.ProcessPayment(paymentDTO);
+                        if (!res)
+                        {
+                            throw new GenericException($"An error occured while trying to make payment for waybill no {waybill.Waybill}", $"{(int)HttpStatusCode.BadRequest}");
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }
