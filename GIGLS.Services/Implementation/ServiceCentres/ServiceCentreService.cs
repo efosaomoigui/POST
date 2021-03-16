@@ -414,7 +414,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 if (serviceCenterIds.StationId == 4)
                 {
                     excludehub = false;
-                    stationId = serviceCenterIds.StationId;
+                    //stationId = serviceCenterIds.StationId;
                 }
 
                 return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub, stationId);

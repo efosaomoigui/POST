@@ -173,14 +173,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
         {
             //2. priviledged users service centres
-            var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId[0]);
+            //var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+            //var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId[0]);
 
             int stationId = 0;
-            if (serviceCenterIds.StationId == 4)
-            {
-                stationId = serviceCenterIds.StationId;
-            }
+            //if (serviceCenterIds.StationId == 4)
+            //{
+            //    stationId = serviceCenterIds.StationId;
+            //}
 
             return await _portalService.GetActiveServiceCentresBySingleCountry(countryId, stationId);
         }
