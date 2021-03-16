@@ -551,11 +551,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
-        public Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
+        public Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId)
         {
             try
             {
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
+
+                if (stationId > 0)
+                {
+                    centres = centres.Where(x => x.StationId != stationId);
+                }
 
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
