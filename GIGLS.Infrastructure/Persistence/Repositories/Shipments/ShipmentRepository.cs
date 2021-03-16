@@ -32,7 +32,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipment = _context.Shipment.AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                shipment = shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
             //filter by cancelled shipments
@@ -123,7 +123,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var shipment = _context.Shipment.AsQueryable();
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
                 }
 
                 //filter by country Id
@@ -344,7 +344,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var shipment = _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false);
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
                 }
 
                 //filter by Local or International Shipment
@@ -578,7 +578,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipments = _context.Shipment.AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                shipments = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
             ////
 
@@ -982,11 +982,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
-        public Tuple<Task<List<IntlShipmentRequestDTO>>, int> GetIntlTransactionShipmentRequest(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<List<CODShipmentDTO>> GetCODShipments(BaseFilterCriteria baseFilterCriteria)
         {
             try
@@ -1038,7 +1033,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     endDate
                 };
 
-                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
+                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo_Archive " +
                    "@StartDate, @EndDate",
                    param).ToList();
 
@@ -1138,6 +1133,125 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 throw;
             }
+        }
+
+        public Task<ShipmentDTO> GetShipment(string waybill)
+        {
+            var shipment = _context.Shipment.Where(x => x.Waybill == waybill);
+
+            ShipmentDTO shipmentDto = (from r in shipment
+                                       select new ShipmentDTO
+                                       {
+                                           ShipmentId = r.ShipmentId,
+                                           Waybill = r.Waybill,
+                                           CustomerId = r.CustomerId,
+                                           CustomerType = r.CustomerType,
+                                           DateCreated = r.DateCreated,
+                                           DateModified = r.DateModified,
+                                           DeliveryOptionId = r.DeliveryOptionId,
+                                           DeliveryOption = new DeliveryOptionDTO
+                                           {
+                                               Code = r.DeliveryOption.Code,
+                                               Description = r.DeliveryOption.Description
+                                           },
+                                           DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                           DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                           PaymentStatus = r.PaymentStatus,
+                                           ReceiverAddress = r.ReceiverAddress,
+                                           ReceiverCity = r.ReceiverCity,
+                                           ReceiverCountry = r.ReceiverCountry,
+                                           ReceiverEmail = r.ReceiverEmail,
+                                           ReceiverName = r.ReceiverName,
+                                           ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                           ReceiverState = r.ReceiverState,
+                                           SealNumber = r.SealNumber,
+                                           UserId = r.UserId,
+                                           Value = r.Value,
+                                           GrandTotal = r.GrandTotal,
+                                           AppliedDiscount = r.AppliedDiscount,
+                                           DiscountValue = r.DiscountValue,
+                                           ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                           ShipmentPickupPrice = r.ShipmentPickupPrice,
+                                           CompanyType = r.CompanyType,
+                                           CustomerCode = r.CustomerCode,
+                                           Description = r.Description,
+                                           PickupOptions = r.PickupOptions,
+                                           IsInternational = r.IsInternational,
+                                           Total = r.Total,
+                                           CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                           IsCashOnDelivery = r.IsCashOnDelivery,
+                                           SenderAddress = r.SenderAddress,
+                                           SenderState = r.SenderState,
+                                           ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                           DepartureCountryId = r.DepartureCountryId,
+                                           DestinationCountryId = r.DestinationCountryId,
+                                           CurrencyRatio = r.CurrencyRatio,
+                                           ActualAmountCollected = r.ActualAmountCollected,
+                                           DeclarationOfValueCheck = r.DeclarationOfValueCheck,
+                                           DeliveryTime = r.DeliveryTime,
+                                           DepositStatus = (int)r.DepositStatus,
+                                           IsCancelled = r.IsCancelled,
+                                           Insurance = r.Insurance,
+                                           Vat = r.Vat,
+                                           ActualDateOfArrival = r.ActualDateOfArrival,
+                                           ExpectedAmountToCollect = r.ExpectedAmountToCollect,
+                                           ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                           InternationalShipmentType = r.InternationalShipmentType,
+                                           InvoiceDiscountValue_display = r.InvoiceDiscountValue_display,
+                                           IsClassShipment = r.IsClassShipment,
+                                           IsdeclaredVal = r.IsdeclaredVal,
+                                           IsFromMobile = r.IsFromMobile,
+                                           isInternalShipment = r.isInternalShipment,
+                                           offInvoiceDiscountvalue_display = r.offInvoiceDiscountvalue_display,
+                                           PaymentMethod = r.PaymentMethod,
+                                           vatvalue_display = r.vatvalue_display,
+                                           ReprintCounterStatus = r.ReprintCounterStatus,
+                                           ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
+                                           {
+                                               ShipmentId = x.ShipmentId,
+                                               DateCreated = x.DateCreated,
+                                               DateModified = x.DateModified,
+                                               Description = x.Description,
+                                               Description_s = x.Description_s,
+                                               Height = x.Height,
+                                               IsVolumetric = x.IsVolumetric,
+                                               Length = x.Length,
+                                               Nature = x.Nature,
+                                               PackageQuantity = x.PackageQuantity,
+                                               Price = x.Price,
+                                               Quantity = x.Quantity,
+                                               SerialNumber = x.SerialNumber,
+                                               ShipmentItemId = x.ShipmentItemId,
+                                               ShipmentPackagePriceId = x.ShipmentPackagePriceId,
+                                               ShipmentType = x.ShipmentType,
+                                               Weight = x.Weight,
+                                               Width = x.Width
+                                           }).ToList(),
+                                           Invoice = Context.Invoice.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
+                                           {
+                                               Amount = i.Amount,
+                                               Waybill = i.Waybill,
+                                               Cash = i.Cash,
+                                               CountryId = i.CountryId,
+                                               DateCreated = i.DateCreated,
+                                               DateModified = i.DateModified,
+                                               DueDate = i.DueDate,
+                                               InvoiceId = i.InvoiceId,
+                                               InvoiceNo = i.InvoiceNo,
+                                               IsShipmentCollected = i.IsShipmentCollected,
+                                               IsInternational = i.IsInternational,
+                                               PaymentDate = i.PaymentDate,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               Pos = i.Pos,
+                                               ServiceCentreId = i.ServiceCentreId,
+                                               Transfer = i.Transfer
+                                           }).FirstOrDefault(),
+                                           WalletNumber = Context.Wallets.Where(w => w.CustomerCode == r.CustomerCode).Select(x => x.WalletNumber).FirstOrDefault()
+                                       }).FirstOrDefault();
+
+            return Task.FromResult(shipmentDto);
         }
     }
 
@@ -1383,9 +1497,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 intlShipmentDTO = intlShipmentDTO.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 count = intlShipmentDTO.Count();
-                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0)
+                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0 && count > 0)
                 {
-                    intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId).ToList(); 
+                    var currentUser = _context.Users.Where(x => x.Id == filterOptionsDto.UserId).FirstOrDefault();
+                    if (currentUser != null && currentUser.IsMagaya)
+                    {
+                        intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId || x.RequestProcessingCountryId == 0).ToList();
+                    }
+                    else
+                    {
+                        intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId).ToList();
+                    }
                 }
                 return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
             }
@@ -1407,11 +1529,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     shipmentRequest = _context.IntlShipmentRequest.Where(s => s.IsProcessed == false);
                 }
-                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0)
-                {
-                    shipmentRequest = shipmentRequest.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId);
-                }
-
+               
                 var count = 0;
                 List<IntlShipmentRequestDTO> intlShipmentRequestDTO = new List<IntlShipmentRequestDTO>();
 
@@ -1555,6 +1673,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 intlShipmentRequestDTO = intlShipmentRequestDTO.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 count = intlShipmentRequestDTO.Count();
+                if (filterOptionsDto.CountryId != null && filterOptionsDto.CountryId > 0 && count > 0)
+                {
+                    var currentUser = _context.Users.Where(x => x.Id == filterOptionsDto.UserId).FirstOrDefault();
+                    if (currentUser != null && currentUser.IsMagaya)
+                    {
+                        intlShipmentRequestDTO = intlShipmentRequestDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId || x.RequestProcessingCountryId == 0).ToList();
+                    }
+                    else
+                    {
+                        intlShipmentRequestDTO = intlShipmentRequestDTO.Where(x => x.RequestProcessingCountryId == filterOptionsDto.CountryId).ToList();
+                    }
+                }
                 var retValue = new Tuple<List<IntlShipmentRequestDTO>, int>(intlShipmentRequestDTO, count);
                 return Task.FromResult(retValue);
             }
@@ -1772,9 +1902,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 }
 
                 count = intlShipmentDTO.Count();
-                if (dateFilterCriteria.CountryId != null && dateFilterCriteria.CountryId > 0)
+                if (dateFilterCriteria.CountryId != null && dateFilterCriteria.CountryId > 0 && count > 0)
                 {
-                    intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == dateFilterCriteria.CountryId).ToList();
+                    var currentUser = _context.Users.Where(x => x.Id == dateFilterCriteria.UserId).FirstOrDefault();
+                    if (currentUser != null && currentUser.IsMagaya)
+                    {
+                        intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == dateFilterCriteria.CountryId || x.RequestProcessingCountryId == 0).ToList();
+                    }
+                    else
+                    {
+                        intlShipmentDTO = intlShipmentDTO.Where(x => x.RequestProcessingCountryId == dateFilterCriteria.CountryId).ToList();
+                    }
                 }
                 return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
             }

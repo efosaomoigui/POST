@@ -1,15 +1,22 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGL.GIGLS.Core.Domain
 {
     public class PreShipmentItem : BaseDomain
     {
-        public int PreShipmentItemId { get; set; } 
+        public int PreShipmentItemId { get; set; }
+
+        [MaxLength(500)]
         public string Description { get; set; }
+
+        [MaxLength(500)]
         public string Description_s { get; set; } 
         public ShipmentType  ShipmentType { get; set; }
-        public double Weight { get; set; }  
+        public double Weight { get; set; }
+
+        [MaxLength(100)]
         public string Nature { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }

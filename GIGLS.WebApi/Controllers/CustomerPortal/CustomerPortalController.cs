@@ -50,13 +50,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
-        //private readonly IPaystackPaymentService _paymentService;
         private readonly IMagayaService _magayaService;
 
         public CustomerPortalController(ICustomerPortalService portalService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
-            //_paymentService = paymentService;
             _magayaService = magayaService;
         }
 
@@ -2244,7 +2242,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [HttpPost]
         [Route("intlshipmentrequests")]
         public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
@@ -2260,13 +2257,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
         [HttpGet]
         [Route("consolidatedintlshipments")]
-        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments()
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments(int countryID = 0)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _magayaService.GetConsolidatedShipmentRequestForUser();
+                var result = await _magayaService.GetConsolidatedShipmentRequestForUser(countryID);
 
                 return new ServiceResponse<List<IntlShipmentRequestDTO>>
                 {

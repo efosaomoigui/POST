@@ -322,6 +322,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsHUB = s.IsHUB,
                                     IsGateway = s.IsGateway,
                                     IsPublic = s.IsPublic,
+                                    LGAId = s.LGAId,
                                     CountryDTO = new CountryDTO
                                     {
                                         CountryId = c.CountryId,

@@ -4924,10 +4924,16 @@ namespace GIGLS.Services.Implementation.Shipments
                                 if (preshipmentmobile.IsApproved != true)
                                 {
                                     int customerid = 0;
+                                    bool isClassShipment = false;
                                     var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                                     if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
+
+                                        if(companyid.Rank == Rank.Class)
+                                        {
+                                            isClassShipment = true;
+                                        }
                                     }
                                     else
                                     {
@@ -4970,8 +4976,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ReceiverAddress = preshipmentmobile.ReceiverAddress,
                                         DeliveryOptionId = 2,
                                         GrandTotal = preshipmentmobile.GrandTotal,
-                                        Insurance = preshipmentmobile.InsuranceValue,
-                                        Vat = preshipmentmobile.Vat,
+                                        Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
+                                        Vat = preshipmentmobile.Vat == null ? 0 : preshipmentmobile.Vat,
                                         SenderAddress = preshipmentmobile.SenderAddress,
                                         IsCashOnDelivery = false,
                                         CustomerCode = preshipmentmobile.CustomerCode,
@@ -4994,6 +5000,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
                                         PackageOptionIds = detail.PackageOptionIds,
+                                        IsClassShipment = isClassShipment,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -5002,10 +5009,11 @@ namespace GIGLS.Services.Implementation.Shipments
                                             Nature = s.ItemType,
                                             Price = (decimal)s.CalculatedPrice,
                                             Quantity = s.Quantity
-
                                         }).ToList()
                                     };
 
+                                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                                    MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();

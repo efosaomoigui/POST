@@ -1019,11 +1019,20 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var RequestNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.RequestNumber, destinationServiceCenter.Code);
                 shipmentDTO.RequestNumber = RequestNumber;
+                if (shipmentDTO.RequestProcessingCountryId == 0)
+                {
+                    shipmentDTO.RequestProcessingCountryId = 207;
+                }
+                var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.RequestProcessingCountryId);
+                if (centre.Any())
+                {
+                    shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+                }
 
                 if (shipmentDTO.Consolidated)
                 {
                     //get count of all unprocessed consolited item
-                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == user.Id && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == shipmentDTO.RequestProcessingCountryId).OrderBy(x => x.DateCreated).ToList();
                     count = consolidated.Count;
                     if (count < 1)
                     {
@@ -1046,14 +1055,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
                
-                if (shipmentDTO.RequestProcessingCountryId <= 0)
-                {
-                    var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
-                    if (country != null)
-                    {
-                        newShipment.RequestProcessingCountryId = country.CountryId;
-                    }
-                }
+               
                 string itemName = "";
 
                 var serialNumber = 1;
@@ -1096,6 +1098,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentre = destinationServiceCenter;
                 var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
                 castObj.ItemDetails = itemName;
+                castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
@@ -1172,10 +1177,15 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var station = await _stationService.GetStationById(destinationServiceCenter.StationId);
                 int count = 0;
 
+                if (existingRequest.RequestProcessingCountryId == 0)
+                {
+                    existingRequest.RequestProcessingCountryId = 207;
+                }
+
                 if (shipmentDTO.Consolidated)
                 {
                     //get count of all unprocessed consolited item
-                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                    var consolidated = _uow.IntlShipmentRequest.GetAll().Where(x => x.UserId == existingRequest.UserId && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == existingRequest.RequestProcessingCountryId).OrderBy(x => x.DateCreated).ToList();
                     count = consolidated.IndexOf(existingRequest);
                 }
                 if (shipmentDTO.Consolidated == false)
@@ -2256,19 +2266,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 throw;
             }
         }
-        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser()
+        public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID)
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(userId);
-                var userCountry = await _uow.Country.GetAsync(c => c.CountryId == user.UserActiveCountryId);
-                var country = Mapper.Map<CountryDTO>(userCountry);
                 var shipmentDtos = new List<IntlShipmentRequestDTO>();
-                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false).OrderBy(x => x.DateCreated).ToList();
+                if (countryID == 0)
+                {
+                    countryID = 207;
+                }
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.UserId == userId && x.Consolidated == true && x.IsProcessed == false && x.RequestProcessingCountryId == countryID).OrderBy(x => x.DateCreated).ToList();
                 shipmentDtos = Mapper.Map<List<IntlShipmentRequestDTO>>(shipments);
                 if (shipmentDtos.Any())
                 {
+                    var countryIds = shipmentDtos.Select(x => x.RequestProcessingCountryId).ToList();
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == countryID);
+                    var countryDTO = Mapper.Map<NewCountryDTO>(country);
                     //GET ALL SERVICE CENTRE
                     var centreIds = shipments.Select(x => x.DestinationServiceCentreId).ToList();
                     var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId));
@@ -2281,12 +2296,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             item.DestinationServiceCentre = centreDTO;
                         }
 
-                        var deptCentre = await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(country.CountryId);
-                        if (deptCentre.Any())
+                        //untill users updated apps
+                        if (item.RequestProcessingCountryId == 0)
                         {
-                            item.DepartureServiceCentre = deptCentre.FirstOrDefault();
-                            item.DepartureCountry = country;
+                            item.RequestProcessingCountryId = countryID;
                         }
+                        if (country != null)
+                        {
+                            item.DepartureCountry = countryDTO;
+                        }
+
+
                     }
 
                 }
