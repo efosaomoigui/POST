@@ -30,6 +30,7 @@ namespace GIGLS.Core.DTO
         public string Amount { get; set; }
         public string Currency { get; set; }
         public List<string> Emails { get; set; }
+        public string MessageTemplate { get; set; } //Message Template to use
 
 
         public SMSSenderPlatform SMSSenderPlatform { get; set; }

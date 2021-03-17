@@ -900,9 +900,17 @@ namespace GIGLS.Services.Implementation.Customers
                 if (obj is CompanyMessagingDTO)
                 {
                     var company = (CompanyMessagingDTO)obj;
+                    var messageDTO = new MessageDTO
+                    {
+                        CustomerName = company.Name,
+                        To = company.Email,
+                        ToEmail = company.Email
+                    };
                     if (company.UserChannelType == UserChannelType.IndividualCustomer)
                     {
-                        await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+                        messageDTO.MessageTemplate = "IndividualWelcome";
+                        await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                        //await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
                     }
                     else if (company.UserChannelType == UserChannelType.Partner)
                     {
@@ -910,32 +918,46 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     else if (company.IsFromMobile)
                     {
-                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        if(company.Rank == Rank.Class)
                         {
-                            await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                            messageDTO.MessageTemplate = "ClassWelcomeApp";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
                         }
-                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
-                        {
-                            await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
-                        }
+                        //if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        //{
+                        //    await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
+                        //}
+                        //else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        //{
+                        //    await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
+                        //}
                         else if (company.Rank == Rank.Basic)
                         {
-                            await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                            //await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                            messageDTO.MessageTemplate = "BasicWelcomeApp";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
                         }
                     }
                     else
                     {
-                        if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        if (company.Rank == Rank.Class)
                         {
-                            await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                            messageDTO.MessageTemplate = "ClassWelcomeWebiste";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
                         }
-                        else if (company.Rank == Rank.Class && company.IsUpdate == true)
-                        {
-                            await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
-                        }
+                        //if (company.Rank == Rank.Class && company.IsUpdate == false)
+                        //{
+                        //   await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
+                        //}
+                        //else if (company.Rank == Rank.Class && company.IsUpdate == true)
+                        //{
+                        //   await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
+                        //}
                         else if (company.Rank == Rank.Basic)
                         {
-                            await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                            messageDTO.MessageTemplate = "BasicWelcomeWebsite";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                           //await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
                         }
                     }
                 }
