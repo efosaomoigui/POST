@@ -205,6 +205,7 @@ namespace GIGLS.Core
         IShipmentTimeMonitorRepository ShipmentTimeMonitor { get; set; }
         IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
         IRankHistoryRepository RankHistory { get; set; }
+        IPriceCategoryRepository PriceCategory { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

@@ -216,6 +216,7 @@
     <Compile Include="Domain\MissingShipment.cs" />
     <Compile Include="Domain\PreShipment.cs" />
     <Compile Include="Domain\PreShipmentMobile.cs" />
+    <Compile Include="Domain\PriceCategory.cs" />
     <Compile Include="Domain\RankHistory.cs" />
     <Compile Include="Domain\ReferrerCode.cs" />
     <Compile Include="Domain\Region.cs" />
@@ -413,6 +414,7 @@
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentTransactionDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\PriceCategoryDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\ThirdPartyPricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
@@ -669,6 +671,7 @@
     <Compile Include="IRepositories\IQueryFluent.cs" />
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
+    <Compile Include="IRepositories\IPriceCategoryRepository.cs" />
     <Compile Include="IRepositories\Magaya\IMagayaShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Partnership\IFleetPartnerRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerPayoutRepository.cs" />
@@ -830,6 +833,7 @@
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />
     <Compile Include="IServices\IStateService.cs" />
+    <Compile Include="IServices\IPriceCategoryService.cs" />
     <Compile Include="IServices\ISubCategoryService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />

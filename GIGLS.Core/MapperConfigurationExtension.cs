@@ -467,6 +467,9 @@ namespace GIGLS.Core
                 config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
                 config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
 
+                config.CreateMap<PriceCategory, PriceCategoryDTO>();
+                config.CreateMap<PriceCategoryDTO, PriceCategory>();
+
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
                 config.CreateMap<ShipmentItem_Archive, ShipmentItem>();
