@@ -155,7 +155,19 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
         {
-            return await _portalService.GetPriceForDropOff(preshipmentMobile);
+            var dropOffPrice = await _portalService.GetPriceForDropOff(preshipmentMobile);
+            //apply dropoff price
+            var countryId = await _userService.GetUserActiveCountryId();
+            var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+            if (discount != null)
+            {
+                var discountValue = Convert.ToDecimal(discount.Value);
+                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal / discountValue;
+            }
+
+            var factor = Convert.ToDecimal(Math.Pow(10, -2));
+            dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
+            return dropOffPrice;
         }
 
         public async Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)

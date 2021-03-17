@@ -4581,11 +4581,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
               
+                    //Send email to customer
                     await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
+
+                    //also send sms to customer
+                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(shipment,MessageType.AISNU);
 
                     //Send an email to Chairman
                     var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-
                     if (chairmanEmail != null)
                     {
                         //seperate email by comma and send message to those email
