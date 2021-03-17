@@ -162,9 +162,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (discount != null)
             {
                 var discountValue = Convert.ToDecimal(discount.Value);
-                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal / discountValue;
+                decimal discountResult = ((100M - discountValue) / 100M);
+                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal * discountResult;
             }
-
             var factor = Convert.ToDecimal(Math.Pow(10, -2));
             dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
             return dropOffPrice;
