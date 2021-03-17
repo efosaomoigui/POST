@@ -328,6 +328,8 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.IsHUB = service.IsHUB;
                 centre.IsGateway = service.IsGateway;
                 centre.LGAId = service.LGAId;
+                centre.Longitude = service.Longitude;
+                centre.Latitude = service.Latitude;
                 centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
                 _uow.Complete();
             }
