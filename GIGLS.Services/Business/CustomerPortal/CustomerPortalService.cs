@@ -2972,9 +2972,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
         }  
-        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
+
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId)
         {
-            return await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(countryId);
+            return await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(countryId, stationId);
         }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -3027,7 +3028,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
         {
-            return await _uow.Store.GetStoresByCountryId(countryId);
+            var stores = await _uow.Store.GetStoresByCountryId(countryId);
+            stores = stores.OrderByDescending(x => x.storeImage).ToList();
+            return stores;
         }
 
         public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)

@@ -56,6 +56,7 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public int CountryId { get; set; }
         public string CustomerCode { get; set; }
         public GlobalPropertyType ItemCategory { get; set; }
+        public int PriceCategoryId { get; set; }
         public string Description { get; set; }
         public int Quantity { get; set; }
     }

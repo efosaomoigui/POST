@@ -510,6 +510,12 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 throw new GenericException($"Customer is suspended or pending");
                             }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
+                            }
                         }
                         result = coporate;
                     }
@@ -526,6 +532,12 @@ namespace GIGLS.Services.Implementation.Customers
                             if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
                             {
                                 throw new GenericException($"Customer is suspended or pending");
+                            }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
                             }
                         }
                         result = coporate;

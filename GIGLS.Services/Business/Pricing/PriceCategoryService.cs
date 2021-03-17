@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
@@ -24,7 +25,7 @@ namespace GIGLS.Services.Business.Pricing
             throw new NotImplementedException();
         }
 
-        public Task<PriceCategoryDTO> GetPriceCategorys()
+        public Task<IEnumerable<PriceCategoryDTO>> GetPriceCategorys()
         {
             throw new NotImplementedException();
         }

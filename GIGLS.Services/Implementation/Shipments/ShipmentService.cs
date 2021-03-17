@@ -316,7 +316,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                             //Demurage should be exclude from Company customer. Only individual customer should have demurage
                             //HomeDelivery shipments should not have demurrage for Individual Shipments
-                            if (customerType != CustomerType.Company && shipmentDto.PickupOptions != PickupOptions.HOMEDELIVERY)
+                            if (customerType == CustomerType.IndividualCustomer && shipmentDto.PickupOptions == PickupOptions.SERVICECENTER)
                             {
                                 //get Demurrage information for Individual customer
                                 await GetDemurrageInformation(shipmentDto);
@@ -650,6 +650,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentDto.DestinationServiceCentreId = serviceCentres.ServiceCentreId;
                     }
                 }
+                //get service centre info
+                var destCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId);
+                if (destCentre != null)
+                {
+                    shipmentDto.DestinationServiceCentreName = destCentre.Name;
+                }
+
 
                 return shipmentDto;
             }
@@ -3503,6 +3510,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
                     shipmentexists.PickupOptions = shipment.PickupOptions;
+                    shipmentexists.IsClassShipment = shipment.IsClassShipment;
 
                     if (shipment.PackageOptionIds.Any())
                     {
@@ -4537,9 +4545,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.SenderAddress = shipmentDTO.Customer[0].Address;
                 shipmentDTO.SenderState = shipmentDTO.Customer[0].State;
             }
+            var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == shipmentDTO.RequestNumber).FirstOrDefault();
+            var intlRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == shipmentDTO.RequestNumber);
+            if (intlRequest.RequestProcessingCountryId == 0)
+            {
+                shipmentDTO.DepartureCountryId = 207;
+            }
+            else
+            {
+                shipmentDTO.DepartureCountryId = intlRequest.RequestProcessingCountryId;
+            }
+            var centre = await _centreService.GetServiceCentresBySingleCountry(shipmentDTO.DepartureCountryId);
+            if (centre.Any())
+            {
+                shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+            }
 
             //set some data to null
-           shipmentDTO.ShipmentCollection = null;
+            shipmentDTO.ShipmentCollection = null;
            shipmentDTO.Demurrage = null;
            shipmentDTO.Invoice = null;
            shipmentDTO.ShipmentCancel = null;
@@ -4557,8 +4580,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DestinationServiceCentre = dest;
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
-                  //  shipment.ItemDetails = shipment.ShipmentItems;
-                    // send email message for payment notification
+              
                     await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
 
                     //Send an email to Chairman
@@ -4582,8 +4604,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
-                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == shipmentDTO.RequestNumber).FirstOrDefault();
-                var intlRequest = await _uow.IntlShipmentRequest.GetAsync(x => x.RequestNumber == shipmentDTO.RequestNumber);
                 intlRequest.IsProcessed = true;
                 foreach (var item in intlRequest.ShipmentRequestItems)
                 {

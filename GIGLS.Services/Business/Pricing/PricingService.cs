@@ -1491,5 +1491,46 @@ namespace GIGLS.Services.Business.Pricing
             }
             return price;
         }
+
+
+
+        public async Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto)
+        {
+            var price = 0.0m;
+            if (pricingDto.DepartureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];
+            }
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+            //get price categories for this country
+            var priceCategories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.CountryId == departureCountry.CountryId && x.IsActive == true).ToList();
+
+            //get item category
+            var itemCategory = priceCategories.Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
+            if (pricingDto.Weight < itemCategory.CategoryMinimumWeight)
+            {
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                }
+            }
+            else
+            {
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                    price = price + priceValue;
+                }
+            }
+            return price;
+        }
     }
 }

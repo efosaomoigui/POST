@@ -8,5 +8,6 @@
         public decimal CategoryMinimumWeight { get; set; }
         public decimal PricePerWeight { get; set; }
         public decimal CategoryMinimumPrice { get; set; }
+        public bool IsActive { get; set; }
     }
 }
