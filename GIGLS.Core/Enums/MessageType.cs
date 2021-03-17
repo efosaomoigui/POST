@@ -60,6 +60,7 @@
         IAFDHD, //International Shipment Arrive Final Destination (Home Delivery)
         IAFDSC, //International Shipment Arrive Final Destination (Terminal Pickup)
         AISNU,  //International Shipment Arrive Nigeria (UnPaid)
+        AISPNU,  //International Shipment Precessed (UnPaid)
         NODESMS, //International Shipments Terms and Condition shown on the App
         IDH, //International Shipment Departs Hub
         IPC, //International Shipment Payment Confirmation
