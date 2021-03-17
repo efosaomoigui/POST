@@ -1285,7 +1285,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Transfer = i.Transfer,
                                                Pos = i.Pos  ,
                                            }).ToList();
-            var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
+            var resultDto = result.OrderBy(x => x.SenderName).ThenByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);
         }
     }
