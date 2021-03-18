@@ -1234,12 +1234,12 @@ namespace GIGLS.Services.Business.Pricing
             newPricingDTO.Total = totalPrice;
             if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                var factor = Convert.ToDecimal(Math.Pow(10, 0));
                 newPricingDTO.GrandTotal = Math.Round(grandTotal * factor) / factor;
             }
             else
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, 0));
+                var factor = Convert.ToDecimal(Math.Pow(10, -2));
                 newPricingDTO.GrandTotal = Math.Round(grandTotal * factor) / factor;
             }
             return newPricingDTO;

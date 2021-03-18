@@ -183,7 +183,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                 dropOffPrice.DiscountedValue = dropOffPrice.GrandTotal * discountResult;
                 dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.DiscountedValue;
             }
-            var factor = Convert.ToDecimal(Math.Pow(10, -2));
+            decimal factor = 0;
+            if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, 0));
+            }
+            else
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, -2));
+            }
             dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal * factor) / factor;
             return dropOffPrice;
         }
@@ -227,7 +235,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (shipment.GrandTotal > 0)
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                decimal factor = 0;
+                if (shipment.CompanyType == CompanyType.Corporate.ToString() || shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, 0));
+                }
+                else
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, -2));
+                }
                 shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
                 shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
                 shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
@@ -236,8 +252,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
-                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
-
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor; 
+                
                 foreach (var item in shipment.ShipmentItems)
                 {
                     item.Price = Math.Round(item.Price * factor) / factor;
