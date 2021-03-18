@@ -9,5 +9,7 @@ namespace GIGLS.Core.IRepositories.Stores
     public interface IStoreRepository : IRepository<Store>
     {
         Task<List<StoreDTO>> GetStoresByCountryId(int countryId);
+        Task<List<StoreDTO>> GetStores();
+        Task<StoreDTO> GetStoreById(int storeId);
     }
 }

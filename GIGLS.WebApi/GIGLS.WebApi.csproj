@@ -402,6 +402,7 @@
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\Sla\SLAController.cs" />
     <Compile Include="Controllers\StateController.cs" />
+    <Compile Include="Controllers\Store\StoreController.cs" />
     <Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />

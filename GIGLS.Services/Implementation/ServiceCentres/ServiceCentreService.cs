@@ -328,6 +328,8 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.IsHUB = service.IsHUB;
                 centre.IsGateway = service.IsGateway;
                 centre.LGAId = service.LGAId;
+                centre.Longitude = service.Longitude;
+                centre.Latitude = service.Latitude;
                 centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
                 _uow.Complete();
             }
@@ -409,13 +411,15 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 //Get all service centre
                 int[] countryIds = new int[] { countryId };
                 bool excludehub = true;
+                int stationId = 0;
                 
                 if (serviceCenterIds.StationId == 4)
                 {
                     excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
                 }
 
-                return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub);
+                return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub, stationId);
             }
             catch (Exception)
             {
