@@ -153,21 +153,38 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetPrice(pricingDto);
         }
 
-        public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //{
+        //    var dropOffPrice = await _portalService.GetPriceForDropOff(preshipmentMobile);
+        //    //apply dropoff price
+        //    var countryId = await _userService.GetUserActiveCountryId();
+        //    var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+        //    if (discount != null)
+        //    {
+        //        var discountValue = Convert.ToDecimal(discount.Value);
+        //        decimal discountResult = (discountValue / 100M);
+        //        dropOffPrice.Discount = dropOffPrice.GrandTotal * discountResult;
+        //        dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.Discount;                  
+        //    }
+        //    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+        //    dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
+        //    return dropOffPrice;
+        //}
+
+        public async Task<NewPricingDTO> GetPriceForDropOff(NewShipmentDTO newShipmentDTO)
         {
-            var dropOffPrice = await _portalService.GetPriceForDropOff(preshipmentMobile);
-            //apply dropoff price
+            var dropOffPrice = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
             var countryId = await _userService.GetUserActiveCountryId();
             var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
             if (discount != null)
             {
                 var discountValue = Convert.ToDecimal(discount.Value);
                 decimal discountResult = (discountValue / 100M);
-                dropOffPrice.Discount = dropOffPrice.GrandTotal * discountResult;
-                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.Discount;                  
+                dropOffPrice.DiscountedValue = dropOffPrice.GrandTotal * discountResult;
+                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.DiscountedValue;
             }
             var factor = Convert.ToDecimal(Math.Pow(10, -2));
-            dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
+            dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal * factor) / factor;
             return dropOffPrice;
         }
 
