@@ -1101,6 +1101,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
                 castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
 
+                //var messageDTO = new MessageDTO()
+                //{
+                //    CustomerName = shipmentDTO.CustomerFirstName,
+                //    IntlMessage = new IntlMessageDTO()
+                //    {
+                //        Description = shipmentDTO.ItemDetails,
+                //        DepartureCenter =  _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
+                //        DestinationCenter = destinationServiceCenter.Name,
+                //        DeliveryOption = shipmentDTO.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
+                //        RequestCode = shipmentDTO.RequestNumber,
+                //        //StoreOfPurchase = shipmentDTO.ShipmentRequestItems.
+                //    }, 
+                //    Subject = "Oversea Shipment Request Acknowledgement"
+
+
+                //};
 
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
