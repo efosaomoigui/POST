@@ -53,7 +53,6 @@
         DBDO, // When discrepancy has been identified during confirmation of bank deposit
         SRMEmail, // Message for Regional Managers when Store Keeper sends shipment to their region
         INTLPEMAIL,  //INTERNATIONAL SHIPMENT PROCESS EMAIL
-        INTLPEMAILUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
         RMCS, //Message for Receiver Delivery Code
         REQMAIL, //International Message for customer
         REQSCA, //International Message for Service centre
@@ -76,6 +75,7 @@
         EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
         ISTC62, //International Shipments Terms and Condition shown on the App for UK
         ISTC207, //International Shipments Terms and Condition shown on the App for UK
+        INTLPEMAILUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
 
-    } 
+    }
 }
