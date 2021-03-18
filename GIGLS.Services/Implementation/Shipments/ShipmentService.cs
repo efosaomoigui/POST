@@ -4581,7 +4581,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
               
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAILUK, shipment);
 
                     //Send an email to Chairman
                     var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
@@ -4596,7 +4596,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             // send email message for payment notification
                             shipment.CustomerDetails.Email = email;
                             shipment.RequestNumber = shipmentDTO.RequestNumber;
-                            await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
+                            await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAILUK, shipment);
                         }
                     }
                 }
