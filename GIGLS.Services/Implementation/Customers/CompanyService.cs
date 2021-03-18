@@ -923,14 +923,6 @@ namespace GIGLS.Services.Implementation.Customers
                             messageDTO.MessageTemplate = "ClassWelcomeApp";
                             await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
                         }
-                        //if (company.Rank == Rank.Class && company.IsUpdate == false)
-                        //{
-                        //    await _messageSenderService.SendMessage(MessageType.ESCA, EmailSmsType.Email, company);
-                        //}
-                        //else if (company.Rank == Rank.Class && company.IsUpdate == true)
-                        //{
-                        //    await _messageSenderService.SendMessage(MessageType.EUCA, EmailSmsType.Email, company);
-                        //}
                         else if (company.Rank == Rank.Basic)
                         {
                             //await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
@@ -945,14 +937,6 @@ namespace GIGLS.Services.Implementation.Customers
                             messageDTO.MessageTemplate = "ClassWelcomeWebiste";
                             await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
                         }
-                        //if (company.Rank == Rank.Class && company.IsUpdate == false)
-                        //{
-                        //   await _messageSenderService.SendMessage(MessageType.ESCW, EmailSmsType.Email, company);
-                        //}
-                        //else if (company.Rank == Rank.Class && company.IsUpdate == true)
-                        //{
-                        //   await _messageSenderService.SendMessage(MessageType.EUCW, EmailSmsType.Email, company);
-                        //}
                         else if (company.Rank == Rank.Basic)
                         {
                             messageDTO.MessageTemplate = "BasicWelcomeWebsite";
