@@ -1083,10 +1083,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 await _uow.CompleteAsync();
 
                 newShipment.DestinationServiceCentre = destinationServiceCenter;
-                var castObj = Mapper.Map<IntlShipmentRequestDTO>(newShipment);
-                castObj.ItemDetails = itemName;
-                castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
-                castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
+                shipmentDTO.ItemDetails = itemName;
+                shipmentDTO.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                shipmentDTO.CustomerEmail = shipmentDTO.ReceiverEmail;
 
                 // await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
                 await _messageSenderService.SendOverseasRequestMails(shipmentDTO, user, storeName);
