@@ -504,11 +504,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [HttpPost]
         [Route("bulkpayment")]
-        public async Task<IServiceResponse<bool>> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentType, string refNo = null)
+        public async Task<IServiceResponse<bool>> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _tickectMan.ProcessBulkPaymentforWaybills(waybills,paymentType,refNo);
+                var result = await _tickectMan.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
 
                 return new ServiceResponse<bool>
                 {

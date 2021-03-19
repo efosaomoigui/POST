@@ -301,9 +301,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             var serviceCentreId = await _userService.GetPriviledgeServiceCenters();
             return await _invoiceService.GetInvoiceByServiceCentre(serviceCentreId[0]);
         }
-        public async Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentType, string refNo)
+        public async Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
         {
-            return await _invoiceService.ProcessBulkPaymentforWaybills(waybills,paymentType,refNo);
+            return await _invoiceService.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
         }
     }
 }

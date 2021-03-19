@@ -47,7 +47,7 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
         Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
         Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre();
-        Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentType, string refNo);
+        Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
     }
 }
                                                                                   

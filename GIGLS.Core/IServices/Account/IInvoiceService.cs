@@ -19,6 +19,6 @@ namespace GIGLS.Core.IServices.Account
         Task<string> SendEmailForDueInvoices(int daystoduedate);
         Task<string> SendEmailForWalletBalanceCheck(decimal daystoduedate);
         Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre(int serviceCentreId);
-        Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentMethod, string refNo);
+        Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
     }
 }

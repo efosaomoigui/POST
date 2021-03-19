@@ -451,32 +451,31 @@ namespace GIGLS.Services.Implementation.Account
            return await _uow.Shipment.GetUnPaidWaybillForServiceCentre(serviceCentreId);
         }
 
-        public async Task<bool> ProcessBulkPaymentforWaybills(List<string> waybills, string paymentMethod, string refNo)
+        public async Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
         {
-            if (waybills.Any())
+            if (bulkWaybillPaymentDTO.Waybills.Any())
             {
-                var paymentType = (PaymentType)Enum.Parse(typeof(PaymentType), paymentMethod);
+                var paymentType = (PaymentType)Enum.Parse(typeof(PaymentType), bulkWaybillPaymentDTO.PaymentType);
                 var currentUserId = await _userService.GetCurrentUserId();
                 if (paymentType != null && paymentType != PaymentType.Cash && paymentType != PaymentType.Pos)
                 {
                     throw new GenericException("Invalid payment type", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                if (String.IsNullOrEmpty(refNo) && paymentType == PaymentType.Pos)
+                if (String.IsNullOrEmpty(bulkWaybillPaymentDTO.RefNo) && paymentType == PaymentType.Pos)
                 {
                     throw new GenericException($"No reference number provided for this payment", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                var shipments = _uow.Invoice.GetAllAsQueryable().Where(y => waybills.Contains(y.Waybill));
+                var shipments = _uow.Invoice.GetAllAsQueryable().Where(y => bulkWaybillPaymentDTO.Waybills.Contains(y.Waybill));
                 if (shipments.Any())
                 {
-                    foreach (var w in shipments)
+                    var alreadypaid = shipments.Where(x => x.PaymentStatus == PaymentStatus.Paid).Select(x => x.Waybill).ToList();
+                    if (alreadypaid.Any())
                     {
-                        if (w.PaymentStatus == PaymentStatus.Paid)
-                        {
-                            throw new GenericException($"this waybill no - {w.Waybill} has been paid for", $"{(int)HttpStatusCode.BadRequest}");
-                        }
-                    } 
+                        throw new GenericException($"Error: Waybill(s) Already paid for. " +
+                               $"The following waybills [{string.Join(", ", alreadypaid.ToList())}] has already been paid for");
+                    }
                 }
-                foreach (var item in waybills)
+                foreach (var item in bulkWaybillPaymentDTO.Waybills)
                 {
                     //check if invoice has been paid for
                     var waybill = shipments.Where(x => x.Waybill == item).FirstOrDefault();
@@ -484,7 +483,7 @@ namespace GIGLS.Services.Implementation.Account
                     {
                         var paymentDTO = new PaymentTransactionDTO();
                         paymentDTO.Waybill = item;
-                        paymentDTO.TransactionCode = refNo;
+                        paymentDTO.TransactionCode = bulkWaybillPaymentDTO.RefNo;
                         paymentDTO.PaymentStatus = waybill.PaymentStatus;
                         paymentDTO.UserId = currentUserId;
                         paymentDTO.FromApp = false;
