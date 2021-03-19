@@ -76,6 +76,7 @@
         EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
         ISTC62, //International Shipments Terms and Condition shown on the App for UK
         ISTC207, //International Shipments Terms and Condition shown on the App for UK
+        REQSCAUK, //International Message for Service centre UK
 
     } 
 }
