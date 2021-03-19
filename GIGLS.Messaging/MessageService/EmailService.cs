@@ -293,7 +293,8 @@ namespace GIGLS.Messaging.MessageService
                 { "SG_Waybill", message.Waybill },
                { "SG_ShippingCost", message.IntlMessage.ShippingCost },
                { "SG_PaymentLink", message.IntlMessage.PaymentLink },
-                 { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName }
+               { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName },
+                { "SG_Country", message.Country }
             });
 
             var response = await client.SendEmailAsync(myMessage);

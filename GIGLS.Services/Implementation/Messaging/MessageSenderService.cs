@@ -1483,7 +1483,7 @@ namespace GIGLS.Services.Implementation.Messaging
         }
 
         //This handles the new mails for all overseas mails 
-        private async Task SendOverseasMails(MessageDTO messageDTO)
+        public async Task SendOverseasMails(MessageDTO messageDTO)
         {
             var result = "";
             try
@@ -1548,7 +1548,7 @@ namespace GIGLS.Services.Implementation.Messaging
             string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
             string ukEmail = ConfigurationManager.AppSettings["UKEmail"];
 
-            messageDTO.CustomerName = messageDTO.IntlMessage.DepartureCenter;
+            messageDTO.Country = messageDTO.IntlMessage.DepartureCenter;
             messageDTO.ToEmail = shipmentDto.RequestProcessingCountryId == 207 ? houstonEmail : ukEmail;
             messageDTO.To = shipmentDto.RequestProcessingCountryId == 207 ? houstonEmail : ukEmail;
             messageDTO.MessageTemplate = "OverseasShippingRequestHub";
@@ -1613,7 +1613,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 },
                 To = customerObj.Email,
                 ToEmail = customerObj.Email,
-                Body = shipmentDto.DepartureCountryId == 5 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
+                Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
                 MessageTemplate = "OverseasReceivedItems"
             };

@@ -32,6 +32,7 @@ namespace GIGLS.Core.DTO
         public List<string> Emails { get; set; }
         public string MessageTemplate { get; set; } //Message Template to use
         public IntlMessageDTO IntlMessage { get; set; }
+        public string Country { get; set; }
 
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
     }

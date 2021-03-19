@@ -18,8 +18,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.DHL;
+using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -36,12 +36,10 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -327,7 +325,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentDto.IsFromMobile)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipmentDto.Waybill);
-                        if(deliveryNumber != null)
+                        if (deliveryNumber != null)
                         {
                             shipmentDto.SenderCode = deliveryNumber.SenderCode;
 
@@ -530,7 +528,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverCity = shipment.ReceiverCity,
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
                     LGA = shipment.LGA
-                    
+
                 };
 
                 if (shipment.IsAgent)
@@ -924,8 +922,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     //}
                     //else
                     //{
-                        checkForHash.DateModified = DateTime.Now;
-                   // }
+                    checkForHash.DateModified = DateTime.Now;
+                    // }
                 }
                 else
                 {
@@ -1045,7 +1043,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.ReceiverAddress = $"GIGL {receieverServiceCenter.FormattedServiceCentreName} SERVICE CENTER ({shipment.ReceiverAddress})";
                 }
 
-                if(shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
+                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY && (shipment.ReceiverLocation.Longitude == null || shipment.ReceiverLocation.Latitude == null))
                 {
                     throw new GenericException("Receiver Longitude and Latitude details not found");
                 }
@@ -2347,7 +2345,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ManifestNumber.IsDriverValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
-                        retVal =  true;
+                        retVal = true;
                     }
                     else
                     {
@@ -2365,7 +2363,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ManifestNumber.IsDestinationServiceCentreValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
                         await _uow.CompleteAsync();
-                        retVal =  true;
+                        retVal = true;
                     }
                     else
                     {
@@ -4144,7 +4142,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO>  cargoMagayaShipmentDTOs)
+        public async Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
         {
             bool result = true;
             try
@@ -4159,35 +4157,35 @@ namespace GIGLS.Services.Implementation.Shipments
                         var shipmentItem = waybillInfo.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
-                        var messageDTO = new ShipmentDTO
+
+                        if (shipmentItem.CustomerType.Contains("Individual"))
                         {
-                            CustomerType = shipmentItem.CustomerType,
-                            CustomerId = shipmentItem.CustomerId,
-                            ReceiverName = shipmentItem.ReceiverName,
+                            shipmentItem.CustomerType = CustomerType.IndividualCustomer.ToString();
+                        }
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentItem.CustomerType);
+
+                        var customerObj = await _messageSenderService.GetCustomer(shipmentItem.CustomerId, customerType);
+
+                        var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentItem.DepartureCountryId);
+
+                        var messageDTO = new MessageDTO()
+                        {
+                            CustomerName = customerObj.FirstName,
                             Waybill = shipmentItem.Waybill,
-                            PickupOptions = shipmentItem.PickupOptions,
-                            ReceiverEmail = shipmentItem.ReceiverEmail,
-                            GrandTotal = shipmentItem.GrandTotal,
-                            DepartureCountryId = shipmentItem.DepartureCountryId,
-                            DepartureServiceCentreId = shipmentItem.DepartureServiceCentreId,
-                            DestinationCountryId = shipmentItem.DestinationCountryId,
-                            DestinationServiceCentreId = shipmentItem.DestinationServiceCentreId,
-                            CustomerDetails = new CustomerDTO
+                            Currency = country.CurrencySymbol,
+                            IntlMessage = new IntlMessageDTO()
                             {
-                                PhoneNumber = shipmentItem.ReceiverPhoneNumber,
-                                Email = shipmentItem.ReceiverEmail
+                                ShippingCost = shipmentItem.GrandTotal.ToString(),
+                                DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentItem.DepartureServiceCentreId).Name,
                             },
-                            DepartureServiceCentre = new ServiceCentreDTO
-                            {
-
-                            },
-                            DestinationServiceCentre = new ServiceCentreDTO
-                            {
-
-                            }
+                            To = customerObj.Email,
+                            ToEmail = customerObj.Email,
+                            Body = shipmentItem.DepartureCountryId == 207 ? DateTime.Now.AddDays(14).ToString("dd/MM/yyyy") : DateTime.Now.AddDays(5).ToString("dd/MM/yyyy"),
+                            Subject = $"International Shipment Cargoed ({country.CountryName})",
+                            MessageTemplate = "OverseasDepartsHub"
                         };
-                        //send an email to receiver
-                        await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IDH);
+
+                        await _messageSenderService.SendOverseasMails(messageDTO);
                     }
                     _uow.Complete();
                 }
@@ -4205,7 +4203,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var result =  await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+                var result = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
                 return await GetTotalPriceBreakDown(result, shipmentDTO);
             }
             catch (Exception ex)
@@ -4229,7 +4227,7 @@ namespace GIGLS.Services.Implementation.Shipments
             total.GrandTotal = total.Amount + total.VAT;
 
             //Get Insurance
-            if(shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
+            if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
             {
                 decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
                 total.GrandTotal = total.GrandTotal + insurance;
@@ -4324,7 +4322,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipment.IsInternational = true;
             return shipment;
         }
-        
+
         private async Task<CustomerDTO> HandleCustomer(CustomerDTO customerDetails)
         {
             //reset rowversion
@@ -4345,14 +4343,14 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.InternationalShipmentWaybill.Add(result);
         }
 
-        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO, InternationalShipmentWaybillDTO dhlShipment,  PaymentType paymentType)
+        private async Task<ShipmentDTO> AddDHLShipmentToAgility(ShipmentDTO shipmentDTO, InternationalShipmentWaybillDTO dhlShipment, PaymentType paymentType)
         {
             try
             {
                 //Get Approximate Items Weight
                 foreach (var item in shipmentDTO.ShipmentItems)
                 {
-                    shipmentDTO.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight + item.Weight; 
+                    shipmentDTO.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight + item.Weight;
                 }
 
                 // create the shipment and shipmentItems
@@ -4563,10 +4561,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
-           shipmentDTO.Demurrage = null;
-           shipmentDTO.Invoice = null;
-           shipmentDTO.ShipmentCancel = null;
-           shipmentDTO.ShipmentReroute = null;
+            shipmentDTO.Demurrage = null;
+            shipmentDTO.Invoice = null;
+            shipmentDTO.ShipmentCancel = null;
+            shipmentDTO.ShipmentReroute = null;
             shipmentDTO.DeliveryOption = null;
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
@@ -4580,7 +4578,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DestinationServiceCentre = dest;
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
-              
+
                     //await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
                     await _messageSenderService.SendOverseasShipmentReceivedMails(shipment);
                 }
