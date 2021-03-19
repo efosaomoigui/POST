@@ -52,5 +52,8 @@ namespace GIGLS.Core.DTO
         public string DeliveryOption { get; set; }
         public string RequestCode { get; set; }
         public string StoreOfPurchase { get; set; }
+        public string ShippingCost { get; set; }
+        public string PaymentLink { get; set; }
+        public string DeliveryAddressOrCenterName { get; set; }
     }
 }

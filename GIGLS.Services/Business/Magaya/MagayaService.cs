@@ -8,8 +8,6 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -18,8 +16,6 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -262,7 +258,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             //magayaShipmentDTO.Charges.Charge = new Charge[magayaShipmentDTO.Items.Length];
             magayaShipmentDTO.Charges.Charge = new Charge[1];
 
-            for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++) 
+            for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++)
             {
                 magayaShipmentDTO.Charges.Charge[i] = new Charge();
                 magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge();
@@ -368,7 +364,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
 
                 //var itemChargeableWeight = (totalVolumeWeight > totalWeight) ? totalVolumeWeight : totalWeight;
-                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume ==null) ?0.00: magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
+                var volume = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Volume.Value * 1728; //Convert volume to ft3
                 var weight = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight == null) ? 0.00 : magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Weight.Value;
                 var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
@@ -578,24 +574,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         {
                             shipmentDto.GrandTotal = Math.Round(shipmentDto.GrandTotal, 2);
                         }
+
                         // send email message for payment notification
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
-
-                        //Send an email to Chairman
-                        var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-
-                        if (chairmanEmail != null)
-                        {
-                            //seperate email by comma and send message to those email
-                            string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-
-                            foreach (string email in chairmanEmails)
-                            {
-                                // send email message for payment notification
-                                shipmentDto.CustomerDetails.Email = email;
-                                await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
-                            }
-                        }
+                        // await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
+                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto);
                     }
 
                     using (var client = new HttpClient())
@@ -1054,11 +1036,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 newShipment.DestinationServiceCentreId = destinationServiceCenter.ServiceCentreId; // station.SuperServiceCentreId;
                 newShipment.DestinationCountryId = Convert.ToInt32(station.Country);
                 newShipment.ReceiverCountry = shipmentDTO.ReceiverCountry;
-               
-               
+
+
                 string itemName = "";
 
                 var serialNumber = 1;
+                var storeName = "";
                 foreach (var shipmentItem in newShipment.ShipmentRequestItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
@@ -1088,6 +1071,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentItem.ItemCount = $"Item {count}";
                     shipmentItem.Received = false;
                     itemName += shipmentItem.ItemName + " ";
+                    if (!String.IsNullOrWhiteSpace(shipmentItem.storeName))
+                    {
+                        storeName += shipmentItem.storeName + " ";
+                    }
                     serialNumber++;
                 }
 
@@ -1101,45 +1088,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
                 castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
 
-                //var messageDTO = new MessageDTO()
-                //{
-                //    CustomerName = shipmentDTO.CustomerFirstName,
-                //    IntlMessage = new IntlMessageDTO()
-                //    {
-                //        Description = shipmentDTO.ItemDetails,
-                //        DepartureCenter =  _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
-                //        DestinationCenter = destinationServiceCenter.Name,
-                //        DeliveryOption = shipmentDTO.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
-                //        RequestCode = shipmentDTO.RequestNumber,
-                //        //StoreOfPurchase = shipmentDTO.ShipmentRequestItems.
-                //    }, 
-                //    Subject = "Oversea Shipment Request Acknowledgement"
-
-
-                //};
-
-                //Send an email with details of request to customer
-                await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
-
-                //Send an email to Chairman
-                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-
-                if (chairmanEmail != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-
-                    foreach (string email in chairmanEmails)
-                    {
-                        castObj.CustomerEmail = email;
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
-                    }
-                }
-
-                //Send an email with details of request to Houston team
-                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
-                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
+                // await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+                await _messageSenderService.SendOverseasRequestMails(shipmentDTO, user, storeName);
 
                 return shipmentDTO;
             }

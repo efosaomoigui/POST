@@ -1,5 +1,7 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using System.Threading.Tasks;
@@ -16,5 +18,7 @@ namespace GIGLS.Core.IMessageService
         Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task SendCustomerRegistrationMails(MessageDTO messageDTO);
+        Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto);
+        Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName);
     }
 }

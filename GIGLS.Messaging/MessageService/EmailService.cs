@@ -52,6 +52,17 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
+        //This handles the new mails for overseas shipments 
+        public async Task<string> SendOverseasShipmentMails(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigOverseasMessage(message);
+            }
+            return result;
+        }
+
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
@@ -237,6 +248,52 @@ namespace GIGLS.Messaging.MessageService
                // { "TPL_CustomerCode", message.CustomerCode },
                 { "TPL_CustomerEmail", message.To },
                 //{ "TPL_Password", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigOverseasMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "SG_Subject", message.Subject },
+                { "SG_CustomerName", message.CustomerName },
+                { "SG_Description", message.IntlMessage.Description },
+                 { "SG_StoreOfPurchase", message.IntlMessage.StoreOfPurchase },
+                { "SG_DepartureCenter", message.IntlMessage.DepartureCenter },
+                { "SG_DestinationCenter", message.IntlMessage.DestinationCenter },
+                { "SG_DeliveryOption", message.IntlMessage.DeliveryOption },
+                { "SG_RequestCode", message.IntlMessage.RequestCode },
+                { "SG_CustomerEmail", message.To },
+                { "SG_ConsolidationMessage", message.Body },
+                { "SG_Currency", message.Currency },
+                { "SG_Waybill", message.Waybill },
+               { "SG_ShippingCost", message.IntlMessage.ShippingCost },
+               { "SG_PaymentLink", message.IntlMessage.PaymentLink },
+                 { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName }
             });
 
             var response = await client.SendEmailAsync(myMessage);
