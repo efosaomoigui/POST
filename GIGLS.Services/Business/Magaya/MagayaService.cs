@@ -1136,10 +1136,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                 }
 
-                //Send an email with details of request to Houston team
-                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
-                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
+                //Send an email with details of request to International team
+                await SendMessageToIntlTeam(shipmentDTO.RequestProcessingCountryId, castObj);
+                //if (shipmentDTO.RequestProcessingCountryId == 207)
+                //{
+                //    string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                //    castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                //    await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj); 
+                //}
 
                 return shipmentDTO;
             }
@@ -2332,6 +2336,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 throw;
             }
+        }
+
+
+        public  async Task<bool> SendMessageToIntlTeam(int countryId, IntlShipmentRequestDTO castObj)
+        {
+            if (countryId == 207)
+            {
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj); 
+            }
+            else if (countryId == 62)
+            {
+                string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCAUK, castObj);
+            }
+            return true;
         }
 
 
