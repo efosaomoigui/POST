@@ -75,7 +75,7 @@
         EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
         ISTC62, //International Shipments Terms and Condition shown on the App for UK
         ISTC207, //International Shipments Terms and Condition shown on the App for UK
-        INTLPEMAILUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
+        INTPEUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
 
     }
 }
