@@ -99,5 +99,21 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("categoriesbycountry/{countryId}")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var priceCategory = await _priceCategoryService.GetPriceCategoriesByCountry(countryId);
+
+                return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
+                {
+                    Object = priceCategory
+                };
+            });
+        }
+
     }
 }

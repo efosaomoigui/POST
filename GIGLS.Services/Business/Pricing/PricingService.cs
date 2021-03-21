@@ -1515,6 +1515,10 @@ namespace GIGLS.Services.Business.Pricing
 
             //get item category
             var itemCategory = priceCategories.Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
+            if (itemCategory == null)
+            {
+                throw new GenericException($"No price definition for this category in {departureCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
+            }
             if (pricingDto.Weight < itemCategory.CategoryMinimumWeight)
             {
                 for (int i = 1; i <= pricingDto.Quantity; i++)

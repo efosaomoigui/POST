@@ -11,5 +11,7 @@ namespace GIGLS.Core.IRepositories
     public interface IPriceCategoryRepository : IRepository<PriceCategory>
     {
         Task<List<PriceCategoryDTO>> GetPriceCategoriesByCountryId(int countryId);
+        Task<PriceCategoryDTO> GetPriceCategoryById(int priceCategoryId);
+        Task<List<PriceCategoryDTO>> GetPriceCategories();
     }
 }

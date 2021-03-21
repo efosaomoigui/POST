@@ -105,7 +105,7 @@ namespace GIGLS.WebApi.Controllers.Business
             {
                 var userCountryId = await _pricing.GetUserCountryId();
                 pricingDto.CountryId = userCountryId;
-                var price = await _pricing.GetPriceForUK(pricingDto);
+                var price = await _pricing.GetPriceByCategory(pricingDto);
 
                 return new ServiceResponse<decimal>
                 {
