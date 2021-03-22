@@ -602,15 +602,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (shipment.IsInternational)
             {
                 //check if the shipment has a scan of AISN in Tracking Table, 
-                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
-                && x.Status == ShipmentScanStatus.AISN.ToString());
+                //bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                //&& x.Status == ShipmentScanStatus.AISN.ToString());
 
-                if (!isPresent)
-                {
-                    //amountToDebit = amountToDebit * 0.95m;
-                    var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
-                    amountToDebit = amountToDebit * discount;
-                }                
+                //if (!isPresent)
+                //{
+                //    //amountToDebit = amountToDebit * 0.95m;
+                //    var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
+                //    amountToDebit = amountToDebit * discount;
+                //}           
+
+                var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
+                amountToDebit = amountToDebit * discount;
             }
 
             return amountToDebit;

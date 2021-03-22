@@ -2284,6 +2284,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         }
 
 
+        public  async Task<bool> SendMessageToIntlTeam(int countryId, IntlShipmentRequestDTO castObj)
+        {
+            if (countryId == 207)
+            {
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj); 
+            }
+            else if (countryId == 62)
+            {
+                string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCAUK, castObj);
+            }
+            return true;
+        }
+
+
     }
 
 
