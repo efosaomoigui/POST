@@ -569,22 +569,37 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //    amountToDebit = amountToDebit * discount;
                 //}           
 
-                var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
-                amountToDebit = amountToDebit * discount;
+                if(UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
+                {
+                    var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
+                    amountToDebit = amountToDebit * discount;
+                }
             }
-
             return amountToDebit;
         }
 
-        private decimal GetDiscountForInternationalShipmentBasedOnRank(Rank rank)
+        private async Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
         {
-            decimal discount = 0.95m;
+            decimal percentage = 0.00M;
 
             if (rank == Rank.Class)
             {
-                discount = 0.90m;
+               var  globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId);
+               if(globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);                    
+                }
+            }
+            else
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId);
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
             }
 
+            decimal discount = ((100M - percentage) / 100M);
             return discount;
         }
 
