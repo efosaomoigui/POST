@@ -226,51 +226,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //Send Email to Sender when Payment for International Shipment has being made
             if(invoiceEntity.IsInternational == true && paymentTransaction.PaymentType == PaymentType.Wallet)
             {
-                var shipmentDTO = new ShipmentDTO
-                {
-                    CustomerType = shipment.CustomerType,
-                    CustomerId = shipment.CustomerId,
-                    ReceiverName = shipment.ReceiverName,
-                    Waybill = shipment.Waybill,
-                    PickupOptions = shipment.PickupOptions,
-                    ReceiverEmail = shipment.ReceiverEmail,
-                    GrandTotal = shipment.GrandTotal,
-                    DepartureCountryId = shipment.DepartureCountryId,
-                    DestinationCountryId = shipment.DestinationCountryId,
-                    DestinationServiceCentreId = shipment.DestinationServiceCentreId,
-                    DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                    CustomerDetails = new CustomerDTO { },
-                    DepartureServiceCentre = new ServiceCentreDTO { },
-                    DestinationServiceCentre = new ServiceCentreDTO { }
-                };
-
-                if (shipmentDTO.CustomerType.Contains("Individual"))
-                {
-                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
-                }
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
-
-                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
-                shipmentDTO.CustomerDetails.Email = customerObj.Email;
-                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
-
-                await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
-
-                //Send email to Chinalu and Peter
-                var mails = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.IntlShipmentPaymentMonitoringEmails.ToString() && s.CountryId == 1);
-
-                if (mails != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] paymentEmails = mails.Value.Split(',').ToArray();
-
-                    foreach (string email in paymentEmails)
-                    {
-                        // send email message for payment notification
-                        shipmentDTO.CustomerDetails.Email = email;
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
-                    }
-                }
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
             }
 
             result = true;

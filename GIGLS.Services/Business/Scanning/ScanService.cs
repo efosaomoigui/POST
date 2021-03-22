@@ -1,21 +1,21 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.Business;
-using System;
-using System.Threading.Tasks;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Core.IServices.Fleets;
-using System.Collections.Generic;
-using GIGL.GIGLS.Core.Domain;
+﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
-using System.Linq;
-using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.User;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -147,7 +147,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
-                        if(shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
                         {
                             trackingType = TrackingType.OutBound;
                         }
@@ -171,53 +171,37 @@ namespace GIGLS.Services.Business.Scanning
                         if (shipment.IsInternational == true)
                         {
                             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
-                            var messageDTO = new ShipmentDTO
+
+                            //Mails to Receiver
+                            var messageDTO = new MessageDTO()
                             {
-                                CustomerType = shipment.CustomerType,
-                                CustomerId = shipment.CustomerId,
-                                ReceiverName = shipment.ReceiverName,
+                                CustomerName = shipment.ReceiverName,
                                 Waybill = shipment.Waybill,
-                                PickupOptions = shipment.PickupOptions,
-                                ReceiverEmail = shipment.ReceiverEmail,
-                                GrandTotal = shipment.GrandTotal,
-                                DepartureCountryId = shipment.DepartureCountryId,
-                                DestinationCountryId = shipment.DestinationCountryId,
-                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
-                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                                ReceiverAddress = shipment.ReceiverAddress,
-                                CustomerDetails = new CustomerDTO
+                                IntlMessage = new IntlMessageDTO()
                                 {
-                                    PhoneNumber = shipment.ReceiverPhoneNumber,
-                                    Email = shipment.ReceiverEmail
+                                    DeliveryAddressOrCenterName = shipment.ReceiverAddress,
                                 },
-                                DepartureServiceCentre = new ServiceCentreDTO
-                                {
-
-                                },
-                                DestinationServiceCentre = new ServiceCentreDTO
-                                {
-
-                                }
+                                To = shipment.ReceiverEmail,
+                                ToEmail = shipment.ReceiverEmail,
+                                Subject = "International Shipments Arrive Final Destination",
                             };
-
-                            //Send Email When Intl Shipment arrives Nigeria
-                            if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && invoice.PaymentStatus != PaymentStatus.Paid)
-                            {
-                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISNU);
-
-                            }
-                            else if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
+                         
+                            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
                             {
                                 var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == scan.WaybillNumber);
-                                messageDTO.SenderCode = deliveryCode.SenderCode;
+                                messageDTO.IntlMessage.DeliveryCode = deliveryCode.SenderCode;
 
                                 if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
                                 {
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDHD);
+                                    messageDTO.MessageTemplate = "OverseasHomeDelivery";
+                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO);
                                 }
                                 else
                                 {
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDSC);
+                                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
+                                    messageDTO.IntlMessage.DeliveryAddressOrCenterName = destination.FormattedServiceCentreName;
+                                    messageDTO.MessageTemplate = "OverseasPickup";
+                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO,;
                                 }
                             }
                         }
@@ -356,7 +340,7 @@ namespace GIGLS.Services.Business.Scanning
                                         {
                                             var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
 
-                                            if(shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
+                                            if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
                                             {
                                                 internationalShipmentList.Add(shipmentItem.Waybill);
                                             }

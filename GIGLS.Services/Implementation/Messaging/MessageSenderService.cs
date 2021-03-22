@@ -1499,7 +1499,7 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
-        //Handle Received Items Mail for Overseas Shipment
+        //Handle Request Items Mail for Overseas Shipment
         public async Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName)
         {
             string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
@@ -1616,6 +1616,52 @@ namespace GIGLS.Services.Implementation.Messaging
                 Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
                 MessageTemplate = "OverseasReceivedItems"
+            };
+
+            await SendOverseasMails(messageDTO);
+
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    await SendOverseasMails(messageDTO);
+                }
+            }
+
+        }
+
+        //Handle Payment Confirmation Mail for Overseas Shipment
+        public async Task SendOverseasPaymentConfirmationMails(ShipmentDTO shipmentDto)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDto.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = shipmentDto.GrandTotal.ToString()
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Payment Confirmation",
+                MessageTemplate = "OverseasPaymentConfirmation"
             };
 
             await SendOverseasMails(messageDTO);

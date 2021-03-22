@@ -14,6 +14,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.User;
 using AutoMapper;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -579,27 +580,10 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Send email to sender when international shipment has arrived Nigeria
-        public async Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType)
+        public async Task<bool> SendEmailToCustomerForIntlShipment(MessageDTO messageDTO)
         {
-            if(messageType == MessageType.AISNU)
-            {
-                if (shipmentDTO.CustomerType.Contains("Individual"))
-                {
-                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
-                }
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
-
-                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
-                shipmentDTO.CustomerDetails.Email = customerObj.Email;
-                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
-
-                //SEND SMS
-                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, shipmentDTO);
-            }
-
-            //send message
-            await _messageSenderService.SendGenericEmailMessage(messageType, shipmentDTO);
-
+            //SEND SMS
+            await _messageSenderService.SendOverseasMails(messageDTO);
             return true;
         }
     }
