@@ -5034,22 +5034,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ShipmentScanStatus = ShipmentScanStatus.ARO
                                     });
 
-                                    //For Corporate Customers, Pay for their shipments through wallet immediately
-                                    if (CompanyType.Corporate.ToString() == preshipmentmobile.CompanyType || CompanyType.Ecommerce.ToString() == preshipmentmobile.CompanyType)
-                                    {
-                                        var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(preshipmentmobile.CustomerCode));
-                                        var wallet = walletEnumeration.FirstOrDefault();
-
-                                        if (wallet != null)
-                                        {
-                                            await _paymentService.ProcessPayment(new PaymentTransactionDTO()
-                                            {
-                                                PaymentType = PaymentType.Wallet,
-                                                TransactionCode = wallet.WalletNumber,
-                                                Waybill = detail.WaybillNumber
-                                            });
-                                        }
-                                    }
                                     await _uow.CompleteAsync();
                                 }
                                 else

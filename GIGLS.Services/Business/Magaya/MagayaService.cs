@@ -1101,40 +1101,22 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
                 castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
 
-                //var messageDTO = new MessageDTO()
-                //{
-                //    CustomerName = shipmentDTO.CustomerFirstName,
-                //    IntlMessage = new IntlMessageDTO()
-                //    {
-                //        Description = shipmentDTO.ItemDetails,
-                //        DepartureCenter =  _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
-                //        DestinationCenter = destinationServiceCenter.Name,
-                //        DeliveryOption = shipmentDTO.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
-                //        RequestCode = shipmentDTO.RequestNumber,
-                //        //StoreOfPurchase = shipmentDTO.ShipmentRequestItems.
-                //    }, 
-                //    Subject = "Oversea Shipment Request Acknowledgement"
-
-
-                //};
-
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
 
-                //Send an email to Chairman
-                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                ////Send an email to Chairman
+                //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                //if (chairmanEmail != null)
+                //{
+                //    //seperate email by comma and send message to those email
+                //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                if (chairmanEmail != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-
-                    foreach (string email in chairmanEmails)
-                    {
-                        castObj.CustomerEmail = email;
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
-                    }
-                }
+                //    foreach (string email in chairmanEmails)
+                //    {
+                //        castObj.CustomerEmail = email;
+                //        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+                //    }
+                //}
 
                 //Send an email with details of request to International team
                 await SendMessageToIntlTeam(shipmentDTO.RequestProcessingCountryId, castObj);
