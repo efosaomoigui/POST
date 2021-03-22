@@ -1257,7 +1257,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             // filter by cancelled shipments
             var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
-            shipments = shipments.Where(X => X.DestinationServiceCentreId == serviceCentreId);
+            shipments = shipments.Where(X => X.DepartureServiceCentreId == serviceCentreId);
             List<InvoiceViewDTO> result = (from s in shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
@@ -1276,7 +1276,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PaymentMethod = i.PaymentMethod,
                                                PaymentStatus = i.PaymentStatus,
                                                DateCreated = i.DateCreated,
-                                              // UserName = u.FirstName + " " + u.LastName,
                                                CompanyType = s.CompanyType,
                                                PaymentTypeReference = i.PaymentTypeReference,
                                                ApproximateItemsWeight = s.ApproximateItemsWeight,
@@ -1285,7 +1284,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Transfer = i.Transfer,
                                                Pos = i.Pos  ,
                                            }).ToList();
-            var resultDto = result.OrderBy(x => x.SenderName).ThenByDescending(x => x.DateCreated).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).OrderBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
     }
