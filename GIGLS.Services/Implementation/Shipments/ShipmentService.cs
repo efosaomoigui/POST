@@ -4568,6 +4568,7 @@ namespace GIGLS.Services.Implementation.Shipments
            shipmentDTO.ShipmentCancel = null;
            shipmentDTO.ShipmentReroute = null;
             shipmentDTO.DeliveryOption = null;
+            shipmentDTO.IsInternational = true;
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {

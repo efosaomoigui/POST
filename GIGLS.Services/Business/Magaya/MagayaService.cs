@@ -1138,13 +1138,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Send an email with details of request to International team
                 await SendMessageToIntlTeam(shipmentDTO.RequestProcessingCountryId, castObj);
-                //if (shipmentDTO.RequestProcessingCountryId == 207)
-                //{
-                //    string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                //    castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
-                //    await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj); 
-                //}
-
                 return shipmentDTO;
             }
             catch (Exception ex)
