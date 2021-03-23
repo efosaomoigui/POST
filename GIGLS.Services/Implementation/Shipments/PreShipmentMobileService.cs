@@ -443,6 +443,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Items cannot be empty");
                 }
 
+                if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+                {
+                    preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+                {
+                    preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
+                }
+
                 var PreshipmentPriceDTO = new MobilePriceDTO();
 
                 // get the current user info
