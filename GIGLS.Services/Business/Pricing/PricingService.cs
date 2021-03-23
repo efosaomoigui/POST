@@ -1507,17 +1507,21 @@ namespace GIGLS.Services.Business.Pricing
                 }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
+            if (pricingDto.DestinationServiceCentreId <= 0)
+            {
+                throw new GenericException("Please select destination ", $"{(int)HttpStatusCode.BadRequest}");
+            }
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
             var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
 
             //get price categories for this country
-            var priceCategories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.CountryId == departureCountry.CountryId && x.IsActive == true).ToList();
+            var priceCategories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.CountryId == destinationCountry.CountryId && x.IsActive == true).ToList();
 
             //get item category
             var itemCategory = priceCategories.Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
             if (itemCategory == null)
             {
-                throw new GenericException($"No price definition for this category in {departureCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
+                throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
             }
             if (itemCategory.CategoryMinimumWeight == 0)
             {
