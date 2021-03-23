@@ -1256,7 +1256,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
          public Task<List<InvoiceViewDTO>> GetUnPaidWaybillForServiceCentre(int serviceCentreId)
         {
             // filter by cancelled shipments
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
             shipments = shipments.Where(X => X.DepartureServiceCentreId == serviceCentreId);
             List<InvoiceViewDTO> result = (from s in shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -1284,7 +1284,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Transfer = i.Transfer,
                                                Pos = i.Pos  ,
                                            }).ToList();
-            var resultDto = result.OrderByDescending(x => x.DateCreated).OrderBy(x => x.SenderName).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
     }
