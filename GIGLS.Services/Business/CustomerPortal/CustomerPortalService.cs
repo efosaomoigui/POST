@@ -2317,6 +2317,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("NULL INPUT");
             }
 
+            if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+            {
+                preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+            {
+                preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
+            }
+
             if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
             {
                 tempCode = await CreateTemporaryShipment(preShipmentDTO);

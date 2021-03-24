@@ -126,7 +126,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
             var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
-            deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+           // deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
             return deliveryOption;
         }
 

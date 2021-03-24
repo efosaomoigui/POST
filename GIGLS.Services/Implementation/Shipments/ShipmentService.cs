@@ -897,6 +897,16 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (!String.IsNullOrEmpty(shipmentDTO.ReceiverPhoneNumber))
+                {
+                    shipmentDTO.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(shipmentDTO.Customer[0].PhoneNumber))
+                {
+                    shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
+                }
+
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))
                 {
                     //check if it has been processed 
@@ -4532,6 +4542,17 @@ namespace GIGLS.Services.Implementation.Shipments
             if (centre.Any())
             {
                 shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
+            }
+
+            //filter phone number issue
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverPhoneNumber))
+            {
+                shipmentDTO.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(shipmentDTO.Customer[0].PhoneNumber))
+            {
+                shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
             }
 
             //set some data to null
