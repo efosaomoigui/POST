@@ -22,5 +22,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus, MessageType messageType);
         Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId);
         Task<bool> SendEmailToCustomerForIntlShipment(MessageDTO messageDTO);
+        Task<bool> SendEmailToCustomerWhenIntlShipmentIsCargoed(ShipmentDTO shipmentDTO);
     }
 }

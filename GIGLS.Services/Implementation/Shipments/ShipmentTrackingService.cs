@@ -582,7 +582,43 @@ namespace GIGLS.Services.Implementation.Shipments
         //Send email to sender when international shipment has arrived Nigeria
         public async Task<bool> SendEmailToCustomerForIntlShipment(MessageDTO messageDTO)
         {
-            //SEND SMS
+            //SEND EMAIL
+            await _messageSenderService.SendOverseasMails(messageDTO);
+            return true;
+        }
+
+        //Send email to sender when international shipment is cargoed,(both US and UK)
+        public async Task<bool> SendEmailToCustomerWhenIntlShipmentIsCargoed(ShipmentDTO  shipmentDTO)
+        {
+            //SEND Email
+
+            if (shipmentDTO.CustomerType.Contains("Individual"))
+            {
+                shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDTO.DepartureCountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDTO.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = shipmentDTO.GrandTotal.ToString(),
+                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Body = shipmentDTO.DepartureCountryId == 207 ? DateTime.Now.AddDays(14).ToString("dd/MM/yyyy") : DateTime.Now.AddDays(5).ToString("dd/MM/yyyy"),
+                Subject = $"International Shipment Cargoed ({country.CountryName})",
+                MessageTemplate = "OverseasDepartsHub"
+            };
+
             await _messageSenderService.SendOverseasMails(messageDTO);
             return true;
         }

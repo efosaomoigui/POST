@@ -4158,34 +4158,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
 
-                        if (shipmentItem.CustomerType.Contains("Individual"))
-                        {
-                            shipmentItem.CustomerType = CustomerType.IndividualCustomer.ToString();
-                        }
-                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentItem.CustomerType);
+                        var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
 
-                        var customerObj = await _messageSenderService.GetCustomer(shipmentItem.CustomerId, customerType);
-
-                        var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentItem.DepartureCountryId);
-
-                        var messageDTO = new MessageDTO()
-                        {
-                            CustomerName = customerObj.FirstName,
-                            Waybill = shipmentItem.Waybill,
-                            Currency = country.CurrencySymbol,
-                            IntlMessage = new IntlMessageDTO()
-                            {
-                                ShippingCost = shipmentItem.GrandTotal.ToString(),
-                                DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentItem.DepartureServiceCentreId).Name,
-                            },
-                            To = customerObj.Email,
-                            ToEmail = customerObj.Email,
-                            Body = shipmentItem.DepartureCountryId == 207 ? DateTime.Now.AddDays(14).ToString("dd/MM/yyyy") : DateTime.Now.AddDays(5).ToString("dd/MM/yyyy"),
-                            Subject = $"International Shipment Cargoed ({country.CountryName})",
-                            MessageTemplate = "OverseasDepartsHub"
-                        };
-
-                        await _messageSenderService.SendOverseasMails(messageDTO);
+                        await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(shipmentDTO);
                     }
                     _uow.Complete();
                 }

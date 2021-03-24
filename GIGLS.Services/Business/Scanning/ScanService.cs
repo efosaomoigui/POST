@@ -1,4 +1,5 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
@@ -55,6 +56,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
             _uow = uow;
+            MapperConfig.Initialize();
         }
 
         public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
@@ -1309,6 +1311,11 @@ namespace GIGLS.Services.Business.Scanning
                                     ServiceCentreId = serviceCenter.ServiceCentreId
                                 };
                                 shipmentTracking.Add(newTracking);
+
+                                var waybillInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                                var waybillDTO = Mapper.Map<ShipmentDTO>(waybillInfo);
+
+                                await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(waybillDTO);
                             }
 
                         }
