@@ -213,6 +213,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 await _financialReportService.AddReport(financialReport);
             }
 
+            //Send Email to Sender when Payment for International Shipment has being made
+            if (invoiceEntity.IsInternational == true)
+            {
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
+                return true;
+            }
+
             if (shipment.DepartureServiceCentreId == 309)
             {
                 await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
@@ -223,13 +231,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
 
-            //Send Email to Sender when Payment for International Shipment has being made
-            if(invoiceEntity.IsInternational == true && paymentTransaction.PaymentType == PaymentType.Wallet)
-            {
-                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
-                await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
-            }
-
+           
             result = true;
             return result;
         }
