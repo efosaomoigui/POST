@@ -201,7 +201,7 @@ namespace GIGLS.Services.Business.Scanning
                                     var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
                                     messageDTO.IntlMessage.DeliveryAddressOrCenterName = destination.FormattedServiceCentreName;
                                     messageDTO.MessageTemplate = "OverseasPickup";
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO,;
+                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO);
                                 }
                             }
                         }
