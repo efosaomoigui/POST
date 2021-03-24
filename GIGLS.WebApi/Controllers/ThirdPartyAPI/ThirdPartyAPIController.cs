@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ThirdPartyAPI;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -286,6 +287,10 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to get the active home delivery locations  
+        /// </summary>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("activehomedeliverylocations")]
@@ -301,6 +306,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to get the details about a shipment 
+        /// </summary>
+        /// <param name="waybillNumber"></param>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("preshipmentmobile/{waybillNumber}")]
@@ -311,6 +321,68 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 var result = await _thirdPartyAPIService.GetPreShipmentMobileByWaybill(waybillNumber);
 
                 return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get the lists of manifests belonging to a service center 
+        /// </summary>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("manifests")]
+        public async Task<IServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetManifestsInServiceCenter(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get the lists of group waybills and waybills assigned to a manifest 
+        /// </summary>
+        /// <param name="manifestCode"></param>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifests/{manifestCode}")]
+        public async Task<IServiceResponse<List<GroupWaybillAndWaybillDTO>>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetGroupWaybillDataInManifest(manifestCode);
+
+                return new ServiceResponse<List<GroupWaybillAndWaybillDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to give "Shipped from the UK" Scan to all the waybills in a manifests
+        /// </summary>
+        /// <param name="manifestCode"></param>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("scan/{manifestCode}")]
+        public async Task<IServiceResponse<bool>> ScanShipment(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.ItemShippedFromUKScan(manifestCode);
+
+                return new ServiceResponse<bool>
                 {
                     Object = result
                 };

@@ -30,5 +30,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationid);
         Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
         Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode);
+        Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifest);
     }
 }

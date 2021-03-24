@@ -1261,5 +1261,63 @@ namespace GIGLS.Services.Business.Scanning
 
             await _uow.CompleteAsync();
         }
+
+        public async Task ItemShippedFromUKScan(string manifestCode)
+        {
+            var shipmentTracking = new List<ShipmentTracking>();
+
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+            if (manifest == null)
+            {
+                throw new GenericException($"No Manifest exists for this code: {manifest}");
+            }
+
+            var currentUser = await _userService.GetCurrentUserId();
+            var userServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            //default sc
+            if (userServiceCenters.Length <= 0)
+            {
+                userServiceCenters = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                userServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
+            }
+            var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCenters[0]);
+
+           
+            var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
+
+            if (groupWaybillInManifestList.Any())
+            {
+                foreach (var groupShipment in groupWaybillInManifestList)
+                {
+                    if (groupShipment.WaybillNumbers.Any())
+                    {
+                        foreach (var waybill in groupShipment.WaybillNumbers)
+                        {
+                            //Should i also add other validation for scan status like ARF?
+                            var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, ShipmentScanStatus.ISFUK.ToString());
+                            if (!checkTrack)
+                            {
+                                var newTracking = new ShipmentTracking()
+                                {
+                                    DateTime = DateTime.Now,
+                                    Status = ShipmentScanStatus.ISFUK.ToString(),
+                                    Waybill = waybill,
+                                    UserId = currentUser,
+                                    Location = serviceCenter.Name,
+                                    ServiceCentreId = serviceCenter.ServiceCentreId
+                                };
+                                shipmentTracking.Add(newTracking);
+                            }
+
+                        }
+                    }
+                }
+                manifest.CargoStatus = CargoStatus.Cargoed;
+                _uow.ShipmentTracking.AddRange(shipmentTracking);
+                await _uow.CompleteAsync();
+            }
+        }
     }
 }
