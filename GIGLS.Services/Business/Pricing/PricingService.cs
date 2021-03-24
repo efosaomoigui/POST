@@ -1514,11 +1514,8 @@ namespace GIGLS.Services.Business.Pricing
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
             var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
 
-            //get price categories for this country
-            var priceCategories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.CountryId == destinationCountry.CountryId && x.IsActive == true).ToList();
-
             //get item category
-            var itemCategory = priceCategories.Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
+            var itemCategory = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
             if (itemCategory == null)
             {
                 throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
