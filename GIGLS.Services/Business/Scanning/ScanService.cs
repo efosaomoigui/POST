@@ -168,46 +168,6 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             await UpdateShipmentPackageForServiceCenter(shipment);
                         }
-
-                        //Intl Shipments Emails 
-                        if (shipment.IsInternational == true)
-                        {
-                            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
-
-                            //Mails to Receiver
-                            var messageDTO = new MessageDTO()
-                            {
-                                CustomerName = shipment.ReceiverName,
-                                Waybill = shipment.Waybill,
-                                IntlMessage = new IntlMessageDTO()
-                                {
-                                    DeliveryAddressOrCenterName = shipment.ReceiverAddress,
-                                },
-                                To = shipment.ReceiverEmail,
-                                ToEmail = shipment.ReceiverEmail,
-                                Subject = "International Shipments Arrive Final Destination",
-                            };
-                         
-                            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
-                            {
-                                var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == scan.WaybillNumber);
-                                messageDTO.IntlMessage.DeliveryCode = deliveryCode.SenderCode;
-
-                                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
-                                {
-                                    messageDTO.MessageTemplate = "OverseasHomeDelivery";
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO);
-                                }
-                                else
-                                {
-                                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
-                                    messageDTO.IntlMessage.DeliveryAddressOrCenterName = destination.FormattedServiceCentreName;
-                                    messageDTO.MessageTemplate = "OverseasPickup";
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO);
-                                }
-                            }
-                        }
-
                         return true;
                     }
                     else

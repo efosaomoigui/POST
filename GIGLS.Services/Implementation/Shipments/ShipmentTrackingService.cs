@@ -107,6 +107,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     Id = newShipmentTracking.ShipmentTrackingId;
 
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == tracking.Waybill);
+
                     //send sms and email
                     if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
                     {
@@ -115,6 +117,10 @@ namespace GIGLS.Services.Implementation.Shipments
                             if (tracking.isInternalShipment)
                             {
                                 await SendEmailToStoreKeeper(tracking, scanStatus);
+                            }
+                            else if (scanStatus.Equals(ShipmentScanStatus.ARF) && shipment.IsInternational == true)
+                            {
+                                await SendEmailToCustomerForIntlShipment(shipment);
                             }
                             else
                             {
@@ -580,10 +586,43 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Send email to sender when international shipment has arrived Nigeria
-        public async Task<bool> SendEmailToCustomerForIntlShipment(MessageDTO messageDTO)
+        public async Task<bool> SendEmailToCustomerForIntlShipment(Shipment shipment)
         {
             //SEND EMAIL
-            await _messageSenderService.SendOverseasMails(messageDTO);
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
+
+            //Mails to Receiver
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = shipment.ReceiverName,
+                Waybill = shipment.Waybill,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    DeliveryAddressOrCenterName = shipment.ReceiverAddress,
+                },
+                To = shipment.ReceiverEmail,
+                ToEmail = shipment.ReceiverEmail,
+                Subject = "International Shipments Arrive Final Destination",
+            };
+
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
+                messageDTO.IntlMessage.DeliveryCode = deliveryCode.SenderCode;
+
+                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    messageDTO.MessageTemplate = "OverseasHomeDelivery";
+                    await _messageSenderService.SendOverseasMails(messageDTO);
+                }
+                else
+                {
+                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
+                    messageDTO.IntlMessage.DeliveryAddressOrCenterName = destination.FormattedServiceCentreName;
+                    messageDTO.MessageTemplate = "OverseasPickup";
+                    await _messageSenderService.SendOverseasMails(messageDTO);
+                }
+            }
             return true;
         }
 
