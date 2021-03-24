@@ -35,6 +35,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             PricePerWeight = s.PricePerWeight,
                                             PriceCategoryId = s.PriceCategoryId,
                                             CountryId = s.CountryId,
+                                            IsActive = s.IsActive,
                                             CategoryMinimumWeight = s.CategoryMinimumWeight,
                                             CountryName = _context.Country.Where(x => x.CountryId == countryId).FirstOrDefault().CountryName
                                 };
@@ -62,6 +63,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             PriceCategoryId = s.PriceCategoryId,
                                             CountryId = s.CountryId,
                                             CategoryMinimumWeight = s.CategoryMinimumWeight,
+                                            IsActive = s.IsActive,
                                             CountryName = _context.Country.Where(x => x.CountryId == s.CountryId).FirstOrDefault().CountryName
                                         };
                 return Task.FromResult(PriceCategorysDTO.FirstOrDefault());
@@ -89,6 +91,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                     PriceCategoryId = s.PriceCategoryId,
                                     CategoryMinimumWeight = s.CategoryMinimumWeight,
                                     CountryName = c.CountryName,
+                                    IsActive = s.IsActive,
                                     CountryId = c.CountryId,
                                 };
                 return Task.FromResult(categoriesDTO.OrderBy(x => x.PriceCategoryName).ToList());
