@@ -1288,6 +1288,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
+    }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
     {
