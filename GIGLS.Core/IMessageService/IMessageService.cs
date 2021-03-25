@@ -15,5 +15,6 @@ namespace GIGLS.Core.IMessageService
         Task SendPaymentNotificationAsync(MessageDTO messageDTO);
         Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
+        Task SendCustomerRegistrationMails(MessageDTO messageDTO);
     }
 }

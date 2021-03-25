@@ -126,7 +126,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
             var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
-            deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+           // deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
             return deliveryOption;
         }
 
@@ -153,9 +153,47 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetPrice(pricingDto);
         }
 
-        public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //{
+        //    var dropOffPrice = await _portalService.GetPriceForDropOff(preshipmentMobile);
+        //    //apply dropoff price
+        //    var countryId = await _userService.GetUserActiveCountryId();
+        //    var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+        //    if (discount != null)
+        //    {
+        //        var discountValue = Convert.ToDecimal(discount.Value);
+        //        decimal discountResult = (discountValue / 100M);
+        //        dropOffPrice.Discount = dropOffPrice.GrandTotal * discountResult;
+        //        dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.Discount;                  
+        //    }
+        //    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+        //    dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
+        //    return dropOffPrice;
+        //}
+
+        public async Task<NewPricingDTO> GetPriceForDropOff(NewShipmentDTO newShipmentDTO)
         {
-            return await _portalService.GetPriceForDropOff(preshipmentMobile);
+            var dropOffPrice = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
+            var countryId = await _userService.GetUserActiveCountryId();
+            var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+            if (discount != null)
+            {
+                var discountValue = Convert.ToDecimal(discount.Value);
+                decimal discountResult = (discountValue / 100M);
+                dropOffPrice.DiscountedValue = dropOffPrice.GrandTotal * discountResult;
+                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.DiscountedValue;
+            }
+            decimal factor = 0;
+            if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, 0));
+            }
+            else
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, -2));
+            }
+            dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal * factor) / factor;
+            return dropOffPrice;
         }
 
         public async Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)
@@ -197,7 +235,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (shipment.GrandTotal > 0)
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                decimal factor = 0;
+                if (shipment.CompanyType == CompanyType.Corporate.ToString() || shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, 0));
+                }
+                else
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, -2));
+                }
                 shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
                 shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
                 shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
@@ -206,8 +252,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
-                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
-
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor; 
+                
                 foreach (var item in shipment.ShipmentItems)
                 {
                     item.Price = Math.Round(item.Price * factor) / factor;

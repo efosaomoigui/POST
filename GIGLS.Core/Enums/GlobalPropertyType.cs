@@ -87,6 +87,9 @@
         UsedGadgetsLessThan6Kg,
         Perfumes,
         PerfumesLessThan6Kg,
+        InternationalRankClassDiscount,
+        InternationalBasicClassDiscount
+        PerfumesLessThan6Kg,
         OthersMinUK
     }
 }

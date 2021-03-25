@@ -1463,6 +1463,23 @@ namespace GIGLS.Services.Implementation.Messaging
             return Mapper.Map<MessageDTO>(message);
         }
 
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        public async Task SendCustomerRegistrationMails(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendCustomerRegistrationMails(messageDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{

@@ -1245,7 +1245,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             ////SEND EMAIL TO NEW SIGNEE
             var companyMessagingDTO = new CompanyMessagingDTO();
-            companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+           // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            companyMessagingDTO.Name = user.FirstName;
             companyMessagingDTO.Email = user.Email;
             companyMessagingDTO.PhoneNumber = user.PhoneNumber;
             companyMessagingDTO.Rank = Rank.Basic;
@@ -2316,6 +2317,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("NULL INPUT");
             }
 
+            if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+            {
+                preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+            {
+                preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
+            }
+
             if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
             {
                 tempCode = await CreateTemporaryShipment(preShipmentDTO);
@@ -3074,6 +3085,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
         {
             var result = new ResponseDTO();
+            string message = "User detail already exist";
 
             if (userDetail == null)
             {
@@ -3081,13 +3093,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result.Message = $"Invalid payload";
                 return result;
             }
+
             if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
                 var company = await _uow.Company.GetAsync(x => x.Name.ToLower() == userDetail.BusinessName.ToLower());
                 if (company != null)
                 {
                     result.Exist = true;
-                    result.Message = "User detail already exist";
+                    result.Message = message;
                     result.Succeeded = false;
                     return result;
                 }
@@ -3097,7 +3110,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (user != null)
                 {
                     result.Exist = true;
-                    result.Message = "User detail already exist";
+                    result.Message = message;
                     result.Succeeded = false;
                     return result;
                 }
@@ -3107,10 +3120,21 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var user = await _uow.User.GetUserByEmail(userDetail.Email);
                 if (user != null)
                 {
-                    result.Exist = true;
-                    result.Message = "User detail already exist";
-                    result.Succeeded = false;
-                    return result;
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer && user.IsRegisteredFromMobile == true)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
+
+                    if (user.UserChannelType != UserChannelType.IndividualCustomer)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
                 }
             }
 
@@ -3119,10 +3143,21 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
                 if (user != null)
                 {
-                    result.Exist = true;
-                    result.Message = "User detail already exist";
-                    result.Succeeded = false;
-                    return result;
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer && user.IsRegisteredFromMobile == true)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
+
+                    if (user.UserChannelType != UserChannelType.IndividualCustomer)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
                 }
             }
 
