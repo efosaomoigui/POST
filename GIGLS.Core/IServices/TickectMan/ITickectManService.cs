@@ -37,7 +37,8 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
         Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria);
-        Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        //Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        Task<NewPricingDTO> GetPriceForDropOff(NewShipmentDTO newShipmentDTO);
         Task<ServiceCentreDTO> GetServiceCentreById(int centreid);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<int[]> GetPriviledgeServiceCenters(string userId);

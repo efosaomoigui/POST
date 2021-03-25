@@ -41,6 +41,17 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        public async Task<string> SendCustomerRegistrationMails(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigCustomerRegistrationMessage(message);
+            }
+            return result;
+        }
+
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
@@ -189,6 +200,43 @@ namespace GIGLS.Messaging.MessageService
                 { "TPL_Amount", message.Amount },
                 { "TPL_Currency", message.Currency },
                 { "TPL_Balance", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        private async Task<string> ConfigCustomerRegistrationMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Subject", message.Subject },
+                { "TPL_CustomerName", message.CustomerName },
+               // { "TPL_CustomerCode", message.CustomerCode },
+                { "TPL_CustomerEmail", message.To },
+                //{ "TPL_Password", message.Body }
             });
 
             var response = await client.SendEmailAsync(myMessage);

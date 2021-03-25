@@ -72,6 +72,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IFinancialReportService _financialReportService;
         private readonly INodeService _nodeService;
+        private readonly IPaymentService _paymentService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -80,7 +81,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
-            INodeService nodeService)
+            INodeService nodeService, IPaymentService paymentService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -105,6 +106,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _groupWaybillNumberService = groupWaybillNumberService;
             _financialReportService = financialReportService;
             _nodeService = nodeService;
+            _paymentService = paymentService;
             MapperConfig.Initialize();
         }
 
@@ -439,6 +441,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!preShipmentDTO.PreShipmentItems.Any())
                 {
                     throw new GenericException("Shipment Items cannot be empty");
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+                {
+                    preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+                {
+                    preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
                 }
 
                 var PreshipmentPriceDTO = new MobilePriceDTO();
@@ -5031,6 +5043,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         WaybillNumber = detail.WaybillNumber,
                                         ShipmentScanStatus = ShipmentScanStatus.ARO
                                     });
+
                                     await _uow.CompleteAsync();
                                 }
                                 else

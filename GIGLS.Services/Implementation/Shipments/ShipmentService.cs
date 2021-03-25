@@ -899,6 +899,16 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (!String.IsNullOrEmpty(shipmentDTO.ReceiverPhoneNumber))
+                {
+                    shipmentDTO.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(shipmentDTO.Customer[0].PhoneNumber))
+                {
+                    shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
+                }
+
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))
                 {
                     //check if it has been processed 
@@ -4561,6 +4571,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.DepartureServiceCentreId = centre.FirstOrDefault().ServiceCentreId;
             }
 
+            //filter phone number issue
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverPhoneNumber))
+            {
+                shipmentDTO.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(shipmentDTO.Customer[0].PhoneNumber))
+            {
+                shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
+            }
+
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
            shipmentDTO.Demurrage = null;
@@ -4568,6 +4589,7 @@ namespace GIGLS.Services.Implementation.Shipments
            shipmentDTO.ShipmentCancel = null;
            shipmentDTO.ShipmentReroute = null;
             shipmentDTO.DeliveryOption = null;
+            shipmentDTO.IsInternational = true;
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {
@@ -4581,11 +4603,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
               
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.INTPEUK, shipment);
+
+                    //also send sms to customer
+                    await _messageSenderService.SendMessage(MessageType.AISPNU, EmailSmsType.SMS, shipment);
 
                     //Send an email to Chairman
                     var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-
                     if (chairmanEmail != null)
                     {
                         //seperate email by comma and send message to those email
@@ -4596,7 +4620,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             // send email message for payment notification
                             shipment.CustomerDetails.Email = email;
                             shipment.RequestNumber = shipmentDTO.RequestNumber;
-                            await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
+                            await _messageSenderService.SendGenericEmailMessage(MessageType.INTPEUK, shipment);
                         }
                     }
                 }

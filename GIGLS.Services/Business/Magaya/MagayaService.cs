@@ -1101,30 +1101,25 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 castObj.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
                 castObj.CustomerEmail = shipmentDTO.ReceiverEmail;
 
-
                 //Send an email with details of request to customer
                 await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
 
-                //Send an email to Chairman
-                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                ////Send an email to Chairman
+                //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                //if (chairmanEmail != null)
+                //{
+                //    //seperate email by comma and send message to those email
+                //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                if (chairmanEmail != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                //    foreach (string email in chairmanEmails)
+                //    {
+                //        castObj.CustomerEmail = email;
+                //        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
+                //    }
+                //}
 
-                    foreach (string email in chairmanEmails)
-                    {
-                        castObj.CustomerEmail = email;
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.REQMAIL, castObj);
-                    }
-                }
-
-                //Send an email with details of request to Houston team
-                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
-                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj);
-
+                //Send an email with details of request to International team
+                await SendMessageToIntlTeam(shipmentDTO.RequestProcessingCountryId, castObj);
                 return shipmentDTO;
             }
             catch (Exception ex)
@@ -2316,6 +2311,24 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 throw;
             }
+        }
+
+
+        public  async Task<bool> SendMessageToIntlTeam(int countryId, IntlShipmentRequestDTO castObj)
+        {
+            if (countryId == 207)
+            {
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCA, castObj); 
+            }
+            else if (countryId == 62)
+            {
+                string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                castObj.CustomerEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                await _messageSenderService.SendGenericEmailMessage(MessageType.REQSCAUK, castObj);
+            }
+            return true;
         }
 
 
