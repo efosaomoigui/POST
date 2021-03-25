@@ -22,9 +22,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
     public class ShipmentRepository : Repository<Shipment, GIGLSContext>, IShipmentRepository
     {
         private GIGLSContext _context;
-        public ShipmentRepository(GIGLSContext context) : base(context)
+        private GIGLSContextForView _viewcontext;
+        public ShipmentRepository(GIGLSContext context, GIGLSContextForView viewcontext) : base(context)
         {
             _context = context;
+            _viewcontext = viewcontext;
         }
 
         public Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds)
@@ -1262,8 +1264,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
-                                          // join u in Context.Users on s.UserId equals u.Id
-                                          join cust in Context.Users on s.CustomerCode equals cust.UserChannelCode
                                            where i.PaymentStatus == PaymentStatus.Pending
                                            select new InvoiceViewDTO
                                            {
@@ -1279,7 +1279,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                CompanyType = s.CompanyType,
                                                PaymentTypeReference = i.PaymentTypeReference,
                                                ApproximateItemsWeight = s.ApproximateItemsWeight,
-                                               SenderName = cust.FirstName + " " + cust.LastName,
+                                               SenderName = _viewcontext.CustomerView.Where(w => w.CustomerCode == s.CustomerCode).Select(x => x.FirstName).FirstOrDefault(),
                                                Cash = i.Cash,
                                                Transfer = i.Transfer,
                                                Pos = i.Pos  ,
