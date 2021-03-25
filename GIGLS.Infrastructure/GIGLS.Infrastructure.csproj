@@ -270,6 +270,7 @@
     <Compile Include="Persistence\Repositories\Zone\WeightLimitPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\WeightLimitRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\ZoneRepository.cs" />
+    <Compile Include="Persistence\Repositories\PriceCategoryRepository.cs" />
     <Compile Include="Persistence\UnitOfWork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoftDeleteHandler\EntityFrameworkConfiguration.cs" />
