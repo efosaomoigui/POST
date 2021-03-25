@@ -311,6 +311,7 @@
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\SalesByServiceCentersDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
+    <Compile Include="DTO\Account\BulkWaybillPaymentDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
     <Compile Include="DTO\Admin\AdminReportDTO.cs" />
