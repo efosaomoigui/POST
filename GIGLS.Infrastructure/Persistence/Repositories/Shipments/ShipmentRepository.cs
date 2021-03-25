@@ -1255,7 +1255,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto);
         }
-         public Task<List<InvoiceViewDTO>> GetUnPaidWaybillForServiceCentre(int serviceCentreId)
+        public Task<List<InvoiceViewDTO>> GetUnPaidWaybillForServiceCentre(int serviceCentreId)
         {
             // filter by cancelled shipments
             var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
@@ -1277,17 +1277,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PaymentStatus = i.PaymentStatus,
                                                DateCreated = i.DateCreated,
                                                CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
                                                PaymentTypeReference = i.PaymentTypeReference,
                                                ApproximateItemsWeight = s.ApproximateItemsWeight,
-                                               SenderName = _viewcontext.CustomerView.Where(w => w.CustomerCode == s.CustomerCode).Select(x => x.FirstName).FirstOrDefault(),
                                                Cash = i.Cash,
+                                               CustomerType = s.CustomerType,
                                                Transfer = i.Transfer,
-                                               Pos = i.Pos  ,
+                                               Pos = i.Pos,
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
-    }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
     {
