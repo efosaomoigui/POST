@@ -193,9 +193,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             else
             {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
-
                 double amountToDebitDouble = (double)invoiceEntity.Amount * countryRateConversion.Rate;
-
                 var amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
 
                 //Add to Financial Reports
@@ -230,7 +228,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
-
            
             result = true;
             return result;

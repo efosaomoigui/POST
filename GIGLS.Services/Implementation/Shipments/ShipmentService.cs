@@ -2509,7 +2509,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var userActiveCountry = await _userService.GetUserActiveCountry();
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
-
             //set defaults
             if (accountFilterCriteria.StartDate == null)
             {
