@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain
 {
@@ -22,5 +23,6 @@ namespace GIGLS.Core.Domain
         public double Rate { get; set; }
 
         public bool Status { get; set; }
+        public CompanyMap CompanyMap { get; set; }
     }
 }

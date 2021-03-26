@@ -33,7 +33,8 @@ namespace GIGLS.Services.Implementation.Zone
 
             var routeZoneMap = Mapper.Map<CountryRouteZoneMap>(routeZoneMapDTO);
 
-            var mapExists = await _unitOfWork.CountryRouteZoneMap.ExistAsync(d => d.DepartureId == routeZoneMap.DepartureId && d.DestinationId == routeZoneMap.DestinationId);
+            var mapExists = await _unitOfWork.CountryRouteZoneMap.ExistAsync(d => d.DepartureId == routeZoneMap.DepartureId && d.DestinationId == routeZoneMap.DestinationId 
+            && d.CompanyMap == routeZoneMap.CompanyMap );
 
             if (mapExists == true)
                 throw new GenericException("The mapping of Route to Zone already exists");
@@ -44,13 +45,12 @@ namespace GIGLS.Services.Implementation.Zone
                 DestinationId = routeZoneMap.DestinationId,
                 ZoneId = routeZoneMap.ZoneId,
                 Status = true,
-                Rate = routeZoneMap.Rate
+                Rate = routeZoneMap.Rate,
+                CompanyMap = routeZoneMap.CompanyMap
             };
 
             _unitOfWork.CountryRouteZoneMap.Add(Mapping);
-
             await _unitOfWork.CompleteAsync();
-
             return new { Id = Mapping.CountryRouteZoneMapId };
         }
 
@@ -76,6 +76,7 @@ namespace GIGLS.Services.Implementation.Zone
             return Task.FromResult(Mapper.Map<IEnumerable<CountryRouteZoneMapDTO>>(_unitOfWork.CountryRouteZoneMap.GetAll("Zone,Departure,Destination")));
         }
 
+        //update later
         public async Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination)
         {
             // use country direct
@@ -110,7 +111,7 @@ namespace GIGLS.Services.Implementation.Zone
             zoneMap.ZoneId = routeZoneMap.ZoneId;
             zoneMap.Status = routeZoneMap.Status;
             zoneMap.Rate = routeZoneMap.Rate;
-
+            zoneMap.CompanyMap = routeZoneMap.CompanyMap;
             await _unitOfWork.CompleteAsync();
         }
 
