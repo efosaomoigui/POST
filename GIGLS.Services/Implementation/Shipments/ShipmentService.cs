@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
@@ -63,6 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGIGGoPricingService _gIGGoPricingService;
         private readonly INodeService _nodeService;
         private readonly IDHLService _DhlService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -72,7 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService)
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -92,6 +94,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _gIGGoPricingService = gIGGoPricingService;
             _nodeService = nodeService;
             _DhlService = dHLService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -4577,7 +4580,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
 
                     //await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
-                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment);
+
+                    //Get the three possible payment links for Waybill (Nigeria, Ghana and US)
+                    var waybillPayment = new WaybillPaymentLogDTO()
+                    {
+                        Waybill = shipment.Waybill,
+                        OnlinePaymentType = OnlinePaymentType.Paystack
+                    };
+
+                    int[] listOfCountryForPayment = { 1, 76, 207 };
+                    List<string> paymentLinks = new List<string>();
+                    foreach ( var country in listOfCountryForPayment)
+                    {
+                        waybillPayment.PaymentCountryId = country;
+                        waybillPayment.PaystackCountrySecret = country == 76 ? "PayStackSecretGhana" : "PayStackSecret";
+                        var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                        paymentLinks.Add(response.data.Authorization.AuthorizationCode);
+                    }
+                    
+                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
                 }
 
                 // get the current user info

@@ -57,5 +57,8 @@ namespace GIGLS.Core.DTO
         public string PaymentLink { get; set; }
         public string DeliveryAddressOrCenterName { get; set; }
         public string DeliveryCode { get; set; }
+        public string GeneralPaymentLinkI { get; set; }
+        public string GeneralPaymentLinkII { get; set; }
+        public string GeneralPaymentLinkIII { get; set; }
     }
 }

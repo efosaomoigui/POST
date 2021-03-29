@@ -61,7 +61,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.Status = false;
                 response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
                 response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
-                response.data.Status = "failed";                
+                response.data.Status = "failed";
                 return response;
             }
             else
@@ -82,18 +82,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
                 }
 
-                if(waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
                 {
                     //Process Payment for FlutterWave;
                     response = await AddWaybillPaymentLogForFlutterWave(waybillPaymentLog);
                 }
 
-                if(waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
                 {
                     response = await AddWaybillPaymentLogForUSSD(waybillPaymentLog);
                 }
             }
-                            
+
             return response;
         }
 
@@ -130,12 +130,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     return response;
                 }
                 else
-                {               
+                {
                     //check the country
                     waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
                     var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
                     waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
-                                        
+
                     //if the country is not Nigeria or Ghana, block it
                     if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
                     {
@@ -195,7 +195,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
-                       
+
             return new PaymentInitiate
             {
                 IsPaymentSuccessful = false,
@@ -221,7 +221,7 @@ namespace GIGLS.Services.Implementation.Wallet
             waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
             //3. send the request to paystack gateway
-            var paystackResponse =  await ProcessMobilePaymentForPaystack(waybillPaymentLog);
+            var paystackResponse = await ProcessMobilePaymentForPaystack(waybillPaymentLog);
             return paystackResponse;
         }
 
@@ -238,10 +238,10 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
                 string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"];
-                
+
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
-                using (var client =  new HttpClient())
+                using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -252,7 +252,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         amount = waybillPaymentLog.Amount * 100,
                         currency = waybillPaymentLog.Currency,
                         email = waybillPaymentLog.Email,
-                        reference = waybillPaymentLog.Reference,                        
+                        reference = waybillPaymentLog.Reference,
                         mobile_money = new Mobile_Money
                         {
                             phone = waybillPaymentLog.PhoneNumber,
@@ -264,12 +264,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(payStackChargeAPI, data);
                     string result = await response.Content.ReadAsStringAsync();
-                    
+
                     var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
-                    
+
                     //update the response from paystack
                     var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
-                    
+
                     if (paystackResponse.data != null)
                     {
                         updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
@@ -283,7 +283,67 @@ namespace GIGLS.Services.Implementation.Wallet
                     await _uow.CompleteAsync();
 
                     return paystackResponse;
-                }                
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Service to generate the different links for payments of international shipment
+        private async Task<PaystackWebhookDTO> ProcessPaymentForPaystackIntlShipment(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            try
+            {
+                string payStackSecret = ConfigurationManager.AppSettings[$"{waybillPaymentLog.PaystackCountrySecret}"];
+                string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"];
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payStackSecret);
+
+                    MobileMoneyDTO mobileMoney = new MobileMoneyDTO
+                    {
+                        amount = waybillPaymentLog.Amount * 100,
+                        currency = waybillPaymentLog.Currency,
+                        email = waybillPaymentLog.Email,
+                        reference = waybillPaymentLog.Reference,
+                        //mobile_money = new Mobile_Money
+                        //{
+                        //    phone = waybillPaymentLog.PhoneNumber,
+                        //    provider = waybillPaymentLog.NetworkProvider
+                        //}
+                    };
+
+                    var json = JsonConvert.SerializeObject(mobileMoney);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(payStackChargeAPI, data);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+
+                    //update the response from paystack
+                    var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+
+                    if (paystackResponse.data != null)
+                    {
+                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.data.Display_Text + " " + paystackResponse.data.Message + " " + paystackResponse.data.Gateway_Response;
+                    }
+                    else
+                    {
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.Message;
+                    }
+
+                    await _uow.CompleteAsync();
+
+                    return paystackResponse;
+                }
             }
             catch (Exception ex)
             {
@@ -293,14 +353,14 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<WaybillPaymentLogDTO> GetWaybillPaymentLogByReference(string reference)
         {
-            var paymentlog =  await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == reference);
+            var paymentlog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == reference);
             return Mapper.Map<WaybillPaymentLogDTO>(paymentlog);
         }
 
         public async Task<WaybillPaymentLogDTO> GetWaybillPaymentLogByWaybill(string waybill)
         {
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable().Where(x => x.Waybill == waybill).LastOrDefault();
-            var paymentDto =  Mapper.Map<WaybillPaymentLogDTO>(paymentLog);
+            var paymentDto = Mapper.Map<WaybillPaymentLogDTO>(paymentLog);
             return await Task.FromResult(paymentDto);
         }
 
@@ -332,7 +392,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //check the current transaction on the waybill
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
                 .Where(x => x.Waybill == waybill || x.Reference == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-            
+
             if (paymentLog != null)
             {
                 PaystackWebhookDTO response = new PaystackWebhookDTO();
@@ -354,8 +414,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 return response;
             }
-                        
-            return new PaystackWebhookDTO { 
+
+            return new PaystackWebhookDTO
+            {
                 Status = false,
                 Message = $"No online payment process occurred for the waybill/reference {waybill}",
                 data = new Core.DTO.OnlinePayment.Data
@@ -409,7 +470,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (paymentLog != null)
             {
-                if(paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
                 {
                     var response = await _paystackService.ProcessPaymentForWaybillUsingPin(paymentLog, pin);
                     return response;
@@ -503,7 +564,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
 
                     responseResult.Message = flutterResponse.Message;
-                    if(flutterResponse.Status == "success")
+                    if (flutterResponse.Status == "success")
                     {
                         responseResult.Status = true;
                     }
@@ -516,16 +577,16 @@ namespace GIGLS.Services.Implementation.Wallet
 
                         if (flutterResponse.data.validateInstructions.Instruction != null)
                         {
-                            responseResult.data.Message =  flutterResponse.data.validateInstructions.Instruction;
+                            responseResult.data.Message = flutterResponse.data.validateInstructions.Instruction;
                         }
-                        else if(flutterResponse.data.ChargeMessage != null)
+                        else if (flutterResponse.data.ChargeMessage != null)
                         {
                             responseResult.data.Message = flutterResponse.data.ChargeMessage;
                         }
                         else
                         {
                             responseResult.data.Message = flutterResponse.data.ChargeResponseMessage;
-                        }                        
+                        }
                     }
                     else
                     {
@@ -561,7 +622,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //3. Send reguest to Oga USSD 
             var ussdResponse = await ProcessPaymentForUSSD(waybillPaymentLog);
 
-            if(ussdResponse.Status == "success")
+            if (ussdResponse.Status == "success")
             {
                 //3. Add record to waybill payment log with the order id
                 var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
@@ -647,6 +708,72 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return amountToDebit;
+        }
+
+        public async Task<PaystackWebhookDTO> AddWaybillPaymentLogForIntlShipment(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            var response = new PaystackWebhookDTO();
+
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybillPaymentLog.Waybill);
+            if (invoice == null)
+            {
+                throw new GenericException($"Waybill {waybillPaymentLog.Waybill}  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                response.Status = false;
+                response.Message = $"Payment already made for the Shipment {waybillPaymentLog.Waybill}";
+                response.data.Message = $"Payment already made for the Shipment {waybillPaymentLog.Waybill}";
+                response.data.Status = "failed";
+                return response;
+            }
+            else
+            {
+                //check if any transaction on the waybill is successful
+                var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                    .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
+
+                if (paymentLog != null)
+                {
+                    response.Status = false;
+                    response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                    response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                    response.data.Status = "failed";
+                    return response;
+                }
+                else
+                {
+                    //if the country is not Nigeria, US or Ghana, block it
+                    if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76 && waybillPaymentLog.PaymentCountryId != 207)
+                    {
+                        throw new GenericException("Waybill payment functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
+                    decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
+
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == waybillPaymentLog.PaymentCountryId);
+                    waybillPaymentLog.Currency = country.CurrencyCode;
+                    waybillPaymentLog.Amount = amountToDebit;
+
+                    if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                    {
+                        response = await PayForIntlShipmentUsingPaystack(waybillPaymentLog);
+                    }
+                }
+            }
+
+            return response;
+        }
+
+
+        private async Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
+
+            //3. send the request to paystack gateway
+            var paystackResponse = await ProcessPaymentForPaystackIntlShipment(waybillPaymentLog);
+            return paystackResponse;
         }
 
     }

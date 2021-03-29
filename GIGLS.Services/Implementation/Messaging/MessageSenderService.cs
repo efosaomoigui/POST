@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -1560,7 +1561,7 @@ namespace GIGLS.Services.Implementation.Messaging
         }
 
         //Handle Received Items Mail for Overseas Shipment
-        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto)
+        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks)
         {
             //get CustomerDetails (
             if (shipmentDto.CustomerType.Contains("Individual"))
@@ -1609,7 +1610,10 @@ namespace GIGLS.Services.Implementation.Messaging
                     ShippingCost = shipmentDto.GrandTotal.ToString(),
                     DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
                     PaymentLink = paymentLink,
-                    DeliveryAddressOrCenterName = delivery
+                    DeliveryAddressOrCenterName = delivery,
+                    GeneralPaymentLinkI = generalPaymentLinks[0],
+                    GeneralPaymentLinkII = generalPaymentLinks[1],
+                    GeneralPaymentLinkIII = generalPaymentLinks[2]
                 },
                 To = customerObj.Email,
                 ToEmail = customerObj.Email,
