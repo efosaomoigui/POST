@@ -2162,7 +2162,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
+                var centres = await _portalService.GetActiveServiceCentres();
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
