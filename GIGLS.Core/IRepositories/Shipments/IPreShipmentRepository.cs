@@ -13,6 +13,5 @@ namespace GIGLS.Core.IRepositories.Shipments
         IQueryable<PreShipment> PreShipmentsAsQueryable();
         Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria, string currentUserId);
         Task<List<PreShipmentDTO>> GetDropOffsForUserByUserCodeOrPhoneNo(SearchOption searchOption);
-        Task<List<string>> GetUserTopFiveAddress(string userId);
     }
 }

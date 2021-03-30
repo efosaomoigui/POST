@@ -3238,10 +3238,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
-        public async Task<List<string>> GetUserTopFiveAddress()
-        {
-            var currentUserId = await _userService.GetCurrentUserId();
-            return await _uow.PreShipment.GetUserTopFiveAddress(currentUserId);
-        }
+      
     }
 }
