@@ -125,5 +125,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
+
+
+
+        public Task<List<string>> GetUserTopFiveAddress(string userId)
+        {
+            var addresses = _context.PreShipment.Where(x => x.SenderUserId == userId).OrderByDescending(x => x.DateCreated).Select(x => x.ReceiverAddress).Take(5).ToList();
+            return Task.FromResult(addresses);
+        }
     }
 }

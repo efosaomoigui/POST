@@ -2287,6 +2287,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("useraddresses")]
+        public async Task<IServiceResponse<List<string>>> GetUserTopFiveAddress()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetUserTopFiveAddress();
+
+                return new ServiceResponse<List<string>>
+                {
+                    Object = result
+                };
+            });
+        }
+
 
     }
 }

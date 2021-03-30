@@ -210,5 +210,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
+        Task<List<string>> GetUserTopFiveAddress();
     }
 }
