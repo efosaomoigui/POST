@@ -51,6 +51,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task<bool> CancelShipment(string waybill);
+        Task<bool> CancelShipmentForMagaya(string waybill); 
 
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
         Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
