@@ -30,17 +30,5 @@ namespace GIGLS.Core.DTO.UPS
         public string Length { get; set; }
         public string Width { get; set; }
         public string Height { get; set; }
-    }
-
-    public class UPSPackaging
-    {
-        public UPSUnitOfMeasurement UnitOfMeasurement { get; set; }
-        public string Weight { get; set; }
-    }
-
-    public class UPSUnitOfMeasurement
-    {
-        public string Code { get; set; }
-        public string Description { get; set; }
-    }
+    }    
 }
