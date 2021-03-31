@@ -455,6 +455,7 @@
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\IISProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

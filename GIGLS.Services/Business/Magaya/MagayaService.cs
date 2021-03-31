@@ -373,6 +373,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
 
+                if(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value > 0.00)
+                {
+                    itemChargeableWeight = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value;
+                }
+
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
                 {
                     Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
@@ -461,6 +466,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Method = MethodType.Air,
                     MeasurementUnits = magayaShipmentDTO.MeasurementUnits
                 };
+
 
                 magayaShipmentDTO.Charges.Charge[i].Customs = null;
                 magayaShipmentDTO.Charges.Charge[i].IsFromSegment = false;
