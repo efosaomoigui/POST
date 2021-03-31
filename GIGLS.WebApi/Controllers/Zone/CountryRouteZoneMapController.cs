@@ -80,6 +80,22 @@ namespace GIGLS.WebApi.Controllers.Zone
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getzone")]
+        public async Task<IServiceResponse<CountryRouteZoneMapDTO>> GetZone(CountryMapQueryDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _mapService.GetZone(data.DepartureId, data.DestinationId, data.CompanyMap);
+
+                return new ServiceResponse<CountryRouteZoneMapDTO>
+                {
+                    Object = zone
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{mappingId:int}")]

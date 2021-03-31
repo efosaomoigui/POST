@@ -20,4 +20,12 @@ namespace GIGLS.Core.DTO.Zone
         public bool Status { get; set; }
         public CompanyMap CompanyMap { get; set; }
     }
+
+    public class CountryMapQueryDTO 
+    {
+        public int DepartureId { get; set; }
+        public int DestinationId { get; set; }
+        public CompanyMap CompanyMap { get; set; }
+    }
+
 }
