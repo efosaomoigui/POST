@@ -117,6 +117,7 @@ namespace GIGLS.Core.DTO.Account
         public decimal Cash { get; set; }
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; }
     }
      
     public class InvoiceViewDTOUNGROUPED
