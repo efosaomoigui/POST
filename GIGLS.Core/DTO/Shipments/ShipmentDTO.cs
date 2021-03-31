@@ -453,6 +453,7 @@ namespace GIGLS.Core.DTO.Shipments
         public Content Content { get; set; }
         public PaymentType PaymentType { get; set; }
         public int RequestProcessingCountryId { get; set; }
+        public CompanyMap CompanyMap { get; set; }
     }
 
 

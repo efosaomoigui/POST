@@ -4182,8 +4182,39 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //DHL Get Price
         public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                if(shipmentDTO.CompanyMap == CompanyMap.UPS)
+                {
+                    return await GetUPSInternationalShipmentPrice(shipmentDTO);
+                }
+                else
+                {
+                    return await GetDHLInternationalShipmentPrice(shipmentDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<TotalNetResult> GetUPSInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                var result = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+                return await GetTotalPriceBreakDown(result, shipmentDTO);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<TotalNetResult> GetDHLInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
@@ -4223,6 +4254,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
         //Add DHL International shipment 
         public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                if(shipmentDTO.CompanyMap == CompanyMap.UPS)
+                {
+                    return await AddUPSInternationalShipment(shipmentDTO);
+                }
+                else
+                {
+                    return await AddDHLInternationalShipment(shipmentDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<ShipmentDTO> AddDHLInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
@@ -4278,6 +4328,64 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        private async Task<ShipmentDTO> AddUPSInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                //1. Get the Price
+                var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+
+                //update price to contain VAT, INSURANCE ETC
+                var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
+
+                //validate the different from DHL
+                if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
+                {
+                    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
+                }
+
+                //if the customer is not an individual, pay by wallet
+                //2. Get the Wallet Balance if payment is by wallet and check if the customer has the amount in its wallet
+                if (shipmentDTO.PaymentType == PaymentType.Wallet)
+                {
+
+                }
+
+                //Bind Agility Shipment Payload
+                var shipment = await BindShipmentPayload(shipmentDTO);
+                shipmentDTO.CustomerDetails = shipment.CustomerDetails;
+
+                //update price to contain VAT, INSURANCE ETC
+                shipment.Total = priceUpdate.Amount;
+                shipment.GrandTotal = priceUpdate.GrandTotal;
+                shipment.Insurance = priceUpdate.Insurance;
+                shipment.Vat = priceUpdate.VAT;
+
+                //Block account that has been suspended/pending from create shipment
+                if (shipment.CustomerDetails.CustomerType == CustomerType.Company)
+                {
+                    if (shipment.CustomerDetails.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"{shipment.CustomerDetails.Name} account has been {shipment.CustomerDetails.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
+                //3. Create shipment on DHL
+                var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
+                shipment.InternationalShipmentType = InternationalShipmentType.DHL;
+                shipment.IsInternational = true;
+
+                //4. Add the Shipment to Agility
+                var createdShipment = await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
+                return createdShipment;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         private async Task<ShipmentDTO> BindShipmentPayload(InternationalShipmentDTO shipmentDTO)
         {
