@@ -9,6 +9,11 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
+using System;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -17,11 +22,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICustomerPortalService _portalService;
         private readonly IQRAndBarcodeService _qrandbarcodeService;
         private readonly IUnitOfWork _uow;
+        private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
+        private readonly IScanService _scanService;
 
-        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow)
+        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
+            _manifestGroupWaybillNumberMappingService = manifestGroupWaybillNumberMappingService;
+            _scanService = scanService;
             _uow = uow;
         }
 
@@ -103,6 +113,24 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber)
         {
             return await _uow.PreShipmentMobile.GetBasicPreShipmentMobileDetail(waybillNumber);
+        }
+
+        //Get manifests (by date) owned by logged in service center
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria)
+        {
+            return await _manifestGroupWaybillNumberMappingService.GetAllManifestGroupWayBillNumberMappings(dateFilterCriteria);
+        }
+
+        //Get waybill information and group waybill from Manifest
+        public async Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await _manifestGroupWaybillNumberMappingService.GetGroupWaybillDataInManifest(manifestCode);
+        }
+
+        public async Task<bool> ItemShippedFromUKScan(string manifestCode)
+        {
+            await _scanService.ItemShippedFromUKScan(manifestCode);
+            return true;
         }
 
         //Price API

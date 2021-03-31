@@ -1,33 +1,19 @@
-﻿using AutoMapper;
-using EfeAuthen.Models;
+﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.TickectMan;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Zone;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using GIGLS.Services.Implementation.Utility;
-using GIGLS.WebApi.Filters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -424,20 +410,139 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        //[HttpPost]
+        //[Route("dropoffprice")]
+        //public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var Price = await _tickectMan.GetPriceForDropOff(preshipmentMobile);
+        //        return new ServiceResponse<MobilePriceDTO>
+        //        {
+        //            Object = Price,
+        //        };
+        //    });
+        //}
+
         [HttpPost]
         [Route("dropoffprice")]
-        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        public async Task<IServiceResponse<NewPricingDTO>> GetPriceForDropOff(NewShipmentDTO preshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var Price = await _tickectMan.GetPriceForDropOff(preshipmentMobile);
-                return new ServiceResponse<MobilePriceDTO>
+                return new ServiceResponse<NewPricingDTO>
                 {
                     Object = Price,
                 };
             });
         }
+        [HttpGet]
+        [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
+        public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _tickectMan.GetShipmentDetailsFromDeliveryNumber(deliverynumber);
+                return new ServiceResponse<PreShipmentSummaryDTO>
+                {
+                    Object = preshipment
+                };
+            });
+        }
 
+        [HttpPost]
+        [Route("approveshipment")]
+        public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.ApproveShipment(detail);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("servicecenterbystation/{stationId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _tickectMan.GetServiceCentreByStation(stationId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicletypes")]
+        public IHttpActionResult GetVehicleTypes()
+        {
+            var types = EnumExtensions.GetValues<Vehicletype>();
+            return Ok(types);
+        }
+
+        [HttpPost]
+        [Route("giggoextension")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddGIGGOShipmentFromAgility(PreShipmentMobileFromAgilityDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.AddAgilityShipmentToGIGGo(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getgiggoprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetGIGGoPrice(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _tickectMan.GetGIGGOPrice(preshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = price,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("bulkpayment")]
+        public async Task<IServiceResponse<bool>> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("unpaidwaybillbyservicecentre")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetInvoiceByServiceCentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoices = await _tickectMan.GetInvoiceByServiceCentre();
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = invoices
+                };
+            });
+        }
 
 
     }

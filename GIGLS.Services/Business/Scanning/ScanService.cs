@@ -1,21 +1,22 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.IServices.Business;
-using System;
-using System.Threading.Tasks;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Core.IServices.Fleets;
-using System.Collections.Generic;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
-using System.Linq;
-using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
-using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.User;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -55,6 +56,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
             _uow = uow;
+            MapperConfig.Initialize();
         }
 
         public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
@@ -147,7 +149,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
-                        if(shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
                         {
                             trackingType = TrackingType.OutBound;
                         }
@@ -166,62 +168,6 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             await UpdateShipmentPackageForServiceCenter(shipment);
                         }
-
-                        //Intl Shipments Emails 
-                        if (shipment.IsInternational == true)
-                        {
-                            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
-                            var messageDTO = new ShipmentDTO
-                            {
-                                CustomerType = shipment.CustomerType,
-                                CustomerId = shipment.CustomerId,
-                                ReceiverName = shipment.ReceiverName,
-                                Waybill = shipment.Waybill,
-                                PickupOptions = shipment.PickupOptions,
-                                ReceiverEmail = shipment.ReceiverEmail,
-                                GrandTotal = shipment.GrandTotal,
-                                DepartureCountryId = shipment.DepartureCountryId,
-                                DestinationCountryId = shipment.DestinationCountryId,
-                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
-                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                                ReceiverAddress = shipment.ReceiverAddress,
-                                CustomerDetails = new CustomerDTO
-                                {
-                                    PhoneNumber = shipment.ReceiverPhoneNumber,
-                                    Email = shipment.ReceiverEmail
-                                },
-                                DepartureServiceCentre = new ServiceCentreDTO
-                                {
-
-                                },
-                                DestinationServiceCentre = new ServiceCentreDTO
-                                {
-
-                                }
-                            };
-
-                            //Send Email When Intl Shipment arrives Nigeria
-                            if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && invoice.PaymentStatus != PaymentStatus.Paid)
-                            {
-                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISNU);
-
-                            }
-                            else if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF && invoice.PaymentStatus == PaymentStatus.Paid)
-                            {
-                                var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == scan.WaybillNumber);
-                                messageDTO.SenderCode = deliveryCode.SenderCode;
-
-                                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
-                                {
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDHD);
-                                }
-                                else
-                                {
-                                    await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.IAFDSC);
-                                }
-                            }
-                        }
-
                         return true;
                     }
                     else
@@ -356,7 +302,7 @@ namespace GIGLS.Services.Business.Scanning
                                         {
                                             var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
 
-                                            if(shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
+                                            if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
                                             {
                                                 internationalShipmentList.Add(shipmentItem.Waybill);
                                             }
@@ -1276,6 +1222,69 @@ namespace GIGLS.Services.Business.Scanning
             _uow.ServiceCenterPackage.AddRange(servicePackage);
 
             await _uow.CompleteAsync();
+        }
+
+        public async Task ItemShippedFromUKScan(string manifestCode)
+        {
+            var shipmentTracking = new List<ShipmentTracking>();
+
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+            if (manifest == null)
+            {
+                throw new GenericException($"No Manifest exists for this code: {manifest}");
+            }
+
+            var currentUser = await _userService.GetCurrentUserId();
+            var userServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            //default sc
+            if (userServiceCenters.Length <= 0)
+            {
+                userServiceCenters = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                userServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
+            }
+            var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCenters[0]);
+
+           
+            var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
+
+            if (groupWaybillInManifestList.Any())
+            {
+                foreach (var groupShipment in groupWaybillInManifestList)
+                {
+                    if (groupShipment.WaybillNumbers.Any())
+                    {
+                        foreach (var waybill in groupShipment.WaybillNumbers)
+                        {
+                            //Should i also add other validation for scan status like ARF?
+                            var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, ShipmentScanStatus.ISFUK.ToString());
+                            if (!checkTrack)
+                            {
+                                var newTracking = new ShipmentTracking()
+                                {
+                                    DateTime = DateTime.Now,
+                                    Status = ShipmentScanStatus.ISFUK.ToString(),
+                                    Waybill = waybill,
+                                    UserId = currentUser,
+                                    Location = serviceCenter.Name,
+                                    ServiceCentreId = serviceCenter.ServiceCentreId
+                                };
+                                shipmentTracking.Add(newTracking);
+
+                                var waybillInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                                var waybillDTO = Mapper.Map<ShipmentDTO>(waybillInfo);
+
+                                await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(waybillDTO);
+                            }
+
+                        }
+                    }
+                }
+                manifest.CargoStatus = CargoStatus.Cargoed;
+                _uow.ShipmentTracking.AddRange(shipmentTracking);
+                await _uow.CompleteAsync();
+            }
         }
     }
 }

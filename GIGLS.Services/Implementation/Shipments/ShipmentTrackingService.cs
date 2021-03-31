@@ -14,6 +14,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.User;
 using AutoMapper;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -106,6 +107,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     Id = newShipmentTracking.ShipmentTrackingId;
 
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == tracking.Waybill);
+
                     //send sms and email
                     if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
                     {
@@ -114,6 +117,10 @@ namespace GIGLS.Services.Implementation.Shipments
                             if (tracking.isInternalShipment)
                             {
                                 await SendEmailToStoreKeeper(tracking, scanStatus);
+                            }
+                            else if (scanStatus.Equals(ShipmentScanStatus.ARF) && shipment.IsInternational == true)
+                            {
+                                await SendEmailToCustomerForIntlShipment(shipment);
                             }
                             else
                             {
@@ -579,27 +586,79 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Send email to sender when international shipment has arrived Nigeria
-        public async Task<bool> SendEmailToCustomerForIntlShipment(ShipmentDTO shipmentDTO, MessageType messageType)
+        public async Task<bool> SendEmailToCustomerForIntlShipment(Shipment shipment)
         {
-            if(messageType == MessageType.AISNU)
+            //SEND EMAIL
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
+
+            //Mails to Receiver
+            var messageDTO = new MessageDTO()
             {
-                if (shipmentDTO.CustomerType.Contains("Individual"))
+                CustomerName = shipment.ReceiverName,
+                Waybill = shipment.Waybill,
+                IntlMessage = new IntlMessageDTO()
                 {
-                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    DeliveryAddressOrCenterName = shipment.ReceiverAddress,
+                },
+                To = shipment.ReceiverEmail,
+                ToEmail = shipment.ReceiverEmail,
+                Subject = "International Shipments Arrive Final Destination",
+            };
+
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                var deliveryCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
+                messageDTO.IntlMessage.DeliveryCode = deliveryCode.SenderCode;
+
+                if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    messageDTO.MessageTemplate = "OverseasHomeDelivery";
+                    await _messageSenderService.SendOverseasMails(messageDTO);
                 }
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
-
-                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
-                shipmentDTO.CustomerDetails.Email = customerObj.Email;
-                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
-
-                //SEND SMS
-                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, shipmentDTO);
+                else
+                {
+                    var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
+                    messageDTO.IntlMessage.DeliveryAddressOrCenterName = destination.FormattedServiceCentreName;
+                    messageDTO.MessageTemplate = "OverseasPickup";
+                    await _messageSenderService.SendOverseasMails(messageDTO);
+                }
             }
+            return true;
+        }
 
-            //send message
-            await _messageSenderService.SendGenericEmailMessage(messageType, shipmentDTO);
+        //Send email to sender when international shipment is cargoed,(both US and UK)
+        public async Task<bool> SendEmailToCustomerWhenIntlShipmentIsCargoed(ShipmentDTO  shipmentDTO)
+        {
+            //SEND Email
 
+            if (shipmentDTO.CustomerType.Contains("Individual"))
+            {
+                shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDTO.DepartureCountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDTO.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = shipmentDTO.GrandTotal.ToString(),
+                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Body = shipmentDTO.DepartureCountryId == 207 ? DateTime.Now.AddDays(14).ToString("dd/MM/yyyy") : DateTime.Now.AddDays(5).ToString("dd/MM/yyyy"),
+                Subject = $"International Shipment Cargoed ({country.CountryName})",
+                MessageTemplate = "OverseasDepartsHub"
+            };
+
+            await _messageSenderService.SendOverseasMails(messageDTO);
             return true;
         }
     }

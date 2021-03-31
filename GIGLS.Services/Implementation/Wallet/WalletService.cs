@@ -129,7 +129,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<Core.Domain.Wallet.Wallet> GetWalletById(string walletNumber)
         {
-            var wallet = await _uow.Wallet.GetAsync(x => x.WalletNumber.Equals(walletNumber));
+            var wallet = await _uow.Wallet.GetAsync(x => x.WalletNumber == walletNumber || x.CustomerCode == walletNumber);
 
             if (wallet == null)
             {

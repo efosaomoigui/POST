@@ -14,4 +14,10 @@
         EnRoute,
         ProcessEnded
     }
+
+    public enum CargoStatus
+    {
+        Unprocessed,
+        Cargoed
+    }
 }

@@ -61,6 +61,7 @@ using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
+using System.Web.Http;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1244,7 +1245,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             ////SEND EMAIL TO NEW SIGNEE
             var companyMessagingDTO = new CompanyMessagingDTO();
-            companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+           // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            companyMessagingDTO.Name = user.FirstName;
             companyMessagingDTO.Email = user.Email;
             companyMessagingDTO.PhoneNumber = user.PhoneNumber;
             companyMessagingDTO.Rank = Rank.Basic;
@@ -2315,6 +2317,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("NULL INPUT");
             }
 
+            if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+            {
+                preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+            }
+
+            if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+            {
+                preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
+            }
+
             if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
             {
                 tempCode = await CreateTemporaryShipment(preShipmentDTO);
@@ -2971,9 +2983,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
         }  
-        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
+
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId)
         {
-            return await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(countryId);
+            return await _uow.ServiceCentre.GetActiveServiceCentresBySingleCountry(countryId, stationId);
         }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequestsPaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -3019,33 +3032,44 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Get International Shipments Terms and Conditions
-        public async Task<MessageDTO> GetIntlMessageForApp()
+        public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
         {
-            return await _uow.Store.GetStoresByCountryId(countryId);
+            var stores = await _uow.Store.GetStoresByCountryId(countryId);
+            stores = stores.OrderByDescending(x => x.storeImage).ToList();
+            return stores;
         }
 
         public async Task<List<IntlShipmentRequestDTO>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
-            var currentUserId = await _userService.GetCurrentUserId();
             int count = 0;
+            var currentUserId = await _userService.GetCurrentUserId();
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var consolidated = requests.Where(x => x.Consolidated).OrderBy(x => x.DateCreated).ToList();
-                if (consolidated.Any())
+                var countryIds =  requests.Select(x => x.RequestProcessingCountryId).ToList();
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
+                foreach (var item in requests)
                 {
-                    foreach (var item in consolidated)
+                    //untill users updated apps
+                    if (item.RequestProcessingCountryId == 0)
                     {
-                       count++;
-                        item.ItemCount = $"{count} of {count}";
-                    } 
-                }
+                        item.RequestProcessingCountryId = 207;
+                    }
+                    var country = countries.Where(x => x.CountryId == item.RequestProcessingCountryId).FirstOrDefault();
+                    if (country != null)
+                    {
+                        var countryDTO = Mapper.Map<NewCountryDTO>(country);
+                        item.DepartureCountry = countryDTO; 
+                    }
+                    count++;
+                    item.ItemCount = $"{count} of {count}";
+                } 
             }
 
             return requests;
@@ -3061,6 +3085,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
         {
             var result = new ResponseDTO();
+            string message = "User detail already exist";
 
             if (userDetail == null)
             {
@@ -3068,13 +3093,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result.Message = $"Invalid payload";
                 return result;
             }
+
             if (!String.IsNullOrEmpty(userDetail.BusinessName))
             {
                 var company = await _uow.Company.GetAsync(x => x.Name.ToLower() == userDetail.BusinessName.ToLower());
                 if (company != null)
                 {
                     result.Exist = true;
-                    result.Message = "User detail already exist";
+                    result.Message = message;
                     result.Succeeded = false;
                     return result;
                 }
@@ -3084,7 +3110,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (user != null)
                 {
                     result.Exist = true;
-                    result.Message = "User detail already exist";
+                    result.Message = message;
                     result.Succeeded = false;
                     return result;
                 }
@@ -3094,10 +3120,21 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var user = await _uow.User.GetUserByEmail(userDetail.Email);
                 if (user != null)
                 {
-                    result.Exist = true;
-                    result.Message = "User detail already exist";
-                    result.Succeeded = false;
-                    return result;
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer && user.IsRegisteredFromMobile == true)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
+
+                    if (user.UserChannelType != UserChannelType.IndividualCustomer)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
                 }
             }
 
@@ -3106,10 +3143,21 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
                 if (user != null)
                 {
-                    result.Exist = true;
-                    result.Message = "User detail already exist";
-                    result.Succeeded = false;
-                    return result;
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer && user.IsRegisteredFromMobile == true)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
+
+                    if (user.UserChannelType != UserChannelType.IndividualCustomer)
+                    {
+                        result.Exist = true;
+                        result.Message = message;
+                        result.Succeeded = false;
+                        return result;
+                    }
                 }
             }
 
@@ -3170,6 +3218,25 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return WaybillWalletPaymentType.Wallet;
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
+        {
+            var countries = await _countryService.GetIntlShipingCountries();
+            countries.ToList();
+            if (countries.Any())
+            {
+                foreach (var item in countries)
+                {
+                    item.States = null;
+                }
+            }
+            return countries;
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentres()
+        {
+            return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
     }
 }

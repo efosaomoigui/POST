@@ -85,6 +85,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
         Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
+        Task<ShipmentDTO> ProcessInternationalShipmentOnAgility(ShipmentDTO shipmentDTO);
+
     }
 
     public interface IMagayaService : IServiceDependencyMarker
@@ -127,8 +129,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
         Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO);
         Task<bool> UpdateReceived(int shipmentItemRequestId);
-        Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser();
-
+        Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID);
     }
 
 

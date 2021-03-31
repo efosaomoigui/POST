@@ -1,14 +1,12 @@
-﻿using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Core.Domain;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IRepositories.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Core.DTO.Shipments;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
-using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -140,7 +138,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          SuperManifestCode = p.SuperManifestCode,
                                                          SuperManifestStatus = p.SuperManifestStatus,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                         CargoStatus = p.CargoStatus
                                                      }).FirstOrDefault()
                                                  };
 
@@ -177,7 +176,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 IsDeleted = mgw.IsDeleted,
                                                 MovementStatus = mgw.MovementStatus,
                                                 DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == mgw.DepartureServiceCentreId).FirstOrDefault()
-                                            }; 
+                                            };
 
             return movementManifestNumberDto.ToList();
         }

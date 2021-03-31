@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
@@ -20,11 +21,13 @@ namespace GIGLS.WebApi.Controllers.Wallet
     {
         private readonly IWalletPaymentLogService _walletPaymentLogService;
         private readonly IWalletService _walletService;
+        private readonly IWalletTransactionService _walletTransactionService;
 
-        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService, IWalletService walletService) : base(nameof(WalletPaymentLogController))
+        public WalletPaymentLogForAllController(IWalletPaymentLogService walletPaymentLogService, IWalletService walletService, IWalletTransactionService walletTransactionService) : base(nameof(WalletPaymentLogController))
         {
             _walletPaymentLogService = walletPaymentLogService;
             _walletService = walletService;
+            _walletTransactionService = walletTransactionService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -130,6 +133,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 return new ServiceResponse<bool>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("walletbydate")]
+        public async Task<IServiceResponse<IEnumerable<WalletTransactionDTO>>> GetWalletTransactionsByDate(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTransactions = await _walletTransactionService.GetWalletTransactionsByDate(dateFilter);
+                return new ServiceResponse<IEnumerable<WalletTransactionDTO>>
+                {
+                    Object = walletTransactions
                 };
             });
         }

@@ -30,7 +30,9 @@ namespace GIGLS.Core.DTO
         public string Amount { get; set; }
         public string Currency { get; set; }
         public List<string> Emails { get; set; }
-
+        public string MessageTemplate { get; set; } //Message Template to use
+        public IntlMessageDTO IntlMessage { get; set; }
+        public string Country { get; set; }
 
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
     }
@@ -41,5 +43,19 @@ namespace GIGLS.Core.DTO
         public EmailSmsType EmailSmsType { get; set; }
         public string Body { get; set; }
         public string Subject { get; set; }
+    }
+
+    public class IntlMessageDTO
+    {
+        public string Description { get; set; }
+        public string DepartureCenter { get; set; }
+        public string DestinationCenter { get; set; }
+        public string DeliveryOption { get; set; }
+        public string RequestCode { get; set; }
+        public string StoreOfPurchase { get; set; }
+        public string ShippingCost { get; set; }
+        public string PaymentLink { get; set; }
+        public string DeliveryAddressOrCenterName { get; set; }
+        public string DeliveryCode { get; set; }
     }
 }

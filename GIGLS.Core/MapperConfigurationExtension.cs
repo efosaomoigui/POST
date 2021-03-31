@@ -43,6 +43,7 @@ using ThirdParty.WebServices.Business;
 using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.Domain.Archived;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.Core
 {
@@ -263,7 +264,10 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
                 config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
-                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>();
+                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>(); 
+
+                config.CreateMap<GIGLS.Core.Domain.Country, NewCountryDTO>();
+                config.CreateMap<NewCountryDTO, GIGLS.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
@@ -463,6 +467,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
                 config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
+
+                config.CreateMap<PriceCategory, PriceCategoryDTO>();
+                config.CreateMap<PriceCategoryDTO, PriceCategory>();
+
+                config.CreateMap<Store, StoreDTO>();
+                config.CreateMap<StoreDTO, Store>();
 
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();

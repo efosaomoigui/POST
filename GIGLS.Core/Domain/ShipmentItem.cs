@@ -6,11 +6,17 @@ namespace GIGL.GIGLS.Core.Domain
 {
     public class ShipmentItem : BaseDomain
     {
-        public int ShipmentItemId { get; set; } 
+        public int ShipmentItemId { get; set; }
+
+        [MaxLength(500)]
         public string Description { get; set; }
+
+        [MaxLength(500)]
         public string Description_s { get; set; } 
         public ShipmentType  ShipmentType { get; set; }
-        public double Weight { get; set; }  
+        public double Weight { get; set; }
+
+        [MaxLength(100)]
         public string Nature { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }

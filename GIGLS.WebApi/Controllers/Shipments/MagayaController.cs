@@ -201,6 +201,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
 
             return await HandleApiOperationAsync(async () =>
             {
@@ -222,6 +223,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
 
             return await HandleApiOperationAsync(async () =>
             {
