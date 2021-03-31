@@ -1475,6 +1475,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     result = await _emailService.SendCustomerRegistrationMails(messageDTO);
                 }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
             }
             catch (Exception ex)
             {
@@ -1491,6 +1497,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendOverseasShipmentMails(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
                 }
             }
             catch (Exception ex)
