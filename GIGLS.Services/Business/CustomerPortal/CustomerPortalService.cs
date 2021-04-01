@@ -3238,5 +3238,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
+      
     }
 }

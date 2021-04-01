@@ -1086,6 +1086,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     serialNumber++;
                 }
 
+                newShipment.Value = newShipment.ShipmentRequestItems.Sum(x => x.ItemValue);
                 newShipment.DestinationServiceCentre = null;
                 _uow.IntlShipmentRequest.Add(newShipment);
                 await _uow.CompleteAsync();
@@ -1282,6 +1283,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         }
                     }
                 }
+                existingRequest.Value = intlShipmentRequestItems.Sum(x => x.ItemValue);
                 _uow.IntlShipmentRequestItem.AddRange(intlShipmentRequestItems);
                 await _uow.CompleteAsync();
                 return true;
@@ -2217,20 +2219,27 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public async Task<bool> UpdateReceived(int shipmentItemRequestId)
+        public async Task<bool> UpdateReceived(List<int> itemIDs)
         {
             try
             {
-                var shipmentItem = await _uow.IntlShipmentRequestItem.GetAsync(x => x.IntlShipmentRequestItemId == shipmentItemRequestId);
-                if (shipmentItem == null)
+                if (itemIDs == null)
                 {
-                    throw new GenericException("Shipment Item Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var shipmentItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => itemIDs.Contains(x.IntlShipmentRequestId)).ToList();
+                if (!shipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Item(s) does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 var userId = await _userService.GetCurrentUserId();
                 var userInfo = await _userService.GetUserById(userId);
 
-                shipmentItem.Received = true;
-                shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
+                foreach (var shipmentItem in shipmentItems)
+                {
+                    shipmentItem.Received = true;
+                    shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}"; 
+                }
                 _uow.Complete();
                 return true;
             }
