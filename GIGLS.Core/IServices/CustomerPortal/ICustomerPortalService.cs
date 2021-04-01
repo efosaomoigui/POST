@@ -209,5 +209,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
     }
 }

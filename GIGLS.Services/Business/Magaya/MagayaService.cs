@@ -373,6 +373,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
 
+                if(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value > 0.00)
+                {
+                    itemChargeableWeight = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value;
+                }
+
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
                 {
                     Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
@@ -461,6 +466,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Method = MethodType.Air,
                     MeasurementUnits = magayaShipmentDTO.MeasurementUnits
                 };
+
 
                 magayaShipmentDTO.Charges.Charge[i].Customs = null;
                 magayaShipmentDTO.Charges.Charge[i].IsFromSegment = false;
@@ -558,6 +564,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
                 string error_code = "";
 
+                var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
+                var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
+                var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDto.Waybill);
+                shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
+                await _uow.CompleteAsync();
+
                 //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
                 result2 = error_code;
@@ -566,11 +578,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (result == api_session_error.no_error)
                 {
-                    var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
-                    var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
-                    var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
-                    shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
-                    await _uow.CompleteAsync();
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
@@ -670,6 +677,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
+                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.WalletNumber); 
                     throw new Exception("Error Creating Shipment ---" + result2);
                 }
 

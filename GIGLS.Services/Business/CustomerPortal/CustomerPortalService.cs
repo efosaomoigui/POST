@@ -3233,5 +3233,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return countries;
         }
+
+        public async Task<List<ServiceCentreDTO>> GetActiveServiceCentres()
+        {
+            return await _uow.ServiceCentre.GetActiveServiceCentres();
+        }
     }
 }
