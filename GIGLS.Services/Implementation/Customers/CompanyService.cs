@@ -955,7 +955,7 @@ namespace GIGLS.Services.Implementation.Customers
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
-            var user = await _userService.GetUserById(currentUserId);
+            var user = await _uow.User.GetUserById(currentUserId);
             if (user == null)
             {
                 throw new GenericException("user does not exist");
@@ -983,11 +983,13 @@ namespace GIGLS.Services.Implementation.Customers
                     Industry = industry,
                     CompanyType = CompanyType.Ecommerce,
                     CustomerCategory = CustomerCategory.Normal,
-                    ReturnOption = PickupOptions.HOMEDELIVERY.ToString(),
+                    ReturnOption = newCompanyDTO.ReturnOption.ToString(),
+                    ReturnServiceCentre = newCompanyDTO.ReturnServiceCentre,
+                    ReturnAddress = newCompanyDTO.ReturnAddress,
                     Name = newCompanyDTO.Name,
                     Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = newCompanyDTO.FirstName,
+                    LastName = newCompanyDTO.LastName,
                     City = individualInfo.City,
                     State = individualInfo.State,
                     Address = individualInfo.Address,
@@ -999,8 +1001,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (!String.IsNullOrEmpty(user.FirstName))
                 {
                     CompanyContactPersonDTO personDto = new CompanyContactPersonDTO();
-                    personDto.FirstName = user.FirstName;
-                    personDto.LastName = user.LastName;
+                    personDto.FirstName = newCompanyDTO.FirstName;
+                    personDto.LastName = newCompanyDTO.LastName;
                     personDto.Email = user.Email;
                     personDto.PhoneNumber = user.PhoneNumber;
                     var person = Mapper.Map<CompanyContactPerson>(personDto);
@@ -1008,6 +1010,8 @@ namespace GIGLS.Services.Implementation.Customers
                     _uow.CompanyContactPerson.Add(person);
                 }
                 user.UserChannelType = UserChannelType.Ecommerce;
+                user.FirstName = newCompanyDTO.FirstName;
+                user.LastName = newCompanyDTO.LastName;
                _uow.Company.Add(company);
                 await _uow.CompleteAsync();
                 companyDTO = Mapper.Map<CompanyDTO>(company);
