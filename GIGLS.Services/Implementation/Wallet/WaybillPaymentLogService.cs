@@ -297,7 +297,7 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 string payStackSecret = ConfigurationManager.AppSettings[$"{waybillPaymentLog.PaystackCountrySecret}"];
-                string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"];
+                string payStackInitializeAPI = ConfigurationManager.AppSettings["PayStackInitializeAPI"];
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -313,16 +313,11 @@ namespace GIGLS.Services.Implementation.Wallet
                         currency = waybillPaymentLog.Currency,
                         email = waybillPaymentLog.Email,
                         reference = waybillPaymentLog.Reference,
-                        //mobile_money = new Mobile_Money
-                        //{
-                        //    phone = waybillPaymentLog.PhoneNumber,
-                        //    provider = waybillPaymentLog.NetworkProvider
-                        //}
                     };
 
                     var json = JsonConvert.SerializeObject(mobileMoney);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(payStackChargeAPI, data);
+                    var response = await client.PostAsync(payStackInitializeAPI, data);
                     string result = await response.Content.ReadAsStringAsync();
 
                     var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
@@ -332,8 +327,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     if (paystackResponse.data != null)
                     {
-                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
-                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.data.Display_Text + " " + paystackResponse.data.Message + " " + paystackResponse.data.Gateway_Response;
+                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.Status.ToString();
+                        updateWaybillPaymentLog.TransactionResponse = $"{paystackResponse.Message} {paystackResponse.data.Authorization_url}";
                     }
                     else
                     {
