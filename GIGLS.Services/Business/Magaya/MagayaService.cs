@@ -592,7 +592,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         var waybillPayment = new WaybillPaymentLogDTO()
                         {
                             Waybill = shipmentdto.Waybill,
-                            OnlinePaymentType = OnlinePaymentType.Paystack
+                            OnlinePaymentType = OnlinePaymentType.Paystack,
+                            Email = shipmentdto.Customer[0].Email
                         };
 
                         int[] listOfCountryForPayment = { 1, 76, 207 };
@@ -602,7 +603,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             waybillPayment.PaymentCountryId = country;
                             waybillPayment.PaystackCountrySecret = country == 76 ? "PayStackSecretGhana" : "PayStackSecret";
                             var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
-                            paymentLinks.Add(response.data.Authorization.AuthorizationCode);
+                            paymentLinks.Add(response.data.Authorization_url);
                         }
 
                         await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto, paymentLinks);
