@@ -292,6 +292,7 @@ namespace GIGLS.Messaging.MessageService
                 { "SG_Currency", message.Currency },
                 { "SG_Waybill", message.Waybill },
                { "SG_ShippingCost", message.IntlMessage.ShippingCost },
+                { "SG_DiscountedShippingCost", message.IntlMessage.DiscountedShippingCost },
                { "SG_PaymentLink", message.IntlMessage.PaymentLink },
                { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName },
                 { "SG_Country", message.Country },

@@ -710,11 +710,13 @@ namespace GIGLS.Services.Implementation.Wallet
             var response = new PaystackWebhookDTO();
 
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybillPaymentLog.Waybill);
-            if (invoice == null)
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybillPaymentLog.Waybill);
+
+            if (invoice == null || shipment == null)
             {
                 throw new GenericException($"Waybill {waybillPaymentLog.Waybill}  Not Found", $"{(int)HttpStatusCode.NotFound}");
             }
-
+            
             if (invoice.PaymentStatus == PaymentStatus.Paid)
             {
                 response.Status = false;
@@ -747,6 +749,20 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
 
+                    // Get Discount
+                    if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
+                    {
+                        var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
+                        if (customer != null)
+                        {
+                            int customerCountryId = customer.UserActiveCountryId;
+                            Rank rank = customer.Rank;
+
+                            var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
+                            amountToDebit = amountToDebit * discount;
+                        }
+                    }
+
                     var country = await _uow.Country.GetAsync(x => x.CountryId == waybillPaymentLog.PaymentCountryId);
                     waybillPaymentLog.Currency = country.CurrencyCode;
                     waybillPaymentLog.Amount = amountToDebit;
@@ -769,6 +785,31 @@ namespace GIGLS.Services.Implementation.Wallet
             //3. send the request to paystack gateway
             var paystackResponse = await ProcessPaymentForPaystackIntlShipment(waybillPaymentLog);
             return paystackResponse;
+        }
+
+        private async Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
+        {
+            decimal percentage = 0.00M;
+
+            if (rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId);
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+            else
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId);
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+
+            decimal discount = ((100M - percentage) / 100M);
+            return discount;
         }
 
     }
