@@ -1614,9 +1614,26 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (shipmentDto.CustomerType.Contains("Individual"))
                 {
                     shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    shipmentDto.CompanyType = CompanyType.Client.ToString();
+                    var individual = await _uow.IndividualCustomer.GetAsync(x => x.IndividualCustomerId == shipment.CustomerId);
+                    if (individual != null)
+                    {
+                        shipmentDto.UserActiveCountryId = individual.UserActiveCountryId;
+                        shipmentDto.CustomerCode = individual.CustomerCode;
+                    }
                 }
 
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+                var customer = await _uow.Company.GetAsync(x => x.CompanyId == shipment.CustomerId);
+                if (customer != null)
+                {
+                    CompanyType companyType = (CompanyType)Enum.Parse(typeof(CompanyType), customer.CompanyType.ToString());
+                    shipmentDto.CustomerType = customerType.ToString();
+                    shipmentDto.CompanyType = companyType.ToString();
+                    shipmentDto.UserActiveCountryId = customer.UserActiveCountryId;
+                    shipmentDto.CustomerCode = customer.CustomerCode;
+                }
+
 
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
                 shipmentDto.CustomerAddress = shipmentDto.SenderAddress;
