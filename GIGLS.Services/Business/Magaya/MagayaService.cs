@@ -562,7 +562,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
                 var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
-                var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
+                var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDto.Waybill);
                 shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
                 await _uow.CompleteAsync();
 
