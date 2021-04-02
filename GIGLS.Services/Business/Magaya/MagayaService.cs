@@ -596,12 +596,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             Email = shipmentdto.Customer[0].Email
                         };
 
-                        int[] listOfCountryForPayment = { 1, 76, 207 };
+                        int[] listOfCountryForPayment = { 1, 207 };
                         List<string> paymentLinks = new List<string>();
                         foreach (var country in listOfCountryForPayment)
                         {
                             waybillPayment.PaymentCountryId = country;
-                            waybillPayment.PaystackCountrySecret = country == 76 ? "PayStackSecretGhana" : "PayStackSecret";
+                            waybillPayment.PaystackCountrySecret = "PayStackSecret";
                             var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
                             paymentLinks.Add(response.data.Authorization_url);
                         }

@@ -1476,6 +1476,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     result = await _emailService.SendCustomerRegistrationMails(messageDTO);
                 }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
             }
             catch (Exception ex)
             {
@@ -1492,6 +1498,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendOverseasShipmentMails(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
                 }
             }
             catch (Exception ex)
@@ -1573,25 +1585,13 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
 
-            var paymentLink = "";
             var delivery = "";
 
-            //Check if it is from mobile or not, to get right payment link
-            if (shipmentDto.Waybill.Contains("MWR"))
-            {
-                var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
-                paymentLink = link.Value;
-            }
-            else
-            {
-                var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
-                paymentLink = $"{link.Value}{shipmentDto.Waybill}";
-            }
-
+            var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+            var paymentLink = $"{link.Value}{shipmentDto.Waybill}";
 
             if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
-
                 delivery = shipmentDto.ReceiverAddress;
             }
             else if (shipmentDto.PickupOptions == PickupOptions.SERVICECENTER)
@@ -1612,8 +1612,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     PaymentLink = paymentLink,
                     DeliveryAddressOrCenterName = delivery,
                     GeneralPaymentLinkI = generalPaymentLinks[0],
-                    GeneralPaymentLinkII = generalPaymentLinks[1],
-                    GeneralPaymentLinkIII = generalPaymentLinks[2]
+                    GeneralPaymentLinkII = generalPaymentLinks[1]
                 },
                 To = customerObj.Email,
                 ToEmail = customerObj.Email,

@@ -4727,7 +4727,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
 
-                    //Get the three possible payment links for Waybill (Nigeria, Ghana and US)
+                    //Get the two possible payment links for Waybill (Nigeria  and US)
                     var waybillPayment = new WaybillPaymentLogDTO()
                     {
                         Waybill = shipment.Waybill,
@@ -4735,12 +4735,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         Email = shipment.Customer[0].Email
                     };
 
-                    int[] listOfCountryForPayment = { 1, 76, 207 };
+                    int[] listOfCountryForPayment = { 1, 207 };
                     List<string> paymentLinks = new List<string>();
                     foreach ( var country in listOfCountryForPayment)
                     {
                         waybillPayment.PaymentCountryId = country;
-                        waybillPayment.PaystackCountrySecret = country == 76 ? "PayStackSecretGhana" : "PayStackSecret";
+                        waybillPayment.PaystackCountrySecret =  "PayStackSecret";
                         var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
                         paymentLinks.Add(response.data.Authorization_url);
                     }
