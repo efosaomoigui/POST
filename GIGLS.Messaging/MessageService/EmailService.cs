@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.IMessage;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System.Configuration;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.DTO;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -14,7 +14,7 @@ namespace GIGLS.Messaging.MessageService
         public async Task<string> SendAsync(MessageDTO message)
         {
             string result = "";
-            if(message.ToEmail != null)
+            if (message.ToEmail != null)
             {
                 result = await ConfigSendGridasync(message);
             }
@@ -106,7 +106,7 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
-        private async Task<string> ConfigPaymentMessageForInternationalShipment(MessageDTO message) 
+        private async Task<string> ConfigPaymentMessageForInternationalShipment(MessageDTO message)
         {
             var myMessage = new SendGridMessage
             {
@@ -292,10 +292,13 @@ namespace GIGLS.Messaging.MessageService
                 { "SG_Currency", message.Currency },
                 { "SG_Waybill", message.Waybill },
                { "SG_ShippingCost", message.IntlMessage.ShippingCost },
+                { "SG_DiscountedShippingCost", message.IntlMessage.DiscountedShippingCost },
                { "SG_PaymentLink", message.IntlMessage.PaymentLink },
                { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName },
                 { "SG_Country", message.Country },
-                 { "SG_DeliveryCode", message.IntlMessage.DeliveryCode }
+                { "SG_DeliveryCode", message.IntlMessage.DeliveryCode },
+                { "SG_GeneralPaymentLinkI", message.IntlMessage.GeneralPaymentLinkI },
+                { "SG_GeneralPaymentLinkII", message.IntlMessage.GeneralPaymentLinkII }
             });
 
             var response = await client.SendEmailAsync(myMessage);

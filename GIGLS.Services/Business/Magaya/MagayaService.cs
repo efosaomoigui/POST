@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Customers;
@@ -13,6 +14,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -49,6 +51,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICustomerService _customerService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
 
         public MagayaService(
@@ -60,7 +63,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IStationService stationService, IIndividualCustomerService individualCustomerController,
             IMessageSenderService messageSenderService,
             ICustomerService customerService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -73,6 +76,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _messageSenderService = messageSenderService;
             _customerService = customerService;
             _globalPropertyService = globalPropertyService;
+            _waybillPaymentLogService = waybillPaymentLogService;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -584,7 +588,25 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                         // send email message for payment notification
                         // await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
-                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto);
+
+                        var waybillPayment = new WaybillPaymentLogDTO()
+                        {
+                            Waybill = shipmentdto.Waybill,
+                            OnlinePaymentType = OnlinePaymentType.Paystack,
+                            Email = shipmentdto.Customer[0].Email
+                        };
+
+                        int[] listOfCountryForPayment = { 1, 207 };
+                        List<string> paymentLinks = new List<string>();
+                        foreach (var country in listOfCountryForPayment)
+                        {
+                            waybillPayment.PaymentCountryId = country;
+                            waybillPayment.PaystackCountrySecret = "PayStackSecret";
+                            var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                            paymentLinks.Add(response.data.Authorization_url);
+                        }
+
+                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto, paymentLinks);
                     }
 
                     using (var client = new HttpClient())
