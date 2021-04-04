@@ -4740,7 +4740,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     foreach ( var country in listOfCountryForPayment)
                     {
                         waybillPayment.PaymentCountryId = country;
-                        waybillPayment.PaystackCountrySecret =  "PayStackSecret";
+                        waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
                         var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
                         paymentLinks.Add(response.data.Authorization_url);
                     }
