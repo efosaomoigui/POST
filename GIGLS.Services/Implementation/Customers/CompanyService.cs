@@ -1009,7 +1009,11 @@ namespace GIGLS.Services.Implementation.Customers
                     person.CompanyId = company.CompanyId;
                     _uow.CompanyContactPerson.Add(person);
                 }
+                //also update orgnization,designation,department
                 user.UserChannelType = UserChannelType.Ecommerce;
+                user.Organisation = newCompanyDTO.Name;
+                user.Department = UserChannelType.Ecommerce.ToString();
+                user.Designation = UserChannelType.Ecommerce.ToString();
                 user.FirstName = newCompanyDTO.FirstName;
                 user.LastName = newCompanyDTO.LastName;
                _uow.Company.Add(company);
