@@ -3245,6 +3245,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
+
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
+        }
       
     }
 }

@@ -2287,6 +2287,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [Route("useraddresses")]
+        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetTopFiveUserAddresses();
+
+                return new ServiceResponse<List<AddressDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpPost]
         [Route("upgradetoecommerce")]
         public async Task<IServiceResponse<CompanyDTO>> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
