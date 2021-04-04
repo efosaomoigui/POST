@@ -311,11 +311,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).LGA,
                                    SenderAddress = r.SenderAddress,
                                    SenderName = r.SenderName,
+                                   DateCreated = r.DateCreated,
                                    SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.SenderStationId).StationName,
                                    SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
                                    SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
                                    SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).LGA,
-                               }).Take(5).ToList();
+                               }).OrderByDescending(x => x.DateCreated).Take(5).ToList();
 
             return address;
         }

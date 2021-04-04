@@ -389,5 +389,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderStationName { get; set; }
         public string SenderName { get; set; }
         public string SenderLGA { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }
