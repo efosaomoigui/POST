@@ -349,5 +349,38 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return await _shipmentService.GetGIGGOPrice(preShipment);
         }
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre()
+        {
+            var serviceCentreId = await _userService.GetPriviledgeServiceCenters();
+            var items = await _invoiceService.GetInvoiceByServiceCentre(serviceCentreId[0]);
+            if (items.Any())
+            {
+                foreach (var item in items)
+                {
+                    if (item.CustomerType == CustomerType.IndividualCustomer.ToString())
+                    {
+                        var cust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                        if (cust != null)
+                        {
+                            item.SenderName = cust.FirstName + " " + cust.LastName;
+                        }
+                    }
+                    else
+                    {
+                        var cust = await _uow.Company.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                        if (cust != null)
+                        {
+                            item.SenderName = cust.FirstName + " " + cust.LastName;
+                        }
+                    }
+                }
+            }
+            return items;
+        }
+        public async Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
+        {
+            return await _invoiceService.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
+        }
     }
 }

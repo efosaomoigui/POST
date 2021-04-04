@@ -1398,8 +1398,11 @@ namespace GIGLS.Services.Business.Pricing
             //get country by service centre
             var price = 0.0m;
             // check if categories is others, and weight is less than 20kg use flat rate of 20kg else use 5kg 
-            //check if the weight less than 20kg
-            if (pricingDto.Weight < 6)
+            //check if the weight less than 20kg,get minimum weight
+            var minValue = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersMinUK.ToString()).FirstOrDefault();
+            var min = Convert.ToInt32(minValue.Value);
+
+            if (pricingDto.Weight < min)
             {
                 var itemCategory = globalProperties.Where(x => x.Key == GlobalPropertyType.OthersLessThan20KgUK.ToString()).FirstOrDefault();
                 //get itemCategory where is others and less than 20kg
@@ -1493,6 +1496,62 @@ namespace GIGLS.Services.Business.Pricing
                 for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
                     price = price + Convert.ToDecimal(itemCategory.Value);
+                }
+            }
+            return price;
+        }
+
+
+
+        public async Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto)
+        {
+            var price = 0.0m;
+            if (pricingDto.DepartureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];
+            }
+            if (pricingDto.DestinationServiceCentreId <= 0)
+            {
+                throw new GenericException("Please select destination ", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+            //get item category
+            var itemCategory = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
+            if (itemCategory == null)
+            {
+                throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (itemCategory.CategoryMinimumWeight == 0)
+            {
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                }
+            }
+            else
+            {
+                if (pricingDto.Weight < itemCategory.CategoryMinimumWeight)
+                {
+                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    {
+                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                    }
+                }
+                else
+                {
+                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    {
+                        var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                        price = price + priceValue;
+                    }
                 }
             }
             return price;

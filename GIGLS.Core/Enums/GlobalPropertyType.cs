@@ -88,6 +88,7 @@
         Perfumes,
         PerfumesLessThan6Kg,
         InternationalRankClassDiscount,
-        InternationalBasicClassDiscount
+        InternationalBasicClassDiscount,
+        OthersMinUK
     }
 }

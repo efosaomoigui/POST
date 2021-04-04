@@ -515,5 +515,35 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpPost]
+        [Route("bulkpayment")]
+        public async Task<IServiceResponse<bool>> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("unpaidwaybillbyservicecentre")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetInvoiceByServiceCentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoices = await _tickectMan.GetInvoiceByServiceCentre();
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = invoices
+                };
+            });
+        }
+
+
     }
 }

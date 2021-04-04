@@ -22,9 +22,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
     public class ShipmentRepository : Repository<Shipment, GIGLSContext>, IShipmentRepository
     {
         private GIGLSContext _context;
-        public ShipmentRepository(GIGLSContext context) : base(context)
+        private GIGLSContextForView _viewcontext;
+        public ShipmentRepository(GIGLSContext context, GIGLSContextForView viewcontext) : base(context)
         {
             _context = context;
+            _viewcontext = viewcontext;
         }
 
         public Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds)
@@ -976,7 +978,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                ApproximateItemsWeight = s.ApproximateItemsWeight,
                                                Cash = i.Cash,
                                                Transfer = i.Transfer,
-                                               Pos = i.Pos
+                                               Pos = i.Pos,
+                                               DeclarationOfValueCheck = s.DeclarationOfValueCheck
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);
@@ -1252,6 +1255,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);
+        }
+        public Task<List<InvoiceViewDTO>> GetUnPaidWaybillForServiceCentre(int serviceCentreId)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            shipments = shipments.Where(X => X.DepartureServiceCentreId == serviceCentreId);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where i.PaymentStatus == PaymentStatus.Pending
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               CustomerType = s.CustomerType,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            return Task.FromResult(resultDto);
         }
     }
 

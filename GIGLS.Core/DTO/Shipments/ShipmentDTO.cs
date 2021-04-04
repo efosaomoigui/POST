@@ -181,7 +181,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerPhoneNumber { get; set; }
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
-        public string ItemSenderfullName { get; set; }  
+        public string ItemSenderfullName { get; set; }
+        public string CompanyType { get; set; }
+        public int UserActiveCountryId { get; set; }
+        public string CustomerCode { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
