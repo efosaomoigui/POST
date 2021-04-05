@@ -177,5 +177,38 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetActiveHomeDeliveryLocations">
+            <summary>
+            This api is used to get the active home delivery locations  
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPreShipmentMobileByWaybill(System.String)">
+            <summary>
+            This api is used to get the details about a shipment 
+            </summary>
+            <param name="waybillNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetManifestsInServiceCenter(GIGLS.CORE.DTO.Report.DateFilterCriteria)">
+            <summary>
+            This api is used to get the lists of manifests belonging to a service center 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetGroupWaybillDataInManifest(System.String)">
+            <summary>
+            This api is used to get the lists of group waybills and waybills assigned to a manifest 
+            </summary>
+            <param name="manifestCode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ScanShipment(System.String)">
+            <summary>
+            This api is used to give "Shipped from the UK" Scan to all the waybills in a manifests
+            </summary>
+            <param name="manifestCode"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

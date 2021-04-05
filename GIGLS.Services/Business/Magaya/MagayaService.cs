@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Customers;
@@ -13,6 +14,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -49,6 +51,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICustomerService _customerService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
 
         public MagayaService(
@@ -60,7 +63,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             IStationService stationService, IIndividualCustomerService individualCustomerController,
             IMessageSenderService messageSenderService,
             ICustomerService customerService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
             _uow = uow;
@@ -73,6 +76,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             _messageSenderService = messageSenderService;
             _customerService = customerService;
             _globalPropertyService = globalPropertyService;
+            _waybillPaymentLogService = waybillPaymentLogService;
 
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
@@ -369,6 +373,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var volumeweight = volume / 166; // * Convert.ToDouble(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Pieces);
                 var itemChargeableWeight = (volumeweight > weight) ? volumeweight : weight;
 
+                if(magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value > 0.00)
+                {
+                    itemChargeableWeight = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.ChargeableWeight.Value;
+                }
+
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
                 {
                     Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
@@ -457,6 +466,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     Method = MethodType.Air,
                     MeasurementUnits = magayaShipmentDTO.MeasurementUnits
                 };
+
 
                 magayaShipmentDTO.Charges.Charge[i].Customs = null;
                 magayaShipmentDTO.Charges.Charge[i].IsFromSegment = false;
@@ -554,6 +564,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
                 string error_code = "";
 
+                var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
+                var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
+                var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDto.Waybill);
+                shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
+                await _uow.CompleteAsync();
+
                 //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
                 result2 = error_code;
@@ -562,11 +578,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (result == api_session_error.no_error)
                 {
-                    var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
-                    var shipmentdto = await _shipmentService.AddShipment(shipmentDto);
-                    var shipmentsResult = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentdto.Waybill);
-                    shipmentsResult.ApproximateItemsWeight = totalChargeWeight;
-                    await _uow.CompleteAsync();
 
                     if (mDto.MagayaPaymentOption == "Collect")
                     {
@@ -577,7 +588,25 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                         // send email message for payment notification
                         // await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipmentDto);
-                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto);
+
+                        var waybillPayment = new WaybillPaymentLogDTO()
+                        {
+                            Waybill = shipmentdto.Waybill,
+                            OnlinePaymentType = OnlinePaymentType.Paystack,
+                            Email = shipmentdto.Customer[0].Email
+                        };
+
+                        int[] listOfCountryForPayment = { 1, 207 };
+                        List<string> paymentLinks = new List<string>();
+                        foreach (var country in listOfCountryForPayment)
+                        {
+                            waybillPayment.PaymentCountryId = country;
+                            waybillPayment.PaystackCountrySecret = "PayStackSecret";
+                            var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                            paymentLinks.Add(response.data.Authorization_url);
+                        }
+
+                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto, paymentLinks);
                     }
 
                     using (var client = new HttpClient())
@@ -649,6 +678,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
+                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.WalletNumber); 
                     throw new Exception("Error Creating Shipment ---" + result2);
                 }
 
@@ -1078,6 +1108,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     serialNumber++;
                 }
 
+                newShipment.Value = newShipment.ShipmentRequestItems.Sum(x => x.ItemValue);
                 newShipment.DestinationServiceCentre = null;
                 _uow.IntlShipmentRequest.Add(newShipment);
                 await _uow.CompleteAsync();
@@ -1274,6 +1305,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         }
                     }
                 }
+                existingRequest.Value = intlShipmentRequestItems.Sum(x => x.ItemValue);
                 _uow.IntlShipmentRequestItem.AddRange(intlShipmentRequestItems);
                 await _uow.CompleteAsync();
                 return true;
@@ -1604,9 +1636,26 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (shipmentDto.CustomerType.Contains("Individual"))
                 {
                     shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    shipmentDto.CompanyType = CompanyType.Client.ToString();
+                    var individual = await _uow.IndividualCustomer.GetAsync(x => x.IndividualCustomerId == shipment.CustomerId);
+                    if (individual != null)
+                    {
+                        shipmentDto.UserActiveCountryId = individual.UserActiveCountryId;
+                        shipmentDto.CustomerCode = individual.CustomerCode;
+                    }
                 }
 
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+                var customer = await _uow.Company.GetAsync(x => x.CompanyId == shipment.CustomerId);
+                if (customer != null)
+                {
+                    CompanyType companyType = (CompanyType)Enum.Parse(typeof(CompanyType), customer.CompanyType.ToString());
+                    shipmentDto.CustomerType = customerType.ToString();
+                    shipmentDto.CompanyType = companyType.ToString();
+                    shipmentDto.UserActiveCountryId = customer.UserActiveCountryId;
+                    shipmentDto.CustomerCode = customer.CustomerCode;
+                }
+
 
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
                 shipmentDto.CustomerAddress = shipmentDto.SenderAddress;
@@ -2209,20 +2258,27 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public async Task<bool> UpdateReceived(int shipmentItemRequestId)
+        public async Task<bool> UpdateReceived(List<int> itemIDs)
         {
             try
             {
-                var shipmentItem = await _uow.IntlShipmentRequestItem.GetAsync(x => x.IntlShipmentRequestItemId == shipmentItemRequestId);
-                if (shipmentItem == null)
+                if (itemIDs == null)
                 {
-                    throw new GenericException("Shipment Item Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var shipmentItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => itemIDs.Contains(x.IntlShipmentRequestId)).ToList();
+                if (!shipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Item(s) does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 var userId = await _userService.GetCurrentUserId();
                 var userInfo = await _userService.GetUserById(userId);
 
-                shipmentItem.Received = true;
-                shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
+                foreach (var shipmentItem in shipmentItems)
+                {
+                    shipmentItem.Received = true;
+                    shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}"; 
+                }
                 _uow.Complete();
                 return true;
             }

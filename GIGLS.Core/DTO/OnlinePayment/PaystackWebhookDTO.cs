@@ -26,6 +26,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         }
         public string Status { get; set; }
         public string Reference { get; set; }
+        public string Authorization_url { get; set; }
         public decimal Amount { get; set; }
         public string Gateway_Response { get; set; }
         public string Display_Text { get; set; }

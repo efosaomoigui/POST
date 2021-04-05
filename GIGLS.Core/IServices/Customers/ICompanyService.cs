@@ -34,5 +34,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
         Task SendMessageToNewSignUps(object obj);
         Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO);
     }
 }

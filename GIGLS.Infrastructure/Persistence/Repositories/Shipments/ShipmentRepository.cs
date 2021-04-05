@@ -978,7 +978,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                ApproximateItemsWeight = s.ApproximateItemsWeight,
                                                Cash = i.Cash,
                                                Transfer = i.Transfer,
-                                               Pos = i.Pos
+                                               Pos = i.Pos,
+                                               DeclarationOfValueCheck = s.DeclarationOfValueCheck
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);

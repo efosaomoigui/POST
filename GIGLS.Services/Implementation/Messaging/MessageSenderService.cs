@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -1475,6 +1476,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     result = await _emailService.SendCustomerRegistrationMails(messageDTO);
                 }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
             }
             catch (Exception ex)
             {
@@ -1491,6 +1498,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendOverseasShipmentMails(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
                 }
             }
             catch (Exception ex)
@@ -1560,7 +1573,7 @@ namespace GIGLS.Services.Implementation.Messaging
         }
 
         //Handle Received Items Mail for Overseas Shipment
-        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto)
+        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks)
         {
             //get CustomerDetails (
             if (shipmentDto.CustomerType.Contains("Individual"))
@@ -1572,25 +1585,13 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
 
-            var paymentLink = "";
             var delivery = "";
 
-            //Check if it is from mobile or not, to get right payment link
-            if (shipmentDto.Waybill.Contains("MWR"))
-            {
-                var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RedirectLinkForApps, 1);
-                paymentLink = link.Value;
-            }
-            else
-            {
-                var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
-                paymentLink = $"{link.Value}{shipmentDto.Waybill}";
-            }
-
+            var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+            var paymentLink = $"{link.Value}{shipmentDto.Waybill}";
 
             if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
-
                 delivery = shipmentDto.ReceiverAddress;
             }
             else if (shipmentDto.PickupOptions == PickupOptions.SERVICECENTER)
@@ -1609,7 +1610,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     ShippingCost = shipmentDto.GrandTotal.ToString(),
                     DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
                     PaymentLink = paymentLink,
-                    DeliveryAddressOrCenterName = delivery
+                    DeliveryAddressOrCenterName = delivery,
+                    GeneralPaymentLinkI = generalPaymentLinks[0],
+                    GeneralPaymentLinkII = generalPaymentLinks[1]
                 },
                 To = customerObj.Email,
                 ToEmail = customerObj.Email,
@@ -1617,6 +1620,19 @@ namespace GIGLS.Services.Implementation.Messaging
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
                 MessageTemplate = "OverseasReceivedItems"
             };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
+                    messageDTO.MessageTemplate = "OverseasReceivedItemsClass";
+                }
+            }
 
             await SendOverseasMails(messageDTO);
 

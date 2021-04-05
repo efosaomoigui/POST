@@ -51,6 +51,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task<bool> CancelShipment(string waybill);
+        Task<bool> CancelShipmentForMagaya(string waybill); 
 
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
         Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
@@ -128,7 +129,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IntlShipmentRequestDTO> GetShipmentRequest(string requestNumber);
         Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId);
         Task<bool> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO shipmentDTO);
-        Task<bool> UpdateReceived(int shipmentItemRequestId);
+        Task<bool> UpdateReceived(List<int> itemIDs);
         Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID);
     }
 
