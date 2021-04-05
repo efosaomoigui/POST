@@ -64,7 +64,6 @@ namespace GIGLS.Core.DTO.UPS
         }
         public string Name { get; set; }
         public string AttentionName { get; set; }
-        public string TaxIdentificationNumber { get; set; }
         public UPSPhone Phone { get; set; }
         public string ShipperNumber { get; set; }
         public UPSAddress Address { get; set; }

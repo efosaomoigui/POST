@@ -913,6 +913,7 @@
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
     <Compile Include="IServices\TickectMan\ITickectManService.cs" />
+    <Compile Include="IServices\UPS\IUPSService.cs" />
     <Compile Include="IServices\User\IRankHistoryService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
     <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />
