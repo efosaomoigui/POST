@@ -207,8 +207,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
+        Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO);
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
+        Task<List<AddressDTO>> GetTopFiveUserAddresses();
     }
 }

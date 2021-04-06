@@ -13,5 +13,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(500)]
         public string FormattedAddress { get; set; }
+        [MaxLength(128)]
+        public string LGA { get; set; }
+
     }
 }

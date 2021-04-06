@@ -137,7 +137,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
-            var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
 
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
@@ -255,7 +255,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //deduct the price for the wallet and update wallet transaction table
                 if (wallet.Balance - amountToDebit < (Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
                 {
-                    throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                    throw new GenericException(" Shipment successfully created, however payment could not be processed for ecommerce customer due to insufficient wallet balance ");
                 }
             }
 
@@ -266,7 +266,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
@@ -274,7 +274,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
