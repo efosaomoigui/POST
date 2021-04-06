@@ -5552,8 +5552,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               DateCreated = r.DateCreated,
                                                               DateModified = r.DateModified,
                                                               ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                                              ReceiverAddress = r.ReceiverAddress == null ? r.ReceiverAddress : _uow.ServiceCentre.GetAllAsQueryable().FirstOrDefault(x => x.ServiceCentreId == r.DestinationServiceCentreId).FormattedServiceCentreName ,
-                                                              SenderAddress = r.SenderAddress == null ? r.SenderAddress : _uow.ServiceCentre.GetAllAsQueryable().FirstOrDefault(x => x.ServiceCentreId == r.DepartureServiceCentreId).FormattedServiceCentreName ,
+                                                              ReceiverAddress = r.ReceiverAddress,
+                                                              SenderAddress = r.SenderAddress,
                                                               ReceiverCountry = r.ReceiverCountry,
                                                               ReceiverEmail = r.ReceiverEmail,
                                                               ReceiverName = r.ReceiverName,
@@ -5592,6 +5592,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
                         shipments.SenderAddress = CustomerDetails.Address;
                         shipments.SenderName = CustomerDetails.Name;
+                    }
+                    if (String.IsNullOrEmpty(shipments.ReceiverAddress))
+                    {
+                        shipments.ReceiverAddress = _uow.ServiceCentre.GetAllAsQueryable().FirstOrDefault(x => x.ServiceCentreId == shipments.DestinationServiceCentreId).FormattedServiceCentreName;
+
                     }
                 }
 
