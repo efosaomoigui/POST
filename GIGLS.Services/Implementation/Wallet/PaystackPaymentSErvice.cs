@@ -1137,32 +1137,33 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
                 {
                     //3. Process payment for the waybill if successful
-                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
-                    {
-                        Waybill = paymentLog.Waybill,
-                        PaymentType = PaymentType.Online,
-                        TransactionCode = paymentLog.Reference,
-                        UserId = paymentLog.UserId
-                    };
+                    var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
-
-                    if (processWaybillPayment)
+                    if (checkAmount)
                     {
-                        //2. Update waybill Payment log
-                        paymentLog.IsPaymentSuccessful = true;
-                        paymentLog.IsWaybillSettled = true;
+                        //3. Process payment for the waybill if successful
+                        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                        {
+                            Waybill = paymentLog.Waybill,
+                            PaymentType = PaymentType.Online,
+                            TransactionCode = paymentLog.Reference,
+                            UserId = paymentLog.UserId
+                        };
+
+                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                        if (processWaybillPayment)
+                        {
+                            //2. Update waybill Payment log
+                            paymentLog.IsPaymentSuccessful = true;
+                            paymentLog.IsWaybillSettled = true;
+                        }
                     }
                 }
 
-                //3. update the wallet payment log
-                if (verifyResult.data.Status != null)
-                {
-                    paymentLog.IsWaybillSettled = true;
-                }
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
@@ -1197,32 +1198,32 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
                 {
-                    //3. Process payment for the waybill if successful
-                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
-                    {
-                        Waybill = paymentLog.Waybill,
-                        PaymentType = PaymentType.Online,
-                        TransactionCode = paymentLog.Reference,
-                        UserId = paymentLog.UserId
-                    };
+                    var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
-
-                    if (processWaybillPayment)
+                    if (checkAmount)
                     {
-                        //2. Update waybill Payment log
-                        paymentLog.IsPaymentSuccessful = true;
-                        paymentLog.IsWaybillSettled = true;
+                        //3. Process payment for the waybill if successful
+                        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                        {
+                            Waybill = paymentLog.Waybill,
+                            PaymentType = PaymentType.Online,
+                            TransactionCode = paymentLog.Reference,
+                            UserId = paymentLog.UserId
+                        };
+
+                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                        if (processWaybillPayment)
+                        {
+                            //2. Update waybill Payment log
+                            paymentLog.IsPaymentSuccessful = true;
+                            paymentLog.IsWaybillSettled = true;
+                        }
                     }
                 }
 
-                //3. update the wallet payment log
-                if (verifyResult.data.Status != null)
-                {
-                    paymentLog.IsWaybillSettled = true;
-                }
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
@@ -1250,5 +1251,22 @@ namespace GIGLS.Services.Implementation.Wallet
             return response;
         }
 
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paystackAmount)
+        {
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            decimal roundUpPaystackAmount = Math.Round(paystackAmount * factor) / factor;
+
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paystackAmount 
+                || increaseShipmentPrice == roundUpPaystackAmount
+                || decreaseShipmentPrice == roundUpPaystackAmount)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
