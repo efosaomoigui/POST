@@ -306,5 +306,37 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task<object> GetByCode(string customerCode)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(customerCode))
+                {
+                    throw new GenericException("Invalid Customer Code");
+                }
+                //check individual table
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                if (customer != null)
+                {
+                    IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+                    return individual;
+                }
+                else
+                {
+                    var company = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                    if (company != null)
+                    {
+                        CompanyDTO companydto = Mapper.Map<CompanyDTO>(company);
+                        return companydto;
+                    }
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

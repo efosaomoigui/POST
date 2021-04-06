@@ -255,7 +255,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //deduct the price for the wallet and update wallet transaction table
                 if (wallet.Balance - amountToDebit < (Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
                 {
-                    throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                    throw new GenericException(" Shipment successfully created, however payment could not be processed for ecommerce customer due to insufficient wallet balance ");
                 }
             }
 
@@ -266,7 +266,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
@@ -274,7 +274,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
