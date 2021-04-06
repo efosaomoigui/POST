@@ -5564,6 +5564,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                              DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                               shipmentstatus = "Shipment",
                                                               CustomerId = r.CustomerId,
                                                               CustomerType = r.CustomerType,
@@ -5591,6 +5592,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
                         shipments.SenderAddress = CustomerDetails.Address;
                         shipments.SenderName = CustomerDetails.Name;
+                    }
+                    if (String.IsNullOrEmpty(shipments.ReceiverAddress))
+                    {
+                        shipments.ReceiverAddress = _uow.ServiceCentre.GetAllAsQueryable().FirstOrDefault(x => x.ServiceCentreId == shipments.DestinationServiceCentreId).FormattedServiceCentreName;
+
                     }
                 }
 
