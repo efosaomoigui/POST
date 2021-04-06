@@ -2324,7 +2324,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
                 var ManifestNumber = movementManifest.FirstOrDefault();
 
-                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                if (ManifestNumber.IsDriverValid == true && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
                 {
                     return true;
                 }
@@ -2344,15 +2344,15 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var retVal = false;
-                if (valMovementManifest.flag == MovementManifestActivationTypes.AgentActivation)
+                if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
                 {
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
+                    if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
-                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
+                        ManifestNumber.MovementStatus = MovementStatus.InProgress;
                         await _uow.CompleteAsync();
                         retVal = true;
                     }
@@ -2362,12 +2362,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
+                if (valMovementManifest.flag == MovementManifestActivationTypes.AgentActivation)
                 {
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DriverCode == valMovementManifest.code)
+                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
@@ -4222,7 +4222,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    // create new
+                    // create new 
                     var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
                     if (await _uow.IndividualCustomer.ExistAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim()))
                     {

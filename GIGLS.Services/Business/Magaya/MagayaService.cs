@@ -656,7 +656,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.WalletNumber); 
+                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.Waybill); 
                     throw new Exception("Error Creating Shipment ---" + result2);
                 }
 
