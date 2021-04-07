@@ -589,5 +589,18 @@ namespace GIGLS.Services.Implementation.Customers
 
         }
 
+        public async Task<object> GetByCode(string customerCode)
+        {
+            try
+            {
+                var customer = await _individualCustomerService.GetByCode(customerCode);
+                return customer;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

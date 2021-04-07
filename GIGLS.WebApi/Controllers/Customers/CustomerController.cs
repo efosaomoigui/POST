@@ -225,5 +225,22 @@ namespace GIGLS.WebApi.Controllers
         }
 
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getbycode/{code}")]
+        public async Task<IServiceResponse<object>> GetByCode(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customerObj = await _service.GetByCode(code);
+
+                return new ServiceResponse<object>
+                {
+                    Object = customerObj
+                };
+            });
+        }
+
+
     }
 }
