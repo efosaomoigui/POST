@@ -100,22 +100,10 @@ namespace GIGLS.Services.Implementation.Wallet
             walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
 
             //if the country is not Nigeria or Ghana, block it
-            if(walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76)
+            if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76 && walletPaymentLogDto.PaymentCountryId != 207)
             {
                 throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
             }
-
-            //set Nigeria as default country if no country assign for the customer
-            //if (walletPaymentLogDto.PaymentCountryId == 0)
-            //{
-            //    walletPaymentLogDto.PaymentCountryId = 1;
-            //}
-
-            //if the country is not Nigeria or Ghana, block it
-            //if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76)
-            //{
-            //    throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
-            //}
 
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (wallet != null)
