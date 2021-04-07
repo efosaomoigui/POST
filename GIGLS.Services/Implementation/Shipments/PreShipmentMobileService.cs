@@ -797,28 +797,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             Waybill = newPreShipment.Waybill,
                             OnlinePaymentType = OnlinePaymentType.Paystack,
-                            Email = customer.Email
+                            Email = customer.Email,
+                            Amount = newPreShipment.GrandTotal
                         };
                         waybillPayment.PaymentCountryId = customer.UserActiveCountryId;
                         waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
-                        var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                        var response = await _waybillPaymentLogService.PayForIntlShipmentUsingPaystack(waybillPayment);
                         preShipmentDTO.PaymentUrl = response.data.Authorization_url;
-
-                        //also log to waybillpaymentlog
-                        var waybillPaymentLog = new WaybillPaymentLog()
-                        {
-                            Waybill = newPreShipment.Waybill,
-                            OnlinePaymentType = OnlinePaymentType.Paystack,
-                            Email = customer.Email,
-                            Reference = await _waybillPaymentLogService.GenerateWaybillReferenceCode(newPreShipment.Waybill),
-                            Amount = newPreShipment.GrandTotal,
-                            Currency = country.CurrencySymbol,
-                            UserId = user.Id,
-                            IsWaybillSettled = false,
-                            PhoneNumber = customer.PhoneNumber,
-                            PaymentCountryId = user.UserActiveCountryId
-                        };
-                        _uow.WaybillPaymentLog.Add(waybillPaymentLog);
                     }
 
                     await _uow.CompleteAsync();

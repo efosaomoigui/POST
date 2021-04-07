@@ -778,7 +778,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        private async Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        public async Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
