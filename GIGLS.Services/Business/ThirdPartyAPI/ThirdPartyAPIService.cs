@@ -14,6 +14,11 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Infrastructure;
+using System.Net;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -24,15 +29,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IUnitOfWork _uow;
         private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
         private readonly IScanService _scanService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
-                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService)
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
             _manifestGroupWaybillNumberMappingService = manifestGroupWaybillNumberMappingService;
             _scanService = scanService;
             _uow = uow;
+            _waybillPaymentLogService = waybillPaymentLogService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -61,7 +68,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result.IsBalanceSufficient,
                 result.Zone,
                 result.WaybillImage,
-                result.WaybillImageFormat
+                result.WaybillImageFormat,
+                result.PaymentUrl
             };
         }
 
@@ -131,6 +139,46 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             await _scanService.ItemShippedFromUKScan(manifestCode);
             return true;
+        }
+
+        public async Task<PaymentTransactionDTO> GetPaymentLink(PaymentTransactionDTO paymentTransactionDTO)
+        {
+            var result = new PaymentTransactionDTO();
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentTransactionDTO.Waybill);
+            if (shipment == null)
+            {
+                throw new GenericException("Waybill does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var email = String.Empty;
+            int country = 0;
+            if (shipment.CompanyType.Contains("Individual"))
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == shipment.CustomerCode);
+                email = customer.Email;
+                country = customer.UserActiveCountryId;
+            }
+            else
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == shipment.CustomerCode);
+                email = customer.Email;
+                country = customer.UserActiveCountryId;
+            }
+            var waybillPayment = new WaybillPaymentLogDTO()
+            {
+                Waybill = paymentTransactionDTO.Waybill,
+                OnlinePaymentType = OnlinePaymentType.Paystack,
+                Email = email
+            };
+
+            waybillPayment.PaymentCountryId = country;
+            waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+            var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+
+            result.PaymentStatus = PaymentStatus.Pending;
+            result.PaymentType = PaymentType.Online;
+            result.Waybill = paymentTransactionDTO.Waybill;
+            result.PaymentLink = response.data.Authorization_url;
+            return result;
         }
 
         //Price API

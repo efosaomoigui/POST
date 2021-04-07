@@ -22,5 +22,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<GatewayCodeResponse> GetGatewayCode();
         Task<PaystackWebhookDTO> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO waybillPaymentLog);
         Task<PaystackWebhookDTO> AddWaybillPaymentLogForIntlShipment(WaybillPaymentLogDTO waybillPaymentLog);
+        Task<string> GenerateWaybillReferenceCode(string waybill);
     }
 }

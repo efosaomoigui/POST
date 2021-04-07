@@ -97,5 +97,6 @@ namespace GIGL.GIGLS.Core.Domain
         public IdentificationType IdentificationType { get; set; }
         public bool IsInternational { get; set; }
         public DateTime RankModificationDate { get; set; }
+        public WalletTransactionType TransactionType { get; set; }
     }
 }

@@ -225,7 +225,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return paystackResponse;
         }
 
-        private async Task<string> GenerateWaybillReferenceCode(string waybill)
+        public async Task<string> GenerateWaybillReferenceCode(string waybill)
         {
             string code = await _passwordGenerator.Generate();
             string reference = "wb-" + waybill + "-" + code;

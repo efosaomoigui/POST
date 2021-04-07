@@ -44,6 +44,7 @@ using GIGLS.Core.IServices.Node;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.DTO.Node;
 using Newtonsoft.Json;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -73,6 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IFinancialReportService _financialReportService;
         private readonly INodeService _nodeService;
         private readonly IPaymentService _paymentService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -81,7 +83,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
-            INodeService nodeService, IPaymentService paymentService)
+            INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -107,6 +109,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _financialReportService = financialReportService;
             _nodeService = nodeService;
             _paymentService = paymentService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -229,6 +232,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preshipmentRetuenObj.message = message;
                 preshipmentRetuenObj.IsBalanceSufficient = IsBalanceSufficient;
                 preshipmentRetuenObj.Zone = zoneid.ZoneId;
+                preshipmentRetuenObj.PaymentUrl = newPreShipment.PaymentUrl;
 
 
                 return preshipmentRetuenObj;
@@ -749,39 +753,73 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.ShipmentPickupPrice = (decimal)(preshipmentPriceDTO.PickUpCharge == null ? 0.0M : preshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
 
-                    //process payment
-                    var transaction = new WalletTransactionDTO
+                    if (customer.TransactionType != WalletTransactionType.BOT)
                     {
-                        WalletId = wallet.WalletId,
-                        CreditDebitType = CreditDebitType.Debit,
-                        Amount = newPreShipment.GrandTotal,
-                        ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
-                        Waybill = newPreShipment.Waybill,
-                        Description = "Payment for Shipment",
-                        PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
-                        UserId = newPreShipment.UserId
-                    };
+                        //process payment
+                        var transaction = new WalletTransactionDTO
+                        {
+                            WalletId = wallet.WalletId,
+                            CreditDebitType = CreditDebitType.Debit,
+                            Amount = newPreShipment.GrandTotal,
+                            ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
+                            Waybill = newPreShipment.Waybill,
+                            Description = "Payment for Shipment",
+                            PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
+                            UserId = newPreShipment.UserId
+                        };
 
-                    if (transaction.CreditDebitType == CreditDebitType.Credit)
-                    {
-                        transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
+                        if (transaction.CreditDebitType == CreditDebitType.Credit)
+                        {
+                            transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
+                        }
+                        else
+                        {
+                            transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
+                        }
+
+                        //update wallet
+                        var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+                        //double check in case something is wrong with the server before complete the transaction
+                        if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
+                        {
+                            preShipmentDTO.IsBalanceSufficient = false;
+                            return preShipmentDTO;
+                        }
+                        decimal price = updatedwallet.Balance - shipmentGrandTotal;
+                        updatedwallet.Balance = price;
+                        var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction); 
                     }
+
                     else
                     {
-                        transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
-                    }
+                        //generate paymentlink 
+                        var waybillPayment = new WaybillPaymentLogDTO()
+                        {
+                            Waybill = newPreShipment.Waybill,
+                            OnlinePaymentType = OnlinePaymentType.Paystack,
+                            Email = customer.Email
+                        };
+                        waybillPayment.PaymentCountryId = customer.UserActiveCountryId;
+                        waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                        var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                        preShipmentDTO.PaymentUrl = response.data.Authorization_url;
 
-                    //update wallet
-                    var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-                    //double check in case something is wrong with the server before complete the transaction
-                    if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
-                    {
-                        preShipmentDTO.IsBalanceSufficient = false;
-                        return preShipmentDTO;
+                        //also log to waybillpaymentlog
+                        var waybillPaymentLog = new WaybillPaymentLog()
+                        {
+                            Waybill = newPreShipment.Waybill,
+                            OnlinePaymentType = OnlinePaymentType.Paystack,
+                            Email = customer.Email,
+                            Reference = await _waybillPaymentLogService.GenerateWaybillReferenceCode(newPreShipment.Waybill),
+                            Amount = newPreShipment.GrandTotal,
+                            Currency = country.CurrencySymbol,
+                            UserId = user.Id,
+                            IsWaybillSettled = false,
+                            PhoneNumber = customer.PhoneNumber,
+                            PaymentCountryId = user.UserActiveCountryId
+                        };
+                        _uow.WaybillPaymentLog.Add(waybillPaymentLog);
                     }
-                    decimal price = updatedwallet.Balance - shipmentGrandTotal;
-                    updatedwallet.Balance = price;
-                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
@@ -792,7 +830,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Fire and forget
                     //Send the Payload to Partner Cloud Handler 
-                    if (!preShipmentDTO.IsBatchPickUp)
+                    if (!preShipmentDTO.IsBatchPickUp && customer.TransactionType != WalletTransactionType.BOT)
                     {
                         await NodeApiCreateShipment(newPreShipment);
                     }
