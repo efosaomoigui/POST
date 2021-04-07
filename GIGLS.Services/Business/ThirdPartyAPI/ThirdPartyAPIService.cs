@@ -141,45 +141,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
-        public async Task<PaymentTransactionDTO> GetPaymentLink(PaymentTransactionDTO paymentTransactionDTO)
-        {
-            var result = new PaymentTransactionDTO();
-            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentTransactionDTO.Waybill);
-            if (shipment == null)
-            {
-                throw new GenericException("Waybill does not exist", $"{(int)HttpStatusCode.NotFound}");
-            }
-            var email = String.Empty;
-            int country = 0;
-            if (shipment.CompanyType.Contains("Individual"))
-            {
-                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == shipment.CustomerCode);
-                email = customer.Email;
-                country = customer.UserActiveCountryId;
-            }
-            else
-            {
-                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == shipment.CustomerCode);
-                email = customer.Email;
-                country = customer.UserActiveCountryId;
-            }
-            var waybillPayment = new WaybillPaymentLogDTO()
-            {
-                Waybill = paymentTransactionDTO.Waybill,
-                OnlinePaymentType = OnlinePaymentType.Paystack,
-                Email = email
-            };
-
-            waybillPayment.PaymentCountryId = country;
-            waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
-            var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
-
-            result.PaymentStatus = PaymentStatus.Pending;
-            result.PaymentType = PaymentType.Online;
-            result.Waybill = paymentTransactionDTO.Waybill;
-            result.PaymentLink = response.data.Authorization_url;
-            return result;
-        }
 
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
