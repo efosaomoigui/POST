@@ -715,6 +715,21 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetExpectedManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria) 
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetExpectedManifestMovementNumberMappings(serviceCenters, dateFilterCriteria);
+
+                return manifestManifests;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<ManifestDTO>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
         {
             try

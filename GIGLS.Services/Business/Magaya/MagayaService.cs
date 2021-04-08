@@ -678,8 +678,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 else
                 {
-                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.WalletNumber); 
-                    throw new Exception("Error Creating Shipment ---" + result2);
+                    var shipmentResult  = await _shipmentService.CancelShipmentForMagaya(shipmentDto.Waybill);
+                    var createStatus = (shipmentResult) ? " Shipment Created in Agility is Cancelled: (" + shipmentDto.Waybill+ "}" : "";
+                    throw new Exception("Error Creating Shipment ---" + result2+ " " + createStatus);
                 }
 
                 errval = error_code;

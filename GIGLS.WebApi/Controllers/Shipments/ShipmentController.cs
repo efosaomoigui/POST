@@ -401,7 +401,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
         public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
