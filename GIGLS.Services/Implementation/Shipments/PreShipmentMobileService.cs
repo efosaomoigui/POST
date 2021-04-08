@@ -751,7 +751,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = preshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(preshipmentPriceDTO.PickUpCharge == null ? 0.0M : preshipmentPriceDTO.PickUpCharge);
-                    if (customer.TransactionType != WalletTransactionType.BOT)
+                    if (customer.TransactionType == WalletTransactionType.BOT)
                     {
                         newPreShipment.shipmentstatus = MobilePickUpRequestStatus.Pending.ToString();
                     }

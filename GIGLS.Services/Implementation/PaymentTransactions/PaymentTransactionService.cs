@@ -672,12 +672,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 };
 
+                var shipmentToUpdate = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == paymentTransaction.Waybill);
+                if (shipmentToUpdate != null)
+                {
+                    //Update shipment to shipment created
+                    preshipment.shipmentstatus = "Shipment created";
+                }
+
                 await _nodeService.CreateShipment(nodePayload);
+                await _uow.CompleteAsync();
             }
-
-            //process payment
-            preshipment.shipmentstatus = "Shipment created";
-
             result = true;
             return result;
         }
