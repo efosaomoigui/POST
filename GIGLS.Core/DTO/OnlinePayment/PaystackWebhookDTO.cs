@@ -73,6 +73,8 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Message { get; set; }
         public string GatewayResponse { get; set; }
         public string Status { get; set; }
+        public bool ResponseStatus { get; set; }
+
     }
 
     public enum WaybillWalletPaymentType

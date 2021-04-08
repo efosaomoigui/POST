@@ -19,6 +19,7 @@
         Processing,
         TimedOut,
         Missed,
-        Moved
+        Moved,
+        Pending
     }
 }

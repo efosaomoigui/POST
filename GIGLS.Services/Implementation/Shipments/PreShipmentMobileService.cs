@@ -751,6 +751,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = preshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(preshipmentPriceDTO.PickUpCharge == null ? 0.0M : preshipmentPriceDTO.PickUpCharge);
+                    if (customer.TransactionType != WalletTransactionType.BOT)
+                    {
+                        newPreShipment.shipmentstatus = MobilePickUpRequestStatus.Pending.ToString();
+                    }
                     _uow.PreShipmentMobile.Add(newPreShipment);
 
                     if (customer.TransactionType != WalletTransactionType.BOT)
@@ -801,7 +805,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             Amount = newPreShipment.GrandTotal
                         };
                         waybillPayment.PaymentCountryId = customer.UserActiveCountryId;
-                        waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                        waybillPayment.PaystackCountrySecret = "PayStackSecret";
                         var response = await _waybillPaymentLogService.PayForIntlShipmentUsingPaystack(waybillPayment);
                         preShipmentDTO.PaymentUrl = response.data.Authorization_url;
                     }

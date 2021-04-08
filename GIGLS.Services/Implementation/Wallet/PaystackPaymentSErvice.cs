@@ -24,6 +24,7 @@ using GIGLS.Core.DTO;
 using System.Linq;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -116,6 +117,61 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
         public async Task<bool> VerifyAndValidateWallet(PaystackWebhookDTO webhook)
+        {
+            bool result = false;
+
+            var checkType = GetPackagePaymentType(webhook.data.Reference);
+
+            if (checkType == WaybillWalletPaymentType.Waybill)
+            {
+                var data = await VerifyAndProcessPaymentForWaybill(webhook.data.Reference);
+                result = data.ResponseStatus;
+
+                if (result)
+                {
+                    //check if waybill is from BOT
+                    var refSplit = webhook.data.Reference.Split('-');
+                    var waybill = refSplit[1];
+                    var preshipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(waybill);
+                    if (preshipment != null)
+                    {
+                        var nodePayload = new CreateShipmentNodeDTO()
+                        {
+                            waybillNumber = preshipment.Waybill,
+                            customerId = preshipment.CustomerCode,
+                            locality = preshipment.SenderLocality,
+                            receiverAddress = preshipment.ReceiverAddress,
+                            vehicleType = preshipment.VehicleType,
+                            value = preshipment.Value,
+                            zone = preshipment.ZoneMapping,
+                            senderAddress = preshipment.SenderAddress,
+                            receiverLocation = new NodeLocationDTO()
+                            {
+                                lng = preshipment.ReceiverLng,
+                                lat = preshipment.ReceiverLat
+                            },
+                            senderLocation = new NodeLocationDTO()
+                            {
+                                lng = preshipment.SenderLng,
+                                lat = preshipment.SenderLat
+                            }
+                        };
+
+                        await _nodeService.CreateShipment(nodePayload);
+                    }
+
+
+                }
+            }
+            else
+            {
+                result = await VerifyAndValidateWalletTopUp(webhook);
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private async Task<bool> VerifyAndValidateWalletTopUp(PaystackWebhookDTO webhook)
         {
             bool result = false;
 
@@ -1173,6 +1229,7 @@ namespace GIGLS.Services.Implementation.Wallet
                             //2. Update waybill Payment log
                             paymentLog.IsPaymentSuccessful = true;
                             paymentLog.IsWaybillSettled = true;
+                            result.ResponseStatus = true;
                         }
                     }
                 }
@@ -1192,6 +1249,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //1. verify the payment 
             var verifyResult = await VerifyPayment(referenceCode);
+            bool processWaybillPayment = false;
 
             PaymentResponse result = new PaymentResponse
             {
@@ -1226,13 +1284,23 @@ namespace GIGLS.Services.Implementation.Wallet
                             UserId = paymentLog.UserId
                         };
 
-                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+                        //check if its GIGGO shipment
+                        var giggoPreshipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == paymentTransaction.Waybill);
+                        if (giggoPreshipmentMobile != null)
+                        {
+                            processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransactionGIGGO(paymentTransaction);
+                        }
+                        else
+                        {
+                            processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+                        }
 
                         if (processWaybillPayment)
                         {
                             //2. Update waybill Payment log
                             paymentLog.IsPaymentSuccessful = true;
                             paymentLog.IsWaybillSettled = true;
+                            result.ResponseStatus = true;
                         }
                     }
                 }
@@ -1275,6 +1343,17 @@ namespace GIGLS.Services.Implementation.Wallet
                 return true;
             }
 
+            return false;
+        }
+
+        private bool ProcessWalletTopUp()
+        {
+
+            return false;
+        }
+
+        private bool ProcessWaybillPayment()
+        {
             return false;
         }
     }

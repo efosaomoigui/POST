@@ -321,5 +321,45 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return address;
         }
 
+
+        public async Task<PreShipmentMobileDTO> GetPreshipmentMobileByWaybill(string waybill)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.Waybill == waybill);
+
+            var preShipmentDTO = (from r in preShipments
+                           select new PreShipmentMobileDTO()
+                           {
+                               ReceiverAddress = r.ReceiverAddress,
+                               ReceiverName = r.ReceiverName,
+                               ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.ReceiverStationId).StationName,
+                               ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Latitude,
+                               ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Longitude,
+                               SenderAddress = r.SenderAddress,
+                               SenderName = r.SenderName,
+                               DateCreated = r.DateCreated,
+                               SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.SenderStationId).StationName,
+                               SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
+                               SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
+                               PreShipmentMobileId = r.PreShipmentMobileId,
+                               Waybill = r.Waybill,
+                               DateModified = r.DateModified,
+                               ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                               shipmentstatus = r.shipmentstatus,
+                               GrandTotal = r.GrandTotal,
+                               IsDelivered = r.IsDelivered,
+                               IsBatchPickUp = r.IsBatchPickUp,
+                               IsCancelled = r.IsCancelled,
+                               PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
+                                      .Select(y => new PreShipmentItemMobileDTO
+                                      {
+                                          PreShipmentItemMobileId = y.PreShipmentItemMobileId,
+                                          Description = y.Description
+                                      }).ToList()
+                           }).ToList();
+
+            return preShipmentDTO.FirstOrDefault();
+
+        }
+
     }
 }

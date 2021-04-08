@@ -19,6 +19,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         IQueryable<PreShipmentMobileDTO> GetBatchedPreShipmentForUser(string userChannelCode);
         IQueryable<PreShipmentMobileDTO> GetAllBatchedPreShipment();
         Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID);
+        Task<PreShipmentMobileDTO> GetPreshipmentMobileByWaybill(string waybill);
 
     }
 }

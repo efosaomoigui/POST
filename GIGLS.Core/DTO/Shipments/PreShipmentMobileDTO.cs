@@ -170,6 +170,10 @@ namespace GIGLS.Core.DTO.Shipments
         public PickupOptions PickupOptions { get; set; }
         public int DestinationServiceCentreId { get; set; }
         public string PaymentUrl { get; set; }
+        public double? ReceiverLat { get; set; }
+        public double? ReceiverLng { get; set; }
+        public double? SenderLat { get; set; }
+        public double? SenderLng { get; set; }
 
 
     }
