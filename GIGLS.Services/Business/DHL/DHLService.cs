@@ -261,14 +261,17 @@ namespace GIGLS.Services.Business.DHL
 
         private Details GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
+            string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
+            string phoneNumber = ConfigurationManager.AppSettings["UPSGIGPhoneNumber"];
+
             Details shipper = new Details
             {
                 Contact = new Contact
                 {
                     PersonName = shipmentDTO.CustomerDetails.CustomerName,
                     CompanyName = "GIG LOGISTICS",
-                    PhoneNumber = "2348035324958",
-                    EmailAddress = "azeez.oladejo@giglogistics.com"
+                    PhoneNumber = phoneNumber,
+                    EmailAddress = email
                 },
                 Address = new AddressPayload
                 {
