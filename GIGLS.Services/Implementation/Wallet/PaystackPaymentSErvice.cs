@@ -1332,17 +1332,18 @@ namespace GIGLS.Services.Implementation.Wallet
             return response;
         }
 
-        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paystackAmount)
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
         {
             var factor = Convert.ToDecimal(Math.Pow(10, 0));
-            decimal roundUpPaystackAmount = Math.Round(paystackAmount * factor) / factor;
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
+            shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
 
             decimal increaseShipmentPrice = shipmentAmount + 1;
             decimal decreaseShipmentPrice = shipmentAmount - 1;
 
-            if (shipmentAmount == paystackAmount
-                || increaseShipmentPrice == roundUpPaystackAmount
-                || decreaseShipmentPrice == roundUpPaystackAmount)
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
             {
                 return true;
             }
