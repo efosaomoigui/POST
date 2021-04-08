@@ -39,7 +39,7 @@ namespace GIGLS.Core.DTO.UPS
         {
             Shipper = new UPSCustomerInfo();
             ShipTo = new UPSCustomerInfo();
-            ShipFrom = new UPSCustomerInfo();
+            //ShipFrom = new UPSCustomerInfo(); Required for return shipment. Required if pickup location is different from the shipper’s address.
             PaymentInformation = new UPSPaymentInformation();
             Service = new UPSService();
             Package = new List<UPSPackage>();
@@ -49,7 +49,7 @@ namespace GIGLS.Core.DTO.UPS
         public string Description { get; set; }
         public UPSCustomerInfo Shipper { get; set; }
         public UPSCustomerInfo ShipTo { get; set; }
-        public UPSCustomerInfo ShipFrom { get; set; }
+        //public UPSCustomerInfo ShipFrom { get; set; }
         public UPSPaymentInformation PaymentInformation { get; set; }
         public UPSService Service { get; set; }
         public List<UPSPackage> Package { get; set; }
@@ -85,7 +85,7 @@ namespace GIGLS.Core.DTO.UPS
             BillShipper = new BillShipper();
         }
 
-        public string Type { get; set; }
+        public string Type { get; set; } = "01";
         public BillShipper BillShipper { get; set; }
     }
 

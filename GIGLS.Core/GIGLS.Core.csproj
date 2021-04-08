@@ -508,6 +508,7 @@
     <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\UPS\LabelDescription.cs" />
     <Compile Include="DTO\UPS\LabelImageFormat.cs" />
     <Compile Include="DTO\UPS\LabelSpecification.cs" />
     <Compile Include="DTO\UPS\UPSAddress.cs" />
@@ -517,7 +518,6 @@
     <Compile Include="DTO\UPS\UPSSecurity.cs" />
     <Compile Include="DTO\UPS\UPSShipmentRequest.cs" />
     <Compile Include="DTO\UPS\UPSShipmentResponsePayload.cs" />
-    <Compile Include="DTO\UPS\UPSUnitOfMeasurement.cs" />
     <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />

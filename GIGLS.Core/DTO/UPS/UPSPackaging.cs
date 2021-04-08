@@ -4,9 +4,9 @@
     {
         public UPSPackaging()
         {
-            UnitOfMeasurement = new UPSUnitOfMeasurement();
+            UnitOfMeasurement = new LabelDescription();
         }
-        public UPSUnitOfMeasurement UnitOfMeasurement { get; set; }
+        public LabelDescription UnitOfMeasurement { get; set; }
         public string Weight { get; set; }
     }
 }

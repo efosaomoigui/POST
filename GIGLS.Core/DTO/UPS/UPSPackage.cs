@@ -6,27 +6,36 @@ namespace GIGLS.Core.DTO.UPS
     {
         public UPSPackage()
         {
-            Packaging = new UPSPackaging();
+            Packaging = new LabelDescription();
             Dimensions = new UPSDimensions();
             PackageWeight = new UPSPackageWeight();
         }
 
         [MaxLength(50, ErrorMessage = "Item Description cannot be more than 50 characters")]
         public string Description { get; set; }
-        public UPSPackaging Packaging { get; set; }
+        public LabelDescription Packaging { get; set; }
         public UPSDimensions Dimensions { get; set; }
         public UPSPackageWeight PackageWeight { get; set; }
     }
 
     public class UPSPackageWeight
     {
-        public string Code { get; set; } = "02";
-        public string Description { get; set; }
+        public UPSPackageWeight()
+        {
+            UnitOfMeasurement = new LabelDescription();
+        }
+
+        public LabelDescription UnitOfMeasurement { get; set; }
+        public string Weight { get; set; }
     }
 
     public class UPSDimensions
     {
-        public UPSUnitOfMeasurement UnitOfMeasurement { get; set; }
+        public UPSDimensions()
+        {
+            UnitOfMeasurement = new LabelDescription();
+        }
+        public LabelDescription UnitOfMeasurement { get; set; }
         public string Length { get; set; }
         public string Width { get; set; }
         public string Height { get; set; }
