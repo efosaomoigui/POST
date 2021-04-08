@@ -125,43 +125,6 @@ namespace GIGLS.Services.Implementation.Wallet
             if (checkType == WaybillWalletPaymentType.Waybill)
             {
                 var data = await VerifyAndProcessPaymentForWaybill(webhook.data.Reference);
-                result = data.ResponseStatus;
-
-                if (result)
-                {
-                    //check if waybill is from BOT
-                    var refSplit = webhook.data.Reference.Split('-');
-                    var waybill = refSplit[1];
-                    var preshipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(waybill);
-                    if (preshipment != null)
-                    {
-                        var nodePayload = new CreateShipmentNodeDTO()
-                        {
-                            waybillNumber = preshipment.Waybill,
-                            customerId = preshipment.CustomerCode,
-                            locality = preshipment.SenderLocality,
-                            receiverAddress = preshipment.ReceiverAddress,
-                            vehicleType = preshipment.VehicleType,
-                            value = preshipment.Value,
-                            zone = preshipment.ZoneMapping,
-                            senderAddress = preshipment.SenderAddress,
-                            receiverLocation = new NodeLocationDTO()
-                            {
-                                lng = preshipment.ReceiverLng,
-                                lat = preshipment.ReceiverLat
-                            },
-                            senderLocation = new NodeLocationDTO()
-                            {
-                                lng = preshipment.SenderLng,
-                                lat = preshipment.SenderLat
-                            }
-                        };
-
-                        await _nodeService.CreateShipment(nodePayload);
-                    }
-
-
-                }
             }
             else
             {
