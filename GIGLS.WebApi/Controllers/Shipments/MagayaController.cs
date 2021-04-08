@@ -580,13 +580,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
 
-        [HttpGet]
-        [Route("confirmreceipt/{itemID}")]
-        public async Task<IServiceResponse<bool>> GetShipmentActivities(int ItemID)
+        [HttpPut]
+        [Route("confirmreceipt")]
+        public async Task<IServiceResponse<bool>> GetShipmentActivities(List<int> ItemIDs)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var res = await _service.UpdateReceived(ItemID);
+                var res = await _service.UpdateReceived(ItemIDs);
 
                 return new ServiceResponse<bool>
                 {

@@ -21,5 +21,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<PaystackWebhookDTO> VerifyAndValidatePaymentUsingOTP(string waybill, string pin);
         Task<GatewayCodeResponse> GetGatewayCode();
         Task<PaystackWebhookDTO> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO waybillPaymentLog);
+        Task<PaystackWebhookDTO> AddWaybillPaymentLogForIntlShipment(WaybillPaymentLogDTO waybillPaymentLog);
     }
 }

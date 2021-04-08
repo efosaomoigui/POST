@@ -16,5 +16,6 @@ namespace GIGLS.Core.DTO
 
         public string Name { get; set; }
         public string FormattedAddress { get; set; }
+        public string LGA { get; set; }
     }
 }

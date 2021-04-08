@@ -3220,6 +3220,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             return WaybillWalletPaymentType.Wallet;
         }
 
+
+        public async Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            return await _companyService.UpgradeToEcommerce(newCompanyDTO);
+
+        }
+
         public async Task<IEnumerable<CountryDTO>> GetIntlShipingCountries()
         {
             var countries = await _countryService.GetIntlShipingCountries();
@@ -3238,5 +3245,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
+
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
+        }
+      
     }
 }
