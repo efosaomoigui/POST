@@ -676,7 +676,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 if (shipmentToUpdate != null)
                 {
                     //Update shipment to shipment created
-                    preshipment.shipmentstatus = "Shipment created";
+                    shipmentToUpdate.shipmentstatus = "Shipment created";
                 }
 
                 await _nodeService.CreateShipment(nodePayload);
