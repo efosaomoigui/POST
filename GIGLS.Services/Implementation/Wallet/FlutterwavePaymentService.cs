@@ -290,24 +290,29 @@ namespace GIGLS.Services.Implementation.Wallet
                         return verifyResult;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled)
                     {
-                        //3. Process payment for the waybill if successful
-                        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
-                        {
-                            Waybill = paymentLog.Waybill,
-                            PaymentType = PaymentType.Online,
-                            TransactionCode = paymentLog.Reference,
-                            UserId = paymentLog.UserId
-                        };
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
-
-                        if (processWaybillPayment)
+                        if (checkAmount)
                         {
-                            //2. Update waybill Payment log
-                            paymentLog.IsPaymentSuccessful = true;
-                            paymentLog.IsWaybillSettled = true;
+                            //3. Process payment for the waybill if successful
+                            PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                            {
+                                Waybill = paymentLog.Waybill,
+                                PaymentType = PaymentType.Online,
+                                TransactionCode = paymentLog.Reference,
+                                UserId = paymentLog.UserId
+                            };
+
+                            var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                            if (processWaybillPayment)
+                            {
+                                //2. Update waybill Payment log
+                                paymentLog.IsPaymentSuccessful = true;
+                                paymentLog.IsWaybillSettled = true;
+                            }
                         }
                     }
 
@@ -398,7 +403,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (verifyResult.data != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == reference);
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
 
                     if (paymentLog == null)
                         return verifyResult;
@@ -412,55 +417,55 @@ namespace GIGLS.Services.Implementation.Wallet
                     var walletDto = new WalletDTO();
                     var userPayload = new UserPayload();
                     var bonusAddon = new BonusAddOn();
+                    bool checkAmount = false;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited)
                     {
-                        //a. update the wallet for the customer
-                        string customerId = null;  //set customer id to null
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                        //get wallet detail to get customer code
-                        walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
-
-                        if (walletDto != null)
+                        if (checkAmount)
                         {
-                            //use customer code to get customer id
-                            var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
 
-                            if (user != null)
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                            if (walletDto != null)
                             {
-                                customerId = user.Id;
-                                userPayload.Email = user.Email;
-                                userPayload.UserId = user.Id;
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                }
                             }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = bonusAddon.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Description = bonusAddon.Description,
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = paymentLog.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
                         }
-
-                        //if pay was done using Master VIsa card, give some discount
-                        bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
-
-                        //update the wallet
-                        await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
-                        {
-                            WalletId = paymentLog.WalletId,
-                            Amount = bonusAddon.Amount,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Description = bonusAddon.Description,
-                            PaymentType = PaymentType.Online,
-                            PaymentTypeReference = paymentLog.Reference,
-                            UserId = customerId
-                        }, false);
-
-                        sendPaymentNotification = true;
-
-                        //3. update the wallet payment log
-                        paymentLog.IsWalletCredited = true;
                     }
-
-                    //3. update the wallet payment log
-                    //if (verifyResult.data.Status.Equals("successful"))
-                    //{
-                    //    paymentLog.IsWalletCredited = true;
-                    //}
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
@@ -477,7 +482,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     //Call Node API for subscription process
-                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
                     {
                         if (userPayload != null)
                         {
@@ -836,5 +841,23 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
+        {
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
+            shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
+
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

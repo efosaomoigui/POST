@@ -2327,7 +2327,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
                 var ManifestNumber = movementManifest.FirstOrDefault();
 
-                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                if (ManifestNumber.IsDriverValid == true && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
                 {
                     return true;
                 }
@@ -2347,15 +2347,15 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var retVal = false;
-                if (valMovementManifest.flag == MovementManifestActivationTypes.AgentActivation)
+                if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
                 {
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
+                    if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
-                        ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
+                        ManifestNumber.MovementStatus = MovementStatus.InProgress;
                         await _uow.CompleteAsync();
                         retVal = true;
                     }
@@ -2365,12 +2365,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                if (valMovementManifest.flag == MovementManifestActivationTypes.DispatchActivation)
+                if (valMovementManifest.flag == MovementManifestActivationTypes.AgentActivation)
                 {
                     var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
                     var ManifestNumber = movementManifest.FirstOrDefault();
 
-                    if (ManifestNumber.DriverCode == valMovementManifest.code)
+                    if (ManifestNumber.DestinationServiceCentreCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
@@ -3449,7 +3449,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (bankDepositOrder != null)
                 {
-                    if (bankDepositOrder.Status == DepositStatus.Deposited || bankDepositOrder.Status == DepositStatus.Verified)
+                    if (bankDepositOrder.Status != DepositStatus.Deposited && bankDepositOrder.Status != DepositStatus.Verified)
                     {
                         //throw new GenericException($"Error Cancelling the Shipment." +
                         //        $" The shipment with waybill number {waybill} has already been deposited in the bank with ref code {bankDepositOrder.RefCode}.");
@@ -4224,7 +4224,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    // create new
+                    // create new 
                     var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
                     if (await _uow.IndividualCustomer.ExistAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim()))
                     {
@@ -4835,24 +4835,24 @@ namespace GIGLS.Services.Implementation.Shipments
                     //await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
 
                     //Get the two possible payment links for Waybill (Nigeria  and US)
-                    var waybillPayment = new WaybillPaymentLogDTO()
-                    {
-                        Waybill = shipment.Waybill,
-                        OnlinePaymentType = OnlinePaymentType.Paystack,
-                        Email = shipment.Customer[0].Email
-                    };
+                    //var waybillPayment = new WaybillPaymentLogDTO()
+                    //{
+                    //    Waybill = shipment.Waybill,
+                    //    OnlinePaymentType = OnlinePaymentType.Paystack,
+                    //    Email = shipment.Customer[0].Email
+                    //};
 
-                    int[] listOfCountryForPayment = { 1, 207 };
-                    List<string> paymentLinks = new List<string>();
-                    foreach ( var country in listOfCountryForPayment)
-                    {
-                        waybillPayment.PaymentCountryId = country;
-                        waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
-                        var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
-                        paymentLinks.Add(response.data.Authorization_url);
-                    }
+                    //int[] listOfCountryForPayment = { 1, 207 };
+                    //List<string> paymentLinks = new List<string>();
+                    //foreach ( var country in listOfCountryForPayment)
+                    //{
+                    //    waybillPayment.PaymentCountryId = country;
+                    //    waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                    //    var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                    //    paymentLinks.Add(response.data.Authorization_url);
+                    //}
                     
-                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
+                    //await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
                 }
 
                 // get the current user info
