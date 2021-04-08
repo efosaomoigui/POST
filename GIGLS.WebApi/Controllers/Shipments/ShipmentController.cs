@@ -43,29 +43,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _shipmentContactService = shipmentContactService;
         }
 
-
-        //public Task<IEnumerable<StateDTO>> GetStatesAsync(int pageSize = 10, int page = 1)
-        //{
-        //    var states = Context.State.ToList();
-        //    var subresult = states.Skip(pageSize * (page - 1)).Take(pageSize);
-        //    var stateDto = Mapper.Map<IEnumerable<StateDTO>>(subresult);
-        //    return Task.FromResult(stateDto);
-        //}
-
-        //[HttpGet]
-        //[Route("all")]
-        //public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments()
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var shipments = await _service.GetShipments();
-        //        return new ServiceResponse<IEnumerable<ShipmentDTO>>
-        //        {
-        //            Object = shipments
-        //        };
-        //    });
-        //}
-
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]

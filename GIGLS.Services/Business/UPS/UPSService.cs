@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.UPS;
 using GIGLS.Core.IServices.UPS;
 using Newtonsoft.Json;
@@ -14,6 +15,21 @@ namespace GIGLS.Services.Business.UPS
 {
     public class UPSService : IUPSService
     {
+        public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            var createShipment = await CreateUPSShipment(shipmentDTO);
+            var result = FormatShipmentCreationReponse(createShipment);
+            return result;
+        }
+
+        //yet to be implemented
+        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(UPSShipmentResponsePayload createShipment)
+        {
+            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+
+            return output;
+        }
+
         public async Task<UPSShipmentResponsePayload> CreateUPSShipment(InternationalShipmentDTO shipmentDto)
         {
             try

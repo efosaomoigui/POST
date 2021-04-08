@@ -4,6 +4,7 @@
     {
         Internal,
         Magaya,
-        DHL
+        DHL,
+        UPS
     }
 }

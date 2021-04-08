@@ -23,6 +23,7 @@ using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.UPS;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
@@ -65,6 +66,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly INodeService _nodeService;
         private readonly IDHLService _DhlService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly IUPSService _UPSService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -74,7 +76,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService, IWaybillPaymentLogService waybillPaymentLogService)
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService, 
+            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -95,6 +98,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _nodeService = nodeService;
             _DhlService = dHLService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _UPSService = uPSService;
             MapperConfig.Initialize();
         }
 
@@ -4482,7 +4486,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //1. Get the Price
+                //1. Get the Price -- We have a set up price for the shipment
                 var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
 
                 //update price to contain VAT, INSURANCE ETC
@@ -4521,12 +4525,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //3. Create shipment on DHL
-                var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
-                shipment.InternationalShipmentType = InternationalShipmentType.DHL;
+                var upsShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
+                shipment.InternationalShipmentType = InternationalShipmentType.UPS;
                 shipment.IsInternational = true;
 
                 //4. Add the Shipment to Agility
-                var createdShipment = await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
+                var createdShipment = await AddDHLShipmentToAgility(shipment, upsShipment, shipmentDTO.PaymentType);
                 return createdShipment;
             }
             catch (Exception ex)
