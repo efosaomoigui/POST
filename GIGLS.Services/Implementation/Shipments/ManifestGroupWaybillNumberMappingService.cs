@@ -454,7 +454,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //Update The Manifest 
-                    manifest.MovementStatus = MovementStatus.EnRoute;
+                    manifest.MovementStatus = MovementStatus.InProgress;
 
                     //insert into movement manifest mapping table
                     var resultMap = new MovementManifestNumberMapping()
