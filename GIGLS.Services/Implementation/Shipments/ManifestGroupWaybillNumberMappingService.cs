@@ -486,7 +486,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationServiceCentreId = destinationScId,
                     MovementManifestCode = movementmanifestCode,
                     UserId = userId,
-                    MovementStatus = MovementStatus.EnRoute,
+                    MovementStatus = MovementStatus.InProgress,
                     DriverCode = driverCode,
                     DestinationServiceCentreCode = destServiceCentreCode
                 };
