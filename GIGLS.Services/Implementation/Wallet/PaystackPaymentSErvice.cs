@@ -548,22 +548,27 @@ namespace GIGLS.Services.Implementation.Wallet
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
-                await Task.Run(async () =>
-                {
-                    HttpClient client = new HttpClient();
-                    client.BaseAddress = new Uri(url);
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
-                    response = await client.GetAsync(url);
-                });
+                //await Task.Run(async () =>
+                //{
+                //    HttpClient client = new HttpClient();
+                //    client.BaseAddress = new Uri(url);
+                //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                //    response = await client.GetAsync(url);
+                //});
 
-                string jObject = await response.Content.ReadAsStringAsync();
-                var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
+                //string jObject = await response.Content.ReadAsStringAsync();
+                //var content = JsonConvert.DeserializeObject<BVNVerificationDTO>(jObject);
 
-                result.Succeeded = content.Status;
-                result.Exist = content.Status;
-                result.Message = content.Message;
-                result.Entity = content.Data;
+                //result.Succeeded = content.Status;
+                //result.Exist = content.Status;
+                //result.Message = content.Message;
+                //result.Entity = content.Data;
+
+                result.Succeeded = true;
+                result.Exist = true;
+                result.Message = "BVN resolved";
+                result.Entity = null;
 
             }
             catch (Exception ex)
@@ -1264,13 +1269,18 @@ namespace GIGLS.Services.Implementation.Wallet
             return response;
         }
 
-        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paystackAmount)
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
         {
             var factor = Convert.ToDecimal(Math.Pow(10, 0));
-            paystackAmount = Math.Round(paystackAmount * factor) / factor;
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
             shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
 
-            if (shipmentAmount == paystackAmount)
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
             {
                 return true;
             }
