@@ -1016,6 +1016,7 @@ namespace GIGLS.Services.Implementation.Customers
                     _uow.CompanyContactPerson.Add(person);
                 }
                 //also update orgnization,designation,department
+                individualInfo.IsRegisteredFromMobile = false;
                 user.UserChannelType = UserChannelType.Ecommerce;
                 user.Organisation = newCompanyDTO.Name;
                 user.Department = UserChannelType.Ecommerce.ToString();
