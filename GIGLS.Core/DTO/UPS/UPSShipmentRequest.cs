@@ -8,16 +8,16 @@ namespace GIGLS.Core.DTO.UPS
         public UPSShipmentRequest()
         {
             UPSSecurity = new UPSSecurity();
-            ShipmentRequest = new ShipmentRequest();
+            ShipmentRequest = new UPSShipmentRequestDTO();
         }
 
         public UPSSecurity UPSSecurity { get; set; }
-        public ShipmentRequest ShipmentRequest { get; set; }
+        public UPSShipmentRequestDTO ShipmentRequest { get; set; }
     }
 
-    public class ShipmentRequest
+    public class UPSShipmentRequestDTO
     {
-        public ShipmentRequest()
+        public UPSShipmentRequestDTO()
         {
             Request = new Request();
             Shipment = new UPSShipment();

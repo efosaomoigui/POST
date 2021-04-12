@@ -13,7 +13,6 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
@@ -4405,7 +4404,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return total;
         }
 
-        //Add DHL International shipment 
+        //Add DHL, UPS International shipment 
         public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
@@ -4492,7 +4491,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //update price to contain VAT, INSURANCE ETC
                 var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
 
-                //validate the different from DHL
+                //validate the different from UPS
                 if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
                 {
                     throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
@@ -4524,8 +4523,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                //3. Create shipment on DHL
-                var upsShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
+                //3. Create shipment on UPS
+                var upsShipment = await _UPSService.CreateInternationalShipment(shipmentDTO);
                 shipment.InternationalShipmentType = InternationalShipmentType.UPS;
                 shipment.IsInternational = true;
 

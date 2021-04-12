@@ -23,9 +23,11 @@ namespace GIGLS.Services.Business.UPS
         }
 
         //yet to be implemented
-        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(UPSShipmentResponsePayload createShipment)
+        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(UPSShipmentResponsePayload upsResponse)
         {
             InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+
+           // if(upsResponse.ShipmentResponse.re)
 
             return output;
         }
@@ -87,10 +89,10 @@ namespace GIGLS.Services.Business.UPS
             return security;
         }
 
-        private ShipmentRequest GetShipmentRequest(InternationalShipmentDTO shipmentDto)
+        private UPSShipmentRequestDTO GetShipmentRequest(InternationalShipmentDTO shipmentDto)
         {
             //Default value for Request and LabelSpecification
-            var payload = new ShipmentRequest
+            var payload = new UPSShipmentRequestDTO
             {
                 Shipment = BindShipmentPayload(shipmentDto)
             };
