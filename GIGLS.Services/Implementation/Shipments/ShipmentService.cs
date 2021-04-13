@@ -2330,7 +2330,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var movementManifest = await _uow.MovementManifestNumber.FindAsync(x => x.MovementManifestCode == movementManifestCode);
                 var ManifestNumber = movementManifest.FirstOrDefault();
 
-                if (ManifestNumber.IsDriverValid == true && ManifestNumber.MovementStatus != MovementStatus.EnRoute)
+                if (ManifestNumber.IsDriverValid == false && ManifestNumber.MovementStatus != MovementStatus.InProgress)
                 {
                     return true;
                 }
@@ -2358,7 +2358,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (ManifestNumber.DriverCode == valMovementManifest.code)
                     {
                         ManifestNumber.IsDriverValid = true;
-                        ManifestNumber.MovementStatus = MovementStatus.InProgress;
+                        ManifestNumber.MovementStatus = MovementStatus.EnRoute;
                         await _uow.CompleteAsync();
                         retVal = true;
                     }

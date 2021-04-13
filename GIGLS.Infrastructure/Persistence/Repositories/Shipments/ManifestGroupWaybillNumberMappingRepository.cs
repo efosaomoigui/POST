@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
@@ -202,7 +203,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 movementDispatches = movementDispatches.Where(s => serviceCentreMovementDispatch.Contains(s.MovementManifestNumber));
                 var dispatchedNumbers = movementDispatches.Select(s => s.MovementManifestNumber).ToList();
 
-                serviceCentreMovementManifests = _context.MovementManifestNumber.Where(s => dispatchedNumbers.Contains(s.MovementManifestCode)).AsQueryable();
+                serviceCentreMovementManifests = _context.MovementManifestNumber.Where(s => dispatchedNumbers.Contains(s.MovementManifestCode) && s.MovementStatus == MovementStatus.EnRoute).AsQueryable();
             }
 
             var movementManifestNumberVals = serviceCentreMovementManifests.ToList();
