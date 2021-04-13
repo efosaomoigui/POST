@@ -14,20 +14,11 @@ namespace GIGLS.Core.DTO.UPS
     {
         public UPSShipmentResponsePayload()
         {
-            Response = new UPSShipmentResponse();
+            Response = new UPSResponse();
             ShipmentResults = new UPSShipmentResults();
         }
-        public UPSShipmentResponse Response { get; set; }
-        public UPSShipmentResults ShipmentResults { get; set; }
-    }
-
-    public class UPSShipmentResponse
-    {
-        public UPSShipmentResponse()
-        {
-            Response = new UPSResponse();
-        }
         public UPSResponse Response { get; set; }
+        public UPSShipmentResults ShipmentResults { get; set; }
     }
 
     public class UPSResponse
@@ -52,14 +43,14 @@ namespace GIGLS.Core.DTO.UPS
         {
             BillingWeight = new UPSPackaging();
             ShipmentCharges = new UPSShipmentCharges();
-            PackageResults = new List<UPSPackageResults>();
+            FinalPackageResults = new List<UPSPackageResults>();
         }
         public UPSShipmentCharges ShipmentCharges { get; set; }
         public UPSPackaging BillingWeight { get; set; }
         public string ShipmentIdentificationNumber { get; set; }
 
-        //the result can be an object and array too
-        public List<UPSPackageResults> PackageResults { get; set; }
+        public object PackageResults { get; set; }
+        public List<UPSPackageResults> FinalPackageResults { get; set; }
     }
 
     public class UPSShipmentCharges

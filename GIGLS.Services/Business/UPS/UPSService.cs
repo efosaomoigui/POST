@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.UPS;
 using GIGLS.Core.IServices.UPS;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -37,9 +38,9 @@ namespace GIGLS.Services.Business.UPS
             {
                 output.ShipmentIdentificationNumber = upsResponse.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
 
-                if (upsResponse.ShipmentResponse.ShipmentResults.PackageResults.Any())
+                if (upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Any())
                 {
-                    string[] itemIds = upsResponse.ShipmentResponse.ShipmentResults.PackageResults.Select(x => x.TrackingNumber).ToArray();
+                    string[] itemIds = upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Select(x => x.TrackingNumber).ToArray();
                     output.PackageResult = string.Join(",", itemIds);
                 }
             }
@@ -70,6 +71,23 @@ namespace GIGLS.Services.Business.UPS
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<UPSShipmentResponseFinalPayload>(responseResult);
+
+                    if (result.Fault == null)
+                    {
+                        var packageData = result.ShipmentResponse.ShipmentResults.PackageResults.ToString();
+                        var packageJson = JToken.Parse(packageData);
+
+                        if (packageJson is JArray)
+                        {
+                            result.ShipmentResponse.ShipmentResults.FinalPackageResults = packageJson.ToObject<List<UPSPackageResults>>();
+                        }
+
+                        if (packageJson is JObject)
+                        {
+                            var packageObj = packageJson.ToObject<UPSPackageResults>();
+                            result.ShipmentResponse.ShipmentResults.FinalPackageResults.Add(packageObj);
+                        }
+                    }
                 }
 
                 return result;
