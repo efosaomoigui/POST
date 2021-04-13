@@ -25,5 +25,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option);
         Task<UserDTO> GetInternationalUser(string email);
         Task<bool> DeactivateInternationalUser(string email);
+        Task<object> GetByCode(string customerCode);
     }
 }

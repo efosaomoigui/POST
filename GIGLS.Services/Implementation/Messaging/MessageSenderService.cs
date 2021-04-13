@@ -16,6 +16,8 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -233,17 +235,17 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if(messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
-                        if(deliveryNumber != null)
+                        if (deliveryNumber != null)
                         {
                             strArray[17] = deliveryNumber.SenderCode;
                         }
                     }
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF &&invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
+                    if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -735,13 +737,13 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = companyMessagingDTO.Name;
 
                 //For the Official GIG Mail
-                if(companyMessagingDTO.UserChannelType == UserChannelType.Partner)
+                if (companyMessagingDTO.UserChannelType == UserChannelType.Partner)
                 {
                     var email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPartnerEmail, 1);
                     var gigmail = email.Value;
                     strArray[1] = gigmail;
                 }
-               
+
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -1240,7 +1242,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         strArray[16] = discount.Value;
                     }
-                } else if (customerObj.Rank == Rank.Basic)
+                }
+                else if (customerObj.Rank == Rank.Basic)
                 {
                     var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.NormalCustomerDiscount.ToString() && s.CountryId == 1);
 
@@ -1299,7 +1302,6 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = intlDTO.ReceiverName;
                 strArray[2] = intlDTO.URL;
                 strArray[3] = intlDTO.RequestNumber;
-                strArray[4] = "Houston, United States";
                 strArray[5] = intlDTO.DestinationServiceCentre.Name;
                 strArray[6] = intlDTO.ItemDetails;
                 strArray[7] = "International Shipment Items";
@@ -1311,6 +1313,21 @@ namespace GIGLS.Services.Implementation.Messaging
                 else if (intlDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     strArray[8] = "Home Delivery";
+                }
+
+                if (intlDTO.RequestProcessingCountryId == 0 || intlDTO.RequestProcessingCountryId == 207)
+                {
+                    intlDTO.RequestProcessingCountryId = 207;
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
+                    strArray[4] = "Houston, United States";
+                    messageDTO.Subject = $"{messageDTO.Subject} ({country.CountryName})";
+                }
+                else
+                {
+                    var country = await _uow.Country.GetAsync(x => x.CountryId == intlDTO.RequestProcessingCountryId);
+                    var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == intlDTO.DepartureServiceCentreId);
+                    messageDTO.Subject = $"{messageDTO.Subject} ({country.CountryName})";
+                    strArray[4] = departure.Name;
                 }
 
                 //B. decode url parameter
@@ -1428,15 +1445,257 @@ namespace GIGLS.Services.Implementation.Messaging
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
 
-        public async Task<MessageDTO> GetMessageByType(MessageType messageType)
+        public async Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId)
         {
-            var message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+            var message = new Message();
+            if (countryId > 0)
+            {
+                var mt = $"{messageType}{countryId}";
+                var newMessageType = (MessageType)Enum.Parse(typeof(MessageType), mt);
+                message = await _uow.Message.GetAsync(x => x.MessageType == newMessageType);
+            }
+            else
+            {
+                message = await _uow.Message.GetAsync(x => x.MessageType == messageType);
+            }
 
             if (message == null)
             {
                 throw new GenericException("Message Information does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<MessageDTO>(message);
+        }
+
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        public async Task SendCustomerRegistrationMails(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendCustomerRegistrationMails(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        //This handles the new mails for all overseas mails 
+        public async Task SendOverseasMails(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendOverseasShipmentMails(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        //Handle Request Items Mail for Overseas Shipment
+        public async Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName)
+        {
+            string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = shipmentDto.CustomerFirstName,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    Description = shipmentDto.ItemDetails,
+                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    DestinationCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId).Name,
+                    DeliveryOption = shipmentDto.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
+                    RequestCode = shipmentDto.RequestNumber,
+                    StoreOfPurchase = storeName
+                },
+                To = user.Email,
+                ToEmail = user.Email,
+                Subject = $"Overseas Shipment Request Acknowledgement ({country}) ",
+                MessageTemplate = "OverseasShippingRequest"
+            };
+            if (shipmentDto.Consolidated)
+            {
+                messageDTO.Body = "Please note that you have opted for consolidated shipping. Item(s) will be kept in store until we receive more and you are ready for final shipping.";
+            }
+
+            //Send an email with details of request to customer
+            await SendOverseasMails(messageDTO);
+
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    messageDTO.To = email;
+                    await SendOverseasMails(messageDTO);
+                }
+            }
+
+            //Send an email with details of request to Houston team, What of UK
+            string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+            string ukEmail = ConfigurationManager.AppSettings["UKEmail"];
+
+            messageDTO.Country = messageDTO.IntlMessage.DepartureCenter;
+            messageDTO.ToEmail = shipmentDto.RequestProcessingCountryId == 207 ? houstonEmail : ukEmail;
+            messageDTO.To = shipmentDto.RequestProcessingCountryId == 207 ? houstonEmail : ukEmail;
+            messageDTO.MessageTemplate = "OverseasShippingRequestHub";
+            messageDTO.Body = shipmentDto.Consolidated ? "who has also opted for the consolidated shipping option." : ".";
+
+
+            await SendOverseasMails(messageDTO);
+
+        }
+
+        //Handle Received Items Mail for Overseas Shipment
+        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            var delivery = "";
+
+            var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+            var paymentLink = $"{link.Value}{shipmentDto.Waybill}";
+
+            if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+            {
+                delivery = shipmentDto.ReceiverAddress;
+            }
+            else if (shipmentDto.PickupOptions == PickupOptions.SERVICECENTER)
+            {
+                var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId);
+                delivery = $"GIGL {destination.FormattedServiceCentreName} experience center ";
+            }
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDto.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = shipmentDto.GrandTotal.ToString(),
+                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    PaymentLink = paymentLink,
+                    DeliveryAddressOrCenterName = delivery,
+                    GeneralPaymentLinkI = generalPaymentLinks[0],
+                    GeneralPaymentLinkII = generalPaymentLinks[1]
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
+                Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
+                MessageTemplate = "OverseasReceivedItems"
+            };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
+                    messageDTO.MessageTemplate = "OverseasReceivedItemsClass";
+                }
+            }
+
+            await SendOverseasMails(messageDTO);
+
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    await SendOverseasMails(messageDTO);
+                }
+            }
+
+        }
+
+        //Handle Payment Confirmation Mail for Overseas Shipment
+        public async Task SendOverseasPaymentConfirmationMails(ShipmentDTO shipmentDto)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDto.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = shipmentDto.GrandTotal.ToString()
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Payment Confirmation",
+                MessageTemplate = "OverseasPaymentConfirmation"
+            };
+
+            await SendOverseasMails(messageDTO);
+
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    await SendOverseasMails(messageDTO);
+                }
+            }
+
         }
 
         //Sends generic email message

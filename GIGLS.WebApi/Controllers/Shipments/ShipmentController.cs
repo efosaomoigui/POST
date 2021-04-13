@@ -401,7 +401,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
         public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
@@ -977,5 +977,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("ProcessIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> ProcessIntlShipment(ShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ProcessInternationalShipmentOnAgility(shipmentDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

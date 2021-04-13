@@ -267,7 +267,25 @@
   <ItemGroup>
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
+    <Content Include="Images\amazon.png" />
+    <Content Include="Images\argos.png" />
+    <Content Include="Images\asos.png" />
+    <Content Include="Images\bestbuy.png" />
+    <Content Include="Images\boots.png" />
+    <Content Include="Images\ebay.png" />
     <Content Include="Images\GIGLogisticsLogo.png" />
+    <Content Include="Images\h&amp;m.png" />
+    <Content Include="Images\homebase.png" />
+    <Content Include="Images\marksspencers.png" />
+    <Content Include="Images\matalan.png" />
+    <Content Include="Images\next.png" />
+    <Content Include="Images\oldnavy.png" />
+    <Content Include="Images\tesco.png" />
+    <Content Include="Images\ukflag.png" />
+    <Content Include="Images\usflag.png" />
+    <Content Include="Images\walmart.jpg" />
+    <Content Include="Images\walmart.png" />
+    <Content Include="Images\zara.png" />
     <Content Include="MagayaDirectory\commoditytypes.xml" />
     <Content Include="MagayaDirectory\Locations.xml" />
     <Content Include="MagayaDirectory\transactiontypes.xml" />
@@ -300,6 +318,7 @@
     <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
     <Compile Include="Controllers\Business\PaymentController.cs" />
+    <Compile Include="Controllers\Business\PriceCategoryController.cs" />
     <Compile Include="Controllers\Business\PricingController.cs" />
     <Compile Include="Controllers\Business\ScanController.cs" />
     <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
@@ -384,6 +403,7 @@
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\Sla\SLAController.cs" />
     <Compile Include="Controllers\StateController.cs" />
+    <Compile Include="Controllers\Store\StoreController.cs" />
     <Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
@@ -451,9 +471,11 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\IISProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

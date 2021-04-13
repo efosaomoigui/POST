@@ -3,63 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core;
 using System.Linq;
-using AutoMapper;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
-using Microsoft.AspNet.Identity;
 using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
 using System;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
-using GIGLS.Core.View;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IServices.Utility;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IMessageService;
-using System.Text.RegularExpressions;
-using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Core.IServices.Partnership;
-using System.Configuration;
-using System.Security.Cryptography;
-using System.Text;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.IServices.Fleets;
-using GIGLS.Core.DTO.Fleets;
-using GIGLS.Core.DTO.MessagingLog;
-using System.Net;
-using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
-using GIGLS.Core.IServices.ShipmentScan;
-using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Core.IServices.PaymentTransactions;
-using GIGLS.Core.DTO.Stores;
-using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
@@ -165,7 +126,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
             var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
-            deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+           // deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
             return deliveryOption;
         }
 
@@ -192,9 +153,47 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetPrice(pricingDto);
         }
 
-        public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        //{
+        //    var dropOffPrice = await _portalService.GetPriceForDropOff(preshipmentMobile);
+        //    //apply dropoff price
+        //    var countryId = await _userService.GetUserActiveCountryId();
+        //    var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+        //    if (discount != null)
+        //    {
+        //        var discountValue = Convert.ToDecimal(discount.Value);
+        //        decimal discountResult = (discountValue / 100M);
+        //        dropOffPrice.Discount = dropOffPrice.GrandTotal * discountResult;
+        //        dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.Discount;                  
+        //    }
+        //    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+        //    dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal.Value * factor) / factor;
+        //    return dropOffPrice;
+        //}
+
+        public async Task<NewPricingDTO> GetPriceForDropOff(NewShipmentDTO newShipmentDTO)
         {
-            return await _portalService.GetPriceForDropOff(preshipmentMobile);
+            var dropOffPrice = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
+            var countryId = await _userService.GetUserActiveCountryId();
+            var discount = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GIGGODropOffDiscount.ToString() && x.CountryId == countryId);
+            if (discount != null)
+            {
+                var discountValue = Convert.ToDecimal(discount.Value);
+                decimal discountResult = (discountValue / 100M);
+                dropOffPrice.DiscountedValue = dropOffPrice.GrandTotal * discountResult;
+                dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.DiscountedValue;
+            }
+            decimal factor = 0;
+            if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, 0));
+            }
+            else
+            {
+                factor = Convert.ToDecimal(Math.Pow(10, -2));
+            }
+            dropOffPrice.GrandTotal = Math.Round(dropOffPrice.GrandTotal * factor) / factor;
+            return dropOffPrice;
         }
 
         public async Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria)
@@ -212,16 +211,39 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId)
         {
             //2. priviledged users service centres
-            var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
-            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId);
+            //var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+            //var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId[0]);
+
+            int stationId = 0;
+            //if (serviceCenterIds.StationId == 4)
+            //{
+            //    stationId = serviceCenterIds.StationId;
+            //}
+
+            return await _portalService.GetActiveServiceCentresBySingleCountry(countryId, stationId);
         }
 
         public async Task<ShipmentDTO> GetShipment(string waybill)
         {
             var shipment = await _shipmentService.GetShipment(waybill);
+
+            //Get the ETA for the shipment
+            int eta = _uow.DomesticRouteZoneMap.GetAllAsQueryable()
+                .Where(x => x.DepartureId == shipment.DepartureServiceCentre.StationId
+                && x.DestinationId == shipment.DestinationServiceCentre.StationId).Select(x => x.ETA).FirstOrDefault();
+            shipment.ETA = eta;
+
             if (shipment.GrandTotal > 0)
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                decimal factor = 0;
+                if (shipment.CompanyType == CompanyType.Corporate.ToString() || shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, 0));
+                }
+                else
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, -2));
+                }
                 shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
                 shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
                 shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
@@ -230,8 +252,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
-                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
-
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor; 
+                
                 foreach (var item in shipment.ShipmentItems)
                 {
                     item.Price = Math.Round(item.Price * factor) / factor;
@@ -273,10 +295,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
             var shipmentCollection = JObject.FromObject(shipmentCollectionforDto).ToObject<ShipmentCollectionDTO>();
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
             if (shipmentCollection.IsComingFromDispatch)
             {
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }
@@ -296,6 +318,69 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<int[]> GetPriviledgeServiceCenters(string userId)
         {
             return await _userService.GetPriviledgeServiceCenters(userId);
+        }
+        public Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)
+        {
+            return _portalService.GetShipmentDetailsFromDeliveryNumber(DeliveryNumber);
+        }
+        public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
+        {
+            return await _portalService.ApproveShipment(detail);
+        }
+
+        public async Task<IEnumerable<ServiceCentreDTO>> GetServiceCentreByStation(int stationId)
+        {
+
+            return await _serviceCentreService.GetServiceCentresByStationId(stationId);
+        }
+
+        public async Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment)
+        {
+
+            return await _shipmentService.AddAgilityShipmentToGIGGo(shipment);
+        }
+
+        public async Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment)
+        {
+            preShipment.IsFromAgility = true;
+            if (preShipment.Value > 0)
+            {
+                preShipment.PreShipmentItems[0].Value = preShipment.Value.ToString();
+            }
+            return await _shipmentService.GetGIGGOPrice(preShipment);
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre()
+        {
+            var serviceCentreId = await _userService.GetPriviledgeServiceCenters();
+            var items = await _invoiceService.GetInvoiceByServiceCentre(serviceCentreId[0]);
+            if (items.Any())
+            {
+                foreach (var item in items)
+                {
+                    if (item.CustomerType == CustomerType.IndividualCustomer.ToString())
+                    {
+                        var cust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                        if (cust != null)
+                        {
+                            item.SenderName = cust.FirstName + " " + cust.LastName;
+                        }
+                    }
+                    else
+                    {
+                        var cust = await _uow.Company.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                        if (cust != null)
+                        {
+                            item.SenderName = cust.FirstName + " " + cust.LastName;
+                        }
+                    }
+                }
+            }
+            return items;
+        }
+        public async Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
+        {
+            return await _invoiceService.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
         }
     }
 }

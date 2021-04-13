@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -36,9 +37,18 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
         Task<DailySalesDTO> GetSalesForServiceCentre(DateFilterForDropOff dateFilterCriteria);
-        Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        //Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        Task<NewPricingDTO> GetPriceForDropOff(NewShipmentDTO newShipmentDTO);
         Task<ServiceCentreDTO> GetServiceCentreById(int centreid);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<int[]> GetPriviledgeServiceCenters(string userId);
+        Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
+        Task<IEnumerable<ServiceCentreDTO>> GetServiceCentreByStation(int stationId);
+        Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment);
+        Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
+        Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre();
+        Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
     }
 }
+                                                                                  

@@ -43,7 +43,8 @@
         DLP,  //DELAYED PICKUP
         THIRDPARTY, //For 3rd party and gigm captain
         PICKED, // PICKED UP
-        AISN //ARRIVE INTL SHIPMENT TO NIGERIA
+        AISN, //ARRIVE INTL SHIPMENT TO NIGERIA
+        ISFUK //Item Shipped from UK
    
 
     }

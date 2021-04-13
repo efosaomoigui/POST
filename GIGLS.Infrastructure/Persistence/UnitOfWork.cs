@@ -510,6 +510,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IRankHistoryRepository RankHistory { get; set; }
 
+        [Inject]
+        public IPriceCategoryRepository PriceCategory { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -195,7 +195,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> CreateNotification(NotificationDTO notificationDTO);
         Task<IEnumerable<NotificationDTO>> GetNotifications(bool? IsRead);
         Task UpdateNotificationAsRead(int notificationId);
-        Task<MessageDTO> GetIntlMessageForApp();
+        Task<MessageDTO> GetIntlMessageForApp(int countryId);
         Task<ResponseDTO> UnboardUser(NewCompanyDTO company);
         Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail);
         Task<ResponseDTO> UpdateUserRank(UserValidationDTO userValidationDTO);
@@ -207,6 +207,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria);
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
-        Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId);
+        Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO);
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
+        Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
+        Task<List<AddressDTO>> GetTopFiveUserAddresses();
     }
 }

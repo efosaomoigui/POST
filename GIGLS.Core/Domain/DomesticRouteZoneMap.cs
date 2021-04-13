@@ -26,6 +26,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool Status { get; set; }
 
-        
+        //Estimated Time of Arrival
+        public int ETA { get; set; }
+
+
     }
 }

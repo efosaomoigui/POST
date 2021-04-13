@@ -24,6 +24,8 @@ namespace GIGLS.Core.DTO
         public string ContactEmail { get; set; }
         public string TermAndConditionAmount { get; set; }
         public string TermAndConditionCountry { get; set; }
+        public string CountryFlag { get; set; }
+        public bool IsInternationalShippingCountry { get; set; }
     }
     public class NewCountryDTO 
     {

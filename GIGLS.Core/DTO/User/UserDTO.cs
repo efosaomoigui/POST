@@ -97,5 +97,6 @@ namespace GIGLS.Core.DTO.User
         public bool DashboardAccess { get; set; }
         public bool IsInternational { get; set; }
         public string IdentificationImage { get; set; }
+        public string CountryType { get; set; }
     }
 }

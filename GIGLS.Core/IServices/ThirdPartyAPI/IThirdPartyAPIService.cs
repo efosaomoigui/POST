@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,5 +36,9 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber);
 
+        //Manifests
+        Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria);
+        Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode);
+        Task<bool> ItemShippedFromUKScan(string manifestCode);
     }
 }

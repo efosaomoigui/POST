@@ -294,5 +294,32 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return shipmentDto;
         }
 
+
+
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID);
+
+            var address = (from r in preShipments
+                               select new AddressDTO()
+                               {
+                                   ReceiverAddress = r.ReceiverAddress,
+                                   ReceiverName = r.ReceiverName,
+                                   ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.ReceiverStationId).StationName,
+                                   ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Latitude,
+                                   ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Longitude,
+                                   ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).LGA,
+                                   SenderAddress = r.SenderAddress,
+                                   SenderName = r.SenderName,
+                                   DateCreated = r.DateCreated,
+                                   SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.SenderStationId).StationName,
+                                   SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
+                                   SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
+                                   SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).LGA,
+                               }).OrderByDescending(x => x.DateCreated).Take(5).ToList();
+
+            return address;
+        }
+
     }
 }

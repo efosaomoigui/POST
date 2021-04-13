@@ -50,13 +50,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
-        //private readonly IPaystackPaymentService _paymentService;
         private readonly IMagayaService _magayaService;
 
         public CustomerPortalController(ICustomerPortalService portalService, IMagayaService magayaService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
-            //_paymentService = paymentService;
             _magayaService = magayaService;
         }
 
@@ -2157,21 +2155,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             types.RemoveAt(3);
             return Ok(types);
         }
-        
+       
         [HttpGet]
         [Route("servicecentresbycountry/{countryId}")]
         public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _portalService.GetServiceCentresBySingleCountry(countryId);
+                var centres = await _portalService.GetActiveServiceCentres();
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
                 };
             });
         }
-
+        
         [HttpGet]
         [Route("storesbycountry/{countryId}")]
         public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
@@ -2232,11 +2230,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("intlshipmentsmessage")]
-        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp()
+        public async Task<IServiceResponse<MessageDTO>> GetIntlMessageForApp(int countryId = 0)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var message = await _portalService.GetIntlMessageForApp();
+                var message = await _portalService.GetIntlMessageForApp(countryId);
 
                 return new ServiceResponse<MessageDTO>
                 {
@@ -2244,7 +2242,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [HttpPost]
         [Route("intlshipmentrequests")]
         public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
@@ -2260,17 +2257,60 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
         [HttpGet]
         [Route("consolidatedintlshipments")]
-        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments()
+        public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetConsolidateIntlShipments(int countryID = 0)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _magayaService.GetConsolidatedShipmentRequestForUser();
+                var result = await _magayaService.GetConsolidatedShipmentRequestForUser(countryID);
 
                 return new ServiceResponse<List<IntlShipmentRequestDTO>>
                 {
                     Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("intlshippingcountries")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetIntlShippingCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetIntlShipingCountries();
+
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [Route("useraddresses")]
+        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetTopFiveUserAddresses();
+
+                return new ServiceResponse<List<AddressDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("upgradetoecommerce")]
+        public async Task<IServiceResponse<CompanyDTO>> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _portalService.UpgradeToEcommerce(newCompanyDTO);
+                return new ServiceResponse<CompanyDTO>
+                {
+                    Object = company
                 };
             });
         }

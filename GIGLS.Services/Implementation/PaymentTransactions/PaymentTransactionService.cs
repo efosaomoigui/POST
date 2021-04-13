@@ -137,12 +137,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
-            var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
 
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
             if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
+                paymentTransaction.TransactionCode = shipment.CustomerCode;
                 await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
@@ -168,7 +169,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipment.Waybill);
 
             //send sms to the customer
-            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            var smsData = new ShipmentTrackingDTO
             {
                 Waybill = shipment.Waybill,
                 QRCode = deliveryNumber.SenderCode
@@ -210,9 +211,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     CountryId = shipment.DestinationCountryId
                 };
                 await _financialReportService.AddReport(financialReport);
-
             }
 
+            //Send Email to Sender when Payment for International Shipment has being made
+            if (invoiceEntity.IsInternational == true)
+            {
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
+                return true;
+            }
 
             if (shipment.DepartureServiceCentreId == 309)
             {
@@ -224,64 +231,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
             }
 
-            //Send Email to Sender when Payment for International Shipment has being made
-            if(invoiceEntity.IsInternational == true && paymentTransaction.PaymentType == PaymentType.Wallet)
-            {
-                var shipmentDTO = new ShipmentDTO
-                {
-                    CustomerType = shipment.CustomerType,
-                    CustomerId = shipment.CustomerId,
-                    ReceiverName = shipment.ReceiverName,
-                    Waybill = shipment.Waybill,
-                    PickupOptions = shipment.PickupOptions,
-                    ReceiverEmail = shipment.ReceiverEmail,
-                    GrandTotal = shipment.GrandTotal,
-                    DepartureCountryId = shipment.DepartureCountryId,
-                    DestinationCountryId = shipment.DestinationCountryId,
-                    DestinationServiceCentreId = shipment.DestinationServiceCentreId,
-                    DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                    CustomerDetails = new CustomerDTO
-                    {
-                    },
-                    DepartureServiceCentre = new ServiceCentreDTO
-                    {
-
-                    },
-                    DestinationServiceCentre = new ServiceCentreDTO
-                    {
-
-                    }
-                };
-
-                if (shipmentDTO.CustomerType.Contains("Individual"))
-                {
-                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
-                }
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
-
-                var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
-                shipmentDTO.CustomerDetails.Email = customerObj.Email;
-                shipmentDTO.CustomerDetails.PhoneNumber = customerObj.PhoneNumber;
-
-                await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
-
-                //Send email to Chinalu and Peter
-                var mails = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.IntlShipmentPaymentMonitoringEmails.ToString() && s.CountryId == 1);
-
-                if (mails != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] paymentEmails = mails.Value.Split(',').ToArray();
-
-                    foreach (string email in paymentEmails)
-                    {
-                        // send email message for payment notification
-                        shipmentDTO.CustomerDetails.Email = email;
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.IPC, shipmentDTO);
-                    }
-                }
-            }
-
+           
             result = true;
             return result;
         }
@@ -305,7 +255,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //deduct the price for the wallet and update wallet transaction table
                 if (wallet.Balance - amountToDebit < (Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
                 {
-                    throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                    throw new GenericException(" Shipment successfully created, however payment could not be processed for ecommerce customer due to insufficient wallet balance ");
                 }
             }
 
@@ -316,7 +266,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
@@ -324,7 +274,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 if (wallet.Balance < amountToDebit)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    throw new GenericException("Shipment successfully created, however payment could not be processed for customer due to insufficient wallet balance ");
                 }
             }
 
@@ -403,6 +353,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 //I used transaction code to represent wallet number when processing for wallet
+                if (string.IsNullOrWhiteSpace(paymentTransaction.TransactionCode))
+                {
+                    paymentTransaction.TransactionCode = shipment.CustomerCode;
+                }
                 var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
 
                 //Additions for Ecommerce customers (Max wallet negative payment limit)
@@ -563,10 +517,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         {
             //1. Get Customer Country detail
             int customerCountryId = 0;
+            Rank rank = Rank.Basic;
 
             if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
             {
-                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                //customerCountryId = _uow.Company.GetAllAsQueryable()
+                //    .Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+
+                var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
+                if(customer != null)
+                {
+                    customerCountryId = customer.UserActiveCountryId;
+                    rank = customer.Rank;
+                }
             }
             else
             {
@@ -598,16 +561,48 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (shipment.IsInternational)
             {
                 //check if the shipment has a scan of AISN in Tracking Table, 
-                bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
-                && x.Status == ShipmentScanStatus.AISN.ToString());
+                //bool isPresent = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill == shipment.Waybill 
+                //&& x.Status == ShipmentScanStatus.AISN.ToString());
 
-                if (!isPresent)
+                //if (!isPresent)
+                //{
+                //    //amountToDebit = amountToDebit * 0.95m;
+                //    var discount = GetDiscountForInternationalShipmentBasedOnRank(rank);
+                //    amountToDebit = amountToDebit * discount;
+                //}           
+
+                if(UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
                 {
-                    amountToDebit = amountToDebit * 0.95m;
-                }                
+                    var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
+                    amountToDebit = amountToDebit * discount;
+                }
+            }
+            return amountToDebit;
+        }
+
+        private async Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
+        {
+            decimal percentage = 0.00M;
+
+            if (rank == Rank.Class)
+            {
+               var  globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId);
+               if(globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);                    
+                }
+            }
+            else
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId);
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
             }
 
-            return amountToDebit;
+            decimal discount = ((100M - percentage) / 100M);
+            return discount;
         }
 
         private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)

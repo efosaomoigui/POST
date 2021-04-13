@@ -373,4 +373,22 @@ namespace GIGLS.Core.DTO.Shipments
         public int ShipmentAssignedForPickedUp { get; set; }
         public int ShipmentPickedUp { get; set; }
     }
+
+
+    public class AddressDTO
+    {
+        public string ReceiverAddress { get; set; }
+        public double? ReceiverLat { get; set; }
+        public double? ReceiverLng { get; set; }
+        public string ReceiverStationName { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverLGA { get; set; }
+        public string SenderAddress { get; set; }
+        public double? SenderLat { get; set; }
+        public double? SenderLng { get; set; }
+        public string SenderStationName { get; set; }
+        public string SenderName { get; set; }
+        public string SenderLGA { get; set; }
+        public DateTime DateCreated { get; set; }
+    }
 }

@@ -72,6 +72,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IFinancialReportService _financialReportService;
         private readonly INodeService _nodeService;
+        private readonly IPaymentService _paymentService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -80,7 +81,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
-            INodeService nodeService)
+            INodeService nodeService, IPaymentService paymentService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -105,6 +106,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _groupWaybillNumberService = groupWaybillNumberService;
             _financialReportService = financialReportService;
             _nodeService = nodeService;
+            _paymentService = paymentService;
             MapperConfig.Initialize();
         }
 
@@ -439,6 +441,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!preShipmentDTO.PreShipmentItems.Any())
                 {
                     throw new GenericException("Shipment Items cannot be empty");
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+                {
+                    preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+                {
+                    preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
                 }
 
                 var PreshipmentPriceDTO = new MobilePriceDTO();
@@ -4924,10 +4936,16 @@ namespace GIGLS.Services.Implementation.Shipments
                                 if (preshipmentmobile.IsApproved != true)
                                 {
                                     int customerid = 0;
+                                    bool isClassShipment = false;
                                     var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                                     if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
+
+                                        if(companyid.Rank == Rank.Class)
+                                        {
+                                            isClassShipment = true;
+                                        }
                                     }
                                     else
                                     {
@@ -4970,8 +4988,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         ReceiverAddress = preshipmentmobile.ReceiverAddress,
                                         DeliveryOptionId = 2,
                                         GrandTotal = preshipmentmobile.GrandTotal,
-                                        Insurance = preshipmentmobile.InsuranceValue,
-                                        Vat = preshipmentmobile.Vat,
+                                        Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
+                                        Vat = preshipmentmobile.Vat == null ? 0 : preshipmentmobile.Vat,
                                         SenderAddress = preshipmentmobile.SenderAddress,
                                         IsCashOnDelivery = false,
                                         CustomerCode = preshipmentmobile.CustomerCode,
@@ -4994,6 +5012,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DestinationCountryId = destinationCountryId,
                                         DepartureCountryId = departureCountryId,
                                         PackageOptionIds = detail.PackageOptionIds,
+                                        IsClassShipment = isClassShipment,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -5002,10 +5021,11 @@ namespace GIGLS.Services.Implementation.Shipments
                                             Nature = s.ItemType,
                                             Price = (decimal)s.CalculatedPrice,
                                             Quantity = s.Quantity
-
                                         }).ToList()
                                     };
 
+                                    var factor = Convert.ToDecimal(Math.Pow(10, -2));
+                                    MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
@@ -5023,6 +5043,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         WaybillNumber = detail.WaybillNumber,
                                         ShipmentScanStatus = ShipmentScanStatus.ARO
                                     });
+
                                     await _uow.CompleteAsync();
                                 }
                                 else
@@ -5543,6 +5564,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                              DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                               shipmentstatus = "Shipment",
                                                               CustomerId = r.CustomerId,
                                                               CustomerType = r.CustomerType,
@@ -5570,6 +5592,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
                         shipments.SenderAddress = CustomerDetails.Address;
                         shipments.SenderName = CustomerDetails.Name;
+                    }
+                    if (String.IsNullOrEmpty(shipments.ReceiverAddress))
+                    {
+                        shipments.ReceiverAddress = _uow.ServiceCentre.GetAllAsQueryable().FirstOrDefault(x => x.ServiceCentreId == shipments.DestinationServiceCentreId).FormattedServiceCentreName;
+
                     }
                 }
 

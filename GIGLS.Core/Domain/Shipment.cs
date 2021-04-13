@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
-
     public class Shipment : BaseDomain, IAuditable
     {
         [Key]
@@ -265,6 +264,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool Consolidated { get; set; }
         [MaxLength(128)]
         public string ConsolidationId { get; set; }
+        public int RequestProcessingCountryId { get; set; }
 
     }
 

@@ -201,6 +201,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
 
             return await HandleApiOperationAsync(async () =>
             {
@@ -222,6 +223,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
             filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
 
             return await HandleApiOperationAsync(async () =>
             {
@@ -578,13 +580,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
 
-        [HttpGet]
-        [Route("confirmreceipt/{itemID}")]
-        public async Task<IServiceResponse<bool>> GetShipmentActivities(int ItemID)
+        [HttpPut]
+        [Route("confirmreceipt")]
+        public async Task<IServiceResponse<bool>> GetShipmentActivities(List<int> ItemIDs)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var res = await _service.UpdateReceived(ItemID);
+                var res = await _service.UpdateReceived(ItemIDs);
 
                 return new ServiceResponse<bool>
                 {

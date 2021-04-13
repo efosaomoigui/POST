@@ -248,7 +248,6 @@ namespace GIGLS.Services.Implementation.Customers
                     var companyDTO = await _companyService.GetCompanyById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(companyDTO);
                     customerDTO.CustomerType = CustomerType.Company;
-
                     return customerDTO;
                 }
                 else
@@ -257,7 +256,6 @@ namespace GIGLS.Services.Implementation.Customers
                     var individualCustomerDTO = await _individualCustomerService.GetCustomerById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
                     customerDTO.CustomerType = CustomerType.IndividualCustomer;
-
                     return customerDTO;
                 }
             }
@@ -512,6 +510,12 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 throw new GenericException($"Customer is suspended or pending");
                             }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
+                            }
                         }
                         result = coporate;
                     }
@@ -528,6 +532,12 @@ namespace GIGLS.Services.Implementation.Customers
                             if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
                             {
                                 throw new GenericException($"Customer is suspended or pending");
+                            }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
                             }
                         }
                         result = coporate;
@@ -577,6 +587,19 @@ namespace GIGLS.Services.Implementation.Customers
             await _uow.User.UpdateUser(user.Id, user);
             return true;
 
+        }
+
+        public async Task<object> GetByCode(string customerCode)
+        {
+            try
+            {
+                var customer = await _individualCustomerService.GetByCode(customerCode);
+                return customer;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

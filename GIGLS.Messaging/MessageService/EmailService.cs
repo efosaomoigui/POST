@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.IMessage;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System.Configuration;
-using GIGLS.Core.IMessage;
-using GIGLS.Core.DTO;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -14,7 +14,7 @@ namespace GIGLS.Messaging.MessageService
         public async Task<string> SendAsync(MessageDTO message)
         {
             string result = "";
-            if(message.ToEmail != null)
+            if (message.ToEmail != null)
             {
                 result = await ConfigSendGridasync(message);
             }
@@ -37,6 +37,28 @@ namespace GIGLS.Messaging.MessageService
             if (!string.IsNullOrWhiteSpace(message.ToEmail))
             {
                 result = await ConfigPaymentNotificationMessage(message);
+            }
+            return result;
+        }
+
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        public async Task<string> SendCustomerRegistrationMails(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigCustomerRegistrationMessage(message);
+            }
+            return result;
+        }
+
+        //This handles the new mails for overseas shipments 
+        public async Task<string> SendOverseasShipmentMails(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigOverseasMessage(message);
             }
             return result;
         }
@@ -84,7 +106,7 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
-        private async Task<string> ConfigPaymentMessageForInternationalShipment(MessageDTO message) 
+        private async Task<string> ConfigPaymentMessageForInternationalShipment(MessageDTO message)
         {
             var myMessage = new SendGridMessage
             {
@@ -189,6 +211,94 @@ namespace GIGLS.Messaging.MessageService
                 { "TPL_Amount", message.Amount },
                 { "TPL_Currency", message.Currency },
                 { "TPL_Balance", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        //This handles the new mails for individual, basic and class customers from the App and the Web 
+        private async Task<string> ConfigCustomerRegistrationMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Subject", message.Subject },
+                { "TPL_CustomerName", message.CustomerName },
+               // { "TPL_CustomerCode", message.CustomerCode },
+                { "TPL_CustomerEmail", message.To },
+                //{ "TPL_Password", message.Body }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigOverseasMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "SG_Subject", message.Subject },
+                { "SG_CustomerName", message.CustomerName },
+                { "SG_Description", message.IntlMessage.Description },
+                 { "SG_StoreOfPurchase", message.IntlMessage.StoreOfPurchase },
+                { "SG_DepartureCenter", message.IntlMessage.DepartureCenter },
+                { "SG_DestinationCenter", message.IntlMessage.DestinationCenter },
+                { "SG_DeliveryOption", message.IntlMessage.DeliveryOption },
+                { "SG_RequestCode", message.IntlMessage.RequestCode },
+                { "SG_CustomerEmail", message.To },
+                { "SG_ConsolidationMessage", message.Body },
+                { "SG_Currency", message.Currency },
+                { "SG_Waybill", message.Waybill },
+               { "SG_ShippingCost", message.IntlMessage.ShippingCost },
+                { "SG_DiscountedShippingCost", message.IntlMessage.DiscountedShippingCost },
+               { "SG_PaymentLink", message.IntlMessage.PaymentLink },
+               { "SG_DeliveryAddress", message.IntlMessage.DeliveryAddressOrCenterName },
+                { "SG_Country", message.Country },
+                { "SG_DeliveryCode", message.IntlMessage.DeliveryCode },
+                { "SG_GeneralPaymentLinkI", message.IntlMessage.GeneralPaymentLinkI },
+                { "SG_GeneralPaymentLinkII", message.IntlMessage.GeneralPaymentLinkII }
             });
 
             var response = await client.SendEmailAsync(myMessage);
