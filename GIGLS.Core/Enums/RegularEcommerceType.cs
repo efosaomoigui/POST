@@ -9,6 +9,8 @@
         InternationalWeightLimit30,
         InternationalWeightLimit70,
         InternationalWeightLimit100,
-        InternationalDocument
+        InternationalDocument,
+        UPSDocument,
+        UPSNonDocument
     }
 }
