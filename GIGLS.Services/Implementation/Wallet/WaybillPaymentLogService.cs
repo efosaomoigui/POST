@@ -137,9 +137,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
 
                     //if the country is not Nigeria or Ghana, block it
-                    if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
+                    if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76 && waybillPaymentLog.PaymentCountryId != 207)
                     {
-                        throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException("Payment can not be initiated for this waybill at this time. Try again later", $"{(int)HttpStatusCode.Forbidden}");
                     }
 
                     decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
