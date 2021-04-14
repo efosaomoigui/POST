@@ -1289,6 +1289,37 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
+
+        public Task<List<InvoiceViewDTO>> GetCoporateTransactions(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where s.CompanyType == CompanyType.Corporate.ToString()
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = s.GrandTotal,
+                                               DateCreated = s.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               CustomerType = s.CustomerType,
+                                               SenderName = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).Name,
+                                               CustomerId = s.CustomerId,
+                                               Email  = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).Email,
+                                               PhoneNumber  = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).PhoneNumber,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            return Task.FromResult(resultDto);
+        }
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
