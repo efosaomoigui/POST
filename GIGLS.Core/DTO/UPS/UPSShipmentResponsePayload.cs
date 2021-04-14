@@ -7,6 +7,7 @@ namespace GIGLS.Core.DTO.UPS
     {
         public UPSShipmentResponsePayload ShipmentResponse { get; set; }
         public FaultPayload Fault { get; set; }
+        public string ResponseResult { get; set; }
     }
 
     //success response

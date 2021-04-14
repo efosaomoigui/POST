@@ -33,7 +33,10 @@ namespace GIGLS.Services.Business.DHL
 
         private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentRequestResponse rateRequestResponse)
         {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
+            {
+                ResponseResult = rateRequestResponse.ResponseResult
+            };
 
             if (rateRequestResponse.ShipmentResponse.Notification.Any())
             {
@@ -122,6 +125,7 @@ namespace GIGLS.Services.Business.DHL
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<ShipmentRequestResponse>(responseResult);
+                    result.ResponseResult = responseResult;
                 }
 
                 return result;

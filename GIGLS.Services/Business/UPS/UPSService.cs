@@ -27,9 +27,12 @@ namespace GIGLS.Services.Business.UPS
 
         private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(UPSShipmentResponseFinalPayload upsResponse)
         {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
+            {
+                ResponseResult = upsResponse.ResponseResult
+            };
 
-            if(upsResponse != null)
+            if (upsResponse != null)
             {
                 throw new GenericException($"There was an issue processing your request: " +
                     $"{upsResponse.Fault.Detail.Errors.ErrorDetail.PrimaryErrorCode.Description}");
@@ -71,6 +74,7 @@ namespace GIGLS.Services.Business.UPS
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<UPSShipmentResponseFinalPayload>(responseResult);
+                    result.ResponseResult = responseResult;
 
                     if (result.Fault == null)
                     {

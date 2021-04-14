@@ -10,6 +10,7 @@ namespace GIGLS.Core.DTO.DHL
         public string ShipmentIdentificationNumber { get; set; }
         public string PackageResult { get; set; }
         public InternationalShipmentStatus InternationalShipmentStatus { get; set; }
+        public string ResponseResult { get; set; }
         //public string ImageFormat { get; set; }
         //public string GraphicImage { get; set; }
     }

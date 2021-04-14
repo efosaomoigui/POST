@@ -4357,6 +4357,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+
+                //1. Get the departure country
+                //2. Get the destination country
+                //3. Get the type of destination
+                //4. Get the zone 
+                //5. Get the 
+
                 var result = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
                 return await GetTotalPriceBreakDown(result, shipmentDTO);
             }
