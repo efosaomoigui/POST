@@ -1118,7 +1118,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    //Process for Nigeria
+                    //Process for Nigeria and USA
                     result = await ProcessPaymentForNigeriaWaybill(referenceCode);
                 }
             }
