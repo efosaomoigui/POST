@@ -651,18 +651,5 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-
-        public async Task<List<InvoiceViewDTO>> GetNegativeBalanceForCorporateCustomers()
-        {
-            try
-            {
-                
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
     }
 }

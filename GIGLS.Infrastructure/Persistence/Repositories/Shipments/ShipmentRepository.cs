@@ -1320,6 +1320,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
+
+
+        public Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            var customerInvoice = new CustomerInvoiceDTO();
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            var customer = _context.Company.AsQueryable().Where(x => x.CustomerCode == filter.CustomerCode).FirstOrDefault();
+            var user = _context.Users.AsQueryable().Where(x => x.Id == filter.UserId).FirstOrDefault();
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate && x.CustomerCode == filter.CustomerCode);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where s.CompanyType == CompanyType.Corporate.ToString()
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = s.GrandTotal,
+                                               Vat = s.Vat.Value,
+                                               DateCreated = s.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               CustomerType = s.CustomerType,
+                                               SenderName = customer.Name,
+                                               CustomerId = s.CustomerId,
+                                               Email = customer.Email,
+                                               PhoneNumber = customer.PhoneNumber,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            if (resultDto.Any())
+            {
+                customerInvoice.InvoiceViewDTOs.AddRange(resultDto);
+                customerInvoice.Total = resultDto.Sum(x => x.Amount);
+                customerInvoice.TotalVat = resultDto.Sum(x => x.Vat);
+                customerInvoice.InvoiceRefNo = "TESTREFNO";
+                customerInvoice.CustomerName = customer.Name;
+                customerInvoice.PhoneNumber = customer.PhoneNumber;
+                customerInvoice.Email = customer.Email;
+                customerInvoice.DateCreated = DateTime.Now;
+                customerInvoice.CreatedBy = $"{user.FirstName} {user.LastName}";
+            }
+            return Task.FromResult(customerInvoice);
+        }
     }
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository

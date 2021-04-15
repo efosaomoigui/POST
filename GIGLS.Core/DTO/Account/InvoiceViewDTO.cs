@@ -206,4 +206,35 @@ namespace GIGLS.Core.DTO.Account
         public int WayBillCount { get; set; }
 
     }
+
+    public class CustomerInvoiceDTO
+    {
+        public CustomerInvoiceDTO()
+        {
+            InvoiceViewDTOs = new List<InvoiceViewDTO>();
+            InvoiceCharges = new List<InvoiceCharge>();
+        }
+        public decimal Total { get; set; }
+        public decimal TotalVat { get; set; }
+        public string InvoiceRefNo { get; set; }
+        public string UserID { get; set; }
+        public string CreatedBy { get; set; }
+        public string CustomerName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public List<InvoiceViewDTO> InvoiceViewDTOs { get; set; }
+        public List<InvoiceCharge> InvoiceCharges { get; set; }
+
+    }
+
+    public class InvoiceCharge
+    {
+
+        public decimal Amount { get; set; }
+        public string Description { get; set; }
+
+    }
 }

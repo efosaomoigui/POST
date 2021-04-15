@@ -17,6 +17,14 @@ using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.Report;
 using AutoMapper;
+using System.Net;
+using GIGLS.Infrastructure;
+using OfficeOpenXml;
+using System.Drawing;
+using System.Web.Hosting;
+using OfficeOpenXml.Style;
+using System.IO;
+using OfficeOpenXml.Drawing;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -686,6 +694,230 @@ namespace GIGLS.Services.Implementation.Report
             }
 
             return await _uow.PreShipmentMobile.GetPreShipments(accountFilterCriteria);
+        }
+
+
+        public async Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            try
+            {
+                if (filter == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (String.IsNullOrEmpty(filter.CustomerCode))
+                {
+                    throw new GenericException("Customer code not provided", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                filter.UserId = await _userService.GetCurrentUserId();
+                var result = await _uow.Shipment.GetCoporateTransactionsByCode(filter);
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+
+            }
+
+        }
+
+        public async Task<string> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            // filter by cancelled shipments
+            try
+            {
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                ExcelPackage ExcelPkg = new ExcelPackage();
+                ExcelWorksheet wsSheet1 = ExcelPkg.Workbook.Worksheets.Add("Sheet1");
+                wsSheet1.View.ShowGridLines = false;
+
+                var imgPath = HostingEnvironment.MapPath("~/Images/");
+                var gigImgPath = imgPath + "\\GIGLogisticsLogo.png";
+                Bitmap bitmap = (Bitmap)Image.FromFile(gigImgPath);//load the image file
+                IntPtr hBitmap = bitmap.GetHbitmap();
+                Image img = Image.FromFile(gigImgPath);
+
+                var customerCode = String.Empty;
+                using (ExcelRange Rng = wsSheet1.Cells[8, 1, 1000, 50])
+                {
+                    Rng.Style.Font.Size = 10;
+                }
+
+                using (ExcelRange Rng = wsSheet1.Cells[2, 3, 2, 4])
+                {
+                    Rng.Value = "Customer Invoice Note";
+                    Rng.Merge = true;
+                    Rng.Style.Font.Size = 16;
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Italic = true;
+                    Rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    Rng.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                }
+
+                wsSheet1.Cells[3, 3].Value = $"From: {customerInvoiceDTO.StartDate.ToString("dd MMM yyy")}";
+                wsSheet1.Cells[4, 3].Value = $"To: { customerInvoiceDTO.EndDate.ToString("dd MMM yyy")}";
+                wsSheet1.Cells[3, 4].Value = $"Printed On: {DateTime.Now.ToString("dd MMM yyy")}";
+                wsSheet1.Cells[4, 4].Value = $"Printed By {customerInvoiceDTO.CreatedBy}";
+
+                wsSheet1.Cells[11, 1].Value = customerInvoiceDTO.CustomerName;
+
+                using (ExcelRange Rng = wsSheet1.Cells[11, 1, 11, 2])
+                {
+                    Rng.Style.Font.Size = 13;
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Color.SetColor(Color.Red);
+                }
+
+                using (ExcelRange Rng = wsSheet1.Cells[11, 6, 11, 7])
+                {
+                    Rng.Value = customerInvoiceDTO.Email;
+                    Rng.Style.Font.Size = 13;
+                    Rng.Style.Font.Bold = true;
+                    Rng.Merge = true;
+                }
+
+                wsSheet1.Protection.IsProtected = false;
+                wsSheet1.Protection.AllowSelectLockedCells = false;
+                int totalRow = customerInvoiceDTO.InvoiceViewDTOs.Count();
+                int row = 13;
+
+
+                int rowIndex;
+                int colIndex;
+
+                int rowIndex1;
+                int colIndex1;
+                var counter = 0;
+
+                rowIndex = row - 8;
+                colIndex = 5;
+
+                rowIndex1 = row - 8;
+                colIndex1 = 0;
+
+                int Height = 100;
+                int Width = 70;
+
+                ExcelPicture pic = wsSheet1.Drawings.AddPicture($"gig_logo{counter++}", img);
+                pic.SetPosition(1,1,1,1);
+                pic.SetSize(Height, Width);
+
+              
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 1])
+                {
+                    Rng.Value = "Waybill";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 2])
+                {
+                    Rng.Value = "Departure";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 3])
+                {
+                    Rng.Value = "Destination";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 4])
+                {
+                    Rng.Value = "Weight";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 5])
+                {
+                    Rng.Value = "Amount";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+               
+                using (ExcelRange Rng = wsSheet1.Cells[row + 5, 9])
+                {
+                    Rng.Value = "Date Created";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                foreach (var subItem in customerInvoiceDTO.InvoiceViewDTOs)
+                {
+                    customerCode = subItem.CustomerCode;
+                    wsSheet1.Cells[row + 6, 1].Value = subItem.Waybill;
+                    wsSheet1.Cells[row + 6, 2].Value = subItem.DepartureServiceCentreName;
+                    wsSheet1.Cells[row + 6, 3].Value = subItem.DestinationServiceCentreName;
+                    wsSheet1.Cells[row + 6, 4].Value = subItem.ApproximateItemsWeight;
+                    wsSheet1.Cells[row + 6, 5].Value = subItem.Amount;
+                    wsSheet1.Cells[row + 6, 6].Value = subItem.DateCreated.ToString("dd MMM yyy");
+                    row++;
+                }
+
+                using (ExcelRange Rng = wsSheet1.Cells[row + 7, 1])
+                {
+                    Rng.Value = "Total Vat";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                }
+                wsSheet1.Cells[row + 7, 3].Value = customerInvoiceDTO.TotalVat == null ? "" : String.Format("{0:n}", customerInvoiceDTO.TotalVat);
+
+                using (ExcelRange Rng = wsSheet1.Cells[row + 9, 1, row + 9, 2])
+                {
+                    Rng.Value = "Total:";
+                    Rng.Style.Font.Bold = true;
+                    Rng.Style.Font.Size = 10;
+                    Rng.Merge = true;
+                }
+                wsSheet1.Cells[row + 9, 3].Value = customerInvoiceDTO.Total == null ? "" : String.Format("{0:n}", customerInvoiceDTO.Total);
+
+                if (customerInvoiceDTO.InvoiceCharges.Any())
+                {
+                    using (ExcelRange Rng = wsSheet1.Cells[row + 11, 1, row + 11, 2])
+                    {
+                        Rng.Value = "Invoice Charges:";
+                        Rng.Style.Font.Bold = true;
+                        Rng.Style.Font.Size = 10;
+                        Rng.Merge = true;
+                    }
+                    int rowCount = 12;
+                    foreach (var item in customerInvoiceDTO.InvoiceCharges)
+                    {
+                        wsSheet1.Cells[row + rowCount, 3].Value = $"{item.Description}: { item.Amount}";
+                        rowCount++;
+                    } 
+                }
+                row = row + 20;
+                wsSheet1.Column(1).AutoFit();
+                wsSheet1.Column(2).AutoFit();
+                wsSheet1.Column(3).AutoFit();
+                wsSheet1.Column(4).AutoFit();
+                wsSheet1.Column(5).AutoFit();
+                wsSheet1.Column(6).AutoFit();
+                wsSheet1.Column(7).AutoFit();
+                wsSheet1.Column(8).AutoFit();
+                wsSheet1.Column(9).AutoFit();
+                wsSheet1.Column(10).AutoFit();
+                wsSheet1.Column(11).AutoFit();
+                wsSheet1.Column(12).AutoFit();
+                wsSheet1.Column(13).AutoFit();
+                wsSheet1.Column(14).AutoFit();
+                string newFileName = "InvoiceNote_" + customerCode+ "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                string path = System.IO.Path.Combine(imgPath, newFileName);
+                StringWriter sw = new StringWriter();
+                File.WriteAllText(path, sw.ToString());
+
+
+                ExcelPkg.SaveAs(new FileInfo(path));
+                return newFileName;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+
+            }
+
         }
     }
 }
