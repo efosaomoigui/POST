@@ -974,6 +974,12 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("This user is not an Individual customer");
                 }
+
+                var nameExist = await _uow.Company.GetAsync(x => x.Name.ToLower() == newCompanyDTO.Name.ToLower());
+                if (nameExist != null)
+                {
+                    throw new GenericException($"Business name {newCompanyDTO.Name.ToUpper()} already exist ");
+                }
                 var industry = string.Join(",", newCompanyDTO.Industry);
                 var productType = string.Join(",", newCompanyDTO.ProductType);
                 var company = new Company()

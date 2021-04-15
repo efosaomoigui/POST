@@ -316,7 +316,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
                                    SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
                                    SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).LGA,
-                               }).OrderByDescending(x => x.DateCreated).Take(5).ToList();
+                               }).Distinct().OrderByDescending(x => x.DateCreated).Take(5).ToList();
 
             return address;
         }
