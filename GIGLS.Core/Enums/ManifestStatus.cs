@@ -10,6 +10,7 @@
 
     public enum MovementStatus
     {
+        NoMovement,
         InProgress,
         EnRoute,
         ProcessEnded
