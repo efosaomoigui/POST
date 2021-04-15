@@ -8,4 +8,11 @@
         public decimal GrandTotal { get; set; }
         public decimal Demurrage { get; set; }
     }
+
+    public class EarningsBreakdownByCustomerDTO
+    {
+        public decimal Individual { get; set; }
+        public decimal Ecommerce { get; set; }
+        public decimal Corporate { get; set; }
+    }
 }

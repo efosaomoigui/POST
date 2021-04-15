@@ -14,6 +14,7 @@ using GIGLS.Core.View;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -1069,6 +1070,12 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
                     dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
+
+                    //Get Agility By Customer Type
+                    var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria);
+
+                    //Get Mobile App
+                    var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria);
                 }
                 _uow.Complete();
             }
@@ -1422,6 +1429,12 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             var result = await _uow.Shipment.GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, shipmentReportType);
             return result;
+        }
+
+        //Get Total Earnings in Financial Reports 
+        private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria);
         }
 
     }

@@ -2,7 +2,6 @@
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Account;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -10,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Account
@@ -131,7 +129,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);  
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                     StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
                     EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 }
@@ -184,7 +182,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);  
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                     StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
                     EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 }
@@ -264,6 +262,53 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     result.GIGGo = summary.GIGGo;
                     result.Agility = summary.Agility;
                     result.Intl = summary.Intl;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var result = new FinancialBreakdownByCustomerTypeDTO
+                {
+                    Individual = 0,
+                    Ecommerce = 0,
+                    Corporate = 0
+                };
+
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await _context.Database.SqlQuery<FinancialBreakdownByCustomerTypeDTO>($"{procedureName} " +
+                           "@StartDate, @EndDate, @CountryId",
+                           param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result.Individual = summary.Individual;
+                    result.Ecommerce = summary.Ecommerce;
+                    result.Corporate = summary.Corporate;
                 }
 
                 return await Task.FromResult(result);

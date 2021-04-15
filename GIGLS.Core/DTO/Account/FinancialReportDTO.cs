@@ -23,4 +23,11 @@ namespace GIGLS.Core.DTO.Account
         public decimal Agility { get; set; }
         public decimal Intl { get; set; }
     }
+
+    public class FinancialBreakdownByCustomerTypeDTO
+    {
+        public decimal Individual { get; set; }
+        public decimal Ecommerce { get; set; }
+        public decimal Corporate { get; set; }
+    }
 }
