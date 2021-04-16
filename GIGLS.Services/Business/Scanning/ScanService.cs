@@ -6,12 +6,14 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -34,6 +36,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly ITransitWaybillNumberService _transitWaybillNumberService;
         private readonly IManifestWaybillMappingService _manifestWaybillService;
         private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly IUnitOfWork _uow;
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
@@ -41,7 +44,7 @@ namespace GIGLS.Services.Business.Scanning
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
             ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService,
-            IHUBManifestWaybillMappingService hubmanifestWaybillService, IUnitOfWork uow)
+            IHUBManifestWaybillMappingService hubmanifestWaybillService, IWaybillPaymentLogService waybillPaymentLogService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -55,6 +58,7 @@ namespace GIGLS.Services.Business.Scanning
             _transitWaybillNumberService = transitWaybillNumberService;
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -167,6 +171,61 @@ namespace GIGLS.Services.Business.Scanning
                         if (shipment.isInternalShipment == true && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                         {
                             await UpdateShipmentPackageForServiceCenter(shipment);
+                        }
+
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && shipment.IsInternational == true)
+                        {
+                            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
+
+                            var messageDTO = new ShipmentDTO
+                            {
+                                CustomerType = shipment.CustomerType,
+                                CustomerId = shipment.CustomerId,
+                                ReceiverName = shipment.ReceiverName,
+                                Waybill = shipment.Waybill,
+                                PickupOptions = shipment.PickupOptions,
+                                ReceiverEmail = shipment.ReceiverEmail,
+                                CustomerDetails = new CustomerDTO
+                                {
+                                    PhoneNumber = shipment.ReceiverPhoneNumber,
+                                    Email = shipment.ReceiverEmail
+                                },
+                                DepartureServiceCentre = new ServiceCentreDTO
+                                {
+
+                                },
+                                DestinationServiceCentre = new ServiceCentreDTO
+                                {
+
+                                }
+                            };
+
+                            if (invoice.PaymentStatus != PaymentStatus.Paid)
+                            {
+                                //Get the two possible payment links for Waybill(Nigeria  and US)
+                                var waybillPayment = new WaybillPaymentLogDTO()
+                                {
+                                    Waybill = shipment.Waybill,
+                                    OnlinePaymentType = OnlinePaymentType.Paystack,
+                                    Email = shipment.ReceiverEmail
+                                };
+
+                                int[] listOfCountryForPayment = { 1, 207 };
+                                List<string> paymentLinks = new List<string>();
+                                foreach (var country in listOfCountryForPayment)
+                                {
+                                    waybillPayment.PaymentCountryId = country;
+                                    waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                                    var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                                    paymentLinks.Add(response.data.Authorization_url);
+                                }
+
+                               // await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
+
+                                //Old mail
+                                //await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISN);
+                            }
+
                         }
                         return true;
                     }
