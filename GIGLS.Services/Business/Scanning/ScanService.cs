@@ -149,7 +149,7 @@ namespace GIGLS.Services.Business.Scanning
                     //check if the waybill has not been scan for the same status before
                     var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
-                    if (checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
+                    if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
