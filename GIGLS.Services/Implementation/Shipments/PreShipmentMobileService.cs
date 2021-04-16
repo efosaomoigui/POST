@@ -3452,12 +3452,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
                 };
 
-                if (preshipmentMobile.shipmentstatus == "Assigned for Pickup")
+                if (mobileRequest.Status == MobilePickUpRequestStatus.Arrived.ToString())
                 {
                     //Send message to Sender
                     await _messageSenderService.SendMessage(MessageType.APFS, EmailSmsType.SMS, messageExtensionDTO);
                 }
-                else if(preshipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
+                else if(mobileRequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                 {
                     //Send message to Receiver
                     messageExtensionDTO.SenderName = preshipmentMobile.ReceiverName;
