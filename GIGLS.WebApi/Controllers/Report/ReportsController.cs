@@ -305,13 +305,13 @@ namespace GIGLS.WebApi.Controllers.Report
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("generatecustomerinvoice")]
-        public async Task<IServiceResponse<string>> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        public async Task<IServiceResponse<bool>> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var report = await _shipmentService.GenerateCustomerInvoice(customerInvoiceDTO);
 
-                return new ServiceResponse<string>
+                return new ServiceResponse<bool>
                 {
                     Object = report
                 };

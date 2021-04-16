@@ -25,6 +25,8 @@ using System.Web.Hosting;
 using OfficeOpenXml.Style;
 using System.IO;
 using OfficeOpenXml.Drawing;
+using GIGLS.Core.Domain;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -723,19 +725,31 @@ namespace GIGLS.Services.Implementation.Report
 
         }
 
-        //public async Task<string> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
-        //{
-        //    try
-        //    {
-               
-        //    }
-        //    catch (Exception ex)
-        //    {
+        public async Task<bool> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            try
+            {
+                if (customerInvoiceDTO == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (!customerInvoiceDTO.InvoiceViewDTOs.Any())
+                {
+                    throw new GenericException("Invalid payload, No invoice detail", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var customerInvoice = JObject.FromObject(customerInvoiceDTO).ToObject<CustomerInvoice>();
+                var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
+                customerInvoice.UserID = await _userService.GetCurrentUserId();
+                customerInvoice.Waybills = string.Join(",", waybills);
+                _uow.CustomerInvoice.Add(customerInvoice);
+               await _uow.CompleteAsync();
+               return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
 
-        //        throw;
-
-        //    }
-
-        //}
+        }
     }
 }

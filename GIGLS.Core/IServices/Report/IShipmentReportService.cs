@@ -23,6 +23,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryBreakDown(ShipmentProgressSummaryFilterCriteria baseFilterCriteria);
         Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria);
         Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter);
-        Task<string> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
+        Task<bool> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
     }
 }
