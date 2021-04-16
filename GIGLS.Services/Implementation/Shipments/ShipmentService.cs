@@ -2432,7 +2432,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.NoMovement && x.IsDispatched == false);
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.NoMovement && x.IsDispatched == true && x.IsReceived ==false);
 
                 if (serviceCenters.Length > 0)
                 {
