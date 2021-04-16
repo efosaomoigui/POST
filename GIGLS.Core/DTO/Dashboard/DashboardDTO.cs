@@ -42,6 +42,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public int TotalDailyShipmentOrdered { get; set; }
         public double TotalMonthlyWeightOfShipmentOrdered { get; set; }
         public double TotalDailyWeightOfShipmentOrdered { get; set; }
+        public EarningsBreakdownByCustomerDTO EarningsBreakdownByCustomerDTO { get; set; }
     }
 
     public class CustomerBreakdownDTO

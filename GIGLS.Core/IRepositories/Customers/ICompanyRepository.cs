@@ -26,5 +26,6 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<List<CompanyDTO>> GetCompanies(Rank rank, ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank);
         Task<CustomerBreakdownDTO> GetNoOfBasicAndClassCustomers(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria);
     }
 }

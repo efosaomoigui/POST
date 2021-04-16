@@ -1071,11 +1071,21 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
                     dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
 
-                    //Get Agility By Customer Type
+                    //Get Revenue By Customer Type for Agility
                     var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria);
 
-                    //Get Mobile App
+                    //Get Revenue By Customer Type for GIGGo
                     var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria);
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual + giggoRevenue.Individual;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
+
+                    var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
+                    var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
+
                 }
                 _uow.Complete();
             }
@@ -1431,10 +1441,16 @@ namespace GIGLS.Services.Implementation.Dashboard
             return result;
         }
 
-        //Get Total Earnings in Financial Reports 
+        //Get  Earnings in Financial Reports By Customer Types
         private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
         {
             return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria);
+        }
+
+        //Get  Revenue by Basic or Class Customers 
+        private async Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetBasicOrClassCustomersIncome(procedureName, dashboardFilterCriteria);
         }
 
     }
