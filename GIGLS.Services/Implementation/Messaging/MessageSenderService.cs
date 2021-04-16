@@ -1573,9 +1573,11 @@ namespace GIGLS.Services.Implementation.Messaging
         }
 
         //Handle Received Items Mail for Overseas Shipment
-        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks)
+        public async Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks, int? isInNigeria)
         {
-            //get CustomerDetails (
+            //If isInNigeria is not null, send to the Sender, else send to Receiver
+
+            //get CustomerDetails 
             if (shipmentDto.CustomerType.Contains("Individual"))
             {
                 shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
@@ -1602,7 +1604,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var messageDTO = new MessageDTO()
             {
-                CustomerName = customerObj.FirstName,
+                CustomerName = isInNigeria == null ? customerObj.FirstName : shipmentDto.ReceiverName,
                 Waybill = shipmentDto.Waybill,
                 Currency = country.CurrencySymbol,
                 IntlMessage = new IntlMessageDTO()
@@ -1614,8 +1616,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     GeneralPaymentLinkI = generalPaymentLinks[0],
                     GeneralPaymentLinkII = generalPaymentLinks[1]
                 },
-                To = customerObj.Email,
-                ToEmail = customerObj.Email,
+                To = isInNigeria == null ? customerObj.Email: shipmentDto.ReceiverEmail,
+                ToEmail = isInNigeria == null ? customerObj.Email: shipmentDto.ReceiverEmail,
                 Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
                 MessageTemplate = "OverseasReceivedItems"

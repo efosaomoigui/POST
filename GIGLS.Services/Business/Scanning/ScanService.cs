@@ -149,7 +149,7 @@ namespace GIGLS.Services.Business.Scanning
                     //check if the waybill has not been scan for the same status before
                     var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
-                    if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
+                    if (checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
@@ -177,29 +177,6 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
 
-                            var messageDTO = new ShipmentDTO
-                            {
-                                CustomerType = shipment.CustomerType,
-                                CustomerId = shipment.CustomerId,
-                                ReceiverName = shipment.ReceiverName,
-                                Waybill = shipment.Waybill,
-                                PickupOptions = shipment.PickupOptions,
-                                ReceiverEmail = shipment.ReceiverEmail,
-                                CustomerDetails = new CustomerDTO
-                                {
-                                    PhoneNumber = shipment.ReceiverPhoneNumber,
-                                    Email = shipment.ReceiverEmail
-                                },
-                                DepartureServiceCentre = new ServiceCentreDTO
-                                {
-
-                                },
-                                DestinationServiceCentre = new ServiceCentreDTO
-                                {
-
-                                }
-                            };
-
                             if (invoice.PaymentStatus != PaymentStatus.Paid)
                             {
                                 //Get the two possible payment links for Waybill(Nigeria  and US)
@@ -220,10 +197,10 @@ namespace GIGLS.Services.Business.Scanning
                                     paymentLinks.Add(response.data.Authorization_url);
                                 }
 
-                               // await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
+                                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
 
-                                //Old mail
-                                //await _shipmentTrackingService.SendEmailToCustomerForIntlShipment(messageDTO, MessageType.AISN);
+                                //Mail and Sms
+                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipmentArriveNigeria(shipmentDTO, paymentLinks);
                             }
 
                         }

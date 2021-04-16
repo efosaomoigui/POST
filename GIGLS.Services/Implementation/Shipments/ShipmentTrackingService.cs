@@ -15,6 +15,8 @@ using GIGLS.Core.DTO.User;
 using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -659,6 +661,24 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             await _messageSenderService.SendOverseasMails(messageDTO);
+            return true;
+        }
+
+        //Send email and SMS when Scan of "Intl Shipment Arrive Nigeria" and payment has not been made
+        public async Task<bool> SendEmailToCustomerForIntlShipmentArriveNigeria(ShipmentDTO shipmentDTO, List<string> paymentLinks)
+        {
+            //Send SMS
+            shipmentDTO.CustomerDetails = new CustomerDTO();
+            shipmentDTO.DepartureServiceCentre = new ServiceCentreDTO();
+            shipmentDTO.DestinationServiceCentre = new ServiceCentreDTO();
+            shipmentDTO.CustomerDetails.PhoneNumber = shipmentDTO.ReceiverPhoneNumber;
+            shipmentDTO.URL = paymentLinks[0];
+
+            await _messageSenderService.SendMessage(MessageType.AISNU, EmailSmsType.SMS, shipmentDTO);
+
+            //Send Email
+            await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDTO, paymentLinks, 1);
+
             return true;
         }
     }
