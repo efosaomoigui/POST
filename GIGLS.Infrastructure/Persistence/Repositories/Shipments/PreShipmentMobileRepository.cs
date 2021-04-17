@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
 using GIGLS.Core.Enums;
+using System.Linq.Dynamic.Core;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -298,25 +299,25 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID);
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
 
             var address = (from r in preShipments
                                select new AddressDTO()
                                {
-                                   ReceiverAddress = r.ReceiverAddress,
-                                   ReceiverName = r.ReceiverName,
-                                   ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.ReceiverStationId).StationName,
-                                   ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Latitude,
-                                   ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Longitude,
-                                   ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).LGA,
-                                   SenderAddress = r.SenderAddress,
-                                   SenderName = r.SenderName,
-                                   DateCreated = r.DateCreated,
-                                   SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.SenderStationId).StationName,
-                                   SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
-                                   SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
-                                   SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).LGA,
-                               }).OrderByDescending(x => x.DateCreated).Take(5).ToList();
+                                   ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
+                                   ReceiverName = r.FirstOrDefault().ReceiverName,
+                                   ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
+                                   ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
+                                   ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Longitude,
+                                   ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).LGA,
+                                   SenderAddress = r.FirstOrDefault().SenderAddress,
+                                   SenderName = r.FirstOrDefault().SenderName,
+                                   DateCreated = r.FirstOrDefault().DateCreated,
+                                   SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().SenderStationId).StationName,
+                                   SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
+                                   SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
+                                   SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
+                               }).Take(5).ToList();
 
             return address;
         }

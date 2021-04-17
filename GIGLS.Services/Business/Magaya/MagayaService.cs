@@ -606,7 +606,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             paymentLinks.Add(response.data.Authorization_url);
                         }
 
-                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto, paymentLinks);
+                        await _messageSenderService.SendOverseasShipmentReceivedMails(shipmentDto, paymentLinks, null);
                     }
 
                     using (var client = new HttpClient())

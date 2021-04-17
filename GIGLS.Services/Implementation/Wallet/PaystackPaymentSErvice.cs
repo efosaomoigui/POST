@@ -540,12 +540,12 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<ResponseDTO> VerifyBVN(string bvnNo)
         {
-            var response = new HttpResponseMessage();
+           // var response = new HttpResponseMessage();
             var result = new ResponseDTO();
-            var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
-            url = $"{url}{bvnNo}";
-            var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            //var url = ConfigurationManager.AppSettings["VerifyBVNURL"];
+            //url = $"{url}{bvnNo}";
+            //var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
                 //await Task.Run(async () =>
@@ -1118,7 +1118,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    //Process for Nigeria
+                    //Process for Nigeria and USA
                     result = await ProcessPaymentForNigeriaWaybill(referenceCode);
                 }
             }
