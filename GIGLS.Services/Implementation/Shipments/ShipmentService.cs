@@ -2207,7 +2207,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var endDate = queryDate.Item2;
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.NoMovement);
 
                 if (serviceCenters.Length > 0)
                 {
