@@ -67,6 +67,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IDHLService _DhlService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly IUPSService _UPSService;
+        private readonly IInternationalPriceService _internationalPriceService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -77,7 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService, 
-            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService)
+            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -99,6 +100,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _DhlService = dHLService;
             _waybillPaymentLogService = waybillPaymentLogService;
             _UPSService = uPSService;
+            _internationalPriceService = internationalPriceService;
             MapperConfig.Initialize();
         }
 
@@ -4358,15 +4360,20 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-
                 //1. Get the departure country
+                if(shipmentDTO.DepartureCountryId < 1)
+                {
+                    var departureCountry = await _userService.GetUserActiveCountryId();
+                    shipmentDTO.DepartureCountryId = departureCountry;
+                }
+
                 //2. Get the destination country
                 //3. Get the type of destination
                 //4. Get the zone 
                 //5. Get the 
 
-                var result = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
-                return await GetTotalPriceBreakDown(result, shipmentDTO);
+                var result = await _internationalPriceService.GetPrice(shipmentDTO, CompanyMap.UPS);
+                return await GetUPSTotalPriceBreakDown(shipmentDTO);
             }
             catch (Exception ex)
             {
@@ -4411,6 +4418,31 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return total;
         }
+
+        private async Task<TotalNetResult> GetUPSTotalPriceBreakDown(InternationalShipmentDTO shipmentDTO)
+        {
+            var total = new TotalNetResult()
+            {
+                Amount = shipmentDTO.GrandTotal,
+                GrandTotal = shipmentDTO.GrandTotal
+            };
+
+            var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == shipmentDTO.DepartureCountryId);
+            decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+            total.VAT = total.Amount * vat;
+            total.GrandTotal = total.Amount + total.VAT;
+
+            //Get Insurance
+            if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
+            {
+                decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
+                total.GrandTotal = total.GrandTotal + insurance;
+                total.Insurance = insurance;
+            }
+
+            return total;
+        }
+
 
         //Add DHL, UPS International shipment 
         public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
@@ -4493,7 +4525,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //1. Get the Price -- We have a set up price for the shipment
+                //1. Get the Price -- UPS Price
                 var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
 
                 //update price to contain VAT, INSURANCE ETC

@@ -7,4 +7,10 @@
         DHL,
         UPS
     }
+
+    public enum InternationalShipmentItemCategory
+    {
+        NonDocument,
+        Document
+    }
 }

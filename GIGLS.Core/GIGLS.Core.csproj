@@ -799,6 +799,7 @@
     <Compile Include="IServices\BankSettlement\IBankService.cs" />
     <Compile Include="IServices\BankSettlement\ICODSettlementSheetService.cs" />
     <Compile Include="IServices\Business\IGIGGoPricingService.cs" />
+    <Compile Include="IServices\Business\IInternationalPriceService.cs" />
     <Compile Include="IServices\Business\IPaymentService.cs" />
     <Compile Include="IServices\Business\IPricingService.cs" />
     <Compile Include="IServices\Business\IScanService.cs" />

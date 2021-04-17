@@ -185,6 +185,7 @@
     <Compile Include="Business\Node\NodeService.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\GIGGoPricingService.cs" />
+    <Compile Include="Business\Pricing\InternationalPriceService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Pricing\PriceCategoryService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />

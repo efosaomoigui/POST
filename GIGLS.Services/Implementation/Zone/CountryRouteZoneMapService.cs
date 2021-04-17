@@ -38,7 +38,7 @@ namespace GIGLS.Services.Implementation.Zone
             && d.CompanyMap == routeZoneMap.CompanyMap );
 
             if (mapExists == true)
-                throw new GenericException("The mapping of Route to Zone already exists");
+                throw new GenericException("The country mapping of Route to Zone already exists");
 
             var Mapping = new CountryRouteZoneMap
             {
@@ -86,23 +86,21 @@ namespace GIGLS.Services.Implementation.Zone
                 && r.CompanyMap == companyMap, "Zone,Destination,Departure");
 
             if (routeZoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Country Mapping of Route to Zone does not exist");
 
             return Mapper.Map<CountryRouteZoneMapDTO>(routeZoneMap);
         }
 
-        //public async Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination)
-        //{
-        //    // use country direct
-        //    var routeZoneMap = await _unitOfWork.CountryRouteZoneMap.GetAsync(r =>
-        //        r.DepartureId == departure &&
-        //        r.DestinationId == destination, "Zone,Destination,Departure");
+        public async Task<CountryRouteZoneMapDTO> GetBasicZone(int departure, int destination, CompanyMap companyMap)
+        {
+            var routeZoneMap = await _unitOfWork.CountryRouteZoneMap.GetAsync(r =>
+                r.DepartureId == departure && r.DestinationId == destination && r.CompanyMap == companyMap);
 
-        //    if (routeZoneMap == null)
-        //        throw new GenericException("The Mapping of Route to Zone does not exist");
+            if (routeZoneMap == null)
+                throw new GenericException("The Country Mapping of Route to Zone does not exist");
 
-        //    return Mapper.Map<CountryRouteZoneMapDTO>(routeZoneMap);
-        //}
+            return Mapper.Map<CountryRouteZoneMapDTO>(routeZoneMap);
+        }
 
         public async Task UpdateCountryRouteZoneMap(int routeZoneMapId, CountryRouteZoneMapDTO routeZoneMapDTO)
         {
@@ -112,12 +110,12 @@ namespace GIGLS.Services.Implementation.Zone
             var routeZoneMap = Mapper.Map<CountryRouteZoneMap>(routeZoneMapDTO);
 
             if (routeZoneMapId != routeZoneMap.CountryRouteZoneMapId)
-                throw new GenericException("Invalid Mapping Route to Zone for the Input parameters");
+                throw new GenericException("Invalid Country Mapping Route to Zone for the Input parameters");
 
             var zoneMap = _unitOfWork.CountryRouteZoneMap.Get(routeZoneMapId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Country Mapping of Route to Zone does not exist");
 
             zoneMap.DepartureId = routeZoneMap.DepartureId;
             zoneMap.DestinationId = routeZoneMap.DestinationId;
@@ -133,7 +131,7 @@ namespace GIGLS.Services.Implementation.Zone
             var zoneMap = _unitOfWork.CountryRouteZoneMap.Get(routeZoneMapId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Country Mapping of Route to Zone does not exist");
 
             zoneMap.Status = status;
             await _unitOfWork.CompleteAsync();

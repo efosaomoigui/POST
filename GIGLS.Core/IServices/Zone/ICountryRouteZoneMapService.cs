@@ -13,8 +13,8 @@ namespace GIGLS.Core.IServices.Zone
         Task UpdateCountryRouteZoneMap(int routeZoneMapId, CountryRouteZoneMapDTO routeZoneMap);
         Task UpdateStatusCountryRouteZoneMap(int routeZoneMapId, bool status);
         Task DeleteCountryRouteZoneMap(int routeZoneMapId); 
-        //Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination);
         Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination, CompanyMap companyMap = CompanyMap.GIG);
+        Task<CountryRouteZoneMapDTO> GetBasicZone(int departure, int destination, CompanyMap companyMap);
 
     }
 }
