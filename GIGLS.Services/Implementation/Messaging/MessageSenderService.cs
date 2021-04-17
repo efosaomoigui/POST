@@ -778,6 +778,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (company != null)
                     {
                         customerDTO.CustomerType = CustomerType.Company;
+                        customerDTO.FirstName = customerDTO.Name;
                     }
                     return customerDTO;
                 }

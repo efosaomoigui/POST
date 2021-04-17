@@ -224,6 +224,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _waybillPaymentLogService.AddWaybillPaymentLogFromApp(walletPaymentLogDto);
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            walletPaymentLog.Amount = Math.Round(walletPaymentLog.Amount * factor) / factor;
             return walletPaymentLog;
         }
 
