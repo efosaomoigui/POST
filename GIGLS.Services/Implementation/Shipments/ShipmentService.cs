@@ -4865,7 +4865,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         paymentLinks.Add(response.data.Authorization_url);
                     }
 
-                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
+                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks, null);
                 }
 
                 // get the current user info
