@@ -4526,10 +4526,10 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //1. Get the Price -- UPS Price
-                var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+                var price = await GetUPSInternationalShipmentPrice(shipmentDTO);
 
                 //update price to contain VAT, INSURANCE ETC
-                var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
+                var priceUpdate = await GetUPSTotalPriceBreakDown(shipmentDTO);
 
                 //validate the different from UPS
                 if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
