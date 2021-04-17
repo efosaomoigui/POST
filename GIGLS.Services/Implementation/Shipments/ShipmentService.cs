@@ -2204,7 +2204,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get startDate and endDate
                 var queryDate = dateFilterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
-                var endDate = queryDate.Item2;
+                var endDate = queryDate.Item2; 
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.NoMovement);
