@@ -19,7 +19,7 @@ namespace GIGLS.Core.IMessageService
         Task<MessageDTO> GetMessageByType(MessageType messageType, int countryId);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task SendCustomerRegistrationMails(MessageDTO messageDTO);
-        Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks);
+        Task SendOverseasShipmentReceivedMails(ShipmentDTO shipmentDto, List<string> generalPaymentLinks, int? isInNigeria);
         Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName);
         Task SendOverseasMails(MessageDTO messageDTO);
         Task SendOverseasPaymentConfirmationMails(ShipmentDTO shipmentDto);
