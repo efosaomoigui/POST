@@ -1620,7 +1620,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 ToEmail = isInNigeria == null ? customerObj.Email: shipmentDto.ReceiverEmail,
                 Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
-                MessageTemplate = "OverseasReceivedItems"
+                MessageTemplate = isInNigeria == null ?  "OverseasReceivedItems" : "OverseasReceivedItemsInNigeria(Unpaid)"
             };
 
             if (customerObj.Rank == Rank.Class)
@@ -1632,7 +1632,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     decimal discount = ((100M - percentage) / 100M);
                     var discountPrice = shipmentDto.GrandTotal * discount;
                     messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
-                    messageDTO.MessageTemplate = "OverseasReceivedItemsClass";
+                    messageDTO.MessageTemplate = isInNigeria == null ? "OverseasReceivedItemsClass" : "OverseasReceivedItemsInNigeriaClass(Unpaid)";
                 }
             }
 
