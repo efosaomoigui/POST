@@ -4758,27 +4758,29 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.DepartureServiceCentre = dept;
                     shipment.SenderCode = shipment.CustomerDetails.CustomerCode;
 
+                    //OLD EMAIL
                     //await _messageSenderService.SendGenericEmailMessage(MessageType.INTLPEMAIL, shipment);
 
-                    //Get the two possible payment links for Waybill (Nigeria  and US)
-                    //var waybillPayment = new WaybillPaymentLogDTO()
-                    //{
-                    //    Waybill = shipment.Waybill,
-                    //    OnlinePaymentType = OnlinePaymentType.Paystack,
-                    //    Email = shipment.Customer[0].Email
-                    //};
+                    //NEW EMAIL
+                    //Get the two possible payment links for Waybill(Nigeria  and US)
+                    var waybillPayment = new WaybillPaymentLogDTO()
+                    {
+                        Waybill = shipment.Waybill,
+                        OnlinePaymentType = OnlinePaymentType.Paystack,
+                        Email = shipment.Customer[0].Email
+                    };
 
-                    //int[] listOfCountryForPayment = { 1, 207 };
-                    //List<string> paymentLinks = new List<string>();
-                    //foreach ( var country in listOfCountryForPayment)
-                    //{
-                    //    waybillPayment.PaymentCountryId = country;
-                    //    waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
-                    //    var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
-                    //    paymentLinks.Add(response.data.Authorization_url);
-                    //}
-                    
-                    //await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks);
+                    int[] listOfCountryForPayment = { 1, 207 };
+                    List<string> paymentLinks = new List<string>();
+                    foreach (var country in listOfCountryForPayment)
+                    {
+                        waybillPayment.PaymentCountryId = country;
+                        waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                        var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                        paymentLinks.Add(response.data.Authorization_url);
+                    }
+
+                    await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks, null);
                 }
 
                 // get the current user info
