@@ -434,8 +434,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var currentServiceCentre = await _userService.GetCurrentServiceCenter();
 
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode) &&
-                x.MovementStatus == MovementStatus.InProgress && serviceCenters.Contains(x.DepartureServiceCentreId));
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
 
