@@ -178,6 +178,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         public Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
         {
             var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+            var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
 
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -191,10 +192,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Destination = dest.Name,
                               Amount = i.Amount,
                               CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
+                              DollarCurrencySymbol = usCountry.CurrencySymbol,
+                              DollarCurrencyCode = usCountry.CurrencyCode,
+                              DollarAmount = Math.Round((Context.CountryRouteZoneMap.Where(c => c.DepartureId == i.CountryId && c.DestinationId == 207).FirstOrDefault().Rate * (double)i.Amount),2),
                               DateCreated = s.DateCreated
                           }).ToList();
-
-            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
+            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList());
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)
