@@ -198,6 +198,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                   CountryName = x.CountryName,
                               }).FirstOrDefault(),
                               CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
+                              Description = s.Description,
                               DateCreated = s.DateCreated
                           }).ToList();
 

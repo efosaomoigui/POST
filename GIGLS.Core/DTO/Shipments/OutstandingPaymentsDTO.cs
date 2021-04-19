@@ -14,6 +14,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal Amount { get; set; }
         public string CurrencySymbol { get; set; }
         public CountryDTO Country { get; set; }
+        public string Description { get; set; }
         public DateTime DateCreated { get; set; }
     }
 }
