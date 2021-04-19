@@ -15,4 +15,10 @@
         public decimal Ecommerce { get; set; }
         public decimal Corporate { get; set; }
     }
+
+    public class EarningsBreakdownOfEcommerceDTO
+    {
+        public decimal Basic { get; set; }
+        public decimal Class { get; set; }
+    }
 }

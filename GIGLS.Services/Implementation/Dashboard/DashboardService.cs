@@ -1083,9 +1083,16 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
                     dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
 
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
+
                     var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
                     var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
 
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
+
+                    var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
+                    dashboardDTO.ClassSubscriptionsCount = classSubscriptions;
                 }
                 _uow.Complete();
             }
@@ -1451,6 +1458,12 @@ namespace GIGLS.Services.Implementation.Dashboard
         private async Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
         {
             return await _uow.Company.GetBasicOrClassCustomersIncome(procedureName, dashboardFilterCriteria);
+        }
+
+        //Get  Number of Class Subscriptions 
+        private async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetClassSubscriptions(dashboardFilterCriteria);
         }
 
     }

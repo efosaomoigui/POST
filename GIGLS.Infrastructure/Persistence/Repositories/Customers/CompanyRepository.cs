@@ -582,5 +582,43 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
+        //Get number of class subscriptions
+        public async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var date = DateTime.Now;
+
+                //declare parameters for the stored procedure
+                SqlParameter endDate = new SqlParameter("@EndDate", date);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    endDate,
+                    countryId
+                };
+
+
+                var summaryResult = await _context.Database.SqlQuery<int?>("ClassSubscription " +
+                 "@EndDate, @CountryId",
+                 param).FirstOrDefaultAsync();
+
+                int summary = 0;
+
+                if (summaryResult != null)
+                {
+                    summary = (int)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
