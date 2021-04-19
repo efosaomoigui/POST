@@ -4394,7 +4394,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //1. Get the departure country
-                if(shipmentDTO.DepartureCountryId < 1)
+                if(shipmentDTO.DepartureCountryId == 0)
                 {
                     var departureCountry = await _userService.GetUserActiveCountryId();
                     shipmentDTO.DepartureCountryId = departureCountry;

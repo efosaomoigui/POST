@@ -82,7 +82,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 if (zone == null)
                 {
-                    throw new GenericException("Price not yet set for this Zone and Weight", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException($"Price not yet set for this Zone {zoneId} and Weight {weight}", $"{(int)HttpStatusCode.NotFound}");
                 }
                 return zone.Price;
             }
