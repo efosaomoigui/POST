@@ -1359,10 +1359,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 customerInvoice.InvoiceViewDTOs.AddRange(resultDto);
                 customerInvoice.Total = resultDto.Sum(x => x.Amount);
                 customerInvoice.TotalVat = resultDto.Sum(x => x.Vat);
-                customerInvoice.InvoiceRefNo = "TESTREFNO";
+                customerInvoice.InvoiceRefNo = "" ;
                 customerInvoice.CustomerName = customer.Name;
                 customerInvoice.PhoneNumber = customer.PhoneNumber;
                 customerInvoice.Email = customer.Email;
+                customerInvoice.CustomerCode = customer.CustomerCode;
                 customerInvoice.DateCreated = DateTime.Now;
                 customerInvoice.CreatedBy = $"{user.FirstName} {user.LastName}";
             }

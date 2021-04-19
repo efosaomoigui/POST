@@ -27,6 +27,7 @@ using System.IO;
 using OfficeOpenXml.Drawing;
 using GIGLS.Core.Domain;
 using Newtonsoft.Json.Linq;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -35,12 +36,14 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private IServiceCentreService _serviceCenterService;
+        private INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -714,6 +717,10 @@ namespace GIGLS.Services.Implementation.Report
                 }
                 filter.UserId = await _userService.GetCurrentUserId();
                 var result = await _uow.Shipment.GetCoporateTransactionsByCode(filter);
+                if (result.InvoiceViewDTOs.Any())
+                {
+                  result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
+                }
                 return result;
             }
             catch (Exception ex)

@@ -29,6 +29,8 @@ namespace GIGLS.Core.Domain
         public string UserID { get; set; }
         [MaxLength(128)]
         public string CreatedBy { get; set; }
+        [MaxLength(128)]
+        public string CustomerCode { get; set; }
         public virtual List<InvoiceCharge> InvoiceCharges { get; set; }
     }
 
