@@ -2210,10 +2210,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get startDate and endDate
                 var queryDate = dateFilterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
-                var endDate = queryDate.Item2;
+                var endDate = queryDate.Item2; 
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.InProgress);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.NoMovement);
 
                 if (serviceCenters.Length > 0)
                 {
@@ -2362,6 +2362,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         ManifestNumber.IsDriverValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.EnRoute;
+
+                        var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
+                        var movementManifestList = movementmanifestMappingList.ToList();
+
+                        var manifestByScList = movementManifestList.Select(x => x.ManifestNumber).Distinct().ToList();
+
+                        var waybillLists = _uow.ManifestWaybillMapping.GetAllAsQueryable().Where(s => manifestByScList.Contains(s.Waybill)).ToList();
+                        var waybills = waybillLists.Select(x => x.Waybill).Distinct().ToList();
+
+                        var shipments = _uow.Shipment.GetAll().Where(s => waybills.Contains(s.Waybill)).ToList();
+
+                        foreach (var shipment in shipments)
+                        {
+                            shipment.ShipmentScanStatus = ShipmentScanStatus.ODMV;
+                        }
+
                         await _uow.CompleteAsync();
                         retVal = true;
                     }
@@ -2380,6 +2396,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         ManifestNumber.IsDestinationServiceCentreValid = true;
                         ManifestNumber.MovementStatus = MovementStatus.ProcessEnded;
+
+
+                        var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == valMovementManifest.movementManifestCode);
+                        var movementManifestList = movementmanifestMappingList.ToList();
+
+                        var manifestByScList = movementManifestList.Select(x => x.ManifestNumber).Distinct().ToList();
+
+                        var waybillLists = _uow.ManifestWaybillMapping.GetAllAsQueryable().Where(s => manifestByScList.Contains(s.Waybill)).ToList();
+                        var waybills = waybillLists.Select(x => x.Waybill).Distinct().ToList();
+
+                        var shipments = _uow.Shipment.GetAll().Where(s => waybills.Contains(s.Waybill)).ToList();
+
+                        foreach (var shipment in shipments)
+                        {
+                            shipment.ShipmentScanStatus = ShipmentScanStatus.ARO;
+                        }
+
                         await _uow.CompleteAsync();
                         retVal = true;
                     }
@@ -2405,7 +2438,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.InProgress && x.IsDispatched == true);
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.NoMovement && x.IsDispatched == true && x.IsReceived ==false);
 
                 if (serviceCenters.Length > 0)
                 {
