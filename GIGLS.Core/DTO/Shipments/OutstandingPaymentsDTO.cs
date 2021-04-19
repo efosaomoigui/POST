@@ -13,6 +13,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string Destination { get; set; }
         public decimal Amount { get; set; }
         public string CurrencySymbol { get; set; }
+        public CountryDTO Country { get; set; }
         public DateTime DateCreated { get; set; }
     }
 }
