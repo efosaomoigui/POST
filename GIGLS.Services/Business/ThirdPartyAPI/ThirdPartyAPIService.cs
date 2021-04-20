@@ -16,6 +16,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.DTO;
 using System.Configuration;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -133,6 +134,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             await _scanService.ItemShippedFromUKScan(manifestCode);
             return true;
+        }
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+           return await _portalService.GetGoogleAddressDetails(location);
         }
 
 

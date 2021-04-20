@@ -20,7 +20,7 @@ namespace GIGLS.Core.DTO
     }
 
 
-    public class GoogleAddressDTO 
+    public class GoogleAddressDTO
     {
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }

@@ -3253,6 +3253,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
         }
-      
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            if (String.IsNullOrEmpty(location.Address))
+            {
+                throw new GenericException("no address provided");
+            }
+            return await _partnertransactionservice.GetGoogleAddressDetails(location);
+        }
+
     }
 }

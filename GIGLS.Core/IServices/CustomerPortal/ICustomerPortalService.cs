@@ -212,5 +212,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
         Task<List<AddressDTO>> GetTopFiveUserAddresses();
+        Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
     }
 }

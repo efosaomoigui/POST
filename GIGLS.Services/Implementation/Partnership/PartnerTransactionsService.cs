@@ -22,6 +22,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -361,13 +362,14 @@ namespace GIGLS.Services.Implementation.Partnership
 
 
 
-        public async Task<RootObject> GetGoogleAddressDetails(GoogleAddressDTO location)
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
         {
-            var Response = new RootObject();
+            var Response = new GeoCodeAddressResponse();
+            var addressResult = new GoogleAddressDTO();
             try
             {
                 var GoogleURL = ConfigurationManager.AppSettings["AddressURL"];
-                var GoogleApiKey = "AIzaSyCl2wtzcjTd1ekKgpNNgQRNuqRjtM8qRic";
+                var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
                 GoogleApiKey = await Decrypt(GoogleApiKey);
                 var finalURL = $"{GoogleURL}{location.Address}&key={GoogleApiKey}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
@@ -376,7 +378,12 @@ namespace GIGLS.Services.Implementation.Partnership
                     Stream result = httpResponse.GetResponseStream();
                     StreamReader reader = new StreamReader(result);
                     string responseFromServer = reader.ReadToEnd();
-                    Response = JsonConvert.DeserializeObject<RootObject>(responseFromServer);
+                    Response = JsonConvert.DeserializeObject<GeoCodeAddressResponse>(responseFromServer);
+                    addressResult.Address = location.Address;
+                    addressResult.FormattedAddress = Response.results.FirstOrDefault().formatted_address;
+                    addressResult.Latitude = Response.results.FirstOrDefault().geometry.location.lat;
+                    addressResult.Longitude = Response.results.FirstOrDefault().geometry.location.lng;
+
 
                     //check if request was fufilled
                     if (Response.status.ToLower() == "request_denied")
@@ -385,12 +392,12 @@ namespace GIGLS.Services.Implementation.Partnership
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
 
-            return await Task.FromResult(Response);
+            return await Task.FromResult(addressResult);
         }
 
     }

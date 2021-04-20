@@ -1,5 +1,7 @@
 ﻿using EfeAuthen.Models;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -383,6 +385,22 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 var result = await _thirdPartyAPIService.ItemShippedFromUKScan(manifestCode);
 
                 return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getaddressdetails")]
+        public async Task<IServiceResponse<GoogleAddressDTO>> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetGoogleAddressDetails(location);
+
+                return new ServiceResponse<GoogleAddressDTO>
                 {
                     Object = result
                 };
