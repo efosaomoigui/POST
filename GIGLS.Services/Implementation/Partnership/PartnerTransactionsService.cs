@@ -359,5 +359,39 @@ namespace GIGLS.Services.Implementation.Partnership
             }
         }
 
+
+
+        public async Task<RootObject> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            var Response = new RootObject();
+            try
+            {
+                var GoogleURL = ConfigurationManager.AppSettings["AddressURL"];
+                var GoogleApiKey = "AIzaSyCl2wtzcjTd1ekKgpNNgQRNuqRjtM8qRic";
+                GoogleApiKey = await Decrypt(GoogleApiKey);
+                var finalURL = $"{GoogleURL}{location.Address}&key={GoogleApiKey}";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    Stream result = httpResponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(result);
+                    string responseFromServer = reader.ReadToEnd();
+                    Response = JsonConvert.DeserializeObject<RootObject>(responseFromServer);
+
+                    //check if request was fufilled
+                    if (Response.status.ToLower() == "request_denied")
+                    {
+                        throw new GenericException($"Geo-Location service unavailable.");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return await Task.FromResult(Response);
+        }
+
     }
 }

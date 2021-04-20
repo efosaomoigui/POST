@@ -14,6 +14,8 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO;
+using System.Configuration;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -132,6 +134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _scanService.ItemShippedFromUKScan(manifestCode);
             return true;
         }
+
 
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
