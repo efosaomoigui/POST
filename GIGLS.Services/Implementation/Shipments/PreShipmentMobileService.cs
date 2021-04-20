@@ -3428,47 +3428,48 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var mobileRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+
                 if (mobileRequest == null)
                 {
                     throw new GenericException("Shipment item does not exist in Pickup");
                 }
-                else
-                {
-                    mobileRequest.Status = MobilePickUpRequestStatus.Visited.ToString();
-                }
+
                 var preshipmentMobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+
                 if (preshipmentMobile == null)
                 {
                     throw new GenericException("Shipment item does not exist");
                 }
-                preshipmentMobile.shipmentstatus = MobilePickUpRequestStatus.Visited.ToString();
-
-                await _uow.CompleteAsync();
-
-                //var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
 
                 //Get the rider phone number
                 var dispatchRider = await _uow.User.GetUserById(userId);
 
-                var emailMessageExtensionDTO = new MobileMessageDTO()
+                var messageExtensionDTO = new MobileMessageDTO()
                 {
-                    SenderName = preshipmentMobile.ReceiverName,
-                    SenderEmail = preshipmentMobile.ReceiverEmail,
+                    SenderName = preshipmentMobile.SenderName,
                     WaybillNumber = preshipmentMobile.Waybill,
-                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber,
+                    SenderPhoneNumber = preshipmentMobile.SenderPhoneNumber,
                     DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
                 };
 
-                var smsMessageExtensionDTO = new MobileMessageDTO()
+                if (preshipmentMobile.shipmentstatus == "Assigned for Pickup")
                 {
-                    SenderName = preshipmentMobile.ReceiverName,
-                    WaybillNumber = preshipmentMobile.Waybill,
-                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber,
-                    DispatchRiderPhoneNumber = dispatchRider.PhoneNumber
-                };
+                    //Send message to Sender
+                    await _messageSenderService.SendMessage(MessageType.APFS, EmailSmsType.SMS, messageExtensionDTO);
+                }
+                else if(preshipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
+                {
+                    //Send message to Receiver
+                    messageExtensionDTO.SenderName = preshipmentMobile.ReceiverName;
+                    messageExtensionDTO.SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber;
+                    await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, messageExtensionDTO);
+                }
 
-                await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
-                await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
+                //Update Status
+                preshipmentMobile.shipmentstatus = MobilePickUpRequestStatus.Visited.ToString();
+                mobileRequest.Status = MobilePickUpRequestStatus.Visited.ToString();
+
+                await _uow.CompleteAsync();
 
             }
             catch (Exception ex)
