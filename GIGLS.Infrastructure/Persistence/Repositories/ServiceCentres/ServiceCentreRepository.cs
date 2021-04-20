@@ -608,7 +608,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsPublic == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 select new ServiceCentreDTO

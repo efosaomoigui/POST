@@ -1021,6 +1021,15 @@ namespace GIGLS.Services.Implementation.Customers
                     person.CompanyId = company.CompanyId;
                     _uow.CompanyContactPerson.Add(person);
                 }
+                //update wallet too
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (wallet != null)
+                {
+                    wallet.CompanyType = CompanyType.Ecommerce.ToString();
+                    wallet.CustomerType = CustomerType.Company;
+                    wallet.CustomerId = company.CompanyId;
+                }
+
                 //also update orgnization,designation,department
                 individualInfo.IsRegisteredFromMobile = false;
                 user.UserChannelType = UserChannelType.Ecommerce;
