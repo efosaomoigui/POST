@@ -175,10 +175,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         }
 
         //Get Shipments that have not been paid for by user
-        public Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
+        public async Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
         {
             var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
             var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
+            var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
+            var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
 
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -191,13 +193,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Departure = dept.Name,
                               Destination = dest.Name,
                               Amount = i.Amount,
+                              CountryId = i.CountryId,
                               CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
-                              DollarCurrencySymbol = usCountry.CurrencySymbol,
-                              DollarCurrencyCode = usCountry.CurrencyCode,
-                              DollarAmount = Math.Round((Context.CountryRouteZoneMap.Where(c => c.DepartureId == i.CountryId && c.DestinationId == 207).FirstOrDefault().Rate * (double)i.Amount),2),
                               DateCreated = s.DateCreated
                           }).ToList();
-            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList());
+
+
+            if (result.Any())
+            {
+               result = await GetEquivalentAmountOfActiveCurrencies(result);
+            }
+            return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)
@@ -323,6 +329,85 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                }).Take(5).ToList();
 
             return address;
+        }
+
+        private async Task<List<OutstandingPaymentsDTO>> GetEquivalentAmountOfActiveCurrencies(List<OutstandingPaymentsDTO> result)
+        {
+            var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
+            var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
+            var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
+            var destCountries = new List<CountryRouteZoneMap>();
+            var countryIds = result.Select(x => x.CountryId);
+            destCountries.AddRange(Context.CountryRouteZoneMap.Where(x => countryIds.Contains(x.DepartureId)));
+            destCountries.AddRange(Context.CountryRouteZoneMap.Where(x => countryIds.Contains(x.DestinationId)));
+            foreach (var i in result)
+            {
+
+                if (i.CountryId == 1)
+                {
+                    var usdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var ukdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (usdestCountry != null)
+                    {
+                        i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                        i.DollarAmount = Math.Round((usdestCountry.Rate * (double)i.Amount), 2);
+                        i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    }
+                    if (ukdestCountry != null)
+                    {
+                        i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                        i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                        i.PoundAmount = Math.Round((ukdestCountry.Rate * (double)i.Amount), 2);
+                    }
+                    i.NairaCurrencyCode = naijaCountry.CurrencyCode;
+                    i.NairaCurrencySymbol = naijaCountry.CurrencySymbol;
+                    i.NairaAmount = (double)i.Amount;
+
+                }
+                else if (i.CountryId == 62)
+                {
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (naijadestCountry != null)
+                    {
+                        i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                        i.NairaCurrencySymbol = i.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                        i.NairaAmount = i.CountryId == 1 ? (double)i.Amount : Math.Round((naijadestCountry.Rate * (double)i.Amount), 2);
+                    }
+
+                    var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (usdestCountry != null)
+                    {
+                        i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                        i.DollarAmount = Math.Round((usdestCountry.Rate * (double)i.Amount), 2);
+                        i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    }
+                    i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                    i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                    i.PoundAmount = (double)i.Amount;
+                }
+                else if (i.CountryId == 207)
+                {
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (naijaCountry != null)
+                    {
+                        i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                        i.NairaCurrencySymbol = i.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                        i.NairaAmount = i.CountryId == 1 ? (double)i.Amount : Math.Round((naijadestCountry.Rate * (double)i.Amount), 2);
+                    }
+
+                    var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (ukdestCountry != null)
+                    {
+                        i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                        i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                        i.PoundAmount = Math.Round((ukdestCountry.Rate * (double)i.Amount), 2);
+                    }
+                    i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                    i.DollarAmount = (double)i.Amount;
+                }
+            }
+            return result;
         }
 
     }
