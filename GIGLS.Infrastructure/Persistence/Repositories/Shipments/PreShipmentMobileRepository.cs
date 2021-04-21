@@ -345,8 +345,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
                 if (i.CountryId == 1)
                 {
-                    var usdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
-                    var ukdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
                     if (usdestCountry != null)
                     {
                         i.DollarCurrencySymbol = usCountry.CurrencySymbol;
@@ -366,7 +366,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 }
                 else if (i.CountryId == 62)
                 {
-                    var naijadestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
                     if (naijadestCountry != null)
                     {
                         i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
@@ -387,7 +387,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 }
                 else if (i.CountryId == 207)
                 {
-                    var naijadestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
                     if (naijaCountry != null)
                     {
                         i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
