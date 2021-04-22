@@ -2046,5 +2046,112 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+        //Get Sum  of Outbound Shipments Weight
+        public async Task<double> GetSumOfOutboundWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                double result = 0.0D;
+
+                var beginningDate = DateTime.Now;
+                var endingDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
+                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    endingDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    beginningDate = queryDate.Item1;
+                    endingDate = queryDate.Item2;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await Context.Database.SqlQuery<double?>("OutboundShipmentsWeight " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = (double)summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                int result = 0;
+
+                var beginningDate = DateTime.Now;
+                var endingDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
+                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    endingDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    beginningDate = queryDate.Item1;
+                    endingDate = queryDate.Item2;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await Context.Database.SqlQuery<int>("OutboundShipmentsCount " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

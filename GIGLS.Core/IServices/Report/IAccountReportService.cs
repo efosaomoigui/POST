@@ -20,5 +20,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter);
         Task<List<FinancialReportDTO>> GetFinancialBreakdownByType(AccountFilterCriteria accountFilter);
         Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter);
+        Task<List<OutboundFinancialReportDTO>> GetFinancialBreakdownOfOutboundShipments(AccountFilterCriteria accountFilter);
     }
 }

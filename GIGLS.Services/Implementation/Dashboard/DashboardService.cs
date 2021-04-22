@@ -1085,14 +1085,24 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
 
+                    //Get revenue for Class and Basic Customers
                     var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
                     var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
 
                     dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
                     dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
 
+                    //Get number of class subscriptions
                     var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
                     dashboardDTO.ClassSubscriptionsCount = classSubscriptions;
+
+                    dashboardDTO.OutboundShipmentsReportDTO = new OutboundShipmentsReportDTO();
+
+                    dashboardDTO.OutboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria);
+                    dashboardDTO.OutboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria);
+                    dashboardDTO.OutboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria);
+
+
                 }
                 _uow.Complete();
             }
@@ -1464,6 +1474,26 @@ namespace GIGLS.Services.Implementation.Dashboard
         private async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
         {
             return await _uow.Company.GetClassSubscriptions(dashboardFilterCriteria);
+        }
+
+        //Get Number of Outbound Shipments Created
+        private async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.IntlShipmentRequest.GetCountOfOutboundShipmentCreated(dashboardFilterCriteria);
+            return result;
+        }
+
+        //Get Sum  of Outbound Shipments Weight
+        private async Task<double> GetSumOfWeightOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.IntlShipmentRequest.GetSumOfOutboundWeightOfShipmentCreated(dashboardFilterCriteria);
+            return result;
+        }
+
+        //Get Total Earnings in Financial Reports For Outbound Shipments
+        private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria);
         }
 
     }

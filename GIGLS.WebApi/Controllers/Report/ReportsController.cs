@@ -286,5 +286,21 @@ namespace GIGLS.WebApi.Controllers.Report
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("outboundfinancialreport")]
+        public async Task<IServiceResponse<List<OutboundFinancialReportDTO>>> GetFinancialBreakdownOfOutboundShipments(AccountFilterCriteria accountFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var financialreport = await _accountService.GetFinancialBreakdownOfOutboundShipments(accountFilter);
+
+                return new ServiceResponse<List<OutboundFinancialReportDTO>>
+                {
+                    Object = financialreport
+                };
+            });
+        }
     }
 }

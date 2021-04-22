@@ -319,5 +319,98 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
+        public async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
+                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    StartDate = queryDate.Item1;
+                    EndDate = queryDate.Item2;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("OutboundShipmentsRevenue " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<OutboundFinancialReportDTO>> GetFinancialReportOfOutboundShipmentsBreakdown(AccountFilterCriteria accountFilterCriteria)
+        {
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+
+            //If No Date Supplied
+            if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
+            {
+                var OneMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
+                startDate = new DateTime(OneMonthAgo.Year, OneMonthAgo.Month, 1);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+            else
+            {
+                var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
+
+
+            //declare parameters for the stored procedure
+            SqlParameter startDates = new SqlParameter("@StartDate", startDate);
+            SqlParameter endDates = new SqlParameter("@EndDate", endDate);
+            SqlParameter countryId = new SqlParameter("@CountryId", accountFilterCriteria.CountryId);
+
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                    startDates,
+                    endDates,
+                    countryId
+            };
+
+            var summary = await _context.Database.SqlQuery<OutboundFinancialReportDTO>("OutboundShipmentsReport " +
+               "@StartDate, @EndDate, @CountryId",
+               param).ToListAsync();
+
+            return await Task.FromResult(summary);
+        }
+
     }
 }
