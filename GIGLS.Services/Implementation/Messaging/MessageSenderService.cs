@@ -1683,6 +1683,19 @@ namespace GIGLS.Services.Implementation.Messaging
                 MessageTemplate = "OverseasPaymentConfirmation"
             };
 
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
+                    messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
+                }
+            }
+
             await SendOverseasMails(messageDTO);
 
             var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
