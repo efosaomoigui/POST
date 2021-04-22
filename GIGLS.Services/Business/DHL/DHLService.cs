@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.DHL.Enum;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
@@ -36,6 +37,7 @@ namespace GIGLS.Services.Business.DHL
         {
             InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
             {
+                OutBoundChannel = CompanyMap.DHL,
                 ResponseResult = rateRequestResponse.ResponseResult
             };
 

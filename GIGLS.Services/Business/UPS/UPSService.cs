@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.UPS;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.UPS;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
@@ -30,6 +31,7 @@ namespace GIGLS.Services.Business.UPS
         {
             var finalResult = new InternationalShipmentWaybillDTO
             {
+                OutBoundChannel = CompanyMap.UPS,
                 ResponseResult = upsResponse.ResponseResult
             };
 

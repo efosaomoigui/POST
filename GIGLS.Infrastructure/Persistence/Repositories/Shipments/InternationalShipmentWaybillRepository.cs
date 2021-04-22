@@ -36,7 +36,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    Waybill= s.Waybill,
                                    ShipmentIdentificationNumber = s.ShipmentIdentificationNumber,
                                    PackageResult = s.PackageResult,
-                                   InternationalShipmentStatus = s.InternationalShipmentStatus
+                                   InternationalShipmentStatus = s.InternationalShipmentStatus,
+                                   OutBoundChannel = s.OutBoundChannel
                                }).ToList();
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
