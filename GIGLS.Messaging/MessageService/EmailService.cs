@@ -298,7 +298,7 @@ namespace GIGLS.Messaging.MessageService
                 { "SG_Country", message.Country },
                 { "SG_DeliveryCode", message.IntlMessage.DeliveryCode },
                 { "SG_GeneralPaymentLinkI", message.IntlMessage.GeneralPaymentLinkI },
-                { "SG_GeneralPaymentLinkII", message.IntlMessage.GeneralPaymentLinkII }
+                { "SG_GeneralPaymentLinkUS", message.IntlMessage.GeneralPaymentLinkII }
             });
 
             var response = await client.SendEmailAsync(myMessage);

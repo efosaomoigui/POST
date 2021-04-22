@@ -315,6 +315,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
+        [Route("RemoveManifestFromMovementManifest/{movementmanifest}/{manifestnumber}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromMovementManifest(string movementmanifest, string manifestnumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveManifestFromMovementManifest(manifestnumber, movementmanifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
         [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
         public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
         {

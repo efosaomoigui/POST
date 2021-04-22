@@ -434,10 +434,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var currentServiceCentre = await _userService.GetCurrentServiceCenter();
 
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode) &&
-                x.MovementStatus == MovementStatus.InProgress && serviceCenters.Contains(x.DepartureServiceCentreId));
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
                 //int manifestByScListCount = manifestByScList.Count;
 
                 //convert the list to HashSet to remove duplicate
@@ -604,23 +605,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //remove groupWaybillNumber from manifest
         public async Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber)
         {
             try
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
                 var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
-
-                //validate the ids are in the system
-                //if (manifestDTO == null)
-                //{
-                //    throw new GenericException($"No Manifest exists for this code: {manifest}");
-                //}
-                //if (groupWaybillNumberDTO == null)
-                //{
-                //    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
-                //}
 
                 var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
                 if (manifestGroupWaybillNumberMapping != null)
@@ -630,6 +620,37 @@ namespace GIGLS.Services.Implementation.Shipments
                     //set GroupWaybill HasManifest to false
                     var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
                     groupwaybill.HasManifest = false;
+                    _uow.Complete();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //remove groupWaybillNumber from manifest
+        public async Task RemoveManifestFromMovementManifest(string manifest, string movementmanifestcode)
+        {
+            try
+            {
+                var movementmanifestDTO = await _manifestService.GetMovementManifestByCode(manifest);
+                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+
+                var movementManifestNumberMapping = _uow.MovementManifestNumberMapping.SingleOrDefault(x => x.ManifestNumber == manifest && x.MovementManifestCode == movementmanifestcode);
+                if (movementManifestNumberMapping != null)
+                {
+                    _uow.MovementManifestNumberMapping.Remove(movementManifestNumberMapping);
+                    _uow.Complete();
+                }
+                 
+                var movementManifestNumberMapping2 = _uow.MovementManifestNumberMapping.SingleOrDefault(x => x.MovementManifestCode == movementmanifestcode);
+                if (movementManifestNumberMapping2 != null)
+                {
+                    var movementmanifest = _uow.MovementManifestNumber.SingleOrDefault(s => s.MovementManifestCode == movementmanifestcode || 
+                    s.MovementStatus == MovementStatus.InProgress || s.MovementStatus == MovementStatus.EnRoute);
+
+                    movementmanifest.MovementStatus = MovementStatus.ProcessEnded;
                     _uow.Complete();
                 }
             }

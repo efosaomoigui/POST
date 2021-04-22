@@ -974,6 +974,12 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("This user is not an Individual customer");
                 }
+
+                var nameExist = await _uow.Company.GetAsync(x => x.Name.ToLower() == newCompanyDTO.Name.ToLower());
+                if (nameExist != null)
+                {
+                    throw new GenericException($"Business name {newCompanyDTO.Name.ToUpper()} already exist ");
+                }
                 var industry = string.Join(",", newCompanyDTO.Industry);
                 var productType = string.Join(",", newCompanyDTO.ProductType);
                 var company = new Company()
@@ -1015,7 +1021,17 @@ namespace GIGLS.Services.Implementation.Customers
                     person.CompanyId = company.CompanyId;
                     _uow.CompanyContactPerson.Add(person);
                 }
+                //update wallet too
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (wallet != null)
+                {
+                    wallet.CompanyType = CompanyType.Ecommerce.ToString();
+                    wallet.CustomerType = CustomerType.Company;
+                    wallet.CustomerId = company.CompanyId;
+                }
+
                 //also update orgnization,designation,department
+                individualInfo.IsRegisteredFromMobile = false;
                 user.UserChannelType = UserChannelType.Ecommerce;
                 user.Organisation = newCompanyDTO.Name;
                 user.Department = UserChannelType.Ecommerce.ToString();

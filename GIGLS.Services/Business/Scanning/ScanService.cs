@@ -3,15 +3,15 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -34,6 +34,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly ITransitWaybillNumberService _transitWaybillNumberService;
         private readonly IManifestWaybillMappingService _manifestWaybillService;
         private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly IUnitOfWork _uow;
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
@@ -41,7 +42,7 @@ namespace GIGLS.Services.Business.Scanning
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
             ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService,
-            IHUBManifestWaybillMappingService hubmanifestWaybillService, IUnitOfWork uow)
+            IHUBManifestWaybillMappingService hubmanifestWaybillService, IWaybillPaymentLogService waybillPaymentLogService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -55,6 +56,7 @@ namespace GIGLS.Services.Business.Scanning
             _transitWaybillNumberService = transitWaybillNumberService;
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
+            _waybillPaymentLogService = waybillPaymentLogService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -167,6 +169,38 @@ namespace GIGLS.Services.Business.Scanning
                         if (shipment.isInternalShipment == true && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                         {
                             await UpdateShipmentPackageForServiceCenter(shipment);
+                        }
+
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.AISN && shipment.IsInternational == true)
+                        {
+                            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipment.Waybill);
+
+                            if (invoice.PaymentStatus != PaymentStatus.Paid)
+                            {
+                                //Get the two possible payment links for Waybill(Nigeria  and US)
+                                var waybillPayment = new WaybillPaymentLogDTO()
+                                {
+                                    Waybill = shipment.Waybill,
+                                    OnlinePaymentType = OnlinePaymentType.Paystack,
+                                    Email = shipment.ReceiverEmail
+                                };
+
+                                int[] listOfCountryForPayment = { 1, 207 };
+                                List<string> paymentLinks = new List<string>();
+                                foreach (var country in listOfCountryForPayment)
+                                {
+                                    waybillPayment.PaymentCountryId = country;
+                                    waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                                    var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                                    paymentLinks.Add(response.data.Authorization_url);
+                                }
+
+                                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+
+                                //Mail and Sms
+                                await _shipmentTrackingService.SendEmailToCustomerForIntlShipmentArriveNigeria(shipmentDTO, paymentLinks);
+                            }
+
                         }
                         return true;
                     }
@@ -503,6 +537,15 @@ namespace GIGLS.Services.Business.Scanning
 
                     //Update for every other scan status apart from "Arrived Collation Center"
                     manifest.SuperManifestStatus = SuperManifestStatus.RegularProcess;
+                }
+
+                //Movement Manifest
+                var movementManifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == scan.WaybillNumber);
+                //Make movement manifest available to service center
+                if (movementManifest != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+                {
+                    await UpdateMovementManifests(movementManifest.MovementManifestCode);
+                    return true;
                 }
 
                 /////////////////////////3. Super Manifest
@@ -1246,7 +1289,7 @@ namespace GIGLS.Services.Business.Scanning
             }
             var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCenters[0]);
 
-           
+
             var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
 
             if (groupWaybillInManifestList.Any())
@@ -1284,6 +1327,42 @@ namespace GIGLS.Services.Business.Scanning
                 manifest.CargoStatus = CargoStatus.Cargoed;
                 _uow.ShipmentTracking.AddRange(shipmentTracking);
                 await _uow.CompleteAsync();
+            }
+        }
+
+        //Make movement manifest available to service center on the event of scan of "Arrived Collation Center"
+        private async Task<bool> UpdateMovementManifests(string movementManifestCode)
+        {
+            try
+            {
+
+                var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementManifestCode);
+                if (!movementManifestCode.Any())
+                {
+                    throw new GenericException($"Manifests does not exist for  Movement Manifest {movementManifestCode} ");
+                }
+                var movementManifestList = movementmanifestMappingList.ToList();
+
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+
+                //Get all Manifests in Movement Manifest
+                var manifestByScList = movementManifestList.Select(x => x.ManifestNumber).Distinct().ToList();
+            
+                //Update the status of movement status
+                var listOfManifests = _uow.Manifest.GetAll().Where(s => manifestByScList.Contains(s.ManifestCode)).ToList();
+
+                //Make manifest available to service Center
+                listOfManifests.ForEach(x => x.DepartureServiceCentreId = currentUserSercentreId);
+                listOfManifests.ForEach(x => x.MovementStatus = MovementStatus.NoMovement);
+
+                await _uow.CompleteAsync();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
