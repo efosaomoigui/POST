@@ -133,6 +133,52 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("returnallmovementmanifests")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedMovementmanifestservicecentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _shipmentService.GetUnmappedMovementManifestServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("savemanifesttomovmentmanifest")]
+        public async Task<IServiceResponse<bool>> MovementManifestNumberMapping(MovementManifestNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("updatemovmentmanifest")]
+        public async Task<IServiceResponse<bool>> UpdateMovementManifestNumberMapping(MovementManifestNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost]
         [Route("agentlogin")]
