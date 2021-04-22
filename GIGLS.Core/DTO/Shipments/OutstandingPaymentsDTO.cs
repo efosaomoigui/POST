@@ -15,6 +15,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double DollarAmount { get; set; }
         public double PoundAmount { get; set; }
         public string CurrencySymbol { get; set; }
+        public CountryDTO Country { get; set; }
+        public string Description { get; set; }
         public string DollarCurrencySymbol { get; set; }
         public string PoundCurrencySymbol { get; set; }
         public int CountryId { get; set; }

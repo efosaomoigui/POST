@@ -3,8 +3,6 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -539,6 +537,15 @@ namespace GIGLS.Services.Business.Scanning
 
                     //Update for every other scan status apart from "Arrived Collation Center"
                     manifest.SuperManifestStatus = SuperManifestStatus.RegularProcess;
+                }
+
+                //Movement Manifest
+                var movementManifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == scan.WaybillNumber);
+                //Make movement manifest available to service center
+                if (movementManifest != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+                {
+                    await UpdateMovementManifests(movementManifest.MovementManifestCode);
+                    return true;
                 }
 
                 /////////////////////////3. Super Manifest
@@ -1282,7 +1289,7 @@ namespace GIGLS.Services.Business.Scanning
             }
             var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCenters[0]);
 
-           
+
             var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
 
             if (groupWaybillInManifestList.Any())
@@ -1320,6 +1327,42 @@ namespace GIGLS.Services.Business.Scanning
                 manifest.CargoStatus = CargoStatus.Cargoed;
                 _uow.ShipmentTracking.AddRange(shipmentTracking);
                 await _uow.CompleteAsync();
+            }
+        }
+
+        //Make movement manifest available to service center on the event of scan of "Arrived Collation Center"
+        private async Task<bool> UpdateMovementManifests(string movementManifestCode)
+        {
+            try
+            {
+
+                var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementManifestCode);
+                if (!movementManifestCode.Any())
+                {
+                    throw new GenericException($"Manifests does not exist for  Movement Manifest {movementManifestCode} ");
+                }
+                var movementManifestList = movementmanifestMappingList.ToList();
+
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+
+                //Get all Manifests in Movement Manifest
+                var manifestByScList = movementManifestList.Select(x => x.ManifestNumber).Distinct().ToList();
+            
+                //Update the status of movement status
+                var listOfManifests = _uow.Manifest.GetAll().Where(s => manifestByScList.Contains(s.ManifestCode)).ToList();
+
+                //Make manifest available to service Center
+                listOfManifests.ForEach(x => x.DepartureServiceCentreId = currentUserSercentreId);
+                listOfManifests.ForEach(x => x.MovementStatus = MovementStatus.NoMovement);
+
+                await _uow.CompleteAsync();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
