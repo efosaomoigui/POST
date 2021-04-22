@@ -4482,7 +4482,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if(shipmentDTO.CompanyMap == CompanyMap.UPS)
+                if (string.IsNullOrWhiteSpace(shipmentDTO.ReceiverCompanyName))
+                {
+                    shipmentDTO.ReceiverCompanyName = shipmentDTO.ReceiverName;
+                }
+
+                if (shipmentDTO.CompanyMap == CompanyMap.UPS)
                 {
                     return await AddUPSInternationalShipment(shipmentDTO);
                 }
@@ -4565,10 +4570,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var priceUpdate = await GetUPSTotalPriceBreakDown(shipmentDTO);
 
                 //validate the different from UPS
-                if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
-                {
-                    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
-                }
+                //if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
+                //{
+                //    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
+                //}
 
                 //if the customer is not an individual, pay by wallet
                 //2. Get the Wallet Balance if payment is by wallet and check if the customer has the amount in its wallet

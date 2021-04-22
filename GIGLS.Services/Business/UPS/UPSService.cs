@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -27,28 +28,28 @@ namespace GIGLS.Services.Business.UPS
 
         private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(UPSShipmentResponseFinalPayload upsResponse)
         {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
+            var finalResult = new InternationalShipmentWaybillDTO
             {
                 ResponseResult = upsResponse.ResponseResult
             };
 
-            if (upsResponse != null)
+            if (upsResponse.Fault != null)
             {
                 throw new GenericException($"There was an issue processing your request: " +
                     $"{upsResponse.Fault.Detail.Errors.ErrorDetail.PrimaryErrorCode.Description}");
             }
             else
             {
-                output.ShipmentIdentificationNumber = upsResponse.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
+                finalResult.ShipmentIdentificationNumber = upsResponse.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
 
                 if (upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Any())
                 {
                     string[] itemIds = upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Select(x => x.TrackingNumber).ToArray();
-                    output.PackageResult = string.Join(",", itemIds);
+                    finalResult.PackageResult = string.Join(",", itemIds);
                 }
             }
 
-            return output;
+            return finalResult;
         }
 
         public async Task<UPSShipmentResponseFinalPayload> CreateUPSShipment(InternationalShipmentDTO shipmentDto)
@@ -63,6 +64,7 @@ namespace GIGLS.Services.Business.UPS
                 string baseUrl = ConfigurationManager.AppSettings["UPSBaseUrl"];
                 string path = ConfigurationManager.AppSettings["UPSShipmentRequest"];
                 string url = baseUrl + path;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 using (var client = new HttpClient())
                 {
@@ -156,8 +158,7 @@ namespace GIGLS.Services.Business.UPS
             string accountNumber = ConfigurationManager.AppSettings["UPSAccountNumber"];
             var payment = new UPSPaymentInformation();
             payment.ShipmentCharge.BillShipper.AccountNumber = accountNumber;
-
-            throw new NotImplementedException();
+            return payment;
         }
 
         private UPSCustomerInfo GetShipperInfo()
@@ -178,8 +179,8 @@ namespace GIGLS.Services.Business.UPS
             shipper.Address.CountryCode = "NG";            
             shipper.ShipperNumber = shipperNumber;
             shipper.AttentionName  = staff;
-            shipper.Phone.Extension = phoneNumber;
-            shipper.Phone.Number = phoneExtension;
+            shipper.Phone.Extension = phoneExtension;
+            shipper.Phone.Number = phoneNumber;
             return shipper;
         }
 
@@ -192,10 +193,11 @@ namespace GIGLS.Services.Business.UPS
             };
             reciever.Address.AddressLine = shipmentDto.ReceiverAddress;
             reciever.Address.City = shipmentDto.ReceiverCity;
-            reciever.Address.StateProvinceCode = shipmentDto.ReceiverCountryCode.Length <= 2 ? shipmentDto.ReceiverCountryCode : shipmentDto.ReceiverCountryCode.Substring(0, 2);
+            reciever.Address.StateProvinceCode = shipmentDto.ReceiverStateOrProvinceCode;
             reciever.Address.PostalCode = shipmentDto.ReceiverPostalCode;
-            reciever.Address.CountryCode = shipmentDto.ReceiverCountryCode;
-            reciever.Phone.Number = shipmentDto.ReceiverPhoneNumber; 
+            reciever.Address.CountryCode = shipmentDto.ReceiverCountryCode.Length <= 2 ? shipmentDto.ReceiverCountryCode : shipmentDto.ReceiverCountryCode.Substring(0, 2);
+            reciever.Phone.Number = shipmentDto.ReceiverPhoneNumber;
+            reciever.Phone.Extension = string.Empty;
             return reciever;
         }
 
@@ -213,6 +215,8 @@ namespace GIGLS.Services.Business.UPS
                 //package.Packaging.Code = "02";
                 //package.Packaging.Description = "Customer Supplied Package";
 
+                package.Dimensions.UnitOfMeasurement.Code = "CM";
+                package.Dimensions.UnitOfMeasurement.Description = "Centimeter";
                 package.Dimensions.Length = item.Length.ToString();
                 package.Dimensions.Width = item.Width.ToString();
                 package.Dimensions.Height = item.Height.ToString();

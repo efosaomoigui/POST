@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -51,7 +52,6 @@ namespace GIGLS.Services.Business.DHL
                         {
                             string[] itemIds = rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Select(x => x.TrackingNumber).ToArray();
                             output.PackageResult = string.Join(",", itemIds);
-                            //[{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
                         }
 
                         //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
@@ -112,6 +112,7 @@ namespace GIGLS.Services.Business.DHL
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
                 string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
                 string url = baseUrl + path;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 using (var client = new HttpClient())
                 {
