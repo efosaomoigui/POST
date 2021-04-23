@@ -239,5 +239,46 @@ namespace GIGLS.Messaging.MessageService
 
             await Task.FromResult(result);
         }
+
+        // Use OGO Sms Bank Channel
+        private async Task<string> SendSMSUsingOGOSMSBankChannelAsync(MessageDTO message)
+        {
+            string result = "";
+
+            //https://ogosms.com/dynamicapi/?route=bank&
+            //username=user1
+            //    &password=password1
+            //    &sender=SENDER1
+            //    &numbers=234XXXXXXXXXX
+            //    &message=Message%20Body
+
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var smsURL = ConfigurationManager.AppSettings["smsURL"];
+                var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
+
+                //ogosms url format
+                var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    using (var sr = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                        result = sr.ReadToEnd();
+                    }
+                }
+
+                result = GetOGOSMSResponseMessage(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return await Task.FromResult(result);
+        }
+
     }
 }
