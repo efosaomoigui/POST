@@ -193,7 +193,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               DateCreated = s.DateCreated
                           }).ToList();
 
-            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
+            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList());
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)

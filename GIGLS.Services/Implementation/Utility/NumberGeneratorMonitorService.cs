@@ -277,7 +277,9 @@ namespace GIGLS.Services.Implementation.Utility
 
         public async Task<string> GenerateInvoiceRefNoWithDate(NumberGeneratorType numberGeneratorType, string customerCode, DateTime startDate, DateTime endDate)
         {
-            var refNo = $"{customerCode}-{startDate.Day}-{startDate.Year}-{startDate.Day}-{endDate.Year}";
+            var startYear = startDate.Year.ToString().Substring(2);
+            var endYear = endDate.Year.ToString().Substring(2);
+            var refNo = $"{customerCode}{startDate.Day}{startYear}{endDate.Day}{endYear}";
             return refNo;
         }
     }
