@@ -741,5 +741,19 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
+
+        [HttpPost]
+        [Route("creditcaptain")]
+        public async Task<IServiceResponse<bool>> CreditCaptainForMovementManifest(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.CreditCaptainForMovementManifestTransaction(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

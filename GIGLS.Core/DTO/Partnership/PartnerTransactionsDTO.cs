@@ -12,6 +12,7 @@ namespace GIGLS.Core.DTO.Partnership
         public string Departure { get; set; }
         public decimal AmountReceived { get; set; }
         public string Waybill { get; set; }
+        public string Manifest { get; set; }
         public string MobileGroupCode { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -90,5 +91,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string Email { get; set; }
         public decimal AmountReceived { get; set; }
         public string Waybill { get; set; }
+        public string Manifest { get; set; }
     }
 }

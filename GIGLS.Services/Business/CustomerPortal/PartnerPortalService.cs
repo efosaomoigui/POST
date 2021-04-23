@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -22,11 +23,13 @@ namespace GIGLS.Services.Business.CustomerPortal
     {
         private readonly ICustomerPortalService _portalService;
         private readonly IShipmentService _shipmentService;
+        private readonly IPartnerTransactionsService _partnerTransactionsService;
 
-        public PartnerPortalService(ICustomerPortalService portalService, IShipmentService shipmentService)
+        public PartnerPortalService(ICustomerPortalService portalService, IShipmentService shipmentService, IPartnerTransactionsService partnerTransactionsService)
         {
             _portalService = portalService;
             _shipmentService = shipmentService;
+            _partnerTransactionsService = partnerTransactionsService;
         }
 
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
@@ -234,6 +237,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
         {
             return await _shipmentService.ReleaseMovementManifest(valMovementManifest);
+        }
+
+        public async Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO creditPartnerTransactionsDTO)
+        {
+             await _partnerTransactionsService.CreditCaptainForMovementManifestTransaction(creditPartnerTransactionsDTO);
         }
 
     }

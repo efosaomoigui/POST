@@ -1,27 +1,27 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Partnership;
+using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Text;
-using System.Collections.Generic;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public PartnerTransactionsService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
                                         IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService,
-                                        IMobileShipmentTrackingService mobileShipmentTrackingService) 
+                                        IMobileShipmentTrackingService mobileShipmentTrackingService)
         {
             _userService = userService;
             _uow = uow;
@@ -79,7 +79,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return await Task.FromResult(Response);
         }
 
-        public async Task<decimal> GetPriceForPartner (PartnerPayDTO partnerpay)
+        public async Task<decimal> GetPriceForPartner(PartnerPayDTO partnerpay)
         {
             var TotalPrice = 0.0M;
             if (partnerpay.ZoneMapping == 1)
@@ -336,7 +336,7 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             catch (Exception)
             {
-                throw ;
+                throw;
             }
         }
 
@@ -351,11 +351,80 @@ namespace GIGLS.Services.Implementation.Partnership
                     Status = scanStatus,
                     Waybill = scan.WaybillNumber,
                 }, scan.ShipmentScanStatus);
-                
+
             }
             catch (Exception)
             {
                 throw new GenericException("Please an error occurred while trying to scan shipment.");
+            }
+        }
+
+        public async Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            try
+            {
+                var manifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == transactionsDTO.Manifest);
+                if (manifest == null)
+                {
+                    throw new GenericException($"This manifest {transactionsDTO.Manifest} does not exist");
+                }
+
+                var partnerTrans = await _uow.PartnerTransactions.GetAsync(x => x.Manifest == transactionsDTO.Manifest);
+                if (partnerTrans != null)
+                {
+                    throw new GenericException($"This transaction already exists");
+                }
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var partner = await _uow.Partner.GetAsync(x => x.UserId == userId);
+                if (partner == null)
+                {
+                    throw new GenericException($"This partner with Email {transactionsDTO.Email} does not exist");
+                }
+
+                var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifest.DepartureServiceCentreId);
+                var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifest.DestinationServiceCentreId);
+
+                var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
+
+                //Add to Partner Transactions
+                var partnerTransactions = new PartnerTransactionsDTO
+                {
+                    Destination = destination.Name,
+                    Departure = departure.Name,
+                    AmountReceived = transactionsDTO.AmountReceived,
+                    Manifest = manifest.MovementManifestCode,
+                    UserId = partner.UserId,
+                };
+                var partnerPayment = Mapper.Map<PartnerTransactions>(partnerTransactions);
+                _uow.PartnerTransactions.Add(partnerPayment);
+
+                //Add to Wallet 
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                wallet.Balance = wallet.Balance + transactionsDTO.AmountReceived;
+
+                //Add to Wallet Transactions
+                var walletTransaction = new WalletTransactionDTO
+                {
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Amount = transactionsDTO.AmountReceived,
+                    ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                    Manifest = manifest.MovementManifestCode,
+                    Description = "Bonus Credit for Timely Delivery",
+                    PaymentType = PaymentType.Online,
+                    UserId = partner.UserId,
+                    DateOfEntry = DateTime.Now
+                };
+                var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransaction);
+                _uow.WalletTransaction.Add(newWalletTransaction);
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
