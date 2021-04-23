@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Infrastructure;
@@ -136,14 +137,15 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("returnallmovementmanifests")]
-        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedMovementmanifestservicecentre()
+        public async Task<IServiceResponse<IEnumerable<MovementManifestNumberDTO>>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _shipmentService.GetUnmappedMovementManifestServiceCentres();
-                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                var MovementmanifestNumberMappings = await _manifestGroupMappingService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<MovementManifestNumberDTO>>
                 {
-                    Object = centres
+                    Object = MovementmanifestNumberMappings
                 };
             });
         }
@@ -163,6 +165,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
