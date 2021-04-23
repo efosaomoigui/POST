@@ -1570,10 +1570,14 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
-        private async Task<decimal> GetCoporateDiscountedAmount(string customerCode, decimal price)
+        public async Task<decimal> GetCoporateDiscountedAmount(string customerCode, decimal price)
         {
             if (!String.IsNullOrEmpty(customerCode))
             {
+                if (price == null)
+                {
+                    return price;
+                }
                 var customerInfo = await _uow.Company.GetAsync(x => x.CustomerCode == customerCode && x.CompanyType == CompanyType.Corporate);
                 if (customerInfo != null)
                 {
