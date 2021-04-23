@@ -1610,7 +1610,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 Currency = country.CurrencySymbol,
                 IntlMessage = new IntlMessageDTO()
                 {
-                    ShippingCost = shipmentDto.GrandTotal.ToString(),
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}",
                     DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
                     PaymentLink = paymentLink,
                     DeliveryAddressOrCenterName = delivery,
@@ -1632,7 +1632,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     decimal percentage = Convert.ToDecimal(globalProperty.Value);
                     decimal discount = ((100M - percentage) / 100M);
                     var discountPrice = shipmentDto.GrandTotal * discount;
-                    messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
+                    messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
                     messageDTO.MessageTemplate = isInNigeria == null ? "OverseasReceivedItemsClass" : "OverseasReceivedItemsInNigeriaClass(Unpaid)";
                 }
             }
@@ -1675,7 +1675,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 Currency = country.CurrencySymbol,
                 IntlMessage = new IntlMessageDTO()
                 {
-                    ShippingCost = shipmentDto.GrandTotal.ToString()
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}"
                 },
                 To = customerObj.Email,
                 ToEmail = customerObj.Email,
@@ -1691,7 +1691,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     decimal percentage = Convert.ToDecimal(globalProperty.Value);
                     decimal discount = ((100M - percentage) / 100M);
                     var discountPrice = shipmentDto.GrandTotal * discount;
-                    messageDTO.IntlMessage.DiscountedShippingCost = discountPrice.ToString();
+                    messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
                     messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
                 }
             }
