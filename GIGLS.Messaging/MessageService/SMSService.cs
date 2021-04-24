@@ -13,6 +13,9 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 using Twilio.Exceptions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -41,6 +44,9 @@ namespace GIGLS.Messaging.MessageService
                         result = await SendSMSUsingTwilioAsync(message);
                         break;
 
+                    case SMSSenderPlatform.OGOSMSBANKROUTE:
+                        result = await SendSMSUsingOGOSMSBankChannelAsync(message);
+                        break;
                     default:
                         break;
                 }
@@ -245,17 +251,10 @@ namespace GIGLS.Messaging.MessageService
         {
             string result = "";
 
-            //https://ogosms.com/dynamicapi/?route=bank&
-            //username=user1
-            //    &password=password1
-            //    &sender=SENDER1
-            //    &numbers=234XXXXXXXXXX
-            //    &message=Message%20Body
-
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                var smsURL = ConfigurationManager.AppSettings["smsURL"];
+                var smsURL = ConfigurationManager.AppSettings["smsURLBankChannel"];
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
 
                 //ogosms url format
@@ -270,7 +269,7 @@ namespace GIGLS.Messaging.MessageService
                     }
                 }
 
-                result = GetOGOSMSResponseMessage(result);
+                result = FomatBankChannelResponseMessage(result);
             }
             catch (Exception ex)
             {
@@ -278,6 +277,35 @@ namespace GIGLS.Messaging.MessageService
             }
 
             return await Task.FromResult(result);
+        }
+
+        private string FomatBankChannelResponseMessage(string reponseMessage)
+        {
+            var response = JsonConvert.DeserializeObject<ResponseData>(reponseMessage);
+
+            var dataJsonResult = response.Data.ToString();
+            var dataJson = JToken.Parse(dataJsonResult);
+
+            if (dataJson is JArray)
+            {
+                var obj = dataJson.ToObject<List<Data>>();
+                response.MessageData.AddRange(obj);
+            }
+
+            if (dataJson is JObject)
+            {
+                var obj = dataJson.ToObject<Data>();
+                response.MessageData.Add(obj);
+            }
+
+            var result = $"{response.Message} | {response.Status}";
+
+            foreach (var data in response.MessageData)
+            {
+                result = $"{result} | {data.Cost} | {data.Pages} | {data.NumberOfReceiver} | {data.MessageId}";
+            }
+
+            return result;
         }
 
     }
