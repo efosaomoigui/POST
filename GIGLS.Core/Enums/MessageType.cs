@@ -78,6 +78,6 @@
         ISTC207, //International Shipments Terms and Condition shown on the App for UK
         REQSCAUK, //International Message for Service centre UK
         INTPEUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
-
+        APFS,  //Message for Attempted Pickup From Sender
     }
 }

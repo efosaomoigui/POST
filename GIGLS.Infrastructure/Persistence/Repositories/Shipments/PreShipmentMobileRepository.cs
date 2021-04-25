@@ -1,15 +1,15 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
-using GIGLS.Core.Enums;
+using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -193,8 +193,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Departure = dept.Name,
                               Destination = dest.Name,
                               Amount = i.Amount,
+                              Country = _context.Country.Where(c => c.CountryId == i.CountryId).Select(x => new CountryDTO
+                              {
+                                  CurrencySymbol = x.CurrencySymbol,
+                                  CountryCode = x.CountryCode,
+                                  CurrencyCode = x.CurrencyCode,
+                                  CountryName = x.CountryName,
+                              }).FirstOrDefault(),
                               CountryId = i.CountryId,
                               CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
+                              Description = s.Description,
                               DateCreated = s.DateCreated
                           }).ToList();
 
@@ -242,9 +250,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
                 //var listCreated = new List<PreShipmentMobileReportDTO>();
 
-               var listCreated = await _context.Database.SqlQuery<PreShipmentMobileReportDTO>("GIGGOReporting " +
-                  "@StartDate, @EndDate, @DepartureStationId, @DestinationStationId, @CountryId, @VehicleType, @CompanyType, @Shipmentstatus",
-                  param).ToListAsync();
+                var listCreated = await _context.Database.SqlQuery<PreShipmentMobileReportDTO>("GIGGOReporting " +
+                   "@StartDate, @EndDate, @DepartureStationId, @DestinationStationId, @CountryId, @VehicleType, @CompanyType, @Shipmentstatus",
+                   param).ToListAsync();
 
                 return await Task.FromResult(listCreated);
             }
@@ -311,22 +319,22 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
 
             var address = (from r in preShipments
-                               select new AddressDTO()
-                               {
-                                   ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
-                                   ReceiverName = r.FirstOrDefault().ReceiverName,
-                                   ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
-                                   ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
-                                   ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Longitude,
-                                   ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).LGA,
-                                   SenderAddress = r.FirstOrDefault().SenderAddress,
-                                   SenderName = r.FirstOrDefault().SenderName,
-                                   DateCreated = r.FirstOrDefault().DateCreated,
-                                   SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().SenderStationId).StationName,
-                                   SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
-                                   SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
-                                   SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
-                               }).Take(5).ToList();
+                           select new AddressDTO()
+                           {
+                               ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
+                               ReceiverName = r.FirstOrDefault().ReceiverName,
+                               ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
+                               ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
+                               ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Longitude,
+                               ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).LGA,
+                               SenderAddress = r.FirstOrDefault().SenderAddress,
+                               SenderName = r.FirstOrDefault().SenderName,
+                               DateCreated = r.FirstOrDefault().DateCreated,
+                               SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().SenderStationId).StationName,
+                               SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
+                               SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
+                               SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
+                           }).Take(5).ToList();
 
             return address;
         }
