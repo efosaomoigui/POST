@@ -84,7 +84,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs);
 
         Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipment);
-        Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
+        Task<List<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
         Task<ShipmentDTO> ProcessInternationalShipmentOnAgility(ShipmentDTO shipmentDTO);
 

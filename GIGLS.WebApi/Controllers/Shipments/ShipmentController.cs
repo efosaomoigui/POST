@@ -943,12 +943,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("getinternationalprice")]
-        public async Task<IServiceResponse<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        public async Task<IServiceResponse<List<TotalNetResult>>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _service.GetInternationalShipmentPrice(shipmentDTO);
-                return new ServiceResponse<TotalNetResult>
+                return new ServiceResponse<List<TotalNetResult>>
                 {
                     Object = shipment
                 };

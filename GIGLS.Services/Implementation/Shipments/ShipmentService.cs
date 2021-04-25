@@ -4370,18 +4370,48 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        public async Task<List<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
-                if(shipmentDTO.CompanyMap == CompanyMap.UPS)
+                //1. Get which third party was enable 
+                var country = await _userService.GetUserActiveCountry();
+
+                //2. Extract it into an array and loop throught it
+                string[] courierList = country.CourierEnable.Split(',');
+
+                //3. Get the result and merge it to the price result
+                var finalResult = new List<TotalNetResult>();
+
+                foreach(string courier in courierList)
                 {
-                    return await GetUPSInternationalShipmentPrice(shipmentDTO);
+                    //convert the string to enum and check if 
+                    CompanyMap courierMap = (CompanyMap)Enum.Parse(typeof(CompanyMap), courier);
+
+                    if (courierMap == CompanyMap.UPS)
+                    {
+                        var ups = await GetUPSInternationalShipmentPrice(shipmentDTO);
+                        if (ups != null)
+                        {
+                            ups.CompanyMap = CompanyMap.UPS;
+                            ups.Currency = country.CurrencySymbol;
+                            finalResult.Add(ups);
+                        }
+                    }
+                    
+                    if(courierMap == CompanyMap.DHL)
+                    {
+                        var dhl = await GetDHLInternationalShipmentPrice(shipmentDTO);
+                        if(dhl != null)
+                        {
+                            dhl.CompanyMap = CompanyMap.DHL;
+                            dhl.Currency = country.CurrencySymbol;
+                            finalResult.Add(dhl);
+                        }
+                    }
                 }
-                else
-                {
-                    return await GetDHLInternationalShipmentPrice(shipmentDTO);
-                }
+
+                return finalResult;
             }
             catch (Exception ex)
             {
@@ -4491,9 +4521,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     return await AddUPSInternationalShipment(shipmentDTO);
                 }
-                else
+                else if (shipmentDTO.CompanyMap == CompanyMap.DHL)
                 {
                     return await AddDHLInternationalShipment(shipmentDTO);
+                }
+                else
+                {
+                    throw new GenericException($"There was an issue processing your request, Courier Company is missing");
                 }
             }
             catch (Exception ex)

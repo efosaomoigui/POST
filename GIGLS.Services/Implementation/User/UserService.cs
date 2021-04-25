@@ -1286,7 +1286,8 @@ namespace GIGLS.Services.Implementation.User
                         CountryName = country.CountryName,
                         CurrencyRatio = country.CurrencyRatio,
                         CurrencyCode = country.CurrencyCode,
-                        CurrencySymbol = country.CurrencySymbol
+                        CurrencySymbol = country.CurrencySymbol,
+                        CourierEnable = country.CourierEnable
                     };
                     priviledgeCountrys.Add(countryDTO);
                 }
