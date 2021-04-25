@@ -13,6 +13,9 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 using Twilio.Exceptions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -41,6 +44,9 @@ namespace GIGLS.Messaging.MessageService
                         result = await SendSMSUsingTwilioAsync(message);
                         break;
 
+                    case SMSSenderPlatform.OGOSMSBANKROUTE:
+                        result = await SendSMSUsingOGOSMSBankChannelAsync(message);
+                        break;
                     default:
                         break;
                 }
@@ -239,5 +245,68 @@ namespace GIGLS.Messaging.MessageService
 
             await Task.FromResult(result);
         }
+
+        // Use OGO Sms Bank Channel
+        private async Task<string> SendSMSUsingOGOSMSBankChannelAsync(MessageDTO message)
+        {
+            string result = "";
+
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var smsURL = ConfigurationManager.AppSettings["smsURLBankChannel"];
+                var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
+
+                //ogosms url format
+                var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    using (var sr = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                        result = sr.ReadToEnd();
+                    }
+                }
+
+                result = FomatBankChannelResponseMessage(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private string FomatBankChannelResponseMessage(string reponseMessage)
+        {
+            var response = JsonConvert.DeserializeObject<ResponseData>(reponseMessage);
+
+            var dataJsonResult = response.Data.ToString();
+            var dataJson = JToken.Parse(dataJsonResult);
+
+            if (dataJson is JArray)
+            {
+                var obj = dataJson.ToObject<List<Data>>();
+                response.MessageData.AddRange(obj);
+            }
+
+            if (dataJson is JObject)
+            {
+                var obj = dataJson.ToObject<Data>();
+                response.MessageData.Add(obj);
+            }
+
+            var result = $"{response.Message} | {response.Status}";
+
+            foreach (var data in response.MessageData)
+            {
+                result = $"{result} | {data.Cost} | {data.Pages} | {data.NumberOfReceiver} | {data.MessageId}";
+            }
+
+            return result;
+        }
+
     }
 }

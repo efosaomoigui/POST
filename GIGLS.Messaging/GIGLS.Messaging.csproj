@@ -150,6 +150,7 @@
     <Compile Include="MessageService\EmailSender.cs" />
     <Compile Include="MessageService\EmailService.cs" />
     <Compile Include="MessageService\ILogger.cs" />
+    <Compile Include="MessageService\ResponseData.cs" />
     <Compile Include="MessageService\SMSService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
