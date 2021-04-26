@@ -151,6 +151,7 @@
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
     <Compile Include="Domain\BaseDomain.cs" />
+    <Compile Include="Domain\CaptainBonusByZoneMaping.cs" />
     <Compile Include="Domain\Category.cs" />
     <Compile Include="Domain\ClientNode.cs" />
     <Compile Include="Domain\Company.cs" />
@@ -324,6 +325,7 @@
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\BaseSearchDto.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
+    <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
@@ -659,6 +661,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
@@ -818,6 +821,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />

@@ -474,6 +474,9 @@ namespace GIGLS.Core
                 config.CreateMap<Store, StoreDTO>();
                 config.CreateMap<StoreDTO, Store>();
 
+                config.CreateMap<CaptainBonusByZoneMaping, CaptainBonusByZoneMapingDTO>();
+                config.CreateMap<CaptainBonusByZoneMapingDTO, CaptainBonusByZoneMaping>();
+
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
                 config.CreateMap<ShipmentItem_Archive, ShipmentItem>();

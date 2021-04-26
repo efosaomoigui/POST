@@ -513,6 +513,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPriceCategoryRepository PriceCategory { get; set; }
 
+        [Inject]
+        public ICaptainBonusByZoneMapingRepository CaptainBonusByZoneMaping { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
