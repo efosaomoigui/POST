@@ -1512,28 +1512,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.ForgotPasswordV2(user);
-                //if (string.IsNullOrWhiteSpace(user.Email))
-                //{
-                //    throw new GenericException("NULL INPUT", $"{(int)HttpStatusCode.BadRequest}");
-                //}
-
-                //string password = await _portalService.Generate(6);
-                //var User = await _portalService.ForgotPassword(user.Email, password);
-
-                //if (User.Succeeded)
-                //{
-                //    var passwordMessage = new PasswordMessageDTO()
-                //    {
-                //        Password = password,
-                //        UserEmail = user.Email
-                //    };
-
-                //    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                //}
-                //else
-                //{
-                //    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
-                //}
 
                 return new ServiceResponse<bool>
                 {
