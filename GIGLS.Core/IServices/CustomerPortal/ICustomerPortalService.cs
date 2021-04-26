@@ -34,7 +34,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
     public interface ICustomerPortalService : IServiceDependencyMarker
     {
         Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria);
-        Task<WalletTransactionSummaryDTO> GetWalletTransactions();
+        Task<WalletTransactionSummaryDTO> GetWalletTransactions(PaginationDTO pagination);
         Task<IEnumerable<InvoiceViewDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);

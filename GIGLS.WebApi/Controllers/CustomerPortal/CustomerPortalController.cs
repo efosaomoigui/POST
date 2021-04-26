@@ -282,11 +282,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("wallet")]
-        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
+        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions(PaginationDTO pagination)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var walletTransactionSummary = await _portalService.GetWalletTransactions();
+                var walletTransactionSummary = await _portalService.GetWalletTransactions(pagination);
 
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
