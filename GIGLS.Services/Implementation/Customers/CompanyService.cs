@@ -1043,7 +1043,8 @@ namespace GIGLS.Services.Implementation.Customers
                     {
                         wallet.CustomerType = CustomerType.Company;
                         wallet.CompanyType = CompanyType.Ecommerce.ToString();
-                        wallet.CustomerId = newCompany.CompanyId; 
+                        wallet.CustomerId = newCompany.CompanyId;
+                        await _uow.CompleteAsync();
                     }
                 }
                 companyDTO = Mapper.Map<CompanyDTO>(company);
