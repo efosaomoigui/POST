@@ -1008,6 +1008,7 @@ namespace GIGLS.Services.Implementation.Customers
                     UserActiveCountryId = user.UserActiveCountryId,
                     isCodNeeded = false,
                     IsRegisteredFromMobile = individualInfo.IsRegisteredFromMobile,
+                    PhoneNumber = user.PhoneNumber
 
                 };
                 if (!String.IsNullOrEmpty(user.FirstName))
@@ -1021,14 +1022,6 @@ namespace GIGLS.Services.Implementation.Customers
                     person.CompanyId = company.CompanyId;
                     _uow.CompanyContactPerson.Add(person);
                 }
-                //update customer wallet
-                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == individualInfo.CustomerCode);
-                if (wallet != null)
-                {
-                    wallet.CustomerType = CustomerType.Company;
-                    wallet.CompanyType = CompanyType.Ecommerce.ToString();
-                    wallet.CustomerId = company.CompanyId;
-                }
 
                 //also update orgnization,designation,department
                 individualInfo.IsRegisteredFromMobile = false;
@@ -1040,6 +1033,19 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = newCompanyDTO.LastName;
                _uow.Company.Add(company);
                 await _uow.CompleteAsync();
+
+                //update customer wallet
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == individualInfo.CustomerCode);
+                if (wallet != null)
+                {
+                    var newCompany = await _uow.Company.GetAsync(x => x.CustomerCode == individualInfo.CustomerCode);
+                    if (newCompany != null)
+                    {
+                        wallet.CustomerType = CustomerType.Company;
+                        wallet.CompanyType = CompanyType.Ecommerce.ToString();
+                        wallet.CustomerId = newCompany.CompanyId; 
+                    }
+                }
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
