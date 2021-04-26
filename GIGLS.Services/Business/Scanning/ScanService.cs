@@ -151,7 +151,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
-                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
                         {
                             trackingType = TrackingType.OutBound;
                         }
@@ -242,7 +242,7 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             //To handle the DHL International from Sending message at arrive final destination
                             TrackingType trackingType = TrackingType.InBound;
-                            if (groupShipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                            if (groupShipment.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
                             {
                                 trackingType = TrackingType.OutBound;
                             }
@@ -336,7 +336,7 @@ namespace GIGLS.Services.Business.Scanning
                                         {
                                             var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
 
-                                            if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
+                                            if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
                                             {
                                                 internationalShipmentList.Add(shipmentItem.Waybill);
                                             }
