@@ -384,7 +384,17 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
 
                 var departure = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifest.DepartureServiceCentreId);
+
+                if(departure == null)
+                {
+                    throw new GenericException($"Departure  does not exist");
+                }
+
                 var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == manifest.DestinationServiceCentreId);
+                if (destination == null)
+                {
+                    throw new GenericException($"Destination  does not exist");
+                }
 
                 var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
 
