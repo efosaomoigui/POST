@@ -1507,37 +1507,38 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPost]
         [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                if (string.IsNullOrWhiteSpace(user.Email))
-                {
-                    throw new GenericException("NULL INPUT", $"{(int)HttpStatusCode.BadRequest}");
-                }
+                var result = await _portalService.ForgotPasswordV2(user);
+                //if (string.IsNullOrWhiteSpace(user.Email))
+                //{
+                //    throw new GenericException("NULL INPUT", $"{(int)HttpStatusCode.BadRequest}");
+                //}
 
-                string password = await _portalService.Generate(6);
-                var User = await _portalService.ForgotPassword(user.Email, password);
+                //string password = await _portalService.Generate(6);
+                //var User = await _portalService.ForgotPassword(user.Email, password);
 
-                if (User.Succeeded)
-                {
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = password,
-                        UserEmail = user.Email
-                    };
+                //if (User.Succeeded)
+                //{
+                //    var passwordMessage = new PasswordMessageDTO()
+                //    {
+                //        Password = password,
+                //        UserEmail = user.Email
+                //    };
 
-                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                }
-                else
-                {
-                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
-                }
+                //    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                //}
+                //else
+                //{
+                //    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+                //}
 
                 return new ServiceResponse<bool>
                 {
                     Code = $"{(int)HttpStatusCode.OK}",
-                    Object = true
+                    Object = result
                 };
             });
         }

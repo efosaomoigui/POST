@@ -99,4 +99,10 @@ namespace GIGLS.Core.DTO.User
         public string IdentificationImage { get; set; }
         public string CountryType { get; set; }
     }
+
+    public class ForgotPasswordDTO
+    {
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+    }
 }
