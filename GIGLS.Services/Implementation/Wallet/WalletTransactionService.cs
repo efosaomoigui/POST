@@ -271,9 +271,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 pagination = new PaginationDTO
                 {
                     Page = 1,
-                    PageSize = 20,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now
+                    PageSize = 20
                 };
             }
             if (pagination.StartDate != null && pagination.EndDate != null)
