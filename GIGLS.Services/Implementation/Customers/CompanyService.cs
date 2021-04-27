@@ -812,14 +812,22 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
+                if (String.IsNullOrEmpty(userValidationDTO.UserID) || userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = "User code or rank not provided";
+                    result.Message = "User or rank not provided";
                     return result;
                 }
 
-                var company = await  _uow.Company.GetAsync(x => x.CustomerCode == userValidationDTO.UserCode);
+                var user = await _userService.GetUserById(userValidationDTO.UserID);
+                if (user == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "User does not exist";
+                    return result;
+                }
+
+                var company = await  _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (company == null)
                 {
                     result.Succeeded = false;
