@@ -2061,7 +2061,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                     beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
-                    endingDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 }
                 else
                 {
@@ -2114,7 +2113,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                     beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
-                    endingDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 }
                 else
                 {

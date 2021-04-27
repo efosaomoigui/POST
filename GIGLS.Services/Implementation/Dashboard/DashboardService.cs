@@ -1007,7 +1007,6 @@ namespace GIGLS.Services.Implementation.Dashboard
             {
                 var threeMonthsAgo = DateTime.Now.AddMonths(-2);  //One (1) Months ago
                 startDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
             else
             {

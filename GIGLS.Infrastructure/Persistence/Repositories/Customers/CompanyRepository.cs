@@ -539,7 +539,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 {
                     var threeMonthsAgo = DateTime.Now.AddMonths(-2);
                     StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
-                    EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 }
                 else
                 {
