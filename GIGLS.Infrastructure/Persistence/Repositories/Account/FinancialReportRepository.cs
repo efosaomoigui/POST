@@ -317,7 +317,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
-        public async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        //If Query Type is 0, it is outbound , if param type is 1, it is inbound
+        public async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
             try
             {
@@ -342,16 +343,18 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
                 SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
                 SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+                SqlParameter paramType = new SqlParameter("@ParamType", queryType);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
                     endDate,
-                    countryId
+                    countryId,
+                    paramType
                 };
 
                 var summaryResult = await _context.Database.SqlQuery<decimal?>("OutboundShipmentsRevenue " +
-                   "@StartDate, @EndDate, @CountryId",
+                   "@StartDate, @EndDate, @CountryId, @ParamType",
                    param).FirstOrDefaultAsync();
 
                 decimal summary = 0.00M;
@@ -379,7 +382,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             {
                 var OneMonthAgo = DateTime.Now.AddMonths(0);  //One (1) Months ago
                 startDate = new DateTime(OneMonthAgo.Year, OneMonthAgo.Month, 1);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
             else
             {

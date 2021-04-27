@@ -38,6 +38,13 @@ namespace GIGLS.Core.DTO.Account
         public int Shipments { get; set; }
     }
 
+    public class InboundShipmentsReportDTO
+    {
+        public decimal Revenue { get; set; }
+        public double Weight { get; set; }
+        public int Shipments { get; set; }
+    }
+
     public class OutboundFinancialReportDTO : BaseDomainDTO
     {
         public ReportSource Source { get; set; }

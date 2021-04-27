@@ -1021,7 +1021,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
 
             //filter by country
-            var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
+            var TotalShipmentDeliveredQueryable =  _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
                 s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid
                 && s.DateCreated >= startDate
                 && s.DateCreated <= endDate);
@@ -1097,9 +1097,17 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.OutboundShipmentsReportDTO = new OutboundShipmentsReportDTO();
 
-                    dashboardDTO.OutboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria);
-                    dashboardDTO.OutboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria);
-                    dashboardDTO.OutboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria);
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.OutboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 0);
+
+                    dashboardDTO.InboundShipmentsReportDTO = new InboundShipmentsReportDTO();
+
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.InboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    dashboardDTO.InboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
 
 
                 }
@@ -1475,24 +1483,24 @@ namespace GIGLS.Services.Implementation.Dashboard
             return await _uow.Company.GetClassSubscriptions(dashboardFilterCriteria);
         }
 
-        //Get Number of Outbound Shipments Created
-        private async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        //Get Number of Outbound Or Inbound Shipments Created
+        private async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
-            var result = await _uow.IntlShipmentRequest.GetCountOfOutboundShipmentCreated(dashboardFilterCriteria);
+            var result = await _uow.IntlShipmentRequest.GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, queryType);
             return result;
         }
 
-        //Get Sum  of Outbound Shipments Weight
-        private async Task<double> GetSumOfWeightOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        //Get Sum  of Outbound Or Inbound Shipments Weight
+        private async Task<double> GetSumOfWeightOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
-            var result = await _uow.IntlShipmentRequest.GetSumOfOutboundWeightOfShipmentCreated(dashboardFilterCriteria);
+            var result = await _uow.IntlShipmentRequest.GetSumOfOutboundWeightOfShipmentCreated(dashboardFilterCriteria, queryType);
             return result;
         }
 
         //Get Total Earnings in Financial Reports For Outbound Shipments
-        private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
-            return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria);
+            return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, queryType);
         }
 
     }

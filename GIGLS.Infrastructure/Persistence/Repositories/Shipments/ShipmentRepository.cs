@@ -2046,8 +2046,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-        //Get Sum  of Outbound Shipments Weight
-        public async Task<double> GetSumOfOutboundWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        //Get Sum  of Outbound Or Inbound Shipments Weight
+        //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+        public async Task<double> GetSumOfOutboundWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
             try
             {
@@ -2074,16 +2075,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
                 SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
                 SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+                SqlParameter paramType = new SqlParameter("@ParamType", queryType);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
                     endDate,
-                    countryId
+                    countryId,
+                    paramType
                 };
 
                 var summary = await Context.Database.SqlQuery<double?>("OutboundShipmentsWeight " +
-                   "@StartDate, @EndDate, @CountryId",
+                   "@StartDate, @EndDate, @CountryId, @ParamType",
                    param).FirstOrDefaultAsync();
 
                 if (summary != null)
@@ -2098,8 +2101,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
-
-        public async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria)
+        //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+        public async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
             try
             {
@@ -2121,21 +2124,23 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     beginningDate = queryDate.Item1;
                     endingDate = queryDate.Item2;
                 }
-
+             
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
                 SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
                 SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+                SqlParameter paramType = new SqlParameter("@ParamType", queryType);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
                     endDate,
-                    countryId
+                    countryId,
+                    paramType
                 };
 
                 var summary = await Context.Database.SqlQuery<int>("OutboundShipmentsCount " +
-                   "@StartDate, @EndDate, @CountryId",
+                   "@StartDate, @EndDate, @CountryId, @ParamType",
                    param).FirstOrDefaultAsync();
 
                 if (summary != null)
