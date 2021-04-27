@@ -271,10 +271,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 pagination = new PaginationDTO
                 {
                     Page = 1,
-                    PageSize = 20
+                    PageSize = 20,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now
                 };
             }
-            var walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+            var walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId && s.DateCreated >= pagination.StartDate && s.DateCreated <= pagination.EndDate).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
             if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
