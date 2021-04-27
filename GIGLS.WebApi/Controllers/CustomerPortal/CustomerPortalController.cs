@@ -280,7 +280,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("wallet")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions(PaginationDTO pagination)
         {

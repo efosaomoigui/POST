@@ -262,7 +262,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             // get the wallet owner information
             var wallet = await _walletService.GetWalletById(walletId);
-
+            var walletTransactions = new List<WalletTransaction>();
             //get the customer info
             //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
             int totalCount;
@@ -276,7 +276,15 @@ namespace GIGLS.Services.Implementation.Wallet
                     EndDate = DateTime.Now
                 };
             }
-            var walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId && s.DateCreated >= pagination.StartDate && s.DateCreated <= pagination.EndDate).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+            if (pagination.StartDate != null && pagination.EndDate != null)
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId && s.DateCreated >= pagination.StartDate && s.DateCreated <= pagination.EndDate).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+
+            }
+            else
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+            }
             if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
