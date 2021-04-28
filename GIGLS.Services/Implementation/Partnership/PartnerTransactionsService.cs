@@ -384,6 +384,13 @@ namespace GIGLS.Services.Implementation.Partnership
                     addressResult.Latitude = Response.results.FirstOrDefault().geometry.location.lat;
                     addressResult.Longitude = Response.results.FirstOrDefault().geometry.location.lng;
 
+                    //also get locality
+                    var lga = Response.results.FirstOrDefault().address_components.Where(x => x.types.Contains("administrative_area_level_2")).FirstOrDefault();
+                    if (lga != null)
+                    {
+                        addressResult.Locality = lga.long_name;
+                    }
+
 
                     //check if request was fufilled
                     if (Response.status.ToLower() == "request_denied")

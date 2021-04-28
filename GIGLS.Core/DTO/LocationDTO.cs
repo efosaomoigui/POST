@@ -26,5 +26,6 @@ namespace GIGLS.Core.DTO
         public double? Longitude { get; set; }
         public string FormattedAddress { get; set; }
         public string Address { get; set; }
+        public string Locality { get; set; }
     }
 }
