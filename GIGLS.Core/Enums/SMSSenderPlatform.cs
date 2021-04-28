@@ -4,6 +4,7 @@
     {
         OGOSMS,
         SCRIPTWALL,
-        TWILIO
+        TWILIO,
+        OGOSMSBANKROUTE
     }
 }

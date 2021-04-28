@@ -125,6 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
         public async Task<MovementManifestNumberDTO> GetMovementManifestByCode(string movementmanifest)
         {
             try
@@ -141,7 +142,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //manifestDTO.ReceiverBy = manifestObj.ReceiverById;
                 return manifestDTO;
             }
-            catch (Exception)
+            catch (Exception  ex)
             {
                 throw;
             }
