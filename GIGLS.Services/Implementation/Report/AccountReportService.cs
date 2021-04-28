@@ -298,8 +298,9 @@ namespace GIGLS.Services.Implementation.Report
 
         }
 
-        //Get  Financial Breakdown of Outbound Shipments
-        public async Task<List<OutboundFinancialReportDTO>> GetFinancialBreakdownOfOutboundShipments(AccountFilterCriteria accountFilter)
+        //Get  Financial Breakdown of Outbound Or Inbound Shipments
+        //Outbound is 0 and Inbound is 1
+        public async Task<List<OutboundFinancialReportDTO>> GetFinancialBreakdownOfOutboundShipments(AccountFilterCriteria accountFilter, int queryType)
         {
             if (accountFilter.CountryId == 0)
             {
@@ -331,7 +332,7 @@ namespace GIGLS.Services.Implementation.Report
 
             var earnings = new List<OutboundFinancialReportDTO>();
 
-            earnings = await _uow.FinancialReport.GetFinancialReportOfOutboundShipmentsBreakdown(accountFilter);
+            earnings = await _uow.FinancialReport.GetFinancialReportOfOutboundShipmentsBreakdown(accountFilter, queryType);
 
             return earnings;
 

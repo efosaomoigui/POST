@@ -372,7 +372,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
-        public async Task<List<OutboundFinancialReportDTO>> GetFinancialReportOfOutboundShipmentsBreakdown(AccountFilterCriteria accountFilterCriteria)
+        //If Query Type is 0, it is outbound , if param type is 1, it is inbound
+        public async Task<List<OutboundFinancialReportDTO>> GetFinancialReportOfOutboundShipmentsBreakdown(AccountFilterCriteria accountFilterCriteria, int queryType)
         {
             var startDate = DateTime.Now;
             var endDate = DateTime.Now;
@@ -395,17 +396,20 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             SqlParameter startDates = new SqlParameter("@StartDate", startDate);
             SqlParameter endDates = new SqlParameter("@EndDate", endDate);
             SqlParameter countryId = new SqlParameter("@CountryId", accountFilterCriteria.CountryId);
+            SqlParameter paramType = new SqlParameter("@ParamType", queryType);
+
 
 
             SqlParameter[] param = new SqlParameter[]
             {
                     startDates,
                     endDates,
-                    countryId
+                    countryId,
+                    paramType
             };
 
             var summary = await _context.Database.SqlQuery<OutboundFinancialReportDTO>("OutboundShipmentsReport " +
-               "@StartDate, @EndDate, @CountryId",
+               "@StartDate, @EndDate, @CountryId, @ParamType",
                param).ToListAsync();
 
             return await Task.FromResult(summary);
