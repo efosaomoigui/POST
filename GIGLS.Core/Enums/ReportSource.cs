@@ -16,6 +16,7 @@ namespace GIGLS.Core.Enums
     public enum ShipmentReportType
     {
         Daily,
-        Monthly
+        Monthly,
+        Normal
     }
 }

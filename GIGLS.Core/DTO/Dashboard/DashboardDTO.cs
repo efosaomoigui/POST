@@ -48,6 +48,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public int ClassSubscriptionsCount { get; set; }
         public OutboundShipmentsReportDTO OutboundShipmentsReportDTO   { get; set; }
         public InboundShipmentsReportDTO InboundShipmentsReportDTO { get; set; }
+        public EarningsBreakdownByCustomerDTO MonthlyEarningsBreakdownByCustomerDTO { get; set; }
     }
 
     public class CustomerBreakdownDTO

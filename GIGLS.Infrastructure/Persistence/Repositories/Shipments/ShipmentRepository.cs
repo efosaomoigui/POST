@@ -2060,8 +2060,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
-                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    beginningDate = DateTime.Now.AddMonths(-3);
                 }
                 else
                 {
@@ -2114,8 +2113,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
-                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    beginningDate = DateTime.Now.AddMonths(-3);
                 }
                 else
                 {

@@ -1005,8 +1005,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                var threeMonthsAgo = DateTime.Now.AddMonths(-2);  //One (1) Months ago
-                startDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                startDate = DateTime.Now.AddMonths(-3);
             }
             else
             {
@@ -1071,16 +1070,26 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
 
                     //Get Revenue By Customer Type for Agility
-                    var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria);
+                    var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria, ShipmentReportType.Normal);
 
                     //Get Revenue By Customer Type for GIGGo
-                    var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria);
+                    var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria, ShipmentReportType.Normal);
+
+                    var earningsBreakdown = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
 
                     dashboardDTO.EarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
 
-                    dashboardDTO.EarningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual + giggoRevenue.Individual;
-                    dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
-                    dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Individual = earningsBreakdown.Individual;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdown.Ecommerce;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = earningsBreakdown.Corporate;
+
+                    var earningsBreakdownMonthly = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
+
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Individual = earningsBreakdownMonthly.Individual;
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdownMonthly.Ecommerce;
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Corporate = earningsBreakdownMonthly.Corporate;
 
                     dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
 
@@ -1451,7 +1460,6 @@ namespace GIGLS.Services.Implementation.Dashboard
             return result;
         }
 
-        //Get Number of Monthly 0r Daily Shipments Created
         private async Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
         {
             var result = await  _uow.Invoice.GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, shipmentReportType);
@@ -1466,9 +1474,9 @@ namespace GIGLS.Services.Implementation.Dashboard
         }
 
         //Get  Earnings in Financial Reports By Customer Types
-        private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
         {
-            return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria);
+            return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria,shipmentReportType);
         }
 
         //Get  Revenue by Basic or Class Customers 
@@ -1501,6 +1509,25 @@ namespace GIGLS.Services.Implementation.Dashboard
         private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
         {
             return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, queryType);
+        }
+
+        //Get Revenue Breakdown by Customer Type 
+        private async Task<EarningsBreakdownByCustomerDTO> GetRevenueBreakdownByCustomerType(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            //Get Revenue By Customer Type for Agility
+            var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            //Get Revenue By Customer Type for GIGGo
+            var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            var earningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+            earningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual + giggoRevenue.Individual;
+            earningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
+            earningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
+
+            return earningsBreakdownByCustomerDTO;
+            
         }
 
     }
