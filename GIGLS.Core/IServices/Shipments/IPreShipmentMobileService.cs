@@ -13,6 +13,7 @@ using System;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Node;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -92,5 +93,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentCreated();
         Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned();
         Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked();
+        Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileTAT(NewFilterOptionsDto newFilterOptionsDto);
     }
 }

@@ -391,4 +391,30 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderLGA { get; set; }
         public DateTime DateCreated { get; set; }
     }
+
+
+    public class PreShipmentMobileTATDTO
+    {
+        public string Waybill { get; set; }
+        public string SenderName { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public string SenderAddress { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverAddress { get; set; }
+        public double CalculatedTotal { get; set; }
+        public string VehicleType { get; set; }
+        public DateTime DateCreated { get; set; }
+        public bool IsHomeDelivery { get; set; }
+        public bool IsScheduled { get; set; }
+        public string SenderLocality { get; set; }
+        public string shipmentstatus { get; set; }
+        public string ShipmentScanStatus { get; set; }
+        public DateTime LastScanDate { get; set; }
+        public string OATAT { get; set; }
+        public string AssignTAT { get; set; }
+        public string PickupTAT { get; set; }
+        public string DeliveryTAT { get; set; }
+        public string AppType { get; set; }
+    }
 }
