@@ -1329,6 +1329,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
             var customer = _context.Company.AsQueryable().Where(x => x.CustomerCode == filter.CustomerCode).FirstOrDefault();
             var user = _context.Users.AsQueryable().Where(x => x.Id == filter.UserId).FirstOrDefault();
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            else if (filter != null && filter.StartDate != null && filter.EndDate == null)
+            {
+                filter.EndDate = DateTime.Now;
+            }
+
             shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate && x.CustomerCode == filter.CustomerCode);
             List<InvoiceViewDTO> result = (from s in shipments
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
