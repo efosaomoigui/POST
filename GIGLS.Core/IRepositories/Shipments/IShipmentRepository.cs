@@ -30,6 +30,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<double> GetSumOfMonthlyOrDailyWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
         Task<ShipmentDTO> GetShipment(string waybill);
         Task<List<InvoiceViewDTO>> GetUnPaidWaybillForServiceCentre(int serviceCentreId);
+        Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

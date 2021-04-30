@@ -1118,7 +1118,11 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.InboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
                     dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
 
+                    //Get count of vehicles dispatched
+                    dashboardDTO.VehiclesDispatched = await GetCountOfVehiclesOrTripsOfMovementManifest("DispatchedVehiclesCount", dashboardFilterCriteria);
 
+                    //Get number of trips of completed
+                    dashboardDTO.TripsCompleted = await GetCountOfVehiclesOrTripsOfMovementManifest("TripsCount", dashboardFilterCriteria);
                 }
                 _uow.Complete();
             }
@@ -1528,6 +1532,13 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return earningsBreakdownByCustomerDTO;
             
+        }
+
+        //Get Count of Vehicles Dispatched or Trips 
+        private async Task<int> GetCountOfVehiclesOrTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.Shipment.GetCountOfVehiclesAndTripsOfMovementManifest(procedureName, dashboardFilterCriteria);
+            return result;
         }
 
     }
