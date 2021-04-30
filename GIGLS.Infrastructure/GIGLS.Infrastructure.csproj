@@ -126,6 +126,7 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\Account\CustomerInvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\ActivationCampaignEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\Archived\InvoiceArchiveRepository.cs" />
     <Compile Include="Persistence\Repositories\Archived\ShipmentArchiveRepository.cs" />

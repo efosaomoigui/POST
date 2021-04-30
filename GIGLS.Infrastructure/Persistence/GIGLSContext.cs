@@ -297,6 +297,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<InternationalShipmentWaybill> InternationalShipmentWaybill { get; set; }
         public DbSet<RankHistory> RankHistory { get; set; }
         public DbSet<PriceCategory> PriceCategory { get; set; }
+        public DbSet<CustomerInvoice> CustomerInvoice { get; set; }
+        public DbSet<InvoiceCharge> InvoiceCharge { get; set; }
 
         //routes
         public DbSet<Route> Routes { get; }

@@ -1840,7 +1840,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (string.IsNullOrEmpty(preShipment.VehicleType))
             {
-                return await _preShipmentMobileService.GetPrice(preShipment);
+                var price = await _preShipmentMobileService.GetPrice(preShipment);
+                price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                return price;
             }
 
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
@@ -1851,7 +1853,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                return await _preShipmentMobileService.GetPrice(preShipment);
+                var price = await _preShipmentMobileService.GetPrice(preShipment);
+                price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                return price;
             }
         }
 
