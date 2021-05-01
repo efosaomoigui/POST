@@ -6398,12 +6398,13 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
-                var dateFor24Hours = DateTime.Now.AddHours(-24);
-                var dateFor72Hours = DateTime.Now.AddHours(-72);
+                var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
+                var dateFor72Hours = newFilterOptionsDto.EndDate.AddHours(72);
 
                 if (!String.IsNullOrEmpty(newFilterOptionsDto.FilterType) && newFilterOptionsDto.FilterType == "OverdueTATIntrastate")
                 {
-                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.DateCreated < dateFor24Hours && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = preshipmentmobile.Where(x => x.DateCreated > dateFor24Hours).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6428,7 +6429,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex)
             {
-                throw;                   
+                throw;
             }
         }
 
@@ -6475,10 +6476,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var tat = await MapPreShipmentMobileTATDTO(item);
                     //calc the remaining TATs
-                    tat.ShipmentScanStatus = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().Status;
-                    tat.LastScanDate = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().DateCreated;
-
-                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAHD.ToString());
+                    var shimentStatus = mobiletracking.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                    if (shimentStatus != null)
+                    {
+                        tat.ShipmentScanStatus = shimentStatus.Status;
+                        tat.LastScanDate = shimentStatus.DateCreated;
+                    }
+                    else if (shimentStatus == null && item.shipmentstatus.ToLower() == "shipment created")
+                    {
+                        tat.ShipmentScanStatus = ShipmentScanStatus.MCRT.ToString();
+                        tat.LastScanDate = item.DateCreated;
+                    }
+                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAHD.ToString() && x.Waybill == item.Waybill);
                     if (dlvrd != null)
                     {
                         var tatAge = (int)(dlvrd.DateCreated - item.DateCreated).TotalHours;
@@ -6489,7 +6498,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             tat.OATAT = $"{tatAge}{min}";
                         }
                     }
-                    var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString());
+                    var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
                     if (assigned != null)
                     {
                         var tatAge = (int)(assigned.DateCreated - item.DateCreated).TotalHours;
@@ -6501,7 +6510,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString());
+                    var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
                     if (picked != null && assigned != null)
                     {
                         var tatAge = (int)(picked.DateCreated - assigned.DateCreated).TotalHours;
@@ -6546,11 +6555,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     //calc the remaining TATs 
                     if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.OnwardProcessing.ToString().ToLower())
                     {
-                        //var onwardWaybill = shipments.FirstOrDefault(x => x.Waybill == item.Waybill);
-                        tat.ShipmentScanStatus = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().Status;
-                        tat.LastScanDate = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().DateCreated;
+                        var shimentStatus = shipmenttracking.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                        if (shimentStatus != null)
+                        {
+                            tat.ShipmentScanStatus = shimentStatus.Status;
+                            tat.LastScanDate = shimentStatus.DateCreated;
+                        }
+                        else if (shimentStatus == null && item.shipmentstatus.ToLower() == "shipment created")
+                        {
+                            tat.ShipmentScanStatus = ShipmentScanStatus.MCRT.ToString();
+                            tat.LastScanDate = item.DateCreated;
+                        }
 
-                        var dlvrd = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.OKC.ToString() || x.Status == ShipmentScanStatus.OKT.ToString());
+                        var dlvrd = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Waybill == item.Waybill && (x.Status == ShipmentScanStatus.OKC.ToString() || x.Status == ShipmentScanStatus.OKT.ToString()));
                         if (dlvrd != null)
                         {
                             var tatAge = (int)(dlvrd.DateCreated - item.DateCreated).TotalHours;
@@ -6561,19 +6578,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                 tat.OATAT = $"{tatAge}{min}";
                             }
                         }
-                        var assigned = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.WC.ToString());
+                        var assigned = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.WC.ToString() && x.Waybill == item.Waybill);
                         if (assigned != null)
                         {
-                            var tatAge = (int)(assigned.DateCreated - shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().DateCreated).TotalHours;
+                            var tatAge = (int)(assigned.DateCreated - shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Waybill == item.Waybill).DateCreated).TotalHours;
                             tat.AssignTAT = $"{tatAge}{hrs}";
                             if (tatAge <= 0)
                             {
-                                tatAge = (int)(assigned.DateCreated - shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault().DateCreated).TotalMinutes;
+                                tatAge = (int)(assigned.DateCreated - shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Waybill == item.Waybill).DateCreated).TotalMinutes;
                                 tat.AssignTAT = $"{tatAge}{min}";
                             }
                         }
 
-                        var picked = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.WC.ToString());
+                        var picked = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.WC.ToString() && x.Waybill == item.Waybill);
                         if (picked != null && assigned != null)
                         {
                             var tatAge = (int)(picked.DateCreated - assigned.DateCreated).TotalHours;
@@ -6612,7 +6629,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
     }
 };
