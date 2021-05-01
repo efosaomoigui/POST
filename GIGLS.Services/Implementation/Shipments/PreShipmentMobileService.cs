@@ -6452,7 +6452,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 tat.IsScheduled = mobile.IsScheduled;
                 tat.SenderLocality = mobile.SenderLocality;
                 tat.shipmentstatus = mobile.shipmentstatus;
-                var user = await _userService.GetUserByChannelCode(mobile.CustomerCode);
+                var user = await _uow.User.GetUserByChannelCode(mobile.CustomerCode);
                 if (user != null)
                 {
                     tat.AppType = user.AppType;
