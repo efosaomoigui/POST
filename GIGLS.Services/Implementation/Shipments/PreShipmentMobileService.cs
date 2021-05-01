@@ -6573,7 +6573,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                         }
 
-                        var picked = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status.ToUpper() == ShipmentScanStatus.WC.ToString());
+                        var picked = shipmenttracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.WC.ToString());
                         if (picked != null && assigned != null)
                         {
                             var tatAge = (int)(picked.DateCreated - assigned.DateCreated).TotalHours;
