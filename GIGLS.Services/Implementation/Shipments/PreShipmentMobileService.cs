@@ -6398,6 +6398,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
+                var range = (newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
+                if (range > 3) 
+                {
+                    newFilterOptionsDto.EndDate = newFilterOptionsDto.StartDate.AddDays(3);
+                }
                 var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
                 var dateFor72Hours = newFilterOptionsDto.EndDate.AddHours(72);
 
