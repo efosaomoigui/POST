@@ -1093,12 +1093,16 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
 
-                    //Get revenue for Class and Basic Customers
+                    //Get revenue for Class and Basic Customers (Shipment Table)
                     var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
                     var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
 
-                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
-                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
+                    //Get revenue for Class and Basic Customers (PreShipmentMobile Table)
+                    var classMobileRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerMobileIncome", dashboardFilterCriteria);
+                    var basicMobileRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerMobileIncome", dashboardFilterCriteria);
+
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue + classMobileRevenue;
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue + basicMobileRevenue;
 
                     //Get number of class subscriptions
                     var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
