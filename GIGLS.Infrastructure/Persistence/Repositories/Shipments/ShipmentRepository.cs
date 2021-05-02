@@ -1321,7 +1321,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
-
         public Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
         {
             // filter by cancelled shipments
@@ -1382,7 +1381,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return Task.FromResult(customerInvoice);
         }
-    }
 
         //Get Count  of  Vehicles and Trips
         public async Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
@@ -1411,13 +1409,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
                 SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
-               
+
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
                     endDate
-                    
+
                 };
 
                 var summary = await Context.Database.SqlQuery<int>($"{procedureName} " +
@@ -1437,6 +1435,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
     }
+
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
     {
