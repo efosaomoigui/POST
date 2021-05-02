@@ -6,6 +6,8 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using System;
 using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Core.IServices.Customers
 {
@@ -26,5 +28,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<UserDTO> GetInternationalUser(string email);
         Task<bool> DeactivateInternationalUser(string email);
         Task<object> GetByCode(string customerCode);
+        Task<List<InvoiceViewDTO>> GetCoporateMonthlyTransaction(DateFilterForDropOff filter);
     }
 }

@@ -12,6 +12,8 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -237,6 +239,22 @@ namespace GIGLS.WebApi.Controllers
                 return new ServiceResponse<object>
                 {
                     Object = customerObj
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("coporatetransactions")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetCoporateTransactions(DateFilterForDropOff searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _service.GetCoporateMonthlyTransaction(searchOption);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = transactions
                 };
             });
         }

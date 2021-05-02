@@ -320,5 +320,36 @@ namespace GIGLS.WebApi.Controllers.Report
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customerinvoice")]
+        public async Task<IServiceResponse<CustomerInvoiceDTO>> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetCoporateTransactionsByCode(filter);
+
+                return new ServiceResponse<CustomerInvoiceDTO>
+                {
+                    Object = report
+                };
+            });
+        }
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("generatecustomerinvoice")]
+        public async Task<IServiceResponse<bool>> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GenerateCustomerInvoice(customerInvoiceDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = report
+                };
+            });
+        }
     }
 }

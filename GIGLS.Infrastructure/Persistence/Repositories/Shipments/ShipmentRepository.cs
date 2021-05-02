@@ -1290,6 +1290,100 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
+        public Task<List<InvoiceViewDTO>> GetCoporateTransactions(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where s.CompanyType == CompanyType.Corporate.ToString()
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = s.GrandTotal,
+                                               DateCreated = s.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               CustomerType = s.CustomerType,
+                                               SenderName = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).Name,
+                                               CustomerId = s.CustomerId,
+                                               Email  = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).Email,
+                                               PhoneNumber  = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).PhoneNumber,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            return Task.FromResult(resultDto);
+        }
+
+
+        public Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            var customerInvoice = new CustomerInvoiceDTO();
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            var customer = _context.Company.AsQueryable().Where(x => x.CustomerCode == filter.CustomerCode).FirstOrDefault();
+            var user = _context.Users.AsQueryable().Where(x => x.Id == filter.UserId).FirstOrDefault();
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            else if (filter != null && filter.StartDate != null && filter.EndDate == null)
+            {
+                filter.EndDate = DateTime.Now;
+            }
+
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate && x.CustomerCode == filter.CustomerCode);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where s.CompanyType == CompanyType.Corporate.ToString()
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = s.GrandTotal,
+                                               Vat = s.Vat.Value,
+                                               DateCreated = s.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               CustomerType = s.CustomerType,
+                                               SenderName = customer.Name,
+                                               CustomerId = s.CustomerId,
+                                               Email = customer.Email,
+                                               PhoneNumber = customer.PhoneNumber,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            if (resultDto.Any())
+            {
+                customerInvoice.InvoiceViewDTOs.AddRange(resultDto);
+                customerInvoice.Total = resultDto.Sum(x => x.Amount);
+                customerInvoice.TotalVat = resultDto.Sum(x => x.Vat);
+                customerInvoice.InvoiceRefNo = "" ;
+                customerInvoice.CustomerName = customer.Name;
+                customerInvoice.PhoneNumber = customer.PhoneNumber;
+                customerInvoice.Email = customer.Email;
+                customerInvoice.CustomerCode = customer.CustomerCode;
+                customerInvoice.DateCreated = DateTime.Now;
+                customerInvoice.CreatedBy = $"{user.FirstName} {user.LastName}";
+            }
+            return Task.FromResult(customerInvoice);
+        }
+    }
+
         //Get Count  of  Vehicles and Trips
         public async Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
         {

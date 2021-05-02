@@ -125,6 +125,10 @@ namespace GIGLS.Services.Business.Pricing
 
             //Calculate Rank Price for the customer
             shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
+
+            //apply corporate user discount if user is a coporate user
+            var corporateDist = await GetCoporateDiscountedAmount(pricingDto.CustomerCode, shipmentTotalPrice);
+            shipmentTotalPrice = corporateDist;
             return shipmentTotalPrice;
         }
 
@@ -211,7 +215,11 @@ namespace GIGLS.Services.Business.Pricing
                 }
             }
 
-            return PackagePrice + deliveryOptionPrice;
+           var price = PackagePrice + deliveryOptionPrice;
+            //apply corporate user discount if user is a coporate user
+            var corporateDist = await GetCoporateDiscountedAmount(pricingDto.CustomerCode, price);
+            price = corporateDist;
+            return price;
         }
 
         private async Task<decimal> GetRegularPriceInternational(PricingDTO pricingDto)
@@ -267,7 +275,11 @@ namespace GIGLS.Services.Business.Pricing
                 PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, departureCountry.CountryId);
             }
 
-            return PackagePrice + deliveryOptionPrice;
+            var price = PackagePrice + deliveryOptionPrice;
+            //apply corporate user discount if user is a coporate user
+            var corporateDist = await GetCoporateDiscountedAmount(pricingDto.CustomerCode, price);
+            price = corporateDist;
+            return price;
         }
 
         private async Task<decimal> GetNormalRegularPrice(decimal weight, int zoneId, int countryId)
@@ -699,6 +711,9 @@ namespace GIGLS.Services.Business.Pricing
             PackagePrice = PackagePrice + percentagePrice + warSurchargePrice;
 
             PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            //apply corporate user discount if user is a coporate user
+            var corporateDist = await GetCoporateDiscountedAmount(pricingDto.CustomerCode, PackagePrice);
+            PackagePrice = corporateDist;
             return PackagePrice;
         }
 
@@ -1501,8 +1516,6 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
-
-
         public async Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto)
         {
             var price = 0.0m;
@@ -1556,5 +1569,30 @@ namespace GIGLS.Services.Business.Pricing
             }
             return price;
         }
+
+        public async Task<decimal> GetCoporateDiscountedAmount(string customerCode, decimal price)
+        {
+            if (!String.IsNullOrEmpty(customerCode))
+            {
+                if (price == null)
+                {
+                    return price;
+                }
+                var customerInfo = await _uow.Company.GetAsync(x => x.CustomerCode == customerCode && x.CompanyType == CompanyType.Corporate);
+                if (customerInfo != null)
+                {
+                    //check if customer has a discount and apply on price
+                    if (customerInfo.Discount > 0)
+                    {
+                        var discount = customerInfo.Discount / 100m;
+                        decimal distValue = price * discount;
+                        price = price - distValue;
+                    }
+                }
+            }
+            return price;
+        }
+
+
     }
 }
