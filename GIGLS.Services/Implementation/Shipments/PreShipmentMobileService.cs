@@ -6403,7 +6403,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                
+                if (newFilterOptionsDto.StartDate.Year != newFilterOptionsDto.EndDate.Year)
+                {
+                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
                 var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
                 var dateFor72Hours = newFilterOptionsDto.EndDate.AddHours(72);
 
