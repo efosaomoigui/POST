@@ -812,21 +812,52 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                if (String.IsNullOrEmpty(userValidationDTO.UserID) || userValidationDTO.Rank == null)
+                if (String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
                 {
                     result.Succeeded = false;
-                    result.Message = "User or rank not provided";
+                    result.Message = "User not provided";
                     return result;
                 }
 
-                var user = await _userService.GetUserById(userValidationDTO.UserID);
-                if (user == null)
+                if (userValidationDTO.Rank == null)
                 {
                     result.Succeeded = false;
-                    result.Message = "User does not exist";
+                    result.Message = "Rank not provided";
                     return result;
                 }
 
+                var user = new UserDTO(); 
+                if (!String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                   user = await _userService.GetUserById(userValidationDTO.UserID);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+                else if (String.IsNullOrEmpty(userValidationDTO.UserID) && !String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                    user = await _userService.GetUserByChannelCode(userValidationDTO.UserCode);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+                else
+                {
+                    user = await _userService.GetUserById(userValidationDTO.UserID);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+                
                 var company = await  _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (company == null)
                 {
