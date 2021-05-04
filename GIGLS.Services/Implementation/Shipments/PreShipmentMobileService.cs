@@ -6398,11 +6398,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
-                var range = (newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
-                if (range > 3) 
+
+                if (newFilterOptionsDto.StartDate.Month != newFilterOptionsDto.EndDate.Month)
                 {
-                    newFilterOptionsDto.EndDate = newFilterOptionsDto.StartDate.AddDays(3);
+                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 }
+                if (newFilterOptionsDto.StartDate.Year != newFilterOptionsDto.EndDate.Year)
+                {
+                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
                 var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
                 var dateFor72Hours = newFilterOptionsDto.EndDate.AddHours(72);
 
@@ -6457,11 +6462,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 tat.IsScheduled = mobile.IsScheduled;
                 tat.SenderLocality = mobile.SenderLocality;
                 tat.shipmentstatus = mobile.shipmentstatus;
-                var user = await _uow.User.GetUserByChannelCode(mobile.CustomerCode);
-                if (user != null)
-                {
-                    tat.AppType = user.AppType;
-                }
+                //var user = await _uow.User.GetUserByChannelCode(mobile.CustomerCode);
+                //if (user != null)
+                //{
+                //    tat.AppType = user.AppType;
+                //}
                 return tat;
             }
             catch (Exception ex)
