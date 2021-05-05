@@ -383,7 +383,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _ussdService.GetGatewayCode();
         }
 
-        public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactions(PaginationDTO pagination)
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
@@ -395,7 +395,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId);
+            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId,pagination);
             return walletTransactionSummary;
         }
 
@@ -1840,7 +1840,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (string.IsNullOrEmpty(preShipment.VehicleType))
             {
-                return await _preShipmentMobileService.GetPrice(preShipment);
+                var price = await _preShipmentMobileService.GetPrice(preShipment);
+                price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                return price;
             }
 
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
@@ -1851,7 +1853,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                return await _preShipmentMobileService.GetPrice(preShipment);
+                var price = await _preShipmentMobileService.GetPrice(preShipment);
+                price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                return price;
             }
         }
 

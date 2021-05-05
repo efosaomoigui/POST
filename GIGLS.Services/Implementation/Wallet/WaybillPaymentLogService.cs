@@ -69,7 +69,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 //check the country
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
-                waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+
+                // waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                if (waybillPaymentLog.PaymentCountryId == 0)
+                {
+                    waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                }
 
                 //if the country is not Nigeria or Ghana, block it
                 if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76)
@@ -134,7 +139,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     //check the country
                     waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
                     var user = await _uow.User.GetUserById(waybillPaymentLog.UserId);
-                    waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                    // waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                    if (waybillPaymentLog.PaymentCountryId == 0)
+                    {
+                        waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
+                    }
 
                     //if the country is not Nigeria or Ghana, block it
                     if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76 && waybillPaymentLog.PaymentCountryId != 207)

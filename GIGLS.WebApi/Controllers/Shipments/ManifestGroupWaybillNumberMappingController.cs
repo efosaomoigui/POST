@@ -136,6 +136,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
+        [Route("updatemovmentmanifest")]
+        public async Task<IServiceResponse<bool>> UpdateMovementManifestNumberMapping(MovementManifestNumberMappingDTO data) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
         [Route("mapsupermanifest")]
         public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
         {

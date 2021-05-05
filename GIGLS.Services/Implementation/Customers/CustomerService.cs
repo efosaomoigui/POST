@@ -17,6 +17,8 @@ using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
 using System.Net;
 using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -595,6 +597,53 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 var customer = await _individualCustomerService.GetByCode(customerCode);
                 return customer;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetCoporateMonthlyTransaction(DateFilterForDropOff filter)
+        {
+            try
+            {
+                var transactions = new List<InvoiceViewDTO>();
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                else if(filter != null && filter.StartDate != null && filter.EndDate == null)
+                {
+                    filter.EndDate = DateTime.Now;
+                }
+                var coporateTransactions = await _uow.Shipment.GetCoporateTransactions(filter);
+                if (coporateTransactions.Any())
+                {
+                    transactions = coporateTransactions.GroupBy(x => x.CustomerCode).Select(s => new InvoiceViewDTO
+                    {
+                        Waybill = s.FirstOrDefault().Waybill,
+                        DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
+                        DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
+                        DepartureServiceCentreName = s.FirstOrDefault().DepartureServiceCentreName,
+                        DestinationServiceCentreName = s.FirstOrDefault().DestinationServiceCentreName,
+                        Amount = s.Sum(x => x.Amount),
+                        DateCreated = s.FirstOrDefault().DateCreated,
+                        CompanyType = s.FirstOrDefault().CompanyType,
+                        CustomerCode = s.FirstOrDefault().CustomerCode,
+                        ApproximateItemsWeight = s.FirstOrDefault().ApproximateItemsWeight,
+                        CustomerType = s.FirstOrDefault().CustomerType,
+                        SenderName = s.FirstOrDefault().SenderName,
+                        CustomerId = s.FirstOrDefault().CustomerId,
+                        Email = s.FirstOrDefault().Email,
+                        PhoneNumber = s.FirstOrDefault().PhoneNumber,
+                    }).ToList();
+                }
+                return transactions;
             }
             catch (Exception)
             {

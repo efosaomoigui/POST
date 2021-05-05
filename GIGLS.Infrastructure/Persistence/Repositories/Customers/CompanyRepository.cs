@@ -526,5 +526,98 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
+
+        public async Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
+                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    StartDate = queryDate.Item1;
+                    EndDate = queryDate.Item2;
+                }
+
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>($"{procedureName} " +
+                 "@StartDate, @EndDate, @CountryId",
+                 param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+               
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get number of class subscriptions
+        public async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var date = DateTime.Now;
+
+                //declare parameters for the stored procedure
+                SqlParameter endDate = new SqlParameter("@EndDate", date);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    endDate,
+                    countryId
+                };
+
+
+                var summaryResult = await _context.Database.SqlQuery<int?>("ClassSubscription " +
+                 "@EndDate, @CountryId",
+                 param).FirstOrDefaultAsync();
+
+                int summary = 0;
+
+                if (summaryResult != null)
+                {
+                    summary = (int)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

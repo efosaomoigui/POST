@@ -17,6 +17,17 @@ using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.Report;
 using AutoMapper;
+using System.Net;
+using GIGLS.Infrastructure;
+using OfficeOpenXml;
+using System.Drawing;
+using System.Web.Hosting;
+using OfficeOpenXml.Style;
+using System.IO;
+using OfficeOpenXml.Drawing;
+using GIGLS.Core.Domain;
+using Newtonsoft.Json.Linq;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -25,12 +36,14 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private IServiceCentreService _serviceCenterService;
+        private INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -686,6 +699,64 @@ namespace GIGLS.Services.Implementation.Report
             }
 
             return await _uow.PreShipmentMobile.GetPreShipments(accountFilterCriteria);
+        }
+
+
+        public async Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            try
+            {
+                if (filter == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (String.IsNullOrEmpty(filter.CustomerCode))
+                {
+                    throw new GenericException("Customer code not provided", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                filter.UserId = await _userService.GetCurrentUserId();
+                var result = await _uow.Shipment.GetCoporateTransactionsByCode(filter);
+                if (result.InvoiceViewDTOs.Any())
+                {
+                  result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+
+            }
+
+        }
+
+        public async Task<bool> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            try
+            {
+                if (customerInvoiceDTO == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (!customerInvoiceDTO.InvoiceViewDTOs.Any())
+                {
+                    throw new GenericException("Invalid payload, No invoice detail", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var customerInvoice = JObject.FromObject(customerInvoiceDTO).ToObject<CustomerInvoice>();
+                var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
+                customerInvoice.UserID = await _userService.GetCurrentUserId();
+                customerInvoice.Waybills = string.Join(",", waybills);
+                _uow.CustomerInvoice.Add(customerInvoice);
+               await _uow.CompleteAsync();
+               return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
         }
     }
 }
