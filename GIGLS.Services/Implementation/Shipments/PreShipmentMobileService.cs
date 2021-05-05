@@ -3334,7 +3334,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             GrandTotal = shipmentPrice,
                             Earnings = shipmentPrice - price,
                             Demurrage = 0.00M,
-                            CountryId = preshipmentmobile.CountryId
+                            CountryId = preshipmentmobile.CountryId,
+                            DepartureCountryId = preshipmentmobile.CountryId,
+                            ShipmentPrice = shipmentPrice - price
                         };
                         await _financialReportService.AddReport(financialReport);
 
@@ -3390,7 +3392,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                 GrandTotal = preshipmentmobile.GrandTotal,
                                 Earnings = preshipmentmobile.GrandTotal - price,
                                 Demurrage = 0.00M,
-                                CountryId = preshipmentmobile.CountryId
+                                CountryId = preshipmentmobile.CountryId,
+                                DepartureCountryId = preshipmentmobile.CountryId,
+                                ShipmentPrice = preshipmentmobile.GrandTotal - price
                             };
                             await _financialReportService.AddReport(financialReport);
                             return;
