@@ -14,6 +14,7 @@ using GIGLS.Core.View;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -1006,7 +1007,6 @@ namespace GIGLS.Services.Implementation.Dashboard
             {
                 var threeMonthsAgo = DateTime.Now.AddMonths(-2);  //One (1) Months ago
                 startDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
             else
             {
@@ -1021,7 +1021,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
 
             //filter by country
-            var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
+            var TotalShipmentDeliveredQueryable =  _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
                 s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid
                 && s.DateCreated >= startDate
                 && s.DateCreated <= endDate);
@@ -1067,8 +1067,49 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
                     dashboardDTO.TotalDailyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
 
-                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
-                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
+                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
+                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
+
+                    //Get Revenue By Customer Type for Agility
+                    var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria);
+
+                    //Get Revenue By Customer Type for GIGGo
+                    var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria);
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual + giggoRevenue.Individual;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
+
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
+
+                    //Get revenue for Class and Basic Customers
+                    var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
+                    var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
+
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
+
+                    //Get number of class subscriptions
+                    var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
+                    dashboardDTO.ClassSubscriptionsCount = classSubscriptions;
+
+                    dashboardDTO.OutboundShipmentsReportDTO = new OutboundShipmentsReportDTO();
+
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.OutboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 0);
+
+                    dashboardDTO.InboundShipmentsReportDTO = new InboundShipmentsReportDTO();
+
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.InboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    dashboardDTO.InboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
+
+
                 }
                 _uow.Complete();
             }
@@ -1422,6 +1463,44 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             var result = await _uow.Shipment.GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, shipmentReportType);
             return result;
+        }
+
+        //Get  Earnings in Financial Reports By Customer Types
+        private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria);
+        }
+
+        //Get  Revenue by Basic or Class Customers 
+        private async Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetBasicOrClassCustomersIncome(procedureName, dashboardFilterCriteria);
+        }
+
+        //Get  Number of Class Subscriptions 
+        private async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetClassSubscriptions(dashboardFilterCriteria);
+        }
+
+        //Get Number of Outbound Or Inbound Shipments Created
+        private async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            var result = await _uow.IntlShipmentRequest.GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, queryType);
+            return result;
+        }
+
+        //Get Sum  of Outbound Or Inbound Shipments Weight
+        private async Task<double> GetSumOfWeightOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            var result = await _uow.IntlShipmentRequest.GetSumOfOutboundWeightOfShipmentCreated(dashboardFilterCriteria, queryType);
+            return result;
+        }
+
+        //Get Total Earnings in Financial Reports For Outbound Shipments
+        private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, queryType);
         }
 
     }

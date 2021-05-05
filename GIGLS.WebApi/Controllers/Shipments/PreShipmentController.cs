@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -235,6 +236,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
                 var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentPicked();
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getpreshipmentmobiletat")]
+        public async Task<IServiceResponse<List<PreShipmentMobileTATDTO>>> GetPreshipmentMobileTAT(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetPreshipmentMobileTAT(newFilterOptionsDto);
+                return new ServiceResponse<List<PreShipmentMobileTATDTO>>
                 {
                     Object = result
                 };

@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
@@ -42,6 +43,11 @@ namespace GIGLS.Core.DTO.Dashboard
         public int TotalDailyShipmentOrdered { get; set; }
         public double TotalMonthlyWeightOfShipmentOrdered { get; set; }
         public double TotalDailyWeightOfShipmentOrdered { get; set; }
+        public EarningsBreakdownByCustomerDTO EarningsBreakdownByCustomerDTO { get; set; }
+        public EarningsBreakdownOfEcommerceDTO EarningsBreakdownOfEcommerceDTO { get; set; }
+        public int ClassSubscriptionsCount { get; set; }
+        public OutboundShipmentsReportDTO OutboundShipmentsReportDTO   { get; set; }
+        public InboundShipmentsReportDTO InboundShipmentsReportDTO { get; set; }
     }
 
     public class CustomerBreakdownDTO

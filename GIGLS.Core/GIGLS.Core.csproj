@@ -185,6 +185,7 @@
     <Compile Include="Domain\GeneralLedger.cs" />
     <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
+    <Compile Include="Domain\CustomerInvoice.cs" />
     <Compile Include="Domain\MobileGroupCodeWaybillMapping.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
@@ -630,6 +631,7 @@
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
+    <Compile Include="IRepositories\Account\ICustomerInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IVATRepository.cs" />
     <Compile Include="IRepositories\Archived\IInvoiceArchiveRepository.cs" />
     <Compile Include="IRepositories\Archived\IShipmentArchiveRepository.cs" />

@@ -124,7 +124,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementmanifestCode);
-                var movementManifestList = movementmanifestMappingList.ToList();
+                var movementManifestList = movementmanifestMappingList.ToList(); 
 
                 var arrOfVals = movementManifestList.Select(s => s.ManifestNumber).ToArray();
                 var dispatch = await _uow.Dispatch.FindAsync(x => arrOfVals.Contains(x.ManifestNumber));
@@ -425,6 +425,57 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task UpdateMappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId) 
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var currentServiceCentre = await _userService.GetCurrentServiceCenter();
+
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
+
+                var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
+                //remove the manifest mapping as it was there before
+                var movementmanifestmappings = _uow.MovementManifestNumberMapping.GetAll().Where(s => s.MovementManifestCode == movementmanifestCode).ToList();
+                _uow.MovementManifestNumberMapping.RemoveRange(movementmanifestmappings);
+                await _uow.CompleteAsync();
+
+                //convert the list to HashSet to remove duplicate
+                var newManifestList = new HashSet<string>(manifestList);
+                var today = DateTime.Now;
+
+                foreach (var manifestCode in newManifestList)
+                {
+                    var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+
+                    if (manifest == null)
+                    {
+                        throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                    }
+
+                    //Update The Manifest 
+                    manifest.MovementStatus = MovementStatus.InProgress;
+
+                    //insert into movement manifest mapping table
+                    var resultMap = new MovementManifestNumberMapping()
+                    {
+                        MovementManifestCode = movementmanifestCode,
+                        ManifestNumber = manifestCode,
+                        UserId = userId
+                    };
+                    _uow.MovementManifestNumberMapping.Add(resultMap);
+                }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //map Manifest to Super Manifest
         public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId)
         {
@@ -634,7 +685,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var movementmanifestDTO = await _manifestService.GetMovementManifestByCode(manifest);
+                var movementmanifestDTO = await _manifestService.GetMovementManifestByCode(movementmanifestcode);
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
                 var movementManifestNumberMapping = _uow.MovementManifestNumberMapping.SingleOrDefault(x => x.ManifestNumber == manifest && x.MovementManifestCode == movementmanifestcode);
@@ -644,8 +695,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Complete();
                 }
                  
-                var movementManifestNumberMapping2 = _uow.MovementManifestNumberMapping.SingleOrDefault(x => x.MovementManifestCode == movementmanifestcode);
-                if (movementManifestNumberMapping2 != null)
+                var movementManifestNumberMapping2 = await _manifestService.GetMovementManifestByCode(movementmanifestcode);
+                if (movementManifestNumberMapping2 == null)
                 {
                     var movementmanifest = _uow.MovementManifestNumber.SingleOrDefault(s => s.MovementManifestCode == movementmanifestcode || 
                     s.MovementStatus == MovementStatus.InProgress || s.MovementStatus == MovementStatus.EnRoute);
@@ -654,7 +705,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Complete();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
