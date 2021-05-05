@@ -15,8 +15,6 @@ namespace GIGLS.Core.DTO.Account
         public int CountryId { get; set; }
         public string CurrencySymbol { get; set; }
         public double ConversionRate { get; set; }
-        public int DepartureCountryId { get; set; }
-        public decimal ShipmentPrice { get; set; }
     }
 
     public class FinancialBreakdownSummaryDTO 

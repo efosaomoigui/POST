@@ -15,9 +15,5 @@ namespace GIGLS.Core.Domain
         public decimal Demurrage { get; set; }
         public int CountryId { get; set; }
         public double ConversionRate { get; set; }
-        public int DepartureCountryId { get; set; }
-
-        //Amount of Shipment according to departure country
-        public decimal ShipmentPrice { get; set; }
     }
 }

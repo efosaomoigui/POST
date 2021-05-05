@@ -186,9 +186,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     GrandTotal = invoiceEntity.Amount,
                     Earnings = invoiceEntity.Amount,
                     Demurrage = 0.00M,
-                    CountryId = invoiceEntity.CountryId,
-                    DepartureCountryId = shipment.DepartureCountryId,
-                    ShipmentPrice = shipment.GrandTotal
+                    CountryId = invoiceEntity.CountryId
                 };
                 await _financialReportService.AddReport(financialReport);
             }
@@ -446,9 +444,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 GrandTotal = invoiceEntity.Amount,
                 Earnings = invoiceEntity.Amount,
                 Demurrage = 0.00M,
-                CountryId = invoiceEntity.CountryId,
-                DepartureCountryId = shipment.DepartureCountryId,
-                ShipmentPrice = shipment.GrandTotal
+                CountryId = invoiceEntity.CountryId
             };
             await _financialReportService.AddReport(financialReport);
 
