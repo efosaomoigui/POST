@@ -6399,11 +6399,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
 
-                if (newFilterOptionsDto.StartDate.Month != newFilterOptionsDto.EndDate.Month)
-                {
-                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
-                }
-                if (newFilterOptionsDto.StartDate.Year != newFilterOptionsDto.EndDate.Year)
+                var range = (int)(newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
+                if (range > 32)
                 {
                     throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 }
