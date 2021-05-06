@@ -2317,15 +2317,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("upgradetoecommerce")]
-        public async Task<IServiceResponse<CompanyDTO>> UpgradeToEcommerce(UpdateUserActiveCountry userActiveCountry)
+        [Route("updateuseractivecountry")]
+        public async Task<IServiceResponse<UserActiveCountryDTO>> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var company = await _portalService.UpgradeToEcommerce(newCompanyDTO);
-                return new ServiceResponse<CompanyDTO>
+                var item = await _portalService.UpdateUserActiveCountry(userActiveCountry);
+                return new ServiceResponse<UserActiveCountryDTO>
                 {
-                    Object = company
+                    Object = item
                 };
             });
         }

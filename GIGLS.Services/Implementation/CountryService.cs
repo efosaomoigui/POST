@@ -16,12 +16,10 @@ namespace GIGLS.Services.Implementation
 {
     public class CountryService : ICountryService
     {
-        private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IUnitOfWork _uow;
 
-        public CountryService(ICountryRouteZoneMapService countryRouteZoneMapService, IUnitOfWork uow)
+        public CountryService(IUnitOfWork uow)
         {
-            _countryRouteZoneMapService = countryRouteZoneMapService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -165,7 +163,7 @@ namespace GIGLS.Services.Implementation
                 user.UserActiveCountryId = userActiveCountry.NewCountryId;
                 user.CountryType = countryDTO.CountryCode;
             }
-            else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+            else if (user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Employee)
             {
                 var individual = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (individual == null)
@@ -186,13 +184,19 @@ namespace GIGLS.Services.Implementation
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (wallet != null)
                 {
-                    var countryRateConversion = await _countryRouteZoneMapService.GetZone(countryID, userActiveCountry.NewCountryId);
+                    var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
+                r.DepartureId == countryID &&
+                r.DestinationId == userActiveCountry.NewCountryId, "Zone,Destination,Departure");
 
-                    double amountToDebitDouble = (double)wallet.Balance * countryRateConversion.Rate;
+                if (countryRateConversion == null)
+                    throw new GenericException("The Mapping of Route to Zone does not exist");
 
-                    result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 2); 
-                }
+                double amountToDebitDouble = (double)wallet.Balance * countryRateConversion.Rate;
+
+                result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 2);
+                    wallet.Balance = result.WalletBalance;
             }
+        }
              _uow.Complete();
             return result;
         }
