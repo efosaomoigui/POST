@@ -206,6 +206,7 @@ namespace GIGLS.Core
         IInternationalShipmentWaybillRepository InternationalShipmentWaybill { get; set; }
         IRankHistoryRepository RankHistory { get; set; }
         IPriceCategoryRepository PriceCategory { get; set; }
+        ICaptainBonusByZoneMapingRepository CaptainBonusByZoneMaping { get; set; }
         ICustomerInvoiceRepository CustomerInvoice { get; set; }
 
         int Complete();

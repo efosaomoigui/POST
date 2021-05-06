@@ -183,11 +183,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
         {
             try
             {
-                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null);
+                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null).ToList();
 
                 //Note:: === Update movement manifest number field with MovementStatus = ProcessEnded(To be done!)
                 var dispatchDto = (from r in dispatchs
                                    join m in _context.MovementManifestNumber on r.MovementManifestNumber equals m.MovementManifestCode
+                                   join d in _context.DomesticRouteZoneMap on r.DepartureId equals d.DepartureId into dr from drz in dr.DefaultIfEmpty().Where(x => x.DepartureId == r.DepartureId && x.DestinationId == r.DestinationId)
+                                   join c in _context.CaptainBonusByZoneMaping on drz.ZoneId equals c.Zone into cb from cbz in cb.DefaultIfEmpty()
                                    select new MovementDispatchDTO
                                    {
                                        DispatchId = r.DispatchId,
@@ -204,7 +206,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                                        DateModified = r.DateModified,
                                        DepartureServiceCenterId = r.DepartureServiceCenterId,
                                        DestinationServiceCenterId = r.DestinationServiceCenterId,
-                                       IsSuperManifest = r.IsSuperManifest
+                                       IsSuperManifest = r.IsSuperManifest,
+                                       BonusAmount = cbz.BonusAmount 
                                    }).ToList();
 
                 return Task.FromResult(dispatchDto.ToList());
