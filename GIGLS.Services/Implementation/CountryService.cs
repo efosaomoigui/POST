@@ -140,6 +140,10 @@ namespace GIGLS.Services.Implementation
             {
                 throw new GenericException("user does not exist");
             }
+            if (userActiveCountry.NewCountryId == 0)
+            {
+                throw new GenericException("invalid country");
+            }
             if (userActiveCountry.NewCountryId == user.UserActiveCountryId)
             {
                 throw new GenericException("user new country cannot be same as the previous country");
