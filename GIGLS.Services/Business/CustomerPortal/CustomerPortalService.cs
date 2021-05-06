@@ -3261,7 +3261,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry)
         {
             userActiveCountry.UserID = await _userService.GetCurrentUserId();
-            return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(userActiveCountry);
+            return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
     }
