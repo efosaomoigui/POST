@@ -3257,6 +3257,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
         }
-      
+
+        public async Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry)
+        {
+            userActiveCountry.UserID = await _userService.GetCurrentUserId();
+            return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(userActiveCountry);
+        }
+
     }
 }

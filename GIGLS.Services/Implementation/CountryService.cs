@@ -8,15 +8,20 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain;
 using System.Linq;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Zone;
 
 namespace GIGLS.Services.Implementation
 {
     public class CountryService : ICountryService
     {
+        private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IUnitOfWork _uow;
 
-        public CountryService(IUnitOfWork uow)
+        public CountryService(ICountryRouteZoneMapService countryRouteZoneMapService, IUnitOfWork uow)
         {
+            _countryRouteZoneMapService = countryRouteZoneMapService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -126,6 +131,66 @@ namespace GIGLS.Services.Implementation
         {
             var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsInternationalShippingCountry == true);
             return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
+        }
+
+        public async Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry)
+        {
+            var user = await _uow.User.GetUserById(userActiveCountry.UserID);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            if (userActiveCountry.NewCountryId == user.UserActiveCountryId)
+            {
+                throw new GenericException("user new country cannot be same as the previous country");
+            }
+            var result = new UserActiveCountryDTO();
+            var countryDTO = await GetCountryById(userActiveCountry.NewCountryId);
+            var countryID = user.UserActiveCountryId;
+            result.HasWallet = false;
+            result.CountryDTO = countryDTO;
+            if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.Ecommerce)
+            {
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company == null)
+                {
+                    throw new GenericException("user does not exist as a Corporate or Ecommerce user");
+                }
+                company.UserActiveCountryId = userActiveCountry.NewCountryId;
+                result.HasWallet = true;
+                user.UserActiveCountryId = userActiveCountry.NewCountryId;
+                user.CountryType = countryDTO.CountryCode;
+            }
+            else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+            {
+                var individual = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (individual == null)
+                {
+                    throw new GenericException("user does not exist as an Individual user");
+                }
+                individual.UserActiveCountryId = userActiveCountry.NewCountryId;
+                result.HasWallet = true;
+                user.UserActiveCountryId = userActiveCountry.NewCountryId;
+                user.CountryType = countryDTO.CountryCode;
+            }
+            else
+            {
+                result = null;
+            }
+            if (result != null && result.HasWallet)
+            {
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (wallet != null)
+                {
+                    var countryRateConversion = await _countryRouteZoneMapService.GetZone(countryID, userActiveCountry.NewCountryId);
+
+                    double amountToDebitDouble = (double)wallet.Balance * countryRateConversion.Rate;
+
+                    result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 2); 
+                }
+            }
+             _uow.Complete();
+            return result;
         }
     }
 }

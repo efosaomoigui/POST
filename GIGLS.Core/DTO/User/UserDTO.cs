@@ -99,4 +99,18 @@ namespace GIGLS.Core.DTO.User
         public string IdentificationImage { get; set; }
         public string CountryType { get; set; }
     }
+
+    public class UpdateUserActiveCountryDTO
+    {
+        public int NewCountryId { get; set; }
+        public string UserID { get; set; }
+    }
+
+    public class UserActiveCountryDTO
+    {
+        public int NewCountryId { get; set; }
+        public CountryDTO CountryDTO { get; set; }
+        public decimal WalletBalance { get; set; }
+        public bool HasWallet { get; set; }
+    }
 }

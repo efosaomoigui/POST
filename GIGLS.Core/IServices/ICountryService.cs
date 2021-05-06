@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.User;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,5 +15,6 @@ namespace GIGLS.Core.IServices
         Task DeleteCountry(int countryId);
         Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries();
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
+        Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry);
     }
 }
