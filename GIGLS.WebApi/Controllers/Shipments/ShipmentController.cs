@@ -43,29 +43,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _shipmentContactService = shipmentContactService;
         }
 
-
-        //public Task<IEnumerable<StateDTO>> GetStatesAsync(int pageSize = 10, int page = 1)
-        //{
-        //    var states = Context.State.ToList();
-        //    var subresult = states.Skip(pageSize * (page - 1)).Take(pageSize);
-        //    var stateDto = Mapper.Map<IEnumerable<StateDTO>>(subresult);
-        //    return Task.FromResult(stateDto);
-        //}
-
-        //[HttpGet]
-        //[Route("all")]
-        //public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments()
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var shipments = await _service.GetShipments();
-        //        return new ServiceResponse<IEnumerable<ShipmentDTO>>
-        //        {
-        //            Object = shipments
-        //        };
-        //    });
-        //}
-
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
@@ -966,12 +943,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("getinternationalprice")]
-        public async Task<IServiceResponse<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        public async Task<IServiceResponse<List<TotalNetResult>>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _service.GetInternationalShipmentPrice(shipmentDTO);
-                return new ServiceResponse<TotalNetResult>
+                return new ServiceResponse<List<TotalNetResult>>
                 {
                     Object = shipment
                 };
