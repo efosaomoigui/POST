@@ -4460,8 +4460,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
         {
             var countryId = await _userService.GetUserActiveCountryId();
-
-            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
+            GlobalPropertyType internationalAdditionalPrice = GlobalPropertyType.InternationalAdditionalPrice;
+            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(internationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value);
             total.Amount = total.Amount + additionalAmount;
 
