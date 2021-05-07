@@ -650,7 +650,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 Currency = country.CurrencySymbol,
                 IntlMessage = new IntlMessageDTO()
                 {
-                    ShippingCost = shipmentDTO.GrandTotal.ToString(),
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDTO.GrandTotal.ToString()}",
                     DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDTO.DepartureServiceCentreId).Name,
                 },
                 To = customerObj.Email,

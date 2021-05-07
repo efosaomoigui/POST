@@ -537,8 +537,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
-                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    StartDate = DateTime.Now.AddMonths(-3);
                 }
                 else
                 {

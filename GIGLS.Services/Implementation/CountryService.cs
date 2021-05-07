@@ -29,6 +29,8 @@ namespace GIGLS.Services.Implementation
                 {
                     throw new GenericException("Country already Exist");
                 }
+
+                countryDto.CourierEnable = string.Join(",", countryDto.CourierList);
                 var newCountry = Mapper.Map<Country>(countryDto);
                 _uow.Country.Add(newCountry);
                 await _uow.CompleteAsync();
@@ -102,6 +104,12 @@ namespace GIGLS.Services.Implementation
                 {
                     throw new GenericException("Country information does not exist");
                 }
+
+                if (countryDto.CourierList.Any())
+                {
+                    countryDto.CourierEnable = string.Join(",", countryDto.CourierList);
+                }
+
                 country.CountryName = countryDto.CountryName;
                 country.CountryCode = countryDto.CountryCode;
                 country.CurrencySymbol = countryDto.CurrencySymbol;
@@ -114,6 +122,7 @@ namespace GIGLS.Services.Implementation
                 country.TermAndConditionAmount = countryDto.TermAndConditionAmount;
                 country.TermAndConditionCountry = countryDto.TermAndConditionCountry;
                 country.IsInternationalShippingCountry = countryDto.IsInternationalShippingCountry;
+                country.CourierEnable = countryDto.CourierEnable;
                 _uow.Complete();
             }
             catch (Exception)

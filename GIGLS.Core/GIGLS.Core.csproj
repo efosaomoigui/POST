@@ -151,6 +151,7 @@
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
     <Compile Include="Domain\BaseDomain.cs" />
+    <Compile Include="Domain\CaptainBonusByZoneMaping.cs" />
     <Compile Include="Domain\Category.cs" />
     <Compile Include="Domain\ClientNode.cs" />
     <Compile Include="Domain\Company.cs" />
@@ -325,6 +326,7 @@
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\BaseSearchDto.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
+    <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
@@ -509,6 +511,16 @@
     <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\UPS\LabelDescription.cs" />
+    <Compile Include="DTO\UPS\LabelImageFormat.cs" />
+    <Compile Include="DTO\UPS\LabelSpecification.cs" />
+    <Compile Include="DTO\UPS\UPSAddress.cs" />
+    <Compile Include="DTO\UPS\UPSPackage.cs" />
+    <Compile Include="DTO\UPS\UPSPackaging.cs" />
+    <Compile Include="DTO\UPS\UPSPhone.cs" />
+    <Compile Include="DTO\UPS\UPSSecurity.cs" />
+    <Compile Include="DTO\UPS\UPSShipmentRequest.cs" />
+    <Compile Include="DTO\UPS\UPSShipmentResponsePayload.cs" />
     <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
@@ -548,6 +560,7 @@
     <Compile Include="DTO\Zone\ZoneDTO.cs" />
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
+    <Compile Include="Enums\CompanyMap.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
@@ -661,6 +674,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
@@ -790,6 +804,7 @@
     <Compile Include="IServices\BankSettlement\IBankService.cs" />
     <Compile Include="IServices\BankSettlement\ICODSettlementSheetService.cs" />
     <Compile Include="IServices\Business\IGIGGoPricingService.cs" />
+    <Compile Include="IServices\Business\IInternationalPriceService.cs" />
     <Compile Include="IServices\Business\IPaymentService.cs" />
     <Compile Include="IServices\Business\IPricingService.cs" />
     <Compile Include="IServices\Business\IScanService.cs" />
@@ -820,6 +835,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />
@@ -904,6 +920,7 @@
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
     <Compile Include="IServices\TickectMan\ITickectManService.cs" />
+    <Compile Include="IServices\UPS\IUPSService.cs" />
     <Compile Include="IServices\User\IRankHistoryService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
     <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />

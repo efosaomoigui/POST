@@ -5226,12 +5226,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 currentUser.PictureUrl = user.PictureUrl;
                 await _userService.UpdateUser(currentUser.Id, currentUser);
 
-                string userChannelType = user.UserChannelType.ToString();
+                string userChannelType = currentUser.UserChannelType.ToString();
                 user.UserChannelCode = currentUser.UserChannelCode;
 
                 if (userChannelType == UserChannelType.Partner.ToString()
                     || userChannelType == UserChannelType.IndividualCustomer.ToString()
-                    || userChannelType == UserChannelType.Ecommerce.ToString())
+                    || userChannelType == UserChannelType.Ecommerce.ToString() || userChannelType == UserChannelType.Corporate.ToString())
                 {
                     await UpdatePartner(user);
                     await UpdateCustomer(user);

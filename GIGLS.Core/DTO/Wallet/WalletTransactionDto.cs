@@ -23,6 +23,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Description { get; set; }
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
+        public string Manifest { get; set; }
         public string ClientNodeId { get; set; }
         public PaymentType PaymentType { get; set; }
         public string PaymentTypeReference { get; set; }

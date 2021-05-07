@@ -322,6 +322,7 @@
     <Compile Include="Controllers\Business\PricingController.cs" />
     <Compile Include="Controllers\Business\ScanController.cs" />
     <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
+    <Compile Include="Controllers\CaptainBonusByZoneMapingController.cs" />
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
