@@ -1727,7 +1727,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 Currency = country.CurrencySymbol,
                 IntlMessage = new IntlMessageDTO()
                 {
-                    ShippingCost = shipmentDto.GrandTotal.ToString(),
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}",
                     DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
                     PaymentLink = paymentLink,
                     DeliveryAddressOrCenterName = delivery,
