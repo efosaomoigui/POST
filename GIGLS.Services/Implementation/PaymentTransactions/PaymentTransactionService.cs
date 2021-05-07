@@ -24,6 +24,8 @@ using System.Net;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -36,10 +38,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IFinancialReportService _financialReportService;
+        private readonly INodeService _nodeService;
+
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INodeService nodeService)
         {
             _uow = uow;
             _userService = userService;
@@ -48,6 +52,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _messageSenderService = messageSenderService;
             _financialReportService = financialReportService;
+            _nodeService = nodeService;
+
             MapperConfig.Initialize();
         }
 
@@ -634,5 +640,54 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);
         }
+
+
+        public async Task<bool> ProcessPaymentTransactionGIGGO(PaymentTransactionDTO paymentTransaction)
+        {
+            var result = false;
+           
+            //check if waybill is from BOT
+            var preshipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(paymentTransaction.Waybill);
+            if (preshipment != null)
+            {
+                //CHECK IF IS BOT USER
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == preshipment.CustomerCode);
+                if (customer != null && customer.TransactionType == WalletTransactionType.BOT)
+                {
+                    var nodePayload = new CreateShipmentNodeDTO()
+                    {
+                        waybillNumber = preshipment.Waybill,
+                        customerId = preshipment.CustomerCode,
+                        locality = preshipment.SenderLocality,
+                        receiverAddress = preshipment.ReceiverAddress,
+                        vehicleType = preshipment.VehicleType,
+                        value = preshipment.Value,
+                        zone = preshipment.ZoneMapping,
+                        senderAddress = preshipment.SenderAddress,
+                        receiverLocation = new NodeLocationDTO()
+                        {
+                            lng = preshipment.ReceiverLng,
+                            lat = preshipment.ReceiverLat
+                        },
+                        senderLocation = new NodeLocationDTO()
+                        {
+                            lng = preshipment.SenderLng,
+                            lat = preshipment.SenderLat
+                        }
+                    };
+                    await _nodeService.CreateShipment(nodePayload);
+                    var shipmentToUpdate = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == paymentTransaction.Waybill);
+                    if (shipmentToUpdate != null)
+                    {
+                        //Update shipment to shipment created
+                        shipmentToUpdate.shipmentstatus = "Shipment created";
+                    }
+                }
+                await _uow.CompleteAsync();
+            }
+            result = true;
+            return result;
+        }
+
     }
 }
