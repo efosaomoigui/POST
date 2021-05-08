@@ -59,30 +59,33 @@ namespace GIGLS.WebApi.Providers
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
-                if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider"  || user.SystemUserRole != "Captain")
+                if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
-                    //Global Property PasswordExpireDaysCount
-                    var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
-                    if (expiredDayCount == null)
+                    if (user.SystemUserRole != "Dispatch Rider" || user.SystemUserRole != "Captain")
                     {
-                        context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
-                        return;
-                    }
-                    isInternational = user.IsInternational;
+                        //Global Property PasswordExpireDaysCount
+                        var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
+                        if (expiredDayCount == null)
+                        {
+                            context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
+                            return;
+                        }
+                        isInternational = user.IsInternational;
 
-                    int expiredDays = Convert.ToInt32(expiredDayCount.Value);
+                        int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
-                    //check for password expiry
-                    var LastUpdatePasswordDate = user.PasswordExpireDate;
-                    DateTime TodayDate = DateTime.Now.Date;
-                    var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
+                        //check for password expiry
+                        var LastUpdatePasswordDate = user.PasswordExpireDate;
+                        DateTime TodayDate = DateTime.Now.Date;
+                        var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
 
-                    if (DayDifferent >= expiredDays)
-                    {
-                        //Redirect to user reset page
-                        context.SetError("password_expired", "The user account has expired.");
-                        context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
-                        return;
+                        if (DayDifferent >= expiredDays)
+                        {
+                            //Redirect to user reset page
+                            context.SetError("password_expired", "The user account has expired.");
+                            context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
+                            return;
+                        } 
                     }
                 }
 
