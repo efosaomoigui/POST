@@ -61,7 +61,7 @@ namespace GIGLS.WebApi.Providers
 
                 if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
-                    if (user.SystemUserRole != "Dispatch Rider" || user.SystemUserRole != "Captain")
+                    if (user.SystemUserRole != "Dispatch Rider" && user.SystemUserRole != "Captain")
                     {
                         //Global Property PasswordExpireDaysCount
                         var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
