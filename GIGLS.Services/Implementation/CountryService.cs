@@ -191,7 +191,7 @@ namespace GIGLS.Services.Implementation
                 if (countryRateConversion == null)
                     throw new GenericException("The Mapping of Route to Zone does not exist");
 
-                double amountToDebitDouble = (double)wallet.Balance * countryRateConversion.Rate;
+                double amountToDebitDouble = (double)wallet.Balance / countryRateConversion.Rate;
 
                 result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 2);
                     wallet.Balance = result.WalletBalance;
