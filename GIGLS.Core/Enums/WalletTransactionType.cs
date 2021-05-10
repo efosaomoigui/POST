@@ -3,6 +3,7 @@
     public enum WalletTransactionType
     {
         Normal,
-        ClassSubscription
+        ClassSubscription,
+        BOT
     }
 }

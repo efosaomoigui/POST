@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.DHL.Enum;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -33,7 +35,11 @@ namespace GIGLS.Services.Business.DHL
 
         private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentRequestResponse rateRequestResponse)
         {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
+            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
+            {
+                OutBoundChannel = CompanyMap.DHL,
+                ResponseResult = rateRequestResponse.ResponseResult
+            };
 
             if (rateRequestResponse.ShipmentResponse.Notification.Any())
             {
@@ -48,7 +54,6 @@ namespace GIGLS.Services.Business.DHL
                         {
                             string[] itemIds = rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Select(x => x.TrackingNumber).ToArray();
                             output.PackageResult = string.Join(",", itemIds);
-                            //[{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
                         }
 
                         //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
@@ -109,6 +114,7 @@ namespace GIGLS.Services.Business.DHL
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
                 string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
                 string url = baseUrl + path;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 using (var client = new HttpClient())
                 {
@@ -122,6 +128,7 @@ namespace GIGLS.Services.Business.DHL
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<ShipmentRequestResponse>(responseResult);
+                    result.ResponseResult = responseResult;
                 }
 
                 return result;
@@ -261,14 +268,17 @@ namespace GIGLS.Services.Business.DHL
 
         private Details GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
+            string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
+            string phoneNumber = ConfigurationManager.AppSettings["UPSGIGPhoneNumber"];
+
             Details shipper = new Details
             {
                 Contact = new Contact
                 {
                     PersonName = shipmentDTO.CustomerDetails.CustomerName,
                     CompanyName = "GIG LOGISTICS",
-                    PhoneNumber = "2348035324958",
-                    EmailAddress = "azeez.oladejo@giglogistics.com"
+                    PhoneNumber = phoneNumber,
+                    EmailAddress = email
                 },
                 Address = new AddressPayload
                 {

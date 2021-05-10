@@ -14,6 +14,11 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Infrastructure;
+using System.Net;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -24,15 +29,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IUnitOfWork _uow;
         private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
         private readonly IScanService _scanService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
-                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService)
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
             _manifestGroupWaybillNumberMappingService = manifestGroupWaybillNumberMappingService;
             _scanService = scanService;
             _uow = uow;
+            _waybillPaymentLogService = waybillPaymentLogService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -61,7 +68,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result.IsBalanceSufficient,
                 result.Zone,
                 result.WaybillImage,
-                result.WaybillImageFormat
+                result.WaybillImageFormat,
+                result.PaymentUrl
             };
         }
 
@@ -132,6 +140,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _scanService.ItemShippedFromUKScan(manifestCode);
             return true;
         }
+
 
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)

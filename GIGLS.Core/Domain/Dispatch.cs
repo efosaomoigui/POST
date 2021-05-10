@@ -76,6 +76,6 @@ namespace GIGLS.Core.Domain
         public int DestinationServiceCenterId { get; set; }
 
         public bool IsSuperManifest { get; set; }
-
+        public decimal BonusAmount { get; set; }
     }
 }

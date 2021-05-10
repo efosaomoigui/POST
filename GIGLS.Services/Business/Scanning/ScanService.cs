@@ -151,7 +151,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         //To handle the DHL International from Sending message at arrive final destination
                         TrackingType trackingType = TrackingType.InBound;
-                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                        if (shipment.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
                         {
                             trackingType = TrackingType.OutBound;
                         }
@@ -242,9 +242,12 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             //To handle the DHL International from Sending message at arrive final destination
                             TrackingType trackingType = TrackingType.InBound;
-                            if (groupShipment.InternationalShipmentType == InternationalShipmentType.DHL)
+                            if (shipment != null)
                             {
-                                trackingType = TrackingType.OutBound;
+                                if (groupShipment.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
+                                {
+                                    trackingType = TrackingType.OutBound;
+                                } 
                             }
 
                             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
@@ -336,9 +339,12 @@ namespace GIGLS.Services.Business.Scanning
                                         {
                                             var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
 
-                                            if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL)
+                                            if (shipment != null)
                                             {
-                                                internationalShipmentList.Add(shipmentItem.Waybill);
+                                                if (shipmentItem.InternationalShipmentType == InternationalShipmentType.DHL || shipment.InternationalShipmentType == InternationalShipmentType.UPS)
+                                                {
+                                                    internationalShipmentList.Add(shipmentItem.Waybill);
+                                                } 
                                             }
 
                                             // For Shipment Check if user has rights to this action
