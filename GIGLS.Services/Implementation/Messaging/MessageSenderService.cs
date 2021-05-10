@@ -1714,6 +1714,65 @@ namespace GIGLS.Services.Implementation.Messaging
 
         }
 
+        //Handle General Emails for Payment Links
+        public async Task SendGeneralMailPayment(ShipmentDTO shipmentDto, List<string> generalPaymentLinks)
+        {
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            var delivery = "";
+
+            var link = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PaymentLinkCustomerPortal, 1);
+            var paymentLink = $"{link.Value}{shipmentDto.Waybill}";
+
+            if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+            {
+                delivery = shipmentDto.ReceiverAddress;
+            }
+            else if (shipmentDto.PickupOptions == PickupOptions.SERVICECENTER)
+            {
+                var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId);
+                delivery = $"GIGL {destination.FormattedServiceCentreName} experience center ";
+            }
+
+            var messageDTO = new MessageDTO()
+            {
+                Waybill = shipmentDto.Waybill,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}",
+                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    PaymentLink = paymentLink,
+                    DeliveryAddressOrCenterName = delivery,
+                    GeneralPaymentLinkI = generalPaymentLinks[0],
+                    GeneralPaymentLinkII = generalPaymentLinks[1]
+                },
+                To = shipmentDto.ReceiverEmail,
+                ToEmail = shipmentDto.ReceiverEmail,
+                Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
+                MessageTemplate = "GeneralPaymentMail"
+            };
+
+            //For Agility The discount for Class has already been removed from Grand Total before writing to Shipment Table
+
+            await SendOverseasMails(messageDTO);
+
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    await SendOverseasMails(messageDTO);
+                }
+            }
+
+        }
+
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{
