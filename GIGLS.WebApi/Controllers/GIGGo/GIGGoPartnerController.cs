@@ -147,7 +147,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                                 bankName = partner.BankName;
                                 accountName = partner.AccountName;
                                 accountNumber = partner.AccountNumber;
-                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString() || partnerType == PartnerType.DeliveryPartner.ToString())
+                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString() || user.SystemUserRole == "Captain")
                                 {
                                     user.IsVerified = true;
                                     await _portalService.AddWallet(new WalletDTO
