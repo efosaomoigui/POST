@@ -7,6 +7,7 @@
         public decimal IntlShipments { get; set; }
         public decimal GrandTotal { get; set; }
         public decimal Demurrage { get; set; }
+        public decimal Corporate { get; set; }
     }
 
     public class EarningsBreakdownByCustomerDTO

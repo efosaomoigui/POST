@@ -20,5 +20,7 @@ namespace GIGLS.Core.IRepositories.Account
         Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType);
         Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType);
         Task<List<OutboundFinancialReportDTO>> GetFinancialReportOfOutboundShipmentsBreakdown(AccountFilterCriteria accountFilterCriteria, int queryType);
+        Task<decimal> GetInternationalTotalEarnings(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<decimal> GetCorporateIncomeBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria);
     }
 }
