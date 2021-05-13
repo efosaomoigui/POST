@@ -6432,13 +6432,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 
-                var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
-                var dateFor72Hours = newFilterOptionsDto.StartDate.AddHours(72);
+                var dateFor24Hours = DateTime.Now;
+                var dateFor72Hours = DateTime.Now;
 
                 if (!String.IsNullOrEmpty(newFilterOptionsDto.FilterType) && newFilterOptionsDto.FilterType == "OverdueTATIntrastate")
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                    preshipmentmobile = preshipmentmobile.Where(x => x.DateCreated > dateFor24Hours).ToList();
+                    preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24 ).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6449,7 +6449,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.DateCreated > dateFor72Hours && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6676,7 +6677,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
                 
                 preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                preshipmentmobile = preshipmentmobile.Where(x => x.DateModified > dateFor24Hours).ToList();
+                preshipmentmobile = preshipmentmobile.Where(x => (int)(x.DateModified - x.DateCreated).TotalHours > 24).ToList();
                 if (preshipmentmobile.Any())
                 {
                     var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
