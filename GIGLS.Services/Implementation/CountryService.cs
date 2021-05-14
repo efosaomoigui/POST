@@ -177,7 +177,7 @@ namespace GIGLS.Services.Implementation
             }
             else
             {
-                result = null;
+                throw new GenericException("user not eligible to switch country");
             }
             if (result != null && result.HasWallet)
             {
