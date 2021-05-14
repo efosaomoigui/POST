@@ -1404,6 +1404,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 preShipment.CountryId = country.CountryId;
 
+                var currentUserId = await _userService.GetCurrentUserId();
+                preShipment.UserId = currentUserId;
+                var user = await _userService.GetUserById(currentUserId);
+                preShipment.CustomerCode = user.UserChannelCode;
+
                 var basePriceBike = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikeBasePrice, preShipment.CountryId);
                 var basePriceBikeValue = Convert.ToDecimal(basePriceBike.Value);
 
