@@ -153,6 +153,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool IsClassShipment { get; set; }
 
+        [MaxLength(500)]
+        public string FileNameUrl { get; set; }
+
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable

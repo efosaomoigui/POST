@@ -4724,6 +4724,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 //QR Code
                 await GenerateDeliveryNumber(shipmentDTO.Waybill);
 
+                // Saving to azure blob
+                byte[] sPDFDecoded = Convert.FromBase64String(dhlShipment.PdfFormat);
+                var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
+                var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
+
+                var shipmentByWaybill = _uow.Shipment.Find(x => x.Waybill == shipmentDTO.Waybill).FirstOrDefault();
+                if(shipmentByWaybill != null)
+                {
+                    shipmentByWaybill.FileNameUrl = blobname;
+                }
+                //await _uow.Shipment.
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 

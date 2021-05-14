@@ -1209,6 +1209,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            PaymentMethod = r.PaymentMethod,
                                            vatvalue_display = r.vatvalue_display,
                                            ReprintCounterStatus = r.ReprintCounterStatus,
+                                           FileNameUrl = r.FileNameUrl,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
