@@ -1005,7 +1005,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                startDate = DateTime.Now.AddMonths(-3);
+                startDate = DateTime.Now.AddMonths(-2);
             }
             else
             {

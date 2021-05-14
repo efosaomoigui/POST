@@ -2206,7 +2206,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    beginningDate = DateTime.Now.AddMonths(-3);
+                    beginningDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -2259,7 +2259,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    beginningDate = DateTime.Now.AddMonths(-3);
+                    beginningDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {

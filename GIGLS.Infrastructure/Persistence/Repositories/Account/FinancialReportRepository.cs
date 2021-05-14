@@ -132,7 +132,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -183,7 +183,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -234,7 +234,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -346,7 +346,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     //If No Date Supplied
                     if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                     {
-                        StartDate = DateTime.Now.AddMonths(-3);
+                        StartDate = DateTime.Now.AddMonths(-2);
                     }
                     else
                     {
@@ -401,7 +401,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
