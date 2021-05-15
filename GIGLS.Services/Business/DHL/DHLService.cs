@@ -393,6 +393,8 @@ namespace GIGLS.Services.Business.DHL
         {
             var rateRequest = new RatePayload();
 
+            var next2Day = DateTime.UtcNow.AddDays(2);
+            rateRequest.PlannedShippingDateAndTime = next2Day.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);

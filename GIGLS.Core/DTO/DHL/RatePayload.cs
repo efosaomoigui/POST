@@ -23,7 +23,7 @@ namespace GIGLS.Core.DTO.DHL
         public string LocalProductCode { get; set; } = "P";
         public List<ValueAddedService> ValueAddedServices { get; set; }
         public string PayerCountryCode { get; set; } = "NG";
-        public DateTime PlannedShippingDateAndTime { get; set; } = DateTime.UtcNow.Date;
+        public string PlannedShippingDateAndTime { get; set; }
         public string UnitOfMeasurement { get; set; } = "metric";
         public bool IsCustomsDeclarable { get; set; } = true;
         public List<MonetaryAmount> MonetaryAmount { get; set; }
