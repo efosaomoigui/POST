@@ -210,6 +210,8 @@ namespace GIGLS.Services.Implementation.Report
         //Get Earnings Breakdown
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
+            string currencySymbol = null;
+
             if (dashboardFilter.ActiveCountryId == null)
             {
                 CountryDTO userActiveCountry = null;
@@ -235,10 +237,21 @@ namespace GIGLS.Services.Implementation.Report
                         }
                     }
                 }
+
                 dashboardFilter.ActiveCountryId = userActiveCountry.CountryId;
+                currencySymbol = userActiveCountry.CurrencySymbol;
+            }
+            else
+            {
+                var userActiveCountryFromEntity = await _countryService.GetCountryById((int)dashboardFilter.ActiveCountryId);
+                if (userActiveCountryFromEntity.CurrencySymbol != null)
+                {
+                    currencySymbol = userActiveCountryFromEntity.CurrencySymbol;
+                }
             }
 
             var earnings = await _uow.FinancialReport.GetEarningsBreakdown(dashboardFilter);
+            earnings.CurrencySymbol = currencySymbol;
 
             return earnings;
 
