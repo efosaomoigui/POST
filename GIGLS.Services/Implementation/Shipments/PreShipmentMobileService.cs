@@ -522,6 +522,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
 
+                //get departure country
+                var deptCountry = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+                if (deptCountry != null)
+                {
+                    if (user.UserActiveCountryId != deptCountry.CountryId)
+                    {
+                        //get actual amount to debit
+                        var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
+                        r.DepartureId == deptCountry.CountryId &&
+                        r.DestinationId == user.UserActiveCountryId, "Zone,Destination,Departure");
+                        if (countryRateConversion == null)
+                            throw new GenericException("The Mapping of Route to Zone does not exist");
+
+                        double amountToDebitDouble = (double)wallet.Balance / countryRateConversion.Rate;
+                        shipmentGrandTotal = (decimal)Math.Round(amountToDebitDouble, 2);
+                    }
+                }
+
                 if (wallet.Balance >= shipmentGrandTotal)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
@@ -568,6 +586,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
+
 
                     //process payment
                     var transaction = new WalletTransactionDTO
