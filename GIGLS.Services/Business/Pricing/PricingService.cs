@@ -514,8 +514,16 @@ namespace GIGLS.Services.Business.Pricing
             }
             else
             {
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
-            }
+                //check if the country is ghana, if country is ghana make RegularEcommerceType = Ecommerce else Regular
+                var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+                if (departureCountry.CountryId == 76)
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+                }
+                else
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
+                }            }
 
             return PackagePrice + deliveryOptionPrice;
         }
