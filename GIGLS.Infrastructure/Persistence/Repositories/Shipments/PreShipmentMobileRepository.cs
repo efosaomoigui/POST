@@ -2,6 +2,7 @@
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
@@ -175,13 +176,25 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         }
 
         //Get Shipments that have not been paid for by user
-        public async Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
+        public async Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode, string userChannelType)
         {
             var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
-            var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
-            var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
-            var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
 
+            Rank rank = Rank.Basic;
+            int customerCountryId = 0;
+            decimal discount = 1;
+
+            if (UserChannelType.Ecommerce.ToString() == userChannelType || UserChannelType.Corporate.ToString() == userChannelType)
+            {
+                var customer = _context.Company.Where(x => x.CustomerCode.ToLower() == userChannelCode.ToLower()).FirstOrDefault();
+                if (customer != null)
+                {
+                    customerCountryId = customer.UserActiveCountryId;
+                    rank = customer.Rank;
+                    discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
+                }
+            }
+          
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
@@ -192,7 +205,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Waybill = s.Waybill,
                               Departure = dept.Name,
                               Destination = dest.Name,
-                              Amount = i.Amount,
+                              Amount = s.IsInternational == true && s.CompanyType == UserChannelType.Ecommerce.ToString() ? (i.Amount * discount) : i.Amount,
                               Country = _context.Country.Where(c => c.CountryId == i.CountryId).Select(x => new CountryDTO
                               {
                                   CurrencySymbol = x.CurrencySymbol,
@@ -212,6 +225,31 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                result = await GetEquivalentAmountOfActiveCurrencies(result);
             }
             return result.OrderByDescending(x => x.DateCreated).ToList();
+        }
+
+        private async  Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
+        {
+            decimal percentage = 0.00M;
+
+            if (rank == Rank.Class)
+            {
+                var globalProperty =  _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+            else
+            {
+                var globalProperty = _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+
+            decimal discount = ((100M - percentage) / 100M);
+            return discount;
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)
