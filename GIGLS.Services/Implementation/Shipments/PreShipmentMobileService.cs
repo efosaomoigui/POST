@@ -520,6 +520,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                decimal actualAmountToDebit = shipmentGrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
 
                 //get departure country
@@ -535,12 +536,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (countryRateConversion == null)
                             throw new GenericException("The Mapping of Route to Zone does not exist");
 
-                        double amountToDebitDouble = (double)wallet.Balance / countryRateConversion.Rate;
-                        shipmentGrandTotal = (decimal)Math.Round(amountToDebitDouble, 2);
+                        double amountToDebitDouble =  countryRateConversion.Rate * (double)shipmentGrandTotal;
+                        actualAmountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
                     }
                 }
 
-                if (wallet.Balance >= shipmentGrandTotal)
+                if (wallet.Balance >= actualAmountToDebit)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
 
