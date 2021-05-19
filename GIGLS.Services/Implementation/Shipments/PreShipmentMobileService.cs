@@ -615,13 +615,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
 
                     //double check in case something is wrong with the server before complete the transaction
-                    if (updatedwallet.Balance < shipmentGrandTotal)
+                    if (updatedwallet.Balance < actualAmountToDebit)
                     {
                         preShipmentDTO.IsBalanceSufficient = false;
                         return preShipmentDTO;
                     }
 
-                    decimal price = updatedwallet.Balance - shipmentGrandTotal;
+                    decimal price = updatedwallet.Balance - actualAmountToDebit;
                     updatedwallet.Balance = price;
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
