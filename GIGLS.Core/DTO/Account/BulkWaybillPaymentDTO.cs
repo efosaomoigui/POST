@@ -14,4 +14,11 @@ namespace GIGLS.Core.DTO.Account
         public string PaymentType { get; set; }
         public string RefNo { get; set; }
     }
+
+    public class GeneralPaymentDTO 
+    {
+        public string Waybill { get; set; }
+        public string Email { get; set; }
+    }
+
 }

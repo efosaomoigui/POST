@@ -2210,7 +2210,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get startDate and endDate
                 var queryDate = dateFilterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
-                var endDate = queryDate.Item2; 
+                var endDate = queryDate.Item2;
 
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && x.MovementStatus == MovementStatus.NoMovement);
@@ -2438,7 +2438,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 // get groupedWaybills that have not been mapped to a manifest for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.NoMovement && x.IsDispatched == true && x.IsReceived ==false);
+                var ManifestNumbers = _uow.Manifest.GetAllAsQueryable().Where(x => x.MovementStatus == MovementStatus.NoMovement && x.IsDispatched == true && x.IsReceived == false);
 
                 if (serviceCenters.Length > 0)
                 {
@@ -3384,7 +3384,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
 
-                if (invoice.PaymentStatus == PaymentStatus.Paid || invoice.PaymentStatus ==PaymentStatus.Pending || invoice.PaymentStatus ==PaymentStatus.Failed)
+                if (invoice.PaymentStatus == PaymentStatus.Paid || invoice.PaymentStatus == PaymentStatus.Pending || invoice.PaymentStatus == PaymentStatus.Failed)
                 {
                     //2. Reverse accounting entries
 
@@ -4468,7 +4468,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
             total.VAT = total.Amount * vat;
-
             total.GrandTotal = total.Amount + total.VAT;
 
             //Get Insurance
@@ -4478,7 +4477,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 total.GrandTotal = total.GrandTotal + insurance;
                 total.Insurance = insurance;
             }
-
             return total;
         }
 
@@ -4649,7 +4647,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
         private async Task<ShipmentDTO> BindShipmentPayload(InternationalShipmentDTO shipmentDTO)
         {
@@ -4995,6 +4992,58 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.Complete();
             }
             return shipmentDTO;
+        }
+
+        public async Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO)
+        {
+
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+
+            if (invoice == null)
+            {
+                throw new GenericException($"Shipment with waybill: {paymentDTO.Waybill}  invoice does not exist!");
+            }
+
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+
+            if (shipment == null)
+            {
+                throw new GenericException($"Shipment with waybill: {paymentDTO.Waybill} does not exist!");
+            }
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                throw new GenericException($"Shipment with waybill: {paymentDTO.Waybill} has already been paid for!");
+            }
+
+            if (string.IsNullOrWhiteSpace(paymentDTO.Email))
+            {
+                throw new GenericException($"Email field is empty!");
+            }
+
+            //Get the two possible payment links for Waybill(Nigeria  and US)
+            var waybillPayment = new WaybillPaymentLogDTO()
+            {
+                Waybill = invoice.Waybill,
+                OnlinePaymentType = OnlinePaymentType.Paystack,
+                Email = paymentDTO.Email
+            };
+
+            int[] listOfCountryForPayment = { 1, 207 };
+            List<string> paymentLinks = new List<string>();
+            foreach (var country in listOfCountryForPayment)
+            {
+                waybillPayment.PaymentCountryId = country;
+                waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
+                var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
+                paymentLinks.Add(response.data.Authorization_url);
+            }
+
+            var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+            shipmentDTO.ReceiverEmail = paymentDTO.Email;
+
+            await _messageSenderService.SendGeneralMailPayment(shipmentDTO, paymentLinks);
+
+            return true;
         }
 
     }

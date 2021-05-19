@@ -156,6 +156,9 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(500)]
         public string FileNameUrl { get; set; }
 
+       // [MaxLength(100)]
+      //  public string ManufacturerCountry { get; set; }
+
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable

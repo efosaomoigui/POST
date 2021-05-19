@@ -1,17 +1,12 @@
 ﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.DHL.Enum;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Shipments;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -25,16 +20,9 @@ namespace GIGLS.Services.Business.DHL
         public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             var createShipment = await CreateDHLShipment(shipmentDTO);
-            var result = FormatShipmentCreationReponseV2(createShipment);
+            var result = FormatShipmentCreationReponse(createShipment);
             return result;
         }
-
-        //public async Task<ShipmentReference> CreateInternationalShipmentV2(InternationalShipmentDTO shipmentDTO)
-        //{
-        //    var createShipment = await CreateDHLShipment(shipmentDTO);
-        //    var result = FormatShipmentCreationReponseV2(createShipment);
-        //    return result;
-        //}
 
         public async Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
         {
@@ -43,50 +31,7 @@ namespace GIGLS.Services.Business.DHL
             return formattedPrice;
         }
 
-        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentRequestResponse rateRequestResponse)
-        {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO
-            {
-                OutBoundChannel = CompanyMap.DHL,
-                ResponseResult = rateRequestResponse.ResponseResult
-            };
-
-            if (rateRequestResponse.ShipmentResponse.Notification.Any())
-            {
-                if (rateRequestResponse.ShipmentResponse.Notification.Any())
-                {
-                    if (rateRequestResponse.ShipmentResponse.Notification[0].Code == "0")
-                    {
-                        output.ShipmentIdentificationNumber = rateRequestResponse.ShipmentResponse.ShipmentIdentificationNumber;
-                        output.PackageResult = rateRequestResponse.ShipmentResponse.PackagesResult.ToString();
-
-                        if (rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Any())
-                        {
-                            string[] itemIds = rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Select(x => x.TrackingNumber).ToArray();
-                            output.PackageResult = string.Join(",", itemIds);
-                        }
-
-                        //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
-                        //{
-                        //    output.ImageFormat = rateRequestResponse.ShipmentResponse.LabelImage[0].LabelImageFormat;
-                        //    output.GraphicImage = rateRequestResponse.ShipmentResponse.LabelImage[0].GraphicImage;
-                        //}
-                    }
-                    else
-                    {
-                        throw new GenericException($"There was an issue processing your request: {rateRequestResponse.ShipmentResponse.Notification[0].Message}");
-                    }
-                }
-            }
-            else
-            {
-                throw new GenericException("There was an issue processing your request. ");
-            }
-
-            return output;
-        }
-
-        private InternationalShipmentWaybillDTO FormatShipmentCreationReponseV2(ShipmentResPayload payload)
+        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentResPayload payload)
         {
             var output = new InternationalShipmentWaybillDTO();
             if (payload != null)
@@ -141,7 +86,8 @@ namespace GIGLS.Services.Business.DHL
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
                     var json = JsonConvert.SerializeObject(rateRequest, new JsonSerializerSettings
                     {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
                     });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
@@ -161,14 +107,15 @@ namespace GIGLS.Services.Business.DHL
         {
             var shipmentPayload = new ShippingPayload();
 
-            var next2Day = DateTime.UtcNow.AddDays(2);
-            shipmentPayload.PlannedShippingDateAndTime = next2Day.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            //var next2Day = DateTime.UtcNow.AddDays(2);
+            shipmentPayload.PlannedShippingDateAndTime =
+            shipmentPayload.PlannedShippingDateAndTime = DateTime.Today.AddDays(2).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             shipmentPayload.Pickup.IsRequested = false;
             shipmentPayload.Accounts.Add(GetAccount());
-            shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO); 
+            shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO);
             shipmentPayload.CustomerDetails.ReceiverDetails = GetReceiverContact(shipmentDTO);
             shipmentPayload.Content = GetShippingContent(shipmentDTO);
-            shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty(shipmentDTO);
+            shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty();
 
             return shipmentPayload;
         }
@@ -185,37 +132,25 @@ namespace GIGLS.Services.Business.DHL
                 IsCustomsDeclarable = true,
                 DeclaredValue = shipmentDTO.DeclarationOfValueCheck.Value,
                 DeclaredValueCurrency = "NGN",
-                Description = shipmentDTO.ItemDetails,
                 Incoterm = "DAP",
                 UnitOfMeasurement = "metric",
                 ExportDeclaration = new ExportDeclaration
                 {
-                    DestinationPortName = "port details",
-                    PayerVATNumber = "12345ED",
-                    RecipientReference = "recipient reference",
-                    PackageMarks = "marks",
-                    ExportReference = "export reference",
-                    ExportReason = "export reason",
+                    DestinationPortName = shipmentDTO.ReceiverCity,
                     Invoice = new ShippingInvoice
                     {
                         Number = "12345-ABC",
                         Date = DateTime.UtcNow.ToString("yyyy-MM-dd"),
                         SignatureName = shipmentDTO.CustomerDetails.CustomerName,
                         SignatureTitle = signatureTitle
-                    },
-                    Exporter = new Exporter
-                    {
-                        Id = "123",
-                        Code = "EXPCZ"
                     }
                 }
             };
-            //TO BE DISCUSSED
-            var charge = new AdditionalCharge { Value = 10, Caption = "fee" };
-            content.ExportDeclaration.AdditionalCharges.Add(charge);
 
-            var note = new DeclarationNote { Value = "declaration notes" };
-            content.ExportDeclaration.DeclarationNotes.Add(note);
+            var removeFiftyPer = 0.5M * shipmentDTO.GrandTotal;
+            var chargeValue = Math.Round((7.5M / 100) * removeFiftyPer, 2);
+            var charge = new AdditionalCharge { Value = chargeValue, Caption = "freight" };
+            content.ExportDeclaration.AdditionalCharges.Add(charge);
 
             var license = new License { Value = "license", TypeCode = "export" };
             content.ExportDeclaration.Licenses.Add(license);
@@ -223,6 +158,8 @@ namespace GIGLS.Services.Business.DHL
             int count = 1;
             foreach (var item in shipmentDTO.ShipmentItems)
             {
+                content.Description = item.Description;
+                var netValue = (float)item.Length * (float)item.Width * (float)item.Height / 5000;
                 var package = new ShippingPackage
                 {
                     Weight = (float)item.Weight,
@@ -234,18 +171,15 @@ namespace GIGLS.Services.Business.DHL
                     }
                 };
                 content.Packages.Add(package);
-                var customerRef = new CustomerReference { TypeCode = "CU", Value = "Customer reference" };
-                content.Packages[0].CustomerReferences.Add(customerRef);
-
                 var lineItem = new LineItem
                 {
                     Number = count,
-                    Description = item.Description,
+                    Description = shipmentDTO.ItemDetails,
                     Price = shipmentDTO.DeclarationOfValueCheck.Value,
                     PriceCurrency = "NGN",
-                    ManufacturerCountry = "NG",
+                    ManufacturerCountry = shipmentDTO.ManufacturerCountry.Trim().Length <= 2 ? shipmentDTO.ManufacturerCountry : shipmentDTO.ManufacturerCountry.Trim().Substring(0, 2),
                     ExportReasonType = "permanent",
-                    ExportControlClassificationNumber = "US123456789",
+                    ExportControlClassificationNumber = "",
                     Quantity = new Quantity
                     {
                         Value = item.Quantity,
@@ -253,20 +187,13 @@ namespace GIGLS.Services.Business.DHL
                     },
                     Weight = new ShippingWeight
                     {
-                        NetValue = 10,
-                        GrossValue = 10,
+                        NetValue = (float)Math.Round(netValue, 2),
+                        GrossValue = (float)Math.Round(netValue, 2),
                     }
                 };
-
-                var commodity = new CommodityCode { TypeCode = "outbound", Value = "HS1111111111" };
-                lineItem.CommodityCodes.Add(commodity);
                 content.ExportDeclaration.LineItems.Add(lineItem);
-
-                var remark = new Remark { Value = item.Description };
-                content.ExportDeclaration.Remarks.Add(remark);
                 count++;
             }
-
             return content;
         }
 
@@ -314,32 +241,28 @@ namespace GIGLS.Services.Business.DHL
                 },
                 PostalAddress = new PostalAddress
                 {
-                    CityName = "LAGOS",
+                    CityName = "Lagos",
                     PostalCode = "100001",
                     ProvinceCode = "NG",
                     CountryCode = "NG",
                     countyName = "Nigeria",
-                    AddressLine1 = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING",
-                    AddressLine2 = "STATION, GBAGADA PHASE 2",
-                    AddressLine3 = "GBAGADA LAGOS"
+                    AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
+                    AddressLine2 = "Beside Mobile Fuel Station",
+                    AddressLine3 = "Gbagada 100234, Lagos",
                 }
             };
             return shipper;
         }
 
-        private OutputImageProperties GetShipperOutputImageProperty(InternationalShipmentDTO shipmentDTO)
+        private OutputImageProperties GetShipperOutputImageProperty()
         {
-            var output = new OutputImageProperties
-            {
-                PrinterDPI = 300,
-                EncodingFormat = "pdf"
-            };
-
-            var barcode = new CustomerBarcode { Content = "barcode content", SymbologyCode = "93", TextBelowBarcode = "text below barcode" };
-            output.CustomerBarcodes.Add(barcode);
-
-            var image = new ImageOption { InvoiceType = "commercial", TypeCode = "invoice", IsRequested = true, LanguageCode = "eng" };
-            output.ImageOptions.Add(image);
+            var output = new OutputImageProperties { AllDocumentsInOneImage = true };
+            var image1 = new ImageOption { TypeCode = "label", TemplateName = "ECOM26_84_A4_001" };
+            output.ImageOptions.Add(image1);
+            var image2 = new ImageOption { TypeCode = "waybillDoc", TemplateName = "ARCH_8X4_A4_002", IsRequested = true };
+            output.ImageOptions.Add(image2);
+            var image3 = new ImageOption { InvoiceType = "commercial", TypeCode = "invoice", IsRequested = true, LanguageCode = "eng" };
+            output.ImageOptions.Add(image3);
 
             return output;
         }
@@ -368,6 +291,9 @@ namespace GIGLS.Services.Business.DHL
                     });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                    }
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
                 }
@@ -393,17 +319,10 @@ namespace GIGLS.Services.Business.DHL
         {
             var rateRequest = new RatePayload();
 
-            var next2Day = DateTime.UtcNow.AddDays(2);
-            rateRequest.PlannedShippingDateAndTime = next2Day.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            rateRequest.PlannedShippingDateAndTime = DateTime.Today.AddDays(2).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
-
-            var addedService = GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value);
-            rateRequest.ValueAddedServices.Add(addedService);
-
-            var monetary = GetMonetaryAmount(shipmentDTO.DeclarationOfValueCheck.Value);
-            rateRequest.MonetaryAmount.Add(monetary);
 
             foreach (var item in shipmentDTO.ShipmentItems)
             {
@@ -464,30 +383,6 @@ namespace GIGLS.Services.Business.DHL
                 Number = number
             };
             return account;
-        }
-
-        private ValueAddedService GetValueAddedService(decimal value)
-        {
-            var service = new ValueAddedService
-            {
-                ServiceCode = "II",
-                LocalServiceCode = "II",
-                Value = value,
-                Currency = "NGN",
-                Method = "cash"
-            };
-            return service;
-        }
-
-        private MonetaryAmount GetMonetaryAmount(decimal value)
-        {
-            var monetary = new MonetaryAmount
-            {
-                TypeCode = "declaredValue",
-                Currency = "NGN",
-                Value = value,
-            };
-            return monetary;
         }
 
     }

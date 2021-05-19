@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.DHL
 {
@@ -61,18 +60,16 @@ namespace GIGLS.Core.DTO.DHL
         public OutputImageProperties()
         {
             ImageOptions = new List<ImageOption>();
-            CustomerBarcodes = new List<CustomerBarcode>();
         }
-        public int PrinterDPI { get; set; }
-        public string EncodingFormat { get; set; }
         public List<ImageOption> ImageOptions { get; set; }
-        public List<CustomerBarcode> CustomerBarcodes { get; set; }
+        public bool AllDocumentsInOneImage { get; set; }
     }
 
     public class ImageOption
     {
         public string TypeCode { get; set; }
-        public bool IsRequested { get; set; }
+        public string TemplateName { get; set; }
+        public bool? IsRequested { get; set; }
         public string InvoiceType { get; set; }
         public string LanguageCode { get; set; }
     }
@@ -155,27 +152,27 @@ namespace GIGLS.Core.DTO.DHL
     {
         public ExportDeclaration()
         {
-            Exporter = new Exporter();
-            Remarks = new List<Remark>();
+         //   Exporter = new Exporter();
+          //  Remarks = new List<Remark>();
             Licenses = new List<License>();
             Invoice = new ShippingInvoice();
             LineItems = new List<LineItem>();
-            DeclarationNotes = new List<DeclarationNote>();
+          //  DeclarationNotes = new List<DeclarationNote>();
             AdditionalCharges = new List<AdditionalCharge>();
         }
         public ShippingInvoice Invoice { get; set; }
-        public Exporter Exporter { get; set; }
-        public List<Remark> Remarks { get; set; }
+      //  public Exporter Exporter { get; set; }
+      //  public List<Remark> Remarks { get; set; }
         public List<License> Licenses { get; set; }
         public List<LineItem> LineItems { get; set; }
-        public List<DeclarationNote> DeclarationNotes { get; set; }
+      //  public List<DeclarationNote> DeclarationNotes { get; set; }
         public List<AdditionalCharge> AdditionalCharges { get; set; }
         public string DestinationPortName { get; set; }
-        public string PayerVATNumber { get; set; }
-        public string RecipientReference { get; set; }
-        public string PackageMarks { get; set; }
-        public string ExportReference { get; set; }
-        public string ExportReason { get; set; }
+       // public string PayerVATNumber { get; set; }
+       // public string RecipientReference { get; set; }
+      //  public string PackageMarks { get; set; }
+       // public string ExportReference { get; set; }
+      //  public string ExportReason { get; set; }
     }
 
     public class ShippingContent
@@ -208,14 +205,14 @@ namespace GIGLS.Core.DTO.DHL
         {
             Weight = new ShippingWeight();
             Quantity = new Quantity();
-            CommodityCodes = new List<CommodityCode>();
+           // CommodityCodes = new List<CommodityCode>();
         }
         public int Number { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
         public string PriceCurrency { get; set; }
         public Quantity Quantity { get; set; }
-        public List<CommodityCode> CommodityCodes { get; set; }
+       // public List<CommodityCode> CommodityCodes { get; set; }
         public string ExportReasonType { get; set; }
         public string ManufacturerCountry { get; set; }
         public string ExportControlClassificationNumber { get; set; }
@@ -239,11 +236,11 @@ namespace GIGLS.Core.DTO.DHL
         public ShippingPackage()
         {
             Dimensions = new Dimensions();
-            CustomerReferences = new List<CustomerReference>();
+           // CustomerReferences = new List<CustomerReference>();
         }
         public float Weight { get; set; }
         public Dimensions Dimensions { get; set; }
-        public List<CustomerReference> CustomerReferences { get; set; }
+       // public List<CustomerReference> CustomerReferences { get; set; }
     }
 
 

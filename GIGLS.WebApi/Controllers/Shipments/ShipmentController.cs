@@ -1,23 +1,23 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.CORE.IServices.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
-using System;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -33,7 +33,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentContactService _shipmentContactService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
+            IUserService userService, IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
@@ -394,7 +394,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("checkreleasemovementmanifest/{movementmanifestcode}")] 
+        [Route("checkreleasemovementmanifest/{movementmanifestcode}")]
         public async Task<IServiceResponse<bool>> CheckReleaseManifest(string movementmanifestcode)
         {
             return await HandleApiOperationAsync(async () =>
@@ -963,6 +963,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
                 var result = await _service.ProcessInternationalShipmentOnAgility(shipmentDTO);
                 return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("generalpayment")]
+        public async Task<IServiceResponse<bool>> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ProcessGeneralPaymentLinksForShipmentsOnAgility(paymentDTO);
+
+                return new ServiceResponse<bool>
                 {
                     Object = result
                 };

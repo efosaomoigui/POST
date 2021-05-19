@@ -87,6 +87,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<TotalNetResult>> GetInternationalShipmentPrice(InternationalShipmentDTO shipment);
         Task<DailySalesDTO> GetWaybillForServiceCentre(string waybill);
         Task<ShipmentDTO> ProcessInternationalShipmentOnAgility(ShipmentDTO shipmentDTO);
+        Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO);
 
     }
 
