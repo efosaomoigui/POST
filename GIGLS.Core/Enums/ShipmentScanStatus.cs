@@ -45,7 +45,8 @@
         PICKED, // PICKED UP
         AISN, //ARRIVE INTL SHIPMENT TO NIGERIA
         ISFUK, //Item Shipped from UK
-        ODMV //ON THE MOVE
+        ODMV, //ON THE MOVE
+        SRFS, //SHIPMENT RECEIVED FROM THE STORE TO GIG HUB OR CENTRE
    
 
     }

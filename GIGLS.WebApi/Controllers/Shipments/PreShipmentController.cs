@@ -256,5 +256,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+
+        [HttpPost]
+        [Route("getpreshipmentmobiledeliverytat")]
+        public async Task<IServiceResponse<List<PreShipmentMobileTATDTO>>> GetPreshipmentMobileDeliveryTAT(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetPreshipmentMobileDeliveryTAT(newFilterOptionsDto);
+                return new ServiceResponse<List<PreShipmentMobileTATDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

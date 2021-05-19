@@ -149,6 +149,7 @@ namespace GIGLS.Services.Business.Tracking
                 "CUSTOMER",
                 "DEPARTURE SERVICE CENTRE",
                 "DESTINATION SERVICE CENTRE",
+                "STORE NAME",
             };
 
             foreach (var shipmentTrackingDTO in result)
@@ -195,6 +196,15 @@ namespace GIGLS.Services.Business.Tracking
                         //map the array
                         strArray[3] = destinationServiceCentre.Name;
                     }
+                }
+
+                //4. {4} - ITEM RECEIVED IN THE HUB OR CENTRE FROM STORE
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{4}"))
+                {
+                    //map the array
+                   var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentTrackingDTO.ServiceCentreId);
+                    strArray[4] = shipmentTrackingDTO.Location;
+                    shipmentTrackingDTO.Location = centre.Name;
                 }
 
                 //populate the Incident message
