@@ -44,7 +44,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
             {
                 //Last 20 days
-                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-60);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
 
