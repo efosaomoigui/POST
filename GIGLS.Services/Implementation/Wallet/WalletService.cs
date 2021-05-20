@@ -204,6 +204,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
             }
+            var user = await _userService.GetUserById(walletTransactionDTO.UserId);
 
             var serviceCenterIds = new int[] { };
             if (hasServiceCentre == true)
@@ -223,6 +224,7 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.DateOfEntry = DateTime.Now;
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
             newWalletTransaction.UserId = walletTransactionDTO.UserId;
+            newWalletTransaction.TransactionCountryId = user.UserActiveCountryId;
             if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
             {
                 newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;

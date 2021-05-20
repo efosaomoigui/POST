@@ -524,14 +524,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 var wallet = await _walletService.GetWalletBalance();
 
                 //get departure country
-                var deptCountry = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
-                if (deptCountry != null)
+                if (country != null)
                 {
-                    if (user.UserActiveCountryId != deptCountry.CountryId)
+                    if (user.UserActiveCountryId != country.CountryId)
                     {
                         //get actual amount to debit
                         var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
-                        r.DepartureId == deptCountry.CountryId &&
+                        r.DepartureId == country.CountryId &&
                         r.DestinationId == user.UserActiveCountryId, "Zone,Destination,Departure");
                         if (countryRateConversion == null)
                             throw new GenericException("The Mapping of Route to Zone does not exist");
@@ -599,7 +598,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = waybill,
                         Description = "Payment for Shipment",
                         PaymentType = PaymentType.Online,
-                        UserId = newPreShipment.UserId
+                        UserId = newPreShipment.UserId,
+                        TransactionCountryId = country.CountryId
                     };
 
                     if (transaction.CreditDebitType == CreditDebitType.Credit)
@@ -780,7 +780,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = newPreShipment.Waybill,
                         Description = "Payment for Shipment",
                         PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
-                        UserId = newPreShipment.UserId
+                        UserId = newPreShipment.UserId,
+                        TransactionCountryId = country.CountryId
                     };
 
                     if (transaction.CreditDebitType == CreditDebitType.Credit)
@@ -1076,6 +1077,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 receiver.IsBalanceSufficient = true;
                 newPreShipment.DiscountValue = receiver.DiscountValue;
                 newPreShipment.ShipmentPickupPrice = individualPickupPrice;
+                var country = await _uow.Country.GetCountryByStationId(receiver.SenderStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 var transaction = new WalletTransactionDTO
                 {
@@ -1086,7 +1092,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = waybill,
                     Description = "Payment for Shipment",
                     PaymentType = PaymentType.Online,
-                    UserId = newPreShipment.UserId
+                    UserId = newPreShipment.UserId,
+                    TransactionCountryId = country.CountryId
                 };
                 var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                 var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
@@ -3261,6 +3268,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                var country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
+
                 if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                 {
                     preshipmentmobile.IsDelivered = true;
@@ -3303,7 +3316,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             Waybill = preshipmentmobile.Waybill,
                             Description = "Credit for Delivered Shipment Request",
                             PaymentType = PaymentType.Online,
-                            UserId = userId
+                            UserId = userId,
+                            TransactionCountryId = country.CountryId
                         };
                         var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
@@ -3397,7 +3411,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                 Waybill = preshipmentmobile.Waybill,
                                 Description = "Credit for Delivered Shipment Request",
                                 PaymentType = PaymentType.Online,
-                                UserId = userId
+                                UserId = userId,
+                                TransactionCountryId = country.CountryId
                             };
                             var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
@@ -4174,6 +4189,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+            var country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+            if (country == null)
+            {
+                throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
             //Add wallet transaction
             var transaction = new WalletTransactionDTO
             {
@@ -4184,7 +4206,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = waybill,
                 Description = "Cancelled Shipment",
                 PaymentType = PaymentType.Online,
-                UserId = user
+                UserId = user,
+                TransactionCountryId = country.CountryId
             };
             //get the balance after transaction
             if (transaction.CreditDebitType == CreditDebitType.Credit)

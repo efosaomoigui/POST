@@ -28,6 +28,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string PaymentTypeReference { get; set; }
         public string PassKey { get; set; }
         public decimal BalanceAfterTransaction { get; set; }
+        public int TransactionCountryId { get; set; }
     }
 
     public class ModifiedWalletTransactionDTO
