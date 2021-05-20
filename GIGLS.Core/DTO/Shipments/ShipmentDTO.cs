@@ -160,6 +160,8 @@ namespace GIGLS.Core.DTO.Shipments
         public int ETA { get; set; }
         public string DestinationServiceCentreName { get; set; }
         public string FileNameUrl { get; set; }
+        public string InternationalWayBill { get; set; }
+
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -459,6 +461,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int RequestProcessingCountryId { get; set; }
         public CompanyMap CompanyMap { get; set; }
         public string ManufacturerCountry { get; set; }
+        public decimal InternationalShippingCost { get; set; }
     }
 
 

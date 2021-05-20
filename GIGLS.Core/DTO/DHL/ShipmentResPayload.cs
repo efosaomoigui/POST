@@ -11,6 +11,7 @@ namespace GIGLS.Core.DTO.DHL
         }
         public string ShipmentTrackingNumber { get; set; }
         public string TrackingUrl { get; set; }
+        public string ErrorReason { get; set; }
         public List<ShipmentResPackage> Packages { get; set; }
         public List<ShipmentResDocument> Documents { get; set; }
     }

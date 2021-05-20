@@ -34,7 +34,7 @@ namespace GIGLS.Services.Business.DHL
         private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentResPayload payload)
         {
             var output = new InternationalShipmentWaybillDTO();
-            if (payload != null)
+            if (payload.Documents.Count > 0 || !string.IsNullOrWhiteSpace(payload.ShipmentTrackingNumber))
             {
                 output.OutBoundChannel = CompanyMap.DHL;
                 output.ShipmentIdentificationNumber = payload.ShipmentTrackingNumber;
@@ -43,7 +43,7 @@ namespace GIGLS.Services.Business.DHL
             }
             else
             {
-                throw new GenericException("There was an issue processing your request.");
+                throw new GenericException($"{payload.ErrorReason}");
             }
             return output;
         }
@@ -54,11 +54,12 @@ namespace GIGLS.Services.Business.DHL
             if (response.Products.Count > 0)
             {
                 output.Amount = (decimal)response.Products[0].TotalPrice[0].Price;
+                output.InternationalShippingCost = (decimal)response.Products[0].TotalPrice[0].Price;
                 output.Currency = response.Products[0].TotalPrice[0].PriceCurrency;
             }
             else
             {
-                throw new GenericException("There was an issue processing your request.");
+                throw new GenericException($"{response.ErrorReason}");
             }
 
             return output;
@@ -92,7 +93,15 @@ namespace GIGLS.Services.Business.DHL
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
-                    result = JsonConvert.DeserializeObject<ShipmentResPayload>(responseResult);
+                    if (response.StatusCode != HttpStatusCode.Created)
+                    {
+                        var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
+                        result.ErrorReason = dHLError.Detail;
+                    }
+                    else
+                    {
+                        result = JsonConvert.DeserializeObject<ShipmentResPayload>(responseResult);
+                    }
                 }
 
                 return result;
@@ -109,7 +118,7 @@ namespace GIGLS.Services.Business.DHL
 
             //var next2Day = DateTime.UtcNow.AddDays(2);
             shipmentPayload.PlannedShippingDateAndTime =
-            shipmentPayload.PlannedShippingDateAndTime = DateTime.Today.AddDays(2).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            shipmentPayload.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             shipmentPayload.Pickup.IsRequested = false;
             shipmentPayload.Accounts.Add(GetAccount());
             shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO);
@@ -139,7 +148,7 @@ namespace GIGLS.Services.Business.DHL
                     DestinationPortName = shipmentDTO.ReceiverCity,
                     Invoice = new ShippingInvoice
                     {
-                        Number = "12345-ABC",
+                        Number = "4010097858",
                         Date = DateTime.UtcNow.ToString("yyyy-MM-dd"),
                         SignatureName = shipmentDTO.CustomerDetails.CustomerName,
                         SignatureTitle = signatureTitle
@@ -147,8 +156,7 @@ namespace GIGLS.Services.Business.DHL
                 }
             };
 
-            var removeFiftyPer = 0.5M * shipmentDTO.GrandTotal;
-            var chargeValue = Math.Round((7.5M / 100) * removeFiftyPer, 2);
+            var chargeValue = Math.Round((7.5M / 100) * shipmentDTO.InternationalShippingCost, 2);
             var charge = new AdditionalCharge { Value = chargeValue, Caption = "freight" };
             content.ExportDeclaration.AdditionalCharges.Add(charge);
 
@@ -287,15 +295,21 @@ namespace GIGLS.Services.Business.DHL
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
                     var json = JsonConvert.SerializeObject(rateRequest, new JsonSerializerSettings
                     {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
                     });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
+                    string responseResult = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
+                        var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
+                        result.ErrorReason = dHLError.Detail;
                     }
-                    string responseResult = await response.Content.ReadAsStringAsync();
-                    result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
+                    else
+                    {
+                        result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
+                    }
                 }
 
                 return result;
@@ -319,7 +333,7 @@ namespace GIGLS.Services.Business.DHL
         {
             var rateRequest = new RatePayload();
 
-            rateRequest.PlannedShippingDateAndTime = DateTime.Today.AddDays(2).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            rateRequest.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
@@ -385,5 +399,33 @@ namespace GIGLS.Services.Business.DHL
             return account;
         }
 
+        public async Task<InternationalShipmentTracking> TrackInternationalShipment(string internationalWaybill)
+        {
+            try
+            {
+                var result = new InternationalShipmentTracking();
+                string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
+                string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
+                string url = $"{baseUrl}{path}/{internationalWaybill}/tracking";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var byteArray = GetAutorizationKey();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    string responseResult = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<InternationalShipmentTracking>(responseResult);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

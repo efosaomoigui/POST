@@ -156,8 +156,8 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(500)]
         public string FileNameUrl { get; set; }
 
-       // [MaxLength(100)]
-      //  public string ManufacturerCountry { get; set; }
+        [MaxLength(100)]
+        public string InternationalWayBill { get; set; }
 
     }
 

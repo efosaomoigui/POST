@@ -4730,6 +4730,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if(shipmentByWaybill != null)
                 {
                     shipmentByWaybill.FileNameUrl = blobname;
+                    shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;
                 }
                 //await _uow.Shipment.
                 // complete transaction if all actions are successful

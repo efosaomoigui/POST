@@ -16,6 +16,7 @@ namespace GIGLS.Core.DTO.DHL
             Products = new List<Product>();
             ExchangeRates = new List<ExchangeRate>();
         }
+        public string ErrorReason { get; set; }
         public List<Product> Products { get; set; }
         public List<ExchangeRate> ExchangeRates { get; set; }
     }

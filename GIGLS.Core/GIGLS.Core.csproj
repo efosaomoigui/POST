@@ -350,6 +350,7 @@
     <Compile Include="DTO\DHL\Enum\Content.cs" />
     <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
     <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentTracking.cs" />
     <Compile Include="DTO\DHL\InternationalShipmentWaybillDTO.cs" />
     <Compile Include="DTO\DHL\RatePayload.cs" />
     <Compile Include="DTO\DHL\RateRequestPayload.cs" />

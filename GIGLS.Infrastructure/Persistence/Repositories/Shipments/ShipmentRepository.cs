@@ -872,6 +872,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            DateCreated = r.DateCreated,
                                            DateModified = r.DateModified,
                                            DeliveryOptionId = r.DeliveryOptionId,
+                                           InternationalWayBill = r.InternationalWayBill,
                                            DeliveryOption = new DeliveryOptionDTO
                                            {
                                                Code = r.DeliveryOption.Code,
@@ -1210,6 +1211,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            vatvalue_display = r.vatvalue_display,
                                            ReprintCounterStatus = r.ReprintCounterStatus,
                                            FileNameUrl = r.FileNameUrl,
+                                           InternationalWayBill = r.InternationalWayBill,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,

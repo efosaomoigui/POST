@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InternationalShipmentWaybillDTO>> GetInternationalShipmentArrivedWaybills();
         Task<bool> UpdateToEnrouteDelivery(List<string> waybills);
         Task<bool> UpdateToDelivered(List<string> waybills);
+        Task<InternationalShipmentTracking> TrackInternationalShipment(string internationalWaybill);
     }
 }
