@@ -604,11 +604,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (transaction.CreditDebitType == CreditDebitType.Credit)
                     {
-                        transaction.BalanceAfterTransaction = wallet.Balance + transaction.Amount;
+                        transaction.BalanceAfterTransaction = wallet.Balance + actualAmountToDebit;
                     }
                     else
                     {
-                        transaction.BalanceAfterTransaction = wallet.Balance - transaction.Amount;
+                        transaction.BalanceAfterTransaction = wallet.Balance - actualAmountToDebit;
                     }
 
                     //update wallet
