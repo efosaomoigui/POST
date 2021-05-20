@@ -5480,10 +5480,12 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
-
-                if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                if (company.Name != null)
                 {
-                    company.Name = user.Organisation;
+                    if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                    {
+                        company.Name = user.Organisation;
+                    } 
                 }
             }
         }
