@@ -27,6 +27,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
             var earningsBreakdownDTO = new EarningsBreakdownDTO();
+            if (dashboardFilter.ActiveCountryId != 1)
+            {
+                earningsBreakdownDTO.Agility = await GetInternationalTotalEarnings(dashboardFilter);
+                return earningsBreakdownDTO;
+            }
             var results = await GetFinancialBreakdownSummary(dashboardFilter);
 
             earningsBreakdownDTO.GIGGO = results.GIGGo;
