@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO.DHL
         public decimal Insurance { get; set; }
         public decimal GrandTotal { get; set; }
         public CompanyMap CompanyMap { get; set; }
+        public decimal InternationalShippingCost { get; set; }
     }
 }

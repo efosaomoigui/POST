@@ -922,6 +922,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.ShipmentHash = "";
+                shipmentDTO.RequestNumber = mDto.RequestNumber;
 
 
                 //Drop Off

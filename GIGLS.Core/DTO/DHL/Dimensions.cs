@@ -2,8 +2,8 @@
 {
     public class Dimensions
     {
-        public decimal Length { get; set; }
-        public decimal Width { get; set; }
-        public decimal Height { get; set; }
+        public float Length { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
     }
 }

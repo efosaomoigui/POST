@@ -996,6 +996,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
                 }
 
+                if (!String.IsNullOrEmpty(shipmentDTO.RequestNumber))
+                {
+                    //scan the shipment received for tracking
+                    var newShipmentTracking = await _shipmentTrackingService.AddShipmentTrackingForReceivedItems(new ShipmentTrackingDTO
+                    {
+                        DateTime = DateTime.Now,
+                        Status = ShipmentScanStatus.SRFS.ToString(),
+                        Waybill = newShipment.Waybill,
+                        ServiceCentreId = newShipment.DepartureServiceCentreId
+                    }, ShipmentScanStatus.SRFS, shipmentDTO.RequestNumber) ;
+                }
+
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
                 {
@@ -4468,7 +4480,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
             total.VAT = total.Amount * vat;
-
             total.GrandTotal = total.Amount + total.VAT;
 
             //Get Insurance
@@ -4478,7 +4489,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 total.GrandTotal = total.GrandTotal + insurance;
                 total.Insurance = insurance;
             }
-
             return total;
         }
 
@@ -4650,7 +4660,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
         private async Task<ShipmentDTO> BindShipmentPayload(InternationalShipmentDTO shipmentDTO)
         {
             //Bind CustomerDetail to the payload
@@ -4724,6 +4733,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 //QR Code
                 await GenerateDeliveryNumber(shipmentDTO.Waybill);
 
+                // Saving to azure blob
+                byte[] sPDFDecoded = Convert.FromBase64String(dhlShipment.PdfFormat);
+                var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
+                var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
+
+                var shipmentByWaybill = _uow.Shipment.Find(x => x.Waybill == shipmentDTO.Waybill).FirstOrDefault();
+                if(shipmentByWaybill != null)
+                {
+                    shipmentByWaybill.FileNameUrl = blobname;
+                    shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;
+                }
+                //await _uow.Shipment.
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 

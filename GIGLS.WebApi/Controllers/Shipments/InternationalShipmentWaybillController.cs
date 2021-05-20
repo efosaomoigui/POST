@@ -110,5 +110,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("TrackInternationalShipment/{internationalWaybill}")]
+        public async Task<IServiceResponse<InternationalShipmentTracking>> TrackInternationalShipment(string internationalWaybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.TrackInternationalShipment(internationalWaybill);
+                return new ServiceResponse<InternationalShipmentTracking>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
     }
 }
