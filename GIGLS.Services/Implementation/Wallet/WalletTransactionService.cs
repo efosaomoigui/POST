@@ -298,11 +298,15 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
 
+            var countryIds = walletTransactionDTOList.Select(x => x.TransactionCountryId).ToList();
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
             // get the service centre
             foreach (var item in walletTransactionDTOList)
             {
                 var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
                 item.ServiceCentre = serviceCentre;
+                item.CurrencyCode = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencyCode;
+                item.CurrencySymbol = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencySymbol;
             }
 
             return new WalletTransactionSummaryDTO
