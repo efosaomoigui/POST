@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
@@ -15,9 +16,11 @@ namespace GIGLS.Services.Implementation.Shipments
     public class InternationalShipmentWaybillService : IInternationalShipmentWaybillService
     {
         private readonly IUnitOfWork _uow;
-        public InternationalShipmentWaybillService(IUnitOfWork uow)
+        private readonly IDHLService _dhlService;
+        public InternationalShipmentWaybillService(IUnitOfWork uow, IDHLService dhlService)
         {
             _uow = uow;
+            _dhlService = dhlService;
         }
 
         public async Task<InternationalShipmentWaybillDTO> GetInternationalWaybill(string waybill)
@@ -127,5 +130,12 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
             return true;
         }
+
+        public async Task<InternationalShipmentTracking> TrackInternationalShipment(string internationalWaybill)
+        {
+            var shipment = await _dhlService.TrackInternationalShipment(internationalWaybill);
+            return shipment;
+        }
+
     }
 }

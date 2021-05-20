@@ -78,5 +78,8 @@ namespace GIGLS.Core.DTO.DHL
     public class Weight
     {
         public decimal Value { get; set; }
+        public float Volumetric { get; set; }
+        public float Provided { get; set; }
+        public string UnitOfMeasurement { get; set; }
     }
 }

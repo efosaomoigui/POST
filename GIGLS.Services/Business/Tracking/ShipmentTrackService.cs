@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.Shipments;
 using System;
 using System.Collections.Generic;
@@ -19,23 +20,26 @@ namespace GIGLS.Services.Business.Tracking
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IShipmentService _shipmentService;
         private readonly IManifestVisitMonitoringService _monitoringService;
+        private readonly IDHLService _DhlService;
 
-        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow, IManifestVisitMonitoringService monitoringService)
+        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow, IManifestVisitMonitoringService monitoringService, IDHLService dHLService)
         {
             _shipmentTrackingService = shipmentTrackingService;
             _shipmentService = shipmentService;
             _uow = uow;
             _monitoringService = monitoringService;
+            _DhlService = dHLService;
         }
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber)
         {
             var result = await _shipmentTrackingService.GetShipmentTrackings(waybillNumber);
+            var shipment = new ShipmentDTO();
 
             if (result.Any())
             {
                 //get shipment Details
-                var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
+                shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
                 string manifest = null;
                 string ManifestTypeValue = ManifestType.Delivery.ToString(); //Default
 
@@ -136,6 +140,25 @@ namespace GIGLS.Services.Business.Tracking
             //Replace the placeholders in Scan Status
             await ResolveScanStatusPlaceholders(result);
 
+            if (!string.IsNullOrWhiteSpace(shipment.InternationalWayBill))
+            {
+                var intlTracking = await _DhlService.TrackInternationalShipment(shipment.InternationalWayBill);
+                if (intlTracking.Shipments.Count > 0)
+                {
+                    if(intlTracking.Shipments[0].Events.Count > 0)
+                    {
+                        result.FirstOrDefault().DateTime = intlTracking.Shipments[0].ShipmentTimestamp;
+                        result.FirstOrDefault().Location = intlTracking.Shipments[0].Events[0].ServiceArea[0].Description;
+                        result.FirstOrDefault().TrackingType = TrackingType.OutBound;
+                    }
+                    else
+                    {
+                        result.FirstOrDefault().DateTime = intlTracking.Shipments[0].ShipmentTimestamp;
+                        result.FirstOrDefault().Location = intlTracking.Shipments[0].ReceiverDetails.ServiceArea[0].Description;
+                        result.FirstOrDefault().TrackingType = TrackingType.OutBound;
+                    }
+                }
+            }
             return result;
         }
 
