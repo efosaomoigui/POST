@@ -577,6 +577,10 @@ namespace GIGLS.Services.Business.Pricing
             }
             else
             {
+                if (departureCountry.CountryId == 76)
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+                }
                 PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
             }
 
