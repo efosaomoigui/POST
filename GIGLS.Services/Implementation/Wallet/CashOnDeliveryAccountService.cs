@@ -137,6 +137,16 @@ namespace GIGLS.Services.Implementation.Wallet
             var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account.OrderByDescending(x => x.DateCreated));
             var walletDto = Mapper.Map<WalletDTO>(wallet);
 
+            //add cod waybills
+            for (int i = 0; i < accountDto.Count; i++)
+            {
+                if (accountDto[i].CreditDebitType == CreditDebitType.Credit)
+                {
+                    var des = accountDto[i].Description.Split(' ');
+                    accountDto[i].Waybill = des.LastOrDefault(); 
+                }
+            }
+
             //set the customer name
             // handle Company customers
             if (CustomerType.Company.Equals(wallet.CustomerType))
