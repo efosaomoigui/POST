@@ -2859,7 +2859,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var outstandingShipments = await _uow.PreShipmentMobile.GetAllOutstandingShipmentsForUser(currentUser.UserChannelCode, currentUser.UserChannelType.ToString());
+            var outstandingShipments = await _uow.PreShipmentMobile.GetAllOutstandingShipmentsForUser(currentUser.UserChannelCode);
 
             return outstandingShipments;
 
