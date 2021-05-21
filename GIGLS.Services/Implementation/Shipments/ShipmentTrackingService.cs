@@ -160,6 +160,48 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> AddShipmentTrackingForReceivedItems(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus,string reqNo)
+        {
+            try
+            {
+                if (tracking.User == null)
+                {
+                    tracking.User = await _userService.GetCurrentUserId();
+                }
+                var request = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == reqNo).FirstOrDefault();
+                if (request != null)
+                {
+                    if (String.IsNullOrEmpty(tracking.Location))
+                    {
+                        var storeNames = request.ShipmentRequestItems.Select(x => x.storeName).ToList();
+                        tracking.Location = string.Join(",", storeNames);
+                    }
+
+                    //check if the waybill has not been scan for the status before
+                    bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
+                    if (!shipmentTracking)
+                    {
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = tracking.Waybill,
+                            Location = tracking.Location,
+                            Status = tracking.Status,
+                            DateTime = DateTime.Now,
+                            UserId = tracking.User,
+                            ServiceCentreId = tracking.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
+                    } 
+                }
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         private async Task<bool> sendSMSEmail(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {

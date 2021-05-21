@@ -254,7 +254,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -312,7 +312,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {

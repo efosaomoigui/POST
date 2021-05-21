@@ -423,5 +423,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string PickupTAT { get; set; }
         public string DeliveryTAT { get; set; }
         public string AppType { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerType { get; set; }
+        public DateTime DeliveredTime { get; set; }
     }
 }

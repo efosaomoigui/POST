@@ -8,5 +8,6 @@ namespace GIGLS.Core.IServices.DHL
     {
         Task<TotalNetResult> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO);
         Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO);
+        Task<InternationalShipmentTracking> TrackInternationalShipment(string internationalWaybill);
     }
 }

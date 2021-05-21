@@ -1005,7 +1005,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //If No Date Supplied
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
-                startDate = DateTime.Now.AddMonths(-3);
+                startDate = DateTime.Now.AddMonths(-2);
             }
             else
             {
@@ -1050,17 +1050,17 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                     dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
 
-                    //get all earnings
-                    dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetTotalFinancialReportEarnings(dashboardFilterCriteria);
-                    var demmurage = await _uow.FinancialReport.GetTotalFinancialReportDemurrage(dashboardFilterCriteria);
-
-                    dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
-
                     //get outstanding corporate payments
                     if (dashboardFilterCriteria.ActiveCountryId == 1)
                     {
                         var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
                         dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
+
+                        //get all earnings
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetTotalFinancialReportEarnings(dashboardFilterCriteria);
+                        var demmurage = await _uow.FinancialReport.GetTotalFinancialReportDemurrage(dashboardFilterCriteria);
+
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
                     }
 
                     dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
@@ -1069,13 +1069,45 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
                     dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
 
-                    //Get Revenue By Customer Type for Agility
-                    var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria, ShipmentReportType.Normal);
+                    //Only for countries that are not in Nigeria
+                    var earningsBreakdown = new EarningsBreakdownByCustomerDTO();
+                    var earningsBreakdownMonthly = new EarningsBreakdownByCustomerDTO();
 
-                    //Get Revenue By Customer Type for GIGGo
-                    var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria, ShipmentReportType.Normal);
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
 
-                    var earningsBreakdown = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
+                    if (dashboardFilterCriteria.ActiveCountryId != 1)
+                    {
+                        earningsBreakdown = await GetIntlRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
+                        earningsBreakdownMonthly = await GetIntlRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
+
+                        //Get revenue for Class and Basic Customers (Shipment Table)
+                        var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncomeInternational", dashboardFilterCriteria);
+                        var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncomeInternational", dashboardFilterCriteria);
+
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
+
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetInternationalTotalEarnings(dashboardFilterCriteria);
+                        
+
+                    }
+                    else if (dashboardFilterCriteria.ActiveCountryId == 1)
+                    {
+                        earningsBreakdown = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
+                        earningsBreakdownMonthly = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
+
+                        //Get revenue for Class and Basic Customers (Shipment Table)
+                        var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
+                        var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
+
+                        //Get revenue for Class and Basic Customers (PreShipmentMobile Table)
+                        var classMobileRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerMobileIncome", dashboardFilterCriteria);
+                        var basicMobileRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerMobileIncome", dashboardFilterCriteria);
+
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue + classMobileRevenue;
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue + basicMobileRevenue;
+                        
+                    }
 
                     dashboardDTO.EarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
 
@@ -1083,26 +1115,12 @@ namespace GIGLS.Services.Implementation.Dashboard
                     dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdown.Ecommerce;
                     dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = earningsBreakdown.Corporate;
 
-                    var earningsBreakdownMonthly = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
-
                     dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
 
                     dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Individual = earningsBreakdownMonthly.Individual;
                     dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdownMonthly.Ecommerce;
                     dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Corporate = earningsBreakdownMonthly.Corporate;
-
-                    dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
-
-                    //Get revenue for Class and Basic Customers (Shipment Table)
-                    var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
-                    var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
-
-                    //Get revenue for Class and Basic Customers (PreShipmentMobile Table)
-                    var classMobileRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerMobileIncome", dashboardFilterCriteria);
-                    var basicMobileRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerMobileIncome", dashboardFilterCriteria);
-
-                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue + classMobileRevenue;
-                    dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue + basicMobileRevenue;
+                                     
 
                     //Get number of class subscriptions
                     var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
@@ -1347,6 +1365,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             return await _uow.FinancialReport.GetTotalFinancialReportEarnings(dashboardFilterCriteria);
         }
 
+        //Get Total Earnings in Financial Reports 
+        private async Task<decimal> GetInternationalTotalEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetInternationalTotalEarnings(dashboardFilterCriteria);
+        }
+
         private async Task<WalletBreakdown> GetWalletBreakdown(int countryId)
         {
             return await _uow.Wallet.GetWalletBreakdown(countryId);
@@ -1536,6 +1560,22 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return earningsBreakdownByCustomerDTO;
             
+        }
+
+        //Get Revenue Breakdown by Customer Type (International Shipments i.e Shipments not created in Nigeria)
+        private async Task<EarningsBreakdownByCustomerDTO> GetIntlRevenueBreakdownByCustomerType(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            //Get Revenue By Customer Type for Agility
+            var agilityRevenue = await GetFinancialSummaryByCustomerType("IntlRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            var earningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+            earningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual;
+            earningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce;
+            earningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate;
+
+            return earningsBreakdownByCustomerDTO;
+
         }
 
         //Get Count of Vehicles Dispatched or Trips 

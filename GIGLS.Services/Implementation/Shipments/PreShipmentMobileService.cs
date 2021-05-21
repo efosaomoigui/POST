@@ -1404,6 +1404,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 preShipment.CountryId = country.CountryId;
 
+                var currentUserId = await _userService.GetCurrentUserId();
+                preShipment.UserId = currentUserId;
+                var user = await _userService.GetUserById(currentUserId);
+                preShipment.CustomerCode = user.UserChannelCode;
+
                 var basePriceBike = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikeBasePrice, preShipment.CountryId);
                 var basePriceBikeValue = Convert.ToDecimal(basePriceBike.Value);
 
@@ -5475,10 +5480,12 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
-
-                if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                if (company.Name != null)
                 {
-                    company.Name = user.Organisation;
+                    if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                    {
+                        company.Name = user.Organisation;
+                    } 
                 }
             }
         }
@@ -6432,13 +6439,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 
-                var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
-                var dateFor72Hours = newFilterOptionsDto.EndDate.AddHours(72);
+                var dateFor24Hours = DateTime.Now;
+                var dateFor72Hours = DateTime.Now;
 
                 if (!String.IsNullOrEmpty(newFilterOptionsDto.FilterType) && newFilterOptionsDto.FilterType == "OverdueTATIntrastate")
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                    preshipmentmobile = preshipmentmobile.Where(x => x.DateCreated > dateFor24Hours).ToList();
+                    preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24 ).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6449,7 +6456,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.DateCreated < dateFor72Hours && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                    preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6486,11 +6494,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 tat.IsScheduled = mobile.IsScheduled;
                 tat.SenderLocality = mobile.SenderLocality;
                 tat.shipmentstatus = mobile.shipmentstatus;
-                //var user = await _uow.User.GetUserByChannelCode(mobile.CustomerCode);
-                //if (user != null)
-                //{
-                //    tat.AppType = user.AppType;
-                //}
                 return tat;
             }
             catch (Exception ex)
@@ -6664,5 +6667,92 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
+        public async Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileDeliveryTAT(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            try
+            {
+                var preshipmentmobile = new List<PreShipmentMobile>();
+                var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
+
+                var range = (int)(newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
+                if (range > 32)
+                {
+                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
+                
+                preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString()).OrderByDescending(x => x.DateCreated).ToList();
+                preshipmentmobile = preshipmentmobile.Where(x => (int)(x.DateModified - x.DateCreated).TotalHours > 24).ToList();
+                if (preshipmentmobile.Any())
+                {
+                    var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
+                    var mobiletracking = _uow.MobileShipmentTracking.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var tats = await GetDeliveryTATIntrastate(waybills, mobiletracking, preshipmentmobile);
+                    preshipmentmobileTATDTO.AddRange(tats);
+                }
+                return preshipmentmobileTATDTO;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<List<PreShipmentMobileTATDTO>> GetDeliveryTATIntrastate(List<string> waybills, List<MobileShipmentTracking> mobiletracking, List<PreShipmentMobile> preshipmentmobile)
+        {
+            try
+            {
+                var min = "Min";
+                var hrs = "Hr";
+                var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
+                var pickupRequests = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var userIDs = pickupRequests.Select(s => s.UserId).ToList();
+                var partners = _uow.Partner.GetAllAsQueryable().Where(x => userIDs.Contains(x.UserId)).ToList();
+
+                foreach (var item in preshipmentmobile)
+                {
+                    var tat = await MapPreShipmentMobileTATDTO(item);
+                    //calc the remaining TATs
+                    var shimentStatus = mobiletracking.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                    if (shimentStatus != null)
+                    {
+                        tat.ShipmentScanStatus = shimentStatus.Status;
+                        tat.LastScanDate = shimentStatus.DateModified;
+                    }
+                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAHD.ToString() && x.Waybill == item.Waybill);
+                    if (dlvrd != null)
+                    {
+                        var tatAge = (int)(dlvrd.DateCreated - item.DateCreated).TotalHours;
+                        tat.OATAT = $"{tatAge}{hrs}";
+                        if (tatAge <= 0)
+                        {
+                            tatAge = (int)(dlvrd.DateCreated - item.DateCreated).TotalMinutes;
+                            tat.OATAT = $"{tatAge}{min}";
+                        }
+                    }
+
+                    //also get the delivery partner
+                    var itemDelivered = pickupRequests.Where(x => x.Status == MobilePickUpRequestStatus.Delivered.ToString() && x.Waybill == item.Waybill).FirstOrDefault();
+                    if (itemDelivered != null)
+                    {
+                        var partner = partners.FirstOrDefault(x => x.UserId == itemDelivered.UserId);
+                        if (partner != null)
+                        {
+                            tat.PartnerName = partner.PartnerName;
+                            tat.DeliveredTime = itemDelivered.DateCreated;
+                            tat.PartnerType = partner.PartnerType.ToString(); 
+                        }
+                    }
+                    preshipmentmobileTATDTO.Add(tat);
+                }
+                return preshipmentmobileTATDTO;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 };

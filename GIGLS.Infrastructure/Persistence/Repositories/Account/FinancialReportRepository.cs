@@ -27,6 +27,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
             var earningsBreakdownDTO = new EarningsBreakdownDTO();
+            if (dashboardFilter.ActiveCountryId != 1)
+            {
+                earningsBreakdownDTO.Agility = await GetInternationalTotalEarnings(dashboardFilter);
+                return earningsBreakdownDTO;
+            }
             var results = await GetFinancialBreakdownSummary(dashboardFilter);
 
             earningsBreakdownDTO.GIGGO = results.GIGGo;
@@ -34,6 +39,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             earningsBreakdownDTO.IntlShipments = results.Intl;
 
             earningsBreakdownDTO.Demurrage = await GetTotalFinancialReportDemurrage(dashboardFilter);
+
+            earningsBreakdownDTO.Corporate = await GetCorporateIncomeBreakdownSummary(dashboardFilter);
 
             return earningsBreakdownDTO;
         }
@@ -130,7 +137,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -171,6 +178,57 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
+        public async Task<decimal> GetInternationalTotalEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    StartDate = DateTime.Now.AddMonths(-2);
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    StartDate = queryDate.Item1;
+                    EndDate = queryDate.Item2;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("TotalEarningsInternational " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<decimal> GetTotalFinancialReportDemurrage(DashboardFilterCriteria dashboardFilterCriteria)
         {
             try
@@ -181,7 +239,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -293,7 +351,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     //If No Date Supplied
                     if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                     {
-                        StartDate = DateTime.Now.AddMonths(-3);
+                        StartDate = DateTime.Now.AddMonths(-2);
                     }
                     else
                     {
@@ -348,7 +406,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    StartDate = DateTime.Now.AddMonths(-3);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -432,6 +490,47 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                param).ToListAsync();
 
             return await Task.FromResult(summary);
+        }
+
+        public async Task<decimal> GetCorporateIncomeBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                var StartDate = queryDate.Item1;
+                var EndDate = queryDate.Item2;
+
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("CorporateIncome " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+               
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

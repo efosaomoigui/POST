@@ -350,11 +350,16 @@
     <Compile Include="DTO\DHL\Enum\Content.cs" />
     <Compile Include="DTO\DHL\Enum\DropOffType.cs" />
     <Compile Include="DTO\DHL\Enum\UnitOfMeasurement.cs" />
+    <Compile Include="DTO\DHL\InternationalShipmentTracking.cs" />
     <Compile Include="DTO\DHL\InternationalShipmentWaybillDTO.cs" />
+    <Compile Include="DTO\DHL\RatePayload.cs" />
     <Compile Include="DTO\DHL\RateRequestPayload.cs" />
     <Compile Include="DTO\DHL\RateRequestResponse.cs" />
+    <Compile Include="DTO\DHL\RateResPayload.cs" />
+    <Compile Include="DTO\DHL\ShipmentResPayload.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestedPayload.cs" />
     <Compile Include="DTO\DHL\ShipmentRequestResponse.cs" />
+    <Compile Include="DTO\DHL\ShippingPayload.cs" />
     <Compile Include="DTO\DHL\TotalNetResult.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />

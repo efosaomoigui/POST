@@ -178,7 +178,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         //Get Shipments that have not been paid for by user
         public async Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
         {
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode && s.IsCancelled == false);
             var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
             var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
             var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
