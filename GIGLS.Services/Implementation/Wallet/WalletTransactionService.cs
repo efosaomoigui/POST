@@ -305,8 +305,9 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
                 item.ServiceCentre = serviceCentre;
-                item.CurrencyCode = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencyCode;
-                item.CurrencySymbol = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencySymbol;
+                item.CurrencyCode = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencyCode == null ? wallet.Country.CurrencyCode : countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencySymbol;
+                item.CurrencySymbol = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencySymbol == null ? wallet.Country.CurrencySymbol : countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId).CurrencySymbol;
+
             }
 
             return new WalletTransactionSummaryDTO
