@@ -581,7 +581,10 @@ namespace GIGLS.Services.Business.Pricing
                 {
                     PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
                 }
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
+                else
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Regular, pricingDto.CountryId);
+                }
             }
 
             return PackagePrice + deliveryOptionPrice;
