@@ -996,6 +996,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
                 }
 
+                if (!String.IsNullOrEmpty(shipmentDTO.RequestNumber))
+                {
+                    //scan the shipment received for tracking
+                    var newShipmentTracking = await _shipmentTrackingService.AddShipmentTrackingForReceivedItems(new ShipmentTrackingDTO
+                    {
+                        DateTime = DateTime.Now,
+                        Status = ShipmentScanStatus.SRFS.ToString(),
+                        Waybill = newShipment.Waybill,
+                        ServiceCentreId = newShipment.DepartureServiceCentreId
+                    }, ShipmentScanStatus.SRFS, shipmentDTO.RequestNumber) ;
+                }
+
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
                 {

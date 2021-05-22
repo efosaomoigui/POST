@@ -1354,6 +1354,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Waybill = s.Waybill,
                                                DepartureServiceCentreId = s.DepartureServiceCentreId,
                                                DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureStationId = dept.StationId,
+                                               DestinationStationId = dest.StationId,
                                                DepartureServiceCentreName = dept.Name,
                                                DestinationServiceCentreName = dest.Name,
                                                Amount = s.GrandTotal,
