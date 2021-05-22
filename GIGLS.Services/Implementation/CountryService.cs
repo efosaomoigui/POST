@@ -193,7 +193,7 @@ namespace GIGLS.Services.Implementation
 
                 double amountToDebitDouble = (double)wallet.Balance / countryRateConversion.Rate;
 
-                result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 2);
+                result.WalletBalance = (decimal)Math.Round(amountToDebitDouble, 7);
                     wallet.Balance = result.WalletBalance;
             }
         }
