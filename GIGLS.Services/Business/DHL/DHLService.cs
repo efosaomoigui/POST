@@ -205,6 +205,7 @@ namespace GIGLS.Services.Business.DHL
 
         private ShipmentReceiverDetail GetReceiverContact(InternationalShipmentDTO shipmentDTO)
         {
+            var splittedAddress = shipmentDTO.ReceiverAddress.Split(',');
             var receiver = new ShipmentReceiverDetail
             {
                 ContactInformation = new ContactInformation
@@ -222,9 +223,9 @@ namespace GIGLS.Services.Business.DHL
                     ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
                     CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
                     countyName = shipmentDTO.ReceiverCountry,
-                    AddressLine1 = shipmentDTO.ReceiverAddress,
-                    AddressLine2 = shipmentDTO.ReceiverCity,
-                    AddressLine3 = shipmentDTO.ReceiverCity
+                    AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0],
+                    AddressLine2 = splittedAddress[1],
+                    AddressLine3 = splittedAddress[2] == null ? shipmentDTO.ReceiverCity : splittedAddress[2]
                 }
             };
             return receiver;
@@ -371,6 +372,7 @@ namespace GIGLS.Services.Business.DHL
 
         private RateReceiverDetail GetRateReceiverAddress(InternationalShipmentDTO shipmentDTO)
         {
+            var splittedAddress = shipmentDTO.ReceiverAddress.Split(',');
             var address = new RateReceiverDetail
             {
                 CityName = shipmentDTO.ReceiverCity,
@@ -378,9 +380,9 @@ namespace GIGLS.Services.Business.DHL
                 CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
                 CountyName = shipmentDTO.ReceiverCountry,
                 ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
-                AddressLine1 = shipmentDTO.ReceiverAddress,
-                AddressLine2 = "address2",
-                AddressLine3 = "address3"
+                AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0],
+                AddressLine2 = splittedAddress[1],
+                AddressLine3 = splittedAddress[2] == null ? shipmentDTO.ReceiverCity : splittedAddress[2]
             };
 
             return address;
