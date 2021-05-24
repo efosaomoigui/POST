@@ -780,18 +780,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (customer.TransactionType != WalletTransactionType.BOT)
                     {
-                        //process payment
-                        var transaction = new WalletTransactionDTO
-                        {
-                            WalletId = wallet.WalletId,
-                            CreditDebitType = CreditDebitType.Debit,
-                            Amount = newPreShipment.GrandTotal,
-                            ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
-                            Waybill = newPreShipment.Waybill,
-                            Description = "Payment for Shipment",
-                            PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
-                            UserId = newPreShipment.UserId
-                        };
+                       
                     //process payment
                     var transaction = new WalletTransactionDTO
                     {
