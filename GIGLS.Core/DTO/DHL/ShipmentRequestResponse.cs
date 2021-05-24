@@ -10,6 +10,7 @@ namespace GIGLS.Core.DTO.DHL
             ShipmentResponse = new ShipmentResponse();
         }
         public ShipmentResponse ShipmentResponse { get; set; }
+        public string ResponseResult { get; set; }
     }
 
     public class ShipmentResponse

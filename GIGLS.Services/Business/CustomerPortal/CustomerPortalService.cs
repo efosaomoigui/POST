@@ -2878,13 +2878,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             //block third party payment process
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
-            if (shipment != null)
-            {
-                if (shipment.CustomerCode != currentUser.UserChannelCode)
-                {
-                    throw new GenericException($"Third Party Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-                }
-            }
+            //if (shipment != null)
+            //{
+            //    if (shipment.CustomerCode != currentUser.UserChannelCode)
+            //    {
+            //        throw new GenericException($"Third Party Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            //    }
+            //}
 
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
 

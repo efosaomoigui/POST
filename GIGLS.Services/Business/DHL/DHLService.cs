@@ -1,13 +1,13 @@
 ﻿using GIGLS.Core.DTO.DHL;
-using GIGLS.Core.DTO.DHL.Enum;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -31,77 +31,45 @@ namespace GIGLS.Services.Business.DHL
             return formattedPrice;
         }
 
-        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentRequestResponse rateRequestResponse)
+        private InternationalShipmentWaybillDTO FormatShipmentCreationReponse(ShipmentResPayload payload)
         {
-            InternationalShipmentWaybillDTO output = new InternationalShipmentWaybillDTO();
-
-            if (rateRequestResponse.ShipmentResponse.Notification.Any())
+            var output = new InternationalShipmentWaybillDTO();
+            if (payload.Documents.Count > 0 || !string.IsNullOrWhiteSpace(payload.ShipmentTrackingNumber))
             {
-                if (rateRequestResponse.ShipmentResponse.Notification.Any())
-                {
-                    if (rateRequestResponse.ShipmentResponse.Notification[0].Code == "0")
-                    {
-                        output.ShipmentIdentificationNumber = rateRequestResponse.ShipmentResponse.ShipmentIdentificationNumber;
-                        output.PackageResult = rateRequestResponse.ShipmentResponse.PackagesResult.ToString();
-
-                        if (rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Any())
-                        {
-                            string[] itemIds = rateRequestResponse.ShipmentResponse.PackagesResult.PackageResult.Select(x => x.TrackingNumber).ToArray();
-                            output.PackageResult = string.Join(",", itemIds);
-                            //[{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
-                        }
-
-                        //if (rateRequestResponse.ShipmentResponse.LabelImage.Any())
-                        //{
-                        //    output.ImageFormat = rateRequestResponse.ShipmentResponse.LabelImage[0].LabelImageFormat;
-                        //    output.GraphicImage = rateRequestResponse.ShipmentResponse.LabelImage[0].GraphicImage;
-                        //}
-                    }
-                    else
-                    {
-                        throw new GenericException($"There was an issue processing your request: {rateRequestResponse.ShipmentResponse.Notification[0].Message}");
-                    }
-                }
+                output.OutBoundChannel = CompanyMap.DHL;
+                output.ShipmentIdentificationNumber = payload.ShipmentTrackingNumber;
+                output.PackageResult = payload.Packages[0].TrackingNumber;
+                output.PdfFormat = payload.Documents[0].Content;
             }
             else
             {
-                throw new GenericException("There was an issue processing your request. ");
+                throw new GenericException($"{payload.ErrorReason}");
             }
-
             return output;
         }
 
-        private TotalNetResult FormatPriceReponse(RateRequestResponse rateRequestResponse)
+        private TotalNetResult FormatPriceReponse(RateResPayload response)
         {
-            TotalNetResult output = new TotalNetResult();
-
-            if (rateRequestResponse.RateResponse.Provider.Any())
+            var output = new TotalNetResult();
+            if (response.Products.Count > 0)
             {
-                if (rateRequestResponse.RateResponse.Provider[0].Notification.Any())
-                {
-                    if (rateRequestResponse.RateResponse.Provider[0].Notification[0].Code == "0")
-                    {
-                        if (rateRequestResponse.RateResponse.Provider[0].Service.Any())
-                        {
-                            output.Amount = rateRequestResponse.RateResponse.Provider[0].Service[0].TotalNet.Amount;
-                            output.Currency = rateRequestResponse.RateResponse.Provider[0].Service[0].TotalNet.Currency;
-                        }
-                    }
-                    else
-                    {
-                        throw new GenericException($"{rateRequestResponse.RateResponse.Provider[0].Notification[0].Message}");
-                    }
-                }
+                output.Amount = (decimal)response.Products[0].TotalPrice[0].Price;
+                output.InternationalShippingCost = (decimal)response.Products[0].TotalPrice[0].Price;
+                output.Currency = response.Products[0].TotalPrice[0].PriceCurrency;
+            }
+            else
+            {
+                throw new GenericException($"{response.ErrorReason}");
             }
 
             return output;
         }
 
-        private async Task<ShipmentRequestResponse> CreateDHLShipment(InternationalShipmentDTO shipmentDTO)
+        private async Task<ShipmentResPayload> CreateDHLShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
-                var result = new ShipmentRequestResponse();
+                var result = new ShipmentResPayload();
 
                 //Get Price from DHL
                 var rateRequest = GetShipmentRequestPayload(shipmentDTO);
@@ -109,6 +77,7 @@ namespace GIGLS.Services.Business.DHL
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
                 string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
                 string url = baseUrl + path;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 using (var client = new HttpClient())
                 {
@@ -116,12 +85,23 @@ namespace GIGLS.Services.Business.DHL
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     var byteArray = GetAutorizationKey();
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-                    var json = JsonConvert.SerializeObject(rateRequest);
+                    var json = JsonConvert.SerializeObject(rateRequest, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
-                    result = JsonConvert.DeserializeObject<ShipmentRequestResponse>(responseResult);
+                    if (response.StatusCode != HttpStatusCode.Created)
+                    {
+                        var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
+                        result.ErrorReason = dHLError.Detail;
+                    }
+                    else
+                    {
+                        result = JsonConvert.DeserializeObject<ShipmentResPayload>(responseResult);
+                    }
                 }
 
                 return result;
@@ -132,163 +112,174 @@ namespace GIGLS.Services.Business.DHL
             }
         }
 
-        private ShipmentRequestedPayload GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
+        private ShippingPayload GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
-            var shipmentPayload = new ShipmentRequestedPayload();
-            var shipmentInfo = GetShipmentInfo();
-            var internationalDetail = GetInternationalDetail(shipmentDTO);
-            var packages = GetPackages(shipmentDTO);
-            string timeStamp = GetShipTimeStamp();
-            var shipperContact = GetShipperContact(shipmentDTO);
-            var receiverContact = GetReceiverContact(shipmentDTO);
+            var shipmentPayload = new ShippingPayload();
 
-            var ship = new ShipDTO
-            {
-                Shipper = shipperContact,
-                Recipient =receiverContact
-            };
+            //var next2Day = DateTime.UtcNow.AddDays(2);
+            shipmentPayload.PlannedShippingDateAndTime =
+            shipmentPayload.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            shipmentPayload.Pickup.IsRequested = false;
+            shipmentPayload.Accounts.Add(GetAccount());
+            shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO);
+            shipmentPayload.CustomerDetails.ReceiverDetails = GetReceiverContact(shipmentDTO);
+            shipmentPayload.Content = GetShippingContent(shipmentDTO);
+            shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty();
 
-            shipmentPayload.ShipmentRequest.RequestedShipment.ShipmentInfo = shipmentInfo;
-            shipmentPayload.ShipmentRequest.RequestedShipment.InternationalDetail = internationalDetail;
-            shipmentPayload.ShipmentRequest.RequestedShipment.Ship = ship;
-            shipmentPayload.ShipmentRequest.RequestedShipment.Packages = packages;
-            shipmentPayload.ShipmentRequest.RequestedShipment.ShipTimestamp = timeStamp;
             return shipmentPayload;
         }
 
-        private string GetShipTimeStamp()
+        private ShippingContent GetShippingContent(InternationalShipmentDTO shipmentDTO)
         {
-            var next2Day = DateTime.Now.AddDays(2);
-            string timeStamp = next2Day.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
-            return timeStamp;
-        }
-
-        private PackagesDTO GetPackages(InternationalShipmentDTO shipmentDTO)
-        {
-            PackagesDTO packages = new PackagesDTO
+            var signatureTitle = "Mr.";
+            if (shipmentDTO.CustomerDetails.Gender == Gender.Female)
             {
-                RequestedPackages = GetItemPackages(shipmentDTO)
-            };
-            return packages;
-        }
-            
-        private List<RequestedPackagesDTO> GetItemPackages(InternationalShipmentDTO shipmentDTO)
-        {
-            var items = new List<RequestedPackagesDTO>();
-
-            int count = 1;
-           foreach(var item in shipmentDTO.ShipmentItems)
-            {
-                Dimensions dimensions = new Dimensions
-                {
-                    Height = (decimal)item.Height,
-                    Width = (decimal)item.Width,
-                    Length = (decimal)item.Length
-                };
-
-                RequestedPackagesDTO requestedPackagesDTO = new RequestedPackagesDTO
-                {
-                    CustomerReferences = "Piece "  + count, // item.Description_s,
-                    number = count,
-                    Weight = (decimal)item.Weight,
-                    Dimensions = dimensions
-                };
-
-                items.Add(requestedPackagesDTO);      
-                count++;
+                signatureTitle = "Mrs.";
             }
-            return items;
-        }
-
-        private InternationalDetailDTO GetInternationalDetail(InternationalShipmentDTO shipmentDTO)
-        {
-            var commodities = GetCommodities(shipmentDTO);
-            var internationalDetail = new InternationalDetailDTO
+            var content = new ShippingContent
             {
-                Commodities = commodities,
-                Content = shipmentDTO.Content.ToString()
-            };
-            return internationalDetail;
-        }
-
-        private ShipmentInfoDTO GetShipmentInfo()
-        {
-            ShipmentInfoDTO shipmentInfo = new ShipmentInfoDTO
-            {
-                DropOffType = DropOffType.REGULAR_PICKUP.ToString(),
-                UnitOfMeasurement = UnitOfMeasurement.SI.ToString()
-            };
-            shipmentInfo.Account = GetGIGAccountNumber();
-            return shipmentInfo;
-        }
-
-        private Commodity GetCommodities(InternationalShipmentDTO shipmentDTO)
-        {
-            var commodity = new Commodity
-            {
-                Description = shipmentDTO.Description,
-                NumberOfPieces = shipmentDTO.ShipmentItems.Count,
-                //Quantity = (int)shipmentDTO.ApproximateItemsWeight,
-                CustomsValue = (int)shipmentDTO.DeclarationOfValueCheck
-            };
-            return commodity;
-        }
-
-        private Details GetReceiverContact(InternationalShipmentDTO shipmentDTO)
-        {
-            Details receiver = new Details
-            {
-                Contact = new Contact
+                IsCustomsDeclarable = true,
+                DeclaredValue = shipmentDTO.DeclarationOfValueCheck.Value,
+                DeclaredValueCurrency = "NGN",
+                Incoterm = "DAP",
+                UnitOfMeasurement = "metric",
+                ExportDeclaration = new ExportDeclaration
                 {
-                    PersonName = shipmentDTO.ReceiverName,
-                    CompanyName = shipmentDTO.ReceiverCompanyName,
-                    PhoneNumber = shipmentDTO.ReceiverPhoneNumber,
-                    EmailAddress = shipmentDTO.ReceiverEmail
-                },
-                Address = new AddressPayload
-                {
-                    StreetLines = shipmentDTO.ReceiverAddress,
-                    City = shipmentDTO.ReceiverCity,
-                    PostalCode = shipmentDTO.ReceiverPostalCode,
-                    CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
-                    StreetLines2 = shipmentDTO.ReceiverCity,
-                    StreetLines3 = shipmentDTO.ReceiverCity
+                    DestinationPortName = shipmentDTO.ReceiverCity,
+                    Invoice = new ShippingInvoice
+                    {
+                        Number = "4010097858",
+                        Date = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+                        SignatureName = shipmentDTO.CustomerDetails.CustomerName,
+                        SignatureTitle = signatureTitle
+                    }
                 }
             };
 
+            var chargeValue = Math.Round((7.5M / 100) * shipmentDTO.InternationalShippingCost, 2);
+            var charge = new AdditionalCharge { Value = chargeValue, Caption = "freight" };
+            content.ExportDeclaration.AdditionalCharges.Add(charge);
+
+            var license = new License { Value = "license", TypeCode = "export" };
+            content.ExportDeclaration.Licenses.Add(license);
+
+            int count = 1;
+            foreach (var item in shipmentDTO.ShipmentItems)
+            {
+                content.Description = item.Description;
+                var netValue = (float)item.Length * (float)item.Width * (float)item.Height / 5000;
+                var package = new ShippingPackage
+                {
+                    Weight = (float)item.Weight,
+                    Dimensions = new Dimensions
+                    {
+                        Length = (float)item.Length,
+                        Width = (float)item.Width,
+                        Height = (float)item.Height,
+                    }
+                };
+                content.Packages.Add(package);
+                var lineItem = new LineItem
+                {
+                    Number = count,
+                    Description = shipmentDTO.ItemDetails,
+                    Price = shipmentDTO.DeclarationOfValueCheck.Value,
+                    PriceCurrency = "NGN",
+                    ManufacturerCountry = shipmentDTO.ManufacturerCountry.Trim().Length <= 2 ? shipmentDTO.ManufacturerCountry : shipmentDTO.ManufacturerCountry.Trim().Substring(0, 2),
+                    ExportReasonType = "permanent",
+                    ExportControlClassificationNumber = "",
+                    Quantity = new Quantity
+                    {
+                        Value = item.Quantity,
+                        UnitOfMeasurement = "BOX"
+                    },
+                    Weight = new ShippingWeight
+                    {
+                        NetValue = (float)Math.Round(netValue, 2),
+                        GrossValue = (float)Math.Round(netValue, 2),
+                    }
+                };
+                content.ExportDeclaration.LineItems.Add(lineItem);
+                count++;
+            }
+            return content;
+        }
+
+        private ShipmentReceiverDetail GetReceiverContact(InternationalShipmentDTO shipmentDTO)
+        {
+            var receiver = new ShipmentReceiverDetail
+            {
+                ContactInformation = new ContactInformation
+                {
+                    Email = shipmentDTO.ReceiverEmail,
+                    Phone = shipmentDTO.ReceiverPhoneNumber,
+                    MobilePhone = shipmentDTO.ReceiverPhoneNumber,
+                    CompanyName = shipmentDTO.ReceiverCompanyName,
+                    FullName = shipmentDTO.ReceiverName
+                },
+                PostalAddress = new PostalAddress
+                {
+                    CityName = shipmentDTO.ReceiverCity,
+                    PostalCode = shipmentDTO.ReceiverPostalCode,
+                    ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
+                    CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
+                    countyName = shipmentDTO.ReceiverCountry,
+                    AddressLine1 = shipmentDTO.ReceiverAddress,
+                    AddressLine2 = shipmentDTO.ReceiverCity,
+                    AddressLine3 = shipmentDTO.ReceiverCity
+                }
+            };
             return receiver;
         }
 
-        private Details GetShipperContact(InternationalShipmentDTO shipmentDTO)
+        private ShipmentShipperDetail GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
-            Details shipper = new Details
+            string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
+            string phoneNumber = ConfigurationManager.AppSettings["UPSGIGPhoneNumber"];
+
+            var shipper = new ShipmentShipperDetail
             {
-                Contact = new Contact
+                ContactInformation = new ContactInformation
                 {
-                    PersonName = shipmentDTO.CustomerDetails.CustomerName,
+                    Email = email,
+                    Phone = phoneNumber,
+                    MobilePhone = phoneNumber,
                     CompanyName = "GIG LOGISTICS",
-                    PhoneNumber = "2348035324958",
-                    EmailAddress = "azeez.oladejo@giglogistics.com"
+                    FullName = shipmentDTO.CustomerDetails.CustomerName
                 },
-                Address = new AddressPayload
+                PostalAddress = new PostalAddress
                 {
-                    StreetLines = "GIG LOGISTICS BUILDING, BEHIND MOBIL FILLING",
-                    StreetLines2 = "STATION, GBAGADA PHASE 2",
-                    StreetLines3 = "GBAGADA LAGOS",
-                    City = "LAGOS ",
+                    CityName = "Lagos",
                     PostalCode = "100001",
-                    CountryCode = "NG"
+                    ProvinceCode = "NG",
+                    CountryCode = "NG",
+                    countyName = "Nigeria",
+                    AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
+                    AddressLine2 = "Beside Mobile Fuel Station",
+                    AddressLine3 = "Gbagada 100234, Lagos",
                 }
             };
             return shipper;
         }
 
-        private async Task<RateRequestResponse> GetDHLPrice(InternationalShipmentDTO shipmentDTO)
+        private OutputImageProperties GetShipperOutputImageProperty()
+        {
+            var output = new OutputImageProperties { AllDocumentsInOneImage = true };
+            var image1 = new ImageOption { TypeCode = "label", TemplateName = "ECOM26_84_A4_001" };
+            output.ImageOptions.Add(image1);
+            var image2 = new ImageOption { TypeCode = "waybillDoc", TemplateName = "ARCH_8X4_A4_002", IsRequested = true };
+            output.ImageOptions.Add(image2);
+            var image3 = new ImageOption { InvoiceType = "commercial", TypeCode = "invoice", IsRequested = true, LanguageCode = "eng" };
+            output.ImageOptions.Add(image3);
+
+            return output;
+        }
+
+        private async Task<RateResPayload> GetDHLPrice(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
-                var result = new RateRequestResponse();
-
+                var result = new RateResPayload();
                 //Get Price from DHL
                 var rateRequest = GetRateRequestPayload(shipmentDTO);
 
@@ -302,12 +293,23 @@ namespace GIGLS.Services.Business.DHL
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     var byteArray = GetAutorizationKey();
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-                    var json = JsonConvert.SerializeObject(rateRequest);
+                    var json = JsonConvert.SerializeObject(rateRequest, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
-                    result = JsonConvert.DeserializeObject<RateRequestResponse>(responseResult);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
+                        result.ErrorReason = dHLError.Detail;
+                    }
+                    else
+                    {
+                        result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
+                    }
                 }
 
                 return result;
@@ -327,68 +329,103 @@ namespace GIGLS.Services.Business.DHL
             return key;
         }
 
-        private string GetGIGAccountNumber()
+        private RatePayload GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
-            string account = ConfigurationManager.AppSettings["DHLAccount"];
-            return account;
-        }
+            var rateRequest = new RatePayload();
 
-        private RateRequestPayload GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
-        {
-            var rateRequest = new RateRequest();
-            rateRequest.RequestedShipment.Account = GetGIGAccountNumber();
+            rateRequest.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            rateRequest.Accounts.Add(GetAccount());
+            rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
+            rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
 
-            rateRequest.RequestedShipment.DropOffType = DropOffType.REGULAR_PICKUP.ToString();
-            rateRequest.RequestedShipment.ShipTimestamp = DateTime.Now.AddDays(2);
-            rateRequest.RequestedShipment.UnitOfMeasurement = UnitOfMeasurement.SI.ToString();
-            rateRequest.RequestedShipment.Content = shipmentDTO.Content.ToString();
-
-            //Shipper address -- GIGL default address
-            var address = GetShipperAddress();
-            rateRequest.RequestedShipment.Ship.Shipper.City = address.City;
-            rateRequest.RequestedShipment.Ship.Shipper.PostalCode = address.PostalCode;
-            rateRequest.RequestedShipment.Ship.Shipper.CountryCode = address.CountryCode;
-
-            //Receiver Address
-            rateRequest.RequestedShipment.Ship.Recipient.City = shipmentDTO.ReceiverCity;
-            rateRequest.RequestedShipment.Ship.Recipient.PostalCode = shipmentDTO.ReceiverPostalCode;
-            rateRequest.RequestedShipment.Ship.Recipient.CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2);
-
-            int count = 1;
             foreach (var item in shipmentDTO.ShipmentItems)
             {
-                var package = new RequestedPackages
+                var package = new RatePackage
                 {
-                    number = count
+                    Weight = (float)item.Weight,
+                    Dimensions = new Dimensions
+                    {
+                        Length = (float)item.Length,
+                        Width = (float)item.Width,
+                        Height = (float)item.Height
+                    }
                 };
-                package.Weight.Value = (decimal)item.Weight;
-                package.Dimensions.Length = (decimal)item.Length;
-                package.Dimensions.Width = (decimal)item.Width;
-                package.Dimensions.Height = (decimal)item.Height;
-
-                //Packages
-                rateRequest.RequestedShipment.Packages.RequestedPackages.Add(package);
-                count++;
+                rateRequest.Packages.Add(package);
             }
-
-            RateRequestPayload ratePayload = new RateRequestPayload
-            {
-                RateRequest = rateRequest
-            };
-            return ratePayload;
+            return rateRequest;
         }
 
-        private AddressPayload GetShipperAddress()
+        private RateShipperDetail GetRateShipperAddress()
         {
             //Move this detail to web-config for now
-            AddressPayload address = new AddressPayload
+            var address = new RateShipperDetail
             {
-                City = "Lagos",
+                CityName = "Lagos",
                 PostalCode = "100001",
-                CountryCode = "NG"
+                CountryCode = "NG",
+                CountyName = "Lagos",
+                AddressLine1 = "address1",
+                AddressLine2 = "address2",
+                AddressLine3 = "address3"
+            };
+            return address;
+        }
+
+        private RateReceiverDetail GetRateReceiverAddress(InternationalShipmentDTO shipmentDTO)
+        {
+            var address = new RateReceiverDetail
+            {
+                CityName = shipmentDTO.ReceiverCity,
+                PostalCode = shipmentDTO.ReceiverPostalCode,
+                CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
+                CountyName = shipmentDTO.ReceiverCountry,
+                ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
+                AddressLine1 = shipmentDTO.ReceiverAddress,
+                AddressLine2 = "address2",
+                AddressLine3 = "address3"
             };
 
             return address;
+        }
+
+        private Account GetAccount()
+        {
+            var number = ConfigurationManager.AppSettings["DHLAccount"];
+            var account = new Account()
+            {
+                TypeCode = "shipper",
+                Number = number
+            };
+            return account;
+        }
+
+        public async Task<InternationalShipmentTracking> TrackInternationalShipment(string internationalWaybill)
+        {
+            try
+            {
+                var result = new InternationalShipmentTracking();
+                string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
+                string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
+                string url = $"{baseUrl}{path}/{internationalWaybill}/tracking";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var byteArray = GetAutorizationKey();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    string responseResult = await response.Content.ReadAsStringAsync();
+                    result = JsonConvert.DeserializeObject<InternationalShipmentTracking>(responseResult);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

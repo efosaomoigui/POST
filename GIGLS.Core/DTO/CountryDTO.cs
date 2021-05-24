@@ -26,6 +26,8 @@ namespace GIGLS.Core.DTO
         public string TermAndConditionCountry { get; set; }
         public string CountryFlag { get; set; }
         public bool IsInternationalShippingCountry { get; set; }
+        public string CourierEnable { get; set; }
+        public List<string> CourierList { get; set; }
     }
     public class NewCountryDTO 
     {

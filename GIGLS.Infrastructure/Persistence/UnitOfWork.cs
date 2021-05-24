@@ -516,6 +516,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICustomerInvoiceRepository CustomerInvoice { get; set; }
 
+        [Inject]
+        public ICaptainBonusByZoneMapingRepository CaptainBonusByZoneMaping { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -1,4 +1,4 @@
-﻿                                                                                                               using GIGLS.Core.IServices;
+﻿using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Services.Implementation;
@@ -10,7 +10,7 @@ using System.Linq;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO;
 
-namespace GIGLS.WebApi.Controllers.ServiceCentres  
+namespace GIGLS.WebApi.Controllers.ServiceCentres
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/servicecentre")]
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         private readonly IServiceCentreService _service;
         private readonly IUserService _userService;
 
-        public ServiceCentreController(IServiceCentreService service, IUserService userService):base(nameof(ServiceCentreController))
+        public ServiceCentreController(IServiceCentreService service, IUserService userService) : base(nameof(ServiceCentreController))
         {
             _userService = userService;
             _service = service;
@@ -44,7 +44,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         [AllowAnonymous]
         [HttpGet]
         [Route("jobs")]
-        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresJobs() 
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresJobs()
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -131,14 +131,15 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         [Route("")]
         public async Task<IServiceResponse<object>> AddServiceCentre(ServiceCentreDTO centreDto)
         {
-            return await HandleApiOperationAsync( async () =>
-            {
-                var centre = await _service.AddServiceCentre(centreDto);
+            return await HandleApiOperationAsync(async () =>
+           {
+               var centre = await _service.AddServiceCentre(centreDto);
 
-                return new ServiceResponse<object> {
-                        Object = centre
-                };
-            });
+               return new ServiceResponse<object>
+               {
+                   Object = centre
+               };
+           });
 
         }
 
@@ -157,14 +158,14 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
 
             });
-            
-            
+
+
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("station/{stationId:int}")]
-        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentreByStationId (int stationId)
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentreByStationId(int stationId)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -189,7 +190,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                    Object = true
                };
            });
-           
+
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
@@ -205,7 +206,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                     Object = true
                 };
             });
-           
+
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
@@ -221,7 +222,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                     Object = true
                 };
             });
-           
+
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]

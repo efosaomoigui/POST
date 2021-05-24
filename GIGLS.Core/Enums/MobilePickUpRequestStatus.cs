@@ -20,6 +20,7 @@
         TimedOut,
         Missed,
         Moved,
-        PendingCancellation
+        PendingCancellation,
+        Pending
     }
 }

@@ -169,6 +169,12 @@ namespace GIGLS.Core.DTO.Shipments
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public string PaymentUrl { get; set; }
+        public double? ReceiverLat { get; set; }
+        public double? ReceiverLng { get; set; }
+        public double? SenderLat { get; set; }
+        public double? SenderLng { get; set; }
+
 
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
@@ -290,6 +296,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string WaybillImage { get; set; }
         public string WaybillImageFormat { get; set; }
         public string ImagePath { get; set; }
+        public string PaymentUrl { get; set; }
     }
 
     public class PreShipmentMobileFromAgilityDTO : BaseDomainDTO
@@ -416,5 +423,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string PickupTAT { get; set; }
         public string DeliveryTAT { get; set; }
         public string AppType { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerType { get; set; }
+        public DateTime DeliveredTime { get; set; }
     }
 }

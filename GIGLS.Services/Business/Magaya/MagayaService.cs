@@ -601,7 +601,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         foreach (var country in listOfCountryForPayment)
                         {
                             waybillPayment.PaymentCountryId = country;
-                            waybillPayment.PaystackCountrySecret = "PayStackSecret";
+                            waybillPayment.PaystackCountrySecret = "PayStackLiveSecret";
                             var response = await _waybillPaymentLogService.AddWaybillPaymentLogForIntlShipment(waybillPayment);
                             paymentLinks.Add(response.data.Authorization_url);
                         }
@@ -922,6 +922,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.ShipmentHash = "";
+                shipmentDTO.RequestNumber = mDto.RequestNumber;
 
 
                 //Drop Off

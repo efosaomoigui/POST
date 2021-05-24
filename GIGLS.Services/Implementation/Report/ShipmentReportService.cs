@@ -719,7 +719,19 @@ namespace GIGLS.Services.Implementation.Report
                 var result = await _uow.Shipment.GetCoporateTransactionsByCode(filter);
                 if (result.InvoiceViewDTOs.Any())
                 {
-                  result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
+                    //change dest and dept to station names
+                    var IDs = new List<int>();
+                    var destStationsIDs = result.InvoiceViewDTOs.Select(x => x.DestinationStationId);
+                    var deptStationsIDs = result.InvoiceViewDTOs.Select(x => x.DepartureStationId);
+                    IDs.AddRange(destStationsIDs);
+                    IDs.AddRange(deptStationsIDs);
+                    var stations = _uow.Station.GetAllAsQueryable().Where(x => IDs.Contains(x.StationId)).ToList();
+                    foreach (var item in result.InvoiceViewDTOs)
+                    {
+                        item.DestinationServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DestinationStationId).StationName;
+                        item.DepartureServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DepartureStationId).StationName;
+                    }
+                    result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
                 }
                 return result;
             }

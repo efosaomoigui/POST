@@ -23,5 +23,6 @@ namespace GIGLS.Core.IMessageService
         Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName);
         Task SendOverseasMails(MessageDTO messageDTO);
         Task SendOverseasPaymentConfirmationMails(ShipmentDTO shipmentDto);
+        Task SendGeneralMailPayment(ShipmentDTO shipmentDto, List<string> generalPaymentLinks);
     }
 }

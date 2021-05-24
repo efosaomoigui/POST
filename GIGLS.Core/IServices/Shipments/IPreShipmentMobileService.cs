@@ -94,5 +94,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned();
         Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked();
         Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileTAT(NewFilterOptionsDto newFilterOptionsDto);
+        Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileDeliveryTAT(NewFilterOptionsDto newFilterOptionsDto);
     }
 }

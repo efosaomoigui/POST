@@ -4,6 +4,13 @@
     {
         Internal,
         Magaya,
-        DHL
+        DHL,
+        UPS
+    }
+
+    public enum InternationalShipmentItemCategory
+    {
+        NonDocument,
+        Document
     }
 }

@@ -255,8 +255,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);  
-                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -314,8 +313,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);  
-                    StartDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    StartDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {

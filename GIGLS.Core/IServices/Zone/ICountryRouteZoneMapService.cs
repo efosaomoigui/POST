@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,6 +14,9 @@ namespace GIGLS.Core.IServices.Zone
         Task UpdateCountryRouteZoneMap(int routeZoneMapId, CountryRouteZoneMapDTO routeZoneMap);
         Task UpdateStatusCountryRouteZoneMap(int routeZoneMapId, bool status);
         Task DeleteCountryRouteZoneMap(int routeZoneMapId); 
+        Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination, CompanyMap companyMap = CompanyMap.GIG);
+        Task<CountryRouteZoneMapDTO> GetBasicZone(int departure, int destination, CompanyMap companyMap);
+
         Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination);
     }
 }

@@ -872,6 +872,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            DateCreated = r.DateCreated,
                                            DateModified = r.DateModified,
                                            DeliveryOptionId = r.DeliveryOptionId,
+                                           InternationalWayBill = r.InternationalWayBill,
                                            DeliveryOption = new DeliveryOptionDTO
                                            {
                                                Code = r.DeliveryOption.Code,
@@ -1209,6 +1210,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            PaymentMethod = r.PaymentMethod,
                                            vatvalue_display = r.vatvalue_display,
                                            ReprintCounterStatus = r.ReprintCounterStatus,
+                                           FileNameUrl = r.FileNameUrl,
+                                           InternationalWayBill = r.InternationalWayBill,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
@@ -1321,7 +1324,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
-
         public Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter)
         {
             // filter by cancelled shipments
@@ -1352,6 +1354,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Waybill = s.Waybill,
                                                DepartureServiceCentreId = s.DepartureServiceCentreId,
                                                DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureStationId = dept.StationId,
+                                               DestinationStationId = dest.StationId,
                                                DepartureServiceCentreName = dept.Name,
                                                DestinationServiceCentreName = dest.Name,
                                                Amount = s.GrandTotal,
@@ -1382,7 +1386,61 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return Task.FromResult(customerInvoice);
         }
+
+        //Get Count  of  Vehicles and Trips
+        public async Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                int result = 0;
+
+                DateTime dt = DateTime.Today;
+                var beginningDate = dt;
+                var endingDate = DateTime.Now;
+
+                //If No Date Supplied
+                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+                {
+                    beginningDate = dt;
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                    beginningDate = queryDate.Item1;
+                    endingDate = queryDate.Item2;
+                }
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+
+                };
+
+                var summary = await Context.Database.SqlQuery<int>($"{procedureName} " +
+                   "@StartDate, @EndDate",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
+
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
     {
@@ -2153,8 +2211,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
-                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    beginningDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {
@@ -2207,8 +2264,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //If No Date Supplied
                 if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
                 {
-                    var threeMonthsAgo = DateTime.Now.AddMonths(-2);
-                    beginningDate = new DateTime(threeMonthsAgo.Year, threeMonthsAgo.Month, 1);
+                    beginningDate = DateTime.Now.AddMonths(-2);
                 }
                 else
                 {

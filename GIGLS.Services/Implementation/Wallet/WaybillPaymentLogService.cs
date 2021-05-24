@@ -234,7 +234,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return paystackResponse;
         }
 
-        private async Task<string> GenerateWaybillReferenceCode(string waybill)
+        public async Task<string> GenerateWaybillReferenceCode(string waybill)
         {
             string code = await _passwordGenerator.Generate();
             string reference = "wb-" + waybill + "-" + code;
@@ -787,7 +787,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        private async Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        public async Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
