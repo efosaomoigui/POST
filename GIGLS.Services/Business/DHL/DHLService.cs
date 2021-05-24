@@ -116,9 +116,7 @@ namespace GIGLS.Services.Business.DHL
         {
             var shipmentPayload = new ShippingPayload();
 
-            //var next2Day = DateTime.UtcNow.AddDays(2);
-            shipmentPayload.PlannedShippingDateAndTime =
-            shipmentPayload.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            shipmentPayload.PlannedShippingDateAndTime = AddWorkdays().ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             shipmentPayload.Pickup.IsRequested = false;
             shipmentPayload.Accounts.Add(GetAccount());
             shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO);
@@ -333,7 +331,7 @@ namespace GIGLS.Services.Business.DHL
         {
             var rateRequest = new RatePayload();
 
-            rateRequest.PlannedShippingDateAndTime = DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            rateRequest.PlannedShippingDateAndTime = AddWorkdays().ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
@@ -427,5 +425,20 @@ namespace GIGLS.Services.Business.DHL
                 throw;
             }
         }
+
+        private DateTime AddWorkdays()
+        {
+            //var originalDate = DateTime.UtcNow;
+            int nonWorkDays = 2;
+            var tmpDate = DateTime.Today;
+            while (nonWorkDays > 0)
+            {
+                tmpDate = tmpDate.AddDays(1);
+                if (tmpDate.DayOfWeek < DayOfWeek.Saturday && tmpDate.DayOfWeek > DayOfWeek.Sunday)
+                    nonWorkDays--;
+            }
+            return tmpDate;
+        }
+
     }
 }
