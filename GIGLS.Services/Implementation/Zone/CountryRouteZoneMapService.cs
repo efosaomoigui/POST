@@ -137,5 +137,17 @@ namespace GIGLS.Services.Implementation.Zone
             await _unitOfWork.CompleteAsync();
         }
 
+        public async Task<CountryRouteZoneMapDTO> GetZone(int departure, int destination)
+        {
+            // use country direct
+            var routeZoneMap = await _unitOfWork.CountryRouteZoneMap.GetAsync(r =>
+                r.DepartureId == departure && r.DestinationId == destination, "Zone,Destination,Departure");
+
+            if (routeZoneMap == null)
+                throw new GenericException("The Country Mapping of Route to Zone does not exist");
+
+            return Mapper.Map<CountryRouteZoneMapDTO>(routeZoneMap);
+        }
+
     }
 }
