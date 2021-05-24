@@ -509,6 +509,26 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletTransactionDTOList = await _uow.WalletTransaction.GetWalletTransactionMobile(wallet.WalletId, filterCriteria);
+            if (walletTransactionDTOList.Any())
+            {
+                var countryIds = walletTransactionDTOList.Select(x => x.TransactionCountryId).ToList();
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+                // get the service centre
+                foreach (var item in walletTransactionDTOList)
+                {
+                    var transactionCountry = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId);
+                    if (transactionCountry != null)
+                    {
+                        item.CurrencyCode = transactionCountry.CurrencyCode;
+                        item.CurrencySymbol = transactionCountry.CurrencySymbol;
+                    }
+                    else
+                    {
+                        item.CurrencyCode = country.CurrencyCode;
+                        item.CurrencySymbol = country.CurrencySymbol;
+                    }
+                }
+            }
             return new ModifiedWalletTransactionSummaryDTO
             {
                 WalletTransactions = walletTransactionDTOList,

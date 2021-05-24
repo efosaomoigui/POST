@@ -233,6 +233,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                            IsDeferred = w.IsDeferred,
                                                                            PaymentType = w.PaymentType,
                                                                            WalletId = w.WalletId,
+                                                                           TransactionCountryId = w.TransactionCountryId
                                                                        }).ToList();
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());

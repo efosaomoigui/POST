@@ -44,6 +44,9 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
         public PaymentType PaymentType { get; set; }
+        public int TransactionCountryId { get; set; }
+        public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 
     public class WalletTransactionSummary
