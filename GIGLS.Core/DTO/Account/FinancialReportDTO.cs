@@ -50,6 +50,7 @@ namespace GIGLS.Core.DTO.Account
         public string Waybill { get; set; }
         public decimal Amount { get; set; }
         public string CurrencySymbol { get; set; }
+        public string CountryName { get; set; }
         public string Name { get; set; }
         public double ApproximateItemsWeight { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
