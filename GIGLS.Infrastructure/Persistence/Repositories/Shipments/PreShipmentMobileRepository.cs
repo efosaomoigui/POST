@@ -2,6 +2,7 @@
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
@@ -182,6 +183,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
             var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
 
+
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
@@ -212,6 +214,31 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                result = await GetEquivalentAmountOfActiveCurrencies(result);
             }
             return result.OrderByDescending(x => x.DateCreated).ToList();
+        }
+
+        private async  Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
+        {
+            decimal percentage = 0.00M;
+
+            if (rank == Rank.Class)
+            {
+                var globalProperty =  _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+            else
+            {
+                var globalProperty = _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+
+            decimal discount = ((100M - percentage) / 100M);
+            return discount;
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)

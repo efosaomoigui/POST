@@ -711,6 +711,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
             }
 
+            //Discount for Class Customers
+            if (shipment.IsInternational && shipment.CompanyType == CompanyType.Ecommerce.ToString())
+            {
+                var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
+                if (customer != null)
+                {
+                    int customerCompanyCountryId = customer.UserActiveCountryId;
+                    Rank rank = customer.Rank;
+
+                    var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCompanyCountryId);
+                    amountToDebit = amountToDebit * discount;
+                }
+            }
+
             return amountToDebit;
         }
 
@@ -758,19 +772,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
 
-                    // Get Discount
-                    if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
-                    {
-                        var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
-                        if (customer != null)
-                        {
-                            int customerCountryId = customer.UserActiveCountryId;
-                            Rank rank = customer.Rank;
-
-                            var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
-                            amountToDebit = amountToDebit * discount;
-                        }
-                    }
 
                     var country = await _uow.Country.GetAsync(x => x.CountryId == waybillPaymentLog.PaymentCountryId);
                     waybillPaymentLog.Currency = country.CurrencyCode;
