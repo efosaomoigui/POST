@@ -37,7 +37,7 @@ namespace GIGLS.Services.Business.Pricing
             //get price
             foreach (var item in shipmentDTO.ShipmentItems)
             {
-                var itemType = item.ItemCategory == InternationalShipmentItemCategory.NonDocument ? RegularEcommerceType.UPSNonDocument : RegularEcommerceType.UPSDocument;
+                var itemType = item.InternationalShipmentItemCategory == InternationalShipmentItemCategory.NonDocument ? RegularEcommerceType.UPSNonDocument : RegularEcommerceType.UPSDocument;
                 decimal weight = (decimal)item.Weight;
                 var price = await _domesticZonePriceService.GetDomesticZonePrice(zone.ZoneId, weight, itemType, shipmentDTO.DepartureCountryId);
                 item.Price = price;
