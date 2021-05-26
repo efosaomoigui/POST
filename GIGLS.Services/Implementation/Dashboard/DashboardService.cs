@@ -1006,6 +1006,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
                 startDate = DateTime.Now.AddMonths(-2);
+                startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day);
+                dashboardFilterCriteria.StartDate = startDate;
+                dashboardFilterCriteria.EndDate = endDate;
             }
             else
             {
@@ -1088,7 +1091,6 @@ namespace GIGLS.Services.Implementation.Dashboard
                         dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
 
                         dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetInternationalTotalEarnings(dashboardFilterCriteria);
-                        
 
                     }
                     else if (dashboardFilterCriteria.ActiveCountryId == 1)
@@ -1138,7 +1140,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                     //If Param Type is 0, it is outbound , if param type is 1, it is inbound
                     dashboardDTO.InboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
                     dashboardDTO.InboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
-                    dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
+                    //dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
 
                     //Get count of vehicles dispatched
                     dashboardDTO.VehiclesDispatched = await GetCountOfVehiclesOrTripsOfMovementManifest("DispatchedVehiclesCount", dashboardFilterCriteria);
@@ -1146,7 +1148,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                     //Get number of trips of completed
                     dashboardDTO.TripsCompleted = await GetCountOfVehiclesOrTripsOfMovementManifest("TripsCount", dashboardFilterCriteria);
                 }
-                _uow.Complete();
+                //_uow.Complete();
             }
 
             //set for TargetAmount and TargetOrder

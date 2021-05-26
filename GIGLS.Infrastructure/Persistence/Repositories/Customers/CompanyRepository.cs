@@ -1,27 +1,27 @@
-using System.Collections.Generic;
-using System.Linq;
-using GIGLS.Infrastructure.Persistence.Repository;
-using GIGLS.Core.IRepositories.Customers;
-using GIGLS.Infrastructure.Persistence;
-using GIGLS.Core.DTO.Customers;
-using GIGL.GIGLS.Core.Domain;
-using System.Threading.Tasks;
-using System;
 using AutoMapper;
-using GIGLS.Core.Enums;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IRepositories.Customers;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Infrastructure.Persistence;
+using GIGLS.Infrastructure.Persistence.Repository;
+using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
     public class CompanyRepository : Repository<Company, GIGLSContext>, ICompanyRepository
     {
-        private GIGLSContext _context; 
+        private GIGLSContext _context;
 
-        public CompanyRepository(GIGLSContext context): base(context)
+        public CompanyRepository(GIGLSContext context) : base(context)
         {
             _context = context;
         }
@@ -108,12 +108,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanies(CompanyType companyType,  CustomerSearchOption searchOption)
+        public Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption)
         {
             try
             {
-                var companies = Context.Company.Where(x => x.CompanyType == companyType && 
-                (   x.Name.Contains(searchOption.SearchData) || x.PhoneNumber.Contains(searchOption.SearchData) || x.Email.Contains(searchOption.SearchData) || x.CustomerCode.Contains(searchOption.SearchData))).ToList();
+                var companies = Context.Company.Where(x => x.CompanyType == companyType &&
+                (x.Name.Contains(searchOption.SearchData) || x.PhoneNumber.Contains(searchOption.SearchData) || x.Email.Contains(searchOption.SearchData) || x.CustomerCode.Contains(searchOption.SearchData))).ToList();
                 var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
                 return Task.FromResult(companiesDto);
             }
@@ -122,7 +122,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
-        
+
         public Task<CompanyDTO> GetCompanyById(int companyId)
         {
             try
@@ -166,7 +166,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            DateModified = p.DateModified,
                                            CompanyId = p.CompanyId
                                        }).ToList(),
-                                       Country = _context.Country.Where(x => x.CountryId == c.UserActiveCountryId).Select(x =>  new CountryDTO
+                                       Country = _context.Country.Where(x => x.CountryId == c.UserActiveCountryId).Select(x => new CountryDTO
                                        {
                                            CountryId = x.CountryId,
                                            CountryName = x.CountryName,
@@ -178,7 +178,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        AccountNumber = c.AccountNumber,
                                        BankName = c.BankName,
                                        Rank = c.Rank,
-                                        RankModificationDate = c.RankModificationDate
+                                       RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -208,7 +208,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        State = c.State,
                                        CountryId = c.CountryId,
                                        ReturnAddress = c.ReturnAddress,
-                                       Industry =c.NatureOfBusiness,
+                                       Industry = c.NatureOfBusiness,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
                                        IsCod = c.IsCod,
@@ -392,7 +392,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 
                 var companies = _context.Company.Where(x => x.Email.ToLower() == email || x.CustomerCode.ToLower() == email || x.Name.Contains(email) || x.PhoneNumber.Contains(email));
 
-                if(rank != null)
+                if (rank != null)
                 {
                     companies = companies.Where(x => x.Rank == rank);
                 }
@@ -534,19 +534,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var StartDate = DateTime.Now;
                 var EndDate = DateTime.Now;
 
-                //If No Date Supplied
-                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
-                {
-                    StartDate = DateTime.Now.AddMonths(-2);
-                }
-                else
-                {
-                    //get startDate and endDate
-                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                    StartDate = queryDate.Item1;
-                    EndDate = queryDate.Item2;
-                }
-
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
@@ -572,7 +563,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 }
 
                 return await Task.FromResult(summary);
-               
+
             }
             catch (Exception)
             {

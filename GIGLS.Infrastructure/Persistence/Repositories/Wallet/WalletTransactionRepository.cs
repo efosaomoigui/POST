@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Wallet;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
-using System.Linq;
-using AutoMapper;
+using System;
+using System.Collections.Generic;
 using System.Data.Entity;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -252,18 +252,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 var StartDate = DateTime.Now;
                 var EndDate = DateTime.Now;
 
-                //If No Date Supplied
-                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
-                {
-                    StartDate = DateTime.Now.AddMonths(-2);
-                }
-                else
-                {
-                    //get startDate and endDate
-                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                    StartDate = queryDate.Item1;
-                    EndDate = queryDate.Item2;
-                }
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
@@ -309,19 +301,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
                 var StartDate = DateTime.Now;
                 var EndDate = DateTime.Now;
+                
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
 
-                //If No Date Supplied
-                if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
-                {
-                    StartDate = DateTime.Now.AddMonths(-2);
-                }
-                else
-                {
-                    //get startDate and endDate
-                    var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-                    StartDate = queryDate.Item1;
-                    EndDate = queryDate.Item2;
-                }
 
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
