@@ -3264,5 +3264,45 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
+        public async Task<decimal> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            decimal price = 0;
+            if (quickQuotePriceDTO.PriceCategoryId.Any())
+            {
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId) && x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId);
+                foreach (var item in quickQuotePriceDTO.PriceCategoryId)
+                {
+                    var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
+                    if (itemCategory.CategoryMinimumWeight == 0)
+                    {
+                        for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                        {
+                            price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        }
+                    }
+                    else
+                    {
+                        if (quickQuotePriceDTO.Weight < itemCategory.CategoryMinimumWeight)
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
+                                price = price + priceValue;
+                            }
+                        }
+                    }
+                }
+            }
+            return price;
+        }
+
     }
 }
