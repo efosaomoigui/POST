@@ -5,7 +5,7 @@ using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Serilog;
+//using Serilog;
 using System;
 using System.Configuration;
 using System.Net;
@@ -44,7 +44,7 @@ namespace GIGLS.Services.Business.DHL
             }
             else
             {
-                Log.Error($"FORMAT SHIPMENT CREATION RESPONSE: {payload.ErrorReason}");
+                //Log.Error($"FORMAT SHIPMENT CREATION RESPONSE: {payload.ErrorReason}");
                 throw new GenericException($"{payload.ErrorReason}");
             }
             return output;
@@ -61,7 +61,7 @@ namespace GIGLS.Services.Business.DHL
             }
             else
             {
-                Log.Error($"FORMAT PRICE RESPONSE: {response.ErrorReason}");
+                //Log.Error($"FORMAT PRICE RESPONSE: {response.ErrorReason}");
                 throw new GenericException($"{response.ErrorReason}");
             }
 
@@ -93,7 +93,7 @@ namespace GIGLS.Services.Business.DHL
                         ContractResolver = new CamelCasePropertyNamesContractResolver(),
                         NullValueHandling = NullValueHandling.Ignore
                     });
-                    Log.Information($"DHL SHIPMENT PAYLOAD: {json}");
+                    //Log.Information($"DHL SHIPMENT PAYLOAD: {json}");
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
@@ -101,13 +101,13 @@ namespace GIGLS.Services.Business.DHL
                     {
                         var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
                         result.ErrorReason = dHLError.Detail;
-                        Log.Error($"DHL SHIPMENT ERROR RESPONSE: {dHLError}");
+                        //Log.Error($"DHL SHIPMENT ERROR RESPONSE: {dHLError}");
 
                     }
                     else
                     {
                         result = JsonConvert.DeserializeObject<ShipmentResPayload>(responseResult);
-                        Log.Information($"DHL SHIPMENT RESPONSE: {result}");
+                        //Log.Information($"DHL SHIPMENT RESPONSE: {result}");
                     }
                 }
 
@@ -115,7 +115,7 @@ namespace GIGLS.Services.Business.DHL
             }
             catch (Exception ex)
             {
-                Log.Error($"DHL SHIPMENT: {ex.Message} {ex}");
+                //Log.Error($"DHL SHIPMENT: {ex.Message} {ex}");
                 throw;
             }
         }
@@ -339,7 +339,7 @@ namespace GIGLS.Services.Business.DHL
                         ContractResolver = new CamelCasePropertyNamesContractResolver(),
                         NullValueHandling = NullValueHandling.Ignore
                     });
-                    Log.Information($"DHL RATE REQUEST PAYLOAD: {json}");
+                    //Log.Information($"DHL RATE REQUEST PAYLOAD: {json}");
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
@@ -347,12 +347,12 @@ namespace GIGLS.Services.Business.DHL
                     {
                         var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
                         result.ErrorReason = dHLError.Detail;
-                        Log.Error($"DHL RATE ERROR RESPONSE: {dHLError}");
+                        //Log.Error($"DHL RATE ERROR RESPONSE: {dHLError}");
                     }
                     else
                     {
                         result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
-                        Log.Information($"DHL RATE RESPONSE: {result}");
+                        //Log.Information($"DHL RATE RESPONSE: {result}");
                     }
                 }
 
@@ -360,7 +360,7 @@ namespace GIGLS.Services.Business.DHL
             }
             catch (Exception ex)
             {
-                Log.Error($"DHL RATE: {ex.Message} {ex}");
+                //Log.Error($"DHL RATE: {ex.Message} {ex}");
                 throw;
             }
         }
@@ -484,13 +484,13 @@ namespace GIGLS.Services.Business.DHL
                     HttpResponseMessage response = await client.GetAsync(url);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<InternationalShipmentTracking>(responseResult);
-                    Log.Information($"DHL TRACKING RESPONSE: {result}");
+                    //Log.Information($"DHL TRACKING RESPONSE: {result}");
                 }
                 return result;
             }
             catch (Exception ex)
             {
-                Log.Error($"DHL TRACKING: {ex.Message} {ex}");
+                //Log.Error($"DHL TRACKING: {ex.Message} {ex}");
                 throw;
             }
         }
