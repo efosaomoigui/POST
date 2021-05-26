@@ -28,7 +28,8 @@ namespace GIGLS.Core.DTO.Shipments
         public int? SpecialPackageId { get; set; }
 
         //use for internatonal shipment 
-        public InternationalShipmentItemCategory ItemCategory { get; set; }
+        public InternationalShipmentItemCategory InternationalShipmentItemCategory { get; set; }
+        //public string InternationalShipmentItemCategory { get; set; }
     }
 
     public class NewShipmentItemDTO 

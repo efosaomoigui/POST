@@ -135,6 +135,7 @@ namespace GIGLS.Core.DTO.DHL
     {
         public decimal Value { get; set; }
         public string Caption { get; set; }
+        public string TypeCode { get; set; }
     }
 
     public class Exporter
@@ -188,6 +189,7 @@ namespace GIGLS.Core.DTO.DHL
         public string Description { get; set; }
         public string Incoterm { get; set; }
         public string UnitOfMeasurement { get; set; }
+        public string TempContentType { get; set; }
         public List<ShippingPackage> Packages { get; set; }
         public ExportDeclaration ExportDeclaration { get; set; }
     }

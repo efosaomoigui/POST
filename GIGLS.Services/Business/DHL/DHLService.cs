@@ -5,6 +5,7 @@ using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Serilog;
 using System;
 using System.Configuration;
 using System.Net;
@@ -43,6 +44,7 @@ namespace GIGLS.Services.Business.DHL
             }
             else
             {
+                Log.Error($"FORMAT SHIPMENT CREATION RESPONSE: {payload.ErrorReason}");
                 throw new GenericException($"{payload.ErrorReason}");
             }
             return output;
@@ -59,6 +61,7 @@ namespace GIGLS.Services.Business.DHL
             }
             else
             {
+                Log.Error($"FORMAT PRICE RESPONSE: {response.ErrorReason}");
                 throw new GenericException($"{response.ErrorReason}");
             }
 
@@ -90,6 +93,7 @@ namespace GIGLS.Services.Business.DHL
                         ContractResolver = new CamelCasePropertyNamesContractResolver(),
                         NullValueHandling = NullValueHandling.Ignore
                     });
+                    Log.Information($"DHL SHIPMENT PAYLOAD: {json}");
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
@@ -97,10 +101,13 @@ namespace GIGLS.Services.Business.DHL
                     {
                         var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
                         result.ErrorReason = dHLError.Detail;
+                        Log.Error($"DHL SHIPMENT ERROR RESPONSE: {dHLError}");
+
                     }
                     else
                     {
                         result = JsonConvert.DeserializeObject<ShipmentResPayload>(responseResult);
+                        Log.Information($"DHL SHIPMENT RESPONSE: {result}");
                     }
                 }
 
@@ -108,6 +115,7 @@ namespace GIGLS.Services.Business.DHL
             }
             catch (Exception ex)
             {
+                Log.Error($"DHL SHIPMENT: {ex.Message} {ex}");
                 throw;
             }
         }
@@ -124,19 +132,25 @@ namespace GIGLS.Services.Business.DHL
             shipmentPayload.Content = GetShippingContent(shipmentDTO);
             shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty();
 
+            shipmentPayload.ProductCode = shipmentPayload.Content.TempContentType != null ? "D" : "P";
+            shipmentPayload.Content.TempContentType = null;
+
             return shipmentPayload;
         }
 
         private ShippingContent GetShippingContent(InternationalShipmentDTO shipmentDTO)
         {
+            var content = new ShippingContent();
+            var lineItem = new LineItem();
+            var weight = new ShippingWeight();
+
             var signatureTitle = "Mr.";
             if (shipmentDTO.CustomerDetails.Gender == Gender.Female)
             {
                 signatureTitle = "Mrs.";
             }
-            var content = new ShippingContent
+            content = new ShippingContent
             {
-                IsCustomsDeclarable = true,
                 DeclaredValue = shipmentDTO.DeclarationOfValueCheck.Value,
                 DeclaredValueCurrency = "NGN",
                 Incoterm = "DAP",
@@ -155,7 +169,7 @@ namespace GIGLS.Services.Business.DHL
             };
 
             var chargeValue = Math.Round((7.5M / 100) * shipmentDTO.InternationalShippingCost, 2);
-            var charge = new AdditionalCharge { Value = chargeValue, Caption = "freight" };
+            var charge = new AdditionalCharge { Value = chargeValue, Caption = "freight", TypeCode = "freight" };
             content.ExportDeclaration.AdditionalCharges.Add(charge);
 
             var license = new License { Value = "license", TypeCode = "export" };
@@ -164,20 +178,52 @@ namespace GIGLS.Services.Business.DHL
             int count = 1;
             foreach (var item in shipmentDTO.ShipmentItems)
             {
+                var package = new ShippingPackage();
                 content.Description = item.Description;
-                var netValue = (float)item.Length * (float)item.Width * (float)item.Height / 5000;
-                var package = new ShippingPackage
+                if (item.InternationalShipmentItemCategory == InternationalShipmentItemCategory.Document)
                 {
-                    Weight = (float)item.Weight,
-                    Dimensions = new Dimensions
+                    content.TempContentType = "Document";
+                    content.IsCustomsDeclarable = false;
+                    package = new ShippingPackage
                     {
-                        Length = (float)item.Length,
-                        Width = (float)item.Width,
-                        Height = (float)item.Height,
-                    }
-                };
+                        Weight = 1.0F,
+                        Dimensions = new Dimensions
+                        {
+                            Length = 1,
+                            Width = 1,
+                            Height = 1
+                        }
+                    };
+
+                    weight = new ShippingWeight
+                    {
+                        NetValue = 0.1F,
+                        GrossValue = 0.1F,
+                    };
+                }
+                else
+                {
+                    var netValue = (float)item.Length * (float)item.Width * (float)item.Height / 5000;
+                    content.IsCustomsDeclarable = true;
+                    package = new ShippingPackage
+                    {
+                        Weight = (float)item.Weight,
+                        Dimensions = new Dimensions
+                        {
+                            Length = (int)Math.Round(item.Length, 0),
+                            Width = (int)Math.Round(item.Width, 0),
+                            Height = (int)Math.Round(item.Height, 0)
+                        }
+                    };
+
+                    weight = new ShippingWeight
+                    {
+                        NetValue = (float)Math.Round(netValue, 2),
+                        GrossValue = (float)Math.Round(netValue, 2),
+                    };
+                }
                 content.Packages.Add(package);
-                var lineItem = new LineItem
+                lineItem = new LineItem
                 {
                     Number = count,
                     Description = shipmentDTO.ItemDetails,
@@ -190,13 +236,9 @@ namespace GIGLS.Services.Business.DHL
                     {
                         Value = item.Quantity,
                         UnitOfMeasurement = "BOX"
-                    },
-                    Weight = new ShippingWeight
-                    {
-                        NetValue = (float)Math.Round(netValue, 2),
-                        GrossValue = (float)Math.Round(netValue, 2),
                     }
                 };
+                lineItem.Weight = weight;
                 content.ExportDeclaration.LineItems.Add(lineItem);
                 count++;
             }
@@ -297,6 +339,7 @@ namespace GIGLS.Services.Business.DHL
                         ContractResolver = new CamelCasePropertyNamesContractResolver(),
                         NullValueHandling = NullValueHandling.Ignore
                     });
+                    Log.Information($"DHL RATE REQUEST PAYLOAD: {json}");
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
@@ -304,10 +347,12 @@ namespace GIGLS.Services.Business.DHL
                     {
                         var dHLError = JsonConvert.DeserializeObject<DHLErrorFeedBack>(responseResult);
                         result.ErrorReason = dHLError.Detail;
+                        Log.Error($"DHL RATE ERROR RESPONSE: {dHLError}");
                     }
                     else
                     {
                         result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
+                        Log.Information($"DHL RATE RESPONSE: {result}");
                     }
                 }
 
@@ -315,6 +360,7 @@ namespace GIGLS.Services.Business.DHL
             }
             catch (Exception ex)
             {
+                Log.Error($"DHL RATE: {ex.Message} {ex}");
                 throw;
             }
         }
@@ -339,16 +385,36 @@ namespace GIGLS.Services.Business.DHL
 
             foreach (var item in shipmentDTO.ShipmentItems)
             {
-                var package = new RatePackage
+                var package = new RatePackage();
+                if (item.InternationalShipmentItemCategory == InternationalShipmentItemCategory.Document)
                 {
-                    Weight = (float)item.Weight,
-                    Dimensions = new Dimensions
+                    rateRequest.ProductCode = "D";
+                    rateRequest.LocalProductCode = "D";
+                    rateRequest.IsCustomsDeclarable = false;
+                    package = new RatePackage
                     {
-                        Length = (float)item.Length,
-                        Width = (float)item.Width,
-                        Height = (float)item.Height
-                    }
-                };
+                        Weight = 1.0F,
+                        Dimensions = new Dimensions
+                        {
+                            Length = 1,
+                            Width = 1,
+                            Height = 1
+                        }
+                    };
+                }
+                else
+                {
+                    package = new RatePackage
+                    {
+                        Weight = (float)item.Weight,
+                        Dimensions = new Dimensions
+                        {
+                            Length = (int)Math.Round(item.Length, 0),
+                            Width = (int)Math.Round(item.Width, 0),
+                            Height = (int)Math.Round(item.Height, 0)
+                        }
+                    };
+                }
                 rateRequest.Packages.Add(package);
             }
             return rateRequest;
@@ -418,19 +484,19 @@ namespace GIGLS.Services.Business.DHL
                     HttpResponseMessage response = await client.GetAsync(url);
                     string responseResult = await response.Content.ReadAsStringAsync();
                     result = JsonConvert.DeserializeObject<InternationalShipmentTracking>(responseResult);
+                    Log.Information($"DHL TRACKING RESPONSE: {result}");
                 }
-
                 return result;
             }
             catch (Exception ex)
             {
+                Log.Error($"DHL TRACKING: {ex.Message} {ex}");
                 throw;
             }
         }
 
         private DateTime AddWorkdays()
         {
-            //var originalDate = DateTime.UtcNow;
             int nonWorkDays = 2;
             var tmpDate = DateTime.Today;
             while (nonWorkDays > 0)
