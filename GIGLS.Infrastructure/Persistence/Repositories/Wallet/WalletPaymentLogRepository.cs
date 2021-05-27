@@ -152,7 +152,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 var result = queryable.Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToList();
 
                 var walletPaymentLogDto = Mapper.Map<List<WalletPaymentLogDTO>>(result);
-                
+                if (walletPaymentLogDto.Any())
+                {
+                    var countryIds = walletPaymentLogDto.Select(x => x.PaymentCountryId).ToList();
+                    var countries = _context.Country.AsQueryable();
+                    countries = countries.Where(x => countryIds.Contains(x.CountryId));
+                    foreach (var item in walletPaymentLogDto)
+                    {
+                        item.CurrencyCode = countries.FirstOrDefault(x => x.CountryId == item.PaymentCountryId).CurrencyCode;
+                        item.CurrencySymbol = countries.FirstOrDefault(x => x.CountryId == item.PaymentCountryId).CurrencySymbol;
+                    }
+                }
                 return new Tuple<Task<List<WalletPaymentLogDTO>>, int>(Task.FromResult(walletPaymentLogDto), totalCount);                
             }
             catch (Exception ex)
