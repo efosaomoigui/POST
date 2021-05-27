@@ -5,7 +5,6 @@ using GIGLS.Core.IServices.DHL;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-//using Serilog;
 using System;
 using System.Configuration;
 using System.Net;
@@ -248,6 +247,8 @@ namespace GIGLS.Services.Business.DHL
         private ShipmentReceiverDetail GetReceiverContact(InternationalShipmentDTO shipmentDTO)
         {
             var splittedAddress = shipmentDTO.ReceiverAddress.Split(',');
+            var postalAddress = new PostalAddress();
+
             var receiver = new ShipmentReceiverDetail
             {
                 ContactInformation = new ContactInformation
@@ -257,19 +258,28 @@ namespace GIGLS.Services.Business.DHL
                     MobilePhone = shipmentDTO.ReceiverPhoneNumber,
                     CompanyName = shipmentDTO.ReceiverCompanyName,
                     FullName = shipmentDTO.ReceiverName
-                },
-                PostalAddress = new PostalAddress
-                {
-                    CityName = shipmentDTO.ReceiverCity,
-                    PostalCode = shipmentDTO.ReceiverPostalCode,
-                    ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
-                    CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
-                    countyName = shipmentDTO.ReceiverCountry,
-                    AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0],
-                    AddressLine2 = splittedAddress[1],
-                    AddressLine3 = splittedAddress[2] == null ? shipmentDTO.ReceiverCity : splittedAddress[2]
                 }
             };
+
+            postalAddress.CityName = shipmentDTO.ReceiverCity;
+            postalAddress.PostalCode = shipmentDTO.ReceiverPostalCode;
+            postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
+            postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2);
+            postalAddress.countyName = shipmentDTO.ReceiverCountry;
+            if (splittedAddress.Length <= 1)
+            {
+                postalAddress.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
+                postalAddress.AddressLine2 = shipmentDTO.ReceiverCountry;
+                postalAddress.AddressLine3 = shipmentDTO.ReceiverCountry;
+            }
+            else
+            {
+                postalAddress.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
+                postalAddress.AddressLine2 = splittedAddress[1] == null ? shipmentDTO.ReceiverCity : splittedAddress[1];
+                postalAddress.AddressLine3 = shipmentDTO.ReceiverCountry;
+            }
+
+            receiver.PostalAddress = postalAddress;
             return receiver;
         }
 
@@ -352,7 +362,7 @@ namespace GIGLS.Services.Business.DHL
                     else
                     {
                         result = JsonConvert.DeserializeObject<RateResPayload>(responseResult);
-                        //Log.Information($"DHL RATE RESPONSE: {result}");
+                        //  Log.Information($"DHL RATE RESPONSE: {result}");
                     }
                 }
 
@@ -428,10 +438,10 @@ namespace GIGLS.Services.Business.DHL
                 CityName = "Lagos",
                 PostalCode = "100001",
                 CountryCode = "NG",
-                CountyName = "Lagos",
-                AddressLine1 = "address1",
-                AddressLine2 = "address2",
-                AddressLine3 = "address3"
+                CountyName = "Nigeria",
+                AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
+                AddressLine2 = "Beside Mobile Fuel Station",
+                AddressLine3 = "Gbagada 100234, Lagos"
             };
             return address;
         }
@@ -439,18 +449,25 @@ namespace GIGLS.Services.Business.DHL
         private RateReceiverDetail GetRateReceiverAddress(InternationalShipmentDTO shipmentDTO)
         {
             var splittedAddress = shipmentDTO.ReceiverAddress.Split(',');
-            var address = new RateReceiverDetail
-            {
-                CityName = shipmentDTO.ReceiverCity,
-                PostalCode = shipmentDTO.ReceiverPostalCode,
-                CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2),
-                CountyName = shipmentDTO.ReceiverCountry,
-                ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode,
-                AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0],
-                AddressLine2 = splittedAddress[1],
-                AddressLine3 = splittedAddress[2] == null ? shipmentDTO.ReceiverCity : splittedAddress[2]
-            };
+            var address = new RateReceiverDetail();
 
+            address.CityName = shipmentDTO.ReceiverCity;
+            address.PostalCode = shipmentDTO.ReceiverPostalCode;
+            address.CountryCode = shipmentDTO.ReceiverCountryCode.Length <= 2 ? shipmentDTO.ReceiverCountryCode : shipmentDTO.ReceiverCountryCode.Substring(0, 2);
+            address.CountyName = shipmentDTO.ReceiverCountry;
+            address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
+            if (splittedAddress.Length <= 1)
+            {
+                address.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
+                address.AddressLine2 = shipmentDTO.ReceiverCity;
+                address.AddressLine3 = shipmentDTO.ReceiverCity;
+            }
+            else
+            {
+                address.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
+                address.AddressLine2 = splittedAddress[1] == null ? shipmentDTO.ReceiverCity : splittedAddress[1];
+                address.AddressLine3 = shipmentDTO.ReceiverCity;
+            }
             return address;
         }
 
