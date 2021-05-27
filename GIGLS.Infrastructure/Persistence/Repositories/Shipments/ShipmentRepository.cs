@@ -1037,7 +1037,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     endDate
                 };
 
-                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo_Archive " +
+                var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
                    "@StartDate, @EndDate",
                    param).ToList();
 
