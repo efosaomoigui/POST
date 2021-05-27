@@ -3304,5 +3304,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return price;
         }
 
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId)
+        {
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(countryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+        }
+
     }
 }

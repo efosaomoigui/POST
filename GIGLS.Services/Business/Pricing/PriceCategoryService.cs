@@ -23,7 +23,7 @@ namespace GIGLS.Services.Business.Pricing
         
         public async Task<object> AddPriceCategory(PriceCategoryDTO priceCategory)
         {
-            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId))
+            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId && c.DepartureCountryId == priceCategory.DepartureCountryId))
             {
                 throw new GenericException("Price category already exist");
             }
