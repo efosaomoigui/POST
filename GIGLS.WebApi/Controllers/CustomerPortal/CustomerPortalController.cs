@@ -2344,5 +2344,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpGet]
+        [Route("getcategoriesbycountry")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetPriceCategoriesByCountry(countryId);
+                return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
+                {
+                    Object = item
+                };
+            });
+        }
+
+
+
     }
 }

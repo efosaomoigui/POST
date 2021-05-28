@@ -143,7 +143,8 @@ namespace GIGLS.Services.Implementation.Wallet
             //add cod waybills
             for (int i = 0; i < accountDto.Count; i++)
             {
-                var country = countries.Where(x => x.CountryId == accountDto[i].CountryId);
+                var countryId = accountDto[i].CountryId;
+                var country = countries.Where(x => x.CountryId == countryId).FirstOrDefault();
                 if (country != null)
                 {
                     var countryDTO = Mapper.Map<CountryDTO>(country);
@@ -152,7 +153,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (accountDto[i].CreditDebitType == CreditDebitType.Credit)
                 {
                     var des = accountDto[i].Description.Split(' ');
-                    accountDto[i].Waybill = des.LastOrDefault(); 
+                    accountDto[i].Waybill = des.LastOrDefault();
                 }
             }
 
@@ -167,15 +168,15 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == wallet.CustomerId);
-                walletDto.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +  $"{individualCustomerDTO.LastName}");
+                walletDto.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
             }
-            
+
             var balance = new CashOnDeliveryBalanceDTO
             {
                 Balance = wallet.Balance,
-                Wallet = walletDto                
+                Wallet = walletDto
             };
-                       
+
             return new CashOnDeliveryAccountSummaryDTO
             {
                 CashOnDeliveryAccount = accountDto,
@@ -183,7 +184,8 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        
+
+
         public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccountByStatus(string walletNumber, CODStatus status)
         {
             var wallet = await _walletService.GetWalletById(walletNumber);
