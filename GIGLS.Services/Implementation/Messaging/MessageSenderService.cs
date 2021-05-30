@@ -1796,6 +1796,28 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
+        public async Task SendMailsShipmentARF(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailShipmentARFAsync(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
 
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)

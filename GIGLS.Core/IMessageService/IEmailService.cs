@@ -12,5 +12,6 @@ namespace GIGLS.Core.IMessage
         Task<string> SendCustomerRegistrationMails(MessageDTO message);
         Task<string> SendOverseasShipmentMails(MessageDTO message);
         Task<string> SendEmailIntlShipmentAsync(MessageDTO message);
+        Task<string> SendEmailShipmentARFAsync(MessageDTO message);
     }
 }
