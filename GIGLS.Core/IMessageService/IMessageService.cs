@@ -26,5 +26,6 @@ namespace GIGLS.Core.IMessageService
         Task SendGeneralMailPayment(ShipmentDTO shipmentDto, List<string> generalPaymentLinks);
         Task SendMailsToIntlShipmentSender(MessageDTO messageDTO);
         Task SendMailsShipmentARF(MessageDTO messageDTO);
+        Task SendMailsEcommerceCustomerRep(MessageDTO messageDTO);
     }
 }
