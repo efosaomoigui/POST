@@ -35,6 +35,7 @@ namespace GIGLS.Core.DTO
         public string Country { get; set; }
 
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
+        public IntlShipmentMessageDTO IntlShipmentMessage { get; set; }
     }
 
     public class NewMessageDTO
@@ -60,5 +61,11 @@ namespace GIGLS.Core.DTO
         public string DeliveryCode { get; set; }
         public string GeneralPaymentLinkI { get; set; }
         public string GeneralPaymentLinkII { get; set; }
+    }
+
+    public class IntlShipmentMessageDTO
+    {
+        public string Description { get; set; }
+        public string DestinationCountry { get; set; }
     }
 }

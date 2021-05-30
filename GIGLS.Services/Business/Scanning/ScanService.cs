@@ -596,6 +596,7 @@ namespace GIGLS.Services.Business.Scanning
 
 
             await _uow.CompleteAsync();
+            //Send mail to receiver on 
             return true;
         }
 

@@ -21,6 +21,8 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
+        
+
         public async Task<string> SendEcommerceRegistrationNotificationAsync(MessageDTO message)
         {
             string result = "";
@@ -59,6 +61,17 @@ namespace GIGLS.Messaging.MessageService
             if (!string.IsNullOrWhiteSpace(message.ToEmail))
             {
                 result = await ConfigOverseasMessage(message);
+            }
+            return result;
+        }
+
+        //This send mails to customers on creation of intl shipments
+        public async Task<string> SendEmailIntlShipmentAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendGridIntlShipmentasync(message);
             }
             return result;
         }
@@ -305,5 +318,50 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
+        private async Task<string> ConfigSendGridIntlShipmentasync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            myMessage.AddTo(message.ToEmail);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TPL_Sender_Name", fromName },
+                { "TPL_Customer_Name", message.CustomerName },
+                { "TPL_Departure_Center", message.IntlMessage.DepartureCenter },
+                { "TPL_Destination_Center", message.IntlMessage.DestinationCenter },
+                { "TPL_Destination_Country", message.IntlShipmentMessage.DestinationCountry },
+                { "TPL_Item_Description", message.IntlShipmentMessage.Description },
+                { "TPL_Waybill", message.Waybill },
+                { "TPL_Subject", message.Subject },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
     }
 }
