@@ -70,10 +70,12 @@ namespace GIGLS.Core.DTO.Shipments
     public class WaybillInGroupWaybillDTO
     {
         public string Waybill { get; set; }
-        public decimal Value { get; set; }
+        public decimal? Value { get; set; }
         public string Description { get; set; }
         public double Weight { get; set; }
         public string DepartureServiceCentre { get; set; }
         public string DestinationServiceCentre { get; set; }
+        public string PaymentMethod { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
     }
 }
