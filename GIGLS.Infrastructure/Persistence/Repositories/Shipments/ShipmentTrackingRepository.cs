@@ -157,5 +157,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
 
         }
+
+        public Shipment GetShipmentByWayBill(string waybill)
+        {
+            try
+            {
+                return  _context.Shipment.FirstOrDefault(x => x.Waybill == waybill);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
