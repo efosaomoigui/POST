@@ -20,15 +20,13 @@ namespace GIGLS.Services.Business.Tracking
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IShipmentService _shipmentService;
         private readonly IManifestVisitMonitoringService _monitoringService;
-        private readonly IDHLService _DhlService;
 
-        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow, IManifestVisitMonitoringService monitoringService, IDHLService dHLService)
+        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow, IManifestVisitMonitoringService monitoringService)
         {
             _shipmentTrackingService = shipmentTrackingService;
             _shipmentService = shipmentService;
             _uow = uow;
             _monitoringService = monitoringService;
-            _DhlService = dHLService;
         }
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber)
@@ -139,26 +137,6 @@ namespace GIGLS.Services.Business.Tracking
 
             //Replace the placeholders in Scan Status
             await ResolveScanStatusPlaceholders(result);
-
-            if (!string.IsNullOrWhiteSpace(shipment.InternationalWayBill))
-            {
-                var intlTracking = await _DhlService.TrackInternationalShipment(shipment.InternationalWayBill);
-                if (intlTracking.Shipments.Count > 0)
-                {
-                    if(intlTracking.Shipments[0].Events.Count > 0)
-                    {
-                        result.FirstOrDefault().DateTime = intlTracking.Shipments[0].ShipmentTimestamp;
-                        result.FirstOrDefault().Location = intlTracking.Shipments[0].Events[0].ServiceArea[0].Description;
-                        result.FirstOrDefault().TrackingType = TrackingType.OutBound;
-                    }
-                    else
-                    {
-                        result.FirstOrDefault().DateTime = intlTracking.Shipments[0].ShipmentTimestamp;
-                        result.FirstOrDefault().Location = intlTracking.Shipments[0].ReceiverDetails.ServiceArea[0].Description;
-                        result.FirstOrDefault().TrackingType = TrackingType.OutBound;
-                    }
-                }
-            }
             return result;
         }
 
@@ -177,6 +155,10 @@ namespace GIGLS.Services.Business.Tracking
 
             foreach (var shipmentTrackingDTO in result)
             {
+                if(shipmentTrackingDTO.User == "International Shipping")
+                {
+                    continue;
+                }
                 //1. {0} - Service Centre
                 if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{0}"))
                 {

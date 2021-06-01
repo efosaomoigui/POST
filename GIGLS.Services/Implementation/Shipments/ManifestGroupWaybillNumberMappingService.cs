@@ -1034,7 +1034,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         if (groupShipment.WaybillNumbers.Any())
                         {
-
                             foreach (var waybill in groupShipment.WaybillNumbers)
                             {
                                 var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
@@ -1042,24 +1041,22 @@ namespace GIGLS.Services.Implementation.Shipments
                                 var dest = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DestinationServiceCentreId);
                                 var newWaybillInfo = new WaybillInGroupWaybillDTO()
                                 {
-                                    Value = (decimal)shipment.DeclarationOfValueCheck,
+                                    Value = shipment.DeclarationOfValueCheck == null ? 0.00M : shipment.DeclarationOfValueCheck,
                                     Weight = shipment.ApproximateItemsWeight,
                                     Waybill = shipment.Waybill,
                                     Description = shipment.Description,
                                     DepartureServiceCentre = dept.Name,
-                                    DestinationServiceCentre = dest.Name
+                                    DestinationServiceCentre = dest.Name,
+                                    PaymentMethod = shipment.PaymentMethod != null ? shipment.PaymentMethod : "N/A",
+                                    PaymentStatus = shipment.PaymentStatus
                                 };
                                 groupWaybillData.WaybillsDTO.Add(newWaybillInfo);
                             }
                         }
                         overallResult.Add(groupWaybillData);
-
                     }
-
                 }
-
                 return overallResult;
-
             }
             catch (Exception ex)
             {
