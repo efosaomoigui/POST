@@ -4696,8 +4696,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     CustomerName = $"{customer?.FirstName} {customer?.LastName}",
                     Waybill = shipment.Waybill,
-                    IntlShipmentMessage = new IntlShipmentMessageDTO 
-                    { 
+                    IntlShipmentMessage = new IntlShipmentMessageDTO
+                    {
                         Description = shipment.ItemDetails,
                         DestinationCountry = shipment.ReceiverCountry,
                     },
@@ -4706,16 +4706,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     Subject = $"Overseas Shipment Request Acknowledgement {shipment.ReceiverCountry}",
                 };
 
-               // await _messageSenderService.SendMailsToIntlShipmentSender(messageDTO);
                 var depature = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DepartureServiceCentreId);
-                var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
-                //var departureCountry = await _uow.Country.GetCountryByServiceCentreId(depature.ServiceCentreId);
-                messageDTO.IntlShipmentMessage.DestinationCenter = destination.FormattedServiceCentreName?? destination.Name;
-                messageDTO.IntlShipmentMessage.DepartureCenter = depature.FormattedServiceCentreName?? depature.Name;
-                //messageDTO.Country = country.CountryName;
-
+                messageDTO.IntlShipmentMessage.DepartureCenter = depature.FormattedServiceCentreName ?? depature.Name;
                 messageDTO.MessageTemplate = "InternationalTemplateAcknowledgement";
+
                 await _messageSenderService.SendMailsToIntlShipmentSender(messageDTO);
+
+                //Send Mail to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        messageDTO.ToEmail = email;
+                        await _messageSenderService.SendMailsToIntlShipmentSender(messageDTO);
+                    }
+                }
 
             }
             return true;

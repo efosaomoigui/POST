@@ -372,7 +372,6 @@ namespace GIGLS.Messaging.MessageService
             {
                 { "SG_CustomerName", message.CustomerName },
                 { "SG_DepartureCenter", message.IntlShipmentMessage.DepartureCenter },
-                { "SG_DestinationCenter", message.IntlShipmentMessage.DestinationCenter },
                 { "SG_DestinationCountry", message.IntlShipmentMessage.DestinationCountry },
                 { "SG_Description", message.IntlShipmentMessage.Description },
                 { "SG_Waybill", message.Waybill },
