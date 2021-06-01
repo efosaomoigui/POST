@@ -4474,8 +4474,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var countryId = await _userService.GetUserActiveCountryId();
             GlobalPropertyType internationalAdditionalPrice = GlobalPropertyType.InternationalAdditionalPrice;
             var aditionalPrice = await _globalPropertyService.GetGlobalProperty(internationalAdditionalPrice, countryId);
-            var additionalAmount = Convert.ToDecimal(aditionalPrice.Value);
-            total.Amount = total.Amount + additionalAmount;
+            var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
+            total.Amount = (total.Amount * additionalAmount) + total.Amount;
 
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
