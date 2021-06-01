@@ -370,14 +370,12 @@ namespace GIGLS.Messaging.MessageService
             //set substitutions
             myMessage.AddSubstitutions(new Dictionary<string, string>
             {
-                { "TPL_Sender_Name", fromName },
-                { "TPL_Customer_Name", message.CustomerName },
-                { "TPL_Departure_Center", message.IntlMessage.DepartureCenter },
-                { "TPL_Destination_Center", message.IntlMessage.DestinationCenter },
-                { "TPL_Destination_Country", message.IntlShipmentMessage.DestinationCountry },
-                { "TPL_Item_Description", message.IntlShipmentMessage.Description },
-                { "TPL_Waybill", message.Waybill },
-                { "TPL_Subject", message.Subject },
+                { "SG_CustomerName", message.CustomerName },
+                { "SG_DepartureCenter", message.IntlShipmentMessage.DepartureCenter },
+                { "SG_DestinationCenter", message.IntlShipmentMessage.DestinationCenter },
+                { "SG_DestinationCountry", message.IntlShipmentMessage.DestinationCountry },
+                { "SG_Description", message.IntlShipmentMessage.Description },
+                { "SG_Waybill", message.Waybill },
             });
 
             var response = await client.SendEmailAsync(myMessage);
@@ -461,14 +459,9 @@ namespace GIGLS.Messaging.MessageService
             //set substitutions
             myMessage.AddSubstitutions(new Dictionary<string, string>
             {
-                { "TPL_Sender_Name", fromName },
-                { "TPL_Customer_Name", message.CustomerName },
-                { "TPL_Departure_Center", message.IntlMessage.DepartureCenter },
-                { "TPL_Destination_Center", message.IntlMessage.DestinationCenter },
-                { "TPL_Destination_Country", message.IntlShipmentMessage.DestinationCountry },
-                { "TPL_Item_Description", message.IntlShipmentMessage.Description },
-                { "TPL_Waybill", message.Waybill },
-                { "TPL_Subject", message.Subject },
+                { "EC_AccountOfficerName", message.EcommerceMessage.AccountOfficerName },
+                { "EC_AccountOfficerPhoneNumber", message.EcommerceMessage.AccountOfficerNumber },
+                { "EC_AccountOfficerEmail",message.EcommerceMessage.AccountOfficerEmail },
             });
 
             var response = await client.SendEmailAsync(myMessage);

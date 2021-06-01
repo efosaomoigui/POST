@@ -1824,7 +1824,7 @@ namespace GIGLS.Services.Implementation.Messaging
             {
                 if (messageDTO != null)
                 {
-                    result = await _emailService.SendEmailShipmentARFAsync(messageDTO);
+                    result = await _emailService.SendEmailEcommerceCustomerRepAsync(messageDTO);
                 }
 
                 //send email if there is email address

@@ -4696,30 +4696,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     CustomerName = $"{customer?.FirstName} {customer?.LastName}",
                     Waybill = shipment.Waybill,
-                    IntlMessage = new IntlMessageDTO()
-                    {
-                        DeliveryAddressOrCenterName = shipment.ReceiverAddress,
-                    },
                     IntlShipmentMessage = new IntlShipmentMessageDTO 
                     { 
-                        Description = shipment.ItemDetails, 
-                        DestinationCountry = shipment.ReceiverCountry
+                        Description = shipment.ItemDetails,
+                        DestinationCountry = shipment.ReceiverCountry,
                     },
                     To = customer?.Email,
                     ToEmail = customer?.Email,
-                    Subject = "International Shipments Successfully Created",
+                    Subject = $"Overseas Shipment Request Acknowledgement {shipment.ReceiverCountry}",
                 };
 
                // await _messageSenderService.SendMailsToIntlShipmentSender(messageDTO);
                 var depature = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DepartureServiceCentreId);
                 var destination = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DestinationServiceCentreId);
-                var country = await _uow.Country.GetCountryByServiceCentreId(depature.ServiceCentreId);
-                messageDTO.IntlMessage.DeliveryAddressOrCenterName = shipment.ReceiverAddress;
-                messageDTO.IntlMessage.DestinationCenter = destination.FormattedServiceCentreName?? destination.Name;
-                messageDTO.IntlMessage.DepartureCenter = depature.FormattedServiceCentreName?? depature.Name;
-                messageDTO.Country = country.CountryName;
+                //var departureCountry = await _uow.Country.GetCountryByServiceCentreId(depature.ServiceCentreId);
+                messageDTO.IntlShipmentMessage.DestinationCenter = destination.FormattedServiceCentreName?? destination.Name;
+                messageDTO.IntlShipmentMessage.DepartureCenter = depature.FormattedServiceCentreName?? depature.Name;
+                //messageDTO.Country = country.CountryName;
 
-                messageDTO.MessageTemplate = "OverseasShippingRequest";
+                messageDTO.MessageTemplate = "InternationalTemplateAcknowledgement";
                 await _messageSenderService.SendMailsToIntlShipmentSender(messageDTO);
 
             }
