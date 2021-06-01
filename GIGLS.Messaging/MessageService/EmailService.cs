@@ -434,7 +434,7 @@ namespace GIGLS.Messaging.MessageService
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
-            myMessage.AddTo(message.ToEmail);
+            myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
