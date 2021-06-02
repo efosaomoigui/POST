@@ -356,15 +356,17 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 foreach (var item in userTransac)
                 {
+                    var createdDay = mobileshipments.FirstOrDefault(x => x.Waybill == item.Waybill);
+
                     var dlvrd = pickupRequests.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == MobilePickUpRequestStatus.Delivered.ToString() && x.Waybill == item.Waybill);
                     if (dlvrd != null)
                     {
-                        dtat += (int)(dlvrd.DateCreated - item.DateCreated).TotalMinutes;
+                        dtat += (int)(dlvrd.DateCreated - createdDay.DateCreated).TotalMinutes;
                     }
                     var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
                     if (assigned != null)
                     {
-                        atat += (int)(assigned.DateCreated - item.DateCreated).TotalMinutes;
+                        atat += (int)(assigned.DateCreated - createdDay.DateCreated).TotalMinutes;
                     }
 
                     var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
@@ -380,17 +382,35 @@ namespace GIGLS.Services.Implementation.Partnership
                         avrating += waybillRating.PartnerRating.Value;
                     }
                 }
-                rider.AssignTAT = userTransac.Count / atat;
-                rider.DeliveryTAT = userTransac.Count / dtat;
-                rider.PickupTAT = userTransac.Count / ptat;
-                rider.AverageAssignTAT = userTransac.Count / (atat + ptat);
-                rider.AverageDeliveryTAT = userTransac.Count / (dtat + ptat);
+                if (atat > 0)
+                {
+                    rider.AssignTAT = atat/ userTransac.Count; 
+                }
+                if (dtat > 0)
+                {
+                    rider.DeliveryTAT = dtat / userTransac.Count; 
+                }
+                if (ptat > 0)
+                {
+                    rider.PickupTAT = ptat / userTransac.Count; 
+                }
+                if (atat > 0 || ptat > 0)
+                {
+                    rider.AverageAssignTAT = (atat + ptat) / userTransac.Count; 
+                }
+                if (dtat > 0 || ptat > 0)
+                {
+                    rider.AverageDeliveryTAT = (dtat + ptat) / userTransac.Count; 
+                }
                 var oatat = atat + dtat + ptat;
-                rider.AverageOATAT = userTransac.Count / oatat;
+                if (oatat > 0)
+                {
+                    rider.AverageOATAT = oatat / userTransac.Count; 
+                }
                 rider.Trip = userTransac.Count;
                 if (count > 0)
                 {
-                    rider.Rate = count / avrating;
+                    rider.Rate = avrating / count;
                 }
             }
             return rider;
