@@ -345,6 +345,11 @@ namespace GIGLS.Messaging.MessageService
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+
             myMessage.AddTo(message.ToEmail);
             myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
@@ -387,7 +392,10 @@ namespace GIGLS.Messaging.MessageService
             myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
-
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
             myMessage.AddTo(message.ToEmail);
             myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
@@ -432,7 +440,10 @@ namespace GIGLS.Messaging.MessageService
             myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
-
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
             myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;

@@ -212,37 +212,53 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                //Send mail to ecommerce customer with an assigned customer rep
-                //1. Get a customer rep to assign to ecommerce customer
-
-                var customerRepDTO = await GetEcommerceCustomerRep();
-                message.EcommerceMessage = new EcommerceCustomerRepMessageDTO
-                {
-                    AccountOfficerName = $"{customerRepDTO?.FirstName} {customerRepDTO?.LastName}",
-                    AccountOfficerNumber = customerRepDTO?.PhoneNumber,
-                    AccountOfficerEmail = customerRepDTO?.Email
-                };
-
-
-                //2. Send Mail
-                message.MessageTemplate = "AssignEcommerceToCustomerRep";
-                await _messageSenderService.SendMailsEcommerceCustomerRep(message);
-
-                //3. After successful email sending
-                //Change Company IsAssignedCustomerRep to true
-                newCompany.IsAssignedCustomerRep = true;
-                await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
-                //Increase Customer rep assigned ecommerce
-                customerRepDTO.AssignedEcommerceCustomer += 1;
-                await _userService.UpdateUser(customerRepDTO.Id, customerRepDTO);
-                //complete
-                _uow.Complete();
+                await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private async Task SendEmailToAssignEcommerceCustomerRep(Company newCompany)
+        {
+            var message = new MessageDTO()
+            {
+                ToEmail = newCompany.Email,
+                To = newCompany.Email,
+            };
+            
+            //Send mail to ecommerce customer with an assigned customer rep
+            //1. Get a customer rep to assign to ecommerce customer
+
+            var customerRepDTO = await GetEcommerceCustomerRep();
+            if (customerRepDTO == null)
+            {
+                throw new GenericException("No customer rep to be assigned");
+            }
+
+            message.EcommerceMessage = new EcommerceCustomerRepMessageDTO
+            {
+                AccountOfficerName = $"{customerRepDTO?.FirstName} {customerRepDTO?.LastName}",
+                AccountOfficerNumber = customerRepDTO?.PhoneNumber,
+                AccountOfficerEmail = customerRepDTO?.Email
+            };
+
+            //2. Send Mail
+            message.MessageTemplate = "AssignEcommerceToCustomerRep";
+            await _messageSenderService.SendMailsEcommerceCustomerRep(message);
+
+            //3. After successful email sending
+            //Change Company IsAssignedCustomerRep to true
+            newCompany.IsAssignedCustomerRep = true;
+            await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
+
+            //Increase Customer rep assigned ecommerce
+            customerRepDTO.AssignedEcommerceCustomer += 1;
+            await _userService.UpdateUser(customerRepDTO.Id, customerRepDTO);
+            //complete
+            await _uow.CompleteAsync();
         }
 
         private async Task<UserDTO> GetEcommerceCustomerRep()
@@ -253,9 +269,9 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 ecommerceCustomerRepEmails = ecommerceCustomerRepEmail.Value.Split(',').ToArray();
             }
-            var customerRep =  _uow.User.GetCorporateCustomerUsersAsQueryable().Where(s => ecommerceCustomerRepEmails.Contains(s.Email)).OrderBy(s => s.AssignedEcommerceCustomer).FirstOrDefault();
+            var customerRep = _uow.User.GetCorporateCustomerUsersAsQueryable().Where(s => ecommerceCustomerRepEmails.Contains(s.Email)).OrderBy(s => s.AssignedEcommerceCustomer).FirstOrDefault();
             //customerReps = customerReps.AsEnumerable();
-           // var customerRep = customerReps.;
+            // var customerRep = customerReps.;
 
             if (customerRep == null)
             {
@@ -840,6 +856,9 @@ namespace GIGLS.Services.Implementation.Customers
                 companyMessagingDTO.IsFromMobile = company.IsFromMobile;
                 companyMessagingDTO.UserChannelType = userChannelType;
                 await SendMessageToNewSignUps(companyMessagingDTO);
+
+                //SendEmailToAssignEcommerceCustomerRep
+                await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 return result;
             }
             catch (Exception)
