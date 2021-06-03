@@ -21,6 +21,7 @@ using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
+using System.Data.Entity;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -211,12 +212,72 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
+                await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private async Task SendEmailToAssignEcommerceCustomerRep(Company newCompany)
+        {
+            var message = new MessageDTO()
+            {
+                ToEmail = newCompany.Email,
+                To = newCompany.Email,
+            };
+            
+            //Send mail to ecommerce customer with an assigned customer rep
+            //1. Get a customer rep to assign to ecommerce customer
+
+            var customerRepDTO = await GetEcommerceCustomerRep();
+            if (customerRepDTO == null)
+            {
+                throw new GenericException("No customer rep to be assigned");
+            }
+
+            message.EcommerceMessage = new EcommerceCustomerRepMessageDTO
+            {
+                AccountOfficerName = $"{customerRepDTO?.FirstName} {customerRepDTO?.LastName}",
+                AccountOfficerNumber = customerRepDTO?.PhoneNumber,
+                AccountOfficerEmail = customerRepDTO?.Email
+            };
+
+            //2. Send Mail
+            message.MessageTemplate = "AssignEcommerceToCustomerRep";
+            await _messageSenderService.SendMailsEcommerceCustomerRep(message);
+
+            //3. After successful email sending
+            //Change Company IsAssignedCustomerRep to true
+            newCompany.IsAssignedCustomerRep = true;
+            await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
+
+            //Increase Customer rep assigned ecommerce
+            customerRepDTO.AssignedEcommerceCustomer += 1;
+            await _userService.UpdateUser(customerRepDTO.Id, customerRepDTO);
+            //complete
+            await _uow.CompleteAsync();
+        }
+
+        private async Task<UserDTO> GetEcommerceCustomerRep()
+        {
+            var ecommerceCustomerRepEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.EcommerceCustomerRep.ToString() && s.CountryId == 1);
+            string[] ecommerceCustomerRepEmails = { };
+            if (ecommerceCustomerRepEmail != null)
+            {
+                ecommerceCustomerRepEmails = ecommerceCustomerRepEmail.Value.Split(',').ToArray();
+            }
+            var customerRep = _uow.User.GetCorporateCustomerUsersAsQueryable().Where(s => ecommerceCustomerRepEmails.Contains(s.Email)).OrderBy(s => s.AssignedEcommerceCustomer).FirstOrDefault();
+            //customerReps = customerReps.AsEnumerable();
+            // var customerRep = customerReps.;
+
+            if (customerRep == null)
+            {
+                throw new GenericException("No customer rep to be assigned");
+            }
+            return Mapper.Map<UserDTO>(customerRep);
         }
 
         private async Task<EcommerceAgreement> CheckEcommerceAgreement(int companyId)
@@ -391,7 +452,7 @@ namespace GIGLS.Services.Implementation.Customers
                     user.LastName = companyDto.Name;
                     user.FirstName = companyDto.Name;
                     user.Email = companyDto.Email;
-                    await _userService.UpdateUser(user.Id, userDto); 
+                    await _userService.UpdateUser(user.Id, userDto);
                 }
                 _uow.Complete();
             }
@@ -760,7 +821,7 @@ namespace GIGLS.Services.Implementation.Customers
                     userDTO.Referrercode = ReferrerCodeExists.Referrercode;
                     userDTO.RegistrationReferrercode = ReferrerCodeExists.Referrercode;
                 }
-                await _userService.UpdateUser(userDTO.Id,userDTO);
+                await _userService.UpdateUser(userDTO.Id, userDTO);
 
                 // add customer to a wallet
                 await _walletService.AddWallet(new WalletDTO
@@ -795,6 +856,9 @@ namespace GIGLS.Services.Implementation.Customers
                 companyMessagingDTO.IsFromMobile = company.IsFromMobile;
                 companyMessagingDTO.UserChannelType = userChannelType;
                 await SendMessageToNewSignUps(companyMessagingDTO);
+
+                //SendEmailToAssignEcommerceCustomerRep
+                await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 return result;
             }
             catch (Exception)
@@ -829,10 +893,10 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                var user = new UserDTO(); 
+                var user = new UserDTO();
                 if (!String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
                 {
-                   user = await _userService.GetUserById(userValidationDTO.UserID);
+                    user = await _userService.GetUserById(userValidationDTO.UserID);
                     if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
                     {
                         result.Succeeded = false;
@@ -860,8 +924,8 @@ namespace GIGLS.Services.Implementation.Customers
                         return result;
                     }
                 }
-                
-                var company = await  _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (company == null)
                 {
                     result.Succeeded = false;
@@ -884,7 +948,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     company.isCodNeeded = false;
                 }
-                
+
                 company.Rank = userValidationDTO.Rank;
                 company.BVN = userValidationDTO.BVN;
                 company.RankModificationDate = DateTime.Now;
@@ -910,7 +974,7 @@ namespace GIGLS.Services.Implementation.Customers
                         string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
                         foreach (string email in chairmanEmails)
                         {
-                           companyMessagingDTO.Emails.Add(email);
+                            companyMessagingDTO.Emails.Add(email);
                         }
                     }
                     var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
@@ -921,7 +985,7 @@ namespace GIGLS.Services.Implementation.Customers
                     companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
                     companyMessagingDTO.UserChannelType = userchannelType;
                     companyMessagingDTO.IsUpdate = true;
-                    await SendMessageToNewSignUps(companyMessagingDTO); 
+                    await SendMessageToNewSignUps(companyMessagingDTO);
                 }
 
                 result.Message = "User Rank Update Successful";
@@ -960,7 +1024,7 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     else if (company.IsFromMobile)
                     {
-                        if(company.Rank == Rank.Class)
+                        if (company.Rank == Rank.Class)
                         {
                             messageDTO.MessageTemplate = "ClassWelcomeApp";
                             await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
@@ -983,7 +1047,7 @@ namespace GIGLS.Services.Implementation.Customers
                         {
                             messageDTO.MessageTemplate = "BasicWelcomeWebsite";
                             await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
-                           //await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                            //await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
                         }
                     }
                 }
@@ -1032,7 +1096,7 @@ namespace GIGLS.Services.Implementation.Customers
                     RankModificationDate = DateTime.Now,
                     IsEligible = true,
                     IsDeleted = false,
-                   // IsInternational = newCompanyDTO.isInternational,
+                    // IsInternational = newCompanyDTO.isInternational,
                     ProductType = productType,
                     Industry = industry,
                     CompanyType = CompanyType.Ecommerce,
@@ -1073,7 +1137,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.Designation = UserChannelType.Ecommerce.ToString();
                 user.FirstName = newCompanyDTO.FirstName;
                 user.LastName = newCompanyDTO.LastName;
-               _uow.Company.Add(company);
+                _uow.Company.Add(company);
                 await _uow.CompleteAsync();
 
                 //update customer wallet
@@ -1094,5 +1158,5 @@ namespace GIGLS.Services.Implementation.Customers
             return companyDTO;
         }
     }
-        
+
 }

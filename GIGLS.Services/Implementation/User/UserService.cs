@@ -270,6 +270,7 @@ namespace GIGLS.Services.Implementation.User
             user.UserChannelType = userDto.UserChannelType;
             user.PictureUrl = userDto.PictureUrl;
             user.UserActiveCountryId = userDto.UserActiveCountryId;
+            user.AssignedEcommerceCustomer = userDto.AssignedEcommerceCustomer;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
