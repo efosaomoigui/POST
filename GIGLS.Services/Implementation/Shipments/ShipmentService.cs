@@ -4472,16 +4472,34 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
         {
             var countryId = await _userService.GetUserActiveCountryId();
-            GlobalPropertyType internationalAdditionalPrice = GlobalPropertyType.InternationalAdditionalPrice;
-            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(internationalAdditionalPrice, countryId);
+            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
             total.Amount = (total.Amount * additionalAmount) + total.Amount;
-
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
-            total.VAT = total.Amount * vat;
-            total.GrandTotal = total.Amount + total.VAT;
 
+            // Discount for Ecommerce & Corporate
+            if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+            {
+                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.ClassRankPercentage : GlobalPropertyType.BasicRankPercentage;
+                var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
+                var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
+                total.VAT = total.Amount * vat;
+                total.Discount = total.Amount * discountPer;
+                total.GrandTotal =  (total.Amount + total.VAT) - total.Discount;
+            }
+            else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
+            {
+                var discountPer = Convert.ToDecimal(shipmentDTO.CustomerDetails.Discount) / 100;
+                total.VAT = total.Amount * vat;
+                total.Discount = total.Amount * discountPer;
+                total.GrandTotal = (total.Amount + total.VAT) - total.Discount;
+            }
+            else
+            {
+                total.VAT = total.Amount * vat;
+                total.GrandTotal = total.Amount + total.VAT;
+            }
             //Get Insurance
             if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
             {

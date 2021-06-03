@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Business;
 using System.Net;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -33,7 +34,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackService = shipmentTrackService;
 
         }
-        
+
         public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {
             try
@@ -55,42 +56,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
 
                 //3. convert agility tracking object to mobile tracking object
-                var shipmentTrackingMobileVersion = shipmentTracking.Select(s => new MobileShipmentTrackingDTO
-                    {
-                        Waybill = s.Waybill,
-                        Location = s.Location,
-                        Status = s.Status,
-                        DateTime = s.DateTime,
-                        TrackingType = s.TrackingType,
-                        User = s.User,
-                        MobileShipmentTrackingId = s.ShipmentTrackingId,
-                        ScanStatus = new MobileScanStatusDTO
-                        {
-                            Code = s.ScanStatus.Code,
-                            Incident = s.ScanStatus.Incident,
-                            Reason = s.ScanStatus.Reason,
-                            Comment = s.ScanStatus.Comment
-                        }
-                    }
-                );
+                var shipmentTrackingMobileVersion = MobileTrackIngMapping(shipmentTracking.ToList());
 
                 //4. append the two lists together
                 MobileshipmentTracking.AddRange(shipmentTrackingMobileVersion);
 
                 var orderedtrackings = MobileshipmentTracking.OrderByDescending(x => x.DateTime).ToList();
-                
-                var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
+
+                var addresses = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybill);
 
                 var trackings = new MobileShipmentTrackingHistoryDTO();
 
                 if (addresses != null)
                 {
-                   trackings = new MobileShipmentTrackingHistoryDTO
+                    trackings = new MobileShipmentTrackingHistoryDTO
                     {
                         Origin = addresses.SenderAddress,
                         Destination = addresses.ReceiverAddress,
                         MobileShipmentTrackings = orderedtrackings
-                   };
+                    };
                 }
                 else
                 {
@@ -146,15 +130,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {
-            
+
             try
-            {                
+            {
                 if (tracking.User == null)
                 {
                     tracking.User = await _userService.GetCurrentUserId();
                 }
 
-                if(tracking.ServiceCentreId == 0)
+                if (tracking.ServiceCentreId == 0)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                     tracking.ServiceCentreId = gigGOServiceCenter.ServiceCentreId;
@@ -175,7 +159,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.MobileShipmentTracking.Add(newShipmentTracking);
                     await _uow.CompleteAsync();
-                    
+
                 }
             }
             catch (Exception)
@@ -209,5 +193,65 @@ namespace GIGLS.Services.Implementation.Shipments
             bool shipmentTracking = await _uow.MobileShipmentTracking.ExistAsync(x => x.Waybill.Equals(waybill) && x.Status.Equals(status));
             return shipmentTracking;
         }
+
+        private List<MobileShipmentTrackingDTO> MobileTrackIngMapping(List<ShipmentTrackingDTO> shipmentTracking)
+        {
+            var dataList = new List<MobileShipmentTrackingDTO>();
+            if (shipmentTracking.Any(x => x.User == "International Shipping"))
+            {
+                foreach (var item in shipmentTracking)
+                {
+                    var trackObj = new MobileShipmentTrackingDTO();
+                    if (item.User == "International Shipping")
+                    {
+                        trackObj.Waybill = item.Waybill;
+                        trackObj.Location = item.Location;
+                        trackObj.DateTime = item.DateTime;
+                        trackObj.TrackingType = item.TrackingType;
+                        trackObj.User = item.User;
+                    }
+                    else
+                    {
+                        trackObj.Waybill = item.Waybill;
+                        trackObj.Location = item.Location;
+                        trackObj.Status = item.Status;
+                        trackObj.DateTime = item.DateTime;
+                        trackObj.TrackingType = item.TrackingType;
+                        trackObj.User = item.User;
+                        trackObj.MobileShipmentTrackingId = item.ShipmentTrackingId;
+                        trackObj.ScanStatus = new MobileScanStatusDTO
+                        {
+                            Code = item.ScanStatus.Code,
+                            Incident = item.ScanStatus.Incident,
+                            Reason = item.ScanStatus.Reason,
+                            Comment = item.ScanStatus.Comment
+                        };
+                    }
+                    dataList.Add(trackObj);
+                }
+            }
+            else
+            {
+                dataList = shipmentTracking.Select(s => new MobileShipmentTrackingDTO
+                {
+                    Waybill = s.Waybill,
+                    Location = s.Location,
+                    Status = s.Status,
+                    DateTime = s.DateTime,
+                    TrackingType = s.TrackingType,
+                    User = s.User,
+                    MobileShipmentTrackingId = s.ShipmentTrackingId,
+                    ScanStatus = new MobileScanStatusDTO
+                    {
+                        Code = s.ScanStatus.Code,
+                        Incident = s.ScanStatus.Incident,
+                        Reason = s.ScanStatus.Reason,
+                        Comment = s.ScanStatus.Comment
+                    }
+                }).ToList();
+            }
+            return dataList;
+        }
+
     }
 }
