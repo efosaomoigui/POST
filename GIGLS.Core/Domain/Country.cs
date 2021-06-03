@@ -39,5 +39,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string CourierEnable { get; set; }
+
+        [MaxLength(10)]
+        public string CountryShortCode { get; set; }
     }
 }

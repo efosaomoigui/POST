@@ -77,7 +77,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService, 
+            IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService)
         {
             _uow = uow;
@@ -1005,7 +1005,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Status = ShipmentScanStatus.SRFS.ToString(),
                         Waybill = newShipment.Waybill,
                         ServiceCentreId = newShipment.DepartureServiceCentreId
-                    }, ShipmentScanStatus.SRFS, shipmentDTO.RequestNumber) ;
+                    }, ShipmentScanStatus.SRFS, shipmentDTO.RequestNumber);
                 }
 
                 //scan the shipment for tracking
@@ -4395,7 +4395,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //3. Get the result and merge it to the price result
                 var finalResult = new List<TotalNetResult>();
 
-                foreach(string courier in courierList)
+                foreach (string courier in courierList)
                 {
                     //convert the string to enum and check if 
                     CompanyMap courierMap = (CompanyMap)Enum.Parse(typeof(CompanyMap), courier);
@@ -4410,11 +4410,11 @@ namespace GIGLS.Services.Implementation.Shipments
                             finalResult.Add(ups);
                         }
                     }
-                    
-                    if(courierMap == CompanyMap.DHL)
+
+                    if (courierMap == CompanyMap.DHL)
                     {
                         var dhl = await GetDHLInternationalShipmentPrice(shipmentDTO);
-                        if(dhl != null)
+                        if (dhl != null)
                         {
                             dhl.CompanyMap = CompanyMap.DHL;
                             dhl.Currency = country.CurrencySymbol;
@@ -4436,7 +4436,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //1. Get the departure country
-                if(shipmentDTO.DepartureCountryId == 0)
+                if (shipmentDTO.DepartureCountryId == 0)
                 {
                     var departureCountry = await _userService.GetUserActiveCountryId();
                     shipmentDTO.DepartureCountryId = departureCountry;
@@ -4472,16 +4472,34 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
         {
             var countryId = await _userService.GetUserActiveCountryId();
-            GlobalPropertyType internationalAdditionalPrice = GlobalPropertyType.InternationalAdditionalPrice;
-            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(internationalAdditionalPrice, countryId);
+            var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
             total.Amount = (total.Amount * additionalAmount) + total.Amount;
-
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
-            total.VAT = total.Amount * vat;
-            total.GrandTotal = total.Amount + total.VAT;
 
+            // Discount for Ecommerce & Corporate
+            if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+            {
+                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.ClassRankPercentage : GlobalPropertyType.BasicRankPercentage;
+                var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
+                var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
+                total.VAT = total.Amount * vat;
+                total.Discount = total.Amount * discountPer;
+                total.GrandTotal =  (total.Amount + total.VAT) - total.Discount;
+            }
+            else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
+            {
+                var discountPer = Convert.ToDecimal(shipmentDTO.CustomerDetails.Discount) / 100;
+                total.VAT = total.Amount * vat;
+                total.Discount = total.Amount * discountPer;
+                total.GrandTotal = (total.Amount + total.VAT) - total.Discount;
+            }
+            else
+            {
+                total.VAT = total.Amount * vat;
+                total.GrandTotal = total.Amount + total.VAT;
+            }
             //Get Insurance
             if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
             {
@@ -4739,7 +4757,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
 
                 var shipmentByWaybill = _uow.Shipment.Find(x => x.Waybill == shipmentDTO.Waybill).FirstOrDefault();
-                if(shipmentByWaybill != null)
+                if (shipmentByWaybill != null)
                 {
                     shipmentByWaybill.FileNameUrl = blobname;
                     shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;

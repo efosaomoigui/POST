@@ -353,7 +353,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             var dhlTracking = new List<ShipmentTrackingDTO>();
                             var intlTracking = await _DhlService.TrackInternationalShipment(shipment.InternationalWayBill);
-                            if (intlTracking.Shipments.Count > 0)
+                            if (intlTracking.Shipments.Count > 0 && intlTracking.Shipments != null)
                             {
                                 if (intlTracking.Shipments[0].Events.Count > 0)
                                 {
@@ -439,6 +439,36 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                 //add to original list
                                 shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                            }
+                        }
+                    }
+
+                    //3. Check for international shipments
+                    {
+                        var shipment = _uow.ShipmentTracking.GetShipmentByWayBill(waybill);
+                        if (!string.IsNullOrWhiteSpace(shipment.InternationalWayBill))
+                        {
+                            var dhlTracking = new List<ShipmentTrackingDTO>();
+                            var intlTracking = await _DhlService.TrackInternationalShipment(shipment.InternationalWayBill);
+                            if (intlTracking.Shipments.Count > 0 && intlTracking.Shipments != null)
+                            {
+                                if (intlTracking.Shipments[0].Events.Count > 0)
+                                {
+                                    foreach (var item in intlTracking.Shipments[0].Events)
+                                    {
+                                        var data = new ShipmentTrackingDTO
+                                        {
+                                            Waybill = waybill,
+                                            DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
+                                            //Location = item.ServiceArea[0].Description,
+                                            Location = item.Description,
+                                            TrackingType = TrackingType.OutBound,
+                                            User = "International Shipping"
+                                        };
+                                        dhlTracking.Add(data);
+                                    }
+                                    shipmentTracking.AddRange(dhlTracking);
+                                }
                             }
                         }
                     }
