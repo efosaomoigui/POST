@@ -11,6 +11,8 @@ using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -602,6 +604,44 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 
                 return await Task.FromResult(summary);
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-30);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                if (filterCriteria.StartDate != null && filterCriteria.EndDate != null)
+                {
+                    startDate = (DateTime)filterCriteria.StartDate;
+                    endDate = (DateTime)filterCriteria.EndDate;
+                }
+
+                var companies = _context.Company.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep).OrderByDescending(s => s.DateCreated)
+                    .Select(c => new CompanyDTO
+                    {
+                        CustomerCode = c.CustomerCode,
+                        Name = c.Name,
+                        Rank = c.Rank,
+                        Email = c.Email,
+                        PhoneNumber = c.PhoneNumber,
+                    }).AsQueryable();
+                return await Task.FromResult(companies.ToList());
             }
             catch (Exception)
             {

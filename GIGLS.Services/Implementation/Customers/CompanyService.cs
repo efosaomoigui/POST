@@ -250,8 +250,8 @@ namespace GIGLS.Services.Implementation.Customers
             await _messageSenderService.SendMailsEcommerceCustomerRep(message);
 
             //3. After successful email sending
-            //Change Company IsAssignedCustomerRep to true
-            newCompany.IsAssignedCustomerRep = true;
+            //Store customer rep id on Company AssignedCustomerRep
+            newCompany.AssignedCustomerRep = customerRepDTO.Id;
             await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
 
             //Increase Customer rep assigned ecommerce
@@ -1156,6 +1156,19 @@ namespace GIGLS.Services.Implementation.Customers
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            filterCriteria.AssignedCustomerRep = currentUserId;
+            return await _uow.Company.GetAssignedCustomers(filterCriteria);
         }
     }
 
