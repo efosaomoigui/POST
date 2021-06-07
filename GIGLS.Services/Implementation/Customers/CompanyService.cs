@@ -228,7 +228,7 @@ namespace GIGLS.Services.Implementation.Customers
                 ToEmail = newCompany.Email,
                 To = newCompany.Email,
             };
-            
+
             //Send mail to ecommerce customer with an assigned customer rep
             //1. Get a customer rep to assign to ecommerce customer
 
@@ -857,8 +857,11 @@ namespace GIGLS.Services.Implementation.Customers
                 companyMessagingDTO.UserChannelType = userChannelType;
                 await SendMessageToNewSignUps(companyMessagingDTO);
 
-                //SendEmailToAssignEcommerceCustomerRep
-                await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                //Send Email To Assign Ecommerce Customer Rep to class customers
+                if (newCompany.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return result;
             }
             catch (Exception)
@@ -986,6 +989,12 @@ namespace GIGLS.Services.Implementation.Customers
                     companyMessagingDTO.UserChannelType = userchannelType;
                     companyMessagingDTO.IsUpdate = true;
                     await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(company);
                 }
 
                 result.Message = "User Rank Update Successful";
