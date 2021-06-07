@@ -11,7 +11,7 @@ namespace GIGLS.CORE.DTO.Report
         public int StateId { get; set; }
         public bool fromGigGoDashboard { get; set; }
         public string AssignedCustomerRep { get; set; }
-
+        public bool ViewAll { get; set; }
         /// <summary>
         /// Get the Start Date and End Date for query to the database
         /// </summary>

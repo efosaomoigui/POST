@@ -632,7 +632,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                     endDate = (DateTime)filterCriteria.EndDate;
                 }
 
-                var companies = _context.Company.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep).OrderByDescending(s => s.DateCreated)
+                var companies = _context.Company.Where(s => s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep);
+                var companiesDto = new List<CompanyDTO>();
+                if (!filterCriteria.ViewAll)
+                {
+                    companies = companies.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+                }
+                companiesDto = companies.OrderByDescending(s => s.DateCreated)
                     .Select(c => new CompanyDTO
                     {
                         CustomerCode = c.CustomerCode,
@@ -640,8 +646,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                         Rank = c.Rank,
                         Email = c.Email,
                         PhoneNumber = c.PhoneNumber,
-                    }).AsQueryable();
-                return await Task.FromResult(companies.ToList());
+                    }).ToList();
+                return await Task.FromResult(companiesDto);
             }
             catch (Exception)
             {
