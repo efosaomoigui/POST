@@ -23,6 +23,9 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public int DepartureCountryId { get; set; }
         public int Quantity { get; set; }
         public decimal Weight { get; set; }
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
+        public decimal Price { get; set; }
     }
 
 

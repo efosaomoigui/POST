@@ -3264,13 +3264,28 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
-        public async Task<decimal> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        public async Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
         {
             var currentUserId = await _userService.GetCurrentUserId();
+            var countryDTO = await _countryService.GetCountryById(quickQuotePriceDTO.DepartureCountryId);
+            var priceDTO = new QuickQuotePriceDTO();
+            priceDTO.DepartureCountryId = quickQuotePriceDTO.DepartureCountryId;
+            priceDTO.DestinationCountryId = quickQuotePriceDTO.DestinationCountryId;
+            priceDTO.Price = 0;
+            priceDTO.CurrencyCode = countryDTO.CurrencyCode;
+            priceDTO.CurrencySymbol = countryDTO.CurrencySymbol;
             decimal price = 0;
+            if (quickQuotePriceDTO == null)
+            {
+                throw new GenericException("Invalid payload!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (quickQuotePriceDTO.DepartureCountryId == 0 || quickQuotePriceDTO.DestinationCountryId == 0)
+            {
+                throw new GenericException("please ensure departure and destination is selected!", $"{(int)HttpStatusCode.BadRequest}");
+            }
             if (quickQuotePriceDTO.PriceCategoryId.Any())
             {
-                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId) && x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId);
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
                 foreach (var item in quickQuotePriceDTO.PriceCategoryId)
                 {
                     var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
@@ -3278,7 +3293,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                         {
-                            price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            priceDTO.Price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                         }
                     }
                     else
@@ -3287,7 +3302,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         {
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                             {
-                                price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                                priceDTO.Price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                             }
                         }
                         else
@@ -3295,13 +3310,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                             {
                                 var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
-                                price = price + priceValue;
+                                priceDTO.Price = price + priceValue;
                             }
                         }
                     }
                 }
             }
-            return price;
+            return priceDTO;
         }
 
         public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId)
