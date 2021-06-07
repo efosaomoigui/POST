@@ -117,7 +117,7 @@ namespace GIGLS.Core.DTO.DHL
             PriceBreakdown = new List<PriceBreakdown>();
         }
         public string Name { get; set; }
-        public double Price { get; set; }
+        public decimal Price { get; set; }
         public List<PriceBreakdown> PriceBreakdown { get; set; }
         public string ServiceCode { get; set; }
         public string LocalServiceCode { get; set; }
