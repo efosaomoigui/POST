@@ -858,7 +858,7 @@ namespace GIGLS.Services.Implementation.Customers
                 await SendMessageToNewSignUps(companyMessagingDTO);
 
                 //Send Email To Assign Ecommerce Customer Rep to class customers
-                if (newCompany.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
                 {
                     await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 }
@@ -994,7 +994,11 @@ namespace GIGLS.Services.Implementation.Customers
                 //Send mail to class customers with an assigned customer rep
                 if (userValidationDTO.Rank == Rank.Class)
                 {
-                    await SendEmailToAssignEcommerceCustomerRep(company);
+                    //CHeck if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
                 }
 
                 result.Message = "User Rank Update Successful";
