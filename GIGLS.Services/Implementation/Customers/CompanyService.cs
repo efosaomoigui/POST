@@ -212,7 +212,10 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                if(company.Rank == Rank.Class)
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
