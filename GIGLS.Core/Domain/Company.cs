@@ -88,7 +88,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(50)]
         public string BVN { get; set; }
-        public bool IsAssignedCustomerRep { get; set; }
+        public string AssignedCustomerRep { get; set; }
         [MaxLength(500)]
         public string IdentificationNumber { get; set; }
 

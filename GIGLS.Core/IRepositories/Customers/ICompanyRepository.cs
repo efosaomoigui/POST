@@ -28,5 +28,6 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<CustomerBreakdownDTO> GetNoOfBasicAndClassCustomers(DashboardFilterCriteria dashboardFilterCriteria);
         Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria);
         Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria);
     }
 }
