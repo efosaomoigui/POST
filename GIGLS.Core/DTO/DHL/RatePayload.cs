@@ -12,8 +12,8 @@ namespace GIGLS.Core.DTO.DHL
         {
             CustomerDetails = new RateCustomerDetail();
             Accounts = new List<Account>();
-            // ValueAddedServices = new List<ValueAddedService>();
-            // MonetaryAmount = new List<MonetaryAmount>();
+            ValueAddedServices = new List<ValueAddedService>();
+            MonetaryAmount = new List<MonetaryAmount>();
             Packages = new List<RatePackage>();
         }
 
@@ -25,9 +25,9 @@ namespace GIGLS.Core.DTO.DHL
         public string PlannedShippingDateAndTime { get; set; }
         public bool IsCustomsDeclarable { get; set; } = true;
         public List<RatePackage> Packages { get; set; }
-        //  public List<ValueAddedService> ValueAddedServices { get; set; }
+        public List<ValueAddedService> ValueAddedServices { get; set; }
+        public List<MonetaryAmount> MonetaryAmount { get; set; }
         //  public string PayerCountryCode { get; set; } = "NG";
-        // public List<MonetaryAmount> MonetaryAmount { get; set; }
         // public bool RequestAllValueAddedServices { get; set; } = false;
         //  public bool ReturnStandardProductsOnly { get; set; } = false;
         //  public bool NextBusinessDay { get; set; } = false;
@@ -72,7 +72,7 @@ namespace GIGLS.Core.DTO.DHL
     public class ValueAddedService
     {
         public string ServiceCode { get; set; }
-        public string LocalServiceCode { get; set; }
+        //  public string LocalServiceCode { get; set; }
         public decimal Value { get; set; }
         public string Currency { get; set; }
         public string Method { get; set; }

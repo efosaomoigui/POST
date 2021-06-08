@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -57,6 +58,8 @@ namespace GIGLS.Services.Business.DHL
                 output.Amount = (decimal)response.Products[0].TotalPrice[0].Price;
                 output.InternationalShippingCost = (decimal)response.Products[0].TotalPrice[0].Price;
                 output.Currency = response.Products[0].TotalPrice[0].PriceCurrency;
+                var insurance = response.Products[0].DetailedPriceBreakdown[0].Breakdown.FirstOrDefault(x => x.Name == "SHIPMENT INSURANCE");
+                output.Insurance = insurance != null ? insurance.Price : 0.00M;
             }
             else
             {
@@ -130,10 +133,18 @@ namespace GIGLS.Services.Business.DHL
             shipmentPayload.CustomerDetails.ReceiverDetails = GetReceiverContact(shipmentDTO);
             shipmentPayload.Content = GetShippingContent(shipmentDTO);
             shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty();
-
             shipmentPayload.ProductCode = shipmentPayload.Content.TempContentType != null ? "D" : "P";
             shipmentPayload.Content.TempContentType = null;
-
+            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
+            {
+                // for class customers, whose declared value is above or equal to 100k
+                shipmentPayload.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
+            }
+            else if (shipmentDTO.DeclarationOfValueCheck >= 30000.00M)
+            {
+                // for class customers, whose declared value is above or equal to 30k
+                shipmentPayload.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
+            } 
             return shipmentPayload;
         }
 
@@ -262,7 +273,7 @@ namespace GIGLS.Services.Business.DHL
             };
 
             postalAddress.CityName = shipmentDTO.ReceiverCity;
-            postalAddress.PostalCode = shipmentDTO.ReceiverPostalCode;
+            postalAddress.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
             postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
             postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
             postalAddress.countyName = shipmentDTO.ReceiverCountry;
@@ -392,7 +403,19 @@ namespace GIGLS.Services.Business.DHL
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
-
+            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
+            {
+                // for class customers, whose declared value is above or equal to 100k
+                rateRequest.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
+                rateRequest.MonetaryAmount.Add(GetMonetaryAmount(shipmentDTO.DeclarationOfValueCheck.Value));
+            }
+            else if (shipmentDTO.DeclarationOfValueCheck >= 30000.00M)
+            {
+                // for class customers, whose declared value is above or equal to 30k
+                rateRequest.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
+                rateRequest.MonetaryAmount.Add(GetMonetaryAmount(shipmentDTO.DeclarationOfValueCheck.Value));
+            }
+           
             foreach (var item in shipmentDTO.ShipmentItems)
             {
                 var package = new RatePackage();
@@ -452,7 +475,7 @@ namespace GIGLS.Services.Business.DHL
             var address = new RateReceiverDetail();
 
             address.CityName = shipmentDTO.ReceiverCity;
-            address.PostalCode = shipmentDTO.ReceiverPostalCode;
+            address.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
             address.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
             address.CountyName = shipmentDTO.ReceiverCountry;
             address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
@@ -523,6 +546,27 @@ namespace GIGLS.Services.Business.DHL
                     nonWorkDays--;
             }
             return tmpDate;
+        }
+
+        private ValueAddedService GetValueAddedService(decimal declareValue)
+        {
+            return new ValueAddedService
+            {
+                ServiceCode = "II",
+                Value = declareValue,
+                Currency = "NGN",
+                Method = "cash"
+            };
+        }
+
+        private MonetaryAmount GetMonetaryAmount(decimal declareValue)
+        {
+            return new MonetaryAmount
+            {
+                TypeCode = "declaredValue",
+                Value = declareValue,
+                Currency = "NGN"
+            };
         }
 
     }
