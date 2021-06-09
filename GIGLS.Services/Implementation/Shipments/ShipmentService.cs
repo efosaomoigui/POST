@@ -4569,39 +4569,38 @@ namespace GIGLS.Services.Implementation.Shipments
             var countryId = await _userService.GetUserActiveCountryId();
             var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
+            total.Amount = total.Amount - total.Insurance;
             total.Amount = (total.Amount * additionalAmount) + total.Amount;
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+            total.VAT = total.Amount * vat;
 
             // Discount for Ecommerce & Corporate
             if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
             {
-                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.ClassRankPercentage : GlobalPropertyType.BasicRankPercentage;
+                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.InternationalRankClassDiscount : GlobalPropertyType.InternationalBasicClassDiscount;
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
-                total.VAT = total.Amount * vat;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal = (total.Amount + total.VAT) - total.Discount;
+                total.GrandTotal =  (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
             else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
             {
                 var discountPer = Convert.ToDecimal(shipmentDTO.CustomerDetails.Discount) / 100;
-                total.VAT = total.Amount * vat;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal = (total.Amount + total.VAT) - total.Discount;
+                total.GrandTotal = (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
             else
             {
-                total.VAT = total.Amount * vat;
-                total.GrandTotal = total.Amount + total.VAT;
+                total.GrandTotal = total.Amount + total.VAT + total.Insurance;
             }
             //Get Insurance
-            if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
-            {
-                decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
-                total.GrandTotal = total.GrandTotal + insurance;
-                total.Insurance = insurance;
-            }
+            //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
+            //{
+            //    decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
+            //    total.GrandTotal = total.GrandTotal + insurance;
+            //    total.Insurance = insurance;
+            //}
             return total;
         }
 

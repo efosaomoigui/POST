@@ -212,7 +212,10 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                if(company.Rank == Rank.Class)
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
@@ -228,7 +231,7 @@ namespace GIGLS.Services.Implementation.Customers
                 ToEmail = newCompany.Email,
                 To = newCompany.Email,
             };
-            
+
             //Send mail to ecommerce customer with an assigned customer rep
             //1. Get a customer rep to assign to ecommerce customer
 
@@ -250,8 +253,8 @@ namespace GIGLS.Services.Implementation.Customers
             await _messageSenderService.SendMailsEcommerceCustomerRep(message);
 
             //3. After successful email sending
-            //Change Company IsAssignedCustomerRep to true
-            newCompany.IsAssignedCustomerRep = true;
+            //Store customer rep id on Company AssignedCustomerRep
+            newCompany.AssignedCustomerRep = customerRepDTO.Id;
             await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
 
             //Increase Customer rep assigned ecommerce
@@ -857,8 +860,11 @@ namespace GIGLS.Services.Implementation.Customers
                 companyMessagingDTO.UserChannelType = userChannelType;
                 await SendMessageToNewSignUps(companyMessagingDTO);
 
-                //SendEmailToAssignEcommerceCustomerRep
-                await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                //Send Email To Assign Ecommerce Customer Rep to class customers
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return result;
             }
             catch (Exception)
@@ -986,6 +992,16 @@ namespace GIGLS.Services.Implementation.Customers
                     companyMessagingDTO.UserChannelType = userchannelType;
                     companyMessagingDTO.IsUpdate = true;
                     await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //CHeck if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
                 }
 
                 result.Message = "User Rank Update Successful";
@@ -1156,6 +1172,19 @@ namespace GIGLS.Services.Implementation.Customers
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            filterCriteria.AssignedCustomerRep = currentUserId;
+            return await _uow.Company.GetAssignedCustomers(filterCriteria);
         }
     }
 
