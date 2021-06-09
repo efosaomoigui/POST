@@ -376,7 +376,7 @@ namespace GIGLS.Services.Implementation.Partnership
                     }
 
                     var waybillRating = mobilerating.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
-                    if (waybillRating != null)
+                    if (waybillRating != null && waybillRating.PartnerRating != null)
                     {
                         count++;
                         avrating += waybillRating.PartnerRating.Value;
