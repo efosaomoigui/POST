@@ -303,9 +303,9 @@ namespace GIGLS.Services.Business.DHL
             {
                 ContactInformation = new ContactInformation
                 {
-                    Email = email,
-                    Phone = phoneNumber,
-                    MobilePhone = phoneNumber,
+                    Email = shipmentDTO.CustomerDetails.Email != null ? shipmentDTO.CustomerDetails.Email : email,
+                    Phone = shipmentDTO.CustomerDetails.PhoneNumber != null ? shipmentDTO.CustomerDetails.PhoneNumber : phoneNumber,
+                    MobilePhone = shipmentDTO.CustomerDetails.PhoneNumber != null ? shipmentDTO.CustomerDetails.PhoneNumber : phoneNumber,
                     CompanyName = "GIG LOGISTICS",
                     FullName = shipmentDTO.CustomerDetails.CustomerName
                 },
