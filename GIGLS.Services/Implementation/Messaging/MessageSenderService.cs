@@ -1839,7 +1839,65 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
+        public async Task SendMailsShipmentCreation(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailShipmentCreationAsync(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
 
+        public async Task SendMailsShipmentARFHomeDelivery(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailShipmentARFHomeDeliveryAsync(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        public async Task SendMailsShipmentARFTerminalPickup(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailShipmentARFTerminalPickupAsync(messageDTO);
+                    if(!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{

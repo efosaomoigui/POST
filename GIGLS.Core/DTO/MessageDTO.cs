@@ -37,6 +37,7 @@ namespace GIGLS.Core.DTO
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
         public IntlShipmentMessageDTO IntlShipmentMessage { get; set; }
         public EcommerceCustomerRepMessageDTO EcommerceMessage { get; set; }
+        public ShipmentCreationMessageDTO ShipmentCreationMessage { get; set; }
     }
 
     public class NewMessageDTO
@@ -77,5 +78,10 @@ namespace GIGLS.Core.DTO
         public string AccountOfficerName { get; set; }
         public string AccountOfficerNumber { get; set; }
         public string AccountOfficerEmail { get; set; }
+    }
+
+    public class ShipmentCreationMessageDTO
+    {
+        public string DeliveryNumber { get; set; }
     }
 }
