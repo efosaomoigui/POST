@@ -150,7 +150,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public async Task<List<MovementManifestNumberDTO>> GetManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
         {
             //get startDate and endDate
-            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var dateFilterCriteria2 = (dateFilterCriteria == null)? new DateFilterCriteria() : dateFilterCriteria;
+            var queryDate = dateFilterCriteria2.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
