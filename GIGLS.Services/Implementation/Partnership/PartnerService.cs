@@ -373,7 +373,8 @@ namespace GIGLS.Services.Implementation.Partnership
                     var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
                     if (picked != null && assigned != null)
                     {
-                        ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
+                       // ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
+                        ptat += (int)picked.DateCreated.Minute - assigned.DateCreated.Minute;
                     }
 
                     var waybillRating = mobilerating.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
