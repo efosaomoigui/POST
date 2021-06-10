@@ -4050,7 +4050,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                 item.ItemName = preshipmentitemmobile.ItemName;
                                 item.Length = preshipmentitemmobile.Length;
                                 item.SpecialPackageId = preshipmentitemmobile.SpecialPackageId;
-                                item.ShipmentType = preshipmentitemmobile.ShipmentType;
+                                item.WeightRange = preshipmentitemmobile.WeightRange;
+                                // item.ShipmentType = preshipmentitemmobile.ShipmentType;
                                 item.CalculatedPrice = preshipmentPriceDTO.PreshipmentMobile.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).Select(y => y.CalculatedPrice).FirstOrDefault();
                                 if (!string.IsNullOrEmpty(preshipmentitemmobile.Value))
                                 {
