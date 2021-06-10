@@ -366,7 +366,8 @@ namespace GIGLS.Services.Implementation.Partnership
                     var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
                     if (assigned != null)
                     {
-                        atat += (int)(assigned.DateCreated - createdDay.DateCreated).TotalMinutes;
+                        //atat += (int)(assigned.DateCreated - createdDay.DateCreated).TotalMinutes;
+                        atat += (int)(assigned.DateCreated).Minute;
                     }
 
                     var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
