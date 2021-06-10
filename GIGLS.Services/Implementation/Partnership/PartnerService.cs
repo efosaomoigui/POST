@@ -358,23 +358,24 @@ namespace GIGLS.Services.Implementation.Partnership
                 {
                     var createdDay = mobileshipments.FirstOrDefault(x => x.Waybill == item.Waybill);
 
-                    var dlvrd = pickupRequests.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == MobilePickUpRequestStatus.Delivered.ToString() && x.Waybill == item.Waybill);
+                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == MobilePickUpRequestStatus.Delivered.ToString() && x.Waybill == item.Waybill);
+                    var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
+                    var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
+
                     if (dlvrd != null)
                     {
                         dtat += (int)(dlvrd.DateCreated - createdDay.DateCreated).TotalMinutes;
                     }
-                    var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
-                    if (assigned != null)
-                    {
-                        //atat += (int)(assigned.DateCreated - createdDay.DateCreated).TotalMinutes;
-                        atat += (int)(assigned.DateCreated).Minute;
-                    }
 
-                    var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
                     if (picked != null && assigned != null)
                     {
                         ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
                         //ptat += (int)picked.DateCreated.Minute - assigned.DateCreated.Minute;
+                    }
+                    if (assigned != null)
+                    {
+                        atat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
+                        // atat += (int)(assigned.DateCreated).Minute;
                     }
 
                     var waybillRating = mobilerating.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
