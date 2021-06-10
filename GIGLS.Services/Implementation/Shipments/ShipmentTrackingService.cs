@@ -364,8 +364,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             Waybill = waybill,
                                             DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
-                                            //Location = item.ServiceArea[0].Description,
-                                            Location = item.Description,
+                                            Location = item.ServiceArea[0].Description,
+                                            Status = item.Description,
                                             TrackingType = TrackingType.OutBound,
                                             User = "International Shipping"
                                         };
@@ -461,9 +461,10 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             Waybill = waybill,
                                             DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
-                                            Location = item.Description,
+                                            Location = item.ServiceArea[0].Description,
                                             TrackingType = TrackingType.OutBound,
                                             User = "International Shipping",
+                                            Status = item.Description,
                                             ScanStatus = new ScanStatusDTO
                                             {
                                                 Code = item.ServiceArea[0].Code,
