@@ -2383,6 +2383,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               InputtedSenderAddress = r.InputtedSenderAddress,
                                                               InputtedReceiverAddress = r.InputtedReceiverAddress,
                                                               SenderLocality = r.SenderLocality,
+                                                              ZoneMapping = r.ZoneMapping,
                                                               ReceiverLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.ReceiverLocation.Longitude,
