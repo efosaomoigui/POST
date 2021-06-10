@@ -4367,6 +4367,22 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
 
+                        ShipmentScanStatus shipmentScan = ShipmentScanStatus.IDH;
+
+                        if (shipmentItem.DepartureCountryId != 207)
+                        {
+                            shipmentScan = ShipmentScanStatus.IDK;
+                        }
+
+                        var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                        {
+                            DateTime = DateTime.Now,
+                            Status = shipmentScan.ToString(),
+                            Waybill = shipmentItem.Waybill,
+                            isInternalShipment = shipmentItem.isInternalShipment,
+                            TrackingType = TrackingType.OutBound,
+                        }, shipmentItem.ShipmentScanStatus);
+
                         var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
 
                         await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(shipmentDTO);
@@ -4487,7 +4503,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal =  (total.Amount + total.VAT + total.Insurance) - total.Discount;
+                total.GrandTotal = (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
             else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
             {
