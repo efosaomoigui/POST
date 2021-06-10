@@ -4051,7 +4051,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                 item.Length = preshipmentitemmobile.Length;
                                 item.SpecialPackageId = preshipmentitemmobile.SpecialPackageId;
                                 item.WeightRange = preshipmentitemmobile.WeightRange;
-                                // item.ShipmentType = preshipmentitemmobile.ShipmentType;
                                 item.CalculatedPrice = preshipmentPriceDTO.PreshipmentMobile.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).Select(y => y.CalculatedPrice).FirstOrDefault();
                                 if (!string.IsNullOrEmpty(preshipmentitemmobile.Value))
                                 {
@@ -4126,6 +4125,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentitemmobile.ImageUrl = item.ImageUrl;
                     preshipmentitemmobile.ItemName = item.ItemName;
                     preshipmentitemmobile.Length = item.Length;
+                    preshipmentitemmobile.SpecialPackageId = item.SpecialPackageId;
+                    preshipmentitemmobile.WeightRange = item.WeightRange;
                 }
 
                 var PreshipmentPriceDTO = await GetPriceForResolveDispute(preShipment, pickupPrice);
