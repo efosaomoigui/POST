@@ -365,9 +365,18 @@ namespace GIGLS.Services.Implementation.Shipments
                                             Waybill = waybill,
                                             DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
                                             Location = item.ServiceArea[0].Description,
-                                            Status = item.Description,
                                             TrackingType = TrackingType.OutBound,
-                                            User = "International Shipping"
+                                            User = "International Shipping",
+                                            Status = item.Description,
+                                            ScanStatus = new ScanStatusDTO
+                                            {
+                                                Code = item.ServiceArea[0].Code,
+                                                Incident = item.Description,
+                                                Reason = item.ServiceArea[0].Description,
+                                                Comment = item.Description,
+                                                DateCreated = Convert.ToDateTime(item.Date + " " + item.Time),
+                                                DateModified = Convert.ToDateTime(item.Date + " " + item.Time)
+                                            }
                                         };
                                         dhlTracking.Add(data);
                                     }
