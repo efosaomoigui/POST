@@ -274,7 +274,7 @@ namespace GIGLS.Services.Business.DHL
 
             postalAddress.CityName = shipmentDTO.ReceiverCity;
             postalAddress.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
-            postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
+            postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || shipmentDTO.ReceiverStateOrProvinceCode == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
             postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
             postalAddress.countyName = shipmentDTO.ReceiverCountry;
             if (splittedAddress.Length <= 1)
@@ -478,7 +478,7 @@ namespace GIGLS.Services.Business.DHL
             address.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
             address.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
             address.CountyName = shipmentDTO.ReceiverCountry;
-            address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode;
+            address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || shipmentDTO.ReceiverStateOrProvinceCode == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
             if (splittedAddress.Length <= 1)
             {
                 address.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
@@ -537,7 +537,7 @@ namespace GIGLS.Services.Business.DHL
 
         private DateTime AddWorkdays()
         {
-            int nonWorkDays = 2;
+            int nonWorkDays = 1;
             var tmpDate = DateTime.Today;
             while (nonWorkDays > 0)
             {
