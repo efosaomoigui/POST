@@ -2,6 +2,8 @@
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -18,6 +20,14 @@ namespace GIGLS.Services.Business.DHL
 {
     public class DHLService : IDHLService
     {
+        private readonly IUserService _userService;
+        private readonly IGlobalPropertyService _globalPropertyService;
+        public DHLService(IUserService userService, IGlobalPropertyService globalPropertyService)
+        {
+            _userService = userService;
+            _globalPropertyService = globalPropertyService;
+        }
+
         public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             var createShipment = await CreateDHLShipment(shipmentDTO);
@@ -77,7 +87,7 @@ namespace GIGLS.Services.Business.DHL
                 var result = new ShipmentResPayload();
 
                 //Get Price from DHL
-                var rateRequest = GetShipmentRequestPayload(shipmentDTO);
+                var rateRequest = await GetShipmentRequestPayload(shipmentDTO);
 
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
                 string path = ConfigurationManager.AppSettings["DHLShipmentRequest"];
@@ -122,11 +132,11 @@ namespace GIGLS.Services.Business.DHL
             }
         }
 
-        private ShippingPayload GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
+        private async Task<ShippingPayload> GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var shipmentPayload = new ShippingPayload();
-
-            shipmentPayload.PlannedShippingDateAndTime = AddWorkdays().ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            var shippingDate = await AddWorkdays();
+            shipmentPayload.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             shipmentPayload.Pickup.IsRequested = false;
             shipmentPayload.Accounts.Add(GetAccount());
             shipmentPayload.CustomerDetails.ShipperDetails = GetShipperContact(shipmentDTO);
@@ -144,7 +154,7 @@ namespace GIGLS.Services.Business.DHL
             {
                 // for class customers, whose declared value is above or equal to 30k
                 shipmentPayload.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
-            } 
+            }
             return shipmentPayload;
         }
 
@@ -343,7 +353,7 @@ namespace GIGLS.Services.Business.DHL
             {
                 var result = new RateResPayload();
                 //Get Price from DHL
-                var rateRequest = GetRateRequestPayload(shipmentDTO);
+                var rateRequest = await GetRateRequestPayload(shipmentDTO);
 
                 string baseUrl = ConfigurationManager.AppSettings["DHLBaseUrl"];
                 string path = ConfigurationManager.AppSettings["DHLPriceRequest"];
@@ -395,11 +405,11 @@ namespace GIGLS.Services.Business.DHL
             return key;
         }
 
-        private RatePayload GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
+        private async Task<RatePayload> GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var rateRequest = new RatePayload();
-
-            rateRequest.PlannedShippingDateAndTime = AddWorkdays().ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
+            var shippingDate = await AddWorkdays();
+            rateRequest.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
@@ -415,7 +425,7 @@ namespace GIGLS.Services.Business.DHL
                 rateRequest.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
                 rateRequest.MonetaryAmount.Add(GetMonetaryAmount(shipmentDTO.DeclarationOfValueCheck.Value));
             }
-           
+
             foreach (var item in shipmentDTO.ShipmentItems)
             {
                 var package = new RatePackage();
@@ -535,15 +545,23 @@ namespace GIGLS.Services.Business.DHL
             }
         }
 
-        private DateTime AddWorkdays()
+        private async Task<DateTime> AddWorkdays()
         {
-            int nonWorkDays = 1;
+            var countryId = await _userService.GetUserActiveCountryId();
+            var shipTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PlannedShippingDateAndTime, countryId);
+            int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
             var tmpDate = DateTime.Today;
-            while (nonWorkDays > 0)
+            if (tmpDate.DayOfWeek == DayOfWeek.Saturday)
             {
                 tmpDate = tmpDate.AddDays(1);
-                if (tmpDate.DayOfWeek < DayOfWeek.Saturday && tmpDate.DayOfWeek > DayOfWeek.Sunday)
-                    nonWorkDays--;
+            }
+            else if (tmpDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                tmpDate = tmpDate.AddDays(1);
+            }
+            else
+            {
+                tmpDate = tmpDate.AddDays(shipDays);
             }
             return tmpDate;
         }
