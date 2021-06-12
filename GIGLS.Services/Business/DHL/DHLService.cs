@@ -413,7 +413,7 @@ namespace GIGLS.Services.Business.DHL
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
-            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
+            if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
             {
                 // for class customers, whose declared value is above or equal to 100k
                 rateRequest.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
