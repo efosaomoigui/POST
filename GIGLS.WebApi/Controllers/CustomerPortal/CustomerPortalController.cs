@@ -2332,12 +2332,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("getintlquickqoute")]
-        public async Task<IServiceResponse<decimal>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var item = await _portalService.GetIntlQuickQuote(quickQuotePriceDTO);
-                return new ServiceResponse<decimal>
+                return new ServiceResponse<QuickQuotePriceDTO>
                 {
                     Object = item
                 };

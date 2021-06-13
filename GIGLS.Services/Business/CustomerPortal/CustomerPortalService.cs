@@ -3274,7 +3274,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             priceDTO.Price = 0;
             priceDTO.CurrencyCode = countryDTO.CurrencyCode;
             priceDTO.CurrencySymbol = countryDTO.CurrencySymbol;
-            decimal price = 0;
             if (quickQuotePriceDTO == null)
             {
                 throw new GenericException("Invalid payload!", $"{(int)HttpStatusCode.BadRequest}");
@@ -3293,7 +3292,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                         {
-                            priceDTO.Price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                         }
                     }
                     else
@@ -3302,7 +3301,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         {
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                             {
-                                priceDTO.Price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                             }
                         }
                         else
@@ -3310,7 +3309,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                             {
                                 var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
-                                priceDTO.Price = price + priceValue;
+                                priceDTO.Price = priceDTO.Price + priceValue;
                             }
                         }
                     }
