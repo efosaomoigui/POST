@@ -762,6 +762,34 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
             }
 
+            //4. obj is PasswordMessageDTO
+            if (obj is PasswordMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Password",
+                    "UserEmail",
+                    "CustomerCode",
+                    "UserPhoneNumber"
+                };
+                var passwordMessageDTO = (PasswordMessageDTO)obj;
+
+                strArray[0] = passwordMessageDTO.Password;
+                strArray[1] = passwordMessageDTO.UserEmail;
+                strArray[2] = passwordMessageDTO.CustomerCode;
+                strArray[3] = passwordMessageDTO.UserPhoneNumber;
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = passwordMessageDTO.UserEmail;
+
+                messageDTO.To = passwordMessageDTO.UserPhoneNumber;
+
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+            }
+
             return await Task.FromResult(true);
         }
 
@@ -1087,14 +1115,15 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     "Password",
                     "UserEmail",
-                    "URL",
-                    "CustomerCode"
+                    "CustomerCode",
+                    "UserPhoneNumber"
                 };
                 var passwordMessageDTO = (PasswordMessageDTO)obj;
 
                 strArray[0] = passwordMessageDTO.Password;
                 strArray[1] = passwordMessageDTO.UserEmail;
                 strArray[2] = passwordMessageDTO.CustomerCode;
+                strArray[3] = passwordMessageDTO.UserPhoneNumber;
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
