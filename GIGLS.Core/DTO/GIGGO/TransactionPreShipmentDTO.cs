@@ -17,6 +17,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
         public string PartnerImageUrl { get; set; }
+        public int ZoneMapping { get; set; }
         public List<PreShipmentItemMobileDTO> PreShipmentItems { get; set; } = null;
     }
 }
