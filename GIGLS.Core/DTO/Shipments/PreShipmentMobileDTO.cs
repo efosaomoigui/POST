@@ -427,4 +427,29 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerType { get; set; }
         public DateTime DeliveredTime { get; set; }
     }
+
+
+
+    public class RiderRateDTO
+    {
+        public string Waybill { get; set; }
+        public string ShipmentScanStatus { get; set; }
+        public DateTime LastScanDate { get; set; }
+        public int DeliveryTAT { get; set; }
+        public int AssignTAT { get; set; }
+        public int PickupTAT { get; set; }
+        public int AverageDeliveryTAT { get; set; }
+        public int AverageAssignTAT { get; set; }
+        public int AveragePickupTAT { get; set; }
+        public int AverageOATAT { get; set; }
+        public int Trip { get; set; }
+        public DateTime LastSeen { get; set; }
+        public ActivityStatus Status { get; set; }
+        public double Rate { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerID { get; set; }
+        public string PartnerEmail { get; set; }
+        public string PartnerType { get; set; }
+        public DateTime DeliveredTime { get; set; }
+    }
 }

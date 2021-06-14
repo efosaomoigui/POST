@@ -420,5 +420,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifests/{manifestCode}")]
+        public async Task<IServiceResponse<List<GroupWaybillAndWaybillDTO>>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetGroupWaybillDataInManifest(manifestCode);
+
+                return new ServiceResponse<List<GroupWaybillAndWaybillDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

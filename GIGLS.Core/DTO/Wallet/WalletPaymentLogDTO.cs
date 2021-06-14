@@ -27,6 +27,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string ExternalReference { get; set; }
         public string GatewayCode { get; set; }
         public WalletTransactionType TransactionType { get; set; }
+        public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 
 }

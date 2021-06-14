@@ -255,5 +255,20 @@ namespace GIGLS.WebApi.Controllers.Customers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("assignedcustomers")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetAssignedCustomers(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetAssignedCustomers(filterCriteria);
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
     }
 }

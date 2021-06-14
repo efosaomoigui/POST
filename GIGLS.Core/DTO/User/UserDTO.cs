@@ -98,6 +98,7 @@ namespace GIGLS.Core.DTO.User
         public bool IsInternational { get; set; }
         public string IdentificationImage { get; set; }
         public string CountryType { get; set; }
+        public int AssignedEcommerceCustomer { get; set; }
     }
 
     public class UpdateUserActiveCountryDTO

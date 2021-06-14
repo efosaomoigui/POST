@@ -11,6 +11,7 @@ namespace GIGLS.Core.DTO.DHL
             Accounts = new List<Account>();
             CustomerDetails = new ShipmentCustomerDetail();
             OutputImageProperties = new OutputImageProperties();
+            ValueAddedServices = new List<ValueAddedService>();
         }
         public string ProductCode { get; set; } = "P";
         public string PlannedShippingDateAndTime { get; set; }
@@ -19,6 +20,8 @@ namespace GIGLS.Core.DTO.DHL
         public List<Account> Accounts { get; set; }
         public ShipmentCustomerDetail CustomerDetails { get; set; }
         public OutputImageProperties OutputImageProperties { get; set; }
+        public List<ValueAddedService> ValueAddedServices { get; set; }
+
     }
 
     public class ShipmentCustomerDetail
@@ -135,6 +138,7 @@ namespace GIGLS.Core.DTO.DHL
     {
         public decimal Value { get; set; }
         public string Caption { get; set; }
+        public string TypeCode { get; set; }
     }
 
     public class Exporter
@@ -188,6 +192,7 @@ namespace GIGLS.Core.DTO.DHL
         public string Description { get; set; }
         public string Incoterm { get; set; }
         public string UnitOfMeasurement { get; set; }
+        public string TempContentType { get; set; }
         public List<ShippingPackage> Packages { get; set; }
         public ExportDeclaration ExportDeclaration { get; set; }
     }

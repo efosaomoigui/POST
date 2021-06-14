@@ -55,6 +55,8 @@ namespace GIGL.GIGLS.Core.Domain
         public string IdentificationNumber { get; set; }
         public bool DashboardAccess { get; set; }
         public string CountryType { get; set; }
+        public int AssignedEcommerceCustomer { get; set; }
+        
 
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)

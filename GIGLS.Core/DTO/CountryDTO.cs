@@ -28,6 +28,8 @@ namespace GIGLS.Core.DTO
         public bool IsInternationalShippingCountry { get; set; }
         public string CourierEnable { get; set; }
         public List<string> CourierList { get; set; }
+        public string CountryShortCode { get; set; }
+
     }
     public class NewCountryDTO 
     {

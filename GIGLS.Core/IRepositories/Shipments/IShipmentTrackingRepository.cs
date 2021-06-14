@@ -17,5 +17,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         //Task<List<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
         IQueryable<ShipmentTrackingView> GetShipmentTrackingsFromViewAsync(ScanTrackFilterCriteria f_Criteria);
         IQueryable<ShipmentTracking> GetShipmentTrackingsAsync(ScanTrackFilterCriteria f_Criteria);
+        Shipment GetShipmentByWayBill(string waybill);
+
     }
 }
