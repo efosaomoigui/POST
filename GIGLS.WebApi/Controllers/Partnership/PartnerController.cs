@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
@@ -392,6 +394,22 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("riderratings")]
+        public async Task<IServiceResponse<List<RiderRateDTO>>> GetRidersRatings(PaginationDTO pagination)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ratings =await _partnerService.GetRidersRatings(pagination);
+
+                return new ServiceResponse<List<RiderRateDTO>>
+                {
+                    Object = ratings
                 };
             });
         }

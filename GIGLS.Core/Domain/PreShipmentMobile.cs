@@ -165,5 +165,6 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string WaybillImageUrl { get; set; }
         public bool IsFromAgility { get; set; }
+        public int Haulageid { get; set; }
     }
 }

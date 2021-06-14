@@ -807,5 +807,39 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return true;
         }
+
+        //Send email and SMS when Scan of "Intl Shipment Arrive Nigeria" and payment has not been made
+        public async Task<bool> SendEmailShipmentArriveFinalDestination(ShipmentDTO shipmentDTO)
+        {
+            if(shipmentDTO != null)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            var customerObj = await _messageSenderService.GetCustomer(shipmentDTO.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDTO.DepartureCountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                Waybill = shipmentDTO.Waybill,
+                Currency = country.CurrencySymbol,
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Body = shipmentDTO.DepartureCountryId == 207 ? DateTime.Now.AddDays(14).ToString("dd/MM/yyyy") : DateTime.Now.AddDays(5).ToString("dd/MM/yyyy"),
+                Subject = $"Shipment arrive final destination",
+                MessageTemplate = "OverseasDepartsHub"
+            };
+
+            //Send Email
+            await _messageSenderService.SendMailsShipmentARF(messageDTO);
+
+            return true;
+        }
     }
 }

@@ -728,6 +728,12 @@ namespace GIGLS.Services.Implementation.Wallet
             return amountToDebit;
         }
 
+        public async Task<List<WaybillPaymentLogDTO>> GetAllWaybillsForFailedPayments()
+        {
+            var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable().Where(x => x.IsPaymentSuccessful == false).ToList();
+            return Mapper.Map<List<WaybillPaymentLogDTO>>(paymentLog);
+        }
+
         public async Task<PaystackWebhookDTO> AddWaybillPaymentLogForIntlShipment(WaybillPaymentLogDTO waybillPaymentLog)
         {
             var response = new PaystackWebhookDTO();

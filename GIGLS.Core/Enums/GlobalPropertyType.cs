@@ -90,6 +90,7 @@
         InternationalRankClassDiscount,
         InternationalBasicClassDiscount,
         OthersMinUK,
+        EcommerceCustomerRep,
         PlannedShippingDateAndTime
     }
 }

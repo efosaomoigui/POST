@@ -1,5 +1,7 @@
-﻿using GIGLS.Core.DTO.Partnership;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,5 +24,7 @@ namespace GIGLS.Core.IServices.Partnership
         Task ContactUnverifiedPartner(string email);
         Task<IEnumerable<VehicleTypeDTO>> GetVerifiedByRangePartners(ShipmentCollectionFilterCriteria filterCriteria);
         Task DeactivatePartner(int partnerId);
+        Task<List<PartnerTransactionsDTO>> RiderRatings(PaginationDTO pagination);
+        Task<List<RiderRateDTO>> GetRidersRatings(PaginationDTO pagination);
     }
 }

@@ -108,10 +108,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         {
             var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable().Where(s => s.DepositType == type && s.RefCode == refcode);
 
-            if(serviceCenters.Length > 0)
-            {
-                processingordersvalue = processingordersvalue.Where(s => serviceCenters.Contains(s.ServiceCenterId));
-            }
+            //if(serviceCenters.Length > 0)
+            //{
+            //    processingordersvalue = processingordersvalue.Where(s => serviceCenters.Contains(s.ServiceCenterId));
+            //}
 
             var processingorders = from processingorderCode in processingordersvalue
                                    select new BankProcessingOrderForShipmentAndCODDTO

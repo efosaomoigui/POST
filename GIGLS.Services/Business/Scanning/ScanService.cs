@@ -202,6 +202,8 @@ namespace GIGLS.Services.Business.Scanning
                             }
 
                         }
+                        //Send Email on Shipment Arrive final Destination
+                        await _shipmentTrackingService.SendEmailShipmentArriveFinalDestination(Mapper.Map<ShipmentDTO>(shipment));
                         return true;
                     }
                     else
@@ -596,6 +598,7 @@ namespace GIGLS.Services.Business.Scanning
 
 
             await _uow.CompleteAsync();
+            //Send mail to receiver on 
             return true;
         }
 
