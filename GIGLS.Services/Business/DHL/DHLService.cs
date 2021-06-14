@@ -559,7 +559,7 @@ namespace GIGLS.Services.Business.DHL
             {
                 tmpDate = tmpDate.AddDays(shipDays);
             }
-            return tmpDate;
+            return tmpDate.AddDays(shipDays);
         }
 
         private ValueAddedService GetValueAddedService(decimal declareValue)
