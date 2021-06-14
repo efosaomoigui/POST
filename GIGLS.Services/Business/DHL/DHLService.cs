@@ -143,18 +143,18 @@ namespace GIGLS.Services.Business.DHL
             shipmentPayload.CustomerDetails.ReceiverDetails = GetReceiverContact(shipmentDTO);
             shipmentPayload.Content = GetShippingContent(shipmentDTO);
             shipmentPayload.OutputImageProperties = GetShipperOutputImageProperty();
-            shipmentPayload.ProductCode = shipmentPayload.Content.TempContentType != null ? "D" : "P";
-            shipmentPayload.Content.TempContentType = null;
-            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
+            shipmentPayload.ProductCode = shipmentPayload.Content.TempContentType == InternationalShipmentItemCategory.Document.ToString() ? "D" : "P";
+            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M && InternationalShipmentItemCategory.NonDocument.ToString() == shipmentPayload.Content.TempContentType)
             {
                 // for class customers, whose declared value is above or equal to 100k
                 shipmentPayload.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
             }
-            else if (shipmentDTO.DeclarationOfValueCheck >= 30000.00M)
+            else if (shipmentDTO.DeclarationOfValueCheck >= 30000.00M && InternationalShipmentItemCategory.NonDocument.ToString() == shipmentPayload.Content.TempContentType)
             {
                 // for class customers, whose declared value is above or equal to 30k
                 shipmentPayload.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
             }
+            shipmentPayload.Content.TempContentType = null;
             return shipmentPayload;
         }
 
@@ -202,7 +202,7 @@ namespace GIGLS.Services.Business.DHL
                 content.Description = item.Description;
                 if (item.InternationalShipmentItemCategory == InternationalShipmentItemCategory.Document)
                 {
-                    content.TempContentType = "Document";
+                    content.TempContentType = item.InternationalShipmentItemCategory.ToString();
                     content.IsCustomsDeclarable = false;
                     package = new ShippingPackage
                     {
@@ -413,7 +413,7 @@ namespace GIGLS.Services.Business.DHL
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
-            if (shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
+            if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
             {
                 // for class customers, whose declared value is above or equal to 100k
                 rateRequest.ValueAddedServices.Add(GetValueAddedService(shipmentDTO.DeclarationOfValueCheck.Value));
