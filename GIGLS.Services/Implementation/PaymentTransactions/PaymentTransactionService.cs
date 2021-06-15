@@ -469,14 +469,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 QRCode = deliveryNumber.SenderCode
             };
 
+            var shipmentObjDTO = Mapper.Map<ShipmentDTO>(shipment);
             if (shipment.DepartureServiceCentreId == 309)
             {
                 await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
-                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                //Commented this out 15/06/2021 to implement new email 
+                //await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO);
             }
             else
             {
-                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                //Commented this out 15/06/2021 to implement new email
+                //await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+
+                //sperated the previous implementation into sms / email
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO);
             }
 
             result = true;
