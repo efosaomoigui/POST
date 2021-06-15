@@ -1054,7 +1054,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             else
             {
-                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CompanyType);
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
             }
 
             var customer = await GetCustomerForShipment(shipment.CustomerId, customerType);
