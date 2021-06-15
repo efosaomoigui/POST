@@ -1032,10 +1032,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 //Send mail for shipment creation
-                if (newShipment != null)
-                {
-                    await SendEmailToCustomerForShipmentCreation(newShipment);
-                }
+                //if (newShipment != null)
+                //{
+                //    await SendEmailToCustomerForShipmentCreation(newShipment);
+                //}
                 return newShipment;
             }
             catch (Exception ex)
