@@ -131,7 +131,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                             else
                             {
+
                                 await sendSMSEmail(tracking, scanStatus);
+
                             }
                         }
                     }
@@ -221,7 +223,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //send message
-            await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            if(messageType != MessageType.ARF)
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                var shipment =await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFHomeDelivery(shipmentDTO);
+                }
+                //Send Email on Shipment Arrive final Destination for Terminal pickup option
+                if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFTerminalPickup(shipmentDTO);
+                }
+            }
 
             return true;
         }
