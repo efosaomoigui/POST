@@ -4886,6 +4886,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentByWaybill != null)
                 {
                     shipmentByWaybill.FileNameUrl = blobname;
+                    shipmentByWaybill.IsdeclaredVal = true;
+                    shipmentByWaybill.Insurance = shipmentDTO.Insurance != null ? (shipmentDTO.Insurance * 100) / shipmentDTO.DeclarationOfValueCheck : 0;
                     shipmentByWaybill.DeclarationOfValueCheck = shipmentDTO.DeclarationOfValueCheck;
                     shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;
                 }
