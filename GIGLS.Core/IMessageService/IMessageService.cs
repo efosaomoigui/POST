@@ -30,5 +30,6 @@ namespace GIGLS.Core.IMessageService
         Task SendMailsShipmentCreation(MessageDTO messageDTO);
         Task SendMailsShipmentARFHomeDelivery(MessageDTO messageDTO);
         Task SendMailsShipmentARFTerminalPickup(MessageDTO messageDTO);
+        Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment);
     }
 }

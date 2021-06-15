@@ -1773,6 +1773,55 @@ namespace GIGLS.Services.Implementation.Messaging
 
         }
 
+        //Send Email to customer for shipment creation
+        public async Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment)
+        {
+            CustomerType customerType = CustomerType.IndividualCustomer;
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                customerType = CustomerType.IndividualCustomer;
+            }
+            else
+            {
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            }
+
+            var customer = await GetCustomer(shipment.CustomerId, customerType);
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipment.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var invoice = _uow.Invoice.GetAll()
+                                        .Where(s => s.Waybill == shipment.Waybill)
+                                        .Select(s => new { s.Amount, s.CountryId }).FirstOrDefault();
+
+            var currencySymbol = _uow.Country.GetAll()
+                                        .Where(s => s.CountryId == invoice.CountryId)
+                                        .Select(s => new { s.CurrencySymbol }).FirstOrDefault().CurrencySymbol;
+
+            if (!string.IsNullOrEmpty(customer.Email))
+            {
+                var messageDTO = new MessageDTO()
+                {
+                    CustomerName = customer?.FirstName,
+                    Waybill = shipment?.Waybill,
+                    Amount = invoice.Amount.ToString("N"),
+                    Currency = currencySymbol,
+                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    {
+                        DeliveryNumber = deliveryNumber,
+                    },
+                    To = customer?.Email,
+                    ToEmail = customer?.Email,
+                    Subject = $"Shipment Creation Notification",
+                    MessageTemplate = "CreateShipment"
+                };
+
+                await SendMailsShipmentCreation(messageDTO);
+            }
+
+            return true;
+        }
 
         public async Task SendMailsToIntlShipmentSender(MessageDTO messageDTO)
         {
