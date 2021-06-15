@@ -4462,6 +4462,22 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
 
+                        ShipmentScanStatus shipmentScan = ShipmentScanStatus.IDH;
+
+                        if (shipmentItem.DepartureCountryId != 207)
+                        {
+                            shipmentScan = ShipmentScanStatus.IDK;
+                        }
+
+                        var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                        {
+                            DateTime = DateTime.Now,
+                            Status = shipmentScan.ToString(),
+                            Waybill = shipmentItem.Waybill,
+                            isInternalShipment = shipmentItem.isInternalShipment,
+                            TrackingType = TrackingType.OutBound,
+                        }, shipmentItem.ShipmentScanStatus);
+
                         var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
 
                         await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(shipmentDTO);
@@ -4576,15 +4592,15 @@ namespace GIGLS.Services.Implementation.Shipments
             total.VAT = total.Amount * vat;
 
             // Discount for Ecommerce & Corporate
-            if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+            if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
             {
                 var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.InternationalRankClassDiscount : GlobalPropertyType.InternationalBasicClassDiscount;
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal =  (total.Amount + total.VAT + total.Insurance) - total.Discount;
+                total.GrandTotal = (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
-            else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
+            else if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
             {
                 var discountPer = Convert.ToDecimal(shipmentDTO.CustomerDetails.Discount) / 100;
                 total.Discount = total.Amount * discountPer;
@@ -4965,6 +4981,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentByWaybill != null)
                 {
                     shipmentByWaybill.FileNameUrl = blobname;
+                    shipmentByWaybill.DeclarationOfValueCheck = shipmentDTO.DeclarationOfValueCheck;
                     shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;
                 }
                 //await _uow.Shipment.

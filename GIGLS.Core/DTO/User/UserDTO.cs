@@ -114,4 +114,10 @@ namespace GIGLS.Core.DTO.User
         public decimal WalletBalance { get; set; }
         public bool HasWallet { get; set; }
     }
+
+    public class ForgotPasswordDTO
+    {
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+    }
 }
