@@ -370,12 +370,10 @@ namespace GIGLS.Services.Implementation.Partnership
                     if (picked != null && assigned != null)
                     {
                         ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
-                        //ptat += (int)picked.DateCreated.Minute - assigned.DateCreated.Minute;
                     }
-                    if (assigned != null)
+                    if (assigned != null && picked != null)
                     {
                         atat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
-                        // atat += (int)(assigned.DateCreated).Minute;
                     }
 
                     var waybillRating = mobilerating.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
