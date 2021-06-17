@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO
@@ -77,5 +78,79 @@ namespace GIGLS.Core.DTO
         public string AccountOfficerName { get; set; }
         public string AccountOfficerNumber { get; set; }
         public string AccountOfficerEmail { get; set; }
+    }
+
+    public class TypeTextDTO
+    {
+        [JsonProperty("preview_url")]
+        public bool PreviewUrl { get; set; }
+        [JsonProperty("content")]
+        public string Content { get; set; }
+    }
+
+    public class WhatsAppMessageDTO
+    {
+        public WhatsAppMessageDTO()
+        {
+            TypeText = new List<TypeTextDTO>();
+        }
+        [JsonProperty("recipient_whatsapp")]
+        public string RecipientWhatsapp { get; set; }
+        [JsonProperty("recipient_type")]
+        public string RecipientType { get; set; }
+        [JsonProperty("message_type")]
+        public string MessageType { get; set; }
+        [JsonProperty("source")]
+        public string Source { get; set; }
+
+        [JsonProperty("x-apiheader")]
+        public string XApiheader { get; set; }
+        [JsonProperty("type_text")]
+        public List<TypeTextDTO> TypeText { get; set; }
+    }
+
+    public class WhatsAppMessagesDTO
+    {
+        public WhatsAppMessagesDTO()
+        {
+            Message = new List<WhatsAppMessageDTO>();
+        }
+        [JsonProperty("message")]
+        public List<WhatsAppMessageDTO> Message { get; set; }
+    }
+
+    public class WhatsappNumberDTO
+    {
+        [JsonProperty("phone_number")]
+        public string PhoneNumber { get; set; }
+    }
+
+    public class RecipientDTO
+    {
+        [JsonProperty("recipient")]
+        public string Recipient { get; set; }
+
+        [JsonProperty("source")]
+        public string Source { get; set; }
+
+        [JsonProperty("user_agent")]
+        public string UserAgent { get; set; }
+
+        [JsonProperty("ip")]
+        public string Ip { get; set; }
+    }
+
+    public class ManageWhatsappConsentDTO
+    {
+        public ManageWhatsappConsentDTO()
+        {
+            Recipients = new List<RecipientDTO>();
+        }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("recipients")]
+        public List<RecipientDTO> Recipients { get; set; }
     }
 }
