@@ -336,7 +336,7 @@ namespace GIGLS.Services.Implementation.Partnership
                         }
                     }
                 }
-                return riderRates;
+                return riderRates.OrderByDescending(x => x.LastSeen).ToList();
             }
             catch (Exception ex)
             {
