@@ -27,5 +27,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> SendEmailToCustomerForIntlShipmentArriveNigeria(ShipmentDTO shipmentDTO, List<string> paymentLinks);
         Task<bool> AddShipmentTrackingForReceivedItems(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus, string reqNo);
         Task<bool> SendEmailShipmentArriveFinalDestination(ShipmentDTO shipmentDTO);
+        Task<bool> SendEmailShipmentARFHomeDelivery(ShipmentDTO shipmentDTO);
+        Task<bool> SendEmailShipmentARFTerminalPickup(ShipmentDTO shipmentDTO);
     }
 }

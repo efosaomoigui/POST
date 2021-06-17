@@ -132,7 +132,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                             else
                             {
+
                                 await sendSMSEmail(tracking, scanStatus);
+
                             }
                         }
                     }
@@ -222,7 +224,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //send message
-            await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            if(messageType != MessageType.ARF)
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                var shipment =await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFHomeDelivery(shipmentDTO);
+                }
+                //Send Email on Shipment Arrive final Destination for Terminal pickup option
+                if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFTerminalPickup(shipmentDTO);
+                }
+            }
 
             return true;
         }
@@ -838,6 +858,83 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //Send Email
             await _messageSenderService.SendMailsShipmentARF(messageDTO);
+
+            return true;
+        }
+
+        //Send email when Shipment Arrive final destination and its home delivery
+        public async Task<bool> SendEmailShipmentARFHomeDelivery(ShipmentDTO shipmentDTO)
+        {
+            if (shipmentDTO != null)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail.Trim();
+
+
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                           .Where(s => s.Waybill == shipmentDTO.Waybill)
+                                           .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = string.IsNullOrEmpty(shipmentDTO?.ReceiverName) ? "Customer" : shipmentDTO?.ReceiverName,
+                Waybill = shipmentDTO.Waybill,
+                To = shipmentDTO?.ReceiverEmail,
+                ToEmail = shipmentDTO?.ReceiverEmail,
+                ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                {
+                    DeliveryNumber = deliveryNumber,
+                },
+                Subject = $"Shipment Arrival Notification",
+                MessageTemplate = "ArrivedFinalDestinationForHomeDelivery"
+            };
+
+            //Send Email
+            await _messageSenderService.SendMailsShipmentARFHomeDelivery(messageDTO);
+
+            return true;
+        }
+
+        //Send email when Shipment Arrive final destination and its terminal pickup
+        public async Task<bool> SendEmailShipmentARFTerminalPickup(ShipmentDTO shipmentDTO)
+        {
+            if (shipmentDTO != null)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail.Trim();
+
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipmentDTO.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = string.IsNullOrEmpty(shipmentDTO?.ReceiverName) ? "Customer" : shipmentDTO?.ReceiverName,
+                Waybill = shipmentDTO.Waybill,
+                To = shipmentDTO?.ReceiverEmail,
+                ToEmail = shipmentDTO?.ReceiverEmail,
+                ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                {
+                    DeliveryNumber = deliveryNumber,
+                },
+                Subject = $"Shipment Arrival Notification",
+                MessageTemplate = "ArrivedFinalDestinationForTerminalPickup"
+            };
+
+            //Send Email
+            await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO);
 
             return true;
         }

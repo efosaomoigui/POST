@@ -96,6 +96,36 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+        //This send mails on shipment creation
+        public async Task<string> SendEmailShipmentCreationAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendGridShipmentCreationasync(message);
+            }
+            return result;
+        }
+        //This send mails when shipment ARF Home Delivery
+        public async Task<string> SendEmailShipmentARFHomeDeliveryAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendGridShipmentARFHomeDeliveryasync(message);
+            }
+            return result;
+        }
+        //This send mails when shipment ARF Service Center
+        public async Task<string> SendEmailShipmentARFTerminalPickupAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendGridShipmentARFTerminalPickupasync(message);
+            }
+            return result;
+        }
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
@@ -472,6 +502,140 @@ namespace GIGLS.Messaging.MessageService
                 { "EC_AccountOfficerName", message.EcommerceMessage.AccountOfficerName },
                 { "EC_AccountOfficerPhoneNumber", message.EcommerceMessage.AccountOfficerNumber },
                 { "EC_AccountOfficerEmail",message.EcommerceMessage.AccountOfficerEmail },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigSendGridShipmentCreationasync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+
+            //set substitutions 
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "CS_CustomerName", message.CustomerName },
+                { "CS_WaybillNumber", message.Waybill },
+                { "CS_DeliveryPin",message.ShipmentCreationMessage.DeliveryNumber },
+                { "CS_Amount",message.Amount },
+                { "CS_Currency",message.Currency },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigSendGridShipmentARFHomeDeliveryasync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "HD_CustomerName", message.CustomerName },
+                { "HD_Waybill", message.Waybill },
+                { "HD_DeliveryPin", message.ShipmentCreationMessage.DeliveryNumber },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigSendGridShipmentARFTerminalPickupasync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "TP_CustomerName", message.CustomerName },
+                { "TP_Waybill", message.Waybill },
+                { "TP_DeliveryPin", message.ShipmentCreationMessage.DeliveryNumber },
             });
 
             var response = await client.SendEmailAsync(myMessage);
