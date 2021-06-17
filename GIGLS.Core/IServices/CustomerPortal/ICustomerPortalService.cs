@@ -214,5 +214,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<AddressDTO>> GetTopFiveUserAddresses();
         Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry);
         Task<bool> ForgotPasswordV2(ForgotPasswordDTO forgotPasswordDTO);
+        Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO);
     }
 }

@@ -3300,5 +3300,31 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
+        public async Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO)
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            //check if the company name already exist
+            var exist = await _uow.Company.GetAsync(x => x.Name.ToLower().Trim() == updateCompanyNameDTO.Name.ToLower().Trim());
+            if (exist != null)
+            {
+                throw new GenericException($"Company name {updateCompanyNameDTO.Name.ToUpper()}  already exist");
+            }
+
+            //update company name if it does not exist
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.Name = updateCompanyNameDTO.Name;
+            }
+
+            _uow.Complete();
+            return updateCompanyNameDTO;
+        }
+
     }
 }
