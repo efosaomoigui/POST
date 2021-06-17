@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.OnlinePayment;
@@ -213,5 +214,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
         Task<List<AddressDTO>> GetTopFiveUserAddresses();
         Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry);
+        Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO);
+        Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO);
+        Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO);
     }
 }

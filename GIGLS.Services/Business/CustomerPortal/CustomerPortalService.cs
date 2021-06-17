@@ -62,6 +62,7 @@ using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using System.Web.Http;
+using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -106,9 +107,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
-        private readonly IShipmentService _shipmentService; 
+        private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
-        private readonly IWaybillPaymentLogService _waybillPaymentLogService;       
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -121,8 +122,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService) 
+            INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
+            IWaybillPaymentLogService waybillPaymentLogService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -163,7 +164,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
             _companyService = companyService;
-            _shipmentService  = shipmentService;
+            _shipmentService = shipmentService;
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
@@ -395,7 +396,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId,pagination);
+            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId, pagination);
             return walletTransactionSummary;
         }
 
@@ -1247,7 +1248,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             ////SEND EMAIL TO NEW SIGNEE
             var companyMessagingDTO = new CompanyMessagingDTO();
-           // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
             companyMessagingDTO.Name = user.FirstName;
             companyMessagingDTO.Email = user.Email;
             companyMessagingDTO.PhoneNumber = user.PhoneNumber;
@@ -2827,8 +2828,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _scanService.ScanMultipleShipment(scanList);
         }
-        
-        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+
+        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch()
         {
             return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
         }
@@ -2966,7 +2967,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
             user.IsInternational = true;
             user.IdentificationType = intlUserProfiler.IdentificationType;
-           // await _uow.User.UpdateUser(currentUserId, user);
+            // await _uow.User.UpdateUser(currentUserId, user);
             //also update company table
             var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (company != null)
@@ -2988,7 +2989,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
-        }  
+        }
 
         public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId)
         {
@@ -3007,7 +3008,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
         {
-          return  await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
+            return await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
         }
         public async Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile)
         {
@@ -3040,7 +3041,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         //Get International Shipments Terms and Conditions
         public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC, countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
@@ -3058,7 +3059,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var countryIds =  requests.Select(x => x.RequestProcessingCountryId).ToList();
+                var countryIds = requests.Select(x => x.RequestProcessingCountryId).ToList();
                 var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
                 foreach (var item in requests)
                 {
@@ -3071,11 +3072,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     if (country != null)
                     {
                         var countryDTO = Mapper.Map<NewCountryDTO>(country);
-                        item.DepartureCountry = countryDTO; 
+                        item.DepartureCountry = countryDTO;
                     }
                     count++;
                     item.ItemCount = $"{count} of {count}";
-                } 
+                }
             }
 
             return requests;
@@ -3144,7 +3145,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
 
-             if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
             {
                 var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
                 if (user != null)
@@ -3180,15 +3181,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-           // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
-            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType,newMessageDTO);
+            // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
+            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType, newMessageDTO);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
         {
             var user = await _uow.User.GetUserByEmail(email);
             var userDTO = Mapper.Map<UserDTO>(user);
-            return userDTO; 
+            return userDTO;
         }
 
         public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
@@ -3198,7 +3199,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
         {
-           return await  _shipmentService.ReleaseMovementManifest(valMovementManifest);
+            return await _shipmentService.ReleaseMovementManifest(valMovementManifest);
         }
 
         public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
@@ -3264,5 +3265,22 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
+        public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(rateDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
+            return await _shipmentService.AddInternationalShipment(shipment);
+        }
     }
 }
