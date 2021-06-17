@@ -27,5 +27,6 @@ namespace GIGLS.Core.IMessageService
         Task SendMailsToIntlShipmentSender(MessageDTO messageDTO);
         Task SendMailsShipmentARF(MessageDTO messageDTO);
         Task SendMailsEcommerceCustomerRep(MessageDTO messageDTO);
+        Task SendWhatsappMessage(ShipmentDTO shipmentDto);
     }
 }
