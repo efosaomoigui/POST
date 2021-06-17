@@ -3320,6 +3320,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (company != null)
             {
                 company.Name = updateCompanyNameDTO.Name;
+                company.LastName = company.LastName == null ? updateCompanyNameDTO.Name : company.LastName;
+                company.FirstName = company.FirstName == null ? updateCompanyNameDTO.Name : company.FirstName;
             }
 
             _uow.Complete();
