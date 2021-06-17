@@ -24,6 +24,7 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
         public async Task<string> GetConsentDetailsAsync(WhatsappNumberDTO number)
         {
             string result = "";
@@ -33,6 +34,7 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
         public async Task<string> ManageOptInOutAsync(ManageWhatsappConsentDTO consent)
         {
             string result = "";
@@ -42,130 +44,113 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
         private async Task<string> ConfigSendWhatsappMessageAsync(WhatsAppMessagesDTO message)
         {
-            var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
-            var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                if (whatsappToken != null && whatsappToken.Length != 0)
+                var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
+                var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                string result = "";
+                using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri(whatsappUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-                }
-                HttpResponseMessage response = new HttpResponseMessage();
-                try
-                {
-                    if (message != null)
+                    if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        response = await client.PostAsJsonAsync("message", message);
-                        if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                        client.BaseAddress = new Uri(whatsappUrl);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
+
+                        if (message != null)
                         {
-                            return response.StatusCode.ToString();
+                            var response = await client.PostAsJsonAsync("message", message);
+                            result = await response.Content.ReadAsStringAsync();
                         }
                         else
                         {
-                            return response.StatusCode.ToString();
+                            result = $"Message cannot be null. Please provide the appropriate values";
                         }
                     }
-                    else
-                    {
-                        return "Whatsapp message cannot be null or empty";
-                    }
+                    return result;
                 }
-                catch (Exception ex)
-                {
-
-                    return ex.Message.ToString();
-                }
-
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
+
         private async Task<string> ConfigGetConsentDetailsAsync(WhatsappNumberDTO number)
         {
-            var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
-            var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                if (whatsappToken != null && whatsappToken.Length != 0)
+                var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
+                var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                string result = "";
+                using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri(whatsappUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-                }
-                HttpResponseMessage response = new HttpResponseMessage();
-                try
-                {
-                    if (number != null)
+                    if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        response = await client.PostAsJsonAsync("consent", number);
-                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        client.BaseAddress = new Uri(whatsappUrl);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
+
+                        HttpResponseMessage response = new HttpResponseMessage();
+
+                        if (number != null)
                         {
-                            return response.StatusCode.ToString();
+                            response = await client.PostAsJsonAsync("consent", number);
+                            result = await response.Content.ReadAsStringAsync();
                         }
                         else
                         {
-                            return response.StatusCode.ToString();
+                            result = $"Message cannot be null. Please provide the appropriate values";
                         }
                     }
-                    else
-                    {
-                        return "Whatsapp message cannot be null or empty";
-                    }
                 }
-                catch (Exception ex)
-                {
-
-                    return ex.Message.ToString();
-                }
-
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
+
         private async Task<string> ConfigManageOptInOutAsync(ManageWhatsappConsentDTO consent)
         {
-            var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
-            var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                if (whatsappToken != null && whatsappToken.Length != 0)
+                var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
+                var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                string result = "";
+                using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri(whatsappUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-                }
-                HttpResponseMessage response = new HttpResponseMessage();
-                try
-                {
-                    if (consent != null)
+                    if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        response = await client.PostAsJsonAsync("consent/manage", consent);
-                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        client.BaseAddress = new Uri(whatsappUrl);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
+
+                        HttpResponseMessage response = new HttpResponseMessage();
+
+                        if (consent != null)
                         {
-                            return response.StatusCode.ToString();
+                            response = await client.PostAsJsonAsync("consent/manage", consent);
+                            result = await response.Content.ReadAsStringAsync();
                         }
                         else
                         {
-                            return response.StatusCode.ToString();
+                            result = $"Message cannot be null. Please provide the appropriate values";
                         }
                     }
-                    else
-                    {
-                        return "Whatsapp message cannot be null or empty";
-                    }
                 }
-                catch (Exception ex)
-                {
-
-                    return ex.Message.ToString();
-                }
-
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
