@@ -1097,6 +1097,11 @@ namespace GIGLS.Services.Implementation.Customers
                     throw new GenericException("This user is not an Individual customer");
                 }
 
+                if (String.IsNullOrEmpty(newCompanyDTO.Name))
+                {
+                    throw new GenericException($"Business name is required");
+                }
+
                 var nameExist = await _uow.Company.GetAsync(x => x.Name.ToLower() == newCompanyDTO.Name.ToLower());
                 if (nameExist != null)
                 {
