@@ -28,6 +28,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var centres = _context.ServiceCentre;
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
+                                where s.IsActive == true
                                 select new ServiceCentreDTO
                                 {
                                     Name = s.Name,
