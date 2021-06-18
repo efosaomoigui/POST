@@ -787,7 +787,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
