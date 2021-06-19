@@ -348,24 +348,6 @@ namespace GIGLS.Core.DTO.Shipments
 
     public class InternationalShipmentDTO : BaseDomainDTO
     {
-        //Shipment Information
-        //public int ShipmentId { get; set; }
-        //public string SealNumber { get; set; }
-        //public string Waybill { get; set; }
-
-        //Senders' Information
-        //public decimal Value { get; set; }
-        // public DateTime? DeliveryTime { get; set; }
-        //  public PaymentStatus PaymentStatus { get; set; }
-        //public string CustomerType { get; set; }
-        //public int CustomerId { get; set; }
-        //public string CompanyType { get; set; }
-        //public string CustomerCode { get; set; }
-
-        //Receivers Information
-        // public int DepartureServiceCentreId { get; set; }
-        // public int DestinationServiceCentreId { get; set; }
-
         public string ReceiverName { get; set; }
         public string ReceiverCompanyName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
@@ -379,28 +361,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverStateOrProvinceCode { get; set; }
         public string ReceiverCountryCode { get; set; }
 
-        //Delivery Options
-        //public int DeliveryOptionId { get; set; } = 1;
-        //public List<int> DeliveryOptionIds { get; set; } = new List<int>();
-
-        //PickUp Options
-        // public PickupOptions PickupOptions { get; set; }
-
-        //General but optional
-        //public DateTime? ExpectedDateOfArrival { get; set; }
-        //public DateTime? ActualDateOfArrival { get; set; }
-
         //Shipment Items
         public List<ShipmentItemDTO> ShipmentItems { get; set; }
         public double ApproximateItemsWeight { get; set; }
         public decimal GrandTotal { get; set; }
-
-        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
-        //  public bool IsCashOnDelivery { get; set; }
-        //  public decimal? CashOnDeliveryAmount { get; set; } = 0;
-
-        //public decimal? ExpectedAmountToCollect { get; set; } = 0;
-        //public decimal? ActualAmountCollected { get; set; } = 0;
 
         //General Details comes with role user
         //  public string UserId { get; set; }
@@ -408,28 +372,13 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsdeclaredVal { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; } = 0;
 
-        //discount information
-        //   public decimal? AppliedDiscount { get; set; } = 0;
-        //  public decimal? DiscountValue { get; set; } = 0;
-        //public decimal? Insurance { get; set; } = 0;
-        //public decimal? Vat { get; set; } = 0;
-        //public decimal? Total { get; set; } = 0;
-
         public decimal ShipmentPackagePrice { get; set; }
 
         public decimal ShipmentPickupPrice { get; set; }
 
-        //wallet information
-        //   public string WalletNumber { get; set; }
-
-        //from client
-        //public decimal? vatvalue_display { get; set; } = 0;
-        //public decimal? InvoiceDiscountValue_display { get; set; } = 0;
-        //public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
-
         //payment method
         public string PaymentMethod { get; set; }
-        //   public bool IsInternational { get; set; } = true;
+        public bool IsInternational { get; set; } = true;
 
         public string Description { get; set; }
 
@@ -464,7 +413,6 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal InternationalShippingCost { get; set; }
     }
 
-
     public class CODShipmentDTO : BaseDomainDTO
     {
         public string Waybill { get; set; }
@@ -476,7 +424,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string ShipmentScanStatus { get; set; }
         public string CompanyName { get; set; }
     }
-
 
     public class NewShipmentDTO
     {

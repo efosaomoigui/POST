@@ -56,6 +56,17 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Zone;
+using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.Stores;
+using System.Net.Http;
+using GIGLS.CORE.DTO.Report;
+using System.Web.Http;
+using GIGLS.Core.DTO.DHL;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -391,7 +402,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId,pagination);
+            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId, pagination);
             return walletTransactionSummary;
         }
 
@@ -3300,5 +3311,22 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
         }
 
+        public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(rateDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
+            return await _shipmentService.AddInternationalShipment(shipment);
+        }
     }
 }

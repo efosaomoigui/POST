@@ -249,7 +249,7 @@ namespace GIGLS.Services.Business.DHL
                     Description = shipmentDTO.ItemDetails,
                     Price = shipmentDTO.DeclarationOfValueCheck.Value,
                     PriceCurrency = "NGN",
-                    ManufacturerCountry = shipmentDTO.ManufacturerCountry.Trim().Length <= 2 ? shipmentDTO.ManufacturerCountry.Trim() : shipmentDTO.ManufacturerCountry.Trim().Substring(0, 2),
+                    ManufacturerCountry = shipmentDTO.ManufacturerCountry == null ? shipmentDTO.ManufacturerCountry.Trim() : shipmentDTO.ReceiverCountryCode.Trim(),
                     ExportReasonType = "permanent",
                     ExportControlClassificationNumber = "",
                     Quantity = new Quantity
@@ -285,7 +285,7 @@ namespace GIGLS.Services.Business.DHL
             postalAddress.CityName = shipmentDTO.ReceiverCity;
             postalAddress.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
             postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || shipmentDTO.ReceiverStateOrProvinceCode == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
-            postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
+            postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Trim();
             postalAddress.countyName = shipmentDTO.ReceiverCountry;
             if (splittedAddress.Length <= 1)
             {
@@ -486,7 +486,7 @@ namespace GIGLS.Services.Business.DHL
 
             address.CityName = shipmentDTO.ReceiverCity;
             address.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
-            address.CountryCode = shipmentDTO.ReceiverCountryCode.Trim().Length <= 2 ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverCountryCode.Trim().Substring(0, 2);
+            address.CountryCode = shipmentDTO.ReceiverCountryCode.Trim();
             address.CountyName = shipmentDTO.ReceiverCountry;
             address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || shipmentDTO.ReceiverStateOrProvinceCode == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
             if (splittedAddress.Length <= 1)
