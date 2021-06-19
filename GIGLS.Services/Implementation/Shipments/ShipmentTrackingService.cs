@@ -874,7 +874,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
 
-            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail.Trim();
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail == null ? shipmentDTO.ReceiverEmail : shipmentDTO.ReceiverEmail.Trim();
+
 
 
             var deliveryNumber = _uow.DeliveryNumber.GetAll()
@@ -896,7 +897,10 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             //Send Email
-            await _messageSenderService.SendMailsShipmentARFHomeDelivery(messageDTO);
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
+            {
+                await _messageSenderService.SendMailsShipmentARFHomeDelivery(messageDTO);
+            } 
 
             return true;
         }
@@ -913,7 +917,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
 
-            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail.Trim();
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail == null ? shipmentDTO.ReceiverEmail : shipmentDTO.ReceiverEmail.Trim();
 
             var deliveryNumber = _uow.DeliveryNumber.GetAll()
                                             .Where(s => s.Waybill == shipmentDTO.Waybill)
@@ -934,7 +938,10 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             //Send Email
-            await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO);
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
+            {
+                await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO); 
+            }
 
             return true;
         }
