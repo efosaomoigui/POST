@@ -2385,5 +2385,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
 
 
+
+
+        [HttpPost]
+        [Route("updatecompanyname")]
+        public async Task<IServiceResponse<UpdateCompanyNameDTO>> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.UpdateCompanyName(updateCompanyNameDTO);
+                return new ServiceResponse<UpdateCompanyNameDTO>
+                {
+                    Object = item
+                };
+            });
+        }
     }
 }

@@ -220,5 +220,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ForgotPasswordV2(ForgotPasswordDTO forgotPasswordDTO);
         Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId);
+        Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO);
     }
 }
