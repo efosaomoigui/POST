@@ -1853,8 +1853,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (globalProperty != null)
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
-                        decimal discount = ((100M - percentage) / 100M);
-                        var originalPrice = shipment.GrandTotal / discount;
+                        decimal discountRate = ((100M - percentage) / 100M);
+                        var originalPrice = shipment.GrandTotal / discountRate;
                         originalPrice = Math.Round(originalPrice, 2);
                         messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{originalPrice.ToString()}";
                         messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
