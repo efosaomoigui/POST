@@ -1849,14 +1849,15 @@ namespace GIGLS.Services.Implementation.Messaging
                         MessageTemplate = "ClassCustomerShipmentCreation"
                     };
 
-                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
                     if (globalProperty != null)
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
                         decimal discount = ((100M - percentage) / 100M);
-                        var discountPrice = shipment.GrandTotal * discount;
-                        messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
-                        messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
+                        var discountPrice = shipment.GrandTotal / discount;
+                        discountPrice = Math.Round(discountPrice, 2);
+                        messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
+                        messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
                     }
                     await SendMailsClassCustomerShipmentCreation(messageDTO);
                 }
