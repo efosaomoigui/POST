@@ -1646,11 +1646,11 @@ namespace GIGLS.Services.Implementation.Messaging
                     GeneralPaymentLinkI = generalPaymentLinks[0],
                     GeneralPaymentLinkII = generalPaymentLinks[1]
                 },
-                To = isInNigeria == null ? customerObj.Email: shipmentDto.ReceiverEmail,
-                ToEmail = isInNigeria == null ? customerObj.Email: shipmentDto.ReceiverEmail,
+                To = isInNigeria == null ? customerObj.Email : shipmentDto.ReceiverEmail,
+                ToEmail = isInNigeria == null ? customerObj.Email : shipmentDto.ReceiverEmail,
                 Body = shipmentDto.DepartureCountryId == 62 ? "three to four (3-4) " : "seven to fourteen (7-14) ",
                 Subject = $"Shipment Processing and Payment Notification ({country.CountryName})",
-                MessageTemplate = isInNigeria == null ?  "OverseasReceivedItems" : "OverseasReceivedItemsInNigeria(Unpaid)"
+                MessageTemplate = isInNigeria == null ? "OverseasReceivedItems" : "OverseasReceivedItemsInNigeria(Unpaid)"
             };
 
             if (customerObj.Rank == Rank.Class)
@@ -1851,7 +1851,64 @@ namespace GIGLS.Services.Implementation.Messaging
 
             return true;
         }
+        //Send Email to class customer for shipment creation
+        public async Task<bool> SendEmailToClassCustomerForShipmentCreation(ShipmentDTO shipment)
+        {
+            CustomerType customerType = CustomerType.IndividualCustomer;
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                customerType = CustomerType.IndividualCustomer;
+            }
+            else
+            {
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            }
 
+            var customer = await GetCustomer(shipment.CustomerId, customerType);
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipment.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var invoice = _uow.Invoice.GetAll()
+                                        .Where(s => s.Waybill == shipment.Waybill)
+                                        .Select(s => new { s.Amount, s.CountryId }).FirstOrDefault();
+
+            var currencySymbol = _uow.Country.GetAll()
+                                        .Where(s => s.CountryId == invoice.CountryId)
+                                        .Select(s => new { s.CurrencySymbol }).FirstOrDefault().CurrencySymbol;
+
+            if (!string.IsNullOrEmpty(customer.Email) && customer.Rank == Rank.Class)
+            {
+                var messageDTO = new MessageDTO()
+                {
+                    CustomerName = customer?.FirstName,
+                    Waybill = shipment?.Waybill,
+                    Amount = invoice.Amount.ToString("N"),
+                    Currency = currencySymbol,
+                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    {
+                        DeliveryNumber = deliveryNumber,
+                    },
+                    To = customer?.Email,
+                    ToEmail = customer?.Email,
+                    Subject = $"Shipment Creation Notification",
+                    MessageTemplate = "ClassCustomerShipmentCreation"
+                };
+
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipment.GrandTotal * discount;
+                    messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
+                    messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
+                }
+                await SendMailsClassCustomerShipmentCreation(messageDTO);
+            }
+
+            return true;
+        }
         public async Task SendMailsToIntlShipmentSender(MessageDTO messageDTO)
         {
             var result = "";
@@ -1965,7 +2022,27 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendEmailShipmentARFTerminalPickupAsync(messageDTO);
-                    if(!string.IsNullOrEmpty(result))
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        public async Task SendMailsClassCustomerShipmentCreation(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailClassCustomerShipmentCreationAsync(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
                     {
                         await LogEmailMessage(messageDTO, result);
                     }

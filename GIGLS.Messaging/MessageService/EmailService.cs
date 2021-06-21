@@ -126,6 +126,16 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+        //This send mails when shipment is created for class customer
+        public async Task<string> SendEmailClassCustomerShipmentCreationAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendGridClassCustomerShipmentCreationAsync(message);
+            }
+            return result;
+        }
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
@@ -636,6 +646,53 @@ namespace GIGLS.Messaging.MessageService
                 { "TP_CustomerName", message.CustomerName },
                 { "TP_Waybill", message.Waybill },
                 { "TP_DeliveryPin", message.ShipmentCreationMessage.DeliveryNumber },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigSendGridClassCustomerShipmentCreationAsync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+
+            //set substitutions 
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "CC_CustomerName", message.CustomerName },
+                { "CC_WaybillNumber", message.Waybill },
+                { "CC_DeliveryPin",message.IntlMessage.DeliveryCode },
+                { "CC_Currency",message.Currency },
+                { "CC_ShippingCost", message.IntlMessage.ShippingCost },
+                { "CC_DiscountedShippingCost", message.IntlMessage.DiscountedShippingCost },
             });
 
             var response = await client.SendEmailAsync(myMessage);

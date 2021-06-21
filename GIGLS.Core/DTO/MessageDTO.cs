@@ -83,5 +83,7 @@ namespace GIGLS.Core.DTO
     public class ShipmentCreationMessageDTO
     {
         public string DeliveryNumber { get; set; }
+        public string ShippingCost { get; set; }
+        public string DiscountedShippingCost { get; set; }
     }
 }
