@@ -131,7 +131,7 @@ namespace GIGLS.WebApi.Providers
                     user.LastName = ecommerce.LastName == null ? user.LastName : ecommerce.LastName;
                     userBVN = ecommerce.BVN;
                     rank = ecommerce.Rank.ToString();
-                    isInternational = ecommerce.IsInternational;
+                    isInternational = user.IsInternational;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
