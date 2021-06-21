@@ -34,10 +34,11 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
+        private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -46,6 +47,7 @@ namespace GIGLS.Services.Implementation.Customers
             _globalPropertyService = globalPropertyService;
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
+            _paystackPaymentService = paystackPaymentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -211,6 +213,9 @@ namespace GIGLS.Services.Implementation.Customers
                         await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
                     }
                 }
+
+                //call the api to create the nuban account for corporate customers
+                var customerNubanAccount = _paystackPaymentService.CreateUserNubanAccount
 
                 if(company.Rank == Rank.Class)
                 {

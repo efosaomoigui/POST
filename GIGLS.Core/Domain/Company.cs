@@ -90,7 +90,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string BVN { get; set; }
         public string AssignedCustomerRep { get; set; }
         [MaxLength(500)]
-        public string IdentificationNumber { get; set; }
+        public string IdentificationNumber { get; set; }                                                                                                                                        
 
         [MaxLength(500)]
         public string IdentificationImageUrl { get; set; }
@@ -98,5 +98,11 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsInternational { get; set; }
         public DateTime RankModificationDate { get; set; }
         public WalletTransactionType TransactionType { get; set; }
+
+        [MaxLength(100)]
+        public string NUBANAccountNo { get; set; }
+
+        [MaxLength(128)]
+        public string NUBANBankName { get; set; }
     }
 }

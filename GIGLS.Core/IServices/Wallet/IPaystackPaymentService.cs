@@ -21,5 +21,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
         Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingPin(WaybillPaymentLog waybillPaymentLog, string pin);
         Task<ResponseDTO> VerifyBVN(string bvnNo);
+        Task<CreateNubanAccountResponseDTO> CreateUserNubanAccount(CreateNubanAccountDTO nubanAccountDTO);
     }
 }

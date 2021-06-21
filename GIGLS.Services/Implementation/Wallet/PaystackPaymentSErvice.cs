@@ -1329,5 +1329,41 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return false;
         }
+
+        //this method creates a nuban account for user
+        public async Task<CreateNubanAccountResponseDTO> CreateUserNubanAccount(CreateNubanAccountDTO nubanAccountDTO)
+        {
+            var response = new HttpResponseMessage();
+            var result = new CreateNubanAccountResponseDTO();
+            var url = ConfigurationManager.AppSettings["PaystackNubanAccount"];
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackLiveSecret"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                    var json = JsonConvert.SerializeObject(nubanAccountDTO);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    response = await client.PostAsync(url,data);
+                });
+
+                string jObject = await response.Content.ReadAsStringAsync();
+                 result = JsonConvert.DeserializeObject<CreateNubanAccountResponseDTO>(jObject);
+                if (response.IsSuccessStatusCode)
+                {
+                    result.succeeded = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }
