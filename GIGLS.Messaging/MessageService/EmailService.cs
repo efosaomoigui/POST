@@ -689,10 +689,10 @@ namespace GIGLS.Messaging.MessageService
             {
                 { "CC_CustomerName", message.CustomerName },
                 { "CC_WaybillNumber", message.Waybill },
-                { "CC_DeliveryPin",message.IntlMessage.DeliveryCode },
+                { "CC_DeliveryPin",message.ShipmentCreationMessage.DeliveryNumber },
                 { "CC_Currency",message.Currency },
-                { "CC_ShippingCost", message.IntlMessage.ShippingCost },
-                { "CC_DiscountedShippingCost", message.IntlMessage.DiscountedShippingCost },
+                { "CC_ShippingCost", message.ShipmentCreationMessage.ShippingCost },
+                { "CC_DiscountedShippingCost", message.ShipmentCreationMessage.DiscountedShippingCost },
             });
 
             var response = await client.SendEmailAsync(myMessage);
