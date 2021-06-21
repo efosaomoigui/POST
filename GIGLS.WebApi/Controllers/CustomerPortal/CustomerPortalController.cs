@@ -2354,5 +2354,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("getintlquickqoute")]
+        public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetIntlQuickQuote(quickQuotePriceDTO);
+                return new ServiceResponse<QuickQuotePriceDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("getcategoriesbycountry/{countryId}")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetPriceCategoriesByCountry(countryId);
+                return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
+                {
+                    Object = item
+                };
+            });
+        }
+
+
+
     }
 }
