@@ -1830,85 +1830,61 @@ namespace GIGLS.Services.Implementation.Messaging
 
             if (!string.IsNullOrEmpty(customer.Email))
             {
-                var messageDTO = new MessageDTO()
+                //Check if customer is class and send class customer email else send email
+                if(customer.Rank == Rank.Class)
                 {
-                    CustomerName = customer?.FirstName,
-                    Waybill = shipment?.Waybill,
-                    Amount = invoice.Amount.ToString("N"),
-                    Currency = currencySymbol,
-                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    var messageDTO = new MessageDTO()
                     {
-                        DeliveryNumber = deliveryNumber,
-                    },
-                    To = customer?.Email,
-                    ToEmail = customer?.Email,
-                    Subject = $"Shipment Creation Notification",
-                    MessageTemplate = "CreateShipment"
-                };
+                        CustomerName = customer?.FirstName,
+                        Waybill = shipment?.Waybill,
+                        Amount = invoice.Amount.ToString("N"),
+                        Currency = currencySymbol,
+                        ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                        {
+                            DeliveryNumber = deliveryNumber,
+                        },
+                        To = customer?.Email,
+                        ToEmail = customer?.Email,
+                        Subject = $"Shipment Creation Notification",
+                        MessageTemplate = "ClassCustomerShipmentCreation"
+                    };
 
-                await SendMailsShipmentCreation(messageDTO);
-            }
-
-            return true;
-        }
-        //Send Email to class customer for shipment creation
-        public async Task<bool> SendEmailToClassCustomerForShipmentCreation(ShipmentDTO shipment)
-        {
-            CustomerType customerType = CustomerType.IndividualCustomer;
-            if (shipment.CustomerType.Contains("Individual"))
-            {
-                customerType = CustomerType.IndividualCustomer;
-            }
-            else
-            {
-                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
-            }
-
-            var customer = await GetCustomer(shipment.CustomerId, customerType);
-            var deliveryNumber = _uow.DeliveryNumber.GetAll()
-                                            .Where(s => s.Waybill == shipment.Waybill)
-                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
-
-            var invoice = _uow.Invoice.GetAll()
-                                        .Where(s => s.Waybill == shipment.Waybill)
-                                        .Select(s => new { s.Amount, s.CountryId }).FirstOrDefault();
-
-            var currencySymbol = _uow.Country.GetAll()
-                                        .Where(s => s.CountryId == invoice.CountryId)
-                                        .Select(s => new { s.CurrencySymbol }).FirstOrDefault().CurrencySymbol;
-
-            if (!string.IsNullOrEmpty(customer.Email) && customer.Rank == Rank.Class)
-            {
-                var messageDTO = new MessageDTO()
-                {
-                    CustomerName = customer?.FirstName,
-                    Waybill = shipment?.Waybill,
-                    Amount = invoice.Amount.ToString("N"),
-                    Currency = currencySymbol,
-                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                    if (globalProperty != null)
                     {
-                        DeliveryNumber = deliveryNumber,
-                    },
-                    To = customer?.Email,
-                    ToEmail = customer?.Email,
-                    Subject = $"Shipment Creation Notification",
-                    MessageTemplate = "ClassCustomerShipmentCreation"
-                };
-
-                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
-                if (globalProperty != null)
-                {
-                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
-                    decimal discount = ((100M - percentage) / 100M);
-                    var discountPrice = shipment.GrandTotal * discount;
-                    messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
-                    messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
+                        decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                        decimal discount = ((100M - percentage) / 100M);
+                        var discountPrice = shipment.GrandTotal * discount;
+                        messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
+                        messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
+                    }
+                    await SendMailsClassCustomerShipmentCreation(messageDTO);
                 }
-                await SendMailsClassCustomerShipmentCreation(messageDTO);
+                else
+                {
+                    var messageDTO = new MessageDTO()
+                    {
+                        CustomerName = customer?.FirstName,
+                        Waybill = shipment?.Waybill,
+                        Amount = invoice.Amount.ToString("N"),
+                        Currency = currencySymbol,
+                        ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                        {
+                            DeliveryNumber = deliveryNumber,
+                        },
+                        To = customer?.Email,
+                        ToEmail = customer?.Email,
+                        Subject = $"Shipment Creation Notification",
+                        MessageTemplate = "CreateShipment"
+                    };
+
+                    await SendMailsShipmentCreation(messageDTO);
+                }
             }
 
             return true;
         }
+        
         public async Task SendMailsToIntlShipmentSender(MessageDTO messageDTO)
         {
             var result = "";
