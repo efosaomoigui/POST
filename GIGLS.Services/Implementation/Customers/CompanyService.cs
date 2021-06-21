@@ -1117,7 +1117,7 @@ namespace GIGLS.Services.Implementation.Customers
                     RankModificationDate = DateTime.Now,
                     IsEligible = true,
                     IsDeleted = false,
-                    // IsInternational = newCompanyDTO.isInternational,
+                    IsInternational = user.IsInternational,
                     ProductType = productType,
                     Industry = industry,
                     CompanyType = CompanyType.Ecommerce,
