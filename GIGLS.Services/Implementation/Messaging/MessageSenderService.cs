@@ -1854,9 +1854,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
                         decimal discount = ((100M - percentage) / 100M);
-                        var discountPrice = shipment.GrandTotal / discount;
-                        discountPrice = Math.Round(discountPrice, 2);
-                        messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{discountPrice.ToString()}";
+                        var originalPrice = shipment.GrandTotal / discount;
+                        originalPrice = Math.Round(originalPrice, 2);
+                        messageDTO.ShipmentCreationMessage.ShippingCost = $"{currencySymbol}{originalPrice.ToString()}";
                         messageDTO.ShipmentCreationMessage.DiscountedShippingCost = $"{currencySymbol}{shipment.GrandTotal.ToString()}";
                     }
                     await SendMailsClassCustomerShipmentCreation(messageDTO);
