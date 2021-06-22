@@ -23,10 +23,14 @@ namespace GIGLS.Services.Business.Pricing
         
         public async Task<object> AddPriceCategory(PriceCategoryDTO priceCategory)
         {
-            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId))
+            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId && c.DepartureCountryId == priceCategory.DepartureCountryId))
             {
                 throw new GenericException("Price category already exist");
-            }   
+            }
+            if (priceCategory.CountryId == priceCategory.DepartureCountryId)
+            {
+                throw new GenericException("Price category can't be set for the same country");
+            }
             var newcategory = Mapper.Map<PriceCategory>(priceCategory);
             _uow.PriceCategory.Add(newcategory);
             await _uow.CompleteAsync();
@@ -90,6 +94,7 @@ namespace GIGLS.Services.Business.Pricing
                 cattoModify.CategoryMinimumWeight = priceCategory.CategoryMinimumWeight;
                 cattoModify.PricePerWeight = priceCategory.PricePerWeight;
                 cattoModify.CountryId = priceCategory.CountryId;
+                cattoModify.DepartureCountryId = priceCategory.DepartureCountryId;
                 cattoModify.IsActive = priceCategory.IsActive;
                 _uow.Complete();
             }

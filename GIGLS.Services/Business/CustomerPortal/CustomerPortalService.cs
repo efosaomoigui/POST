@@ -3328,5 +3328,93 @@ namespace GIGLS.Services.Business.CustomerPortal
             var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
             return await _shipmentService.AddInternationalShipment(shipment);
         }
+        public async Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var countryDTO = await _countryService.GetCountryById(quickQuotePriceDTO.DepartureCountryId);
+            var priceDTO = new QuickQuotePriceDTO();
+            priceDTO.DepartureCountryId = quickQuotePriceDTO.DepartureCountryId;
+            priceDTO.DestinationCountryId = quickQuotePriceDTO.DestinationCountryId;
+            priceDTO.Price = 0;
+            priceDTO.CurrencyCode = countryDTO.CurrencyCode;
+            priceDTO.CurrencySymbol = countryDTO.CurrencySymbol;
+            if (quickQuotePriceDTO == null)
+            {
+                throw new GenericException("Invalid payload!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (quickQuotePriceDTO.DepartureCountryId == 0 || quickQuotePriceDTO.DestinationCountryId == 0)
+            {
+                throw new GenericException("please ensure departure and destination is selected!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (quickQuotePriceDTO.PriceCategoryId.Any())
+            {
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
+                foreach (var item in quickQuotePriceDTO.PriceCategoryId)
+                {
+                    var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
+                    if (itemCategory.CategoryMinimumWeight == 0)
+                    {
+                        for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                        {
+                            priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        }
+                    }
+                    else
+                    {
+                        if (quickQuotePriceDTO.Weight < itemCategory.CategoryMinimumWeight)
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
+                                priceDTO.Price = priceDTO.Price + priceValue;
+                            }
+                        }
+                    }
+                }
+            }
+            return priceDTO;
+        }
+
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId)
+        {
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(countryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+        }
+
+        public async Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO)
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            //check if the company name already exist
+            var exist = await _uow.Company.GetAsync(x => x.Name.ToLower().Trim() == updateCompanyNameDTO.Name.ToLower().Trim());
+            if (exist != null)
+            {
+                throw new GenericException($"Company name {updateCompanyNameDTO.Name.ToUpper()}  already exist");
+            }
+
+            //update company name if it does not exist
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.Name = updateCompanyNameDTO.Name;
+                company.LastName = company.LastName == null ? updateCompanyNameDTO.Name : company.LastName;
+                company.FirstName = company.FirstName == null ? updateCompanyNameDTO.Name : company.FirstName;
+            }
+
+            _uow.Complete();
+            return updateCompanyNameDTO;
+        }
+
     }
 }
