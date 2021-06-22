@@ -3267,8 +3267,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
         {
-            var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
-            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            try
+            {
+                var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+                return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)

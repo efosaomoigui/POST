@@ -28,8 +28,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepartureCountryId { get; set; }
         [Required]
         public int DestinationCountryId { get; set; }
-        [Required]
-        public CompanyMap CompanyMap { get; set; }
     }
 
     public class RateInternationalShipmentDTO : InternationalShipmenManipulationtDTO
@@ -82,7 +80,6 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepartureCountryId { get; set; }
         [Required]
         public int DestinationCountryId { get; set; }
-        [Required]
         public CompanyMap CompanyMap { get; set; }
         public virtual decimal GrandTotal { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
@@ -100,7 +97,6 @@ namespace GIGLS.Core.DTO.Shipments
 
     public class QuoteShipmentItem : BaseDomainDTO
     {
-        [Required]
         public double Weight { get; set; }
         [Required]
         public int Quantity { get; set; }

@@ -492,6 +492,8 @@ namespace GIGLS.Core
                 config.CreateMap<RateShipmentItem, ShipmentItemDTO>();
                 config.CreateMap<ShipmentItemDTO, RateShipmentItem>();
 
+                config.CreateMap<QuoteShipmentItem, ShipmentItemDTO>();
+                config.CreateMap<ShipmentItemDTO, QuoteShipmentItem>();
 
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
