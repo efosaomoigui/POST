@@ -24,12 +24,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICustomerPortalService _portalService;
         private readonly IShipmentService _shipmentService;
         private readonly IPartnerTransactionsService _partnerTransactionsService;
+        private readonly IPreShipmentMobileService _preShipmentMobileService;
 
-        public PartnerPortalService(ICustomerPortalService portalService, IShipmentService shipmentService, IPartnerTransactionsService partnerTransactionsService)
+        public PartnerPortalService(ICustomerPortalService portalService, IShipmentService shipmentService, IPartnerTransactionsService partnerTransactionsService, IPreShipmentMobileService preShipmentMobileService)
         {
             _portalService = portalService;
             _shipmentService = shipmentService;
             _partnerTransactionsService = partnerTransactionsService;
+            _preShipmentMobileService = preShipmentMobileService;
         }
 
         public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
@@ -244,5 +246,9 @@ namespace GIGLS.Services.Business.CustomerPortal
              await _partnerTransactionsService.CreditCaptainForMovementManifestTransaction(creditPartnerTransactionsDTO);
         }
 
+        public async Task RemoveShipmentFromQueue(string waybill)
+        {
+             await _preShipmentMobileService.RemoveShipmentFromQueue(waybill);
+        }
     }
 }
