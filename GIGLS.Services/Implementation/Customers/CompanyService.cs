@@ -1195,6 +1195,15 @@ namespace GIGLS.Services.Implementation.Customers
         public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(string email)
         {
             //get the user by email 
+            if (!string.IsNullOrEmpty(email))
+            {
+                email = email.Trim();
+            }
+            else
+            {
+                throw new GenericException("Email is invalid");
+            }
+
             var user = await _uow.User.GetUserByEmail(email);
             if (user == null)
             {
