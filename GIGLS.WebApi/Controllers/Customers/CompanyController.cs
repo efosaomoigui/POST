@@ -271,8 +271,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpPost]
-        [Route("assignedcustomers/{email}")]
+        [HttpGet]
+        [Route("{email}/assignedcustomersbycustomerrep")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetAssignedCustomersByCustomerRep(string email)
         {
             return await HandleApiOperationAsync(async () =>
