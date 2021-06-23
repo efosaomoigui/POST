@@ -1201,7 +1201,7 @@ namespace GIGLS.Services.Implementation.Customers
                 throw new GenericException("user does not exist");
             }
             //filterCriteria.AssignedCustomerRep = currentUserId;
-            return await _uow.Company.GetAssignedCustomersByCustomerRep(email);
+            return await _uow.Company.GetAssignedCustomersByCustomerRep(user.Id);
         }
     }
 
