@@ -280,7 +280,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
                                        Rank = c.Rank,
-                                       RankModificationDate = c.RankModificationDate
+                                       RankModificationDate = c.RankModificationDate,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -330,7 +333,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
                                        Rank = c.Rank,
-                                       RankModificationDate = c.RankModificationDate
+                                       RankModificationDate = c.RankModificationDate,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
