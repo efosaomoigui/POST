@@ -29,5 +29,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task ServiceCentreViewState(int serviceCentreId, bool ispublic);
         Task<IEnumerable<ServiceCentreDTO>> GetActiveServiceCentres();
         Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
+        Task<List<ServiceCentreDTO>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId);
     }
 }

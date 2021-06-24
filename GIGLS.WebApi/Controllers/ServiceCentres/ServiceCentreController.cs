@@ -322,5 +322,23 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("isconsignableservicecentrewithouthubfornonlagosstation/{countryId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //2. priviledged users service centres
+                var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+
+                var centres = await _service.GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(usersServiceCentresId[0], countryId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
     }
 }

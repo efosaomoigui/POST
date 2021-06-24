@@ -451,5 +451,30 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId);
+
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = true;
+                int stationId = 0;
+
+                if (serviceCenterIds.StationId == 4)
+                {
+                    excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
+                }
+
+                return await _uow.ServiceCentre.GetServiceCentresIsConsignable(countryIds, excludehub, stationId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
