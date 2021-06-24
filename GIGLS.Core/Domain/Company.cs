@@ -103,6 +103,10 @@ namespace GIGL.GIGLS.Core.Domain
         public string NUBANAccountNo { get; set; }
 
         [MaxLength(128)]
-        public string NUBANBankName { get; set; }
+        public string PrefferedNubanBank { get; set; }
+        public int NUBANCustomerId { get; set; }
+        [MaxLength(128)]
+        public string NUBANCustomerCode { get; set; }
+
     }
 }

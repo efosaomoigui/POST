@@ -178,6 +178,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
     {
         public int customer { get; set; }
         public string preferred_bank { get; set; }
+        public string email { get; set; }
+        public string phone { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
     }
 
 
@@ -187,18 +191,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public CreateNubanAccountResponseDTO()
         {
             data = new NubanDataResponse();
-            assignment = new NubanAssignment();
-            customer = new NubanCustomer();
         }
         public string status { get; set; }
         public string message { get; set; }
         public NubanDataResponse data { get; set; }
-        public NubanAssignment assignment { get; set; }
-        public NubanCustomer customer { get; set; }
-        public string account_name { get; set; }
-        public string assigned { get; set; }
-        public string currency { get; set; }
-        public string active { get; set; }
         public bool succeeded { get; set; }
     }
 
@@ -206,9 +202,18 @@ namespace GIGLS.Core.DTO.OnlinePayment
     {
         public NubanDataResponse()
         {
-            NubanBank = new NubanBank();
+            bank = new NubanBank();
+            assignment = new NubanAssignment();
+            customer = new NubanCustomer();
         }
-        public NubanBank NubanBank { get; set; }
+        public NubanAssignment assignment { get; set; }
+        public NubanCustomer customer { get; set; }
+        public string account_name { get; set; }
+        public string account_number { get; set; }
+        public string assigned { get; set; }
+        public string currency { get; set; }
+        public string active { get; set; }
+        public NubanBank bank { get; set; }
     }
 
     public class NubanBank
@@ -242,6 +247,32 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string phone { get; set; }
         public string risk_action { get; set; }
 
+    }
+
+
+    public class NubanCustomerDataResponse
+    {
+      public string email { get; set; }
+      public int integration { get; set; }
+      public int id { get; set; }
+      public string domain { get; set; }
+      public string customer_code { get; set; }
+      public bool identified { get; set; }
+      public string identifications { get; set; }
+      public string createdAt { get; set; }
+      public string updatedAt { get; set; }
+    }
+
+    public class NubanCreateCustomerDTO
+    {
+        public NubanCreateCustomerDTO()
+        {
+            data = new NubanCustomerDataResponse();
+        }
+        public string status { get; set; }
+        public string message { get; set; }
+        public NubanCustomerDataResponse data { get; set; }
+        public bool succeeded { get; set; }
     }
 
 

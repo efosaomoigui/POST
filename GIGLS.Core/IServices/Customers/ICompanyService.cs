@@ -1,9 +1,11 @@
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,5 +38,7 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria);
         Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO);
         Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria);
+        Task<CreateNubanAccountResponseDTO> CraeteNubanAccount(CreateNubanAccountDTO nubanAccount);
+        Task<JObject> GetNubanProviders();
     }
 }

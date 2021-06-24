@@ -9,6 +9,8 @@ using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.OnlinePayment;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -266,6 +268,22 @@ namespace GIGLS.WebApi.Controllers.Customers
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("nubanproviders")]
+        public async Task<IServiceResponse<JObject>> GetNubanProviders()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var providers = await _service.GetNubanProviders();
+                return new ServiceResponse<JObject>
+                {
+                    Object = providers
                 };
             });
         }

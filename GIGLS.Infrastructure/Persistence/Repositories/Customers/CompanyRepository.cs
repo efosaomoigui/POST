@@ -180,6 +180,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        AccountNumber = c.AccountNumber,
                                        BankName = c.BankName,
                                        Rank = c.Rank,
+                                       NUBANAccountNo = c.NUBANAccountNo,
+                                       PrefferedNubanBank = c.PrefferedNubanBank,
                                        RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
@@ -446,7 +448,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         private Task<List<CompanyDTO>> GetListOfCompany(IQueryable<Company> companies)
         {
             var companiesDto = from c in companies
-                               join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                               //join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
                                join co in _context.Country on c.UserActiveCountryId equals co.CountryId
                                select new CompanyDTO
                                {
@@ -472,8 +474,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                    ReturnAddress = c.ReturnAddress,
                                    DateCreated = c.DateCreated,
                                    DateModified = c.DateModified,
-                                   WalletBalance = w.Balance,
+                                  // WalletBalance = w.Balance,
                                    UserActiveCountryId = c.UserActiveCountryId,
+                                   PrefferedNubanBank = c.PrefferedNubanBank,
+                                   NUBANAccountNo = c.NUBANAccountNo,
                                    Country = new CountryDTO
                                    {
                                        CountryId = co.CountryId,
