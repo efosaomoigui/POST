@@ -354,7 +354,6 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                     Object = true
                 };
             });
-
         }
     }
 }
