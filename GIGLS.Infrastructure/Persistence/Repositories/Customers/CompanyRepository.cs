@@ -662,8 +662,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companiesDto = new List<CompanyDTO>();
                 if (!string.IsNullOrEmpty(customerRepId))
                 {
-                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == customerRepId);
-                    companiesDto = companies.OrderByDescending(s => s.DateCreated)
+                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == customerRepId && s.Rank == Rank.Class);
+                    companiesDto = companies.OrderByDescending(s => s.RankModificationDate)
                         .Select(c => new CompanyDTO
                         {
                             CustomerCode = c.CustomerCode,
