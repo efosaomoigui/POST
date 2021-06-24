@@ -42,5 +42,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsPublic { get; set; }
         public bool HomeDeliveryStatus { get; set; }
         public bool IsGateway { get; set; }
+        public bool IsConsignable { get; set; }
     }
 }

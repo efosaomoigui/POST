@@ -161,7 +161,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
-        }       
+        }
         public async Task<IEnumerable<ServiceCentreDTO>> GetActiveServiceCentres()
         {
             try
@@ -303,7 +303,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 }
 
                 //1. update the old service centre code to the new one in Number Generator Monitor if they are different
-                if(centre.Code.ToLower() != service.Code.ToLower())
+                if (centre.Code.ToLower() != service.Code.ToLower())
                 {
                     var numberGenerator = await _uow.NumberGeneratorMonitor.FindAsync(x => x.ServiceCentreCode == centre.Code);
 
@@ -413,7 +413,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 int[] countryIds = new int[] { countryId };
                 bool excludehub = true;
                 int stationId = 0;
-                
+
                 if (serviceCenterIds.StationId == 4)
                 {
                     excludehub = false;
@@ -451,5 +451,49 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId);
+
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = true;
+                int stationId = 0;
+
+                if (serviceCenterIds.StationId == 4)
+                {
+                    excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
+                }
+
+                return await _uow.ServiceCentre.GetServiceCentresIsConsignable(countryIds, excludehub, stationId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ServiceCentreConsignableState(int serviceCentreId, bool isconsignable)
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
+                if (centre == null)
+                {
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                centre.IsConsignable = isconsignable;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
+
