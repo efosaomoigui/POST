@@ -47,6 +47,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string FormattedServiceCentreName { get; set; }
         public bool IsPublic { get; set; }
         public int LGAId { get; set; }
+        public bool IsConsignable { get; set; }
 
     }
 }
