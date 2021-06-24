@@ -718,7 +718,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
                                     IsPublic = s.IsPublic,
                                     HomeDeliveryStatus = t.HomeDeliveryStatus,
-                                    IsGateway = s.IsGateway
+                                    IsGateway = s.IsGateway,
+                                    IsConsignable = s.IsConsignable
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }

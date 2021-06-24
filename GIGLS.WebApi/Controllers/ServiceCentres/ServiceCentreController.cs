@@ -340,5 +340,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{servicecentreId:int}/consignable/{isconsignable}")]
+        public async Task<IServiceResponse<bool>> UpdateServiceCentreConsignableState(int servicecentreId, bool isconsignable)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.ServiceCentreConsignableState(servicecentreId, isconsignable);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
     }
 }
