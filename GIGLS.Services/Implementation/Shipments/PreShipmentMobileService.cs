@@ -5539,8 +5539,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
+                company.AccountNumber = user.AccountNumber;
+                company.AccountName = user.AccountName;
+                company.BankName = user.BankName;
                 if (company.Name != null)
                 {
+                    var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
+                    if (exist != null)
+                    {
+                        throw new GenericException("Company name already exist!!");
+                    }
                     if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
                     {
                         company.Name = user.Organisation;

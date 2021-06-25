@@ -69,9 +69,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     CustomerCode = r.CustomerCode,
                                                     PickupOptions = r.PickupOptions,
                                                     SenderCity = r.SenderCity,
-                                                    SenderName = r.SenderName,
+                                                    //SenderName = i.FirstName + ' ' + i.LastName,
                                                     SenderPhoneNumber = r.SenderPhoneNumber,
-                                                    IsAgent = r.IsAgent,                                                    
+                                                    IsAgent = r.IsAgent,
                                                     DepartureStationId = r.DepartureStationId,
                                                     DestinationStationId = r.DestinationStationId,
                                                     DestinationServiceCenterId = r.DestinationServiceCenterId,
@@ -80,7 +80,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                         {
                                                                             Description = x.Description,
                                                                             ShipmentType = x.ShipmentType,
-                                                                            Weight = x.Weight,
+                                                                            Weight = x.Weight == 0 ? (double)_context.SpecialDomesticPackage.FirstOrDefault(y => y.SpecialDomesticPackageId == x.SpecialPackageId).Weight : x.Weight,
                                                                             Quantity = x.Quantity,
                                                                             SpecialPackageId = x.SpecialPackageId,
                                                                             PreShipmentId = x.PreShipmentId,
@@ -88,6 +88,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             ItemValue = x.ItemValue
                                                                         }).ToList()
                                                 }).ToList();
+            if (shipmentDto.Any())
+            {
+                for (int i = 0; i < shipmentDto.Count; i++)
+                {
+                    var item = shipmentDto[i];
+                    var sender = _context.Users.FirstOrDefault(x => x.Id == item.SenderUserId);
+                    if (sender != null)
+                    {
+                        item.SenderName = sender.FirstName + ' ' + sender.LastName;
+                    }
+                }
+            }
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
@@ -98,6 +110,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             var dropOffs = _context.PreShipment.Where(x => (x.CustomerCode.ToLower() == searchOption.Option.ToLower() || x.SenderPhoneNumber.ToLower() == searchOption.Option.ToLower()) && x.IsProcessed == false).ToList();
             List<PreShipmentDTO> shipmentDto = (from r in dropOffs
+                                                join i in Context.Users on r.SenderUserId equals i.Id
                                                 select new PreShipmentDTO()
                                                 {
                                                     PreShipmentId = r.PreShipmentId,
@@ -116,7 +129,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     CustomerCode = r.CustomerCode,
                                                     PickupOptions = r.PickupOptions,
                                                     SenderCity = r.SenderCity,
-                                                    SenderName = r.SenderName,
+                                                    SenderName = i.FirstName + ' ' + i.LastName,
                                                     SenderPhoneNumber = r.SenderPhoneNumber,
                                                     IsAgent = r.IsAgent,
                                                     DepartureStationId = r.DepartureStationId,

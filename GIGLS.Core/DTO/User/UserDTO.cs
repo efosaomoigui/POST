@@ -99,6 +99,11 @@ namespace GIGLS.Core.DTO.User
         public string IdentificationImage { get; set; }
         public string CountryType { get; set; }
         public int AssignedEcommerceCustomer { get; set; }
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
     }
 
     public class UpdateUserActiveCountryDTO
