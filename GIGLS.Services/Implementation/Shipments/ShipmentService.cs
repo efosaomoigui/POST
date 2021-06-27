@@ -4590,7 +4590,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
 
                 //validate the different from DHL
-                if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
+                var grandTotal1 = Math.Round(priceUpdate.GrandTotal, 2);
+                var grandTotal2 = Math.Round(shipmentDTO.GrandTotal, 2);
+                if (grandTotal1 != grandTotal2)
                 {
                     throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
                 }
@@ -4857,10 +4859,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //Get Approximate Items Weight
-                foreach (var item in shipmentDTO.ShipmentItems)
-                {
-                    shipmentDTO.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight + item.Weight;
-                }
+                shipmentDTO.ApproximateItemsWeight = shipmentDTO.ShipmentItems.Sum(x => x.Weight);
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);
@@ -4960,8 +4959,11 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
-            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-            shipmentDTO.Waybill = waybill;
+            if(shipmentDTO.Waybill == null)
+            {
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                shipmentDTO.Waybill = waybill;
+            }
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment

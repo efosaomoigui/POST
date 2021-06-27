@@ -411,6 +411,7 @@ namespace GIGLS.Core.DTO.Shipments
         public CompanyMap CompanyMap { get; set; }
         public string ManufacturerCountry { get; set; }
         public decimal InternationalShippingCost { get; set; }
+        public string Waybill { get; set; }
     }
 
     public class CODShipmentDTO : BaseDomainDTO
