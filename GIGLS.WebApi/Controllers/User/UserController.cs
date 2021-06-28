@@ -889,7 +889,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("api/{email}/user")]
+        [Route("api/user/getemployeeuser/{email}")]
         public async Task<IServiceResponse<UserDTO>> GetEmployeeUserByEmail(string email)
         {
             return await HandleApiOperationAsync(async () =>
