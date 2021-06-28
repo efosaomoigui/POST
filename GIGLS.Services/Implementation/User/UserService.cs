@@ -1517,5 +1517,22 @@ namespace GIGLS.Services.Implementation.User
 
             return await _unitOfWork.User.UpdateUser(userid, user);
         }
+
+        public async Task<UserDTO> GetEmployeeUserByEmail(string email)
+        {
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    throw new GenericException("Email is empty or Not Valid!");
+            //}
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!"): email.Trim();
+            var user = await _unitOfWork.User.GetEmployeeUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+        }
     }
 }
