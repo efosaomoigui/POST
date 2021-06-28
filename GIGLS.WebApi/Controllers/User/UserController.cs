@@ -886,5 +886,20 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/{email}/user")]
+        public async Task<IServiceResponse<UserDTO>> GetEmployeeUserByEmail(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var user = await _userService.GetEmployeeUserByEmail(email);
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = user
+                };
+            });
+        }
     }
 }
