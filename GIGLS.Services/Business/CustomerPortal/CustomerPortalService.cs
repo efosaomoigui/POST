@@ -3396,6 +3396,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("user does not exist");
             }
+
+            if (String.IsNullOrEmpty(updateCompanyNameDTO.Name))
+            {
+                throw new GenericException("Company name required");
+            }
             //check if the company name already exist
             var exist = await _uow.Company.GetAsync(x => x.Name.ToLower().Trim() == updateCompanyNameDTO.Name.ToLower().Trim());
             if (exist != null)
