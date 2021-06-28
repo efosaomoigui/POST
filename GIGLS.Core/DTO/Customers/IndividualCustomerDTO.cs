@@ -34,6 +34,11 @@ namespace GIGLS.Core.DTO.Customers
         public bool IsRegisteredFromMobile { get; set; }
         public bool IsFromMobile { get; set; }
         public CountryDTO Country { get; set; }
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
         public CustomerType CustomerType { get; set; } = CustomerType.IndividualCustomer;
     }
 }
