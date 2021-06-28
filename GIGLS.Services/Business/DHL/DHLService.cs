@@ -559,10 +559,6 @@ namespace GIGLS.Services.Business.DHL
             {
                 return tmpDate = tmpDate.AddDays(2);
             }
-            else if (tmpDate.DayOfWeek == DayOfWeek.Sunday)
-            {
-                return tmpDate = tmpDate.AddDays(1);
-            }
             else
             {
                 return tmpDate.AddDays(shipDays);
