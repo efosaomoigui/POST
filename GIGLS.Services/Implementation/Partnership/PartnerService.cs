@@ -29,7 +29,7 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICompanyService _companyService;
 
-        public PartnerService(IUnitOfWork uow, IWalletService walletService, 
+        public PartnerService(IUnitOfWork uow, IWalletService walletService,
             INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService)
         {
             _uow = uow;
@@ -134,7 +134,7 @@ namespace GIGLS.Services.Implementation.Partnership
         }
 
         public async Task<object> AddPartner(PartnerDTO partnerDto)
-        {            
+        {
             partnerDto.PartnerName = partnerDto.PartnerName.Trim();
 
             if (await _uow.Partner.ExistAsync(v => v.PartnerName.ToLower() == partnerDto.PartnerName.ToLower()))
@@ -145,12 +145,12 @@ namespace GIGLS.Services.Implementation.Partnership
             var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
 
             var partner = Mapper.Map<Partner>(partnerDto);
-            partner.PartnerCode = partnerCode;            
+            partner.PartnerCode = partnerCode;
             _uow.Partner.Add(partner);
             await _uow.CompleteAsync();
             return new { id = partner.PartnerId };
         }
-        
+
         public async Task UpdatePartner(int partnerId, PartnerDTO partner)
         {
             var existingParntner = await _uow.Partner.GetAsync(partnerId);
@@ -209,7 +209,7 @@ namespace GIGLS.Services.Implementation.Partnership
         {
             var partner = await _uow.Partner.GetAsync(x => x.Email == email);
 
-            if(partner == null)
+            if (partner == null)
             {
                 throw new GenericException($"Partner with email {email} does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
@@ -234,9 +234,9 @@ namespace GIGLS.Services.Implementation.Partnership
             string fleetCode = null;
             List<VehicleTypeDTO> partners = new List<VehicleTypeDTO>();
 
-           if (filterCriteria.StartDate != null)
+            if (filterCriteria.StartDate != null)
             {
-                partners = await _uow.Partner.GetPartnersAsync(fleetCode, true, filterCriteria); 
+                partners = await _uow.Partner.GetPartnersAsync(fleetCode, true, filterCriteria);
             }
             else
             {
@@ -249,7 +249,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 foreach (var item in partners)
                 {
                     var months = 12 * (today.Year - item.ActivityDate.Year) + today.Month - item.ActivityDate.Month;
-                  var monthsApart = Math.Abs(months);
+                    var monthsApart = Math.Abs(months);
                     if (monthsApart <= 1)
                     {
                         item.Active = true;
@@ -385,28 +385,28 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
                 if (atat > 0)
                 {
-                    rider.AssignTAT = atat/ userTransac.Count; 
+                    rider.AssignTAT = atat / userTransac.Count;
                 }
                 if (dtat > 0)
                 {
-                    rider.DeliveryTAT = dtat / userTransac.Count; 
+                    rider.DeliveryTAT = dtat / userTransac.Count;
                 }
                 if (ptat > 0)
                 {
-                    rider.PickupTAT = ptat / userTransac.Count; 
+                    rider.PickupTAT = ptat / userTransac.Count;
                 }
                 if (atat > 0 || ptat > 0)
                 {
-                    rider.AverageAssignTAT = (atat + ptat) / userTransac.Count; 
+                    rider.AverageAssignTAT = (atat + ptat) / userTransac.Count;
                 }
                 if (dtat > 0 || ptat > 0)
                 {
-                    rider.AverageDeliveryTAT = (dtat + ptat) / userTransac.Count; 
+                    rider.AverageDeliveryTAT = (dtat + ptat) / userTransac.Count;
                 }
                 var oatat = atat + dtat + ptat;
                 if (oatat > 0)
                 {
-                    rider.AverageOATAT = oatat / userTransac.Count; 
+                    rider.AverageOATAT = oatat / userTransac.Count;
                 }
                 rider.Trip = userTransac.Count;
                 if (count > 0)
@@ -415,6 +415,95 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
             }
             return rider;
+        }
+
+        public async Task UpdatePartnerEmailPhoneNumber(PartnerUpdateDTO update)
+        {
+            if (string.IsNullOrEmpty(update.OldEmail))
+            {
+                throw new GenericException("Partner Email is invalid");
+            }
+
+            update.OldEmail = string.IsNullOrEmpty(update.OldEmail) ? update.OldEmail : update.OldEmail.Trim();
+            update.NewEmail = string.IsNullOrEmpty(update.NewEmail) ? update.NewEmail : update.NewEmail.Trim();
+            update.OldPhoneNumber = string.IsNullOrEmpty(update.OldPhoneNumber) ? update.OldPhoneNumber : update.OldPhoneNumber.Trim();
+            update.NewPhoneNumber = string.IsNullOrEmpty(update.NewPhoneNumber) ? update.NewPhoneNumber : update.NewPhoneNumber.Trim();
+
+            var subOldNumber = string.IsNullOrEmpty(update.OldPhoneNumber) ? update.OldPhoneNumber : update.OldPhoneNumber.Substring(4);
+
+            var partners = await _uow.Partner.GetPartnerByEmail(update.OldEmail);
+
+            if (partners.Count == 0)
+            {
+                throw new GenericException("Partner Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            foreach (var partner in partners)
+            {
+                if (!string.IsNullOrEmpty(update.NewEmail) && partner.Email.Contains(update.OldEmail))
+                {
+                    partner.Email = update.NewEmail;
+                }
+
+                if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
+                {
+                    if (partner.PhoneNumber.Length > 11 )
+                    {
+                        if (partner.PhoneNumber.Contains(update.OldPhoneNumber))
+                        {
+                            partner.PhoneNumber = update.NewPhoneNumber;
+                        }
+                    }
+                    else
+                    {
+                        if (partner.PhoneNumber.Contains(subOldNumber))
+                        {
+                            partner.PhoneNumber = update.NewPhoneNumber;
+                        }
+                        if (partner.PhoneNumber == null)
+                        {
+                            partner.PhoneNumber = update.NewPhoneNumber;
+                        }
+                    }
+                }
+            }
+
+            var users = await _uow.User.GetPartnerUsersByEmail(update.OldEmail);
+
+            if (users.Count != 0)
+            {
+                foreach (var user in users)
+                {
+                    if (!string.IsNullOrEmpty(update.NewEmail) && user.Email.Contains(update.OldEmail))
+                    {
+                        user.Email = update.NewEmail;
+                    }
+
+                    if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
+                    {
+                        if (user.PhoneNumber.Length > 11)
+                        {
+                            if (user.PhoneNumber.Contains(update.OldPhoneNumber))
+                            {
+                                user.PhoneNumber = update.NewPhoneNumber;
+                            }
+                        }
+                        else
+                        {
+                            if (user.PhoneNumber.Contains(subOldNumber))
+                            {
+                                user.PhoneNumber = update.NewPhoneNumber;
+                            }
+                            if (user.PhoneNumber == null)
+                            {
+                                user.PhoneNumber = update.NewPhoneNumber;
+                            }
+                        }
+                    }
+                }
+            }
+
+            await _uow.CompleteAsync();
         }
     }
 }
