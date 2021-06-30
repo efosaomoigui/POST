@@ -4809,6 +4809,10 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 customerType = CustomerType.IndividualCustomer;
             }
+            else if (shipment.CompanyType == "Ecommerce" || shipment.CompanyType == "Corporate")
+            {
+                customerType = CustomerType.Company;
+            }
             else
             {
                 customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
