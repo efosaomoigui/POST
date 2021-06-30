@@ -4,6 +4,7 @@ namespace GIGLS.CORE.DTO.Report
 {
     public class DateFilterCriteria
     {
+
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int CountryId { get; set; }
@@ -18,6 +19,7 @@ namespace GIGLS.CORE.DTO.Report
         /// <returns></returns>
         public Tuple<DateTime, DateTime> getStartDateAndEndDate()
         {
+
             DateFilterCriteria dateFilterCriteria = this;
 
             var startDate = DateTime.Now;
