@@ -480,6 +480,19 @@ namespace GIGLS.Core
                 config.CreateMap<CustomerInvoice, CustomerInvoiceDTO>();
                 config.CreateMap<CustomerInvoiceDTO, CustomerInvoice>();
 
+                config.CreateMap<InternationalShipmentQuoteDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, InternationalShipmentQuoteDTO>();
+
+                config.CreateMap<RateInternationalShipmentDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, RateInternationalShipmentDTO>();
+
+                config.CreateMap<CreateInternationalShipmentDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, CreateInternationalShipmentDTO>();
+
+                config.CreateMap<RateShipmentItem, ShipmentItemDTO>();
+                config.CreateMap<ShipmentItemDTO, RateShipmentItem>();
+
+
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
                 config.CreateMap<ShipmentItem_Archive, ShipmentItem>();

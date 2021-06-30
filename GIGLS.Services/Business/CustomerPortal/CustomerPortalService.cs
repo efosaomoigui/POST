@@ -1,56 +1,60 @@
-﻿using GIGLS.Core.IServices.CustomerPortal;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
-using System.Linq;
-using AutoMapper;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
-using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Haulage;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO;
-using Microsoft.AspNet.Identity;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
-using System;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.DTO.User;
-using GIGLS.Core.DTO.SLA;
-using GIGLS.Core.IServices.Sla;
-using GIGLS.Core.Enums;
-using GIGLS.Core.View;
-using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.Domain.Partnership;
-using GIGLS.Core.IServices.Utility;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IMessageService;
-using System.Text.RegularExpressions;
+using GIGLS.Core;
+using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
-using GIGLS.Core.IServices.Report;
-using GIGLS.Core.IServices.Partnership;
-using System.Configuration;
-using System.Security.Cryptography;
-using System.Text;
-using GIGLS.Core.DTO.Utility;
-using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.DTO.Stores;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.BankSettlement;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.CashOnDeliveryAccount;
+using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.IServices.Partnership;
+using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.IServices.Report;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.Sla;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.IServices.Zone;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Infrastructure;
+using Microsoft.AspNet.Identity;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using System.Net;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
@@ -62,6 +66,9 @@ using GIGLS.Core.DTO.Stores;
 using System.Net.Http;
 using GIGLS.CORE.DTO.Report;
 using System.Web.Http;
+using GIGLS.Core.DTO.DHL;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -106,9 +113,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobilePickUpRequestsService _mobilePickUpRequestService;
         private readonly INotificationService _notificationService;
         private readonly ICompanyService _companyService;
-        private readonly IShipmentService _shipmentService; 
+        private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
-        private readonly IWaybillPaymentLogService _waybillPaymentLogService;       
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -121,8 +128,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
-            INotificationService notificationService,ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService  movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService) 
+            INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
+            IWaybillPaymentLogService waybillPaymentLogService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -163,7 +170,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _mobilePickUpRequestService = mobilePickUpRequestsService;
             _notificationService = notificationService;
             _companyService = companyService;
-            _shipmentService  = shipmentService;
+            _shipmentService = shipmentService;
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
             MapperConfig.Initialize();
@@ -395,7 +402,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId,pagination);
+            var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId, pagination);
             return walletTransactionSummary;
         }
 
@@ -1247,7 +1254,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             ////SEND EMAIL TO NEW SIGNEE
             var companyMessagingDTO = new CompanyMessagingDTO();
-           // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
+            // companyMessagingDTO.Name = user.FirstName + "" + user.LastName;
             companyMessagingDTO.Name = user.FirstName;
             companyMessagingDTO.Email = user.Email;
             companyMessagingDTO.PhoneNumber = user.PhoneNumber;
@@ -1565,6 +1572,46 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return await _userService.ForgotPassword(email, password);
+        }
+
+        //New Modified Forgot Password
+        public async Task<bool> ForgotPasswordV2(ForgotPasswordDTO forgotPasswordDTO)
+        {
+            if (string.IsNullOrEmpty(forgotPasswordDTO.Email.Trim()))
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var user = await _uow.User.GetUserByEmail(forgotPasswordDTO.Email);
+            if (user == null)
+            {
+                throw new GenericException("User does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            string password = await Generate(6);
+
+            var result =  await _userService.ForgotPassword(user.Email, password);
+
+            if (result.Succeeded)
+            {
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = user.Email,
+                    UserPhoneNumber = user.PhoneNumber
+                };
+
+                // Send Email and SMS 
+                var response = await _messageSenderService.SendMessage(MessageType.PEmail, EmailSmsType.All, passwordMessage);
+                 
+            }
+            else
+            {
+                throw new GenericException("User does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return true;
+
         }
 
         public async Task SendGenericEmailMessage(MessageType messageType, object obj)
@@ -2827,8 +2874,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _scanService.ScanMultipleShipment(scanList);
         }
-        
-        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch() 
+
+        public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch()
         {
             return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
         }
@@ -2966,7 +3013,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             user.IdentificationNumber = intlUserProfiler.IdentificationNumber;
             user.IsInternational = true;
             user.IdentificationType = intlUserProfiler.IdentificationType;
-           // await _uow.User.UpdateUser(currentUserId, user);
+            // await _uow.User.UpdateUser(currentUserId, user);
             //also update company table
             var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (company != null)
@@ -2988,7 +3035,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId)
         {
             return await _uow.ServiceCentre.GetServiceCentresBySingleCountry(countryId);
-        }  
+        }
 
         public async Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId)
         {
@@ -3007,7 +3054,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> UpdatePreshipmentMobileStatusToPickedup(string manifestNumber, List<string> waybills)
         {
-          return  await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
+            return await _dispatchService.UpdatePreshipmentMobileStatusToPickedup(manifestNumber, waybills);
         }
         public async Task<bool> UpdatePreShipmentMobile(PreShipmentMobile preshipmentmobile)
         {
@@ -3040,7 +3087,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         //Get International Shipments Terms and Conditions
         public async Task<MessageDTO> GetIntlMessageForApp(int countryId)
         {
-            return await _messageSenderService.GetMessageByType(MessageType.ISTC,countryId);
+            return await _messageSenderService.GetMessageByType(MessageType.ISTC, countryId);
         }
 
         public async Task<List<StoreDTO>> GetStoresByCountry(int countryId)
@@ -3058,7 +3105,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var requests = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsForUser(filterCriteria, currentUserId);
             if (requests.Any())
             {
-                var countryIds =  requests.Select(x => x.RequestProcessingCountryId).ToList();
+                var countryIds = requests.Select(x => x.RequestProcessingCountryId).ToList();
                 var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
                 foreach (var item in requests)
                 {
@@ -3071,11 +3118,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     if (country != null)
                     {
                         var countryDTO = Mapper.Map<NewCountryDTO>(country);
-                        item.DepartureCountry = countryDTO; 
+                        item.DepartureCountry = countryDTO;
                     }
                     count++;
                     item.ItemCount = $"{count} of {count}";
-                } 
+                }
             }
 
             return requests;
@@ -3144,7 +3191,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
 
-             if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
+            if (!String.IsNullOrEmpty(userDetail.PhoneNumber))
             {
                 var user = await _uow.User.GetUserByPhoneNumber(userDetail.PhoneNumber);
                 if (user != null)
@@ -3180,15 +3227,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SendMessage(NewMessageDTO newMessageDTO)
         {
-           // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
-            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType,newMessageDTO);
+            // var msgType = (MessageType)Enum.Parse(typeof(MessageType), "ESEAS");
+            return await _messageSenderService.SendMessage(MessageType.ESEAS, newMessageDTO.EmailSmsType, newMessageDTO);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
         {
             var user = await _uow.User.GetUserByEmail(email);
             var userDTO = Mapper.Map<UserDTO>(user);
-            return userDTO; 
+            return userDTO;
         }
 
         public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
@@ -3198,7 +3245,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest)
         {
-           return await  _shipmentService.ReleaseMovementManifest(valMovementManifest);
+            return await _shipmentService.ReleaseMovementManifest(valMovementManifest);
         }
 
         public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
@@ -3262,6 +3309,116 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             userActiveCountry.UserID = await _userService.GetCurrentUserId();
             return await _countryService.UpdateUserActiveCountry(userActiveCountry);
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(rateDTO);
+            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+        }
+
+        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
+        {
+            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
+            return await _shipmentService.AddInternationalShipment(shipment);
+        }
+        public async Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var countryDTO = await _countryService.GetCountryById(quickQuotePriceDTO.DepartureCountryId);
+            var priceDTO = new QuickQuotePriceDTO();
+            priceDTO.DepartureCountryId = quickQuotePriceDTO.DepartureCountryId;
+            priceDTO.DestinationCountryId = quickQuotePriceDTO.DestinationCountryId;
+            priceDTO.Price = 0;
+            priceDTO.CurrencyCode = countryDTO.CurrencyCode;
+            priceDTO.CurrencySymbol = countryDTO.CurrencySymbol;
+            if (quickQuotePriceDTO == null)
+            {
+                throw new GenericException("Invalid payload!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (quickQuotePriceDTO.DepartureCountryId == 0 || quickQuotePriceDTO.DestinationCountryId == 0)
+            {
+                throw new GenericException("please ensure departure and destination is selected!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (quickQuotePriceDTO.PriceCategoryId.Any())
+            {
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
+                foreach (var item in quickQuotePriceDTO.PriceCategoryId)
+                {
+                    var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
+                    if (itemCategory.CategoryMinimumWeight == 0)
+                    {
+                        for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                        {
+                            priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        }
+                    }
+                    else
+                    {
+                        if (quickQuotePriceDTO.Weight < itemCategory.CategoryMinimumWeight)
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
+                                priceDTO.Price = priceDTO.Price + priceValue;
+                            }
+                        }
+                    }
+                }
+            }
+            return priceDTO;
+        }
+
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId)
+        {
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(countryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+        }
+
+        public async Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO)
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+
+            if (String.IsNullOrEmpty(updateCompanyNameDTO.Name))
+            {
+                throw new GenericException("Company name required");
+            }
+            //check if the company name already exist
+            var exist = await _uow.Company.GetAsync(x => x.Name.ToLower().Trim() == updateCompanyNameDTO.Name.ToLower().Trim());
+            if (exist != null)
+            {
+                throw new GenericException($"Company name {updateCompanyNameDTO.Name.ToUpper()}  already exist");
+            }
+
+            //update company name if it does not exist
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.Name = updateCompanyNameDTO.Name;
+                company.LastName = company.LastName == null ? updateCompanyNameDTO.Name : company.LastName;
+                company.FirstName = company.FirstName == null ? updateCompanyNameDTO.Name : company.FirstName;
+            }
+
+            _uow.Complete();
+            return updateCompanyNameDTO;
         }
 
     }

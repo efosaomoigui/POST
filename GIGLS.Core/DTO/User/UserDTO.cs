@@ -99,6 +99,11 @@ namespace GIGLS.Core.DTO.User
         public string IdentificationImage { get; set; }
         public string CountryType { get; set; }
         public int AssignedEcommerceCustomer { get; set; }
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
     }
 
     public class UpdateUserActiveCountryDTO
@@ -113,5 +118,11 @@ namespace GIGLS.Core.DTO.User
         public CountryDTO CountryDTO { get; set; }
         public decimal WalletBalance { get; set; }
         public bool HasWallet { get; set; }
+    }
+
+    public class ForgotPasswordDTO
+    {
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

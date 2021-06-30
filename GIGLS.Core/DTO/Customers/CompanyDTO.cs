@@ -143,4 +143,9 @@ namespace GIGLS.Core.DTO.Customers
         public string FirstName { get; set; }
         public string LastName { get; set; }
     }
+
+    public class UpdateCompanyNameDTO
+    {
+        public string Name { get; set; }
+    }
 }

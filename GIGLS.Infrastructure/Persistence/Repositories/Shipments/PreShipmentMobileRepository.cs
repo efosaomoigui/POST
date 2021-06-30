@@ -132,6 +132,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    IsDelivered = r.IsDelivered,
                                    IsBatchPickUp = r.IsBatchPickUp,
                                    IsCancelled = r.IsCancelled,
+                                   ZoneMapping = r.ZoneMapping,
                                    PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {

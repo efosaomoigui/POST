@@ -57,5 +57,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ReleaseMovementManifest(ReleaseMovementManifestDto valMovementManifest);
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
         Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO creditPartnerTransactionsDTO);
+        Task RemoveShipmentFromQueue(string waybill);
     }
 }

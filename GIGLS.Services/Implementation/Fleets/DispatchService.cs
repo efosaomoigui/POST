@@ -99,6 +99,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchObj.Amount = dispatchDTO.Amount;
                     dispatchObj.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     dispatchId = dispatchObj.DispatchId;
+                    dispatchObj.DriverDetail = dispatchDTO.UserId == null ? dispatchDTO.DriverDetail : dispatchDTO.UserId;
                 }
                 else
                 {
@@ -111,7 +112,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         newDispatch.DriverDetail = dispatchDTO.UserId;
                     }
-
+                    newDispatch.DriverDetail = dispatchDTO.UserId == null ? dispatchDTO.DriverDetail : dispatchDTO.UserId;
                     //Set Departure Service Center
                     newDispatch.DepartureServiceCenterId = userServiceCentreId;
                     newDispatch.DepartureId = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.ServiceCentreId == newDispatch.DepartureServiceCenterId).Select(x => x.StationId).FirstOrDefault();

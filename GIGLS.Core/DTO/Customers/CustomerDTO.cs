@@ -65,6 +65,11 @@ namespace GIGLS.Core.DTO.Customers
         public string IdentifictionNumber { get; set; }
         public string IdentificationImage { get; set; } 
         public string IdentificationNumber { get; set; }
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
         public Rank Rank { get; set; }
 
     }

@@ -163,7 +163,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                         item.CurrencySymbol = countries.FirstOrDefault(x => x.CountryId == item.PaymentCountryId).CurrencySymbol;
                     }
                 }
-                return new Tuple<Task<List<WalletPaymentLogDTO>>, int>(Task.FromResult(walletPaymentLogDto), totalCount);
+                return new Tuple<Task<List<WalletPaymentLogDTO>>, int>(Task.FromResult(walletPaymentLogDto), totalCount);                
             }
             catch (Exception ex)
             {

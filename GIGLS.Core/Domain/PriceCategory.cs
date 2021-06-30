@@ -15,5 +15,6 @@ namespace GIGLS.Core.Domain
         public decimal PricePerWeight { get; set; }
         public decimal CategoryMinimumPrice { get; set; }
         public bool IsActive { get; set; }
+        public int DepartureCountryId { get; set; }
     }
 }

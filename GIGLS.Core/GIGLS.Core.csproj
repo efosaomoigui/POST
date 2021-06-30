@@ -478,6 +478,7 @@
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreshipmentManifestDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\InternationalFreightDTO.cs" />
     <Compile Include="DTO\Shipments\SearchOption.cs" />
     <Compile Include="DTO\Shipments\ShipmentActivityDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentContactHistoryDTO.cs" />

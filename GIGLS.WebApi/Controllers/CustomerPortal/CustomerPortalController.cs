@@ -42,6 +42,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation.Utility;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.DHL;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -89,11 +90,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPut]
         [Route("intlshipmentrequest/{requestNumber}")]
-        public async Task<IServiceResponse<object>> UpdateIntlShipmentRequest(string requestNumber,IntlShipmentRequestDTO transactionDTO)
+        public async Task<IServiceResponse<object>> UpdateIntlShipmentRequest(string requestNumber, IntlShipmentRequestDTO transactionDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _magayaService.UpdateIntlShipmentRequest(requestNumber,transactionDTO);
+                var result = await _magayaService.UpdateIntlShipmentRequest(requestNumber, transactionDTO);
                 return new ServiceResponse<object>
                 {
                     Object = result
@@ -712,7 +713,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpPost]
         [Route("verifyotp")]
@@ -1507,37 +1508,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [AllowAnonymous]
         [HttpPost]
         [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                if (string.IsNullOrWhiteSpace(user.Email))
-                {
-                    throw new GenericException("NULL INPUT", $"{(int)HttpStatusCode.BadRequest}");
-                }
-
-                string password = await _portalService.Generate(6);
-                var User = await _portalService.ForgotPassword(user.Email, password);
-
-                if (User.Succeeded)
-                {
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = password,
-                        UserEmail = user.Email
-                    };
-
-                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                }
-                else
-                {
-                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
-                }
+                var result = await _portalService.ForgotPasswordV2(user);
 
                 return new ServiceResponse<bool>
                 {
                     Code = $"{(int)HttpStatusCode.OK}",
-                    Object = true
+                    Object = result
                 };
             });
         }
@@ -1982,7 +1962,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 await _portalService.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
                 return new ServiceResponse<bool>
                 {
@@ -2061,7 +2042,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-    
+
         [HttpPost]
         [Route("getwallettransactions")]
         public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactions(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -2075,7 +2056,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-       
+
         [HttpPost]
         [Route("getshipments")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetShipments(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO)
@@ -2123,7 +2104,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("profileinternationaluser")]
         public async Task<IServiceResponse<bool>> ProfileInternationalUser(IntertnationalUserProfilerDTO intlUserProfiler)
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 await _portalService.ProfileInternationalUser(intlUserProfiler);
                 return new ServiceResponse<bool>
                 {
@@ -2155,7 +2137,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             types.RemoveAt(3);
             return Ok(types);
         }
-       
+
         [HttpGet]
         [Route("servicecentresbycountry/{countryId}")]
         public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresBySingleCountry(int countryId)
@@ -2169,7 +2151,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("storesbycountry/{countryId}")]
         public async Task<IServiceResponse<List<StoreDTO>>> GetStoresByCountry(int countryId)
@@ -2242,7 +2224,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpPost]
         [Route("intlshipmentrequests")]
         public async Task<IServiceResponse<List<IntlShipmentRequestDTO>>> GetIntlShipmentRequestsForUser(ShipmentCollectionFilterCriteria filterCriteria)
@@ -2330,5 +2312,93 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("internationalshipmentquote")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _portalService.GetInternationalshipmentQuote(quoteDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("internationalshipmentrate")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _portalService.GetInternationalshipmentRate(rateDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createinternationalshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _portalService.CreateInternationalShipment(createDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getintlquickqoute")]
+        public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetIntlQuickQuote(quickQuotePriceDTO);
+                return new ServiceResponse<QuickQuotePriceDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("getcategoriesbycountry/{countryId}")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetPriceCategoriesByCountry(countryId);
+                return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
+                {
+                    Object = item
+                };
+            });
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("updatecompanyname")]
+        public async Task<IServiceResponse<UpdateCompanyNameDTO>> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.UpdateCompanyName(updateCompanyNameDTO);
+                return new ServiceResponse<UpdateCompanyNameDTO>
+                {
+                    Object = item
+                };
+            });
+        }
     }
 }

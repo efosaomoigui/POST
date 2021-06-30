@@ -1031,6 +1031,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
                     }
                 }
+                //Send mail for shipment creation
+                //if (newShipment != null)
+                //{
+                   //await SendEmailToCustomerForShipmentCreation(newShipment);
+                //}
                 return newShipment;
             }
             catch (Exception ex)
@@ -1039,6 +1044,96 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Send Email to customer for shipment creation
+        private async Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment)
+        {
+            CustomerType customerType = CustomerType.IndividualCustomer;
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                customerType = CustomerType.IndividualCustomer;
+            }
+            else
+            {
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            }
+
+            var customer = await GetCustomerForShipment(shipment.CustomerId, customerType);
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipment.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var invoice = _uow.Invoice.GetAll()
+                                        .Where(s => s.Waybill == shipment.Waybill)
+                                        .Select(s => new { s.Amount, s.CountryId }).FirstOrDefault();
+
+            var currencySymbol = _uow.Country.GetAll()
+                                        .Where(s => s.CountryId == invoice.CountryId)
+                                        .Select(s => new { s.CurrencySymbol }).FirstOrDefault().CurrencySymbol;
+
+            if (!string.IsNullOrEmpty(customer.Email))
+            {
+                var messageDTO = new MessageDTO()
+                {
+                    CustomerName = customer?.FirstName,
+                    Waybill = shipment?.Waybill,
+                    Amount = invoice.Amount.ToString("N"),
+                    Currency = currencySymbol,
+                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    {
+                        DeliveryNumber = deliveryNumber,
+                    },
+                    To = customer?.Email,
+                    ToEmail = customer?.Email,
+                    Subject = $"Shipment Creation Notification",
+                    MessageTemplate = "CreateShipment"
+                };
+
+                await _messageSenderService.SendMailsShipmentCreation(messageDTO);
+            }
+
+            return true;
+        }
+
+        //Get Customer info base on customer type and customer Id for shipment creation
+        private async Task<CustomerDTO> GetCustomerForShipment(int customerId, CustomerType customerType)
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerType.Company.Equals(customerType))
+                {
+                    var company = await _uow.Company.GetCompanyById(customerId);
+                    var customerDTO = Mapper.Map<CustomerDTO>(company);
+
+                    if (company != null)
+                    {
+                        customerDTO.CustomerType = CustomerType.Company;
+                        customerDTO.FirstName = customerDTO.Name;
+                    }
+                    return customerDTO;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var customer = await _uow.IndividualCustomer.GetAsync(customerId);
+                    IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                    //get all countries and set the country name
+                    if (customer != null)
+                    {
+                        var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                        individual.UserActiveCountryName = userCountry?.CountryName;
+                    }
+
+                    var customerDTO = Mapper.Map<CustomerDTO>(individual);
+                    return customerDTO;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment)
         {
             try
@@ -4367,6 +4462,22 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentItem.IsCargoed = true;
                         shipmentItem.DateModified = DateTime.Now;
 
+                        ShipmentScanStatus shipmentScan = ShipmentScanStatus.IDH;
+
+                        if (shipmentItem.DepartureCountryId != 207)
+                        {
+                            shipmentScan = ShipmentScanStatus.IDK;
+                        }
+
+                        var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                        {
+                            DateTime = DateTime.Now,
+                            Status = shipmentScan.ToString(),
+                            Waybill = shipmentItem.Waybill,
+                            isInternalShipment = shipmentItem.isInternalShipment,
+                            TrackingType = TrackingType.OutBound,
+                        }, shipmentItem.ShipmentScanStatus);
+
                         var shipmentDTO = Mapper.Map<ShipmentDTO>(shipmentItem);
 
                         await _shipmentTrackingService.SendEmailToCustomerWhenIntlShipmentIsCargoed(shipmentDTO);
@@ -4474,39 +4585,38 @@ namespace GIGLS.Services.Implementation.Shipments
             var countryId = await _userService.GetUserActiveCountryId();
             var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
+            total.Amount = total.Amount - total.Insurance;
             total.Amount = (total.Amount * additionalAmount) + total.Amount;
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == countryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+            total.VAT = total.Amount * vat;
 
             // Discount for Ecommerce & Corporate
-            if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+            if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.CompanyType == CompanyType.Ecommerce)
             {
-                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.ClassRankPercentage : GlobalPropertyType.BasicRankPercentage;
+                var globalProperty = shipmentDTO.CustomerDetails.Rank == Rank.Class ? GlobalPropertyType.InternationalRankClassDiscount : GlobalPropertyType.InternationalBasicClassDiscount;
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var discountPer = Convert.ToDecimal(globalValue.Value) / 100;
-                total.VAT = total.Amount * vat;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal =  (total.Amount + total.VAT) - total.Discount;
+                total.GrandTotal = (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
-            else if (shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
+            else if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.CompanyType == CompanyType.Corporate && shipmentDTO.CustomerDetails.Discount > 0)
             {
                 var discountPer = Convert.ToDecimal(shipmentDTO.CustomerDetails.Discount) / 100;
-                total.VAT = total.Amount * vat;
                 total.Discount = total.Amount * discountPer;
-                total.GrandTotal = (total.Amount + total.VAT) - total.Discount;
+                total.GrandTotal = (total.Amount + total.VAT + total.Insurance) - total.Discount;
             }
             else
             {
-                total.VAT = total.Amount * vat;
-                total.GrandTotal = total.Amount + total.VAT;
+                total.GrandTotal = total.Amount + total.VAT + total.Insurance;
             }
             //Get Insurance
-            if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
-            {
-                decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
-                total.GrandTotal = total.GrandTotal + insurance;
-                total.Insurance = insurance;
-            }
+            //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
+            //{
+            //    decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
+            //    total.GrandTotal = total.GrandTotal + insurance;
+            //    total.Insurance = insurance;
+            //}
             return total;
         }
 
@@ -4701,7 +4811,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             else
             {
-                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CompanyType);
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
             }
 
             var customer = await GetCustomerForIntlShipment(shipment.CustomerId, customerType);
@@ -4871,6 +4981,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentByWaybill != null)
                 {
                     shipmentByWaybill.FileNameUrl = blobname;
+                    shipmentByWaybill.IsdeclaredVal = true;
+                    shipmentByWaybill.Insurance = shipmentDTO.Insurance != null ? (shipmentDTO.Insurance * 100) / shipmentDTO.DeclarationOfValueCheck : 0;
+                    shipmentByWaybill.DeclarationOfValueCheck = shipmentDTO.DeclarationOfValueCheck;
                     shipmentByWaybill.InternationalWayBill = dhlShipment.ShipmentIdentificationNumber;
                 }
                 //await _uow.Shipment.

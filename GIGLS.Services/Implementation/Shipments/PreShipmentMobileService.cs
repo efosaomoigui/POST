@@ -2383,6 +2383,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               InputtedSenderAddress = r.InputtedSenderAddress,
                                                               InputtedReceiverAddress = r.InputtedReceiverAddress,
                                                               SenderLocality = r.SenderLocality,
+                                                              ZoneMapping = r.ZoneMapping,
                                                               ReceiverLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.ReceiverLocation.Longitude,
@@ -4009,6 +4010,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preshipmentPriceDTO = await GetPriceForBike(preShipment);
                 }
+                else if (preshipmentmobilegrandtotal.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                {
+                    preshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
+                    {
+                        Haulageid = (int)preShipment.Haulageid,
+                        DepartureStationId = preShipment.SenderStationId,
+                        DestinationStationId = preShipment.ReceiverStationId
+                    });
+                    preshipmentPriceDTO.GrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
+                }
                 else
                 {
                     preshipmentPriceDTO = await GetPrice(preShipment);
@@ -4039,6 +4050,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                 item.ImageUrl = preshipmentitemmobile.ImageUrl;
                                 item.ItemName = preshipmentitemmobile.ItemName;
                                 item.Length = preshipmentitemmobile.Length;
+                                item.SpecialPackageId = preshipmentitemmobile.SpecialPackageId;
+                                item.WeightRange = preshipmentitemmobile.WeightRange;
                                 item.CalculatedPrice = preshipmentPriceDTO.PreshipmentMobile.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).Select(y => y.CalculatedPrice).FirstOrDefault();
                                 if (!string.IsNullOrEmpty(preshipmentitemmobile.Value))
                                 {
@@ -4113,6 +4126,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentitemmobile.ImageUrl = item.ImageUrl;
                     preshipmentitemmobile.ItemName = item.ItemName;
                     preshipmentitemmobile.Length = item.Length;
+                    preshipmentitemmobile.SpecialPackageId = item.SpecialPackageId;
+                    preshipmentitemmobile.WeightRange = item.WeightRange;
                 }
 
                 var PreshipmentPriceDTO = await GetPriceForResolveDispute(preShipment, pickupPrice);
@@ -5424,7 +5439,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
                 {
-                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString())
+                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                         await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
@@ -5524,8 +5539,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
+                company.AccountNumber = user.AccountNumber;
+                company.AccountName = user.AccountName;
+                company.BankName = user.BankName;
                 if (company.Name != null)
                 {
+                    var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
+                    if (exist != null)
+                    {
+                        throw new GenericException("Company name already exist!!");
+                    }
                     if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
                     {
                         company.Name = user.Organisation;
@@ -6719,11 +6742,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
 
-                var range = (int)(newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
-                if (range > 32)
-                {
-                    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
-                }
+                //var range = (int)(newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
+                //if (range > 32)
+                //{
+                //    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
+                //}
 
                 var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
                 

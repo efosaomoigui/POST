@@ -19,6 +19,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.IServices.DHL;
 using System.Globalization;
+using GIGLS.Core.DTO.ShipmentScan;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -131,7 +132,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                             else
                             {
+
                                 await sendSMSEmail(tracking, scanStatus);
+
                             }
                         }
                     }
@@ -221,7 +224,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //send message
-            await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            if(messageType != MessageType.ARF)
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                var shipment =await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFHomeDelivery(shipmentDTO);
+                }
+                //Send Email on Shipment Arrive final Destination for Terminal pickup option
+                if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
+                {
+                    await SendEmailShipmentARFTerminalPickup(shipmentDTO);
+                }
+            }
 
             return true;
         }
@@ -363,10 +384,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             Waybill = waybill,
                                             DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
-                                            //Location = item.ServiceArea[0].Description,
-                                            Location = item.Description,
+                                            Location = item.ServiceArea[0].Description,
                                             TrackingType = TrackingType.OutBound,
-                                            User = "International Shipping"
+                                            User = "International Shipping",
+                                            Status = item.Description,
+                                            ScanStatus = new ScanStatusDTO
+                                            {
+                                                Code = item.ServiceArea[0].Code,
+                                                Incident = item.Description,
+                                                Reason = item.ServiceArea[0].Description,
+                                                Comment = item.Description,
+                                                DateCreated = Convert.ToDateTime(item.Date + " " + item.Time),
+                                                DateModified = Convert.ToDateTime(item.Date + " " + item.Time)
+                                            }
                                         };
                                         dhlTracking.Add(data);
                                     }
@@ -460,10 +490,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             Waybill = waybill,
                                             DateTime = Convert.ToDateTime(item.Date + " " + item.Time),
-                                            //Location = item.ServiceArea[0].Description,
-                                            Location = item.Description,
+                                            Location = item.ServiceArea[0].Description,
                                             TrackingType = TrackingType.OutBound,
-                                            User = "International Shipping"
+                                            User = "International Shipping",
+                                            Status = item.Description,
+                                            ScanStatus = new ScanStatusDTO
+                                            {
+                                                Code = item.ServiceArea[0].Code,
+                                                Incident = item.Description,
+                                                Reason = item.ServiceArea[0].Description,
+                                                Comment = item.Description,
+                                                DateCreated = Convert.ToDateTime(item.Date + " " + item.Time),
+                                                DateModified = Convert.ToDateTime(item.Date + " " + item.Time)
+                                            }
                                         };
                                         dhlTracking.Add(data);
                                     }
@@ -819,6 +858,90 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //Send Email
             await _messageSenderService.SendMailsShipmentARF(messageDTO);
+
+            return true;
+        }
+
+        //Send email when Shipment Arrive final destination and its home delivery
+        public async Task<bool> SendEmailShipmentARFHomeDelivery(ShipmentDTO shipmentDTO)
+        {
+            if (shipmentDTO != null)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail == null ? shipmentDTO.ReceiverEmail : shipmentDTO.ReceiverEmail.Trim();
+
+
+
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                           .Where(s => s.Waybill == shipmentDTO.Waybill)
+                                           .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = string.IsNullOrEmpty(shipmentDTO?.ReceiverName) ? "Customer" : shipmentDTO?.ReceiverName,
+                Waybill = shipmentDTO.Waybill,
+                To = shipmentDTO?.ReceiverEmail,
+                ToEmail = shipmentDTO?.ReceiverEmail,
+                ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                {
+                    DeliveryNumber = deliveryNumber,
+                },
+                Subject = $"Shipment Arrival Notification",
+                MessageTemplate = "ArrivedFinalDestinationForHomeDelivery"
+            };
+
+            //Send Email
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
+            {
+                await _messageSenderService.SendMailsShipmentARFHomeDelivery(messageDTO);
+            } 
+
+            return true;
+        }
+
+        //Send email when Shipment Arrive final destination and its terminal pickup
+        public async Task<bool> SendEmailShipmentARFTerminalPickup(ShipmentDTO shipmentDTO)
+        {
+            if (shipmentDTO != null)
+            {
+                if (shipmentDTO.CustomerType.Contains("Individual"))
+                {
+                    shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDTO.CustomerType);
+
+            shipmentDTO.ReceiverEmail = shipmentDTO.ReceiverEmail == null ? shipmentDTO.ReceiverEmail : shipmentDTO.ReceiverEmail.Trim();
+
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipmentDTO.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = string.IsNullOrEmpty(shipmentDTO?.ReceiverName) ? "Customer" : shipmentDTO?.ReceiverName,
+                Waybill = shipmentDTO.Waybill,
+                To = shipmentDTO?.ReceiverEmail,
+                ToEmail = shipmentDTO?.ReceiverEmail,
+                ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                {
+                    DeliveryNumber = deliveryNumber,
+                },
+                Subject = $"Shipment Arrival Notification",
+                MessageTemplate = "ArrivedFinalDestinationForTerminalPickup"
+            };
+
+            //Send Email
+            if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
+            {
+                await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO); 
+            }
 
             return true;
         }
