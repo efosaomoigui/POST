@@ -447,24 +447,25 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
                 {
-                    if (partner.PhoneNumber.Length > 11 )
+                    if (!string.IsNullOrEmpty(partner.PhoneNumber))
                     {
-                        if (partner.PhoneNumber.Contains(update.OldPhoneNumber))
+                        if (partner.PhoneNumber.Length > 11 && partner.PhoneNumber.Contains(update.OldPhoneNumber))
                         {
                             partner.PhoneNumber = update.NewPhoneNumber;
+                        }
+                        else
+                        {
+                            if (partner.PhoneNumber.Contains(subOldNumber))
+                            {
+                                partner.PhoneNumber = update.NewPhoneNumber;
+                            }
                         }
                     }
                     else
                     {
-                        if (partner.PhoneNumber.Contains(subOldNumber))
-                        {
-                            partner.PhoneNumber = update.NewPhoneNumber;
-                        }
-                        if (partner.PhoneNumber == null)
-                        {
-                            partner.PhoneNumber = update.NewPhoneNumber;
-                        }
+                        partner.PhoneNumber = update.NewPhoneNumber;
                     }
+
                 }
             }
 
@@ -481,23 +482,23 @@ namespace GIGLS.Services.Implementation.Partnership
 
                     if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
                     {
-                        if (user.PhoneNumber.Length > 11)
+                        if (!string.IsNullOrEmpty(user.PhoneNumber))
                         {
-                            if (user.PhoneNumber.Contains(update.OldPhoneNumber))
+                            if (user.PhoneNumber.Length > 11 && user.PhoneNumber.Contains(update.OldPhoneNumber))
                             {
                                 user.PhoneNumber = update.NewPhoneNumber;
+                            }
+                            else
+                            {
+                                if (user.PhoneNumber.Contains(subOldNumber))
+                                {
+                                    user.PhoneNumber = update.NewPhoneNumber;
+                                }
                             }
                         }
                         else
                         {
-                            if (user.PhoneNumber.Contains(subOldNumber))
-                            {
-                                user.PhoneNumber = update.NewPhoneNumber;
-                            }
-                            if (user.PhoneNumber == null)
-                            {
-                                user.PhoneNumber = update.NewPhoneNumber;
-                            }
+                            user.PhoneNumber = update.NewPhoneNumber;
                         }
                     }
                 }
