@@ -5022,7 +5022,38 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        if (preshipmentmobile.ZoneMapping != 1)
+                        if (preshipmentmobile.IsApproved == true)
+                        {
+                            throw new GenericException("Shipment has already been approved!!!", $"{(int)HttpStatusCode.Forbidden}");
+                        }
+                        if (preshipmentmobile.IsApproved != true && preshipmentmobile.IsInternationalShipment == true)
+                        {
+                            var shipment = new InternationalShipmentDTO();
+                            var customer = new CustomerDTO();
+                            var company = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                            if (company != null)
+                            {
+                                customer = Mapper.Map<CustomerDTO>(company);
+                            }
+                            else
+                            {
+                                var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                                customer = Mapper.Map<CustomerDTO>(individual);
+                            }
+
+                            var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
+                            shipment = Mapper.Map<InternationalShipmentDTO>(preshipmentmobile);
+                            shipment.ShipmentItems = shipmentItems;
+                            shipment.CustomerDetails = customer;
+                            shipment.IsFromMobile = true;
+                            var result = await _shipmentService.AddInternationalShipment(shipment);
+                            preshipmentmobile.GrandTotal = result.GrandTotal;
+                            preshipmentmobile.IsApproved = true;
+                            await _uow.CompleteAsync();
+                            return true;
+                        }
+
+                        if (preshipmentmobile.ZoneMapping != 1 && preshipmentmobile.IsInternationalShipment == false)
                         {
                             if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                             {
@@ -5139,35 +5170,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                     await _uow.CompleteAsync();
                                 }
-                                else if (preshipmentmobile.IsApproved != true && preshipmentmobile.IsInternationalShipment == true)
-                                {
-                                    var shipment = new InternationalShipmentDTO();
-                                    var customer = new CustomerDTO();
-                                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                    if (company != null)
-                                    {
-                                        customer = Mapper.Map<CustomerDTO>(company);
-                                    }
-                                    else
-                                    {
-                                        var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                        customer = Mapper.Map<CustomerDTO>(individual);
-                                    }
-
-                                    var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
-                                    shipment = Mapper.Map<InternationalShipmentDTO>(preshipmentmobile);
-                                    shipment.ShipmentItems = shipmentItems;
-                                    shipment.CustomerDetails = customer;
-                                    await _shipmentService.AddInternationalShipment(shipment);
-                                    preshipmentmobile.IsApproved = true;
-                                    await _uow.CompleteAsync();
-                                }
                                 else
                                 {
                                     throw new GenericException("Shipment has already been approved!!!", $"{(int)HttpStatusCode.Forbidden}");
                                 }
                             }
-                            else
+                            else if (preshipmentmobile.IsInternationalShipment == false)
                             {
                                 throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.", $"{(int)HttpStatusCode.Forbidden}");
                             }

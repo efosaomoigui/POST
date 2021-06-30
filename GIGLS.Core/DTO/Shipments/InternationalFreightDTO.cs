@@ -93,6 +93,8 @@ namespace GIGLS.Core.DTO.Shipments
         [MaxLength(2)]
         public virtual string ManufacturerCountry { get; set; }
         public virtual decimal InternationalShippingCost { get; set; }
+        [Required]
+        public string VehicleType { get; set; }
     }
 
     public class QuoteShipmentItem : BaseDomainDTO

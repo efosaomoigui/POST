@@ -3280,14 +3280,24 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
         {
+            var customer = new CustomerDTO();
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                customer = Mapper.Map<CustomerDTO>(company);
+            }
+            else
+            {
+                var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                customer = Mapper.Map<CustomerDTO>(individual);
+            }
             var shipment = Mapper.Map<InternationalShipmentDTO>(rateDTO);
+            shipment.CustomerDetails = customer;
+            shipment.IsFromMobile = true;
             return await _shipmentService.GetInternationalShipmentPrice(shipment);
-        }
-
-        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
-        {
-            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
-            return await _shipmentService.AddInternationalShipment(shipment);
         }
     }
 }

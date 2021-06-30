@@ -2361,19 +2361,5 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpPost]
-        [Route("createinternationalshipment")]
-        public async Task<IServiceResponse<ShipmentDTO>> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipment = await _portalService.CreateInternationalShipment(createDTO);
-                return new ServiceResponse<ShipmentDTO>
-                {
-                    Object = shipment
-                };
-            });
-        }
-
     }
 }
