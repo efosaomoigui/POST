@@ -5544,15 +5544,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 company.BankName = user.BankName;
                 if (!String.IsNullOrEmpty(user.Organisation))
                 {
-                    var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
-                    if (exist != null)
-                    {
-                        throw new GenericException("Company name already exist!!");
-                    }
                     if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
                     {
+                        var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
+                        if (exist != null)
+                        {
+                            throw new GenericException("Company name already exist!!");
+                        }
                         company.Name = user.Organisation;
-                    } 
+                    }
+                   
                 }
             }
         }
