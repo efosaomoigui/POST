@@ -5542,7 +5542,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 company.AccountNumber = user.AccountNumber;
                 company.AccountName = user.AccountName;
                 company.BankName = user.BankName;
-                if (company.Name != null)
+                if (!String.IsNullOrEmpty(user.Organisation))
                 {
                     var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
                     if (exist != null)
