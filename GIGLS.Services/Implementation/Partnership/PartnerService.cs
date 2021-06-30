@@ -429,8 +429,10 @@ namespace GIGLS.Services.Implementation.Partnership
             update.OldPhoneNumber = string.IsNullOrEmpty(update.OldPhoneNumber) ? update.OldPhoneNumber : update.OldPhoneNumber.Trim();
             update.NewPhoneNumber = string.IsNullOrEmpty(update.NewPhoneNumber) ? update.NewPhoneNumber : update.NewPhoneNumber.Trim();
 
-            var subOldNumber = string.IsNullOrEmpty(update.OldPhoneNumber) ? update.OldPhoneNumber : update.OldPhoneNumber.Substring(4);
-
+            var subOldNumber = string.IsNullOrEmpty(update.OldPhoneNumber) ? update.OldPhoneNumber : update.OldPhoneNumber.Substring(1);
+            var subNewNumber = string.IsNullOrEmpty(update.NewPhoneNumber) ? update.NewPhoneNumber : update.NewPhoneNumber.Substring(1);
+            var countryCode = "";
+            var prefixNewNumber = "";
             var partners = await _uow.Partner.GetPartnerByEmail(update.OldEmail);
 
             if (partners.Count == 0)
@@ -438,8 +440,14 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw new GenericException("Partner Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            
             foreach (var partner in partners)
             {
+                if (partner.UserActiveCountryId != 0)
+                {
+                    countryCode = _uow.Country.GetAllAsQueryable().Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new { x.PhoneNumberCode }).FirstOrDefault().PhoneNumberCode;
+                }
+
                 if (!string.IsNullOrEmpty(update.NewEmail) && partner.Email.Contains(update.OldEmail))
                 {
                     partner.Email = update.NewEmail;
@@ -447,25 +455,19 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
                 {
+                    prefixNewNumber = $"{countryCode}{subNewNumber}";
+
                     if (!string.IsNullOrEmpty(partner.PhoneNumber))
                     {
-                        if (partner.PhoneNumber.Length > 11 && partner.PhoneNumber.Contains(update.OldPhoneNumber))
+                        if ( partner.PhoneNumber.Contains(subOldNumber))
                         {
-                            partner.PhoneNumber = update.NewPhoneNumber;
-                        }
-                        else
-                        {
-                            if (partner.PhoneNumber.Contains(subOldNumber))
-                            {
-                                partner.PhoneNumber = update.NewPhoneNumber;
-                            }
+                            partner.PhoneNumber = prefixNewNumber;
                         }
                     }
                     else
                     {
-                        partner.PhoneNumber = update.NewPhoneNumber;
+                        partner.PhoneNumber = prefixNewNumber;
                     }
-
                 }
             }
 
@@ -475,6 +477,11 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 foreach (var user in users)
                 {
+                    if (user.UserActiveCountryId != 0)
+                    {
+                        countryCode = _uow.Country.GetAllAsQueryable().Where(x => x.CountryId == user.UserActiveCountryId).Select(x => new { x.CountryCode }).FirstOrDefault().CountryCode;
+                    }
+
                     if (!string.IsNullOrEmpty(update.NewEmail) && user.Email.Contains(update.OldEmail))
                     {
                         user.Email = update.NewEmail;
@@ -482,23 +489,18 @@ namespace GIGLS.Services.Implementation.Partnership
 
                     if (!string.IsNullOrEmpty(update.NewPhoneNumber) && !string.IsNullOrEmpty(update.OldPhoneNumber))
                     {
+                        prefixNewNumber = $"{countryCode}{subNewNumber}";
+
                         if (!string.IsNullOrEmpty(user.PhoneNumber))
                         {
-                            if (user.PhoneNumber.Length > 11 && user.PhoneNumber.Contains(update.OldPhoneNumber))
+                            if (user.PhoneNumber.Contains(subOldNumber))
                             {
-                                user.PhoneNumber = update.NewPhoneNumber;
-                            }
-                            else
-                            {
-                                if (user.PhoneNumber.Contains(subOldNumber))
-                                {
-                                    user.PhoneNumber = update.NewPhoneNumber;
-                                }
+                                user.PhoneNumber = prefixNewNumber;
                             }
                         }
                         else
                         {
-                            user.PhoneNumber = update.NewPhoneNumber;
+                            user.PhoneNumber = prefixNewNumber;
                         }
                     }
                 }
