@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.IMessageService;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -87,27 +88,17 @@ namespace GIGLS.Messaging.MessageService
             {
                 var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
                 var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                whatsappUrl = $"{whatsappUrl}/consent";
                 string result = "";
                 using (HttpClient client = new HttpClient())
                 {
                     if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        client.BaseAddress = new Uri(whatsappUrl);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-
-                        HttpResponseMessage response = new HttpResponseMessage();
-
-                        if (number != null)
-                        {
-                            response = await client.PostAsJsonAsync("consent", number);
-                            result = await response.Content.ReadAsStringAsync();
-                        }
-                        else
-                        {
-                            result = $"Message cannot be null. Please provide the appropriate values";
-                        }
+                        var json = JsonConvert.SerializeObject(number);
+                        var data = new StringContent(json, Encoding.UTF8, "application/json");
+                        var response = await client.PostAsync(whatsappUrl, data);
+                        result = await response.Content.ReadAsStringAsync();
                     }
                 }
                 return result;
