@@ -85,7 +85,7 @@ namespace GIGLS.WebApi.Providers
                             context.SetError("password_expired", "The user account has expired.");
                             context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
                             return;
-                        } 
+                        }
                     }
                 }
 
@@ -112,7 +112,7 @@ namespace GIGLS.WebApi.Providers
                 }
 
                 //differentiate expire toke time
-                if(user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
+                if (user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
                 {
                     context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
                 }
@@ -123,7 +123,7 @@ namespace GIGLS.WebApi.Providers
                     isInternational = user.IsInternational;
                 }
 
-                if(user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
                 {
                     var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                     user.Organisation = ecommerce.Name;
@@ -158,6 +158,7 @@ namespace GIGLS.WebApi.Providers
                     { "Rank", rank},
                     { "ReferralCode", user.RegistrationReferrercode},
                     { "CountryType", user.CountryType},
+                    { "IsRequestNewPassword", user.IsRequestNewPassword.ToString()},
                 };
 
                 //get claims for the user
