@@ -3447,6 +3447,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
 
+            else
+            {
+                throw new GenericException("Shipment does not exist");
+            }
+
             return result;
         }
     }
