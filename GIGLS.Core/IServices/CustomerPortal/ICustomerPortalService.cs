@@ -221,5 +221,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId);
         Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO);
+        Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill);
     }
 }
