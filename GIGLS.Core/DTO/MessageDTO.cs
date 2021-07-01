@@ -136,7 +136,7 @@ namespace GIGLS.Core.DTO
     public class RecipientDTO
     {
         [JsonProperty("recipient")]
-        public string Recipient { get; set; }
+        public long Recipient { get; set; }
 
         [JsonProperty("source")]
         public string Source { get; set; }

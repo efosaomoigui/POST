@@ -35,10 +35,11 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
         private readonly IUserService _userService;
+        private readonly IWhatsappService _whatsappService;
 
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService, IMessageService messageService,
             IUserService userService, ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService, IWhatsappService whatsappService)
         {
             _uow = uow;
             _emailService = emailService;
@@ -48,6 +49,7 @@ namespace GIGLS.Services.Implementation.Messaging
             _iSmsSendLogService = iSmsSendLogService;
             _iEmailSendLogService = iEmailSendLogService;
             _userService = userService;
+            _whatsappService = whatsappService;
             MapperConfig.Initialize();
         }
 
@@ -2043,7 +2045,47 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
 
+            var getConsent =await GetConsentDetails(customerObj.PhoneNumber);
+
+
+
+            if (!getConsent.Contains("success"))
+            {
+                var consent = ManageOptInOut(customerObj.PhoneNumber);
+            }
+            else
+            {
+
+            }
             
+
+        }
+
+        private async Task<string> ManageOptInOut(string  phoneNumber)
+        {
+            var userDetail = new ManageWhatsappConsentDTO
+            {
+                Type = "optin",
+                Recipients = new List<RecipientDTO>
+               {
+                   new RecipientDTO
+                   {
+                       Recipient = Convert.ToInt64( phoneNumber),
+                       Source = "WEB"
+                   }
+               }
+            };
+
+            var result = await _whatsappService.ManageOptInOutAsync(userDetail);
+            return result;
+        }
+
+        private async Task<string> GetConsentDetails(string phoneNumber)
+        {
+            var userDetail = new WhatsappNumberDTO { PhoneNumber = phoneNumber };
+
+            var result = await _whatsappService.GetConsentDetailsAsync(userDetail);
+            return result;
         }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
