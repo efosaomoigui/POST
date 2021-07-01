@@ -3446,7 +3446,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result = await GetPreShipmentDetail(waybill);
                 }
             }
-
             else
             {
                 throw new GenericException("Shipment does not exist");
