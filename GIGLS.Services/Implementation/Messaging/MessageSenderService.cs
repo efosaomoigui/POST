@@ -1833,7 +1833,7 @@ namespace GIGLS.Services.Implementation.Messaging
             if (!string.IsNullOrEmpty(customer.Email))
             {
                 //Check if customer is class and send class customer email else send email
-                if(customer.Rank == Rank.Class)
+                if (customer.Rank == Rank.Class)
                 {
                     var messageDTO = new MessageDTO()
                     {
@@ -1887,7 +1887,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
             return true;
         }
-        
+
         public async Task SendMailsToIntlShipmentSender(MessageDTO messageDTO)
         {
             var result = "";
@@ -2045,23 +2045,28 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
 
-            var getConsent =await GetConsentDetails(customerObj.PhoneNumber);
-
+            var getConsent = await GetConsentDetails(customerObj.PhoneNumber);
 
 
             if (!getConsent.Contains("success"))
             {
-                var consent = ManageOptInOut(customerObj.PhoneNumber);
+                var consent =await  ManageOptInOut(customerObj.PhoneNumber);
+
+                if (consent.Contains("success"))
+                {
+                    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+                }
+                 
             }
             else
             {
 
             }
-            
+
 
         }
 
-        private async Task<string> ManageOptInOut(string  phoneNumber)
+        private async Task<string> ManageOptInOut(string phoneNumber)
         {
             var userDetail = new ManageWhatsappConsentDTO
             {
@@ -2085,6 +2090,26 @@ namespace GIGLS.Services.Implementation.Messaging
             var userDetail = new WhatsappNumberDTO { PhoneNumber = phoneNumber };
 
             var result = await _whatsappService.GetConsentDetailsAsync(userDetail);
+            return result;
+        }
+
+        private async Task<string> SendWhatsappMessageToNumber(string phoneNumber)
+        {
+            var whatsappMessage = new WhatsAppMessageDTO
+            {
+                RecipientWhatsapp = phoneNumber,
+                MessageType = "text",
+                Source = "Creation API",
+                TypeText = new List<TypeTextDTO>
+                        {
+                            new TypeTextDTO
+                            {
+                                Content = "your-text-message-content"
+                            }
+                        }
+            };
+
+            var result = await _whatsappService.SendWhatsappMessageAsync(whatsappMessage);
             return result;
         }
         //Sends generic email message
