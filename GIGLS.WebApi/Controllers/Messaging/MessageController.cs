@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.Messaging
 {
@@ -13,10 +14,12 @@ namespace GIGLS.WebApi.Controllers.Messaging
     public class MessageController : BaseWebApiController
     {
         private readonly IMessageService _messageService;
+        private readonly IMessageSenderService _messageSender;
 
-        public MessageController(IMessageService messageService):base(nameof(MessageController))
+        public MessageController(IMessageService messageService, IMessageSenderService messageSender) :base(nameof(MessageController))
         {
             _messageService = messageService;
+            _messageSender = messageSender;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -115,6 +118,22 @@ namespace GIGLS.WebApi.Controllers.Messaging
                 };
             });
         }
-        
+
+        [AllowAnonymous]
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("SendWhatsappMessage")]
+        public async Task<IServiceResponse<string>> SendWhatsappMessage(WhatsAppMessageDTO messageDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var message = await _messageSender.SendWhatsappMessage(messageDto);
+
+                return new ServiceResponse<string>
+                {
+                    Object = message
+                };
+            });
+        }
     }
 }

@@ -51,6 +51,7 @@ namespace GIGLS.Messaging.MessageService
             {
                 var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
                 var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                
                 string result = "";
                 using (HttpClient client = new HttpClient())
                 {

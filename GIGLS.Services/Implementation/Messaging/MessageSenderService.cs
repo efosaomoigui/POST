@@ -2033,36 +2033,57 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
-        public async Task SendWhatsappMessage(ShipmentDTO shipmentDto)
+        public async Task<string> SendWhatsappMessage(WhatsAppMessageDTO shipmentDto)
         {
             //get CustomerDetails (
-            if (shipmentDto.CustomerType.Contains("Individual"))
-            {
-                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
-            }
-            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
-            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+            //if (shipmentDto.CustomerType.Contains("Individual"))
+            //{
+            //    shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            //}
+            //CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            //var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
 
-            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+            //var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
 
-            var getConsent = await GetConsentDetails(customerObj.PhoneNumber);
+            //var getConsent = await GetConsentDetails(customerObj.PhoneNumber);
+
+
+            //if (!getConsent.Contains("success"))
+            //{
+            //    var consent =await  ManageOptInOut(customerObj.PhoneNumber);
+
+            //    if (consent.Contains("success"))
+            //    {
+            //        await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+            //    }
+
+            //}
+            //else
+            //{
+            //    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+            //}
+
+
+            var result = "";
+            var getConsent = await GetConsentDetails(shipmentDto.RecipientWhatsapp);
 
 
             if (!getConsent.Contains("success"))
             {
-                var consent =await  ManageOptInOut(customerObj.PhoneNumber);
+                var consent = await ManageOptInOut(shipmentDto.RecipientWhatsapp);
 
                 if (consent.Contains("success"))
                 {
-                    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+                    result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
                 }
-                 
+
             }
             else
             {
-
+               result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
             }
 
+            return result;
 
         }
 
@@ -2095,11 +2116,13 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<string> SendWhatsappMessageToNumber(string phoneNumber)
         {
+            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
             var whatsappMessage = new WhatsAppMessageDTO
             {
                 RecipientWhatsapp = phoneNumber,
                 MessageType = "text",
-                Source = "Creation API",
+                Source = sourceId,
                 TypeText = new List<TypeTextDTO>
                         {
                             new TypeTextDTO
