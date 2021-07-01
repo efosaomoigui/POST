@@ -2030,6 +2030,21 @@ namespace GIGLS.Services.Implementation.Messaging
                 await LogEmailMessage(messageDTO, result, ex.Message);
             }
         }
+
+        public async Task SendWhatsappMessage(ShipmentDTO shipmentDto)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            
+        }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{
