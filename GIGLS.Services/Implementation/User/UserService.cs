@@ -787,7 +787,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -1516,6 +1516,23 @@ namespace GIGLS.Services.Implementation.User
             user.DashboardAccess = val;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
+        }
+
+        public async Task<UserDTO> GetEmployeeUserByEmail(string email)
+        {
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    throw new GenericException("Email is empty or Not Valid!");
+            //}
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!"): email.Trim();
+            var user = await _unitOfWork.User.GetEmployeeUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return Mapper.Map<UserDTO>(user);
         }
     }
 }

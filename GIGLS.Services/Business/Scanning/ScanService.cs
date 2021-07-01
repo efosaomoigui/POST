@@ -203,7 +203,19 @@ namespace GIGLS.Services.Business.Scanning
 
                         }
                         //Send Email on Shipment Arrive final Destination
-                        await _shipmentTrackingService.SendEmailShipmentArriveFinalDestination(Mapper.Map<ShipmentDTO>(shipment));
+                        //await _shipmentTrackingService.SendEmailShipmentArriveFinalDestination(Mapper.Map<ShipmentDTO>(shipment));
+                        //Send Email on Shipment Arrive final Destination for Home delivery option
+
+                        //Email inplementation moved into the shipment tracking method on line 159
+                        //if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                        //{
+                        //    await _shipmentTrackingService.SendEmailShipmentARFHomeDelivery(Mapper.Map<ShipmentDTO>(shipment));
+                        //}
+                        ////Send Email on Shipment Arrive final Destination for Terminal pickup option
+                        //if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                        //{
+                        //    await _shipmentTrackingService.SendEmailShipmentARFTerminalPickup(Mapper.Map<ShipmentDTO>(shipment));
+                        //}
                         return true;
                     }
                     else

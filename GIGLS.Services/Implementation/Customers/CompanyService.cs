@@ -1097,6 +1097,11 @@ namespace GIGLS.Services.Implementation.Customers
                     throw new GenericException("This user is not an Individual customer");
                 }
 
+                if (String.IsNullOrEmpty(newCompanyDTO.Name))
+                {
+                    throw new GenericException($"Business name is required");
+                }
+
                 var nameExist = await _uow.Company.GetAsync(x => x.Name.ToLower() == newCompanyDTO.Name.ToLower());
                 if (nameExist != null)
                 {
@@ -1112,7 +1117,7 @@ namespace GIGLS.Services.Implementation.Customers
                     RankModificationDate = DateTime.Now,
                     IsEligible = true,
                     IsDeleted = false,
-                    // IsInternational = newCompanyDTO.isInternational,
+                    IsInternational = user.IsInternational,
                     ProductType = productType,
                     Industry = industry,
                     CompanyType = CompanyType.Ecommerce,
@@ -1185,6 +1190,26 @@ namespace GIGLS.Services.Implementation.Customers
             }
             filterCriteria.AssignedCustomerRep = currentUserId;
             return await _uow.Company.GetAssignedCustomers(filterCriteria);
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(string email)
+        {
+            //get the user by email 
+            if (!string.IsNullOrEmpty(email))
+            {
+                email = email.Trim();
+            }
+            else
+            {
+                throw new GenericException("Email is invalid");
+            }
+
+            var user = await _uow.User.GetUserByEmail(email);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            return await _uow.Company.GetAssignedCustomersByCustomerRep(user.Id);
         }
     }
 

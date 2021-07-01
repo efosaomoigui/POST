@@ -5439,7 +5439,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
                 {
-                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString())
+                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                         await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
@@ -5539,12 +5539,21 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
-                if (company.Name != null)
+                company.AccountNumber = user.AccountNumber;
+                company.AccountName = user.AccountName;
+                company.BankName = user.BankName;
+                if (!String.IsNullOrEmpty(user.Organisation))
                 {
                     if (!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
                     {
+                        var exist = await _uow.Company.GetAsync(s => s.CompanyId != company.CompanyId && s.Name.ToLower() == user.Organisation.ToLower());
+                        if (exist != null)
+                        {
+                            throw new GenericException("Company name already exist!!");
+                        }
                         company.Name = user.Organisation;
-                    } 
+                    }
+                   
                 }
             }
         }

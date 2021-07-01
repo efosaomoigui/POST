@@ -1031,6 +1031,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
                     }
                 }
+                //Send mail for shipment creation
+                //if (newShipment != null)
+                //{
+                   //await SendEmailToCustomerForShipmentCreation(newShipment);
+                //}
                 return newShipment;
             }
             catch (Exception ex)
@@ -1039,6 +1044,96 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Send Email to customer for shipment creation
+        private async Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment)
+        {
+            CustomerType customerType = CustomerType.IndividualCustomer;
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                customerType = CustomerType.IndividualCustomer;
+            }
+            else
+            {
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            }
+
+            var customer = await GetCustomerForShipment(shipment.CustomerId, customerType);
+            var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == shipment.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+            var invoice = _uow.Invoice.GetAll()
+                                        .Where(s => s.Waybill == shipment.Waybill)
+                                        .Select(s => new { s.Amount, s.CountryId }).FirstOrDefault();
+
+            var currencySymbol = _uow.Country.GetAll()
+                                        .Where(s => s.CountryId == invoice.CountryId)
+                                        .Select(s => new { s.CurrencySymbol }).FirstOrDefault().CurrencySymbol;
+
+            if (!string.IsNullOrEmpty(customer.Email))
+            {
+                var messageDTO = new MessageDTO()
+                {
+                    CustomerName = customer?.FirstName,
+                    Waybill = shipment?.Waybill,
+                    Amount = invoice.Amount.ToString("N"),
+                    Currency = currencySymbol,
+                    ShipmentCreationMessage = new ShipmentCreationMessageDTO
+                    {
+                        DeliveryNumber = deliveryNumber,
+                    },
+                    To = customer?.Email,
+                    ToEmail = customer?.Email,
+                    Subject = $"Shipment Creation Notification",
+                    MessageTemplate = "CreateShipment"
+                };
+
+                await _messageSenderService.SendMailsShipmentCreation(messageDTO);
+            }
+
+            return true;
+        }
+
+        //Get Customer info base on customer type and customer Id for shipment creation
+        private async Task<CustomerDTO> GetCustomerForShipment(int customerId, CustomerType customerType)
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerType.Company.Equals(customerType))
+                {
+                    var company = await _uow.Company.GetCompanyById(customerId);
+                    var customerDTO = Mapper.Map<CustomerDTO>(company);
+
+                    if (company != null)
+                    {
+                        customerDTO.CustomerType = CustomerType.Company;
+                        customerDTO.FirstName = customerDTO.Name;
+                    }
+                    return customerDTO;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var customer = await _uow.IndividualCustomer.GetAsync(customerId);
+                    IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                    //get all countries and set the country name
+                    if (customer != null)
+                    {
+                        var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                        individual.UserActiveCountryName = userCountry?.CountryName;
+                    }
+
+                    var customerDTO = Mapper.Map<CustomerDTO>(individual);
+                    return customerDTO;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<ShipmentDTO> AddAgilityShipmentToGIGGo(PreShipmentMobileFromAgilityDTO shipment)
         {
             try
@@ -4714,9 +4809,13 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 customerType = CustomerType.IndividualCustomer;
             }
+            else if (shipment.CompanyType == "Ecommerce" || shipment.CompanyType == "Corporate")
+            {
+                customerType = CustomerType.Company;
+            }
             else
             {
-                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CompanyType);
+                customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
             }
 
             var customer = await GetCustomerForIntlShipment(shipment.CustomerId, customerType);

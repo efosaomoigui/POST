@@ -352,7 +352,10 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _portalService.UpdateMobilePickupRequest(PickupRequest);
-
+                if (flag)
+                {
+                    await _portalService.RemoveShipmentFromQueue(PickupRequest.Waybill);
+                }
                 return new ServiceResponse<object>
                 {
                     Object = flag

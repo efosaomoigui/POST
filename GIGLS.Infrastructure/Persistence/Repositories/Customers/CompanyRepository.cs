@@ -280,7 +280,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
                                        Rank = c.Rank,
-                                       RankModificationDate = c.RankModificationDate
+                                       RankModificationDate = c.RankModificationDate,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -330,7 +333,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            PhoneNumberCode = x.PhoneNumberCode
                                        }).FirstOrDefault(),
                                        Rank = c.Rank,
-                                       RankModificationDate = c.RankModificationDate
+                                       RankModificationDate = c.RankModificationDate,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -655,5 +661,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
+        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRep(string customerRepId)
+        {
+            try
+            {
+                var companiesDto = new List<CompanyDTO>();
+                if (!string.IsNullOrEmpty(customerRepId))
+                {
+                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == customerRepId && s.Rank == Rank.Class);
+                    companiesDto = companies.OrderByDescending(s => s.RankModificationDate)
+                        .Select(c => new CompanyDTO
+                        {
+                            CustomerCode = c.CustomerCode,
+                            Name = c.Name,
+                            Rank = c.Rank,
+                            Email = c.Email,
+                            PhoneNumber = c.PhoneNumber,
+                        }).ToList();
+                }
+                return await Task.FromResult(companiesDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -36,5 +36,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria);
         Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO);
         Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria);
+        Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(string email);
     }
 }

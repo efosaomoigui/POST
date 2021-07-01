@@ -25,11 +25,14 @@ namespace Job.IntlPaymentConfirmation
                 //Shipment
                 foreach (var item in failedpayments)
                 {
-                    //Shippment
-                    string urlString1 = $"api/waybillpaymentlog/verifypayment2/{item.Waybill}";
+                    if (string.IsNullOrEmpty(item.Waybill))
+                    {
+                        //Shippment
+                        string urlString1 = $"api/waybillpaymentlog/verifypayment2/{item.Waybill}";
 
-                    //if (count >= 2) break;
-                    var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
+                        //if (count >= 2) break;
+                        var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
+                    }
                     count++;
                 }
 

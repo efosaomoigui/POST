@@ -892,7 +892,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get the service centre
             var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre).ToArray();
+            var serviceCentres = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre).ToArray();
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
 
             //get startDate and endDate

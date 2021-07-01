@@ -81,10 +81,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     var shipmentaddress = await _uow.Shipment.GetAsync(s => s.Waybill == waybill);
                     if (shipmentaddress != null)
                     {
+                        var deptCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentaddress.DepartureServiceCentreId);
+                        var destCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentaddress.DestinationServiceCentreId);
                         trackings = new MobileShipmentTrackingHistoryDTO
                         {
-                            Origin = shipmentaddress.SenderAddress,
-                            Destination = shipmentaddress.ReceiverAddress,
+                            Origin = shipmentaddress.SenderAddress == null ? deptCentre.FormattedServiceCentreName : shipmentaddress.SenderAddress,
+                            Destination = shipmentaddress.ReceiverAddress == null ? destCentre.FormattedServiceCentreName : shipmentaddress.ReceiverAddress,
                             MobileShipmentTrackings = orderedtrackings
                         };
                     }
