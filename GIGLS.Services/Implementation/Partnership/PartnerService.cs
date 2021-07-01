@@ -479,7 +479,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 {
                     if (user.UserActiveCountryId != 0)
                     {
-                        countryCode = _uow.Country.GetAllAsQueryable().Where(x => x.CountryId == user.UserActiveCountryId).Select(x => new { x.CountryCode }).FirstOrDefault().CountryCode;
+                        countryCode = _uow.Country.GetAllAsQueryable().Where(x => x.CountryId == user.UserActiveCountryId).Select(x => new { x.PhoneNumberCode }).FirstOrDefault().PhoneNumberCode;
                     }
 
                     if (!string.IsNullOrEmpty(update.NewEmail) && user.Email.Contains(update.OldEmail))
