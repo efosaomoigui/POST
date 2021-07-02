@@ -3345,13 +3345,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             shipment.IsFromMobile = true;
             return await _shipmentService.GetInternationalShipmentPrice(shipment);
         }
-    }
 
-        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
-        {
-            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
-            return await _shipmentService.AddInternationalShipment(shipment);
-        }
         public async Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
         {
             var currentUserId = await _userService.GetCurrentUserId();
