@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -52,20 +53,25 @@ namespace GIGLS.Messaging.MessageService
             {
                 var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
                 var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
-                
+                whatsappUrl = $"{whatsappUrl}message/"; 
+
                 string result = "";
-                using (HttpClient client = new HttpClient())
+                using (var client = new HttpClient())
                 {
                     if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        client.BaseAddress = new Uri(whatsappUrl);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-
                         if (message != null)
                         {
-                            var response = await client.PostAsJsonAsync("message", message);
+                            System.Net.ServicePointManager.SecurityProtocol |=
+                                                                            SecurityProtocolType.Tls12 |
+                                                                            SecurityProtocolType.Tls11 |
+                                                                            SecurityProtocolType.Tls;
+
+                            client.DefaultRequestHeaders.Accept.Clear();
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
+                            var json = JsonConvert.SerializeObject(message);
+                            var data = new StringContent(json, Encoding.UTF8, "application/json");
+                            var response = await client.PostAsync(whatsappUrl, data);
                             result = await response.Content.ReadAsStringAsync();
                         }
                         else
@@ -88,12 +94,17 @@ namespace GIGLS.Messaging.MessageService
             {
                 var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
                 var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
-                whatsappUrl = $"{whatsappUrl}/consent";
+                whatsappUrl = $"{whatsappUrl}consent/";
                 string result = "";
-                using (HttpClient client = new HttpClient())
+                using (var client = new HttpClient())
                 {
                     if (whatsappToken != null && whatsappToken.Length != 0)
                     {
+                        System.Net.ServicePointManager.SecurityProtocol |=
+                                                                            SecurityProtocolType.Tls12 |
+                                                                            SecurityProtocolType.Tls11 |
+                                                                            SecurityProtocolType.Tls;
+                        client.DefaultRequestHeaders.Accept.Clear();
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
                         var json = JsonConvert.SerializeObject(number);
                         var data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -115,27 +126,22 @@ namespace GIGLS.Messaging.MessageService
             {
                 var whatsappToken = ConfigurationManager.AppSettings["WhatsAppToken"];
                 var whatsappUrl = ConfigurationManager.AppSettings["WhatsAppUrl"];
+                whatsappUrl = $"{whatsappUrl}consent/manage/";
                 string result = "";
-                using (HttpClient client = new HttpClient())
+                using (var client = new HttpClient())
                 {
                     if (whatsappToken != null && whatsappToken.Length != 0)
                     {
-                        client.BaseAddress = new Uri(whatsappUrl);
+                        System.Net.ServicePointManager.SecurityProtocol |=
+                                                                            SecurityProtocolType.Tls12 |
+                                                                            SecurityProtocolType.Tls11 |
+                                                                            SecurityProtocolType.Tls;
                         client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", whatsappToken);
-
-                        HttpResponseMessage response = new HttpResponseMessage();
-
-                        if (consent != null)
-                        {
-                            response = await client.PostAsJsonAsync("consent/manage", consent);
-                            result = await response.Content.ReadAsStringAsync();
-                        }
-                        else
-                        {
-                            result = $"Message cannot be null. Please provide the appropriate values";
-                        }
+                        var json = JsonConvert.SerializeObject(consent);
+                        var data = new StringContent(json, Encoding.UTF8, "application/json");
+                        var response = await client.PostAsync(whatsappUrl, data);
+                        result = await response.Content.ReadAsStringAsync();
                     }
                 }
                 return result;

@@ -2080,7 +2080,8 @@ namespace GIGLS.Services.Implementation.Messaging
             }
             else
             {
-               result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
+                var consent = await ManageOptInOut(shipmentDto.RecipientWhatsapp);
+                result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
             }
 
             return result;
@@ -2103,6 +2104,7 @@ namespace GIGLS.Services.Implementation.Messaging
             };
 
             var result = await _whatsappService.ManageOptInOutAsync(userDetail);
+
             return result;
         }
 
@@ -2123,17 +2125,61 @@ namespace GIGLS.Services.Implementation.Messaging
                 RecipientWhatsapp = phoneNumber,
                 MessageType = "text",
                 Source = sourceId,
+                RecipientType = "individual",
                 TypeText = new List<TypeTextDTO>
                         {
                             new TypeTextDTO
                             {
-                                Content = "your-text-message-content"
+                                Content = "Hello Gig Logistics! Your test shipment just arrived."
                             }
                         }
             };
 
-            var result = await _whatsappService.SendWhatsappMessageAsync(whatsappMessage);
+            string result = "";
+            try
+            {
+
+
+                result = await _whatsappService.SendWhatsappMessageAsync(whatsappMessage);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    await LogWhatsappMessage(whatsappMessage, result);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                await LogWhatsappMessage(whatsappMessage, result, ex.Message);
+            }
             return result;
+        }
+
+        private async Task<bool> LogWhatsappMessage(WhatsAppMessageDTO whatsAppMessage, string result, string exceptionMessage = null)
+        {
+            try
+            {
+                foreach (var text in whatsAppMessage.TypeText)
+                {
+                    await _iSmsSendLogService.AddSmsSendLog(new SmsSendLogDTO()
+                    {
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        From = "GIG Logistics Chat Bot",
+                        To = whatsAppMessage.RecipientWhatsapp,
+                        Message = text.Content,
+                        Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
+                        ResultStatus = result,
+                        ResultDescription = exceptionMessage + " Sent using Pepipost"
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+            return true;
         }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
