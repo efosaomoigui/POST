@@ -847,6 +847,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = true;
             var result = await _unitOfWork.User.ResetPassword(userid, password);
             await _unitOfWork.CompleteAsync();
             return result;
@@ -866,6 +867,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = false;
             var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
             await _unitOfWork.CompleteAsync();
             return result;

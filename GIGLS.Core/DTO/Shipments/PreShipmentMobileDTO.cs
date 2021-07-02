@@ -49,6 +49,19 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
         public string ReceiverStationName { get; set; }
+        public string ReceiverCompanyName { get; set; }
+        public string ReceiverPostalCode { get; set; }
+        public string ReceiverStateOrProvinceCode { get; set; }
+        public string ReceiverCountryCode { get; set; }
+        public decimal InternationalShippingCost { get; set; }
+        public string ManufacturerCountry { get; set; }
+        public string ItemDetails { get; set; }
+        public CompanyMap CompanyMap { get; set; }
+        public bool IsInternationalShipment { get; set; }
+        public decimal DeclarationOfValueCheck { get; set; }
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+
         public string InputtedReceiverAddress { get; set; }
 
         public LocationDTO SenderLocation { get; set; }      
@@ -174,7 +187,6 @@ namespace GIGLS.Core.DTO.Shipments
         public double? ReceiverLng { get; set; }
         public double? SenderLat { get; set; }
         public double? SenderLng { get; set; }
-
 
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO

@@ -1039,6 +1039,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
                                 var dept = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DepartureServiceCentreId);
                                 var dest = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DestinationServiceCentreId);
+                                var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
                                 var newWaybillInfo = new WaybillInGroupWaybillDTO()
                                 {
                                     Value = shipment.DeclarationOfValueCheck == null ? 0.00M : shipment.DeclarationOfValueCheck,
@@ -1048,7 +1049,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     DepartureServiceCentre = dept.Name,
                                     DestinationServiceCentre = dest.Name,
                                     PaymentMethod = shipment.PaymentMethod != null ? shipment.PaymentMethod : "N/A",
-                                    PaymentStatus = shipment.PaymentStatus
+                                    PaymentStatus = invoice.PaymentStatus
                                 };
                                 groupWaybillData.WaybillsDTO.Add(newWaybillInfo);
                             }

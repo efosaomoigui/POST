@@ -1233,8 +1233,11 @@ namespace GIGLS.Services.Business.Pricing
                     var itemPrice = await GetEcommercePrice(priceDTO);
                     totalPrice += itemPrice;
                 }
+
+                var newPrice = await CalculateCustomerRankPrice(priceDTO, totalPrice);
+                totalPrice += newPrice;
             }
-                                                          
+
             //calculate the vat
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
