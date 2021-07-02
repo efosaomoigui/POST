@@ -358,22 +358,22 @@ namespace GIGLS.Services.Implementation.Partnership
                 {
                     var createdDay = mobileshipments.FirstOrDefault(x => x.Waybill == item.Waybill);
 
-                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == MobilePickUpRequestStatus.Delivered.ToString() && x.Waybill == item.Waybill);
+                    var dlvrd = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => (x.Status == ShipmentScanStatus.MAHD.ToString() || x.Status == ShipmentScanStatus.MSVC.ToString()) && x.Waybill == item.Waybill);
                     var picked = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MSHC.ToString() && x.Waybill == item.Waybill);
                     var assigned = mobiletracking.OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.Status == ShipmentScanStatus.MAPT.ToString() && x.Waybill == item.Waybill);
 
                     if (dlvrd != null)
                     {
-                        dtat += (int)(dlvrd.DateCreated - createdDay.DateCreated).TotalMinutes;
+                        dtat += (int)(dlvrd.DateCreated - createdDay.DateCreated).TotalHours;
                     }
 
                     if (picked != null && assigned != null)
                     {
-                        ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
+                        ptat += (int)(picked.DateCreated - assigned.DateCreated).TotalHours;
                     }
                     if (assigned != null && picked != null)
                     {
-                        atat += (int)(picked.DateCreated - assigned.DateCreated).TotalMinutes;
+                        atat += (int)(picked.DateCreated - assigned.DateCreated).TotalHours;
                     }
 
                     var waybillRating = mobilerating.Where(x => x.Waybill == item.Waybill).FirstOrDefault();
