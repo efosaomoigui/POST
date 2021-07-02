@@ -2063,6 +2063,22 @@ namespace GIGLS.Services.Implementation.Messaging
             //    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
             //}
 
+            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
+            var whatsappMessage = new WhatsAppMessageDTO
+            {
+                RecipientWhatsapp = shipmentDto.RecipientWhatsapp,
+                MessageType = "text",
+                Source = sourceId,
+                RecipientType = "individual",
+                TypeText = new List<TypeTextDTO>
+                        {
+                            new TypeTextDTO
+                            {
+                                Content = "Hello Gig Logistics! Your test shipment just arrived."
+                            }
+                        }
+            };
 
             var result = "";
             var getConsent = await GetConsentDetails(shipmentDto.RecipientWhatsapp);
@@ -2074,14 +2090,14 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 if (consent.Contains("success"))
                 {
-                    result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
+                    result = await SendWhatsappMessageToNumber(whatsappMessage);
                 }
 
             }
             else
             {
                 var consent = await ManageOptInOut(shipmentDto.RecipientWhatsapp);
-                result = await SendWhatsappMessageToNumber(shipmentDto.RecipientWhatsapp);
+                result = await SendWhatsappMessageToNumber(whatsappMessage);
             }
 
             return result;
@@ -2116,30 +2132,11 @@ namespace GIGLS.Services.Implementation.Messaging
             return result;
         }
 
-        private async Task<string> SendWhatsappMessageToNumber(string phoneNumber)
+        private async Task<string> SendWhatsappMessageToNumber(WhatsAppMessageDTO whatsappMessage)
         {
-            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
-
-            var whatsappMessage = new WhatsAppMessageDTO
-            {
-                RecipientWhatsapp = phoneNumber,
-                MessageType = "text",
-                Source = sourceId,
-                RecipientType = "individual",
-                TypeText = new List<TypeTextDTO>
-                        {
-                            new TypeTextDTO
-                            {
-                                Content = "Hello Gig Logistics! Your test shipment just arrived."
-                            }
-                        }
-            };
-
             string result = "";
             try
             {
-
-
                 result = await _whatsappService.SendWhatsappMessageAsync(whatsappMessage);
                 if (!string.IsNullOrEmpty(result))
                 {
