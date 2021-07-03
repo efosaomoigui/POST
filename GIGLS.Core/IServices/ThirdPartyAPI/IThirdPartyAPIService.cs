@@ -37,6 +37,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
 
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
+        Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user);
 
         //Manifests
         Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria);

@@ -3431,5 +3431,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _partnertransactionservice.GetGoogleAddressDetails(location);
         }
 
+
+        public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
+        {
+         
+            var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
+            return registerUser;
+                
+        }
     }
 }
