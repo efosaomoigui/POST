@@ -3421,5 +3421,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             return updateCompanyNameDTO;
         }
 
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            if (String.IsNullOrEmpty(location.Address))
+            {
+                throw new GenericException("no address provided");
+            }
+            return await _partnertransactionservice.GetGoogleAddressDetails(location);
+        }
+
     }
 }

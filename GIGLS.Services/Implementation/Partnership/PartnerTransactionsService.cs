@@ -22,6 +22,15 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -357,6 +366,53 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 throw new GenericException("Please an error occurred while trying to scan shipment.");
             }
+        }
+
+
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            var Response = new GeoCodeAddressResponse();
+            var addressResult = new GoogleAddressDTO();
+            try
+            {
+                var GoogleURL = ConfigurationManager.AppSettings["AddressURL"];
+                var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
+                GoogleApiKey = await Decrypt(GoogleApiKey);
+                var finalURL = $"{GoogleURL}{location.Address}&key={GoogleApiKey}";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    Stream result = httpResponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(result);
+                    string responseFromServer = reader.ReadToEnd();
+                    Response = JsonConvert.DeserializeObject<GeoCodeAddressResponse>(responseFromServer);
+                    addressResult.Address = location.Address;
+                    addressResult.FormattedAddress = Response.results.FirstOrDefault().formatted_address;
+                    addressResult.Latitude = Response.results.FirstOrDefault().geometry.location.lat;
+                    addressResult.Longitude = Response.results.FirstOrDefault().geometry.location.lng;
+
+                    //also get locality
+                    var lga = Response.results.FirstOrDefault().address_components.Where(x => x.types.Contains("administrative_area_level_2")).FirstOrDefault();
+                    if (lga != null)
+                    {
+                        addressResult.Locality = lga.long_name;
+                    }
+
+
+                    //check if request was fufilled
+                    if (Response.status.ToLower() == "request_denied")
+                    {
+                        throw new GenericException($"Geo-Location service unavailable.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            return await Task.FromResult(addressResult);
         }
 
         public async Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO transactionsDTO)
