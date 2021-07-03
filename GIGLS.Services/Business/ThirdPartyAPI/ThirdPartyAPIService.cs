@@ -144,6 +144,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await _portalService.GetGoogleAddressDetails(location);
+        }
+
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{
