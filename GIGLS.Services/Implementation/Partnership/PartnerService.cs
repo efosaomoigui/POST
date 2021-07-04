@@ -276,8 +276,13 @@ namespace GIGLS.Services.Implementation.Partnership
         {
             int totalCount;
             var transactions = new List<PartnerTransactions>();
+            pagination.StartDate = pagination.StartDate.Value.ToUniversalTime();
+            pagination.StartDate = pagination.StartDate.Value.AddHours(12).AddMinutes(00);
+            pagination.EndDate = pagination.EndDate.Value.ToUniversalTime();
+            pagination.EndDate = pagination.EndDate.Value.AddHours(23).AddMinutes(59);
             if (!String.IsNullOrEmpty(pagination.FilterOption))
             {
+
                 var partner = await _uow.Partner.GetAsync(x => x.Email.ToLower() == pagination.FilterOption.ToLower() || x.FirstName.Contains(pagination.FilterOption) || x.LastName.Contains(pagination.FilterOption));
                 if (partner != null)
                 {
