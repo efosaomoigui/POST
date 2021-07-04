@@ -369,7 +369,7 @@ namespace GIGLS.Core.DTO.Shipments
         //General Details comes with role user
         //  public string UserId { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
-        public bool IsdeclaredVal { get; set; }
+        public bool IsdeclaredVal { get; set; } = true;
         public decimal? DeclarationOfValueCheck { get; set; } = 0;
 
         public decimal ShipmentPackagePrice { get; set; }
@@ -411,6 +411,7 @@ namespace GIGLS.Core.DTO.Shipments
         public CompanyMap CompanyMap { get; set; }
         public string ManufacturerCountry { get; set; }
         public decimal InternationalShippingCost { get; set; }
+        public string Waybill { get; set; }
     }
 
     public class CODShipmentDTO : BaseDomainDTO

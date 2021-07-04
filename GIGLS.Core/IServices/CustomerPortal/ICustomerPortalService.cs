@@ -216,7 +216,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry);
         Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO);
         Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO);
-        Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO);
         Task<bool> ForgotPasswordV2(ForgotPasswordDTO forgotPasswordDTO);
         Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId);

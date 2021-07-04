@@ -551,15 +551,18 @@ namespace GIGLS.Services.Business.DHL
             var shipTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PlannedShippingDateAndTime, countryId);
             int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
             var tmpDate = DateTime.Today;
-            if (tmpDate.DayOfWeek == DayOfWeek.Saturday)
+            if (tmpDate.DayOfWeek == DayOfWeek.Friday)
             {
-                tmpDate = tmpDate.AddDays(shipDays);
+               return tmpDate = tmpDate.AddDays(3);
             }
-            if (tmpDate.DayOfWeek == DayOfWeek.Sunday)
+            else if (tmpDate.DayOfWeek == DayOfWeek.Saturday)
             {
-                tmpDate = tmpDate.AddDays(shipDays);
+                return tmpDate = tmpDate.AddDays(2);
             }
-            return tmpDate.AddDays(shipDays);
+            else
+            {
+                return tmpDate.AddDays(shipDays);
+            }
         }
 
         private ValueAddedService GetValueAddedService(decimal declareValue)
