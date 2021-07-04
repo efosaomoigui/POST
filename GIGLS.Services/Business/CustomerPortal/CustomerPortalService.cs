@@ -3430,12 +3430,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("user does not exist");
             }
-            var result = new object();
+            var result = new GIGGOAgilityInvoiceDTO();
             var agilityShipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
             if (agilityShipment != null)
             {
                 //call agility get invoice
-                result = await GetInvoiceByWaybill(waybill);
+                result.Shipment = await GetInvoiceByWaybill(waybill);
+                result.IsAgility = true;
             }
             else if (agilityShipment == null)
             {
@@ -3443,7 +3444,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (giggoShipment != null)
                 {
                     //call gigo mobile get invoice
-                    result = await GetPreShipmentDetail(waybill);
+                    result.PreshipmentMobile = await GetPreShipmentDetail(waybill);
+                    result.IsAgility = false;
                 }
             }
             else

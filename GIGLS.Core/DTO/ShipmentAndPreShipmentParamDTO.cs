@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Shipments;
+using System;
 
 namespace GIGLS.Core.DTO
 {
@@ -17,5 +19,13 @@ namespace GIGLS.Core.DTO
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string FilterOption { get; set; }
+    }
+
+
+    public class GIGGOAgilityInvoiceDTO
+    {
+        public bool IsAgility { get; set; }
+        public PreShipmentMobileDTO PreshipmentMobile { get; set; } 
+        public InvoiceDTO Shipment { get; set; }
     }
 }
