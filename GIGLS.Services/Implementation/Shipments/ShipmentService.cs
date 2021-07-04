@@ -4610,6 +4610,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 total.GrandTotal = total.Amount + total.VAT + total.Insurance;
             }
+
+            if (shipmentDTO.IsFromMobile && shipmentDTO.VehicleType != null)
+            {
+                var globalProperty = shipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() ? GlobalPropertyType.BikeBasePrice 
+                    : shipmentDTO.VehicleType.ToLower() == Vehicletype.Car.ToString().ToLower() ? GlobalPropertyType.CarPickupPrice 
+                    : GlobalPropertyType.VanPickupPrice;
+                var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
+                var pickupPrice = Convert.ToDecimal(globalValue.Value);
+                total.GrandTotal = total.GrandTotal + pickupPrice;
+            }
             //Get Insurance
             //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
             //{
@@ -4685,17 +4695,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
 
                 //validate the different from DHL
-                if (shipmentDTO.GrandTotal != priceUpdate.GrandTotal)
-                {
-                    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
-                }
+                //var grandTotal1 = Math.Round(priceUpdate.GrandTotal, 2);
+                //var grandTotal2 = Math.Round(shipmentDTO.GrandTotal, 2);
+                //if (grandTotal1 != grandTotal2)
+                //{
+                //    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
+                // }
 
                 //if the customer is not an individual, pay by wallet
                 //2. Get the Wallet Balance if payment is by wallet and check if the customer has the amount in its wallet
-                if (shipmentDTO.PaymentType == PaymentType.Wallet)
-                {
+                //if (shipmentDTO.PaymentType == PaymentType.Wallet)
+                //{
 
-                }
+                //}
 
                 //Bind Agility Shipment Payload
                 var shipment = await BindShipmentPayload(shipmentDTO);
@@ -4808,6 +4820,10 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipment.CustomerType == "IndividualCustomer")
             {
                 customerType = CustomerType.IndividualCustomer;
+            }
+            else if (shipment.CompanyType == "Ecommerce" || shipment.CompanyType == "Corporate")
+            {
+                customerType = CustomerType.Company;
             }
             else
             {
@@ -4952,10 +4968,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //Get Approximate Items Weight
-                foreach (var item in shipmentDTO.ShipmentItems)
-                {
-                    shipmentDTO.ApproximateItemsWeight = shipmentDTO.ApproximateItemsWeight + item.Weight;
-                }
+                shipmentDTO.ApproximateItemsWeight = shipmentDTO.ShipmentItems.Sum(x => x.Weight);
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);
@@ -5014,7 +5027,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
-                if (CustomerType.Company.ToString() == shipmentDTO.CustomerType)
+                if (CustomerType.Company.ToString() == shipmentDTO.CustomerType && shipmentDTO.IsFromMobile == false)
                 {
                     var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
                     var wallet = walletEnumeration.FirstOrDefault();
@@ -5055,8 +5068,11 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
-            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-            shipmentDTO.Waybill = waybill;
+            if (shipmentDTO.Waybill == null)
+            {
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                shipmentDTO.Waybill = waybill;
+            }
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
