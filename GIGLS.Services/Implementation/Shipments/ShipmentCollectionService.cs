@@ -520,16 +520,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //Check if the user is a staff at final destination
-            if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.ARF || shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.SRC)
+            if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKT)
             {
                 //Get user priviledge service centers
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                if (serviceCenters.Length == 1 && serviceCenters[0] == shipmentCollection.DestinationServiceCentreId)
+                if (serviceCenters.Length == 1 && serviceCenters[0] != shipmentCollection.DestinationServiceCentreId)
                 {
-                    //do nothing
-                }
-                else
-                {
+                    //Block user from releasing shipment if user is not at the destination service center
                     throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                 }
             }
