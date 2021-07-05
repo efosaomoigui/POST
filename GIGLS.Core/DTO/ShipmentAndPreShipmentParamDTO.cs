@@ -25,7 +25,6 @@ namespace GIGLS.Core.DTO
     public class GIGGOAgilityInvoiceDTO
     {
         public bool IsAgility { get; set; }
-        public PreShipmentMobileDTO PreshipmentMobile { get; set; } 
-        public InvoiceDTO Shipment { get; set; }
+        public object ShipmentInvoice { get; set; } 
     }
 }

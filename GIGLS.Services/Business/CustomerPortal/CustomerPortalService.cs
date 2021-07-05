@@ -3435,7 +3435,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (agilityShipment != null)
             {
                 //call agility get invoice
-                result.Shipment = await GetInvoiceByWaybill(waybill);
+                result.ShipmentInvoice = await GetInvoiceByWaybill(waybill);
                 result.IsAgility = true;
             }
             else if (agilityShipment == null)
@@ -3444,7 +3444,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (giggoShipment != null)
                 {
                     //call gigo mobile get invoice
-                    result.PreshipmentMobile = await GetPreShipmentDetail(waybill);
+                    result.ShipmentInvoice = await GetPreShipmentDetail(waybill);
                     result.IsAgility = false;
                 }
             }
