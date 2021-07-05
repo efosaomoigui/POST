@@ -1,4 +1,6 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -35,10 +37,13 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
 
         Task<IEnumerable<LGADTO>> GetActiveHomeDeliveryLocations();
         Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId);
+        Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user);
 
         //Manifests
         Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria);
         Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode);
         Task<bool> ItemShippedFromUKScan(string manifestCode);
+        Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
     }
 }

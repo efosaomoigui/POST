@@ -14,6 +14,9 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO;
+using System.Configuration;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Infrastructure;
@@ -122,6 +125,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _uow.PreShipmentMobile.GetBasicPreShipmentMobileDetail(waybillNumber);
         }
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+        }
+
+        public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
+        {
+
+            var registerUser = await _portalService.CheckUserPhoneNo(user);
+            return registerUser;
+
+        }
 
         //Get manifests (by date) owned by logged in service center
         public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria)
@@ -141,6 +156,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await _portalService.GetGoogleAddressDetails(location);
+        }
 
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)

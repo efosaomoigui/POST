@@ -17,4 +17,12 @@ namespace GIGLS.Core.DTO
         public string CurrencySymbol { get; set; }
         public string CurrencyCode { get; set; }
     }
+
+    public class PartnerUpdateDTO
+    {
+        public string OldEmail { get; set; }
+        public string NewEmail { get; set; }
+        public string OldPhoneNumber { get; set; }
+        public string NewPhoneNumber { get; set; }
+    }
 }

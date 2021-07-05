@@ -367,5 +367,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
                         && x.UserChannelType == UserChannelType.Employee).FirstOrDefault();
             return Task.FromResult(user);
         }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        {
+            var user = _userManager.Users.Where(x =>email.Contains(x.Email) &&x.IsActive == true && x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner || x.UserChannelType == UserChannelType.Employee);
+            return Task.FromResult(user.ToList());
+        }
     }
 }

@@ -210,5 +210,11 @@
             <param name="manifestCode"></param>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetServiceCentresByStation(System.Int32)">
+            <summary>
+            This api is used to get a list of service centres by station id 
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>
