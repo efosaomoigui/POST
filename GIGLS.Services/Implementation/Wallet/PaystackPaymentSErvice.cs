@@ -116,11 +116,14 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (verifyResponse.Status && verifyResponse.Data.Customer != null)
                 {
-                    customer = JObject.FromObject(verifyResponse.Data.Customer).ToObject<NubanCustomerResponse>();
-                    if (customer != null)
-                    {
-                        CreditCorporateAccount(customer);
-                    }
+                    customer.CustomerCode = verifyResponse.Data.Customer.CustomerCode;
+                    customer.FirstName = verifyResponse.Data.Customer.FirstName;
+                    customer.LastName = verifyResponse.Data.Customer.LastName;
+                    customer.Id = verifyResponse.Data.Customer.Id;
+                    customer.Reference = verifyResponse.Data.Reference;
+                    customer.Id = verifyResponse.Data.Customer.Id;
+                    customer.Amount = result.data.Amount;
+                    CreditCorporateAccount(customer);
                 }
             });
 
