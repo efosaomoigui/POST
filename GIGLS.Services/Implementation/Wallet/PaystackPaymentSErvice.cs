@@ -77,6 +77,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<PaystackWebhookDTO> VerifyPayment(string reference)
         {
             PaystackWebhookDTO result = new PaystackWebhookDTO();
+            NubanCustomerResponse customer = new NubanCustomerResponse();
 
             await Task.Run(() =>
             {
@@ -111,6 +112,15 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
                     result.data.Status = verifyResponse.Data.Status;
                     result.data.Amount = verifyResponse.Data.Amount / 100;
+                }
+
+                if (verifyResponse.Data.Customer != null)
+                {
+                    customer = JObject.FromObject(verifyResponse.Data.Customer).ToObject<NubanCustomerResponse>();
+                    if (customer != null)
+                    {
+                      // update
+                    }
                 }
             });
 
