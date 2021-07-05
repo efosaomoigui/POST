@@ -222,5 +222,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UpdateCompanyNameDTO> UpdateCompanyName(UpdateCompanyNameDTO updateCompanyNameDTO);
         Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
         Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user);
+        Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill);
     }
 }

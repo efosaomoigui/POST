@@ -3459,3 +3459,39 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
     }
 }
+
+        public async Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill)
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            var result = new GIGGOAgilityInvoiceDTO();
+            var agilityShipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (agilityShipment != null)
+            {
+                //call agility get invoice
+                result.ShipmentInvoice = await GetInvoiceByWaybill(waybill);
+                result.IsAgility = true;
+            }
+            else if (agilityShipment == null)
+            {
+                var giggoShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (giggoShipment != null)
+                {
+                    //call gigo mobile get invoice
+                    result.ShipmentInvoice = await GetPreShipmentDetail(waybill);
+                    result.IsAgility = false;
+                }
+            }
+            else
+            {
+                throw new GenericException("Shipment does not exist");
+            }
+
+            return result;
+        }
+    }
+}

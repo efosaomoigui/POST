@@ -2386,5 +2386,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getagilityandgiggoinvoce/{waybillNumber}")]
+        public async Task<IServiceResponse<object>> GetGIGGOAndAgilityShipmentInvoice(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetGIGGOAndAgilityShipmentInvoice(waybillNumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = details
+                };
+            });
+        }
     }
 }
