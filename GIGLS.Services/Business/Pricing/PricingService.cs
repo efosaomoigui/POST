@@ -1234,8 +1234,8 @@ namespace GIGLS.Services.Business.Pricing
                     totalPrice += itemPrice;
                 }
 
-                var newPrice = await CalculateCustomerRankPrice(priceDTO, totalPrice);
-                totalPrice += newPrice;
+                //var newPrice = await CalculateCustomerRankPrice(priceDTO, totalPrice);
+                //totalPrice += newPrice;
             }
 
             //calculate the vat
