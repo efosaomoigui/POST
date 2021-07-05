@@ -4847,7 +4847,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     },
                     To = customer?.Email,
                     ToEmail = customer?.Email,
-                    Subject = $"Overseas Shipment Request Acknowledgement {shipment.ReceiverCountry}",
+                    Subject = $"Overseas Outbound Shipment Request Acknowledgement {shipment.ReceiverCountry}",
                 };
 
                 var depature = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipment.DepartureServiceCentreId);
