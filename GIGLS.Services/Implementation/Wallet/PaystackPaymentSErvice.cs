@@ -116,10 +116,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (verifyResponse.Data.Customer != null)
                 {
+
                     customer = JObject.FromObject(verifyResponse.Data.Customer).ToObject<NubanCustomerResponse>();
                     if (customer != null)
                     {
-                      // update
+                        CreditCorporateAccount(customer);
                     }
                 }
             });
@@ -1441,6 +1442,30 @@ namespace GIGLS.Services.Implementation.Wallet
             {
 
                 throw;
+            }
+        }
+
+
+        public async Task CreditCorporateAccount(NubanCustomerResponse customer)
+        {
+            var coporateCustomer = await _uow.Company.GetAsync(x => x.NUBANCustomerCode == customer.CustomerCode);
+            if (coporateCustomer != null)
+            {
+                // credit customer wallet
+                //update the wallet
+                var user = await _userService.GetUserByChannelCode(coporateCustomer.CustomerCode);
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = customer.Amount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Description = "Nuban Credit Transaction",
+                    PaymentType = PaymentType.Online,
+                    PaymentTypeReference = customer.Reference,
+                    UserId = user.Id
+                }, false);
+                await _uow.CompleteAsync();
             }
         }
     }
