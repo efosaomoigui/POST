@@ -114,9 +114,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.data.Amount = verifyResponse.Data.Amount / 100;
                 }
 
-                if (verifyResponse.Data.Customer != null)
+                if (verifyResponse.Status && verifyResponse.Data.Customer != null)
                 {
-
                     customer = JObject.FromObject(verifyResponse.Data.Customer).ToObject<NubanCustomerResponse>();
                     if (customer != null)
                     {
