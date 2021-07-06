@@ -80,7 +80,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                         {
                                                                             Description = x.Description,
                                                                             ShipmentType = x.ShipmentType,
-                                                                            Weight = x.Weight == 0 ? (double)_context.SpecialDomesticPackage.FirstOrDefault(y => y.SpecialDomesticPackageId == x.SpecialPackageId).Weight : x.Weight,
+                                                                            Weight = x.Weight,
                                                                             Quantity = x.Quantity,
                                                                             SpecialPackageId = x.SpecialPackageId,
                                                                             PreShipmentId = x.PreShipmentId,
@@ -97,6 +97,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     if (sender != null)
                     {
                         item.SenderName = sender.FirstName + ' ' + sender.LastName;
+                    }
+
+                    //also get weight
+                    foreach (var d in item.PreShipmentItems)
+                    {
+                        var itemWeight = _context.SpecialDomesticPackage.FirstOrDefault(y => y.SpecialDomesticPackageId == d.SpecialPackageId);
+                        if (itemWeight != null && itemWeight.Weight != null)
+                        {
+                            d.Weight = (double)itemWeight.Weight;
+                        }
+
                     }
                 }
             }
