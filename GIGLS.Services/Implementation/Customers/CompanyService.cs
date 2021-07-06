@@ -1192,24 +1192,25 @@ namespace GIGLS.Services.Implementation.Customers
             return await _uow.Company.GetAssignedCustomers(filterCriteria);
         }
 
-        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(string email)
+        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(BaseFilterCriteria filterCriteria)
         {
             //get the user by email 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrEmpty(filterCriteria.AssignedCustomerRepEmail))
             {
-                email = email.Trim();
+                filterCriteria.AssignedCustomerRepEmail = filterCriteria.AssignedCustomerRepEmail.Trim();
             }
             else
             {
                 throw new GenericException("Email is invalid");
             }
 
-            var user = await _uow.User.GetUserByEmail(email);
+            var user = await _uow.User.GetUserByEmail(filterCriteria.AssignedCustomerRepEmail);
             if (user == null)
             {
                 throw new GenericException("user does not exist");
             }
-            return await _uow.Company.GetAssignedCustomersByCustomerRep(user.Id);
+            filterCriteria.AssignedCustomerRep = user.Id;
+            return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
         }
     }
 
