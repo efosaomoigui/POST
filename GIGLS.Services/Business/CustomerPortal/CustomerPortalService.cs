@@ -3457,8 +3457,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return registerUser;
                 
         }
-    }
-}
+
 
         public async Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill)
         {
