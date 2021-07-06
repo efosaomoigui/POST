@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
+using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.DHL;
@@ -23,18 +24,34 @@ namespace GIGLS.Services.Implementation.Shipments
             _dhlService = dhlService;
         }
 
-        public async Task<InternationalShipmentWaybillDTO> GetInternationalWaybill(string waybill)
+        public async Task<List<InternationalShipmentWaybillDTO>> GetInternationalWaybill(string waybill)
         {
             try
             {
-                var log = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == waybill);
-                if (log == null)
+                var dataToReturn = new List<InternationalShipmentWaybill>();
+                var waybillArr = waybill.Split(',');
+                if (waybillArr.Length > 1)
                 {
-                    throw new GenericException("Information does not exist");
-                }
+                    foreach (var item in waybillArr)
+                    {
+                        var result = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill.Trim() == item.Trim() || x.ShipmentIdentificationNumber.Trim() == item.Trim());
+                        if (result != null)
+                        {
+                            dataToReturn.Add(result);
+                        }
+                    }
 
-                var logDto = Mapper.Map<InternationalShipmentWaybillDTO>(log);
-                return logDto;
+                    dataToReturn = dataToReturn.Distinct().ToList();
+                }
+                else
+                {
+                    var result = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == waybill || x.ShipmentIdentificationNumber == waybill);
+                    if (result != null)
+                    {
+                        dataToReturn.Add(result);
+                    }
+                }
+                return Mapper.Map<List<InternationalShipmentWaybillDTO>>(dataToReturn);
             }
             catch (Exception)
             {
@@ -54,7 +71,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return await _uow.InternationalShipmentWaybill.GetInternationalWaybills(dateFilterCriteria);
         }
-        
+
         public async Task<List<InternationalShipmentWaybillDTO>> GetInternationalShipmentOnwardDeliveryWaybills()
         {
             var shipment = await _uow.InternationalShipmentWaybill.FindAsync(x => x.InternationalShipmentStatus == InternationalShipmentStatus.OnwardDelivery);
@@ -95,7 +112,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //add tracking history
 
-            await _uow.CompleteAsync();       
+            await _uow.CompleteAsync();
             return true;
         }
 
