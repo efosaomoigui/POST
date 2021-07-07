@@ -3492,5 +3492,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return result;
         }
+
+
+        public async Task<List<WebsiteCountryDTO>> GetCoreForWebsite()
+        {
+            var countries = await _uow.ServiceCentre.GetWebsiteCountryData();
+            return countries;
+        }
+
+
+
     }
 }

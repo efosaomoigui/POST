@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Collections.Generic;
@@ -24,5 +25,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
         Task<ServiceCentreBreakdownDTO> GetServiceCentresData(int countryId);
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<List<ServiceCentreDTO>> GetServiceCentresIsConsignable(int[] countryIds, bool excludeHub, int stationId);
+        Task<List<WebsiteCountryDTO>> GetWebsiteCountryData();
     }
 }
