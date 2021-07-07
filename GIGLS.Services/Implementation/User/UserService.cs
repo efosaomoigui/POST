@@ -1536,5 +1536,11 @@ namespace GIGLS.Services.Implementation.User
 
             return Mapper.Map<UserDTO>(user);
         }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        {
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!") : email.Trim();
+            return  _unitOfWork.User.GetPartnerUsersByEmail2(email);
+        }
     }
 }
