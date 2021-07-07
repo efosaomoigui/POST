@@ -730,52 +730,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
-        public Task<List<WebsiteCountryDTO>> GetWebsiteCountryData()
-        {
-            try
-            {
-                var centres = _context.ServiceCentre;
-                var centreDto = from s in centres
-                                join sc in _context.Station on s.StationId equals sc.StationId
-                                join st in _context.State on sc.StateId equals st.StateId
-                                join c in _context.Country on st.CountryId equals c.CountryId
-                                select new WebsiteCountryDTO
-                                {
-                                    CountryId = c.CountryId,
-                                    CountryName = c.CountryName,
-                                    CountryCode = c.CountryCode,
-                                    IsActive = c.IsActive,
-                                    States = _context.State.Where(s => s.StateId == st.StateId)
-                                                                        .Select(x => new WebsiteStateDTO
-                                                                        {
-                                                                            StateId = x.StateId,
-                                                                            StateName = x.StateName,
-                                                                            CountryId = c.CountryId,
-                                                                            Stations = _context.Station.Where(s => s.StationId == sc.StationId)
-                                                                            .Select(y => new WebsiteStationDTO
-                                                                            {
-                                                                                StateId = y.StateId,
-                                                                                StationName = y.StationName,
-                                                                                StationCode = y.StationCode,
-                                                                                GIGGoActive = y.GIGGoActive,
-                                                                                ServiceCentres = _context.ServiceCentre.Where(s => s.StationId == sc.StationId)
-                                                                                    .Select(a => new WebsiteServiceCentreDTO
-                                                                                    {
-                                                                                        StationId = a.StationId,
-                                                                                        Name = a.Name,
-                                                                                        Code = a.Code,
-                                                                                        IsActive = a.IsActive,
-                                                                                        FormattedServiceCentreName = a.FormattedServiceCentreName
-                                                                                    }).ToList()
-                                                                            }).ToList()
-                                                                        }).ToList()
-                                };
-                return Task.FromResult(centreDto.OrderBy(x => x.CountryName).ToList());
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
     }
 }

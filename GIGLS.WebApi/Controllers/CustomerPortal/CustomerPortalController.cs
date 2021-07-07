@@ -2401,5 +2401,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getwebsitecountrydata")]
+        public async Task<IServiceResponse<List<WebsiteCountryDTO>>> GetCoreForWebsite()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetCoreForWebsite();
+                return new ServiceResponse<List<WebsiteCountryDTO>>
+                {
+                    Object = item
+                };
+            });
+        }
     }
 }
