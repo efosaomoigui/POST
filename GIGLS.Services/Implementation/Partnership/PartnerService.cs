@@ -20,6 +20,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Node;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -29,14 +30,16 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICompanyService _companyService;
+        private readonly INodeService _nodeService;
 
         public PartnerService(IUnitOfWork uow, IWalletService walletService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService, INodeService nodeService)
         {
             _uow = uow;
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _companyService = companyService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
