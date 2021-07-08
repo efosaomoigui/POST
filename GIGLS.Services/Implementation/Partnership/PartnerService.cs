@@ -19,6 +19,7 @@ using System.Net;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
