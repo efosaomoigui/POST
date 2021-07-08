@@ -18,4 +18,20 @@ namespace GIGLS.Core.DTO.Node
         [JsonProperty("partnerInfo")]
         public PartnerPayload PartnerInfo { get; set; }
     }
+
+    public class PartnerPayload
+    {
+
+        [JsonProperty("fullName")]
+        public string FullName { get; set; }
+
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        [JsonProperty("vehicleType")]
+        public string VehicleType { get; set; }
+
+        [JsonProperty("imageUrl")]
+        public string ImageUrl { get; set; }
+    }
 }
