@@ -153,9 +153,30 @@ namespace GIGLS.Services.Business.Node
                 throw;
             }
         }
+        public async Task<string> AssignShipmentToPartner(AcceptShipmentPayload nodePayload)
+        {
+            try
+            {
+                string result = "";
+
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
+                nodeURL = $"{nodeURL}{nodePostShipment}/accept";
+
+                using (var client = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(nodePayload);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(nodeURL, data);
+                    result = await response.Content.ReadAsStringAsync();
+                }
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
-
-
-   
-
 }
