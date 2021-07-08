@@ -1534,6 +1534,7 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
+
         public async Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto)
         {
             var price = 0.0m;
@@ -1568,7 +1569,7 @@ namespace GIGLS.Services.Business.Pricing
                     price = price + Convert.ToDecimal(itemCategory.SubminimumPrice);
                 }
             }
-           
+
             else
             {
                 if (itemCategory.SubminimumWeight == 0)
@@ -1586,13 +1587,6 @@ namespace GIGLS.Services.Business.Pricing
                     }
                 }
 
-                else if (pricingDto.Weight > itemCategory.CategoryMinimumWeight)
-                {
-                    for (int i = 1; i <= pricingDto.Quantity; i++)
-                    {
-                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
-                    }
-                }
                 else
                 {
                     for (int i = 1; i <= pricingDto.Quantity; i++)
