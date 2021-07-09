@@ -5468,6 +5468,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment cannot be found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                //Get user
+                var user = await _userService.GetCurrentUserId();
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
+
                 // check the invoice table to be sure money was collected for the shipment
                 var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == Waybill);
                 if (invoice.PaymentStatus == PaymentStatus.Paid)
@@ -5500,11 +5504,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
                     else
                     {
-                        //Get user
-                        var user = await _userService.GetCurrentUserId();
                         //var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
-                        var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
-
                         if (pickuprequests != null)
                         {
                             pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
@@ -5512,6 +5512,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     }
+                }
+                else
+                {
+                    if (pickuprequests != null)
+                    {
+                        pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                    }
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
