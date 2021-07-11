@@ -93,5 +93,6 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> SetDashboardAccess(string userid, bool val);
         Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
         Task<UserDTO> GetEmployeeUserByEmail(string email);
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email);
     }
 }
