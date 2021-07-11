@@ -3513,18 +3513,18 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var webStates = states.Where(x => x.CountryId == cou.CountryId).ToList();
                 for (int j = 0; j < webStates.Count; j++)
                 {
-                    websiteCountries[i].States.AddRange(JArray.FromObject(webStates, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStateDTO>>());
+                    websiteCountries[i].States = (JArray.FromObject(webStates, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStateDTO>>());
                     var sta = websiteCountries[i].States[j];
                     var webStations = stations.Where(x => x.StateId == sta.StateId).ToList();
                     for (int k = 0; k < webStations.Count; k++)
                     {
-                        websiteCountries[i].States[j].Stations.AddRange(JArray.FromObject(webStations, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStationDTO>>());
+                        websiteCountries[i].States[j].Stations = (JArray.FromObject(webStations, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStationDTO>>());
 
                         var cen = websiteCountries[i].States[j].Stations[k];
                         var webCentres = centres.Where(x => x.StationId == cen.StationId).ToList();
                         for (int l = 0; l < webCentres.Count; l++)
                         {
-                            websiteCountries[i].States[j].Stations[k].ServiceCentres.AddRange(JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
+                            websiteCountries[i].States[j].Stations[k].ServiceCentres = (JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
                         }
                     }
                     
