@@ -57,10 +57,16 @@ namespace GIGLS.Services.Implementation
             }
         }
 
-        public Task<List<CategoryDTO>> GetCategories()
+        public async Task<List<CategoryDTO>> GetCategories()
         {
-            var categories = _uow.Category.GetAll();
-            return Task.FromResult(Mapper.Map<List<CategoryDTO>>(categories));
+            var categories =  _uow.Category.GetAll();
+            var categoryDTO = Mapper.Map<List<CategoryDTO>>(categories);
+            var excludeShoe = categoryDTO.Find(x => x.CategoryId == 3);
+            if (excludeShoe != null)
+            {
+              categoryDTO.Remove(excludeShoe);
+            }
+            return categoryDTO;
         }
 
         public async Task<CategoryDTO> GetCategoryById(int categoryId)
