@@ -1562,7 +1562,7 @@ namespace GIGLS.Services.Business.Pricing
                 throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
             }
 
-            if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight < itemCategory.SubminimumWeight)
+            if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight <= itemCategory.SubminimumWeight)
             {
                 for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
@@ -1579,7 +1579,8 @@ namespace GIGLS.Services.Business.Pricing
                         price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                     }
                 }
-                else if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight > itemCategory.SubminimumWeight && pricingDto.Weight < itemCategory.CategoryMinimumWeight)
+
+                else if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight > itemCategory.SubminimumWeight && pricingDto.Weight <= itemCategory.CategoryMinimumWeight)
                 {
                     for (int i = 1; i <= pricingDto.Quantity; i++)
                     {
