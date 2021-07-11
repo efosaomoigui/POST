@@ -14,6 +14,8 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public bool IsActive { get; set; }
         public int DepartureCountryId { get; set; }
         public string DepartureCountryName { get; set; }
+        public decimal SubminimumWeight { get; set; }
+        public decimal SubminimumPrice { get; set; }
     }
 
     public class QuickQuotePriceDTO

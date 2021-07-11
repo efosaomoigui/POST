@@ -1534,6 +1534,7 @@ namespace GIGLS.Services.Business.Pricing
             return price;
         }
 
+
         public async Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto)
         {
             var price = 0.0m;
@@ -1560,22 +1561,33 @@ namespace GIGLS.Services.Business.Pricing
             {
                 throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
             }
-            if (itemCategory.CategoryMinimumWeight == 0)
+
+            if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight <= itemCategory.SubminimumWeight)
             {
                 for (int i = 1; i <= pricingDto.Quantity; i++)
                 {
-                    price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                    price = price + Convert.ToDecimal(itemCategory.SubminimumPrice);
                 }
             }
+
             else
             {
-                if (pricingDto.Weight < itemCategory.CategoryMinimumWeight)
+                if (itemCategory.SubminimumWeight == 0)
                 {
                     for (int i = 1; i <= pricingDto.Quantity; i++)
                     {
                         price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                     }
                 }
+
+                else if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight > itemCategory.SubminimumWeight && pricingDto.Weight <= itemCategory.CategoryMinimumWeight)
+                {
+                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    {
+                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                    }
+                }
+
                 else
                 {
                     for (int i = 1; i <= pricingDto.Quantity; i++)
