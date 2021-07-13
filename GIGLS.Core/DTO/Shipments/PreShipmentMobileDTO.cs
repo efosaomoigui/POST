@@ -464,4 +464,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerType { get; set; }
         public DateTime DeliveredTime { get; set; }
     }
+
+    public class PendingNodeShipmentDTO
+    {
+        public string PartnerId { get; set; } // UserId
+        public string WaybillNumber { get; set; }
+    }
 }

@@ -6866,5 +6866,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<NewNodeResponse> RemoveNodePendingShipment(PendingNodeShipmentDTO dto)
+        {
+            try
+            {
+                return await _nodeService.RemovePendingShipment(dto);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
-};
+}
