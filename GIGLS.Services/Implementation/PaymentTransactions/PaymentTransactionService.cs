@@ -242,10 +242,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
             else
             {
+
+                //if (paymentTransaction.IsNotOwner)
+                //{
+                //  //TODO: SEND PAYMENT NOTIFICATION FOR ALREADY CREATED SHIPMENT 
+                //}
                 //Commented this out 15/06/2021 to implement new email
                 //await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
-
                 //sperated the previous implementation into sms / email
+                //else
+                //{
+                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                //    await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO); 
+                //}
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
                 await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO);
             }

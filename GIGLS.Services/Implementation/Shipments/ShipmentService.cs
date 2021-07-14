@@ -5331,9 +5331,22 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("waybill not provided", $"{(int)HttpStatusCode.BadRequest}");
             }
+            var customerCode = String.Empty;
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentDTO.Waybill);
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == paymentDTO.Waybill);
-            var customerCode = String.Empty;
+
+            if (invoice == null)
+            {
+                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                throw new GenericException($"Payment already made for the Shipment {paymentDTO.Waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet.Balance < invoice.Amount)
+            {
+                throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
             if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
             {
                 var user = await _userService.GetUserByChannelCode(paymentDTO.CustomerCode);
@@ -5352,7 +5365,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
             if (wallet != null)
             {
                 await _paymentService.ProcessPayment(new PaymentTransactionDTO()
