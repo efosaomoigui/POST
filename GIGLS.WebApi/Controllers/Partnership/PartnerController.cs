@@ -414,5 +414,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("updatepartnerdetails")]
+        public async Task<IServiceResponse<bool>> UpdatePartnerDetails(PartnerUpdateDTO update)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 await _partnerService.UpdatePartnerEmailPhoneNumber(update);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
 }

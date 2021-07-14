@@ -18,4 +18,14 @@ namespace GIGLS.Core.DTO
         public string FormattedAddress { get; set; }
         public string LGA { get; set; }
     }
+
+
+    public class GoogleAddressDTO
+    {
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public string FormattedAddress { get; set; }
+        public string Address { get; set; }
+        public string Locality { get; set; }
+    }
 }

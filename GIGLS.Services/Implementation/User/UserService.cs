@@ -847,6 +847,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = true;
             var result = await _unitOfWork.User.ResetPassword(userid, password);
             await _unitOfWork.CompleteAsync();
             return result;
@@ -866,6 +867,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = false;
             var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
             await _unitOfWork.CompleteAsync();
             return result;
@@ -1533,6 +1535,12 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        {
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!") : email.Trim();
+            return  _unitOfWork.User.GetPartnerUsersByEmail2(email);
         }
     }
 }

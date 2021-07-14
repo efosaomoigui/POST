@@ -53,5 +53,7 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string WeightRange { get; set; }
+        public InternationalShipmentItemCategory InternationalShipmentItemCategory { get; set; }
+
     }
 }

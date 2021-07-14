@@ -2341,20 +2341,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("createinternationalshipment")]
-        public async Task<IServiceResponse<ShipmentDTO>> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipment = await _portalService.CreateInternationalShipment(createDTO);
-                return new ServiceResponse<ShipmentDTO>
-                {
-                    Object = shipment
-                };
-            });
-        }
-
-        [HttpPost]
         [Route("getintlquickqoute")]
         public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
         {
@@ -2395,6 +2381,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var item = await _portalService.UpdateCompanyName(updateCompanyNameDTO);
                 return new ServiceResponse<UpdateCompanyNameDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getagilityandgiggoinvoce/{waybillNumber}")]
+        public async Task<IServiceResponse<object>> GetGIGGOAndAgilityShipmentInvoice(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetGIGGOAndAgilityShipmentInvoice(waybillNumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = details
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getwebsitecountrydata")]
+        public async Task<IServiceResponse<List<WebsiteCountryDTO>>> GetCoreForWebsite()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetCoreForWebsite();
+                return new ServiceResponse<List<WebsiteCountryDTO>>
                 {
                     Object = item
                 };

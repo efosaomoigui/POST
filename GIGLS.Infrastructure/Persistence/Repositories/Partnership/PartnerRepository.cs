@@ -280,5 +280,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 
             return Task.FromResult(partnerDto.FirstOrDefault());
         }
+
+        public Task<List<Partner>> GetPartnerByEmail(string email)
+        {
+            var partners = _context.Partners.AsQueryable();
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                email = email.Trim();
+                partners = partners.Where(x => email.Contains( x.Email) && x.IsActivated == true);
+            }
+
+            return Task.FromResult(partners.ToList());
+        }
     }
 }

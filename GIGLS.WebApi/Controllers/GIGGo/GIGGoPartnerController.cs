@@ -354,7 +354,10 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 var flag = await _portalService.UpdateMobilePickupRequest(PickupRequest);
                 if (flag)
                 {
-                    await _portalService.RemoveShipmentFromQueue(PickupRequest.Waybill);
+                    if(PickupRequest.Status.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower() || PickupRequest.Status.ToLower() == MobilePickUpRequestStatus.OnwardProcessing.ToString().ToLower())
+                    {
+                        await _portalService.RemoveShipmentFromQueue(PickupRequest.Waybill);
+                    }
                 }
                 return new ServiceResponse<object>
                 {

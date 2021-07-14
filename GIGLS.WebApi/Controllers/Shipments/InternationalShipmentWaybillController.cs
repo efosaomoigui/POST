@@ -39,12 +39,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<InternationalShipmentWaybillDTO>> GetInternationalShipmentWaybill(string waybill)
+        public async Task<IServiceResponse<List<InternationalShipmentWaybillDTO>>> GetInternationalShipmentWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _service.GetInternationalWaybill(waybill);
-                return new ServiceResponse<InternationalShipmentWaybillDTO>
+                return new ServiceResponse<List<InternationalShipmentWaybillDTO>>
                 {
                     Object = shipment
                 };

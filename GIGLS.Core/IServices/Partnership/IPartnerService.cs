@@ -26,5 +26,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task DeactivatePartner(int partnerId);
         Task<List<PartnerTransactionsDTO>> RiderRatings(PaginationDTO pagination);
         Task<List<RiderRateDTO>> GetRidersRatings(PaginationDTO pagination);
+        Task UpdatePartnerEmailPhoneNumber(PartnerUpdateDTO update);
     }
 }

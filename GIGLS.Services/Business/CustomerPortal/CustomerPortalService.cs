@@ -69,6 +69,8 @@ using System.Web.Http;
 using GIGLS.Core.DTO.DHL;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -3313,21 +3315,39 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
         {
-            var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
-            return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            try
+            {
+                var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+                return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
         {
+            var customer = new CustomerDTO();
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                customer = Mapper.Map<CustomerDTO>(company);
+            }
+            else
+            {
+                var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                customer = Mapper.Map<CustomerDTO>(individual);
+            }
             var shipment = Mapper.Map<InternationalShipmentDTO>(rateDTO);
+            shipment.CustomerDetails = customer;
+            shipment.IsFromMobile = true;
             return await _shipmentService.GetInternationalShipmentPrice(shipment);
         }
 
-        public async Task<ShipmentDTO> CreateInternationalShipment(CreateInternationalShipmentDTO createDTO)
-        {
-            var shipment = Mapper.Map<InternationalShipmentDTO>(createDTO);
-            return await _shipmentService.AddInternationalShipment(shipment);
-        }
         public async Task<QuickQuotePriceDTO> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
         {
             var currentUserId = await _userService.GetCurrentUserId();
@@ -3419,6 +3439,98 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             _uow.Complete();
             return updateCompanyNameDTO;
+        }
+
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            if (String.IsNullOrEmpty(location.Address))
+            {
+                throw new GenericException("no address provided");
+            }
+            return await _partnertransactionservice.GetGoogleAddressDetails(location);
+        }
+
+
+        public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
+        {
+         
+            var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
+            return registerUser;
+                
+        }
+
+
+        public async Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill)
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            var result = new GIGGOAgilityInvoiceDTO();
+            var agilityShipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (agilityShipment != null)
+            {
+                //call agility get invoice
+                result.ShipmentInvoice = await GetInvoiceByWaybill(waybill);
+                result.IsAgility = true;
+            }
+            else if (agilityShipment == null)
+            {
+                var giggoShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (giggoShipment != null)
+                {
+                    //call gigo mobile get invoice
+                    result.ShipmentInvoice = await GetPreShipmentDetail(waybill);
+                    result.IsAgility = false;
+                }
+            }
+            else
+            {
+                throw new GenericException("Shipment does not exist");
+            }
+
+            return result;
+        }
+
+
+        public async Task<List<WebsiteCountryDTO>> GetCoreForWebsite()
+        {
+
+            var countries = await _countryService.GetActiveCountries();
+            var countryIds = countries.Select(x => x.CountryId);
+            var states = _uow.State.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+            var stateIds = states.Select(x => x.StateId).ToList();
+            var stations = _uow.Station.GetAllAsQueryable().Where(x => stateIds.Contains(x.StateId)).ToList();
+            var stationIds = stations.Select(x => x.StationId).ToList();
+            var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => stationIds.Contains(x.StationId) && x.IsActive && x.IsPublic).ToList();
+            var websiteCountries = JArray.FromObject(countries).ToObject<List<WebsiteCountryDTO>>();
+            for (int i = 0; i < websiteCountries.Count; i++)
+            {
+                var cou = websiteCountries[i];
+                var webStates = states.Where(x => x.CountryId == cou.CountryId).ToList();
+                for (int j = 0; j < webStates.Count; j++)
+                {
+                    websiteCountries[i].States = (JArray.FromObject(webStates, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStateDTO>>());
+                    var sta = websiteCountries[i].States[j];
+                    var webStations = stations.Where(x => x.StateId == sta.StateId).ToList();
+                    for (int k = 0; k < webStations.Count; k++)
+                    {
+                        websiteCountries[i].States[j].Stations = (JArray.FromObject(webStations, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStationDTO>>());
+
+                        var cen = websiteCountries[i].States[j].Stations[k];
+                        var webCentres = centres.Where(x => x.StationId == cen.StationId).ToList();
+                        for (int l = 0; l < webCentres.Count; l++)
+                        {
+                            websiteCountries[i].States[j].Stations[k].ServiceCentres = (JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
+                        }
+                    }
+                    
+                }
+            }
+            return websiteCountries;
         }
 
         public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)

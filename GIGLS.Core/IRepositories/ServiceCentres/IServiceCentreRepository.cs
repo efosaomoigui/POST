@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Collections.Generic;

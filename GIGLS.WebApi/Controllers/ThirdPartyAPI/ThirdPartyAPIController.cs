@@ -1,8 +1,11 @@
 ﻿using EfeAuthen.Models;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ThirdPartyAPI;
 using GIGLS.CORE.DTO.Report;
@@ -388,5 +391,57 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getaddressdetails")]
+        public async Task<IServiceResponse<GoogleAddressDTO>> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetGoogleAddressDetails(location);
+
+                return new ServiceResponse<GoogleAddressDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get a list of service centres by station id 
+        /// </summary>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("servicecentresbystation/{stationId}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _thirdPartyAPIService.GetServiceCentresByStation(stationId);
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("userdetail")]
+        public async Task<IServiceResponse<UserDTO>> GetUserDetail(UserValidationFor3rdParty user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.CheckUserPhoneNo(user);
+
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
