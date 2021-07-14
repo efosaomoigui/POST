@@ -2033,7 +2033,7 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
-        public async Task<string> SendWhatsappMessage(WhatsAppMessageDTO shipmentDto)
+        public async Task<string> SendWhatsappMessage(WhatsappNumberDTO number)
         {
             //get CustomerDetails (
             //if (shipmentDto.CustomerType.Contains("Individual"))
@@ -2067,7 +2067,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var whatsappMessage = new WhatsAppMessageDTO
             {
-                RecipientWhatsapp = shipmentDto.RecipientWhatsapp,
+                RecipientWhatsapp = number.PhoneNumber,
                 MessageType = "text",
                 Source = sourceId,
                 RecipientType = "individual",
@@ -2075,18 +2075,18 @@ namespace GIGLS.Services.Implementation.Messaging
                         {
                             new TypeTextDTO
                             {
-                                Content = "Hello Gig Logistics! Your test shipment just arrived."
+                                Content = "Welcome to Gig Logistics! Your test shipment just arrived final destination."
                             }
                         }
             };
 
             var result = "";
-            var getConsent = await GetConsentDetails(shipmentDto.RecipientWhatsapp);
+            var getConsent = await GetConsentDetails(number.PhoneNumber);
 
 
             if (!getConsent.Contains("success"))
             {
-                var consent = await ManageOptInOut(shipmentDto.RecipientWhatsapp);
+                var consent = await ManageOptInOut(number.PhoneNumber);
 
                 if (consent.Contains("success"))
                 {
@@ -2096,12 +2096,78 @@ namespace GIGLS.Services.Implementation.Messaging
             }
             else
             {
-                var consent = await ManageOptInOut(shipmentDto.RecipientWhatsapp);
+                var consent = await ManageOptInOut(number.PhoneNumber);
                 result = await SendWhatsappMessageToNumber(whatsappMessage);
             }
 
             return result;
 
+        }
+
+        public async Task<string> SendWhatsappMessageNew(WhatsappNumberDTO number)
+        {
+            //get CustomerDetails (
+            //if (shipmentDto.CustomerType.Contains("Individual"))
+            //{
+            //    shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            //}
+            //CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            //var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            //var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
+
+            //var getConsent = await GetConsentDetails(customerObj.PhoneNumber);
+
+
+            //if (!getConsent.Contains("success"))
+            //{
+            //    var consent =await  ManageOptInOut(customerObj.PhoneNumber);
+
+            //    if (consent.Contains("success"))
+            //    {
+            //        await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+            //    }
+
+            //}
+            //else
+            //{
+            //    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
+            //}
+
+            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
+            var whatsappMessage = new WhatsAppMessageDTO
+            {
+                RecipientWhatsapp = number.PhoneNumber,
+                MessageType = "text",
+                Source = sourceId,
+                RecipientType = "individual",
+                TypeText = new List<TypeTextDTO>
+                        {
+                            new TypeTextDTO
+                            {
+                                Content = "Welcome to Gig Logistics! Your test shipment just arrived final destination."
+                            }
+                        }
+            };
+
+            var result = "";
+
+            result = await SendWhatsappMessageToNumber(whatsappMessage);
+
+            return result;
+
+        }
+
+        public async Task<string> ManageOptInOutForWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            var result = "";
+            if (whatsappNumber != null)
+            {
+                result = await ManageOptInOut(whatsappNumber.PhoneNumber);
+            }
+
+            return result;
         }
 
         private async Task<string> ManageOptInOut(string phoneNumber)

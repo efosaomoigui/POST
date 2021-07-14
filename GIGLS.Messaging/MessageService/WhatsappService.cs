@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.IMessageService;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -73,14 +74,15 @@ namespace GIGLS.Messaging.MessageService
                             var data = new StringContent(json, Encoding.UTF8, "application/json");
                             var response = await client.PostAsync(whatsappUrl, data);
                             result = await response.Content.ReadAsStringAsync();
+                            result = JObject.Parse(result)["status"].ToString();
                         }
                         else
                         {
                             result = $"Message cannot be null. Please provide the appropriate values";
                         }
                     }
-                    return result;
                 }
+                return result;
             }
             catch (Exception)
             {
@@ -110,6 +112,7 @@ namespace GIGLS.Messaging.MessageService
                         var data = new StringContent(json, Encoding.UTF8, "application/json");
                         var response = await client.PostAsync(whatsappUrl, data);
                         result = await response.Content.ReadAsStringAsync();
+                        result = JObject.Parse(result)["status"].ToString();
                     }
                 }
                 return result;
@@ -142,6 +145,7 @@ namespace GIGLS.Messaging.MessageService
                         var data = new StringContent(json, Encoding.UTF8, "application/json");
                         var response = await client.PostAsync(whatsappUrl, data);
                         result = await response.Content.ReadAsStringAsync();
+                        result = JObject.Parse(result)["status"].ToString();
                     }
                 }
                 return result;
