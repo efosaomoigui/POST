@@ -5343,10 +5343,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Payment already made for the Shipment {paymentDTO.Waybill}", $"{(int)HttpStatusCode.Forbidden}");
             }
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
-            if (wallet.Balance < invoice.Amount)
-            {
-                throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
             if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
             {
                 var user = await _userService.GetUserByChannelCode(paymentDTO.CustomerCode);
@@ -5356,27 +5352,30 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                  user = await _userService.GetUserByEmail(paymentDTO.CustomerCode);
-                    if (user ==  null)
+                    user = await _userService.GetUserByEmail(paymentDTO.CustomerCode);
+                    if (user == null)
                     {
-                      throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
+                        throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
                     }
                     customerCode = user.UserChannelCode;
                 }
             }
-
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
             if (wallet != null)
             {
+                if (wallet.Balance < invoice.Amount)
+                {
+                    throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
+                }
                 await _paymentService.ProcessPayment(new PaymentTransactionDTO()
                 {
                     PaymentType = PaymentType.Wallet,
                     TransactionCode = wallet.WalletNumber,
                     Waybill = shipment.Waybill,
                     IsNotOwner = true
-                }) ;
+                });
 
             }
-
             return true;
         }
 
