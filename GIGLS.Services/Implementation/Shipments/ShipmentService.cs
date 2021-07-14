@@ -5317,5 +5317,49 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
+        public async Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO)
+        {
+            if (paymentDTO == null)
+            {
+                throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (String.IsNullOrEmpty(paymentDTO.CustomerCode) && String.IsNullOrEmpty(paymentDTO.Email))
+            {
+                throw new GenericException("user info not provided", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (String.IsNullOrEmpty(paymentDTO.Waybill))
+            {
+                throw new GenericException("waybill not provided", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+            var customerCode = String.Empty;
+            if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
+            {
+                var user = await _userService.GetUserByChannelCode(paymentDTO.CustomerCode);
+                customerCode = user.UserChannelCode;
+            }
+            else if (!String.IsNullOrEmpty(paymentDTO.Email))
+            {
+                var user = await _userService.GetUserByEmail(paymentDTO.Email);
+                customerCode = user.UserChannelCode;
+            }
+
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet != null)
+            {
+                await _paymentService.ProcessPayment(new PaymentTransactionDTO()
+                {
+                    PaymentType = PaymentType.Wallet,
+                    TransactionCode = wallet.WalletNumber,
+                    Waybill = shipment.Waybill,
+                    IsNotOwner = true
+                }) ;
+
+            }
+
+            return true;
+        }
+
     }
 }
