@@ -5337,12 +5337,19 @@ namespace GIGLS.Services.Implementation.Shipments
             if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
             {
                 var user = await _userService.GetUserByChannelCode(paymentDTO.CustomerCode);
-                customerCode = user.UserChannelCode;
-            }
-            else if (!String.IsNullOrEmpty(paymentDTO.Email))
-            {
-                var user = await _userService.GetUserByEmail(paymentDTO.Email);
-                customerCode = user.UserChannelCode;
+                if (user != null)
+                {
+                    customerCode = user.UserChannelCode;
+                }
+                else
+                {
+                  user = await _userService.GetUserByEmail(paymentDTO.CustomerCode);
+                    if (user ==  null)
+                    {
+                      throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                    customerCode = user.UserChannelCode;
+                }
             }
 
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
