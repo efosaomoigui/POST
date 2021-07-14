@@ -2400,7 +2400,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        [AllowAnonymous]
+
         [HttpPost]
         [Route("optincustomerwhatsappnumber")]
         public async Task<IServiceResponse<bool>> OptinCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
