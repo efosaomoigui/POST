@@ -74,7 +74,16 @@ namespace GIGLS.Messaging.MessageService
                             var data = new StringContent(json, Encoding.UTF8, "application/json");
                             var response = await client.PostAsync(whatsappUrl, data);
                             result = await response.Content.ReadAsStringAsync();
-                            result = JObject.Parse(result)["status"].ToString();
+                            var status = JObject.Parse(result)["status"].ToString();
+                            if (status.Contains("success"))
+                            {
+                                var id = JObject.Parse(result)["data"]["id"].ToString();
+                                result = $"Status : {status}, Id : {id}";
+                            }
+                            else
+                            {
+                                result = $"Status : {status}";
+                            }
                         }
                         else
                         {

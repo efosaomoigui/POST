@@ -33,7 +33,7 @@ namespace GIGLS.Core.IMessageService
         Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment);
         Task SendMailsClassCustomerShipmentCreation(MessageDTO messageDTO);
         //Task SendWhatsappMessage(ShipmentDTO shipmentDto);
-        Task<string> SendWhatsappMessage(WhatsappNumberDTO whatsappNumber);
+        Task<string> SendWhatsappMessage(WhatsAppMessageDTO whatsappMessage);
         Task<string> ManageOptInOutForWhatsappNumber(WhatsappNumberDTO whatsappNumber);
     }
 }

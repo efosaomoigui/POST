@@ -5,6 +5,7 @@
         OGOSMS,
         SCRIPTWALL,
         TWILIO,
-        OGOSMSBANKROUTE
+        OGOSMSBANKROUTE,
+        PEPIPOST
     }
 }
