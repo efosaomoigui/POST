@@ -2083,7 +2083,13 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             if (whatsAppMessage != null)
             {
-                whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
+                whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Trim();
+
+                if (whatsAppMessage.RecipientWhatsapp.Contains("+"))
+                {
+                    whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
+                }
+                
                 var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
 
                 if (!getConsent.Contains("success"))
