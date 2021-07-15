@@ -44,4 +44,18 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsGateway { get; set; }
         public bool IsConsignable { get; set; }
     }
+
+
+    public class WebsiteServiceCentreDTO
+    {
+
+        public int ServiceCentreId { get; set; }
+        public int StationId { get; set; }
+        public string Name { get; set; }
+        public string Code { get; set; }
+        public string Address { get; set; }
+        public bool IsActive { get; set; }
+        public string FormattedServiceCentreName { get; set; }
+
+    }
 }

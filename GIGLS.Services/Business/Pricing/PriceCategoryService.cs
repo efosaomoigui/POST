@@ -96,6 +96,8 @@ namespace GIGLS.Services.Business.Pricing
                 cattoModify.CountryId = priceCategory.CountryId;
                 cattoModify.DepartureCountryId = priceCategory.DepartureCountryId;
                 cattoModify.IsActive = priceCategory.IsActive;
+                cattoModify.SubminimumPrice = priceCategory.SubminimumPrice;
+                cattoModify.SubminimumWeight = priceCategory.SubminimumWeight;
                 _uow.Complete();
             }
             catch (Exception)

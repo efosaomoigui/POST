@@ -519,6 +519,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"NULL INPUT");
             }
 
+            ////Check if the user is a staff at final destination
+            //if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKT)
+            //{
+            //    //Get user priviledge service centers
+            //    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            //    if (serviceCenters.Length == 1 && serviceCenters[0] != shipmentCollection.DestinationServiceCentreId)
+            //    {
+            //        //Block user from releasing shipment if user is not at the destination service center
+            //        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+            //    }
+            //}
+
+
+            if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.ARF || shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.SRC)
+            {
+                //Get user priviledge service centers
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 1 && serviceCenters[0] == shipmentCollection.DestinationServiceCentreId)
+                {
+                    //do nothing
+                }
+                else
+                {
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                }
+            }
+
+
             if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
             {
                 throw new GenericException("Kindly enter Receiver Name, Phone number, Address and State");

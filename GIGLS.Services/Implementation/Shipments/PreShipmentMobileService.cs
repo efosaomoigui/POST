@@ -5468,13 +5468,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment cannot be found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                // check the invoice table to be sure money was collected for the shipment
+                var walletTransaction = await _uow.WalletTransaction.GetAsync(s => s.Waybill == Waybill);
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
                 {
                     if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
-                        await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
+                        if (walletTransaction != null)
+                        {
+                            await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
 
+                        }
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = Waybill,
@@ -5498,9 +5503,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //Get user
                     var user = await _userService.GetCurrentUserId();
-                    //var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
                     var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
-
                     if (pickuprequests != null)
                     {
                         pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
@@ -5508,6 +5511,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                 }
+
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
             }
@@ -5584,7 +5588,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         company.Name = user.Organisation;
                     }
-                   
+
                 }
             }
         }
