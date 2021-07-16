@@ -34,4 +34,20 @@ namespace GIGLS.Core.DTO.Node
         [JsonProperty("imageUrl")]
         public string ImageUrl { get; set; }
     }
+
+    public class AcceptShipmentResponse
+    {
+
+        [JsonProperty("apiId")]
+        public string ApiId { get; set; }
+
+        [JsonProperty("statusCode")]
+        public string StatusCode { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public string Data { get; set; }
+    }
 }

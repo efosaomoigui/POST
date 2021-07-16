@@ -224,5 +224,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user);
         Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill);
         Task<List<WebsiteCountryDTO>> GetCoreForWebsite();
+        Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo);
     }
 }

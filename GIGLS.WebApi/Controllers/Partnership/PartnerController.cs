@@ -429,19 +429,5 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
-        [HttpPost]
-        [Route("assignshipment")]
-        public async Task<IServiceResponse<bool>> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _partnerService.AssignShipmentToPartner(partnerInfo);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
     }
 }

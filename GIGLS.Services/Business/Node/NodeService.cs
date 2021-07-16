@@ -154,7 +154,7 @@ namespace GIGLS.Services.Business.Node
             }
         }
 
-        public async Task<string> AssignShipmentToPartner(AcceptShipmentPayload nodePayload)
+        public async Task<AcceptShipmentResponse> AssignShipmentToPartner(AcceptShipmentPayload nodePayload)
         {
             try
             {
@@ -163,6 +163,7 @@ namespace GIGLS.Services.Business.Node
                 var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
                 var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
                 nodeURL = $"{nodeURL}{nodePostShipment}/accept";
+                var nodeResponse = new AcceptShipmentResponse();
 
                 using (var client = new HttpClient())
                 {
@@ -170,9 +171,11 @@ namespace GIGLS.Services.Business.Node
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(nodeURL, data);
                     result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<AcceptShipmentResponse>(result);
+                    nodeResponse = jObject;
                 }
 
-                return result;
+                return nodeResponse;
             }
             catch (Exception)
             {
