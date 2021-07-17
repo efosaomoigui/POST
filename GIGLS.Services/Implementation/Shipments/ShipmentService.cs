@@ -5345,14 +5345,14 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
             {
-                var user = await _userService.GetUserByChannelCode(paymentDTO.CustomerCode);
+                var user = await _uow.User.GetUserByChannelCode(paymentDTO.CustomerCode);
                 if (user != null)
                 {
                     customerCode = user.UserChannelCode;
                 }
                 else
                 {
-                    user = await _userService.GetUserByEmail(paymentDTO.CustomerCode);
+                    user = await _uow.User.GetUserByEmail(paymentDTO.CustomerCode);
                     if (user == null)
                     {
                         throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
