@@ -115,6 +115,7 @@ namespace GIGLS.Core.DTO
         public string XApiheader { get; set; }
         [JsonProperty("type_text")]
         public List<TypeTextDTO> TypeText { get; set; }
+        public string Waybill { get; set; }
     }
 
     public class WhatsAppMessagesDTO
