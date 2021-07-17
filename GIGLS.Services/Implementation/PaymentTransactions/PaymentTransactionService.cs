@@ -152,7 +152,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 paymentTransaction.TransactionCode = shipment.CustomerCode;
                 if (paymentTransaction.IsNotOwner)
                 {
-                    await ProcessWalletPaymentForShipment(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId); 
+                    paymentTransaction.UserId = paymentTransaction.CustomerUserId;
+                    paymentTransaction.TransactionCode = paymentTransaction.CustomerCode;
+                    await ProcessWalletPaymentForShipment(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, paymentTransaction.UserId); 
                 }
                 else
                 {

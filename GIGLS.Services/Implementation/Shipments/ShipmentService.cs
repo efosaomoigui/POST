@@ -5332,6 +5332,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("waybill not provided", $"{(int)HttpStatusCode.BadRequest}");
             }
             var customerCode = String.Empty;
+            var userid = String.Empty;
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentDTO.Waybill);
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == paymentDTO.Waybill);
 
@@ -5349,6 +5350,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (user != null)
                 {
                     customerCode = user.UserChannelCode;
+                    userid = user.Id;
                 }
                 else
                 {
@@ -5358,6 +5360,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
                     }
                     customerCode = user.UserChannelCode;
+                    userid = user.Id;
                 }
             }
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
@@ -5372,7 +5375,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = PaymentType.Wallet,
                     TransactionCode = wallet.WalletNumber,
                     Waybill = shipment.Waybill,
-                    IsNotOwner = true
+                    IsNotOwner = true,
+                    CustomerCode = customerCode,
+                    CustomerUserId = userid
+
                 });
 
             }
