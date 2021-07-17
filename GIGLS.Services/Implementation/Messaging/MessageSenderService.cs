@@ -2132,12 +2132,13 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         DateCreated = DateTime.Now,
                         DateModified = DateTime.Now,
-                        From = "GIG Logistics Chat Bot",
+                        From = "GIG Logistics",
                         To = whatsAppMessage.RecipientWhatsapp,
                         Message = text.Content,
                         Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                         ResultStatus = result,
-                        ResultDescription = exceptionMessage + " Sent using " + SMSSenderPlatform.PEPIPOST.ToString()
+                        ResultDescription = exceptionMessage + " Sent using " + SMSSenderPlatform.WHATSAPPBOT.ToString(),
+                        Waybill = whatsAppMessage.Waybill
                     });
                 }
 
@@ -2170,6 +2171,7 @@ namespace GIGLS.Services.Implementation.Messaging
             var whatsAppMessage = new WhatsAppMessageDTO
             {
                 RecipientWhatsapp = messageDTO.To,
+                Waybill = messageDTO.Waybill,
                 MessageType = "text",
                 Source = sourceId,
                 RecipientType = "individual",
