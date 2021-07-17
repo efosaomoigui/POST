@@ -2149,6 +2149,66 @@ namespace GIGLS.Services.Implementation.Messaging
 
             return true;
         }
+        //Send Whatsapp message using ARF sms format for Home delivery terminal pickup
+        public async Task<string> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        {
+            var result = "";
+
+            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
+            var messageDTO = new MessageDTO();
+
+            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
+            messageDTO = Mapper.Map<MessageDTO>(smsMessages);
+
+            if (messageDTO != null)
+            {
+                //prepare message finalBody
+                await PrepareMessageFinalBody(messageDTO, tracking);
+            }
+
+            var whatsAppMessage = new WhatsAppMessageDTO
+            {
+                RecipientWhatsapp = messageDTO.To,
+                MessageType = "text",
+                Source = sourceId,
+                RecipientType = "individual",
+                TypeText = new List<TypeTextDTO>
+                        {
+                            new TypeTextDTO
+                            {
+                                Content = messageDTO.FinalBody
+                            }
+                        }
+            };
+
+            if (!string.IsNullOrWhiteSpace(whatsAppMessage.RecipientWhatsapp))
+            {
+                whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Trim();
+
+                if (whatsAppMessage.RecipientWhatsapp.Contains("+"))
+                {
+                    whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
+                }
+
+                var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
+
+                if (!getConsent.Contains("success"))
+                {
+                    var consent = await ManageOptInOut(whatsAppMessage.RecipientWhatsapp);
+
+                    if (consent.Contains("success"))
+                    {
+                        result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                    }
+                }
+                else
+                {
+                    result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                }
+            }
+            return result;
+        }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
         //{

@@ -234,15 +234,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
                 var shipment = await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                await SendWhatsappMessageTemporal(messageType, tracking);
                 if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
                 {
-                    await SendWhatsappMessage(shipmentDTO);
+                   // await SendWhatsappMessage(shipmentDTO);
                     await SendEmailShipmentARFHomeDelivery(shipmentDTO);
                 }
                 //Send Email on Shipment Arrive final Destination for Terminal pickup option
                 if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
                 {
-                    await SendWhatsappMessage(shipmentDTO);
+                    //await SendWhatsappMessage(shipmentDTO);
                     await SendEmailShipmentARFTerminalPickup(shipmentDTO);
                 }
             }
@@ -982,6 +983,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+            return true;
+        }
+
+        //Send whatsapp message when Shipment Arrive final destination Temporal
+        public async Task<bool> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        {
+            if(tracking != null)
+            {
+                await _messageSenderService.SendWhatsappMessageTemporal(messageType, tracking);
+            }
             return true;
         }
     }
