@@ -6,6 +6,6 @@
         SCRIPTWALL,
         TWILIO,
         OGOSMSBANKROUTE,
-        PEPIPOST
+        WHATSAPPBOT
     }
 }
