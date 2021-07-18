@@ -25,6 +25,7 @@ using System.Linq;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.Shipments;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -76,6 +77,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<PaystackWebhookDTO> VerifyPayment(string reference)
         {
             PaystackWebhookDTO result = new PaystackWebhookDTO();
+            NubanCustomerResponse customer = new NubanCustomerResponse();
 
             await Task.Run(() =>
             {
@@ -110,6 +112,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
                     result.data.Status = verifyResponse.Data.Status;
                     result.data.Amount = verifyResponse.Data.Amount / 100;
+                }
+
+                if (verifyResponse.Status && verifyResponse.Data.Customer != null)
+                {
+                    customer.CustomerCode = verifyResponse.Data.Customer.CustomerCode;
+                    customer.FirstName = verifyResponse.Data.Customer.FirstName;
+                    customer.LastName = verifyResponse.Data.Customer.LastName;
+                    customer.Id = verifyResponse.Data.Customer.Id;
+                    customer.Reference = verifyResponse.Data.Reference;
+                    customer.Id = verifyResponse.Data.Customer.Id;
+                    customer.Amount = result.data.Amount;
+                    CreditCorporateAccount(customer);
                 }
             });
 
@@ -1328,6 +1342,133 @@ namespace GIGLS.Services.Implementation.Wallet
         private bool ProcessWaybillPayment()
         {
             return false;
+        }
+
+        //this method creates a nuban account for user
+        public async Task<CreateNubanAccountResponseDTO> CreateUserNubanAccount(CreateNubanAccountDTO nubanAccountDTO)
+        {
+            var response = new HttpResponseMessage();
+            var result = new CreateNubanAccountResponseDTO();
+            var url = ConfigurationManager.AppSettings["PaystackNubanAccount"];
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackSecret"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                    var json = JsonConvert.SerializeObject(nubanAccountDTO);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    response = await client.PostAsync(url,data);
+                });
+
+                string jObject = await response.Content.ReadAsStringAsync();
+                var res = JObject.Parse(jObject);
+                result = res.ToObject<CreateNubanAccountResponseDTO>();
+                if (response.IsSuccessStatusCode)
+                {
+                    result.succeeded = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<NubanCreateCustomerDTO> CreateNubanCustomer(CreateNubanAccountDTO nubanAccountDTO)
+        {
+            var response = new HttpResponseMessage();
+            var result = new NubanCreateCustomerDTO();
+            var url = ConfigurationManager.AppSettings["PaystackCreateNubanCustomer"];
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackSecret"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                    var json = JsonConvert.SerializeObject(nubanAccountDTO);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    response = await client.PostAsync(url, data);
+                });
+
+                string jObject = await response.Content.ReadAsStringAsync();
+                var res = JObject.Parse(jObject);
+                result = res.ToObject<NubanCreateCustomerDTO>();
+                if (response.IsSuccessStatusCode)
+                {
+                    result.succeeded = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<JObject> GetNubanAccountProviders()
+        {
+            var response = new HttpResponseMessage();
+            var url = ConfigurationManager.AppSettings["PaystackNubanProviders"];
+            var liveSecretKey = ConfigurationManager.AppSettings["PayStackSecret"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {liveSecretKey}");
+                    response = await client.GetAsync(url);
+                });
+
+                string jObject = await response.Content.ReadAsStringAsync();
+                var res = JObject.Parse(jObject);
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task CreditCorporateAccount(NubanCustomerResponse customer)
+        {
+            var coporateCustomer = await _uow.Company.GetAsync(x => x.NUBANCustomerCode == customer.CustomerCode);
+            if (coporateCustomer != null)
+            {
+                // credit customer wallet
+                //update the wallet
+                var user = await _userService.GetUserByChannelCode(coporateCustomer.CustomerCode);
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = customer.Amount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Description = "Nuban Credit Transaction",
+                    PaymentType = PaymentType.Online,
+                    PaymentTypeReference = customer.Reference,
+                    UserId = user.Id
+                }, false);
+                await _uow.CompleteAsync();
+            }
         }
     }
 }
