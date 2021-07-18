@@ -3585,6 +3585,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Message = res.Data;
                     return result;
                 }
+                preshipment.shipmentstatus = MobilePickUpRequestStatus.Accepted.ToString();
                 // also call the agility api to update mobile shipment
                 var mobilePickUpDTO = new MobilePickUpRequestsDTO()
                 {
@@ -3594,6 +3595,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
 
                 };
+               var updateAgilty = await  AddMobilePickupRequest(mobilePickUpDTO);
+                result.Succeeded = true;
                 return result;
 
             }
