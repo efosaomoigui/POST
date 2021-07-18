@@ -3568,7 +3568,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var nodePayload = new AcceptShipmentPayload()
                 {
                     WaybillNumber = preshipment.Waybill,
-                    PartnerId = partner.PartnerId.ToString(),
+                    PartnerId = partner.UserId.ToString(),
                     PartnerInfo = new PartnerPayload()
                     {
                         FullName = partner.PartnerName,
