@@ -1592,7 +1592,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             string password = await Generate(6);
 
-            var result =  await _userService.ForgotPassword(user.Email, password);
+            var result = await _userService.ForgotPassword(user.Email, password);
 
             if (result.Succeeded)
             {
@@ -1605,7 +1605,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 // Send Email and SMS 
                 var response = await _messageSenderService.SendMessage(MessageType.PEmail, EmailSmsType.All, passwordMessage);
-                 
+
             }
             else
             {
@@ -3533,7 +3533,22 @@ namespace GIGLS.Services.Business.CustomerPortal
             return websiteCountries;
         }
 
+        public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            if (whatsappNumber is null)
+            {
+                throw new GenericException("Please provide valid  number");
+            }
 
+            if (string.IsNullOrWhiteSpace(whatsappNumber.PhoneNumber))
+            {
+                throw new GenericException("Phone number is required");
+            }
+
+            await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
+
+            return true;
+        }
 
     }
 }

@@ -32,5 +32,8 @@ namespace GIGLS.Core.IMessageService
         Task SendMailsShipmentARFTerminalPickup(MessageDTO messageDTO);
         Task<bool> SendEmailToCustomerForShipmentCreation(ShipmentDTO shipment);
         Task SendMailsClassCustomerShipmentCreation(MessageDTO messageDTO);
+        //Task SendWhatsappMessage(ShipmentDTO shipmentDto);
+        Task<string> SendWhatsappMessage(WhatsappNumberDTO whatsappNumber);
+        Task<string> ManageOptInOutForWhatsappNumber(WhatsappNumberDTO whatsappNumber);
     }
 }

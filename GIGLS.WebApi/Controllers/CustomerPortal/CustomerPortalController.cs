@@ -2415,5 +2415,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("optincustomerwhatsappnumber")]
+        public async Task<IServiceResponse<bool>> OptinCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.OptInCustomerWhatsappNumber(whatsappNumber);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }
