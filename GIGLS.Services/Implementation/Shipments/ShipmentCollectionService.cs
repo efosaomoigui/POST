@@ -428,7 +428,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var financialReport = await _uow.FinancialReport.GetAsync(x => x.Waybill == shipmentCollectionDto.Waybill);
 
-                if (financialReport != null)
+                if(financialReport != null)
                 {
                     financialReport.Demurrage = shipmentCollectionDto.Demurrage.AmountPaid;
                 }
@@ -444,21 +444,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //update TransitWaybillNumber to settle some waybill that doesn't pass through process to be remove from grouping again
             var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(x => x.WaybillNumber == shipmentCollectionDto.Waybill);
-            if (transitWaybill != null)
+            if(transitWaybill != null)
             {
                 transitWaybill.IsTransitCompleted = true;
             }
 
-            if (shipmentCollectionDto.DeliveryNumber != null)
+            if(shipmentCollectionDto.DeliveryNumber != null)
             {
                 //update delivery number
                 var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollectionDto.Waybill);
-                if (deliveryNumber != null)
+                if(deliveryNumber != null)
                 {
                     deliveryNumber.IsUsed = true;
                     deliveryNumber.UserId = shipmentCollectionDto.UserId;
-                }
-            }
+                }                
+            }           
 
             await _uow.CompleteAsync();
         }
@@ -519,15 +519,33 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"NULL INPUT");
             }
 
-            //Check if the user is a staff at final destination
+            ////Check if the user is a staff at final destination
+            //if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKT)
+            //{
+            //    //Get user priviledge service centers
+            //    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            //    if (serviceCenters.Length == 1 && serviceCenters[0] != shipmentCollection.DestinationServiceCentreId)
+            //    {
+            //        //Block user from releasing shipment if user is not at the destination service center
+            //        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+            //    }
+            //}
 
-            //Get user priviledge service centers
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-            if (serviceCenters.Length == 1 && serviceCenters[0] != shipmentCollection.DestinationServiceCentreId)
+
+            if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.ARF || shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.SRC)
             {
-                //Block user from releasing shipment if user is not at the destination service center
-                throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                //Get user priviledge service centers
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 1 && serviceCenters[0] == shipmentCollection.DestinationServiceCentreId)
+                {
+                    //do nothing
+                }
+                else
+                {
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                }
             }
+
 
             if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
             {
@@ -557,32 +575,36 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //check if the shipment pin corresponds to the pin for the waybill 
-            //if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
-            //{
-            //    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
-            //    if (deliveryNumber != null)
-            //    {
-            //        if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
-            //        {
-            //            if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-            //            {
-            //                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-            //            {
-            //                throw new GenericException($"This Delivery Nubmer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //            }
-            //        }
+            if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
+            {
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+                if (deliveryNumber != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
+                    {
+                        if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                        {
+                            throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                        }
+                    }
+                    else
+                    {
+                        if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                        {
+                            throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                        }
+                    }
 
-            //    }
-            //    else
-            //    {
-            //        throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //    }
-            //}
+                }
+                else
+                {
+                    throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                }
+            }
+            else
+            {
+                throw new GenericException($"Kindly provide delivery number");
+            }
 
             await UpdateShipmentCollection(shipmentCollection);
 
