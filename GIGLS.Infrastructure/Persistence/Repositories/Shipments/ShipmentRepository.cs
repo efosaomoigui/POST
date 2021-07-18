@@ -1344,7 +1344,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 filter.EndDate = DateTime.Now;
             }
 
-            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated < filter.EndDate && x.CustomerCode == filter.CustomerCode);
+            if (filter != null && filter.StartDate != null && filter.EndDate != null )
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate && x.CustomerCode == filter.CustomerCode);
             List<InvoiceViewDTO> result = (from s in shipments
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
