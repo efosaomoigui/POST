@@ -134,7 +134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService,INodeService nodeService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -3458,10 +3458,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
         {
-         
+
             var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
             return registerUser;
-                
+
         }
 
 
@@ -3531,7 +3531,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             websiteCountries[i].States[j].Stations[k].ServiceCentres = (JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
                         }
                     }
-                    
+
                 }
             }
             return websiteCountries;
@@ -3568,7 +3568,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var nodePayload = new AcceptShipmentPayload()
                 {
                     WaybillNumber = preshipment.Waybill,
-                    PartnerId = partner.UserId.ToString(),
+                    PartnerId = partner.UserId,
                     PartnerInfo = new PartnerPayload()
                     {
                         FullName = partner.PartnerName,
@@ -3594,17 +3594,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
 
                 };
-
-        public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
-        {
-            if (whatsappNumber is null)
-            {
-                throw new GenericException("Please provide valid  number");
-            }
-                var agilityRes = _preShipmentMobileService.AddMobilePickupRequest(mobilePickUpDTO);
-                result.Succeeded = true;
-                result.Message = res.Message;
                 return result;
+
             }
             catch (Exception ex)
             {
@@ -3612,21 +3603,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            if (whatsappNumber is null)
+            {
+                throw new GenericException("Please provide valid  number");
+            }
             if (string.IsNullOrWhiteSpace(whatsappNumber.PhoneNumber))
             {
                 throw new GenericException("Phone number is required");
             }
-
             whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Trim();
-
             if (whatsappNumber.PhoneNumber.Contains("+"))
             {
                 whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Replace("+", string.Empty);
             }
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
-
             return true;
         }
-
     }
 }
