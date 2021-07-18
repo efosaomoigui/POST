@@ -3545,6 +3545,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Phone number is required");
             }
 
+            whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Trim();
+
+            if (whatsappNumber.PhoneNumber.Contains("+"))
+            {
+                whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Replace("+", string.Empty);
+            }
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
 
             return true;
