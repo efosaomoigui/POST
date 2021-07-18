@@ -27,5 +27,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<PartnerTransactionsDTO>> RiderRatings(PaginationDTO pagination);
         Task<List<RiderRateDTO>> GetRidersRatings(PaginationDTO pagination);
         Task UpdatePartnerEmailPhoneNumber(PartnerUpdateDTO update);
+        Task<bool> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo);
     }
 }
