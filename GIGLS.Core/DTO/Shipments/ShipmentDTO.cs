@@ -496,4 +496,11 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
 
     }
+
+    public class ShipmentPaymentDTO
+    {
+        public string Email { get; set; }
+        public string CustomerCode { get; set; }
+        public string Waybill { get; set; }
+    }
 }

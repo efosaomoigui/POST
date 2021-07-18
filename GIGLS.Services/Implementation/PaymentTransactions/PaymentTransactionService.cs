@@ -150,7 +150,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 paymentTransaction.TransactionCode = shipment.CustomerCode;
-                await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
+                if (paymentTransaction.IsNotOwner)
+                {
+                    paymentTransaction.UserId = paymentTransaction.CustomerUserId;
+                    paymentTransaction.TransactionCode = paymentTransaction.CustomerCode;
+                    await ProcessWalletPaymentForShipment(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, paymentTransaction.UserId); 
+                }
+                else
+                {
+                    await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
+                }
             }
 
             // create payment
@@ -235,10 +244,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
             else
             {
+
+                //if (paymentTransaction.IsNotOwner)
+                //{
+                //  //TODO: SEND PAYMENT NOTIFICATION FOR ALREADY CREATED SHIPMENT 
+                //}
                 //Commented this out 15/06/2021 to implement new email
                 //await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
-
                 //sperated the previous implementation into sms / email
+                //else
+                //{
+                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                //    await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO); 
+                //}
                 await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
                 await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO);
             }
@@ -702,5 +720,88 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return result;
         }
 
+
+        private async Task<bool> ProcessWalletPaymentForShipment(PaymentTransactionDTO paymentTransaction, Shipment shipment, Invoice invoiceEntity, GeneralLedger generalLedgerEntity, string currentUserId)
+        {
+            //I used transaction code to represent wallet number when processing for wallet
+            var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
+
+            decimal amountToDebit = invoiceEntity.Amount;
+
+            amountToDebit = await GetActualAmountToDebit(shipment, amountToDebit);
+
+            //Additions for Ecommerce customers (Max wallet negative payment limit)
+            //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType && !paymentTransaction.FromApp)
+            {
+                //Gets the customer wallet limit for ecommerce
+                decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
+
+                //deduct the price for the wallet and update wallet transaction table
+                if (wallet.Balance - amountToDebit < (Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
+                {
+                    throw new GenericException("Payment could not be processed for customer due to insufficient wallet balance");
+                }
+            }
+
+            //for other customers
+            //deduct the price for the wallet and update wallet transaction table
+            //--Update April 25, 2019: Corporate customers should be debited from wallet
+            if (shipment != null && CompanyType.Client.ToString() == shipment.CompanyType)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Payment could not be processed for customer due to insufficient wallet balance ");
+                }
+            }
+
+            if (shipment != null && paymentTransaction.FromApp == true)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Payment could not be processed for customer due to insufficient wallet balance ");
+                }
+            }
+
+            int[] serviceCenterIds = { };
+
+            if (!paymentTransaction.FromApp)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            else
+            {
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
+            }
+
+            var newWalletTransaction = new WalletTransaction
+            {
+                WalletId = wallet.WalletId,
+                Amount = amountToDebit,
+                DateOfEntry = DateTime.Now,
+                ServiceCentreId = serviceCenterIds[0],
+                UserId = currentUserId,
+                CreditDebitType = CreditDebitType.Debit,
+                PaymentType = PaymentType.Wallet,
+                Waybill = paymentTransaction.Waybill,
+                Description = generalLedgerEntity.Description
+            };
+            //get the balance after transaction
+            if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance + newWalletTransaction.Amount;
+            }
+            else
+            {
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance - newWalletTransaction.Amount;
+            }
+            wallet.Balance = wallet.Balance - amountToDebit;
+
+            _uow.WalletTransaction.Add(newWalletTransaction);
+            return true;
+        }
+
+
     }
-}
+}                                                                                                      
