@@ -1596,7 +1596,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             string password = await Generate(6);
 
-            var result =  await _userService.ForgotPassword(user.Email, password);
+            var result = await _userService.ForgotPassword(user.Email, password);
 
             if (result.Succeeded)
             {
@@ -1609,7 +1609,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 // Send Email and SMS 
                 var response = await _messageSenderService.SendMessage(MessageType.PEmail, EmailSmsType.All, passwordMessage);
-                 
+
             }
             else
             {
@@ -3595,6 +3595,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 };
 
+        public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            if (whatsappNumber is null)
+            {
+                throw new GenericException("Please provide valid  number");
+            }
                 var agilityRes = _preShipmentMobileService.AddMobilePickupRequest(mobilePickUpDTO);
                 result.Succeeded = true;
                 result.Message = res.Message;
@@ -3606,6 +3612,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+            if (string.IsNullOrWhiteSpace(whatsappNumber.PhoneNumber))
+            {
+                throw new GenericException("Phone number is required");
+            }
+
+            whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Trim();
+
+            if (whatsappNumber.PhoneNumber.Contains("+"))
+            {
+                whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Replace("+", string.Empty);
+            }
+            await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
+
+            return true;
+        }
 
     }
 }

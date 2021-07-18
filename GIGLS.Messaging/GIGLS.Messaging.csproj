@@ -152,6 +152,7 @@
     <Compile Include="MessageService\ILogger.cs" />
     <Compile Include="MessageService\ResponseData.cs" />
     <Compile Include="MessageService\SMSService.cs" />
+    <Compile Include="MessageService\WhatsappService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
