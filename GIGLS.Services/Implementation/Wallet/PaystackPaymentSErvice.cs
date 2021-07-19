@@ -120,18 +120,21 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.data.Amount = verifyResponse.Data.Amount / 100;
                 }
 
-                if (verifyResponse.Status && verifyResponse.Data.Customer != null)
+                if (verifyResponse.Status && verifyResponse.Data.Customer != null && !String.IsNullOrEmpty(verifyResponse.Data.Customer.CustomerCode))
                 {
                     customer.CustomerCode = verifyResponse.Data.Customer.CustomerCode;
                     customer.FirstName = verifyResponse.Data.Customer.FirstName;
                     customer.LastName = verifyResponse.Data.Customer.LastName;
                     customer.Id = verifyResponse.Data.Customer.Id;
                     customer.Reference = verifyResponse.Data.Reference;
-                    customer.Id = verifyResponse.Data.Customer.Id;
                     customer.Amount = result.data.Amount;
-                    CreditCorporateAccount(customer);
                 }
             });
+
+            if (!String.IsNullOrEmpty(customer.CustomerCode))
+            {
+                await CreditCorporateAccount(customer);
+            }
 
             return result;
         }
@@ -1456,24 +1459,32 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task CreditCorporateAccount(NubanCustomerResponse customer)
         {
-            var coporateCustomer = await _uow.Company.GetAsync(x => x.NUBANCustomerCode == customer.CustomerCode);
-            if (coporateCustomer != null)
+            try
             {
-                // credit customer wallet
-                //update the wallet
-                var user = await _userService.GetUserByChannelCode(coporateCustomer.CustomerCode);
-                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
-                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                var coporateCustomer = await _uow.Company.GetAsync(x => x.NUBANCustomerCode == customer.CustomerCode);
+                if (coporateCustomer != null)
                 {
-                    WalletId = wallet.WalletId,
-                    Amount = customer.Amount,
-                    CreditDebitType = CreditDebitType.Credit,
-                    Description = "Nuban Credit Transaction",
-                    PaymentType = PaymentType.Online,
-                    PaymentTypeReference = customer.Reference,
-                    UserId = user.Id
-                }, false);
-                await _uow.CompleteAsync();
+                    // credit customer wallet
+                    //update the wallet
+                    var user = await _userService.GetUserByChannelCode(coporateCustomer.CustomerCode);
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                    await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                    {
+                        WalletId = wallet.WalletId,
+                        Amount = customer.Amount,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Description = "Nuban Credit Transaction",
+                        PaymentType = PaymentType.Online,
+                        PaymentTypeReference = customer.Reference,
+                        UserId = user.Id
+                    }, false);
+                    await _uow.CompleteAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
             }
         }
     }

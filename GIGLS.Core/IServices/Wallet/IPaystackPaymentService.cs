@@ -25,5 +25,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CreateNubanAccountResponseDTO> CreateUserNubanAccount(CreateNubanAccountDTO nubanAccountDTO);
         Task<JObject> GetNubanAccountProviders();
         Task<NubanCreateCustomerDTO> CreateNubanCustomer(CreateNubanAccountDTO nubanAccountDTO);
+        Task CreditCorporateAccount(NubanCustomerResponse customer);
     }
 }
