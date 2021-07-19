@@ -26,6 +26,7 @@ using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.Shipments;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -90,7 +91,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 result.Message = verifyResponse.Message;
                 result.data.Reference = reference;
 
-                if(verifyResponse.Data != null)
+                var json = JsonConvert.SerializeObject(verifyResponse, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
+
+                if (verifyResponse.Data != null)
                 {
                     if(verifyResponse.Data.Authorization != null)
                     {
