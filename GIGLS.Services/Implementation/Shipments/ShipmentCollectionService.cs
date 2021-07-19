@@ -574,36 +574,39 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Reroute");
             }
 
-            //check if the shipment pin corresponds to the pin for the waybill 
-            if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
+            if (!shipmentCollection.IsComingFromDispatch)
             {
-                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
-                if (deliveryNumber != null)
+                //check if the shipment pin corresponds to the pin for the waybill 
+                if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
                 {
-                    if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
+                    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+                    if (deliveryNumber != null)
                     {
-                        if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                        if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
                         {
-                            throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                            if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                            {
+                                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                            }
                         }
+                        else
+                        {
+                            if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                            {
+                                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                            }
+                        }
+
                     }
                     else
                     {
-                        if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-                        {
-                            throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                        }
+                        throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
                     }
-
                 }
                 else
                 {
-                    throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException($"Kindly provide delivery number");
                 }
-            }
-            else
-            {
-                throw new GenericException($"Kindly provide delivery number");
             }
 
             await UpdateShipmentCollection(shipmentCollection);
