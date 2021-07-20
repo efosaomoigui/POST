@@ -234,16 +234,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
                 var shipment = await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
-                await SendWhatsappMessageTemporal(messageType, tracking);
+
+                //Send Whatsapp message
+                await SendWhatsappMessage(shipmentDTO);
+
                 if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
                 {
-                   // await SendWhatsappMessage(shipmentDTO);
                     await SendEmailShipmentARFHomeDelivery(shipmentDTO);
                 }
                 //Send Email on Shipment Arrive final Destination for Terminal pickup option
                 if (shipment != null && shipment.PickupOptions == PickupOptions.SERVICECENTER && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
                 {
-                    //await SendWhatsappMessage(shipmentDTO);
                     await SendEmailShipmentARFTerminalPickup(shipmentDTO);
                 }
             }
@@ -955,29 +956,51 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             if (shipmentDTO != null)
             {
+
+                var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentDTO.Waybill).FirstOrDefault();
+
                 var deliveryNumber = _uow.DeliveryNumber.GetAll()
-                                            .Where(s => s.Waybill == shipmentDTO.Waybill)
+                                            .Where(s => s.Waybill == invoice.Waybill)
                                             .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
 
-                shipmentDTO.ReceiverName = string.IsNullOrEmpty(shipmentDTO?.ReceiverName) ? "Customer" : shipmentDTO?.ReceiverName;
                 var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
 
                 var whatsappMessage = new WhatsAppMessageDTO
                 {
-                    RecipientWhatsapp = shipmentDTO.ReceiverPhoneNumber,
-                    MessageType = "text",
+                    RecipientWhatsapp = invoice.ReceiverPhoneNumber,
+                    MessageType = "template",
                     Source = sourceId,
                     RecipientType = "individual",
-                    TypeText = new List<TypeTextDTO>
+                    TypeTemplate = new List<TypeTemplateDTO>
                         {
-                            new TypeTextDTO
+                            new TypeTemplateDTO
                             {
-                                Content = $"Welcome to Gig Logistics! Dear {shipmentDTO.ReceiverName} Your test shipment just arrived final destination. Kindly provide your delivery code {deliveryNumber} to our agent."
+                                Name = "shipment_notification_terminal_pickup",
+                                Attributes = new List<string>
+                                {
+                                    invoice.ReceiverName, 
+                                    invoice.Waybill,
+                                    invoice.DestinationServiceCentreName,
+                                    deliveryNumber
+                                },
+                                Language = new LanguageDTO
+                                {
+                                    Locale = "en",
+                                    Policy = "deterministic"
+                                }
                             }
                         }
                 };
+
+                if(shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    foreach (var template in whatsappMessage.TypeTemplate)
+                    {
+                        template.Name = "shipment_notification_home_delivery";
+                    }
+                }
                 //Send Whatsapp message
-                if (!String.IsNullOrEmpty(shipmentDTO.ReceiverPhoneNumber))
+                if (!String.IsNullOrEmpty(invoice.ReceiverPhoneNumber))
                 {
                     await _messageSenderService.SendWhatsappMessage(whatsappMessage);
                 }
