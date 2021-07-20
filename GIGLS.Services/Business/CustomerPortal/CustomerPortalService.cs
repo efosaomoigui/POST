@@ -71,6 +71,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -118,6 +120,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly INodeService _nodeService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -131,7 +134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -175,6 +178,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _shipmentService = shipmentService;
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -3454,10 +3458,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
         {
-         
+
             var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
             return registerUser;
-                
+
         }
 
 
@@ -3527,10 +3531,79 @@ namespace GIGLS.Services.Business.CustomerPortal
                             websiteCountries[i].States[j].Stations[k].ServiceCentres = (JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
                         }
                     }
-                    
+
                 }
             }
             return websiteCountries;
+        }
+
+        public async Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
+        {
+            try
+            {
+                var result = new AssignedShipmentDTO();
+
+                var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == partnerInfo.Waybill);
+                if (preshipment == null)
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} does not exist");
+                }
+
+                if (preshipment.shipmentstatus != "Shipment created")
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to Shipment Created to perform this action.");
+                }
+                if (string.IsNullOrWhiteSpace(partnerInfo.Email))
+                {
+                    throw new GenericException($"Partner Email is required.");
+                }
+
+                var partner = await _uow.Partner.GetAsync(x => x.Email == partnerInfo.Email);
+                if (partner == null)
+                {
+                    throw new GenericException($"This partner  does not exist");
+                }
+                result.Waybill = preshipment.Waybill;
+                result.Email = partner.Email;
+                var nodePayload = new AcceptShipmentPayload()
+                {
+                    WaybillNumber = preshipment.Waybill,
+                    PartnerId = partner.UserId,
+                    PartnerInfo = new PartnerPayload()
+                    {
+                        FullName = partner.PartnerName,
+                        PhoneNumber = partner.PhoneNumber,
+                        VehicleType = partnerInfo.VehicleType,
+                        ImageUrl = partner.PictureUrl
+                    },
+
+                };
+                var res = await _nodeService.AssignShipmentToPartner(nodePayload);
+                if (res.Message.Contains("Failure"))
+                {
+                    result.Succeeded = false;
+                    result.Message = res.Data;
+                    return result;
+                }
+                preshipment.shipmentstatus = MobilePickUpRequestStatus.Accepted.ToString();
+                // also call the agility api to update mobile shipment
+                var mobilePickUpDTO = new MobilePickUpRequestsDTO()
+                {
+                    Status = MobilePickUpRequestStatus.Accepted.ToString(),
+                    Waybill = preshipment.Waybill,
+                    UserId = partner.UserId,
+                    PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
+
+                };
+               var updateAgilty = await  AddMobilePickupRequest(mobilePickUpDTO);
+                result.Succeeded = true;
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
@@ -3539,7 +3612,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("Please provide valid  number");
             }
-
             if (string.IsNullOrWhiteSpace(whatsappNumber.PhoneNumber))
             {
                 throw new GenericException("Phone number is required");
@@ -3552,9 +3624,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Replace("+", string.Empty);
             }
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
-
             return true;
         }
-
     }
 }

@@ -271,5 +271,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpPost]
+        [Route("removenodependingshipment")]
+        public async Task<IServiceResponse<NewNodeResponse>> RemoveNodePendingShipment(PendingNodeShipmentDTO dto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.RemoveNodePendingShipment(dto);
+                return new ServiceResponse<NewNodeResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

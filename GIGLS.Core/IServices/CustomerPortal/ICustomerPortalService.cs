@@ -225,5 +225,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> GetGIGGOAndAgilityShipmentInvoice(string waybill);
         Task<List<WebsiteCountryDTO>> GetCoreForWebsite();
         Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber);
+        Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo);
     }
 }

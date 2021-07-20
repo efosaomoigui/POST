@@ -2429,5 +2429,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("assignshipment")]
+        public async Task<IServiceResponse<AssignedShipmentDTO>> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.AssignShipmentToPartner(partnerInfo);
+                return new ServiceResponse<AssignedShipmentDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

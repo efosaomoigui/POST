@@ -429,6 +429,5 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
     }
 }

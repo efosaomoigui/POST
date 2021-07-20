@@ -22,6 +22,7 @@ using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -34,10 +35,11 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
+        private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -46,6 +48,7 @@ namespace GIGLS.Services.Implementation.Customers
             _globalPropertyService = globalPropertyService;
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
+            _paystackPaymentService = paystackPaymentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -212,7 +215,43 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                if(company.Rank == Rank.Class)
+                if (newCompany.CompanyType == CompanyType.Corporate)
+                {
+                    var user = await _userService.GetUserByChannelCode(newCompany.CustomerCode);
+                    var corporate = await _uow.Company.GetAsync(x => x.CustomerCode == newCompany.CustomerCode);
+
+                    //first create customer on paystack if customer doesnt exist already
+                    var nubanAcc = new CreateNubanAccountDTO()
+                    {
+                        customer = 0,
+                        email = company.Email,
+                        preferred_bank = company.PrefferedNubanBank,
+                        first_name = company.Name,
+                        last_name = company.Name,
+                        phone = company.PhoneNumber
+                    };
+
+                    var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                    if (nubanCustomer.succeeded)
+                    {
+                        //then call api to create the nuban account for corporate customers
+                        newCompany.NUBANCustomerId = nubanCustomer.data.id;
+                        newCompany.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                        nubanAcc.customer = nubanCustomer.data.id;
+                        var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                        if (customerNubanAccount.succeeded)
+                        {
+                            if (company != null)
+                            {
+                                newCompany.PrefferedNubanBank = company.PrefferedNubanBank;
+                                newCompany.NUBANAccountNo = customerNubanAccount.data.account_number;
+                            }
+                        }
+                    }
+                    _uow.Complete();
+                }
+
+                if (company.Rank == Rank.Class)
                 {
                     await SendEmailToAssignEcommerceCustomerRep(newCompany);
                 }
@@ -457,6 +496,54 @@ namespace GIGLS.Services.Implementation.Customers
                     user.Email = companyDto.Email;
                     await _userService.UpdateUser(user.Id, userDto);
                 }
+
+                if (companyDto.CompanyType == CompanyType.Corporate)
+                {
+                    //first create customer on paystack if customer doesnt exist already
+                    var nubanAcc = new CreateNubanAccountDTO()
+                    {
+                        customer = 0,
+                        email = company.Email,
+                        preferred_bank = companyDto.PrefferedNubanBank,
+                        first_name = company.Name,
+                        last_name = company.Name,
+                        phone = company.PhoneNumber
+                    };
+                    if (String.IsNullOrEmpty(company.NUBANCustomerCode))
+                    {
+                        var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                        if (nubanCustomer.succeeded)
+                        {
+                            company.NUBANCustomerId = nubanCustomer.data.id;
+                            company.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                            nubanAcc.customer = nubanCustomer.data.id;
+                            var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                            if (customerNubanAccount.succeeded)
+                            {
+                                if (company != null)
+                                {
+                                    company.PrefferedNubanBank = companyDto.PrefferedNubanBank;
+                                    company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                }
+                            }
+                        }
+                    }
+                    else if (!String.IsNullOrEmpty(company.NUBANCustomerCode) && String.IsNullOrEmpty(company.NUBANAccountNo))
+                    {
+                        nubanAcc.customer = company.NUBANCustomerId;
+                        var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                        if (customerNubanAccount.succeeded)
+                        {
+                            if (company != null)
+                            {
+                                company.PrefferedNubanBank = company.PrefferedNubanBank;
+                                company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                            }
+                        }
+                    }
+
+                }
+
                 _uow.Complete();
             }
             catch (Exception ex)
@@ -1190,6 +1277,35 @@ namespace GIGLS.Services.Implementation.Customers
             }
             filterCriteria.AssignedCustomerRep = currentUserId;
             return await _uow.Company.GetAssignedCustomers(filterCriteria);
+        }
+
+        //create a nuban account
+        public async Task<CreateNubanAccountResponseDTO> CraeteNubanAccount(CreateNubanAccountDTO nubanAccount)
+        {
+            try
+            {
+
+                var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAccount);
+                return customerNubanAccount;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<JObject> GetNubanProviders()
+        {
+            try
+            {
+
+                var providers = await _paystackPaymentService.GetNubanAccountProviders();
+                return providers;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(BaseFilterCriteria filterCriteria)

@@ -19,6 +19,8 @@ using System.Net;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Node;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -28,14 +30,16 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICompanyService _companyService;
+        private readonly INodeService _nodeService;
 
         public PartnerService(IUnitOfWork uow, IWalletService walletService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService, INodeService nodeService)
         {
             _uow = uow;
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _companyService = companyService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -512,6 +516,58 @@ namespace GIGLS.Services.Implementation.Partnership
             }
 
             await _uow.CompleteAsync();
+        }
+
+        //Assign a Shipment to a Partner
+        public async Task<bool> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
+        {
+            try
+            {
+                var result = false;
+
+                var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == partnerInfo.Waybill);
+                if (preshipment == null)
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} does not exist");
+                }
+
+                if (preshipment.shipmentstatus != "Shipment created")
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to Shipment Created to perform this action.");
+                }
+                if (string.IsNullOrWhiteSpace(partnerInfo.Email))
+                {
+                    throw new GenericException($"Partner Email is required.");
+                }
+
+                var partner = await _uow.Partner.GetAsync(x => x.Email == partnerInfo.Email);
+                if (partner == null)
+                {
+                    throw new GenericException($"This partner  does not exist");
+                }
+
+                var nodePayload = new AcceptShipmentPayload()
+                {
+                    WaybillNumber = preshipment.Waybill,
+                    PartnerId = partner.PartnerId.ToString(),
+                    PartnerInfo = new PartnerPayload()
+                    {
+                        FullName = partner.PartnerName,
+                        PhoneNumber = partner.PhoneNumber,
+                        VehicleType = partnerInfo.VehicleType,
+                        ImageUrl = partner.PictureUrl
+                    },
+
+                };
+                await _nodeService.AssignShipmentToPartner(nodePayload);
+
+                result = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.Domain.Wallet;
 using System.Net.Http;
 using GIGLS.Core.DTO;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Core.IServices.Wallet
 {
@@ -21,5 +22,9 @@ namespace GIGLS.Core.IServices.Wallet
         Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
         Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingPin(WaybillPaymentLog waybillPaymentLog, string pin);
         Task<ResponseDTO> VerifyBVN(string bvnNo);
+        Task<CreateNubanAccountResponseDTO> CreateUserNubanAccount(CreateNubanAccountDTO nubanAccountDTO);
+        Task<JObject> GetNubanAccountProviders();
+        Task<NubanCreateCustomerDTO> CreateNubanCustomer(CreateNubanAccountDTO nubanAccountDTO);
+        Task CreditCorporateAccount(NubanCustomerResponse customer);
     }
 }
