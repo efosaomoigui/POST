@@ -198,7 +198,6 @@ namespace GIGLS.Services.Implementation.Customers
                     To = newCompany.Email,
                     Body = password
                 };
-                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
                 //send mail to ecommerce team
                 var ecommerceEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.EcommerceEmail.ToString() && s.CountryId == 1);
@@ -245,11 +244,17 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 newCompany.PrefferedNubanBank = company.PrefferedNubanBank;
                                 newCompany.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                message.BankName = company.PrefferedNubanBank;
+                                message.AccountName = customerNubanAccount.data.account_name;
+                                message.AccountNo = customerNubanAccount.data.account_number;
+                                message.IsCoporate = true;
                             }
                         }
                     }
                     _uow.Complete();
                 }
+
+                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
                 if (company.Rank == Rank.Class)
                 {
