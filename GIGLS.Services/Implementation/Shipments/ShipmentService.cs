@@ -4938,8 +4938,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.CompanyType = shipment.CustomerDetails.CustomerType.ToString();
             }
 
-            shipment.InternationalShipmentType = InternationalShipmentType.DHL;
             shipment.IsInternational = true;
+            shipment.InternationalShippingCost = shipmentDTO.InternationalShippingCost;
+            shipment.Courier = shipmentDTO.CompanyMap.ToString();
             return shipment;
         }
 
@@ -4969,6 +4970,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //Get Approximate Items Weight
                 shipmentDTO.ApproximateItemsWeight = shipmentDTO.ShipmentItems.Sum(x => x.Weight);
+
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);

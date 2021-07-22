@@ -161,7 +161,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string DestinationServiceCentreName { get; set; }
         public string FileNameUrl { get; set; }
         public string InternationalWayBill { get; set; }
-
+        public decimal? InternationalShippingCost { get; set; } = 0;
+        public string Courier { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
