@@ -252,6 +252,7 @@ namespace GIGLS.Services.Implementation.Customers
                         }
                     }
                     _uow.Complete();
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.UserAccountCreation, message);
                 }
 
                 await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);

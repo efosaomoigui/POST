@@ -210,6 +210,15 @@ namespace GIGLS.Messaging.MessageService
                 { "TPL_CustomerEmail", message.To },
                 { "TPL_Password", message.Body }
             });
+            if (message.IsCoporate)
+            {
+                myMessage.AddSubstitutions(new Dictionary<string, string>
+                {
+                    { "TPL_AccountName", message.AccountName },
+                    { "TPL_AccountNo", message.AccountNo },
+                    { "TPL_BankName", message.BankName }
+                });
+            }
 
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
