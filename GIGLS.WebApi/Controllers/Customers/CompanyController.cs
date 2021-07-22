@@ -43,6 +43,21 @@ namespace GIGLS.WebApi.Controllers.Customers
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{searchParams}/emailorcode")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompaniesByEmailOrCode(string searchParams)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetCompaniesByEmailOrCode(searchParams);
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("search")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies(BaseFilterCriteria filterCriteria)

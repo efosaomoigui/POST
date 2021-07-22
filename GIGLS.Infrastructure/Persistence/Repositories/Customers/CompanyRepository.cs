@@ -42,6 +42,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
+        public Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams)
+        {
+            try
+            {
+                searchParams = searchParams.Trim().ToLower();
+                var companies = _context.Company.Where(x=>x.CustomerCode.ToLower().Equals(searchParams) || x.Email.ToLower().Equals(searchParams)).AsQueryable();
+                var companiesDto = GetListOfCompany(companies);
+                return companiesDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
         {
             try
