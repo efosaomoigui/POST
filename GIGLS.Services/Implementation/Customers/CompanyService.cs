@@ -252,8 +252,16 @@ namespace GIGLS.Services.Implementation.Customers
                             }
                         }
                     }
+                    var msgObj = new CoporateSignupMessageDTO();
+                    msgObj.Password = password;
+                    msgObj.ToEmail = company.Email;
+                    msgObj.IsCoporate = true;
+                    msgObj.CustomerCode = newCompany.CustomerCode;
+                    msgObj.BankName = message.BankName;
+                    msgObj.AccountName = message.AccountName;
+                    msgObj.AccountNo = message.AccountNo;
                     _uow.Complete();
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.UserAccountCreation, message);
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.UserAccountCreation, msgObj);
                 }
 
                 await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);

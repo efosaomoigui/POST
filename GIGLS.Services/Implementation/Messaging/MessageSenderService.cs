@@ -1133,6 +1133,31 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = passwordMessageDTO.UserEmail;
             }
 
+            if (obj is CoporateSignupMessageDTO)
+            {
+                var strArray = new string[]
+                  {
+                    "Password",
+                    "UserEmail",
+                    "CustomerCode",
+                    ""
+                  };
+                var msgDTO = (CoporateSignupMessageDTO)obj;
+
+                strArray[0] = msgDTO.Password;
+                strArray[1] = msgDTO.ToEmail;
+                strArray[2] = msgDTO.CustomerCode;
+                if (msgDTO.IsCoporate)
+                {
+                    strArray[3] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}"; 
+                }
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = msgDTO.ToEmail;
+            }
+
             //5 obj is EcommerceMessageDTO
             if (obj is EcommerceMessageDTO)
             {
