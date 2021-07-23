@@ -247,6 +247,7 @@ namespace GIGLS.Services.Implementation.Customers
                                 message.BankName = company.PrefferedNubanBank;
                                 message.AccountName = customerNubanAccount.data.account_name;
                                 message.AccountNo = customerNubanAccount.data.account_number;
+                                message.ToEmail = company.Email;
                                 message.IsCoporate = true;
                             }
                         }
