@@ -2444,8 +2444,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpPost]
-        [Route("getcorporatecustomer")]
+        [HttpGet]
+        [Route("getcorporatecustomer/{customerCode}")]
         public async Task<IServiceResponse<CustomerDTO>> GetCorporateCustomer(string customerCode)
         {
             return await HandleApiOperationAsync(async () =>
