@@ -2443,5 +2443,33 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getcorporatecustomer")]
+        public async Task<IServiceResponse<CustomerDTO>> GetCorporateCustomer(string customerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetCorporateCustomer(customerCode);
+                return new ServiceResponse<CustomerDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("corporateshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CreateCorporateShipment(corporateShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

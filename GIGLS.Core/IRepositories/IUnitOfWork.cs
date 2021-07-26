@@ -208,6 +208,7 @@ namespace GIGLS.Core
         IPriceCategoryRepository PriceCategory { get; set; }
         ICaptainBonusByZoneMapingRepository CaptainBonusByZoneMaping { get; set; }
         ICustomerInvoiceRepository CustomerInvoice { get; set; }
+        IWaybillChargeRepository WaybillCharge { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

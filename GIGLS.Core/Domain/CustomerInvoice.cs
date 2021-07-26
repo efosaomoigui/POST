@@ -32,6 +32,7 @@ namespace GIGLS.Core.Domain
         [MaxLength(128)]
         public string CustomerCode { get; set; }
         public virtual List<InvoiceCharge> InvoiceCharges { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
     }
 
     public class InvoiceCharge : BaseDomain, IAuditable

@@ -32,6 +32,7 @@ using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -989,6 +990,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     UserServiceCentreName = deptCentre.Name
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
+
+                //also create customer charges if  any
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
+                    {
+                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
+                        foreach (var item in waybillCharges)
+                        {
+                            item.Waybill = newShipment.Waybill;
+                        }
+                        _uow.WaybillCharge.AddRange(waybillCharges);
+                    }
+                }
+
+
+
+
+
                 await _uow.CompleteAsync();
 
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))

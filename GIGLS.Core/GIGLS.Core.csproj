@@ -158,6 +158,7 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
     <Compile Include="Domain\DeliveryNumber.cs" />
     <Compile Include="Domain\DeliveryNumberDTO.cs" />
@@ -647,12 +648,13 @@
     <Compile Include="IMessageService\IMessageService.cs" />
     <Compile Include="IMessageService\ISMSService.cs" />
     <Compile Include="IMessageService\IWhatsappService.cs" />
+    <Compile Include="IRepositories\Account\ICustomerInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IFinancialReportRepository.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
-    <Compile Include="IRepositories\Account\ICustomerInvoiceRepository.cs" />
+    <Compile Include="IRepositories\Account\IWaybillChargeRepository.cs" />
     <Compile Include="IRepositories\Account\IVATRepository.cs" />
     <Compile Include="IRepositories\Archived\IInvoiceArchiveRepository.cs" />
     <Compile Include="IRepositories\Archived\IShipmentArchiveRepository.cs" />
