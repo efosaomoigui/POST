@@ -12,5 +12,6 @@ namespace GIGLS.Core.DTO.DHL
         public decimal Discount { get; set; }
         public CompanyMap CompanyMap { get; set; }
         public decimal InternationalShippingCost { get; set; }
+        public string ShipmentMethod { get; set; } = "Express";
     }
 }

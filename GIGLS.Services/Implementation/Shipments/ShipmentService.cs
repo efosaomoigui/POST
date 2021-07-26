@@ -1034,7 +1034,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Send mail for shipment creation
                 //if (newShipment != null)
                 //{
-                   //await SendEmailToCustomerForShipmentCreation(newShipment);
+                //await SendEmailToCustomerForShipmentCreation(newShipment);
                 //}
                 return newShipment;
             }
@@ -4505,6 +4505,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //3. Get the result and merge it to the price result
                 var finalResult = new List<TotalNetResult>();
+                decimal dhlAmount = 0, upsAmount = 0;
 
                 foreach (string courier in courierList)
                 {
@@ -4518,6 +4519,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             ups.CompanyMap = CompanyMap.UPS;
                             ups.Currency = country.CurrencySymbol;
+                            upsAmount = ups.GrandTotal;
                             finalResult.Add(ups);
                         }
                     }
@@ -4529,8 +4531,25 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             dhl.CompanyMap = CompanyMap.DHL;
                             dhl.Currency = country.CurrencySymbol;
+                            dhlAmount = dhl.GrandTotal;
                             finalResult.Add(dhl);
                         }
+                    }
+                }
+
+                // the best way to compare both amount is to loop through the finalResult twice
+
+                if (finalResult.Count > 1)
+                {
+                    if (dhlAmount > upsAmount)
+                    {
+                        finalResult[0].ShipmentMethod = "Regular"; // UPS
+                        finalResult[1].ShipmentMethod = "Express"; // DHL
+                    }
+                    if (upsAmount > dhlAmount)
+                    {
+                        finalResult[0].ShipmentMethod = "Express"; // UPS
+                        finalResult[1].ShipmentMethod = "Regular"; // DHL
                     }
                 }
 
@@ -4613,8 +4632,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentDTO.IsFromMobile && shipmentDTO.VehicleType != null)
             {
-                var globalProperty = shipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() ? GlobalPropertyType.BikeBasePrice 
-                    : shipmentDTO.VehicleType.ToLower() == Vehicletype.Car.ToString().ToLower() ? GlobalPropertyType.CarPickupPrice 
+                var globalProperty = shipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() ? GlobalPropertyType.BikeBasePrice
+                    : shipmentDTO.VehicleType.ToLower() == Vehicletype.Car.ToString().ToLower() ? GlobalPropertyType.CarPickupPrice
                     : GlobalPropertyType.VanPickupPrice;
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var pickupPrice = Convert.ToDecimal(globalValue.Value);
