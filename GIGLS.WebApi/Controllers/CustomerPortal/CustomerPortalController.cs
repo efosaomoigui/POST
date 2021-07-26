@@ -2415,5 +2415,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet, Route("allcountry")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var country = await _portalService.GetCountries();
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = country
+                };
+            });
+        }
     }
 }

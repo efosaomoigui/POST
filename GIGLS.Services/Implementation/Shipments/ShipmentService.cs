@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.DHL;
@@ -68,6 +69,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly IUPSService _UPSService;
         private readonly IInternationalPriceService _internationalPriceService;
+        private readonly ICountryService _countryService;
+
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -78,7 +81,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
-            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService)
+            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
+            ICountryService countryService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -101,6 +105,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _waybillPaymentLogService = waybillPaymentLogService;
             _UPSService = uPSService;
             _internationalPriceService = internationalPriceService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
@@ -4497,9 +4502,21 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var country = new CountryDTO();
+                const int currentShippingCountry = 1;
                 //1. Get which third party was enable 
-                var country = await _userService.GetUserActiveCountry();
-
+                if (shipmentDTO.IsFromMobile)
+                {
+                    country = await _countryService.GetCountryById(shipmentDTO.DepartureCountryId);
+                    if (shipmentDTO.RequestType == InternationalRequestType.Rates && shipmentDTO.DepartureCountryId != currentShippingCountry)
+                    {
+                        throw new GenericException($"We don't currently ship from {country.CountryName} at the moment");
+                    }
+                }
+                else
+                {
+                    country = await _userService.GetUserActiveCountry();
+                }
                 //2. Extract it into an array and loop throught it
                 string[] courierList = country.CourierEnable.Split(',');
 
@@ -4601,7 +4618,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
         {
-            var countryId = await _userService.GetUserActiveCountryId();
+            var countryId = 0;
+            if (shipmentDTO.IsFromMobile)
+            {
+                var result = await _countryService.GetCountryById(shipmentDTO.DepartureCountryId);
+                countryId = result.CountryId;
+            }
+            else
+            {
+                countryId = await _userService.GetUserActiveCountryId();
+            }
             var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
             total.Amount = total.Amount - total.Insurance;

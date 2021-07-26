@@ -28,11 +28,13 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepartureCountryId { get; set; }
         [Required]
         public int DestinationCountryId { get; set; }
+        public bool IsFromMobile { get; set; } = true;
+        public InternationalRequestType RequestType { get; set; } = InternationalRequestType.QuickQuote;
     }
 
     public class RateInternationalShipmentDTO : InternationalShipmenManipulationtDTO
     {
-        
+        public InternationalRequestType RequestType { get; set; } = InternationalRequestType.Rates;
     }
 
     public class CreateInternationalShipmentDTO : InternationalShipmenManipulationtDTO
@@ -47,9 +49,10 @@ namespace GIGLS.Core.DTO.Shipments
         public override decimal GrandTotal { get; set; }
         [Required]
         public override decimal InternationalShippingCost { get; set; }
+        public InternationalRequestType RequestType { get; set; } = InternationalRequestType.CaptureShipment;
     }
 
-    
+
     public abstract class InternationalShipmenManipulationtDTO : BaseDomainDTO
     {
         [Required]

@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -22,10 +23,12 @@ namespace GIGLS.Services.Business.DHL
     {
         private readonly IUserService _userService;
         private readonly IGlobalPropertyService _globalPropertyService;
-        public DHLService(IUserService userService, IGlobalPropertyService globalPropertyService)
+        private readonly ICountryService _countryService;
+        public DHLService(IUserService userService, IGlobalPropertyService globalPropertyService, ICountryService countryService)
         {
             _userService = userService;
             _globalPropertyService = globalPropertyService;
+            _countryService = countryService;
         }
 
         public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
@@ -135,7 +138,7 @@ namespace GIGLS.Services.Business.DHL
         private async Task<ShippingPayload> GetShipmentRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var shipmentPayload = new ShippingPayload();
-            var shippingDate = await AddWorkdays();
+            var shippingDate = await AddWorkdays(shipmentDTO.IsFromMobile, shipmentDTO.DepartureCountryId);
             shipmentPayload.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             shipmentPayload.Pickup.IsRequested = false;
             shipmentPayload.Accounts.Add(GetAccount());
@@ -408,7 +411,7 @@ namespace GIGLS.Services.Business.DHL
         private async Task<RatePayload> GetRateRequestPayload(InternationalShipmentDTO shipmentDTO)
         {
             var rateRequest = new RatePayload();
-            var shippingDate = await AddWorkdays();
+            var shippingDate = await AddWorkdays(shipmentDTO.IsFromMobile, shipmentDTO.DepartureCountryId);
             rateRequest.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
             rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
@@ -545,9 +548,18 @@ namespace GIGLS.Services.Business.DHL
             }
         }
 
-        private async Task<DateTime> AddWorkdays()
+        private async Task<DateTime> AddWorkdays(bool isFrombile, int departureCountryId)
         {
-            var countryId = await _userService.GetUserActiveCountryId();
+            int countryId = 0;
+            if (isFrombile)
+            {
+                var result = await _countryService.GetCountryById(departureCountryId);
+                countryId = result.CountryId;
+            }
+            else
+            {
+                countryId = await _userService.GetUserActiveCountryId();
+            }
             var shipTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PlannedShippingDateAndTime, countryId);
             int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
             var tmpDate = DateTime.Today;

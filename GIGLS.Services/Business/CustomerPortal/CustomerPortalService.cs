@@ -3533,7 +3533,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return websiteCountries;
         }
 
-
-
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        {
+           return await _countryService.GetCountries();
+        }
     }
 }
