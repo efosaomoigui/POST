@@ -1161,7 +1161,7 @@ namespace GIGLS.Services.Business.Scanning
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
-            //3. Create a scan status for it
+            //Create a scan status for it
             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
                 DateTime = DateTime.Now,
@@ -1171,6 +1171,11 @@ namespace GIGLS.Services.Business.Scanning
                 Location = serviceCentreName,
                 ServiceCentreId = currentUserSercentreId
             }, scan.ShipmentScanStatus);
+
+            //Update shipment status on shipment table
+            shipment.ShipmentScanStatus = ShipmentScanStatus.DUBC;
+
+           await _uow.CompleteAsync();
         }
 
         /// <summary>
