@@ -965,6 +965,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //also add waybill charges if  any to grand total
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
+                    {
+                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
+                        shipmentDTO.GrandTotal =+  waybillCharges.Sum(x => x.Amount);
+                    }
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
@@ -972,6 +982,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
+
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
+                    {
+                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
+                        foreach (var item in waybillCharges)
+                        {
+                            item.Waybill = newShipment.Waybill;
+                        }
+                        _uow.WaybillCharge.AddRange(waybillCharges);
+                    }
+                }
 
                 //QR Code
                 await GenerateDeliveryNumber(newShipment.Waybill);
@@ -990,25 +1013,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     UserServiceCentreName = deptCentre.Name
                 };
                 _uow.ShipmentTimeMonitor.Add(timeMonitor);
-
-                //also create customer charges if  any
-                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
-                {
-                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
-                    {
-                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
-                        foreach (var item in waybillCharges)
-                        {
-                            item.Waybill = newShipment.Waybill;
-                        }
-                        _uow.WaybillCharge.AddRange(waybillCharges);
-                    }
-                }
-
-
-
-
-
                 await _uow.CompleteAsync();
 
                 if (!string.IsNullOrEmpty(shipmentDTO.TempCode))

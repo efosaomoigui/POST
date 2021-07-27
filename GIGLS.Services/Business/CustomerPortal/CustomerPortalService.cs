@@ -3641,17 +3641,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"customer does not exist");
             }
+            var customerList = new List<CustomerDTO>();
             var customerDto = await _customerService.GetCustomer(customer.UserChannelCode, customer.UserChannelType);
             var userId = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(userId);
             var shipmentDTO = JObject.FromObject(corporateShipmentDTO).ToObject<ShipmentDTO>();
+            shipmentDTO.Customer = customerList;
             shipmentDTO.UserId = userId;
             shipmentDTO.CompanyType = customerDto.CompanyType.ToString();
             shipmentDTO.CustomerDetails = customerDto;
             shipmentDTO.DeliveryOptionId = 1;
+            shipmentDTO.DeliveryOptionIds.Add(shipmentDTO.DeliveryOptionId);
             shipmentDTO.PickupOptions = PickupOptions.HOMEDELIVERY;
             shipmentDTO.Customer.Add(customerDto);
             shipmentDTO.WaybillCharges = corporateShipmentDTO.WaybillCharges;
+            shipmentDTO.CustomerType = customerDto.CustomerType.ToString();
             var result = await _shipmentService.AddShipment(shipmentDTO);
             return result;
         }

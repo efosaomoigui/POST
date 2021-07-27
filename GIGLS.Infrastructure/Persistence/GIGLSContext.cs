@@ -299,7 +299,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<RankHistory> RankHistory { get; set; }
         public DbSet<PriceCategory> PriceCategory { get; set; }
         public DbSet<CustomerInvoice> CustomerInvoice { get; set; }
-        public DbSet<InvoiceCharge> InvoiceCharge { get; set; }
+        public DbSet<WaybillCharge> WaybillCharge { get; set; }
 
         //routes
         public DbSet<Route> Routes { get; }
