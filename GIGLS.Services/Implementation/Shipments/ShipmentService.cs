@@ -970,8 +970,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
                     {
-                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
-                        shipmentDTO.GrandTotal =+  waybillCharges.Sum(x => x.Amount);
+                        shipmentDTO.GrandTotal =+ shipmentDTO.WaybillCharges.Sum(x => x.Amount);
                     }
                 }
 
@@ -983,6 +982,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
+                //if sender is corporate check for waybill charges
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
                 {
                     if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
@@ -1042,8 +1042,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
                 {
-                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
-                    var wallet = walletEnumeration.FirstOrDefault();
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
 
                     if (wallet != null)
                     {
