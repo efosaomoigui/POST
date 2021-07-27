@@ -1171,11 +1171,6 @@ namespace GIGLS.Services.Business.Scanning
                 Location = serviceCentreName,
                 ServiceCentreId = currentUserSercentreId
             }, scan.ShipmentScanStatus);
-
-            //Update shipment status on shipment table
-            shipment.ShipmentScanStatus = ShipmentScanStatus.DUBC;
-
-           await _uow.CompleteAsync();
         }
 
         /// <summary>
