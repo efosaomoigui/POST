@@ -488,7 +488,7 @@ namespace GIGLS.Services.Business.DHL
             address.PostalCode = shipmentDTO.ReceiverPostalCode != null ? shipmentDTO.ReceiverPostalCode : string.Empty;
             address.CountryCode = shipmentDTO.ReceiverCountryCode.Trim();
             address.CountyName = shipmentDTO.ReceiverCountry;
-            address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || shipmentDTO.ReceiverStateOrProvinceCode == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
+            address.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || string.IsNullOrEmpty(shipmentDTO.ReceiverStateOrProvinceCode) ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
             if (splittedAddress.Length <= 1)
             {
                 address.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
