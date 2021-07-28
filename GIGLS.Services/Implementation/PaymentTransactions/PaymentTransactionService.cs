@@ -712,6 +712,34 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     {
                         //Update shipment to shipment created
                         shipmentToUpdate.shipmentstatus = "Shipment created";
+                        var userId = await _userService.GetCurrentUserId();
+                        var user = await _uow.User.GetUserById(userId);
+                        if (user != null)
+                        {
+                            if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                            {
+                                var indCust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                                if (indCust != null)
+                                {
+                                    shipmentToUpdate.CustomerCode = user.UserChannelCode;
+                                    shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
+                                    shipmentToUpdate.CompanyType = CompanyType.Client.ToString();
+                                    shipmentToUpdate.UserId = userId;
+                                }
+                            }
+                            else if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.Ecommerce)
+                            {
+                                var compCust = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                                if (compCust != null)
+                                {
+                                    shipmentToUpdate.CustomerCode = user.UserChannelCode;
+                                    shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
+                                    shipmentToUpdate.CompanyType = compCust.CompanyType.ToString();
+                                    shipmentToUpdate.UserId = userId;
+                                }
+                            }
+                           
+                        }
                     }
                 }
                 await _uow.CompleteAsync();

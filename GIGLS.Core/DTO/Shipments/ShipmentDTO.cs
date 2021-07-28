@@ -161,6 +161,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string DestinationServiceCentreName { get; set; }
         public string FileNameUrl { get; set; }
         public string InternationalWayBill { get; set; }
+        public int SenderStationId { get; set; }
+        public int ReceiverStationId { get; set; }
 
     }
 
