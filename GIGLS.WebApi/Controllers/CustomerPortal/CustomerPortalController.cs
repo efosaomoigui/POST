@@ -2458,6 +2458,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpPost]
+        [Route("getshipmentprice")]
+        public async Task<IServiceResponse<NewPricingDTO>> GetShipmentPrice(CorporateShipmentDTO newShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _tickectMan.GetGrandPriceForShipment(newShipmentDTO);
+                return new ServiceResponse<NewPricingDTO>
+                {
+                    Object = price
+                };
+            });
+        }
+
         [HttpPost]
         [Route("corporateshipment")]
         public async Task<IServiceResponse<ShipmentDTO>> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO)

@@ -228,5 +228,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo);
         Task<CustomerDTO> GetCorporateCustomer(string customerCode);
         Task<ShipmentDTO> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO);
+        Task<NewPricingDTO> GetGrandPriceForShipment(CorporateShipmentDTO corporateShipmentDTO);
     }
 }

@@ -1238,6 +1238,20 @@ namespace GIGLS.Services.Business.Pricing
                 //totalPrice += newPrice;
             }
 
+            //also add waybill charges if  any to grand total
+            var customer = await _uow.Company.GetAsync(x => x.CustomerCode == newShipmentDTO.CustomerCode);
+            if (customer != null)
+            {
+                if (customer.CompanyType == CompanyType.Corporate)
+                {
+                    if (newShipmentDTO.WaybillCharges != null && newShipmentDTO.WaybillCharges.Any())
+                    {
+                        var amount = newShipmentDTO.WaybillCharges.Sum(x => x.Amount);
+                        totalPrice = totalPrice + amount;
+                    }
+                } 
+            }
+
             //calculate the vat
             var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == newShipmentDTO.DepartureCountryId);
             decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);

@@ -965,15 +965,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                //also add waybill charges if  any to grand total
-                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
-                {
-                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
-                    {
-                        shipmentDTO.GrandTotal =+ shipmentDTO.WaybillCharges.Sum(x => x.Amount);
-                    }
-                }
-
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;

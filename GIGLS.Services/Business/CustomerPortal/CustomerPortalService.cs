@@ -3656,6 +3656,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             shipmentDTO.Customer.Add(customerDto);
             shipmentDTO.WaybillCharges = corporateShipmentDTO.WaybillCharges;
             shipmentDTO.CustomerType = customerDto.CustomerType.ToString();
+
+            //re-calculate price
+            var newShipmentDTO = JObject.FromObject(corporateShipmentDTO).ToObject<NewShipmentDTO>();
+            var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
+            shipmentDTO.GrandTotal = price.GrandTotal;
+            shipmentDTO.Total = price.Total;
+            shipmentDTO.Vat = price.Vat;
+            shipmentDTO.Insurance = price.Insurance;
+            shipmentDTO.DiscountValue = price.DiscountedValue;
+
             var result = await _shipmentService.AddShipment(shipmentDTO);
             return result;
         }
@@ -3670,6 +3680,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             var customerDto = await _customerService.GetCustomer(customer.UserChannelCode, customer.UserChannelType);
             return customerDto;
+        }
+
+        public async Task<NewPricingDTO> GetGrandPriceForShipment(CorporateShipmentDTO corporateShipmentDTO)
+        {
+            var newShipmentDTO = JObject.FromObject(corporateShipmentDTO).ToObject<NewShipmentDTO>();
+            var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
+            return price;
         }
     }
 }
