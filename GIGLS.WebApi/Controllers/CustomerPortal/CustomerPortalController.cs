@@ -2443,5 +2443,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPut]
+        [Route("gigxuserdetails")]
+        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SaveGIGXUserDetails(userDetails);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

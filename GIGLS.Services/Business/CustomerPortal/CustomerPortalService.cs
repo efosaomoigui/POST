@@ -3624,5 +3624,27 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
             return true;
         }
+
+        public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        {
+            if (userDetails is null)
+            {
+                throw new GenericException("Please provide valid GIGX user details");
+            }
+
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+
+            if(user is null)
+            {
+                throw new GenericException("User does not exit");
+            }
+
+            user.WalletAddress = userDetails.WalletAddress;
+            user.PrimaryKey = userDetails.PrimaryKey;
+            user.SecretKey = userDetails.SecretKey;
+            await _uow.CompleteAsync();
+            return true;
+        }
     }
 }

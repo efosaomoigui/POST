@@ -57,6 +57,10 @@ namespace GIGL.GIGLS.Core.Domain
         public string CountryType { get; set; }
         public int AssignedEcommerceCustomer { get; set; }
         public bool IsRequestNewPassword { get; set; }
+        public string WalletAddress { get; set; }
+        public string PrimaryKey { get; set; }
+        public string SecretKey { get; set; }
+
 
 
 
