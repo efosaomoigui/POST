@@ -26,6 +26,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -716,6 +717,23 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         var user = await _uow.User.GetUserById(userId);
                         if (user != null)
                         {
+
+                            //Pin Generation 
+                            var message = new MobileShipmentCreationMessageDTO
+                            {
+                                SenderPhoneNumber = shipmentToUpdate.SenderPhoneNumber,
+                                WaybillNumber = shipmentToUpdate.Waybill
+                            };
+                            var number = await _globalPropertyService.GenerateDeliveryCode();
+                            var deliveryNumber = new DeliveryNumber
+                            {
+                                SenderCode = number,
+                                IsUsed = false,
+                                Waybill = shipmentToUpdate.Waybill
+                            };
+                            _uow.DeliveryNumber.Add(deliveryNumber);
+                            message.QRCode = deliveryNumber.SenderCode;
+
                             if (user.UserChannelType == UserChannelType.IndividualCustomer)
                             {
                                 var indCust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
@@ -725,6 +743,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                                     shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
                                     shipmentToUpdate.CompanyType = CompanyType.Client.ToString();
                                     shipmentToUpdate.UserId = userId;
+                                    shipmentToUpdate.SenderPhoneNumber = indCust.PhoneNumber;
+                                    message.SenderName = indCust.FirstName + " " + indCust.LastName;
                                 }
                             }
                             else if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.Ecommerce)
@@ -736,9 +756,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                                     shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
                                     shipmentToUpdate.CompanyType = compCust.CompanyType.ToString();
                                     shipmentToUpdate.UserId = userId;
+                                    shipmentToUpdate.SenderPhoneNumber = compCust.PhoneNumber;
+                                    message.SenderName = compCust.Name;
                                 }
                             }
-                           
+                            await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, message);
                         }
                     }
                 }
