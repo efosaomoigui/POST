@@ -345,6 +345,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                         }
                     }
+
+                    //also get waybill charges if any for only corporate
+                    if (shipmentDto.CustomerDetails.CompanyType == CompanyType.Corporate)
+                    {
+                        var waybillcharges = _uow.WaybillCharge.GetAllAsQueryable().Where(x => x.Waybill == shipmentDto.Waybill).ToList();
+                        if (waybillcharges.Any())
+                        {
+                            shipmentDto.WaybillCharges = JArray.FromObject(waybillcharges).ToObject<List<WaybillChargeDTO>>();
+                        }
+                    }
                 }
                 return shipmentDto;
             }
@@ -962,15 +972,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (customerId.CompanyStatus != CompanyStatus.Active)
                     {
                         throw new GenericException($"{customerId.Name} account has been {customerId.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                }
-
-                //also add waybill charges if  any to grand total
-                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
-                {
-                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
-                    {
-                        shipmentDTO.GrandTotal =+ shipmentDTO.WaybillCharges.Sum(x => x.Amount);
                     }
                 }
 
