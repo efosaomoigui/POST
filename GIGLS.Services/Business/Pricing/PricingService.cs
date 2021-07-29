@@ -1224,6 +1224,7 @@ namespace GIGLS.Services.Business.Pricing
                 priceDTO.Width = Convert.ToDecimal(item.Width);
                 priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
                 priceDTO.CustomerCode = newShipmentDTO.CustomerCode;
+                priceDTO.DeliveryOptionIds = newShipmentDTO.DeliveryOptionIds;
 
                 if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Regular.ToString().ToLower())
                 {
