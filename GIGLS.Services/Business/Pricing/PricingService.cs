@@ -1213,7 +1213,14 @@ namespace GIGLS.Services.Business.Pricing
                 priceDTO.IsVolumetric = item.IsVolumetric;
                 priceDTO.Height = Convert.ToDecimal(item.Height);
                 priceDTO.ShipmentType = item.ShipmentType;
-                priceDTO.SpecialPackageId = item.SpecialPackageId.Value;
+                if (item.SpecialPackageId != null)
+                {
+                    priceDTO.SpecialPackageId = item.SpecialPackageId.Value; 
+                }
+                else
+                {
+                    priceDTO.SpecialPackageId = 0;
+                }
                 priceDTO.Width = Convert.ToDecimal(item.Width);
                 priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
                 priceDTO.CustomerCode = newShipmentDTO.CustomerCode;
