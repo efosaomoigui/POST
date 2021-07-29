@@ -3659,6 +3659,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             //re-calculate price
             var newShipmentDTO = JObject.FromObject(corporateShipmentDTO).ToObject<NewShipmentDTO>();
+            newShipmentDTO.DeliveryOptionIds.Add(shipmentDTO.DeliveryOptionId);
+            newShipmentDTO.DeliveryOptionId = shipmentDTO.DeliveryOptionId;
             var price = await _pricing.GetGrandPriceForShipment(newShipmentDTO);
             shipmentDTO.GrandTotal = price.GrandTotal;
             shipmentDTO.Total = price.Total;
