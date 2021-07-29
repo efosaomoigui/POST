@@ -160,8 +160,8 @@ namespace GIGLS.WebApi.Providers
                     { "CountryType", user.CountryType},
                     { "IsRequestNewPassword", user.IsRequestNewPassword.ToString()},
                     { "WalletAddress", user.WalletAddress},
-                    { "PrimaryKey", user.PrimaryKey},
-                    { "SecretKey", user.SecretKey},
+                    { "PrivateKey", user.PrivateKey},
+                    { "PublicKey", user.PublicKey},
                 };
 
                 //get claims for the user

@@ -3632,6 +3632,21 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide valid GIGX user details");
             }
 
+            if (string.IsNullOrWhiteSpace(userDetails.WalletAddress))
+            {
+                throw new GenericException("Wallet Address is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(userDetails.PrivateKey))
+            {
+                throw new GenericException("Private Key is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(userDetails.PublicKey))
+            {
+                throw new GenericException("Public Key is required");
+            }
+
             var userId = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(userId);
 
@@ -3640,9 +3655,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("User does not exit");
             }
 
-            user.WalletAddress = userDetails.WalletAddress;
-            user.PrimaryKey = userDetails.PrimaryKey;
-            user.SecretKey = userDetails.SecretKey;
+            user.WalletAddress = userDetails.WalletAddress.Trim();
+            user.PrivateKey = userDetails.PrivateKey.Trim();
+            user.PublicKey = userDetails.PublicKey.Trim();
             await _uow.CompleteAsync();
             return true;
         }

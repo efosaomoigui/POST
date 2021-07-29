@@ -58,8 +58,8 @@ namespace GIGL.GIGLS.Core.Domain
         public int AssignedEcommerceCustomer { get; set; }
         public bool IsRequestNewPassword { get; set; }
         public string WalletAddress { get; set; }
-        public string PrimaryKey { get; set; }
-        public string SecretKey { get; set; }
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
 
 
 
