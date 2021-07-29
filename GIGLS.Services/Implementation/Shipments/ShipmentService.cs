@@ -995,6 +995,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         _uow.WaybillCharge.AddRange(waybillCharges);
                     }
+
+                    //check if this corporate user has an outstanding payment
+                    var outstanding = await CheckCorporateOutstandingPayment(shipmentDTO.CustomerCode);
+                    if (outstanding)
+                    {
+                        throw new GenericException($"{shipmentDTO.CustomerDetails.Name} has an outstanding payment ", $"{(int)HttpStatusCode.BadRequest}");
+                    }
                 }
 
                 //QR Code
@@ -5407,6 +5414,33 @@ namespace GIGLS.Services.Implementation.Shipments
 
             }
             return true;
+        }
+
+        public async Task<bool> CheckCorporateOutstandingPayment(string customerCode)
+        {
+            var now = DateTime.Now;
+            DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+            DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+            firstDay = firstDay.ToUniversalTime();
+            firstDay = firstDay.AddHours(12).AddMinutes(00);
+            lastDay = lastDay.ToUniversalTime();
+            lastDay = lastDay.AddHours(23).AddMinutes(59);
+            var shipment = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.DateCreated >= firstDay && x.DateCreated <= lastDay && x.CustomerCode == customerCode);
+            if (shipment != null)
+            {
+                if (shipment.PaymentStatus != PaymentStatus.Paid)
+                {
+                    //check if last generated is up to 15 days
+                    var dateDiff = (shipment.DateCreated - now).TotalDays;
+                    if (dateDiff >= 15)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
     }

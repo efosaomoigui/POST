@@ -1479,6 +1479,34 @@ namespace GIGLS.Services.Implementation.Wallet
                         UserId = user.Id
                     }, false);
                     await _uow.CompleteAsync();
+
+                    // also clear outstanding invoices
+                    var shipments = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.CustomerCode == coporateCustomer.CustomerCode && x.PaymentStatus != PaymentStatus.Paid).ToList();
+                    if (shipments.Any())
+                    {
+                        foreach (var shipment in shipments)
+                        {
+                            var tempWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                            if (tempWallet.Balance >= shipment.Total)
+                            {
+                                tempWallet.Balance = tempWallet.Balance - shipment.Total;
+                                await _walletService.UpdateWallet(tempWallet.WalletId, new WalletTransactionDTO()
+                                {
+                                    WalletId = wallet.WalletId,
+                                    Amount = shipment.Total,
+                                    CreditDebitType = CreditDebitType.Debit,
+                                    Description = "Automated Outstanding Payment",
+                                    PaymentType = PaymentType.Online,
+                                    PaymentTypeReference = customer.Reference,
+                                    UserId = user.Id
+                                }, false);
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
