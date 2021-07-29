@@ -3661,5 +3661,25 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _uow.CompleteAsync();
             return true;
         }
+
+        public async Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails()
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+
+            if (user is null)
+            {
+                throw new GenericException("User does not exit");
+            }
+
+            var result = new GIGXUserDetailsDTO
+            {
+                WalletAddress = user.WalletAddress,
+                PrivateKey = user.PrivateKey,
+                PublicKey = user.PublicKey
+            };
+           
+            return result;
+        }
     }
 }

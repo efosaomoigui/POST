@@ -2457,5 +2457,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getgigxuserwalletdetails")]
+        public async Task<IServiceResponse<GIGXUserDetailsDTO>> GetGIGXUserWalletDetails()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetGIGXUserWalletDetails();
+                return new ServiceResponse<GIGXUserDetailsDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -227,5 +227,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber);
         Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo);
         Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails);
+        Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails();
     }
 }
