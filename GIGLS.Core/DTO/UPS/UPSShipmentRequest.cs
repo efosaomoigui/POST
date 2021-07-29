@@ -31,6 +31,7 @@ namespace GIGLS.Core.DTO.UPS
     public class Request
     {
         public string RequestOption { get; set; } = "validate";
+        public TransactionReference TransactionReference { get; set; }
     }
 
     public class UPSShipment
@@ -98,5 +99,10 @@ namespace GIGLS.Core.DTO.UPS
     {
         public string Code { get; set; } = "07";
         public string Description { get; set; } = "Express Saver";
+    }
+
+    public class TransactionReference
+    {
+        public string CustomerContext { get; set; } // Your Customer Context
     }
 }
