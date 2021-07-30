@@ -1437,7 +1437,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _portalService.CancelShipment(waybillNumber);
+                var cancel = new CancelShipmentDTO
+                {
+                    Waybill = waybillNumber,
+                    CancelReason = "None",
+                };
+                var flag = await _portalService.CancelShipment(cancel.Waybill);
 
                 return new ServiceResponse<object>
                 {
