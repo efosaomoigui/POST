@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.Messaging
 {
@@ -14,7 +15,7 @@ namespace GIGLS.WebApi.Controllers.Messaging
     {
         private readonly IMessageService _messageService;
 
-        public MessageController(IMessageService messageService):base(nameof(MessageController))
+        public MessageController(IMessageService messageService) :base(nameof(MessageController))
         {
             _messageService = messageService;
         }
@@ -115,6 +116,6 @@ namespace GIGLS.WebApi.Controllers.Messaging
                 };
             });
         }
-        
+
     }
 }

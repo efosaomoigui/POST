@@ -9,6 +9,8 @@ using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.OnlinePayment;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -270,14 +272,30 @@ namespace GIGLS.WebApi.Controllers.Customers
             });
         }
 
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{email}/assignedcustomersbycustomerrep")]
-        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetAssignedCustomersByCustomerRep(string email)
+        [Route("nubanproviders")]
+        public async Task<IServiceResponse<JObject>> GetNubanProviders()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var companies = await _service.GetAssignedCustomersByCustomerRepEmail(email);
+                var providers = await _service.GetNubanProviders();
+                return new ServiceResponse<JObject>
+                {
+                    Object = providers
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("assignedcustomersbycustomerrep")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetAssignedCustomersByCustomerRep(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetAssignedCustomersByCustomerRepEmail(filterCriteria);
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies

@@ -12,5 +12,8 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public PaymentType PaymentType { get; set; }
         public string UserId { get; set; }
         public bool FromApp { get; set; }
+        public bool IsNotOwner { get; set; }
+        public string CustomerCode { get; set; }
+        public string CustomerUserId { get; set; }
     }
 }

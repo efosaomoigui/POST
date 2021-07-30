@@ -5317,5 +5317,73 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
+        public async Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO)
+        {
+            if (paymentDTO == null)
+            {
+                throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (String.IsNullOrEmpty(paymentDTO.CustomerCode) && String.IsNullOrEmpty(paymentDTO.Email))
+            {
+                throw new GenericException("user info not provided", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (String.IsNullOrEmpty(paymentDTO.Waybill))
+            {
+                throw new GenericException("waybill not provided", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var customerCode = String.Empty;
+            var userid = String.Empty;
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == paymentDTO.Waybill);
+
+            if (invoice == null)
+            {
+                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            if (invoice.PaymentStatus == PaymentStatus.Paid)
+            {
+                throw new GenericException($"Payment already made for the Shipment {paymentDTO.Waybill}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            if (!String.IsNullOrEmpty(paymentDTO.CustomerCode))
+            {
+                var user = await _uow.User.GetUserByChannelCode(paymentDTO.CustomerCode);
+                if (user != null)
+                {
+                    customerCode = user.UserChannelCode;
+                    userid = user.Id;
+                }
+                else
+                {
+                    user = await _uow.User.GetUserByEmail(paymentDTO.CustomerCode);
+                    if (user == null)
+                    {
+                        throw new GenericException("user does not exist", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                    customerCode = user.UserChannelCode;
+                    userid = user.Id;
+                }
+            }
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet != null)
+            {
+                if (wallet.Balance < invoice.Amount)
+                {
+                    throw new GenericException("Insufficient Balance In Wallet", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                await _paymentService.ProcessPayment(new PaymentTransactionDTO()
+                {
+                    PaymentType = PaymentType.Wallet,
+                    TransactionCode = wallet.WalletNumber,
+                    Waybill = shipment.Waybill,
+                    IsNotOwner = true,
+                    CustomerCode = customerCode,
+                    CustomerUserId = userid
+
+                });
+
+            }
+            return true;
+        }
+
     }
 }

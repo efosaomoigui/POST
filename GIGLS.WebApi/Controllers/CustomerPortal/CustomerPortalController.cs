@@ -2401,5 +2401,47 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getwebsitecountrydata")]
+        public async Task<IServiceResponse<List<WebsiteCountryDTO>>> GetCoreForWebsite()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _portalService.GetCoreForWebsite();
+                return new ServiceResponse<List<WebsiteCountryDTO>>
+                {
+                    Object = item
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("optincustomerwhatsappnumber")]
+        public async Task<IServiceResponse<bool>> OptinCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.OptInCustomerWhatsappNumber(whatsappNumber);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("assignshipment")]
+        public async Task<IServiceResponse<AssignedShipmentDTO>> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.AssignShipmentToPartner(partnerInfo);
+                return new ServiceResponse<AssignedShipmentDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -69,6 +69,10 @@ using System.Web.Http;
 using GIGLS.Core.DTO.DHL;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -116,6 +120,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly INodeService _nodeService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -129,7 +134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -173,6 +178,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _shipmentService = shipmentService;
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _nodeService = nodeService;
             MapperConfig.Initialize();
         }
 
@@ -1590,7 +1596,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             string password = await Generate(6);
 
-            var result =  await _userService.ForgotPassword(user.Email, password);
+            var result = await _userService.ForgotPassword(user.Email, password);
 
             if (result.Succeeded)
             {
@@ -1603,7 +1609,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 // Send Email and SMS 
                 var response = await _messageSenderService.SendMessage(MessageType.PEmail, EmailSmsType.All, passwordMessage);
-                 
+
             }
             else
             {
@@ -3452,10 +3458,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
         {
-         
+
             var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
             return registerUser;
-                
+
         }
 
 
@@ -3491,6 +3497,132 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return result;
+        }
+
+
+        public async Task<List<WebsiteCountryDTO>> GetCoreForWebsite()
+        {
+
+            var countries = await _countryService.GetActiveCountries();
+            var countryIds = countries.Select(x => x.CountryId);
+            var states = _uow.State.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+            var stateIds = states.Select(x => x.StateId).ToList();
+            var stations = _uow.Station.GetAllAsQueryable().Where(x => stateIds.Contains(x.StateId)).ToList();
+            var stationIds = stations.Select(x => x.StationId).ToList();
+            var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => stationIds.Contains(x.StationId) && x.IsActive && x.IsPublic).ToList();
+            var websiteCountries = JArray.FromObject(countries).ToObject<List<WebsiteCountryDTO>>();
+            for (int i = 0; i < websiteCountries.Count; i++)
+            {
+                var cou = websiteCountries[i];
+                var webStates = states.Where(x => x.CountryId == cou.CountryId).ToList();
+                for (int j = 0; j < webStates.Count; j++)
+                {
+                    websiteCountries[i].States = (JArray.FromObject(webStates, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStateDTO>>());
+                    var sta = websiteCountries[i].States[j];
+                    var webStations = stations.Where(x => x.StateId == sta.StateId).ToList();
+                    for (int k = 0; k < webStations.Count; k++)
+                    {
+                        websiteCountries[i].States[j].Stations = (JArray.FromObject(webStations, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteStationDTO>>());
+
+                        var cen = websiteCountries[i].States[j].Stations[k];
+                        var webCentres = centres.Where(x => x.StationId == cen.StationId).ToList();
+                        for (int l = 0; l < webCentres.Count; l++)
+                        {
+                            websiteCountries[i].States[j].Stations[k].ServiceCentres = (JArray.FromObject(webCentres, new JsonSerializer { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }).ToObject<List<WebsiteServiceCentreDTO>>());
+                        }
+                    }
+
+                }
+            }
+            return websiteCountries;
+        }
+
+        public async Task<AssignedShipmentDTO> AssignShipmentToPartner(ShipmentAssignmentDTO partnerInfo)
+        {
+            try
+            {
+                var result = new AssignedShipmentDTO();
+
+                var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == partnerInfo.Waybill);
+                if (preshipment == null)
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} does not exist");
+                }
+
+                if (preshipment.shipmentstatus != "Shipment created")
+                {
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to Shipment Created to perform this action.");
+                }
+                if (string.IsNullOrWhiteSpace(partnerInfo.Email))
+                {
+                    throw new GenericException($"Partner Email is required.");
+                }
+
+                var partner = await _uow.Partner.GetAsync(x => x.Email == partnerInfo.Email);
+                if (partner == null)
+                {
+                    throw new GenericException($"This partner  does not exist");
+                }
+                result.Waybill = preshipment.Waybill;
+                result.Email = partner.Email;
+                var nodePayload = new AcceptShipmentPayload()
+                {
+                    WaybillNumber = preshipment.Waybill,
+                    PartnerId = partner.UserId,
+                    PartnerInfo = new PartnerPayload()
+                    {
+                        FullName = partner.PartnerName,
+                        PhoneNumber = partner.PhoneNumber,
+                        VehicleType = partnerInfo.VehicleType,
+                        ImageUrl = partner.PictureUrl
+                    },
+
+                };
+                var res = await _nodeService.AssignShipmentToPartner(nodePayload);
+                if (res.Message.Contains("Failure"))
+                {
+                    result.Succeeded = false;
+                    result.Message = res.Data;
+                    return result;
+                }
+                preshipment.shipmentstatus = MobilePickUpRequestStatus.Accepted.ToString();
+                // also call the agility api to update mobile shipment
+                var mobilePickUpDTO = new MobilePickUpRequestsDTO()
+                {
+                    Status = MobilePickUpRequestStatus.Accepted.ToString(),
+                    Waybill = preshipment.Waybill,
+                    UserId = partner.UserId,
+                    PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
+
+                };
+               var updateAgilty = await  AddMobilePickupRequest(mobilePickUpDTO);
+                result.Succeeded = true;
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> OptInCustomerWhatsappNumber(WhatsappNumberDTO whatsappNumber)
+        {
+            if (whatsappNumber is null)
+            {
+                throw new GenericException("Please provide valid  number");
+            }
+            if (string.IsNullOrWhiteSpace(whatsappNumber.PhoneNumber))
+            {
+                throw new GenericException("Phone number is required");
+            }
+            whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Trim();
+            if (whatsappNumber.PhoneNumber.Contains("+"))
+            {
+                whatsappNumber.PhoneNumber = whatsappNumber.PhoneNumber.Replace("+", string.Empty);
+            }
+            await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
+            return true;
         }
     }
 }

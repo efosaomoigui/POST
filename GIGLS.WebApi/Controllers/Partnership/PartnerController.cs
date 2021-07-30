@@ -414,7 +414,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [AllowAnonymous]
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("updatepartnerdetails")]
@@ -430,6 +429,5 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
     }
 }

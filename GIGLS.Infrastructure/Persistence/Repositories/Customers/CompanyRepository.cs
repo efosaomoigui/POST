@@ -180,6 +180,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        AccountNumber = c.AccountNumber,
                                        BankName = c.BankName,
                                        Rank = c.Rank,
+                                       NUBANAccountNo = c.NUBANAccountNo,
+                                       PrefferedNubanBank = c.PrefferedNubanBank,
                                        RankModificationDate = c.RankModificationDate
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
@@ -452,7 +454,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         private Task<List<CompanyDTO>> GetListOfCompany(IQueryable<Company> companies)
         {
             var companiesDto = from c in companies
-                               join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                               //join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
                                join co in _context.Country on c.UserActiveCountryId equals co.CountryId
                                select new CompanyDTO
                                {
@@ -478,8 +480,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                    ReturnAddress = c.ReturnAddress,
                                    DateCreated = c.DateCreated,
                                    DateModified = c.DateModified,
-                                   WalletBalance = w.Balance,
+                                  // WalletBalance = w.Balance,
                                    UserActiveCountryId = c.UserActiveCountryId,
+                                   PrefferedNubanBank = c.PrefferedNubanBank,
+                                   NUBANAccountNo = c.NUBANAccountNo,
                                    Country = new CountryDTO
                                    {
                                        CountryId = co.CountryId,
@@ -642,7 +646,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companiesDto = new List<CompanyDTO>();
                 if (!filterCriteria.ViewAll)
                 {
-                    companies = companies.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+                    companies = companies.Where(s => s.DateCreated >= startDate && s.DateCreated <= endDate);
                 }
                 companiesDto = companies.OrderByDescending(s => s.DateCreated)
                     .Select(c => new CompanyDTO
@@ -661,15 +665,37 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
-        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRep(string customerRepId)
+        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRep(BaseFilterCriteria filterCriteria)
         {
             try
             {
-                var companiesDto = new List<CompanyDTO>();
-                if (!string.IsNullOrEmpty(customerRepId))
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                if (filterCriteria.StartDate != null && filterCriteria.EndDate != null)
                 {
-                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == customerRepId && s.Rank == Rank.Class);
-                    companiesDto = companies.OrderByDescending(s => s.RankModificationDate)
+                    startDate = (DateTime)filterCriteria.StartDate;
+                    endDate = (DateTime)filterCriteria.EndDate;
+                }
+
+                var companiesDto = new List<CompanyDTO>();
+                if (!string.IsNullOrEmpty(filterCriteria.AssignedCustomerRep))
+                {
+                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep && s.Rank == Rank.Class);
+
+                    if (filterCriteria.StartDate != null )
+                    {
+                        companies = companies.Where(s => s.DateCreated >= startDate);
+                    }
+
+                    if (filterCriteria.StartDate != null && filterCriteria.EndDate != null)
+                    {
+                        companies = companies.Where(s => s.DateCreated >= startDate && s.DateCreated <= endDate);
+                    }
+
+                    companiesDto = companies.OrderByDescending(s => s.DateCreated)
                         .Select(c => new CompanyDTO
                         {
                             CustomerCode = c.CustomerCode,

@@ -985,5 +985,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpPost]
+        [Route("payforwaybillbywallet")]
+        public async Task<IServiceResponse<object>> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.PayForWaybillByWallet(paymentDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

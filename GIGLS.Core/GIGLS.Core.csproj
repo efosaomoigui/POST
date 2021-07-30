@@ -403,6 +403,7 @@
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\Node\AcceptShipmentPayload.cs" />
     <Compile Include="DTO\Node\NodeResponse.cs" />
     <Compile Include="DTO\Node\UserPayload.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
@@ -645,6 +646,7 @@
     <Compile Include="IMessageService\IEmailService.cs" />
     <Compile Include="IMessageService\IMessageService.cs" />
     <Compile Include="IMessageService\ISMSService.cs" />
+    <Compile Include="IMessageService\IWhatsappService.cs" />
     <Compile Include="IRepositories\Account\IFinancialReportRepository.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />

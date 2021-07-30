@@ -33,7 +33,7 @@ namespace GIGLS.Services.Business.Pricing
         {
             //Get country zone
             var zone = await _countryMapService.GetBasicZone(shipmentDTO.DepartureCountryId, shipmentDTO.DestinationCountryId, companyMap);
-
+            shipmentDTO.GrandTotal = 0;
             //get price
             foreach (var item in shipmentDTO.ShipmentItems)
             {
