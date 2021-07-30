@@ -2453,7 +2453,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                
-                var flag = await _portalService.CancelShipment(cancelPreShipmentMobile);
+                var flag = await _portalService.CancelShipmentWithReason(cancelPreShipmentMobile);
 
                 return new ServiceResponse<object>
                 {
@@ -2469,7 +2469,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _portalService.CancelShipmentWithNoCharge(shipment);
+                var flag = await _portalService.CancelShipmentWithNoChargeAndReason(shipment);
 
                 return new ServiceResponse<object>
                 {

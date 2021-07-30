@@ -6870,5 +6870,135 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment)
+        {
+            try
+            {
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipment.Waybill);
+
+                if (preshipmentmobile == null)
+                {
+                    throw new GenericException("Shipment cannot be found", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                // check the invoice table to be sure money was collected for the shipment
+                var walletTransaction = await _uow.WalletTransaction.GetAsync(s => s.Waybill == shipment.Waybill);
+                if (shipment.Userchanneltype == UserChannelType.IndividualCustomer.ToString())
+                {
+                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
+                    {
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                        if (walletTransaction != null)
+                        {
+                            await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
+
+                        }
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = shipment.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MSCC
+                        });
+
+                        //remove from report
+                        var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == shipment.Waybill);
+                        if (report != null)
+                        {
+                            report.IsDeleted = true;
+                        }
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment cannot be cancelled because it has a current status of {preshipmentmobile.shipmentstatus}.", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+                //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
+                else
+                {
+                    //Get user
+                    var user = await _userService.GetCurrentUserId();
+                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
+                    if (pickuprequests != null)
+                    {
+                        pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                    }
+
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                }
+
+                await _uow.CompleteAsync();
+                return new { IsCancelled = true };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            try
+            {
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == cancelPreShipmentMobile.Waybill);
+                var report = await _uow.FinancialReport.GetAsync(s => s.Waybill == preshipmentmobile.Waybill);
+                if (preshipmentmobile == null)
+                {
+                    throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                preshipmentmobile.CustomerCancelReason = cancelPreShipmentMobile.CancelReason;
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+                if (pickuprequests != null)
+                {
+                    var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
+                    var partnersPrice = (0.4M * Convert.ToDecimal(pickuprice));
+
+                    var rider = await _userService.GetUserById(pickuprequests.UserId);
+                    var riderWallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == rider.UserChannelCode);
+                    riderWallet.Balance = riderWallet.Balance + partnersPrice;
+
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                    pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+
+                    //update wallet transaction for customer 
+                    decimal amount = preshipmentmobile.GrandTotal - Convert.ToDecimal(pickuprice);
+                    await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, amount);
+
+                    var partnertransactions = new PartnerTransactionsDTO
+                    {
+                        Destination = preshipmentmobile.ReceiverAddress,
+                        Departure = preshipmentmobile.SenderAddress,
+                        AmountReceived = partnersPrice,
+                        Waybill = preshipmentmobile.Waybill
+                    };
+                    await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+
+                    //update financial report 
+                    if (report != null)
+                    {
+                        report.PartnerEarnings = partnersPrice;
+                        report.Earnings = 0.00M;
+                        report.GrandTotal = 0.00M;
+                    }
+                }
+                else
+                {
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                    await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
+
+                    //remove from report
+                    if (report != null)
+                    {
+                        report.IsDeleted = true;
+                    }
+                }
+                await _uow.CompleteAsync();
+                return new { IsCancelled = true };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
 }

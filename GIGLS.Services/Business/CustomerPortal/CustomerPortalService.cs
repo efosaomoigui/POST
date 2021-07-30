@@ -3624,5 +3624,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
             return true;
         }
+
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithReason(cancelPreShipmentMobile);
+        }
+
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithNoChargeAndReason(cancelPreShipmentMobile);
+        }
     }
 }
