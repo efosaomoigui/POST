@@ -5433,7 +5433,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipment.PaymentStatus != PaymentStatus.Paid)
                 {
                     //check if last generated is up to 15 days
-                    var dateDiff = (shipment.DateCreated - now).TotalDays;
+                    var dateDiff = (now - shipment.DateCreated).TotalDays;
                     if (dateDiff >= 15)
                     {
                         return true;
