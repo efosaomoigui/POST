@@ -168,7 +168,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 var corporateSales = await GetCorporateIncomeBreakdownSummary(dashboardFilterCriteria);
                 summary = (terminalShipment + giggoShipment + corporateSales);
 
-
                 return await Task.FromResult(summary);
             }
             catch (Exception)
