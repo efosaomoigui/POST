@@ -2443,5 +2443,39 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithreason")]
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+               
+                var flag = await _portalService.CancelShipment(cancelPreShipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithnochargeandreason")]
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipmentWithNoCharge(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
     }
 }
