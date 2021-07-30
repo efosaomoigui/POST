@@ -1501,7 +1501,7 @@ namespace GIGLS.Services.Implementation.Wallet
                                     CreditDebitType = CreditDebitType.Debit,
                                     Description = "Automated Payment for Outstanding Invoice",
                                     PaymentType = PaymentType.Online,
-                                    PaymentTypeReference = customer.Reference,
+                                    PaymentTypeReference = shipment.InvoiceRefNo,
                                     UserId = user.Id
                                 }, false);
 
