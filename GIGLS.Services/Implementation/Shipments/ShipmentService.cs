@@ -1000,8 +1000,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var outstanding = await CheckCorporateOutstandingPayment(shipmentDTO.CustomerCode);
                     if (outstanding)
                     {
-                        var company = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
-                        throw new GenericException($"{shipmentDTO.CustomerDetails.Name} You currently have unsettled invoice. Please make payment to account number {company.NUBANAccountNo} before shipment can be created ", $"{(int)HttpStatusCode.BadRequest}");
+                        //var company = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                        throw new GenericException($"{shipmentDTO.CustomerDetails.Name} You currently have unsettled invoice. Please make payment to your NUBAN account number before shipment can be created ", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
