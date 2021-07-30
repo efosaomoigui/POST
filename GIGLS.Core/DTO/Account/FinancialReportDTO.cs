@@ -24,6 +24,13 @@ namespace GIGLS.Core.DTO.Account
         public decimal Intl { get; set; }
     }
 
+    public class FinancialTestBreakdownSummaryDTO
+    {
+        public decimal @GIGGo { get; set; }
+        public decimal @Agility { get; set; }
+        public decimal @Intl { get; set; }
+    }
+
     public class FinancialBreakdownByCustomerTypeDTO
     {
         public decimal Individual { get; set; }

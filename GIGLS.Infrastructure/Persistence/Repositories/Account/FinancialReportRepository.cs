@@ -284,18 +284,109 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     countryId
                 };
 
-                var summary = await _context.Database.SqlQuery<FinancialBreakdownSummaryDTO>("FinancialBreakdownSummary " +
+
+                var summary = await _context.Database.SqlQuery<FinancialTestBreakdownSummaryDTO>("FinancialBreakdownSummary " +
                    "@StartDate, @EndDate, @CountryId",
                    param).FirstOrDefaultAsync();
 
-                if (summary != null)
-                {
-                    result.GIGGo = summary.GIGGo;
-                    result.Agility = summary.Agility;
-                    result.Intl = summary.Intl;
-                }
+                //if (summary != null)
+                //{
+                //    result.GIGGo = summary.GIGGo;
+                //    result.Agility = summary.Agility;
+                //    result.Intl = summary.Intl;
+                //}
+
+                result.GIGGo = await GetTotalGIGGoShipments(dashboardFilterCriteria);
+                result.Agility = await GetTotalTerminalShipments(dashboardFilterCriteria);
+
 
                 return await Task.FromResult(result);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<decimal> GetTotalTerminalShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId,
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("TotalTerminalShipment " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<decimal> GetTotalGIGGoShipments(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId,
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<decimal?>("TotalGIGGOIntraStateShipment " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                decimal summary = 0.00M;
+
+                if (summaryResult != null)
+                {
+                    summary = (decimal)summaryResult;
+                }
+
+                return await Task.FromResult(summary);
             }
             catch (Exception)
             {
