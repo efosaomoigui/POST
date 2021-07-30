@@ -1512,6 +1512,7 @@ namespace GIGLS.Services.Implementation.Wallet
                                 continue;
                             }
                         }
+                        await _uow.CompleteAsync();
                     }
                 }
             }
