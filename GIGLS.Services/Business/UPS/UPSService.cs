@@ -6,6 +6,7 @@ using GIGLS.Core.IServices.UPS;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -43,12 +44,12 @@ namespace GIGLS.Services.Business.UPS
             else
             {
                 finalResult.ShipmentIdentificationNumber = upsResponse.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
-
-                if (upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Any())
-                {
-                    string[] itemIds = upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Select(x => x.TrackingNumber).ToArray();
-                    finalResult.PackageResult = string.Join(",", itemIds);
-                }
+                finalResult.PackageResult = upsResponse.ShipmentResponse.ShipmentResults.PackageResults.TrackingNumber;
+                //if (upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Any())
+                //{
+                //    string[] itemIds = upsResponse.ShipmentResponse.ShipmentResults.FinalPackageResults.Select(x => x.TrackingNumber).ToArray();
+                //    finalResult.PackageResult = string.Join(",", itemIds);
+                //}
             }
 
             return finalResult;
@@ -71,9 +72,13 @@ namespace GIGLS.Services.Business.UPS
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    
-                    var json = JsonConvert.SerializeObject(request);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));       
+                    //var json = JsonConvert.SerializeObject(request);
+                    var json = JsonConvert.SerializeObject(request, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, data);
                     string responseResult = await response.Content.ReadAsStringAsync();
@@ -147,6 +152,7 @@ namespace GIGLS.Services.Business.UPS
             {
                 Description = shipmentDto.Description,
                 Shipper = GetShipperInfo(),
+                ShipFrom = GetShipperInfo(),
                 ShipTo = GetReceiverInfo(shipmentDto),
                 PaymentInformation = GetPaymentInformation(),
                 Package = GetPackageList(shipmentDto)
@@ -176,7 +182,7 @@ namespace GIGLS.Services.Business.UPS
             };
             shipper.Address.AddressLine = "GIG LOGISTICS BUILDING, BEHIND MOBI";
             shipper.Address.City = "Lagos";
-            shipper.Address.StateProvinceCode = "";
+            shipper.Address.StateProvinceCode = "NG";
             shipper.Address.PostalCode = "100001";
             shipper.Address.CountryCode = "NG";            
             shipper.ShipperNumber = shipperNumber;
@@ -197,7 +203,7 @@ namespace GIGLS.Services.Business.UPS
             reciever.Address.City = shipmentDto.ReceiverCity;
             reciever.Address.StateProvinceCode = shipmentDto.ReceiverStateOrProvinceCode;
             reciever.Address.PostalCode = shipmentDto.ReceiverPostalCode;
-            reciever.Address.CountryCode = shipmentDto.ReceiverCountryCode.Length <= 2 ? shipmentDto.ReceiverCountryCode : shipmentDto.ReceiverCountryCode.Substring(0, 2);
+            reciever.Address.CountryCode = shipmentDto.ReceiverCountryCode.Trim();
             reciever.Phone.Number = shipmentDto.ReceiverPhoneNumber;
             reciever.Phone.Extension = string.Empty;
             return reciever;
@@ -206,7 +212,6 @@ namespace GIGLS.Services.Business.UPS
         private List<UPSPackage> GetPackageList(InternationalShipmentDTO shipmentDto)
         {
             var packageList = new List<UPSPackage>();
-
             int count = 1;
             foreach (var item in shipmentDto.ShipmentItems)
             {
