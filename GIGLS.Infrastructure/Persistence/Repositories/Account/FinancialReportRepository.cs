@@ -151,16 +151,23 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     countryId
                 };
 
-                var summaryResult = await _context.Database.SqlQuery<decimal?>("FinancialReportsEarnings " +
-                   "@StartDate, @EndDate, @CountryId",
-                   param).FirstOrDefaultAsync();
+                //var summaryResult = await _context.Database.SqlQuery<decimal?>("FinancialReportsEarnings " +
+                //   "@StartDate, @EndDate, @CountryId",
+                //   param).FirstOrDefaultAsync();
 
                 decimal summary = 0.00M;
 
-                if (summaryResult != null)
-                {
-                    summary = (decimal)summaryResult;
-                }
+                //if (summaryResult != null)
+                //{
+                //    summary = (decimal)summaryResult;
+                //}
+                var terminalShipment = await GetTotalTerminalShipments(dashboardFilterCriteria);
+
+                var giggoShipment = await GetTotalGIGGoShipments(dashboardFilterCriteria);
+
+                var corporateSales = await GetCorporateIncomeBreakdownSummary(dashboardFilterCriteria);
+                summary = (terminalShipment + giggoShipment + corporateSales);
+
 
                 return await Task.FromResult(summary);
             }
@@ -285,9 +292,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                 };
 
 
-                var summary = await _context.Database.SqlQuery<FinancialTestBreakdownSummaryDTO>("FinancialBreakdownSummary " +
-                   "@StartDate, @EndDate, @CountryId",
-                   param).FirstOrDefaultAsync();
+                //var summary = await _context.Database.SqlQuery<FinancialTestBreakdownSummaryDTO>("FinancialBreakdownSummary " +
+                //   "@StartDate, @EndDate, @CountryId",
+                //   param).FirstOrDefaultAsync();
 
                 //if (summary != null)
                 //{
