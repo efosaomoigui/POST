@@ -186,6 +186,8 @@ namespace GIGLS.Core.Domain
         public decimal DeclarationOfValueCheck { get; set; }
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
+        [MaxLength(300)]
+        public string CustomerCancelReason { get; set; }
 
     }
 }
