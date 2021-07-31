@@ -2444,6 +2444,34 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPut]
+        [Route("gigxuserdetails")]
+        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SaveGIGXUserDetails(userDetails);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getgigxuserwalletdetails")]
+        public async Task<IServiceResponse<GIGXUserDetailsDTO>> GetGIGXUserWalletDetails()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetGIGXUserWalletDetails();
+                return new ServiceResponse<GIGXUserDetailsDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpGet, Route("allcountry")]
         public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
         {

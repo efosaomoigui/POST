@@ -3627,6 +3627,63 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
             return true;
         }
+
+        public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        {
+            if (userDetails is null)
+            {
+                throw new GenericException("Please provide valid GIGX user details");
+            }
+
+            if (string.IsNullOrWhiteSpace(userDetails.WalletAddress))
+            {
+                throw new GenericException("Wallet Address is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(userDetails.PrivateKey))
+            {
+                throw new GenericException("Private Key is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(userDetails.PublicKey))
+            {
+                throw new GenericException("Public Key is required");
+            }
+
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+
+            if(user is null)
+            {
+                throw new GenericException("User does not exit");
+            }
+
+            user.WalletAddress = userDetails.WalletAddress.Trim();
+            user.PrivateKey = userDetails.PrivateKey.Trim();
+            user.PublicKey = userDetails.PublicKey.Trim();
+            await _uow.CompleteAsync();
+            return true;
+        }
+
+        public async Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails()
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+
+            if (user is null)
+            {
+                throw new GenericException("User does not exit");
+            }
+
+            var result = new GIGXUserDetailsDTO
+            {
+                WalletAddress = user.WalletAddress,
+                PrivateKey = user.PrivateKey,
+                PublicKey = user.PublicKey
+            };
+           
+            return result;
+        }
         public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
            return await _countryService.GetCountries();

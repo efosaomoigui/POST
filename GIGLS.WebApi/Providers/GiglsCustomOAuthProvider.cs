@@ -159,6 +159,9 @@ namespace GIGLS.WebApi.Providers
                     { "ReferralCode", user.RegistrationReferrercode},
                     { "CountryType", user.CountryType},
                     { "IsRequestNewPassword", user.IsRequestNewPassword.ToString()},
+                    { "WalletAddress", user.WalletAddress},
+                    { "PrivateKey", user.PrivateKey},
+                    { "PublicKey", user.PublicKey},
                 };
 
                 //get claims for the user

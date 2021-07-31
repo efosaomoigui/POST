@@ -394,6 +394,11 @@ namespace GIGLS.Services.Implementation.Customers
             return _uow.Company.GetCompanies();
         }
 
+        public Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams)
+        {
+            return _uow.Company.GetCompaniesByEmailOrCode(searchParams);
+        }
+
         public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
         {
             return _uow.Company.GetCompanies(filterCriteria);
