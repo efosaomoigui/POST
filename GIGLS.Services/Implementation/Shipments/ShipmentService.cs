@@ -552,6 +552,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverAddress = shipment.ReceiverAddress,
                     ReceiverCity = shipment.ReceiverCity,
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
+                    ReceiverStationId = shipment.DestinationStationId,
+                    SenderStationId = shipment.DepartureStationId,
                     LGA = shipment.LGA
 
                 };
