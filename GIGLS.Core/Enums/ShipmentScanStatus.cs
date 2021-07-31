@@ -49,5 +49,6 @@
         SRFS, //SHIPMENT RECEIVED FROM THE STORE TO GIG HUB OR CENTRE
         IDH, // International Shipment Depart Houson in Transit
         IDK, // International Shipment Depart UK in Transit
+        DUBC, // DELAYED PICK UP BY CUSTOMER
     }
 }

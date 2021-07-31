@@ -142,6 +142,12 @@ namespace GIGLS.Services.Business.Scanning
                     //2. Check for Scan related to Transit Manifest
                     await ProcessPickUpShipment(shipment, scan, currentCenter, serviceCenters[0].Name);
                 }
+                else if (scan.ShipmentScanStatus == ShipmentScanStatus.DUBC && shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    //Scan related to Delayed pick up by customer for terminal pickup
+                    await ProcessDelayedPickUpShipment(shipment, scan, currentCenter, serviceCenters[0].Name);
+                    return true;
+                }
                 else
                 {
                     //check if the waybill has not been scan for the same status before
@@ -1137,6 +1143,25 @@ namespace GIGLS.Services.Business.Scanning
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
             //3. Create a scan status for it
+            await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+            {
+                DateTime = DateTime.Now,
+                Status = scanStatus,
+                Waybill = scan.WaybillNumber,
+                User = currentUserId,
+                Location = serviceCentreName,
+                ServiceCentreId = currentUserSercentreId
+            }, scan.ShipmentScanStatus);
+        }
+
+
+        private async Task ProcessDelayedPickUpShipment(Shipment shipment, ScanDTO scan, int currentUserSercentreId, string serviceCentreName)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            string scanStatus = scan.ShipmentScanStatus.ToString();
+
+            //Create a scan status for it
             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
                 DateTime = DateTime.Now,

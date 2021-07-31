@@ -118,7 +118,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == tracking.Waybill);
 
                     //send sms and email
-                    if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
+                    if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC) || scanStatus.Equals(ShipmentScanStatus.DUBC)))
                     {
                         if (tracking.TrackingType == TrackingType.InBound)
                         {
