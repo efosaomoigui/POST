@@ -6,4 +6,11 @@
         UPS,
         DHL
     }
+
+    public enum InternationalRequestType
+    {
+        QuickQuote,
+        Rates,
+        CaptureShipment
+    }
 }

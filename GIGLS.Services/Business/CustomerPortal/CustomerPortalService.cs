@@ -3627,5 +3627,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _messageSenderService.ManageOptInOutForWhatsappNumber(whatsappNumber);
             return true;
         }
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        {
+           return await _countryService.GetCountries();
+        }
     }
 }

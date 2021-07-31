@@ -44,13 +44,14 @@ namespace GIGLS.Core.DTO.UPS
         {
             BillingWeight = new UPSPackaging();
             ShipmentCharges = new UPSShipmentCharges();
-            FinalPackageResults = new List<UPSPackageResults>();
+            NegotiatedRateCharges = new UPSNegotiatedRateCharges();
+            PackageResults = new UPSPackageResults();
         }
+        public string ShipmentIdentificationNumber { get; set; }
         public UPSShipmentCharges ShipmentCharges { get; set; }
         public UPSPackaging BillingWeight { get; set; }
-        public string ShipmentIdentificationNumber { get; set; }
-
-        public object PackageResults { get; set; }
+        public UPSPackageResults PackageResults { get; set; }
+        public UPSNegotiatedRateCharges NegotiatedRateCharges { get; set; }
         public List<UPSPackageResults> FinalPackageResults { get; set; }
     }
 
@@ -153,6 +154,15 @@ namespace GIGLS.Core.DTO.UPS
 
         [JsonProperty("Description")]
         public string Description { get; set; }
+    }
+
+    public class UPSNegotiatedRateCharges
+    {
+        public UPSNegotiatedRateCharges()
+        {
+            TotalCharge = new UPSCharges();
+        }
+        public UPSCharges TotalCharge { get; set; }
     }
 
 }
