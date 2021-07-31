@@ -1437,7 +1437,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _portalService.CancelShipment(waybillNumber);
+                var cancel = new CancelShipmentDTO
+                {
+                    Waybill = waybillNumber,
+                    CancelReason = "None",
+                };
+                var flag = await _portalService.CancelShipment(cancel.Waybill);
 
                 return new ServiceResponse<object>
                 {
@@ -2440,6 +2445,40 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<AssignedShipmentDTO>
                 {
                     Object = result
+                };
+            });
+        }
+
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithreason")]
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+               
+                var flag = await _portalService.CancelShipmentWithReason(cancelPreShipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithnochargeandreason")]
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipmentWithNoChargeAndReason(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
                 };
             });
         }

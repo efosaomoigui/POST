@@ -3628,6 +3628,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithReason(cancelPreShipmentMobile);
+        }
+
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithNoChargeAndReason(cancelPreShipmentMobile);
+        }
+
         public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
         {
             if (userDetails is null)
