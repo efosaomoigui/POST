@@ -2958,7 +2958,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Waybill = invoice.Waybill,
                 TransactionCode = wallet.WalletNumber,
                 PaymentType = PaymentType.Wallet,
-                FromApp = true
+                FromApp = true,
+                IsNotOwner = true,
+                CustomerCode = currentUser.UserChannelCode,
+                CustomerUserId = currentUserId
             };
             var result = await _paymentTransactionService.ProcessNewPaymentTransaction(transactionDTO);
             return result;
