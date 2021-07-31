@@ -180,7 +180,7 @@ namespace GIGLS.Services.Business.UPS
             {
                 Name = "GIG Logistics"
             };
-            shipper.Address.AddressLine = "GIG LOGISTICS BUILDING, BEHIND MOBI";
+            shipper.Address.AddressLine = "GIG LOGISTICS BUILDING";
             shipper.Address.City = "Lagos";
             shipper.Address.StateProvinceCode = "NG";
             shipper.Address.PostalCode = "100001";
