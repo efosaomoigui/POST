@@ -104,6 +104,9 @@ namespace GIGLS.Core.DTO.User
         public string AccountNumber { get; set; }
 
         public string BankName { get; set; }
+        public string WalletAddress { get; set; }
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
     }
 
     public class UpdateUserActiveCountryDTO
