@@ -33,6 +33,7 @@ using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -347,6 +348,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             {
                                 shipmentDto.ReceiverCode = deliveryNumber.ReceiverCode;
                             }
+                        }
+                    }
+
+                    //also get waybill charges if any for only corporate
+                    if (shipmentDto.CustomerDetails.CompanyType == CompanyType.Corporate)
+                    {
+                        var waybillcharges = _uow.WaybillCharge.GetAllAsQueryable().Where(x => x.Waybill == shipmentDto.Waybill).ToList();
+                        if (waybillcharges.Any())
+                        {
+                            shipmentDto.WaybillCharges = JArray.FromObject(waybillcharges).ToObject<List<WaybillChargeDTO>>();
                         }
                     }
                 }
@@ -977,6 +988,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
+                //if sender is corporate check for waybill charges
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
+                    {
+                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
+                        foreach (var item in waybillCharges)
+                        {
+                            item.Waybill = newShipment.Waybill;
+                        }
+                        _uow.WaybillCharge.AddRange(waybillCharges);
+                    }
+                }
+
                 //QR Code
                 await GenerateDeliveryNumber(newShipment.Waybill);
 
@@ -1023,8 +1048,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
                 {
-                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
-                    var wallet = walletEnumeration.FirstOrDefault();
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
 
                     if (wallet != null)
                     {
