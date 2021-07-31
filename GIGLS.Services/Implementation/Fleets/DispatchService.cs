@@ -292,6 +292,9 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
                 catch (Exception) { }
 
+                //Scan movement manifest waybill
+                await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
+
                 // commit transaction
                 await _uow.CompleteAsync();
                 return new { Id = dispatchId };
@@ -354,6 +357,36 @@ namespace GIGLS.Services.Implementation.Fleets
             return 0;
         }
 
+        private async Task<int> UpdateMovementManifestWaybillScanStatus(string movementManifestNumber, string currentUserId, int userServiceCentreId)
+        {
+
+            //movement manifest -> manifest -> groupwaybill -> waybill
+            var movementManifestMappings = await _uow.MovementManifestNumberMapping.FindAsync(s => s.MovementManifestCode == movementManifestNumber);
+            var listOfManifestNumbers = movementManifestMappings.Select(s => s.ManifestNumber);
+
+            // manifest -> groupwaybill -> waybill
+            var manifestMappings = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(s => listOfManifestNumbers.Contains(s.ManifestCode));
+            var listOfGroupWaybills = manifestMappings.Select(s => s.GroupWaybillNumber);
+
+            //groupwaybill -> waybill
+            var groupwaybillMappings = await _uow.GroupWaybillNumberMapping.FindAsync(s => listOfGroupWaybills.Contains(s.GroupWaybillNumber));
+            var listOfWaybills = groupwaybillMappings.Select(s => s.WaybillNumber);
+
+            //waybill - from shipmentCancel entity
+            var cancelledWaybills = await _uow.ShipmentCancel.FindAsync(s => listOfWaybills.Contains(s.Waybill));
+            if (cancelledWaybills.ToList().Count > 0)
+            {
+                var waybills = cancelledWaybills.ToList().ToString();
+                throw new GenericException($"{waybills} : The waybill has been cancelled. " +
+                    $"Please remove from the manifest and try again.");
+            }
+            else
+            {
+                //Scan all waybills attached to this movement manifest Number
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, ShipmentScanStatus.DPC);
+            }
+            return 0;
+        }
         /// <summary>
         /// This method ensures that all waybills attached to this manifestNumber
         /// are scan.
