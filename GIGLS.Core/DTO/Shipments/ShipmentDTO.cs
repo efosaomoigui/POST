@@ -550,5 +550,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string DestinationServiceCentreName { get; set; }
         public string DepartureServiceCentreName { get; set; }
         public List<WaybillChargeDTO> WaybillCharges { get; set; }
+        public string VehicleType { get; set; }
     }
 }
