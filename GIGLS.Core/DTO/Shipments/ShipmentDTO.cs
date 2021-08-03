@@ -161,7 +161,12 @@ namespace GIGLS.Core.DTO.Shipments
         public string DestinationServiceCentreName { get; set; }
         public string FileNameUrl { get; set; }
         public string InternationalWayBill { get; set; }
+        public int SenderStationId { get; set; }
+        public int ReceiverStationId { get; set; }
+        public List<WaybillChargeDTO> WaybillCharges { get; set; }
 
+        public decimal? InternationalShippingCost { get; set; } = 0;
+        public string Courier { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -412,6 +417,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ManufacturerCountry { get; set; }
         public decimal InternationalShippingCost { get; set; }
         public string Waybill { get; set; }
+        public InternationalRequestType RequestType { get; set; }
     }
 
     public class CODShipmentDTO : BaseDomainDTO
@@ -502,5 +508,51 @@ namespace GIGLS.Core.DTO.Shipments
         public string Email { get; set; }
         public string CustomerCode { get; set; }
         public string Waybill { get; set; }
+    }
+
+    public class CorporateShipmentDTO : BaseDomainDTO
+    {
+        //Shipment Information
+        //Senders' Information
+        public string CustomerCode { get; set; }
+        //Receivers Information
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverCity { get; set; }
+        //Delivery Options
+        public int DeliveryOptionId { get; set; } = 1;
+        public List<int> DeliveryOptionIds { get; set; } = new List<int>();
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+        //Shipment Items
+        public List<ShipmentItemDTO> ShipmentItems { get; set; }
+        public decimal GrandTotal { get; set; }
+        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+        //General Details comes with role user
+        public string UserId { get; set; }        //
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
+        //payment method
+        public bool IsInternational { get; set; }
+        public string Description { get; set; }
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+        public string SenderState { get; set; }
+        public bool IsFromMobile { get; set; }
+        public bool isInternalShipment { get; set; }
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public string SenderCode { get; set; }
+        public string ReceiverCode { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public int TimeInSeconds { get; set; }
+        public string DestinationServiceCentreName { get; set; }
+        public string DepartureServiceCentreName { get; set; }
+        public List<WaybillChargeDTO> WaybillCharges { get; set; }
     }
 }

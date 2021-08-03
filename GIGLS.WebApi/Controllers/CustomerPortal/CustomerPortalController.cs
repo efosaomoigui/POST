@@ -1437,7 +1437,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _portalService.CancelShipment(waybillNumber);
+                var cancel = new CancelShipmentDTO
+                {
+                    Waybill = waybillNumber,
+                    CancelReason = "None",
+                };
+                var flag = await _portalService.CancelShipment(cancel.Waybill);
 
                 return new ServiceResponse<object>
                 {
@@ -2444,6 +2449,68 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithreason")]
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+               
+                var flag = await _portalService.CancelShipmentWithReason(cancelPreShipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("cancelshipmentwithnochargeandreason")]
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipmentWithNoChargeAndReason(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcorporatecustomer/{customerCode}")]
+        public async Task<IServiceResponse<CustomerDTO>> GetCorporateCustomer(string customerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetCorporateCustomer(customerCode);
+                return new ServiceResponse<CustomerDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("corporateshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CreateCorporateShipment(corporateShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpPut]
         [Route("gigxuserdetails")]
         public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
@@ -2468,6 +2535,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<GIGXUserDetailsDTO>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpGet, Route("allcountry")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var country = await _portalService.GetCountries();
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = country
                 };
             });
         }

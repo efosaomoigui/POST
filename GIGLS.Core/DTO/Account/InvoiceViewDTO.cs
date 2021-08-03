@@ -238,4 +238,12 @@ namespace GIGLS.Core.DTO.Account
         public string Description { get; set; }
 
     }
+
+    public class WaybillChargeDTO
+    {
+
+        public decimal Amount { get; set; }
+        public string Description { get; set; }
+
+    }
 }

@@ -158,6 +158,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string InternationalWayBill { get; set; }
+        public decimal InternationalShippingCost { get; set; }
+        [MaxLength(50)]
+        public string Courier { get; set; }
 
     }
 

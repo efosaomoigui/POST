@@ -2920,30 +2920,25 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
-            //if (waybill.Contains("AWR"))
-            //{
-            //    throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            //}
-
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            //block third party payment process
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-
-            //if (shipment != null)
-            //{
-            //    if (shipment.CustomerCode != currentUser.UserChannelCode)
-            //    {
-            //        throw new GenericException($"Third Party Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            //    }
-            //}
 
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
 
             if (invoice == null)
             {
-                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+                //also check to see if its a giggo shipment
+                var giggo = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (giggo != null)
+                {
+                    throw new GenericException($"Payment can not be processed for this waybill -- {waybill} as it may have been paid for already", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                else
+                {
+                    throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}"); 
+                }
             }
             if (invoice.PaymentStatus == PaymentStatus.Paid)
             {
@@ -3630,6 +3625,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+        public async Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithReason(cancelPreShipmentMobile);
+        }
+
+        public async Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithNoChargeAndReason(cancelPreShipmentMobile);
+        }
+
         public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
         {
             if (userDetails is null)
@@ -3667,6 +3672,53 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+
+        public async Task<ShipmentDTO> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO)
+        {
+            if (corporateShipmentDTO == null)
+            {
+                throw new GenericException($"invalid payload");
+            }
+            if (String.IsNullOrEmpty(corporateShipmentDTO.CustomerCode))
+            {
+                throw new GenericException($"customer info not provided");
+            }
+            var customer = await _uow.User.GetUserByChannelCode(corporateShipmentDTO.CustomerCode);
+            if (customer == null)
+            {
+                throw new GenericException($"customer does not exist");
+            }
+            var customerList = new List<CustomerDTO>();
+            var customerDto = await _customerService.GetCustomer(customer.UserChannelCode, customer.UserChannelType);
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            var shipmentDTO = JObject.FromObject(corporateShipmentDTO).ToObject<ShipmentDTO>();
+            shipmentDTO.Customer = customerList;
+            shipmentDTO.UserId = userId;
+            shipmentDTO.CompanyType = customerDto.CompanyType.ToString();
+            shipmentDTO.CustomerDetails = customerDto;
+            shipmentDTO.DeliveryOptionId = 1;
+            shipmentDTO.DeliveryOptionIds.Add(shipmentDTO.DeliveryOptionId);
+            shipmentDTO.PickupOptions = PickupOptions.HOMEDELIVERY;
+            shipmentDTO.Customer.Add(customerDto);
+            shipmentDTO.WaybillCharges = corporateShipmentDTO.WaybillCharges;
+            shipmentDTO.CustomerType = customerDto.CustomerType.ToString();
+            var result = await _shipmentService.AddShipment(shipmentDTO);
+            return result;
+        }
+
+
+        public async Task<CustomerDTO> GetCorporateCustomer(string customerCode)
+        {
+            var customer = await _uow.User.GetUserByChannelCode(customerCode);
+            if (customer == null)
+            {
+                throw new GenericException($"customer does not exist");
+            }
+            var customerDto = await _customerService.GetCustomer(customer.UserChannelCode, customer.UserChannelType);
+            return customerDto;
+        }
+
         public async Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails()
         {
             var userId = await _userService.GetCurrentUserId();
@@ -3685,6 +3737,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             };
            
             return result;
+        }
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        {
+           return await _countryService.GetCountries();
         }
     }
 }

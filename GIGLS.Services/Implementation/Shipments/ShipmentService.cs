@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.DHL;
@@ -32,6 +33,7 @@ using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -68,6 +70,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly IUPSService _UPSService;
         private readonly IInternationalPriceService _internationalPriceService;
+        private readonly ICountryService _countryService;
+
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -78,7 +82,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
-            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService)
+            IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
+            ICountryService countryService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -101,6 +106,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _waybillPaymentLogService = waybillPaymentLogService;
             _UPSService = uPSService;
             _internationalPriceService = internationalPriceService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
@@ -344,6 +350,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                         }
                     }
+
+                    //also get waybill charges if any for only corporate
+                    if (shipmentDto.CustomerDetails.CompanyType == CompanyType.Corporate)
+                    {
+                        var waybillcharges = _uow.WaybillCharge.GetAllAsQueryable().Where(x => x.Waybill == shipmentDto.Waybill).ToList();
+                        if (waybillcharges.Any())
+                        {
+                            shipmentDto.WaybillCharges = JArray.FromObject(waybillcharges).ToObject<List<WaybillChargeDTO>>();
+                        }
+                    }
                 }
                 return shipmentDto;
             }
@@ -536,6 +552,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverAddress = shipment.ReceiverAddress,
                     ReceiverCity = shipment.ReceiverCity,
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
+                    ReceiverStationId = shipment.DestinationStationId,
+                    SenderStationId = shipment.DepartureStationId,
                     LGA = shipment.LGA
 
                 };
@@ -972,6 +990,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoice(shipmentDTO);
                 CreateGeneralLedger(shipmentDTO);
 
+                //if sender is corporate check for waybill charges
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    if (shipmentDTO.WaybillCharges != null && shipmentDTO.WaybillCharges.Any())
+                    {
+                        var waybillCharges = JArray.FromObject(shipmentDTO.WaybillCharges).ToObject<List<WaybillCharge>>();
+                        foreach (var item in waybillCharges)
+                        {
+                            item.Waybill = newShipment.Waybill;
+                        }
+                        _uow.WaybillCharge.AddRange(waybillCharges);
+                    }
+                }
+
                 //QR Code
                 await GenerateDeliveryNumber(newShipment.Waybill);
 
@@ -1018,8 +1050,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
                 {
-                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
-                    var wallet = walletEnumeration.FirstOrDefault();
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
 
                     if (wallet != null)
                     {
@@ -1034,7 +1065,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Send mail for shipment creation
                 //if (newShipment != null)
                 //{
-                   //await SendEmailToCustomerForShipmentCreation(newShipment);
+                //await SendEmailToCustomerForShipmentCreation(newShipment);
                 //}
                 return newShipment;
             }
@@ -4497,14 +4528,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var country = new CountryDTO();
+                const int currentShippingCountry = 1;
                 //1. Get which third party was enable 
-                var country = await _userService.GetUserActiveCountry();
-
+                if (shipmentDTO.IsFromMobile)
+                {
+                    country = await _countryService.GetCountryById(shipmentDTO.DepartureCountryId);
+                    if (shipmentDTO.RequestType == InternationalRequestType.Rates && shipmentDTO.DepartureCountryId != currentShippingCountry)
+                    {
+                        throw new GenericException($"We don't currently ship from {country.CountryName} at the moment");
+                    }
+                }
+                else
+                {
+                    country = await _userService.GetUserActiveCountry();
+                }
                 //2. Extract it into an array and loop throught it
                 string[] courierList = country.CourierEnable.Split(',');
 
                 //3. Get the result and merge it to the price result
                 var finalResult = new List<TotalNetResult>();
+                decimal dhlAmount = 0, upsAmount = 0;
 
                 foreach (string courier in courierList)
                 {
@@ -4518,6 +4562,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             ups.CompanyMap = CompanyMap.UPS;
                             ups.Currency = country.CurrencySymbol;
+                            upsAmount = ups.GrandTotal;
                             finalResult.Add(ups);
                         }
                     }
@@ -4529,8 +4574,25 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             dhl.CompanyMap = CompanyMap.DHL;
                             dhl.Currency = country.CurrencySymbol;
+                            dhlAmount = dhl.GrandTotal;
                             finalResult.Add(dhl);
                         }
+                    }
+                }
+
+                // the best way to compare both amount is to loop through the finalResult twice
+
+                if (finalResult.Count > 1)
+                {
+                    if (dhlAmount > upsAmount)
+                    {
+                        finalResult[0].ShipmentMethod = "Regular"; // UPS
+                        finalResult[1].ShipmentMethod = "Express"; // DHL
+                    }
+                    if (upsAmount > dhlAmount)
+                    {
+                        finalResult[0].ShipmentMethod = "Express"; // UPS
+                        finalResult[1].ShipmentMethod = "Regular"; // DHL
                     }
                 }
 
@@ -4582,7 +4644,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<TotalNetResult> GetTotalPriceBreakDown(TotalNetResult total, InternationalShipmentDTO shipmentDTO)
         {
-            var countryId = await _userService.GetUserActiveCountryId();
+            var countryId = 0;
+            if (shipmentDTO.IsFromMobile)
+            {
+                var result = await _countryService.GetCountryById(shipmentDTO.DepartureCountryId);
+                countryId = result.CountryId;
+            }
+            else
+            {
+                countryId = await _userService.GetUserActiveCountryId();
+            }
             var aditionalPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalAdditionalPrice, countryId);
             var additionalAmount = Convert.ToDecimal(aditionalPrice.Value) / 100;
             total.Amount = total.Amount - total.Insurance;
@@ -4613,8 +4684,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentDTO.IsFromMobile && shipmentDTO.VehicleType != null)
             {
-                var globalProperty = shipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() ? GlobalPropertyType.BikeBasePrice 
-                    : shipmentDTO.VehicleType.ToLower() == Vehicletype.Car.ToString().ToLower() ? GlobalPropertyType.CarPickupPrice 
+                var globalProperty = shipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() ? GlobalPropertyType.BikeBasePrice
+                    : shipmentDTO.VehicleType.ToLower() == Vehicletype.Car.ToString().ToLower() ? GlobalPropertyType.CarPickupPrice
                     : GlobalPropertyType.VanPickupPrice;
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var pickupPrice = Convert.ToDecimal(globalValue.Value);
@@ -4938,8 +5009,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.CompanyType = shipment.CustomerDetails.CustomerType.ToString();
             }
 
-            shipment.InternationalShipmentType = InternationalShipmentType.DHL;
             shipment.IsInternational = true;
+            shipment.InternationalShippingCost = shipmentDTO.InternationalShippingCost;
+            shipment.Courier = shipmentDTO.CompanyMap.ToString();
             return shipment;
         }
 
@@ -4969,6 +5041,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //Get Approximate Items Weight
                 shipmentDTO.ApproximateItemsWeight = shipmentDTO.ShipmentItems.Sum(x => x.Weight);
+
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateInternationalShipmentOnAgility(shipmentDTO);

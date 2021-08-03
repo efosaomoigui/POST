@@ -39,6 +39,10 @@ namespace GIGLS.Core.DTO
         public IntlShipmentMessageDTO IntlShipmentMessage { get; set; }
         public EcommerceCustomerRepMessageDTO EcommerceMessage { get; set; }
         public ShipmentCreationMessageDTO ShipmentCreationMessage { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNo { get; set; }
+        public string BankName { get; set; }
+        public bool IsCoporate { get; set; }
     }
 
     public class NewMessageDTO
@@ -185,4 +189,17 @@ namespace GIGLS.Core.DTO
         [JsonProperty("policy")]
         public string Policy { get; set; }
     }
+
+
+    public class CoporateSignupMessageDTO
+    {
+        public string Password { get; set; }
+        public string AccountNo { get; set; }
+        public string AccountName { get; set; }
+        public string BankName { get; set; }
+        public bool IsCoporate { get; set; }
+        public string ToEmail { get; set; }
+        public string CustomerCode { get; set; }
+    }
+
 }

@@ -11,6 +11,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -181,6 +183,35 @@ namespace GIGLS.Services.Implementation.Utility
                 return discount;
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> GenerateDeliveryCode()
+        {
+            try
+            {
+                int maxSize = 6;
+                char[] chars = new char[54];
+                string a;
+                a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = "DN" + strippedText.ToUpper();
+                return number;
+            }
+            catch
             {
                 throw;
             }
