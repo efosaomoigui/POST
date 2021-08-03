@@ -2920,30 +2920,25 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> PayForShipment(string waybill)
         {
-            //if (waybill.Contains("AWR"))
-            //{
-            //    throw new GenericException($"Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            //}
-
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            //block third party payment process
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-
-            //if (shipment != null)
-            //{
-            //    if (shipment.CustomerCode != currentUser.UserChannelCode)
-            //    {
-            //        throw new GenericException($"Third Party Payment not allowed for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
-            //    }
-            //}
 
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
 
             if (invoice == null)
             {
-                throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
+                //also check to see if its a giggo shipment
+                var giggo = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (giggo != null)
+                {
+                    throw new GenericException($"Payment can not be processed for this waybill -- {waybill} as it may have been paid for already", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                else
+                {
+                    throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}"); 
+                }
             }
             if (invoice.PaymentStatus == PaymentStatus.Paid)
             {
