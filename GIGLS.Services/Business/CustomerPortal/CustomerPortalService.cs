@@ -3745,5 +3745,43 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
            return await _countryService.GetCountries();
         }
+
+        public async Task<string> EncryptCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return await _partnertransactionservice.Encrypt(apiKey);
+        }
+
+        public async Task<string> GetCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return apiKey;
+        }
+
+        public async Task<string> Decrypt(string encrytedKey)
+        {
+            return await _partnertransactionservice.Decrypt(encrytedKey);
+        }
+
+        public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
+        {
+            try
+            {
+                // var entity = Mapper.Map<TransferDetails>(TransferDetailsDTO);
+                if (transferDetailsDTO == null)
+                {
+                    throw new GenericException($"invalid payload");
+                }
+
+                var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
+                _uow.TransferDetails.Add(transferDetails);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

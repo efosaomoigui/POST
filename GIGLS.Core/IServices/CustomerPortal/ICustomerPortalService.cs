@@ -233,5 +233,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails);
         Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails();
         Task<IEnumerable<CountryDTO>> GetCountries();
+        Task<string> EncryptCellulantKey();
+        Task<string> GetCellulantKey();
+        Task<string> Decrypt(string encrytedKey);
+        Task<bool> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO);
     }
 }

@@ -209,6 +209,7 @@ namespace GIGLS.Core
         ICaptainBonusByZoneMapingRepository CaptainBonusByZoneMaping { get; set; }
         ICustomerInvoiceRepository CustomerInvoice { get; set; }
         IWaybillChargeRepository WaybillCharge { get; set; }
+        ITransferDetailsRepository TransferDetails { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

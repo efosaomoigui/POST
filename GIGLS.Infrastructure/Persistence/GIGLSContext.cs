@@ -304,6 +304,9 @@ namespace GIGLS.Infrastructure.Persistence
         //routes
         public DbSet<Route> Routes { get; }
 
+        //cellulant
+        public DbSet<TransferDetails> TransferDetails { get; set; }
+
         #endregion
 
 

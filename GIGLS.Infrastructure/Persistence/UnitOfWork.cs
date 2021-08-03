@@ -522,6 +522,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IWaybillChargeRepository WaybillCharge { get; set; }
 
+        [Inject]
+        public ITransferDetailsRepository TransferDetails { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
