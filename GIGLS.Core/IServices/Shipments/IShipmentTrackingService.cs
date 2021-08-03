@@ -29,5 +29,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> SendEmailShipmentArriveFinalDestination(ShipmentDTO shipmentDTO);
         Task<bool> SendEmailShipmentARFHomeDelivery(ShipmentDTO shipmentDTO);
         Task<bool> SendEmailShipmentARFTerminalPickup(ShipmentDTO shipmentDTO);
+        Task<bool> SendWhatsappMessage(ShipmentDTO shipmentDTO);
+        Task<bool> SendWhatsappMessageTemporal( MessageType messageType, object tracking);
     }
 }

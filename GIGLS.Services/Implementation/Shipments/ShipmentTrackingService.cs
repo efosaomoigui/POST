@@ -20,6 +20,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.IServices.DHL;
 using System.Globalization;
 using GIGLS.Core.DTO.ShipmentScan;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -224,15 +225,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //send message
-            if(messageType != MessageType.ARF)
+            if (messageType != MessageType.ARF)
             {
                 await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
             }
             else
             {
                 await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
-                var shipment =await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
+                var shipment = await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+
+                //Send Whatsapp message
+                await SendWhatsappMessage(shipmentDTO);
+
                 if (shipment != null && shipment.PickupOptions == PickupOptions.HOMEDELIVERY && scanStatus == ShipmentScanStatus.ARF && shipment.IsInternational == false)
                 {
                     await SendEmailShipmentARFHomeDelivery(shipmentDTO);
@@ -369,7 +374,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //3. Check for international shipments
                     {
-                        var shipment =  _uow.ShipmentTracking.GetShipmentByWayBill(waybill);
+                        var shipment = _uow.ShipmentTracking.GetShipmentByWayBill(waybill);
                         if (!string.IsNullOrWhiteSpace(shipment.InternationalWayBill))
                         {
                             var dhlTracking = new List<ShipmentTrackingDTO>();
@@ -831,7 +836,7 @@ namespace GIGLS.Services.Implementation.Shipments
         //Send email and SMS when Scan of "Intl Shipment Arrive Nigeria" and payment has not been made
         public async Task<bool> SendEmailShipmentArriveFinalDestination(ShipmentDTO shipmentDTO)
         {
-            if(shipmentDTO != null)
+            if (shipmentDTO != null)
             {
                 if (shipmentDTO.CustomerType.Contains("Individual"))
                 {
@@ -900,7 +905,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
             {
                 await _messageSenderService.SendMailsShipmentARFHomeDelivery(messageDTO);
-            } 
+            }
 
             return true;
         }
@@ -940,9 +945,77 @@ namespace GIGLS.Services.Implementation.Shipments
             //Send Email
             if (!String.IsNullOrEmpty(shipmentDTO.ReceiverEmail))
             {
-                await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO); 
+                await _messageSenderService.SendMailsShipmentARFTerminalPickup(messageDTO);
             }
 
+            return true;
+        }
+
+        //Send whatsapp message when Shipment Arrive final destination
+        public async Task<bool> SendWhatsappMessage(ShipmentDTO shipmentDTO)
+        {
+            if (shipmentDTO != null)
+            {
+
+                var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentDTO.Waybill).FirstOrDefault();
+
+                var deliveryNumber = _uow.DeliveryNumber.GetAll()
+                                            .Where(s => s.Waybill == invoice.Waybill)
+                                            .Select(s => new { s.SenderCode }).FirstOrDefault().SenderCode;
+
+                var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
+                var whatsappMessage = new WhatsAppMessageDTO
+                {
+                    RecipientWhatsapp = invoice.ReceiverPhoneNumber,
+                    MessageType = "template",
+                    Source = sourceId,
+                    RecipientType = "individual",
+                    TypeTemplate = new List<TypeTemplateDTO>
+                        {
+                            new TypeTemplateDTO
+                            {
+                                Name = "shipment_notification_terminal_pickup",
+                                Attributes = new List<string>
+                                {
+                                    invoice.ReceiverName, 
+                                    invoice.Waybill,
+                                    invoice.DestinationServiceCentreName,
+                                    deliveryNumber
+                                },
+                                Language = new LanguageDTO
+                                {
+                                    Locale = "en",
+                                    Policy = "deterministic"
+                                }
+                            }
+                        }
+                };
+
+                if(shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    foreach (var template in whatsappMessage.TypeTemplate)
+                    {
+                        template.Name = "shipment_notification_home_delivery";
+                    }
+                }
+                //Send Whatsapp message
+                if (!String.IsNullOrEmpty(invoice.ReceiverPhoneNumber))
+                {
+                    await _messageSenderService.SendWhatsappMessage(whatsappMessage);
+                }
+            }
+
+            return true;
+        }
+
+        //Send whatsapp message when Shipment Arrive final destination Temporal
+        public async Task<bool> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        {
+            if(tracking != null)
+            {
+                await _messageSenderService.SendWhatsappMessageTemporal(messageType, tracking);
+            }
             return true;
         }
     }

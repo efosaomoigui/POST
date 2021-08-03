@@ -115,6 +115,9 @@ namespace GIGLS.Core.DTO
         public string XApiheader { get; set; }
         [JsonProperty("type_text")]
         public List<TypeTextDTO> TypeText { get; set; }
+        public string Waybill { get; set; }
+        [JsonProperty("type_template")]
+        public List<TypeTemplateDTO> TypeTemplate { get; set; }
     }
 
     public class WhatsAppMessagesDTO
@@ -160,5 +163,26 @@ namespace GIGLS.Core.DTO
 
         [JsonProperty("recipients")]
         public List<RecipientDTO> Recipients { get; set; }
+    }
+
+    public class TypeTemplateDTO
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("attributes")]
+        public List<string> Attributes { get; set; }
+
+        [JsonProperty("language")]
+        public LanguageDTO Language { get; set; }
+    }
+
+    public class LanguageDTO
+    {
+        [JsonProperty("locale")]
+        public string Locale { get; set; }
+
+        [JsonProperty("policy")]
+        public string Policy { get; set; }
     }
 }

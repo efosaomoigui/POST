@@ -2033,70 +2033,33 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
-        public async Task<string> SendWhatsappMessage(WhatsappNumberDTO number)
+        public async Task<string> SendWhatsappMessage(WhatsAppMessageDTO whatsAppMessage)
         {
-            //get CustomerDetails (
-            //if (shipmentDto.CustomerType.Contains("Individual"))
-            //{
-            //    shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
-            //}
-            //CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
-            //var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
-
-            //var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountryId);
-
-            //var getConsent = await GetConsentDetails(customerObj.PhoneNumber);
-
-
-            //if (!getConsent.Contains("success"))
-            //{
-            //    var consent =await  ManageOptInOut(customerObj.PhoneNumber);
-
-            //    if (consent.Contains("success"))
-            //    {
-            //        await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
-            //    }
-
-            //}
-            //else
-            //{
-            //    await SendWhatsappMessageToNumber(customerObj.PhoneNumber);
-            //}
-
-            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
-
-            var whatsappMessage = new WhatsAppMessageDTO
-            {
-                RecipientWhatsapp = number.PhoneNumber,
-                MessageType = "text",
-                Source = sourceId,
-                RecipientType = "individual",
-                TypeText = new List<TypeTextDTO>
-                        {
-                            new TypeTextDTO
-                            {
-                                Content = "Welcome to Gig Logistics! Your test shipment just arrived final destination."
-                            }
-                        }
-            };
-
             var result = "";
-            var getConsent = await GetConsentDetails(number.PhoneNumber);
-
-
-            if (!getConsent.Contains("success"))
+            if (whatsAppMessage != null)
             {
-                var consent = await ManageOptInOut(number.PhoneNumber);
+                whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Trim();
 
-                if (consent.Contains("success"))
+                if (whatsAppMessage.RecipientWhatsapp.Contains("+"))
                 {
-                    result = await SendWhatsappMessageToNumber(whatsappMessage);
+                    whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
                 }
-            }
-            else
-            {
-                var consent = await ManageOptInOut(number.PhoneNumber);
-                result = await SendWhatsappMessageToNumber(whatsappMessage);
+                
+                var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
+
+                if (!getConsent.Contains("success"))
+                {
+                    var consent = await ManageOptInOut(whatsAppMessage.RecipientWhatsapp);
+
+                    if (consent.Contains("success"))
+                    {
+                        result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                    }
+                }
+                else
+                {
+                    result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                }
             }
             return result;
         }
@@ -2169,12 +2132,13 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         DateCreated = DateTime.Now,
                         DateModified = DateTime.Now,
-                        From = "GIG Logistics Chat Bot",
+                        From = "GIG Logistics",
                         To = whatsAppMessage.RecipientWhatsapp,
                         Message = text.Content,
                         Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                         ResultStatus = result,
-                        ResultDescription = exceptionMessage + " Sent using Pepipost"
+                        ResultDescription = exceptionMessage + " Sent using " + SMSSenderPlatform.WHATSAPPBOT.ToString(),
+                        Waybill = whatsAppMessage.Waybill
                     });
                 }
 
@@ -2185,6 +2149,67 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             return true;
+        }
+        //Send Whatsapp message using ARF sms format for Home delivery terminal pickup
+        public async Task<string> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        {
+            var result = "";
+
+            var sourceId = ConfigurationManager.AppSettings["WhatsAppSourceID"];
+
+            var messageDTO = new MessageDTO();
+
+            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
+            messageDTO = Mapper.Map<MessageDTO>(smsMessages);
+
+            if (messageDTO != null)
+            {
+                //prepare message finalBody
+                await PrepareMessageFinalBody(messageDTO, tracking);
+            }
+
+            var whatsAppMessage = new WhatsAppMessageDTO
+            {
+                RecipientWhatsapp = messageDTO.To,
+                Waybill = messageDTO.Waybill,
+                MessageType = "text",
+                Source = sourceId,
+                RecipientType = "individual",
+                TypeText = new List<TypeTextDTO>
+                        {
+                            new TypeTextDTO
+                            {
+                                Content = messageDTO.FinalBody
+                            }
+                        }
+            };
+
+            if (!string.IsNullOrWhiteSpace(whatsAppMessage.RecipientWhatsapp))
+            {
+                whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Trim();
+
+                if (whatsAppMessage.RecipientWhatsapp.Contains("+"))
+                {
+                    whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
+                }
+
+                var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
+
+                if (!getConsent.Contains("success"))
+                {
+                    var consent = await ManageOptInOut(whatsAppMessage.RecipientWhatsapp);
+
+                    if (consent.Contains("success"))
+                    {
+                        result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                    }
+                }
+                else
+                {
+                    result = await SendWhatsappMessageToNumber(whatsAppMessage);
+                }
+            }
+            return result;
         }
         //Sends generic email message
         //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
