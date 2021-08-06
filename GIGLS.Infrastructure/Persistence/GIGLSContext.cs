@@ -21,6 +21,8 @@ using GIGLS.Core.Domain.Expenses;
 using GIGLS.Core.Domain.Route;
 using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.Domain.Archived;
+using System.Data.Entity.Infrastructure.Annotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -333,7 +335,12 @@ namespace GIGLS.Infrastructure.Persistence
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
 
-        }
+            modelBuilder.Entity<TransferDetails>().Property(p => p.SessionId).IsRequired()
+                                                                            .HasColumnAnnotation(
+                                                                                IndexAnnotation.AnnotationName,
+                                                                                new IndexAnnotation(
+                                                                                    new IndexAttribute("IX_SessionId", 1) { IsUnique = true }));
+                                                                                }
 
         #region Customize to handle Date and Delete status of Entities
         public override int SaveChanges()
