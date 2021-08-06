@@ -208,7 +208,20 @@ namespace GIGLS.Services.Business.Tracking
                 {
                     //map the array
                    var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentTrackingDTO.ServiceCentreId);
-                    strArray[4] = shipmentTrackingDTO.Location;
+                    //get Shipment information
+                    var shipmentInfo = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentTrackingDTO.Waybill);
+                    if (shipmentInfo.DepartureCountryId == 207)
+                    {
+                        strArray[4] = "AT OUR HOUSTON PROCESSING CENTER";
+                    }
+                    else if (shipmentInfo.DepartureCountryId == 62)
+                    {
+                        strArray[4] = "AT OUR UK PROCESSING CENTRE";
+                    }
+                    else
+                    {
+                        strArray[4] = shipmentTrackingDTO.Location;
+                    }
                     shipmentTrackingDTO.Location = centre.Name;
                 }
 
