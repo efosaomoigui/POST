@@ -3593,7 +3593,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
 
                 };
-               var updateAgilty = await  AddMobilePickupRequest(mobilePickUpDTO);
+                var updateAgilty = await AddMobilePickupRequest(mobilePickUpDTO);
                 result.Succeeded = true;
                 return result;
 
@@ -3660,7 +3660,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var userId = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(userId);
 
-            if(user is null)
+            if (user is null)
             {
                 throw new GenericException("User does not exit");
             }
@@ -3735,12 +3735,55 @@ namespace GIGLS.Services.Business.CustomerPortal
                 PrivateKey = user.PrivateKey,
                 PublicKey = user.PublicKey
             };
-           
+
             return result;
         }
         public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
-           return await _countryService.GetCountries();
+            return await _countryService.GetCountries();
+        }
+
+        public async Task<string> EncryptCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return await _partnertransactionservice.Encrypt(apiKey);
+        }
+
+        public async Task<string> GetCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return apiKey;
+        }
+
+        public async Task<string> Decrypt(string encrytedKey)
+        {
+            return await _partnertransactionservice.Decrypt(encrytedKey);
+        }
+
+        public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
+        {
+            try
+            {
+                if (transferDetailsDTO is null)
+                {
+                    throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
+                if (entity)
+                {
+                    throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
+                _uow.TransferDetails.Add(transferDetails);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

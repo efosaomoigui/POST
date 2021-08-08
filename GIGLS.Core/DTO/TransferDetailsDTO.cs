@@ -1,0 +1,36 @@
+﻿using GIGLS.CORE.DTO;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GIGLS.Core.DTO
+{
+    public class TransferDetailsDTO : BaseDomainDTO
+    {
+        [JsonProperty("originatoraccountnumber")]
+        public string OriginatorAccountNumber { get; set; }
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+        [JsonProperty("originatorname")]
+        public string OriginatorName { get; set; }
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+        [JsonProperty("craccountname")]
+        public string CrAccountName { get; set; }
+        [JsonProperty("paymentreference")]
+        public string PaymentReference { get; set; }
+        [JsonProperty("bankname")]
+        public string BankName { get; set; }
+        [JsonProperty("sessionid")]
+        public string SessionId { get; set; }
+        [JsonProperty("craccount")]
+        public string CrAccount { get; set; }
+        [JsonProperty("bankcode")]
+        public string BankCode { get; set; }
+        [JsonProperty("created_at")]
+        public string CreatedAt { get; set; }
+    }
+}

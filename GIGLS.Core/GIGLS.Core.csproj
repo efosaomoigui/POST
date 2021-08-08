@@ -158,6 +158,7 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
     <Compile Include="Domain\DeliveryNumber.cs" />
@@ -520,6 +521,7 @@
     <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\TransferDetailsDTO.cs" />
     <Compile Include="DTO\UPS\LabelDescription.cs" />
     <Compile Include="DTO\UPS\LabelImageFormat.cs" />
     <Compile Include="DTO\UPS\LabelSpecification.cs" />
@@ -700,6 +702,7 @@
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
     <Compile Include="IRepositories\IPriceCategoryRepository.cs" />
+    <Compile Include="IRepositories\ITransferDetailsRepository.cs" />
     <Compile Include="IRepositories\Magaya\IMagayaShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Partnership\IFleetPartnerRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerPayoutRepository.cs" />

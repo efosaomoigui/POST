@@ -247,6 +247,7 @@
     <Compile Include="Persistence\Repositories\Stores\ServiceCenterPackageRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
     <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
+    <Compile Include="Persistence\Repositories\TransferDetailsRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\User\RankHistoryRepository.cs" />
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />

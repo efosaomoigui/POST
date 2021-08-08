@@ -21,6 +21,8 @@ using GIGLS.Core.Domain.Expenses;
 using GIGLS.Core.Domain.Route;
 using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.Domain.Archived;
+using System.Data.Entity.Infrastructure.Annotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -304,6 +306,9 @@ namespace GIGLS.Infrastructure.Persistence
         //routes
         public DbSet<Route> Routes { get; }
 
+        //cellulant
+        public DbSet<TransferDetails> TransferDetails { get; set; }
+
         #endregion
 
 
@@ -331,7 +336,6 @@ namespace GIGLS.Infrastructure.Persistence
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
 
         }
-
         #region Customize to handle Date and Delete status of Entities
         public override int SaveChanges()
         {
