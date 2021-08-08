@@ -230,6 +230,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile);
         Task<CustomerDTO> GetCorporateCustomer(string customerCode);
         Task<ShipmentDTO> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO);
+        Task<NewPricingDTO> GetGrandPriceForShipment(CorporateShipmentDTO corporateShipmentDTO);
         Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails);
         Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails();
         Task<IEnumerable<CountryDTO>> GetCountries();
