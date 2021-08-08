@@ -2504,7 +2504,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var price = await _tickectMan.GetGrandPriceForShipment(newShipmentDTO);
+                var price = await _portalService.GetGrandPriceForShipment(newShipmentDTO);
                 return new ServiceResponse<NewPricingDTO>
                 {
                     Object = price
