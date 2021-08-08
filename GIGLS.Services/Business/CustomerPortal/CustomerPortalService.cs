@@ -3772,7 +3772,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                //var entity =  _uow.TransferDetails.GetAllAsQueryable().Where(x => x.SessionId == transferDetailsDTO.SessionId).FirstOrDefault();
                 var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
                 if (entity)
                 {
