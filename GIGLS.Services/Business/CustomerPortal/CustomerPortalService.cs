@@ -3598,7 +3598,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment)
 
                 };
-               var updateAgilty = await  AddMobilePickupRequest(mobilePickUpDTO);
+                var updateAgilty = await AddMobilePickupRequest(mobilePickUpDTO);
                 result.Succeeded = true;
                 return result;
 
@@ -3663,7 +3663,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var userId = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(userId);
 
-            if(user is null)
+            if (user is null)
             {
                 throw new GenericException("User does not exit");
             }
@@ -3738,12 +3738,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 PrivateKey = user.PrivateKey,
                 PublicKey = user.PublicKey
             };
-           
+
             return result;
         }
         public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
-           return await _countryService.GetCountries();
+            return await _countryService.GetCountries();
         }
 
         public async Task<string> EncryptCellulantKey()
@@ -3767,10 +3767,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                // var entity = Mapper.Map<TransferDetails>(TransferDetailsDTO);
-                if (transferDetailsDTO == null)
+                if (transferDetailsDTO is null)
                 {
-                    throw new GenericException($"invalid payload");
+                    throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                //var entity =  _uow.TransferDetails.GetAllAsQueryable().Where(x => x.SessionId == transferDetailsDTO.SessionId).FirstOrDefault();
+                var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
+                if (entity)
+                {
+                    throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
