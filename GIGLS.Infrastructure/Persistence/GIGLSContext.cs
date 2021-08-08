@@ -335,8 +335,6 @@ namespace GIGLS.Infrastructure.Persistence
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
 
-            modelBuilder.Entity<TransferDetails>().Property(p => p.SessionId).IsRequired();
-
         }
         #region Customize to handle Date and Delete status of Entities
         public override int SaveChanges()
