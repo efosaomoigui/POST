@@ -22,7 +22,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Shipments
+namespace GIGLS.WebApi.Controllers.CustomerInvoice
 {
     [RoutePrefix("api/customerinvoice")]
     public class CustomerInvoiceController : BaseWebApiController

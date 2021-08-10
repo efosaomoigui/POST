@@ -74,7 +74,7 @@ namespace GIGLS.WebApi
 
         private void timerforMail_Elapsed(object sender, ElapsedEventArgs e)
         {
-            using (Controllers.Shipments.CustomerInvoiceController req = new Controllers.Shipments.CustomerInvoiceController(service))
+            using (Controllers.CustomerInvoice.CustomerInvoiceController req = new Controllers.CustomerInvoice.CustomerInvoiceController(service))
             {
                 req.GenerateCustomerInvoice();
             }
