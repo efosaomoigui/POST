@@ -28,6 +28,13 @@ using OfficeOpenXml.Drawing;
 using GIGLS.Core.Domain;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices.Utility;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using GIGLS.Services.Implementation.Shipments;
+using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Wallet;
+using Image = iTextSharp.text.Image;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -37,13 +44,15 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUserService _userService;
         private IServiceCentreService _serviceCenterService;
         private INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPaystackPaymentService paystackPaymentService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _paystackPaymentService = paystackPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -770,5 +779,199 @@ namespace GIGLS.Services.Implementation.Report
             }
 
         }
+
+        public async Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions()
+        {
+            try
+            {
+                var shipments = await _uow.Shipment.GetMonthlyCoporateTransactions();
+                return shipments;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<string> GeneratePDF(CustomerInvoiceDTO customerInvoice)
+        {
+            using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
+            {
+                var invoices = customerInvoice.InvoiceViewDTOs;
+                Document document = new Document(PageSize.A4, 10, 10, 10, 10);
+                PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
+                document.Open();
+               string[] headers = { "Wabill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
+
+                PdfPTable table = new PdfPTable(headers.Length);
+                var imageURL = ConfigurationManager.AppSettings["InvoiceImg"];
+                Image pngImg = Image.GetInstance(imageURL);
+                pngImg.ScaleToFit(570f, 420f);
+                table.SpacingBefore = 20;
+
+                PdfPCell cell = new PdfPCell();
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+
+                //cell = new PdfPCell(pngImg);
+                //cell.Colspan = 6;
+                //table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase($"Bill To: {customerInvoice.CustomerName}{System.Environment.NewLine}{System.Environment.NewLine}Email: {customerInvoice.Email}{System.Environment.NewLine}{System.Environment.NewLine}Invoice Ref No: {customerInvoice.InvoiceRefNo}"));
+                cell.Colspan = 6;
+                table.AddCell(cell);
+               // table.AddCell(invoices.FirstOrDefault().Name);
+
+
+                cell = new PdfPCell(new Phrase());
+                cell = new PdfPCell(new Phrase($"Customer Code: {customerInvoice.CustomerCode.PadRight(20)} Date Created: {invoices.FirstOrDefault().DateCreated.ToString()}{System.Environment.NewLine}"));
+               // cell = new PdfPCell(new Phrase("Customer Code"));
+                cell.Colspan = 6;
+                table.AddCell(cell);
+               // table.AddCell(invoices.FirstOrDefault().CustomerCode);
+               
+                //cell = new PdfPCell(new Phrase());
+                //cell = new PdfPCell(new Phrase("Date Created"));
+                //cell.Colspan = 5;
+                //table.AddCell(cell);
+                //table.AddCell(invoices.FirstOrDefault().DateCreated.ToString());
+
+                cell = new PdfPCell(new Phrase("Invoice Detail"));
+                cell.Colspan = 6;
+                table.AddCell(cell);
+
+                for (int i = 0; i < 1; i++)
+                {
+                    table.AddCell(headers[0]);
+                    table.AddCell(headers[1]);
+                    table.AddCell(headers[2]);
+                    table.AddCell(headers[3]);
+                    table.AddCell(headers[4]);
+                    table.AddCell(headers[5]);
+                    break;
+                }
+                foreach (var item in customerInvoice.InvoiceViewDTOs)
+                {
+                    table.AddCell(item.Waybill);
+                    table.AddCell(item.DepartureServiceCentreName);
+                    table.AddCell(item.DestinationServiceCentreName); 
+                    table.AddCell(item.ApproximateItemsWeight.ToString()); 
+                    table.AddCell($"₦{item.Amount.ToString()}"); 
+                    table.AddCell(item.DateCreated.ToString()); 
+                }
+                document.Add(pngImg);
+                document.Add(table);
+                document.Close();
+                byte[] bytes = memoryStream.ToArray();
+                memoryStream.Close();
+
+                //save image to blob
+                string filename = string.Empty;
+                string fileMimeType = "application/pdf";
+                var _task = await AzureBlobServiceUtil.UploadFileToBlobAsync(filename, bytes, fileMimeType);
+                string fileUrl = _task;
+                return fileUrl;
+
+            }
+        }
+
+        public async Task<bool> AddCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            try
+            {
+                if (customerInvoiceDTO == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (!customerInvoiceDTO.InvoiceViewDTOs.Any())
+                {
+                    throw new GenericException("Invalid payload, No invoice detail", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var customerInvoice = JObject.FromObject(customerInvoiceDTO).ToObject<CustomerInvoice>();
+                var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
+               // customerInvoice.UserID = await _userService.GetCurrentUserId();
+                customerInvoice.Waybills = string.Join(",", waybills);
+                _uow.CustomerInvoice.Add(customerInvoice);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<bool> CreateNUBAN(CustomerInvoiceDTO customerInvoice)
+        {
+            //first create customer on paystack if customer doesnt exist already
+            var nuban = new CreateNubanAccountResponseDTO();
+            bool res = false;
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode);
+
+            if (!String.IsNullOrEmpty(company.NUBANAccountNo)) { res = true; return res; }
+
+            var nubanAcc = new CreateNubanAccountDTO()
+            {
+                customer = 0,
+                email = company.Email,
+                preferred_bank = "wema-bank",
+                first_name = company.Name,
+                last_name = company.Name,
+                phone = company.PhoneNumber
+            };
+            if (String.IsNullOrEmpty(company.NUBANCustomerCode))
+            {
+                var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                if (nubanCustomer.succeeded)
+                {
+                    company.NUBANCustomerId = nubanCustomer.data.id;
+                    company.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                    nubanAcc.customer = nubanCustomer.data.id;
+                    nuban = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                    if (nuban.succeeded)
+                    {
+                        if (company != null)
+                        {
+                            company.PrefferedNubanBank = nubanAcc.preferred_bank;
+                            company.NUBANAccountNo = nuban.data.account_number;
+                            company.NUBANCustomerName = nuban.data.account_name;
+                        }
+                        res = nuban.succeeded;
+                    }
+                }
+            }
+
+            else if (!String.IsNullOrEmpty(company.NUBANCustomerCode) && String.IsNullOrEmpty(company.NUBANAccountNo))
+            {
+                nubanAcc.customer = company.NUBANCustomerId;
+                var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                if (customerNubanAccount.succeeded)
+                {
+                    if (company != null)
+                    {
+                        company.PrefferedNubanBank = company.PrefferedNubanBank;
+                        company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                    }
+                }
+                res = customerNubanAccount.succeeded;
+            }
+            return res;
+        }
+
+        public async Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice)
+        {
+            bool res = false;
+            var now = DateTime.Now;
+            DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+            DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+            var invoice = await _uow.CustomerInvoice.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode && x.DateCreated >= firstDay && x.DateCreated <= lastDay);
+            if (invoice != null)
+            {
+                res = true;
+            }
+            return res;
+        }
+
     }
 }

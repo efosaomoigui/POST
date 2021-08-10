@@ -8,6 +8,8 @@ using System.Net.Http.Formatting;
 using Newtonsoft.Json.Serialization;
 using GIGLS.WebApi.Providers;
 using Hangfire;
+using System.Timers;
+using GIGLS.CORE.IServices.Report;
 //using GlobalConfiguration = Hangfire.GlobalConfiguration;
 //using Hangfire.SqlServer;
 //using Ninject;
@@ -18,6 +20,8 @@ namespace GIGLS.WebApi
 {
     public partial class Startup
     {
+        const double minute = 6000 * 3;
+        private readonly IShipmentReportService service;
         public void Configuration(IAppBuilder app)
         {
             //var config = new HttpConfiguration();
@@ -46,7 +50,8 @@ namespace GIGLS.WebApi
             //});
             //app.UseHangfireServer();
             //app.UseHangfireDashboard();
-           
+            MethodCaller_Timer();
+
         }
 
 
@@ -57,6 +62,23 @@ namespace GIGLS.WebApi
             var jsonFormatter = config.Formatters.OfType<JsonMediaTypeFormatter>().First();
             jsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
         }
-       
+
+        protected void MethodCaller_Timer()
+        {
+            Timer timerforMail = new Timer(120000);
+            Timer tminute = new Timer(minute);
+
+            timerforMail.Elapsed += new ElapsedEventHandler(timerforMail_Elapsed);
+            timerforMail.Enabled = true;
+        }
+
+        private void timerforMail_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            using (Controllers.Shipments.CustomerInvoiceController req = new Controllers.Shipments.CustomerInvoiceController(service))
+            {
+                req.GenerateCustomerInvoice();
+            }
+        }
+
     }
 }

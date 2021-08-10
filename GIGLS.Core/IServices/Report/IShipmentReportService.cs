@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -24,5 +25,10 @@ namespace GIGLS.CORE.IServices.Report
         Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria);
         Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter);
         Task<bool> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
+        Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
+        Task<string> GeneratePDF(CustomerInvoiceDTO customerInvoice);
+        Task<bool> AddCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
+        Task<bool> CreateNUBAN(CustomerInvoiceDTO customerInvoice);
+        Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice);
     }
 }

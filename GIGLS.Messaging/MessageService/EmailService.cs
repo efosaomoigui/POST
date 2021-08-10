@@ -1,7 +1,10 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.IMessage;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -714,6 +717,57 @@ namespace GIGLS.Messaging.MessageService
                 { "CC_DiscountedShippingCost", message.ShipmentCreationMessage.DiscountedShippingCost },
             });
 
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        public async Task<string> ConfigSendGridMonthlyCorporateTransactions(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
+            var invoice = new InvoiceData();
+            invoice.Total = message.CustomerInvoice.InvoiceViewDTOs.Sum(x => x.Amount);
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "CI_CustomerName", message.CustomerInvoice.CustomerName },
+                { "CI_CustomerPhoneNo", message.CustomerInvoice.PhoneNumber },
+                { "CI_Email",message.CustomerInvoice.Email },
+                { "CI_InvoiceRefNo",message.CustomerInvoice.InvoiceRefNo },
+                { "CI_CreatedBy",message.CustomerInvoice.CreatedBy },
+                { "CI_DateCreated",message.CustomerInvoice.DateCreated.ToString() },
+                { "CI_Total",invoice.Total.ToString() },
+                { "CI_BankName",message.CustomerInvoice.BankName },
+                { "Ci_AccountNo",message.CustomerInvoice.AccountNo },
+                { "CI_AccountName",message.CustomerInvoice.AccountName },
+                { "CI_PDFLink",message.PDF},
+            });
+           
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
         }

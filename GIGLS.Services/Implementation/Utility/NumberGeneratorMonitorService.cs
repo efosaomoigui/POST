@@ -279,7 +279,8 @@ namespace GIGLS.Services.Implementation.Utility
         {
             var startYear = startDate.Year.ToString().Substring(2);
             var endYear = endDate.Year.ToString().Substring(2);
-            var refNo = $"{customerCode}{startDate.Day}{startYear}{endDate.Day}{endYear}";
+            var datewithTime = DateTime.Now.ToUniversalTime().ToString("yyyyMMdd\\THHmmssfff");
+            var refNo = $"{customerCode.Remove(2)}{startDate.Day}{startYear}{endDate.Day}{endYear}{datewithTime}";
             return refNo;
         }
     }
