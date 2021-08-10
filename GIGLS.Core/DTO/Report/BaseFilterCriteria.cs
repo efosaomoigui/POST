@@ -13,6 +13,7 @@ namespace GIGLS.CORE.DTO.Report
         public string AssignedCustomerRep { get; set; }
         public string AssignedCustomerRepEmail { get; set; }
         public bool ViewAll { get; set; }
+        public string SenderAccountNumber { get; set; }
         /// <summary>
         /// Get the Start Date and End Date for query to the database
         /// </summary>
