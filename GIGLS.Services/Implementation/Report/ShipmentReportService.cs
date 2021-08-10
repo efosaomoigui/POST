@@ -802,13 +802,16 @@ namespace GIGLS.Services.Implementation.Report
                 Document document = new Document(PageSize.A4, 10, 10, 10, 10);
                 PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
                 document.Open();
-               string[] headers = { "Wabill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
+                string[] headers = { "Wabill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
+                float[] widths = new float[] { 45, 45, 78, 30, 45, 78, 78, 151, 150 };
 
                 PdfPTable table = new PdfPTable(headers.Length);
                 var imageURL = ConfigurationManager.AppSettings["InvoiceImg"];
                 Image pngImg = Image.GetInstance(imageURL);
                 pngImg.ScaleToFit(570f, 420f);
                 table.SpacingBefore = 20;
+               // table.TotalWidth = 570f;
+                table.WidthPercentage = 99;
 
                 PdfPCell cell = new PdfPCell();
                 cell.HorizontalAlignment = Element.ALIGN_CENTER;

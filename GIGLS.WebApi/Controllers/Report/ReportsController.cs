@@ -372,36 +372,39 @@ namespace GIGLS.WebApi.Controllers.Report
                 var now = DateTime.Now;
                 DateTime firstDay = new DateTime(now.Year, now.Month, 1);
                 DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
-                var shipments = await _shipmentService.GetMonthlyCoporateTransactions();
-                if (shipments.Any())
+                if (lastDay.Date == now.Date)
                 {
-                    foreach (var item in shipments)
+                    var shipments = await _shipmentService.GetMonthlyCoporateTransactions();
+                    if (shipments.Any())
                     {
-                        //send email to customer
-                        var message = new MessageDTO()
+                        foreach (var item in shipments)
                         {
-                            ToEmail = item.Email,
-                            To = item.Email,
-                        };
-                        var alreadyExist = await _shipmentService.CheckIfInvoiceAlreadyExist(item);
-                        if (!alreadyExist)
-                        {
-                            item.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, item.CustomerCode, firstDay, lastDay);
-                            var pdf = await _shipmentService.GeneratePDF(item);
-                            message.MessageTemplate = "CooperateEmail";
-
-                            //check if user has a nuban account, create if not
-                            var acc = await _shipmentService.CreateNUBAN(item);
-                            if (acc)
+                            //send email to customer
+                            var message = new MessageDTO()
                             {
-                                message.PDF = pdf;
-                                message.CustomerInvoice = item;
-                                var result = await _emailService.ConfigSendGridMonthlyCorporateTransactions(message);
-                                var saved = await _shipmentService.AddCustomerInvoice(message.CustomerInvoice);
-                                
-                            } 
+                                ToEmail = item.Email,
+                                To = item.Email,
+                            };
+                            var alreadyExist = await _shipmentService.CheckIfInvoiceAlreadyExist(item);
+                            if (!alreadyExist)
+                            {
+                                item.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, item.CustomerCode, firstDay, lastDay);
+                                var pdf = await _shipmentService.GeneratePDF(item);
+                                message.MessageTemplate = "CooperateEmail";
+
+                                //check if user has a nuban account, create if not
+                                var acc = await _shipmentService.CreateNUBAN(item);
+                                if (acc)
+                                {
+                                    message.PDF = pdf;
+                                    message.CustomerInvoice = item;
+                                    var result = await _emailService.ConfigSendGridMonthlyCorporateTransactions(message);
+                                    var saved = await _shipmentService.AddCustomerInvoice(message.CustomerInvoice);
+
+                                }
+                            }
                         }
-                    }
+                    } 
                 }
                 return true;
             }
