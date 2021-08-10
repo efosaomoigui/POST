@@ -35,6 +35,7 @@ using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Wallet;
 using Image = iTextSharp.text.Image;
 using System.Configuration;
+using Font = iTextSharp.text.Font;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -802,66 +803,95 @@ namespace GIGLS.Services.Implementation.Report
                 Document document = new Document(PageSize.A4, 10, 10, 10, 10);
                 PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
                 document.Open();
-                string[] headers = { "Wabill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
+                string[] headers = { "Waybill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
                 float[] widths = new float[] { 45, 45, 78, 30, 45, 78, 78, 151, 150 };
 
+               
                 PdfPTable table = new PdfPTable(headers.Length);
                 var imageURL = ConfigurationManager.AppSettings["InvoiceImg"];
                 Image pngImg = Image.GetInstance(imageURL);
                 pngImg.ScaleToFit(570f, 420f);
                 table.SpacingBefore = 20;
-               // table.TotalWidth = 570f;
                 table.WidthPercentage = 99;
 
                 PdfPCell cell = new PdfPCell();
                 cell.HorizontalAlignment = Element.ALIGN_CENTER;
-
-                //cell = new PdfPCell(pngImg);
-                //cell.Colspan = 6;
-                //table.AddCell(cell);
+                cell.VerticalAlignment = Element.ALIGN_CENTER;
 
                 cell = new PdfPCell(new Phrase($"Bill To: {customerInvoice.CustomerName}{System.Environment.NewLine}{System.Environment.NewLine}Email: {customerInvoice.Email}{System.Environment.NewLine}{System.Environment.NewLine}Invoice Ref No: {customerInvoice.InvoiceRefNo}"));
                 cell.Colspan = 6;
                 table.AddCell(cell);
-               // table.AddCell(invoices.FirstOrDefault().Name);
 
 
                 cell = new PdfPCell(new Phrase());
                 cell = new PdfPCell(new Phrase($"Customer Code: {customerInvoice.CustomerCode.PadRight(20)} Date Created: {invoices.FirstOrDefault().DateCreated.ToString()}{System.Environment.NewLine}"));
-               // cell = new PdfPCell(new Phrase("Customer Code"));
                 cell.Colspan = 6;
                 table.AddCell(cell);
-               // table.AddCell(invoices.FirstOrDefault().CustomerCode);
-               
-                //cell = new PdfPCell(new Phrase());
-                //cell = new PdfPCell(new Phrase("Date Created"));
-                //cell.Colspan = 5;
-                //table.AddCell(cell);
-                //table.AddCell(invoices.FirstOrDefault().DateCreated.ToString());
 
                 cell = new PdfPCell(new Phrase("Invoice Detail"));
                 cell.Colspan = 6;
+               // cell.PaddingLeft = 50;
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                cell.VerticalAlignment = Element.ALIGN_CENTER;
                 table.AddCell(cell);
+               
 
                 for (int i = 0; i < 1; i++)
                 {
-                    table.AddCell(headers[0]);
-                    table.AddCell(headers[1]);
-                    table.AddCell(headers[2]);
-                    table.AddCell(headers[3]);
-                    table.AddCell(headers[4]);
-                    table.AddCell(headers[5]);
+                    cell = new PdfPCell(new Phrase(headers[0]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[1]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[2]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[3]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[4]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[5]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
                     break;
                 }
                 foreach (var item in customerInvoice.InvoiceViewDTOs)
                 {
-                    table.AddCell(item.Waybill);
-                    table.AddCell(item.DepartureServiceCentreName);
-                    table.AddCell(item.DestinationServiceCentreName); 
-                    table.AddCell(item.ApproximateItemsWeight.ToString()); 
-                    table.AddCell($"₦{item.Amount.ToString()}"); 
-                    table.AddCell(item.DateCreated.ToString()); 
+                    cell = new PdfPCell(new Phrase(item.Waybill));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DepartureServiceCentreName));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DestinationServiceCentreName));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.ApproximateItemsWeight.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.Amount.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DateCreated.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
                 }
+                
                 document.Add(pngImg);
                 document.Add(table);
                 document.Close();
@@ -894,6 +924,7 @@ namespace GIGLS.Services.Implementation.Report
                 var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
                // customerInvoice.UserID = await _userService.GetCurrentUserId();
                 customerInvoice.Waybills = string.Join(",", waybills);
+                customerInvoice.Total = customerInvoiceDTO.InvoiceViewDTOs.Sum(x => x.Amount);
                 _uow.CustomerInvoice.Add(customerInvoice);
                 await _uow.CompleteAsync();
                 return true;
