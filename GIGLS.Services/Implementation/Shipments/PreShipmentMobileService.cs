@@ -705,8 +705,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var preshipmentPriceDTO = new MobilePriceDTO();
-
-                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipmentDTO.ZoneMapping == 1)
+                {
+                    preshipmentPriceDTO = await GetPriceForBike(preShipmentDTO);
+                }
+                else if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
                     preshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
                     {
