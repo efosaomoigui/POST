@@ -84,7 +84,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                    OriginatorName = t.OriginatorName,
                                    PaymentReference = t.PaymentReference,
                                    CreatedAt = t.CreatedAt,
-                                   DateCreated = t.DateCreated
+                                   DateCreated = t.DateCreated,
+                                   ResponseCode = t.ResponseCode,
+                                   TransactionStatus = t.TransactionStatus
                                };
             return Task.FromResult(transferDto.ToList());
         }

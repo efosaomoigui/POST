@@ -3794,6 +3794,19 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                if(transferDetailsDTO.ResponseCode == "00")
+                {
+                    transferDetailsDTO.TransactionStatus = "success";
+                }
+                else if (transferDetailsDTO.ResponseCode == "25")
+                {
+                    transferDetailsDTO.TransactionStatus = "failed";
+                }
+                else
+                {
+                    transferDetailsDTO.TransactionStatus = "pending";
+                }
+
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
                 _uow.TransferDetails.Add(transferDetails);
                 await _uow.CompleteAsync();
