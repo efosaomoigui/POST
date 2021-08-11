@@ -4662,15 +4662,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var message = new MobileShipmentCreationMessageDTO
+                if (preShipmentMobile != null && preShipmentMobile.ZoneMapping == 1)
                 {
-                    SenderPhoneNumber = preShipmentMobile.ReceiverPhoneNumber,
-                    SenderName = preShipmentMobile.ReceiverName,
-                    WaybillNumber = preShipmentMobile.Waybill,
-                    QRCode = number
-                };
+                    var message = new MobileShipmentCreationMessageDTO
+                    {
+                        SenderPhoneNumber = preShipmentMobile.ReceiverPhoneNumber,
+                        SenderName = preShipmentMobile.ReceiverName,
+                        WaybillNumber = preShipmentMobile.Waybill,
+                        QRCode = number
+                    };
 
-                await SendSMSForMobileShipmentCreation(message, MessageType.RMCS);
+                    await SendSMSForMobileShipmentCreation(message, MessageType.RMCS); 
+                }
                 return true;
             }
             catch
