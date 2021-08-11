@@ -32,5 +32,8 @@ namespace GIGLS.Core.DTO
         public string BankCode { get; set; }
         [JsonProperty("created_at")]
         public string CreatedAt { get; set; }
+        [JsonProperty("ResponseCode")]
+        public string ResponseCode { get; set; }
+        public string TransactionStatus { get; set; }
     }
 }

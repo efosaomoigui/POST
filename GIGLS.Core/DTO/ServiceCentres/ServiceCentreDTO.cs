@@ -43,6 +43,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool HomeDeliveryStatus { get; set; }
         public bool IsGateway { get; set; }
         public bool IsConsignable { get; set; }
+        public string CrAccount { get; set; }
     }
 
 

@@ -180,7 +180,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
 
                 //1. countryIds not empty
-                if(countryIds.Length > 0)
+                if (countryIds.Length > 0)
                 {
                     var centreDto = from s in centres
                                     join sc in _context.Station on s.StationId equals sc.StationId
@@ -425,12 +425,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             {
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
 
-                if(excludeHub == true)
+                if (excludeHub == true)
                 {
                     centres = centres.Where(x => x.IsHUB == false);
                 }
 
-                if(stationId > 0)
+                if (stationId > 0)
                 {
                     centres = centres.Where(x => x.StationId != stationId);
                 }
@@ -479,7 +479,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             try
             {
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == false && s.IsPublic == true);
-              var centreDto = new List<ServiceCentreDTO>();
+                var centreDto = new List<ServiceCentreDTO>();
                 if (countryId == 1)
                 {
                     var centreDtos = from s in centres
@@ -730,5 +730,24 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
+        public Task<string> GetServiceCentresCrAccount(int serviceCentreId)
+        {
+            try
+            {
+                var centres = _context.ServiceCentre;
+                var centreDto = from s in centres
+                                where s.ServiceCentreId == serviceCentreId
+                                select new ServiceCentreDTO
+                                {
+                                    CrAccount = s.CrAccount
+                                };
+                var crAccount = centreDto.FirstOrDefault().CrAccount;
+                return Task.FromResult(crAccount);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

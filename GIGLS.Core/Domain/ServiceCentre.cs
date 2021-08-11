@@ -48,6 +48,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsPublic { get; set; }
         public int LGAId { get; set; }
         public bool IsConsignable { get; set; }
+        public string CrAccount { get; set; }
 
     }
 }

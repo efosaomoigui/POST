@@ -1213,10 +1213,18 @@ namespace GIGLS.Services.Business.Pricing
                 priceDTO.IsVolumetric = item.IsVolumetric;
                 priceDTO.Height = Convert.ToDecimal(item.Height);
                 priceDTO.ShipmentType = item.ShipmentType;
-                priceDTO.SpecialPackageId = item.SpecialPackageId.Value;
+                if (item.SpecialPackageId != null)
+                {
+                    priceDTO.SpecialPackageId = item.SpecialPackageId.Value; 
+                }
+                else
+                {
+                    priceDTO.SpecialPackageId = 0;
+                }
                 priceDTO.Width = Convert.ToDecimal(item.Width);
                 priceDTO.CountryId = newShipmentDTO.DepartureCountryId;
                 priceDTO.CustomerCode = newShipmentDTO.CustomerCode;
+                priceDTO.DeliveryOptionIds = newShipmentDTO.DeliveryOptionIds;
 
                 if (priceDTO.ShipmentType.ToString().ToLower() == ShipmentType.Regular.ToString().ToLower())
                 {
@@ -1236,6 +1244,20 @@ namespace GIGLS.Services.Business.Pricing
 
                 //var newPrice = await CalculateCustomerRankPrice(priceDTO, totalPrice);
                 //totalPrice += newPrice;
+            }
+
+            //also add waybill charges if  any to grand total
+            var customer = await _uow.Company.GetAsync(x => x.CustomerCode == newShipmentDTO.CustomerCode);
+            if (customer != null)
+            {
+                if (customer.CompanyType == CompanyType.Corporate)
+                {
+                    if (newShipmentDTO.WaybillCharges != null && newShipmentDTO.WaybillCharges.Any())
+                    {
+                        var amount = newShipmentDTO.WaybillCharges.Sum(x => x.Amount);
+                        totalPrice = totalPrice + amount;
+                    }
+                } 
             }
 
             //calculate the vat

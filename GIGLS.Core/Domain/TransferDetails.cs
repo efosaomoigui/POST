@@ -21,5 +21,7 @@ namespace GIGLS.Core.Domain
         public string CrAccount { get; set; }
         public string BankCode { get; set; }
         public string CreatedAt { get; set; }
+        public string ResponseCode { get; set; }
+        public string TransactionStatus { get; set; }
     }
 }

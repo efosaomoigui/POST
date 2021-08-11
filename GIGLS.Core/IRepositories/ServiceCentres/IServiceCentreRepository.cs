@@ -25,5 +25,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
         Task<ServiceCentreBreakdownDTO> GetServiceCentresData(int countryId);
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<List<ServiceCentreDTO>> GetServiceCentresIsConsignable(int[] countryIds, bool excludeHub, int stationId);
+        Task<string> GetServiceCentresCrAccount(int serviceCentreId);
     }
 }
