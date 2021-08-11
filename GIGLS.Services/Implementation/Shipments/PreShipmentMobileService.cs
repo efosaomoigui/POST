@@ -6352,66 +6352,106 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 object Id = null;
-                string scanStatus = ShipmentScanStatus.ARF.ToString();
-                trackingDTO.Status = scanStatus;
+                //Get shipment Details
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(trackingDTO.Waybill));
 
-                bool shipmentTrackingExists = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(trackingDTO.Waybill) && x.Status.Equals(scanStatus));
-
-                if (!shipmentTrackingExists)
+                if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
                 {
-                    if (trackingDTO.User == null)
+                    string scanStatus = ShipmentScanStatus.ARF.ToString();
+                    trackingDTO.Status = scanStatus;
+                    bool shipmentTrackingExists = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(trackingDTO.Waybill) && x.Status.Equals(scanStatus));
+                    if (!shipmentTrackingExists)
                     {
-                        trackingDTO.User = await _userService.GetCurrentUserId();
-                    }
-
-                    //Get shipment Details
-                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(trackingDTO.Waybill));
-                    shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
-
-                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
-                    {
-                        //add service centre
-                        var newShipmentCollection = new ShipmentCollection
+                        if (trackingDTO.User == null)
                         {
-                            Waybill = trackingDTO.Waybill,
-                            ShipmentScanStatus = ShipmentScanStatus.ARF,
-                            DepartureServiceCentreId = shipment.DepartureServiceCentreId,
-                            DestinationServiceCentreId = shipment.DestinationServiceCentreId,
-                            IsCashOnDelivery = shipment.IsCashOnDelivery
-                        };
-
-                        _uow.ShipmentCollection.Add(newShipmentCollection);
-                    }
-
-                    var newShipmentTracking = new ShipmentTracking
-                    {
-                        Waybill = trackingDTO.Waybill,
-                        Location = trackingDTO.Location,
-                        Status = trackingDTO.Status,
-                        DateTime = DateTime.Now,
-                        UserId = trackingDTO.User,
-                        ServiceCentreId = trackingDTO.ServiceCentreId
-                    };
-                    _uow.ShipmentTracking.Add(newShipmentTracking);
-
-                    Id = newShipmentTracking.ShipmentTrackingId;
-
-                    if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
-                    {
-                        var messageType = MessageType.ShipmentCreation;
-                        foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
-                        {
-                            if (item.ToString() == scanStatus.ToString())
-                            {
-                                messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
-                                break;
-                            }
+                            trackingDTO.User = await _userService.GetCurrentUserId();
                         }
 
-                        //send message
-                        await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
-                    }
+                        shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
 
+                        if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                        {
+                            //add service centre
+                            var newShipmentCollection = new ShipmentCollection
+                            {
+                                Waybill = trackingDTO.Waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.ARF,
+                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                                IsCashOnDelivery = shipment.IsCashOnDelivery
+                            };
+
+                            _uow.ShipmentCollection.Add(newShipmentCollection);
+                        }
+
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = trackingDTO.Waybill,
+                            Location = trackingDTO.Location,
+                            Status = trackingDTO.Status,
+                            DateTime = DateTime.Now,
+                            UserId = trackingDTO.User,
+                            ServiceCentreId = trackingDTO.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                        Id = newShipmentTracking.ShipmentTrackingId;
+
+                        if (shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                        {
+                            var messageType = MessageType.ShipmentCreation;
+                            foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+                            {
+                                if (item.ToString() == scanStatus.ToString())
+                                {
+                                    messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                                    break;
+                                }
+                            }
+
+                            //send message
+                            await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
+                        }
+
+                    } 
+                }
+                else if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    string scanStatus = ShipmentScanStatus.OKC.ToString();
+                    trackingDTO.Status = scanStatus;
+                    bool shipmentTrackingExists = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(trackingDTO.Waybill) && x.Status.Equals(scanStatus));
+                    if (!shipmentTrackingExists)
+                    {
+                        if (trackingDTO.User == null)
+                        {
+                            trackingDTO.User = await _userService.GetCurrentUserId();
+                        }
+
+                        shipment.ShipmentScanStatus = ShipmentScanStatus.OKC;
+
+                        ////add service centre
+                        //var newShipmentCollection = new ShipmentCollection
+                        //{
+                        //    Waybill = trackingDTO.Waybill,
+                        //    ShipmentScanStatus = ShipmentScanStatus.OKC,
+                        //    DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                        //    DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                        //    IsCashOnDelivery = shipment.IsCashOnDelivery
+                        //};
+                        //_uow.ShipmentCollection.Add(newShipmentCollection);
+
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = trackingDTO.Waybill,
+                            Location = shipment.ReceiverAddress,
+                            Status = trackingDTO.Status,
+                            DateTime = DateTime.Now,
+                            UserId = trackingDTO.User,
+                            ServiceCentreId = trackingDTO.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
+                        Id = newShipmentTracking.ShipmentTrackingId;
+                    }
                 }
                 else
                 {
