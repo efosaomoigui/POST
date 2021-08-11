@@ -12,7 +12,7 @@ namespace GIGLS.Core.IRepositories
 {
     public interface ITransferDetailsRepository : IRepository<TransferDetails>
     {
-        Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria);
-        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
+        Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria, string crAccount);
+        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber, string crAccount);
     }
 }

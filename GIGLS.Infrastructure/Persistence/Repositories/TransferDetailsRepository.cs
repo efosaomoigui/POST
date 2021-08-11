@@ -19,7 +19,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria)
+        public Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria, string crAccount)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
                  
-                transferDetails = _context.TransferDetails.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+                transferDetails = _context.TransferDetails.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CrAccount == crAccount);
 
                 var transferDetailsDto = GetListOfTransferDetails(transferDetails);
                 return transferDetailsDto;
@@ -47,7 +47,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             }
         }
 
-        public Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
+        public Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber, string crAccount)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 if (!string.IsNullOrWhiteSpace(accountNumber))
                 {
                     accountNumber = accountNumber.Trim().ToLower();
-                    transferDetails = transferDetails.Where(x => x.OriginatorAccountNumber.ToLower().Equals(accountNumber));
+                    transferDetails = transferDetails.Where(x => x.OriginatorAccountNumber.ToLower().Equals(accountNumber) && x.CrAccount == crAccount);
                 }
 
                 var transferDetailsDto = GetListOfTransferDetails(transferDetails);
