@@ -14,5 +14,7 @@ namespace GIGLS.Core.IRepositories
     {
         Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria, string crAccount);
         Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber, string crAccount);
+        Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria);
+        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
     }
 }

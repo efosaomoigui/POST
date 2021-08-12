@@ -33,27 +33,48 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter)
         {
-            var crAccount = await GetServiceCentreCrAccount();
+            var isAdmin = await CheckUserRoleIsAdmin();
+            List<TransferDetailsDTO> transferDetailsDto;
 
-            if (string.IsNullOrWhiteSpace(crAccount))
+            if (!isAdmin)
             {
-                throw new GenericException($"Service centre does not have a CRAccount.");
-            }
+                var crAccount = await GetServiceCentreCrAccount();
 
-            var transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+                if (string.IsNullOrWhiteSpace(crAccount))
+                {
+                    throw new GenericException($"Service centre does not have a CRAccount.");
+                }
+
+                 transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+            }
+            else
+            {
+                transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+            }
+            
             return transferDetailsDto;
         }
 
         public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
         {
-            var crAccount = await GetServiceCentreCrAccount();
-
-            if (string.IsNullOrWhiteSpace(crAccount))
+            var isAdmin = await CheckUserRoleIsAdmin();
+            List<TransferDetailsDTO> transferDetailsDto;
+            if (!isAdmin)
             {
-                throw new GenericException($"Service centre does not have a CRAccount.");
-            }
+                var crAccount = await GetServiceCentreCrAccount();
 
-            var transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccount);
+                if (string.IsNullOrWhiteSpace(crAccount))
+                {
+                    throw new GenericException($"Service centre does not have a CRAccount.");
+                }
+
+                 transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccount);
+            }
+            else
+            {
+                transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+            }
+            
             return transferDetailsDto;
         }
 
@@ -89,5 +110,23 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return crAccount;
         }
+
+        private async Task<bool> CheckUserRoleIsAdmin()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var userRoles = await _userService.GetUserRoles(currentUserId);
+
+            bool isAdmin = false;
+            foreach (var role in userRoles)
+            {
+                if (role == "Admin")
+                {
+                    isAdmin = true;   // set to true
+                }
+            }
+
+            return isAdmin;
+        }
+
     }
 }
