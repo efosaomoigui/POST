@@ -13,15 +13,15 @@ namespace GIGLS.Core.Domain
         public int TransferDetailsId { get; set; }
         [MaxLength(50)]
         public string OriginatorAccountNumber { get; set; }
-        [MaxLength(250)]
+        [MaxLength(50)]
         public string Amount { get; set; }
-        [MaxLength(250)]
+        [MaxLength(150)]
         public string OriginatorName { get; set; }
         public string Narration { get; set; }
-        [MaxLength(250)]
+        [MaxLength(100)]
         public string CrAccountName { get; set; }
         public string PaymentReference { get; set; }
-        [MaxLength(250)]
+        [MaxLength(100)]
         public string BankName { get; set; }
         public string SessionId { get; set; }
         [MaxLength(50)]
