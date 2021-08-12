@@ -61,6 +61,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
+            var userRoles = await _userService.GetUserRoles(currentUserId);
             var userClaims = await _userService.GetClaimsAsync(currentUserId);
 
             string[] claimValue = null;
@@ -89,5 +90,40 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return crAccount;
         }
+
+        private async Task<string> GetUserRolesAndClaims()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var userRoles = await _userService.GetUserRoles(currentUserId);
+            var userClaims = await _userService.GetClaimsAsync(currentUserId);
+
+            string[] claimValue = null;
+            string crAccount = "";
+            foreach (var claim in userClaims)
+            {
+                if (claim.Type == "Privilege")
+                {
+                    claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                }
+            }
+
+            if (claimValue == null)
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            if (claimValue[0] == "ServiceCentre")
+            {
+                crAccount = await _uow.ServiceCentre.GetServiceCentresCrAccount(int.Parse(claimValue[1]));
+            }
+            else
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            return crAccount;
+        }
+
     }
 }
