@@ -33,27 +33,48 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter)
         {
-            var crAccount = await GetServiceCentreCrAccount();
+            var isAdmin = await CheckUserRoleIsAdmin();
+            List<TransferDetailsDTO> transferDetailsDto;
 
-            if (string.IsNullOrWhiteSpace(crAccount))
+            if (!isAdmin)
             {
-                throw new GenericException($"Service centre does not have a CRAccount.");
-            }
+                var crAccount = await GetServiceCentreCrAccount();
 
-            var transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+                if (string.IsNullOrWhiteSpace(crAccount))
+                {
+                    throw new GenericException($"Service centre does not have a CRAccount.");
+                }
+
+                 transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+            }
+            else
+            {
+                transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+            }
+            
             return transferDetailsDto;
         }
 
         public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
         {
-            var crAccount = await GetServiceCentreCrAccount();
-
-            if (string.IsNullOrWhiteSpace(crAccount))
+            var isAdmin = await CheckUserRoleIsAdmin();
+            List<TransferDetailsDTO> transferDetailsDto;
+            if (!isAdmin)
             {
-                throw new GenericException($"Service centre does not have a CRAccount.");
-            }
+                var crAccount = await GetServiceCentreCrAccount();
 
-            var transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccount);
+                if (string.IsNullOrWhiteSpace(crAccount))
+                {
+                    throw new GenericException($"Service centre does not have a CRAccount.");
+                }
+
+                 transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccount);
+            }
+            else
+            {
+                transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+            }
+            
             return transferDetailsDto;
         }
 
@@ -61,7 +82,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-            var userRoles = await _userService.GetUserRoles(currentUserId);
             var userClaims = await _userService.GetClaimsAsync(currentUserId);
 
             string[] claimValue = null;
@@ -91,38 +111,21 @@ namespace GIGLS.Services.Implementation.Wallet
             return crAccount;
         }
 
-        private async Task<string> GetUserRolesAndClaims()
+        private async Task<bool> CheckUserRoleIsAdmin()
         {
             var currentUserId = await _userService.GetCurrentUserId();
-            var currentUser = await _userService.GetUserById(currentUserId);
             var userRoles = await _userService.GetUserRoles(currentUserId);
-            var userClaims = await _userService.GetClaimsAsync(currentUserId);
 
-            string[] claimValue = null;
-            string crAccount = "";
-            foreach (var claim in userClaims)
+            bool isAdmin = false;
+            foreach (var role in userRoles)
             {
-                if (claim.Type == "Privilege")
+                if (role == "Admin")
                 {
-                    claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    isAdmin = true;   // set to true
                 }
             }
 
-            if (claimValue == null)
-            {
-                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
-            }
-
-            if (claimValue[0] == "ServiceCentre")
-            {
-                crAccount = await _uow.ServiceCentre.GetServiceCentresCrAccount(int.Parse(claimValue[1]));
-            }
-            else
-            {
-                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
-            }
-
-            return crAccount;
+            return isAdmin;
         }
 
     }
