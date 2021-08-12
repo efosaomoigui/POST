@@ -32,7 +32,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
-                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-30);
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
                  
@@ -57,6 +57,55 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 {
                     accountNumber = accountNumber.Trim().ToLower();
                     transferDetails = transferDetails.Where(x => x.OriginatorAccountNumber.ToLower().Equals(accountNumber) && x.CrAccount == crAccount);
+                }
+
+                var transferDetailsDto = GetListOfTransferDetails(transferDetails);
+                return transferDetailsDto;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria filterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                var transferDetails = _context.TransferDetails.AsQueryable();
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                transferDetails = _context.TransferDetails.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate );
+
+                var transferDetailsDto = GetListOfTransferDetails(transferDetails);
+                return transferDetailsDto;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
+        {
+            try
+            {
+                var transferDetails = _context.TransferDetails.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                {
+                    accountNumber = accountNumber.Trim().ToLower();
+                    transferDetails = transferDetails.Where(x => x.OriginatorAccountNumber.ToLower().Equals(accountNumber));
                 }
 
                 var transferDetailsDto = GetListOfTransferDetails(transferDetails);
