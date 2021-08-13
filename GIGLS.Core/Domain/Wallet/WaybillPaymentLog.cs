@@ -41,5 +41,6 @@ namespace GIGLS.Core.Domain.Wallet
         //Network Provider represent Order_Reference for USSD 
         [MaxLength(50)]
         public string NetworkProvider { get; set; }
+        public int PaymentCountryId { get; set; }
     }
 }

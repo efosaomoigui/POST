@@ -23,10 +23,15 @@ namespace GIGLS.Core.DTO.Wallet
         public string Description { get; set; }
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
+        public string Manifest { get; set; }
         public string ClientNodeId { get; set; }
         public PaymentType PaymentType { get; set; }
         public string PaymentTypeReference { get; set; }
+        public string PassKey { get; set; }
         public decimal BalanceAfterTransaction { get; set; }
+        public int TransactionCountryId { get; set; }
+        public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 
     public class ModifiedWalletTransactionDTO
@@ -40,11 +45,28 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
         public PaymentType PaymentType { get; set; }
+        public int TransactionCountryId { get; set; }
+        public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 
     public class WalletTransactionSummary
     {
         public decimal CreditAmount { get; set; }
         public decimal DebitAmount { get; set; }
+    }
+
+    public class WalletPaymentLogSummary
+    {
+        public decimal Paystack { get; set; }
+        public decimal TheTeller { get; set; }
+        public decimal Flutterwave { get; set; }
+        public decimal USSD { get; set; }
+    }
+
+    public class WalletBreakdown
+    {
+        public decimal IndividualCustomer { get; set; }
+        public decimal Ecommerce { get; set; }
     }
 }

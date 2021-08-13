@@ -39,6 +39,11 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
 using ThirdParty.WebServices.Magaya.Business.New;
+using ThirdParty.WebServices.Business;
+using GIGLS.Core.Domain.DHL;
+using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.Domain.Archived;
+using GIGLS.Core.DTO.Stores;
 
 namespace GIGLS.Core
 {
@@ -259,7 +264,10 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
                 config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
-                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>();
+                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>(); 
+
+                config.CreateMap<GIGLS.Core.Domain.Country, NewCountryDTO>();
+                config.CreateMap<NewCountryDTO, GIGLS.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
@@ -303,8 +311,8 @@ namespace GIGLS.Core
                 config.CreateMap<CustomerView, CustomerDTO>();
                 config.CreateMap<CustomerDTO, CustomerView>();
 
-                config.CreateMap<Notification, NotificationDTO>();
-                config.CreateMap<NotificationDTO, Notification>();
+                config.CreateMap<Domain.Notification, NotificationDTO>();
+                config.CreateMap<NotificationDTO, Domain.Notification>();
 
                 config.CreateMap<LogVisitReason, LogVisitReasonDTO>();
                 config.CreateMap<LogVisitReasonDTO, LogVisitReason>();
@@ -449,6 +457,66 @@ namespace GIGLS.Core
 
                 config.CreateMap<FinancialReport, FinancialReportDTO>();
                 config.CreateMap<FinancialReportDTO, FinancialReport>();
+
+                config.CreateMap<IntlShipmentRequestDTL, IntlShipmentRequestDTO>();
+                config.CreateMap<IntlShipmentRequestDTO, IntlShipmentRequestDTL>();
+                config.CreateMap<ShipmentDTO, NewShipmentDTO>();
+                config.CreateMap<NewShipmentDTO, ShipmentDTO>();
+
+                config.CreateMap<InternationalShipmentDTO, ShipmentDTO>();
+
+                config.CreateMap<InternationalShipmentWaybill, InternationalShipmentWaybillDTO>();
+                config.CreateMap<InternationalShipmentWaybillDTO, InternationalShipmentWaybill>();
+
+                config.CreateMap<PriceCategory, PriceCategoryDTO>();
+                config.CreateMap<PriceCategoryDTO, PriceCategory>();
+
+                config.CreateMap<Store, StoreDTO>();
+                config.CreateMap<StoreDTO, Store>();
+
+                config.CreateMap<CaptainBonusByZoneMaping, CaptainBonusByZoneMapingDTO>();
+                config.CreateMap<CaptainBonusByZoneMapingDTO, CaptainBonusByZoneMaping>();
+
+                config.CreateMap<CustomerInvoice, CustomerInvoiceDTO>();
+                config.CreateMap<CustomerInvoiceDTO, CustomerInvoice>();
+
+                config.CreateMap<InternationalShipmentQuoteDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, InternationalShipmentQuoteDTO>();
+
+                config.CreateMap<RateInternationalShipmentDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, RateInternationalShipmentDTO>();
+
+                config.CreateMap<CreateInternationalShipmentDTO, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, CreateInternationalShipmentDTO>();
+
+                config.CreateMap<RateShipmentItem, ShipmentItemDTO>();
+                config.CreateMap<ShipmentItemDTO, RateShipmentItem>();
+
+                config.CreateMap<QuoteShipmentItem, ShipmentItemDTO>();
+                config.CreateMap<ShipmentItemDTO, QuoteShipmentItem>();
+
+                config.CreateMap<PreShipmentItemMobile, ShipmentItemDTO>();
+                config.CreateMap<ShipmentItemDTO, PreShipmentItemMobile>();
+
+                config.CreateMap<PreShipmentMobile, InternationalShipmentDTO>();
+                config.CreateMap<InternationalShipmentDTO, PreShipmentMobile>();
+
+                config.CreateMap<IndividualCustomer, CustomerDTO>();
+                config.CreateMap<CustomerDTO, IndividualCustomer>();
+
+                config.CreateMap<Company, CustomerDTO>();
+                config.CreateMap<CustomerDTO, Company>();
+
+                config.CreateMap<TransferDetails, TransferDetailsDTO>();
+                config.CreateMap<TransferDetailsDTO, TransferDetails>();
+
+                //Archived Marking
+                config.CreateMap<Shipment_Archive, ShipmentDTO>();
+                config.CreateMap<ShipmentItem_Archive, ShipmentItem>();
+                config.CreateMap<ShipmentItem_Archive, ShipmentItemDTO>();
+                config.CreateMap<GeneralLedger_Archive, GeneralLedgerDTO>();
+                config.CreateMap<Invoice_Archive, InvoiceDTO>();
+                config.CreateMap<TransitWaybillNumber_Archive, TransitWaybillNumberDTO>();
 
             });
 

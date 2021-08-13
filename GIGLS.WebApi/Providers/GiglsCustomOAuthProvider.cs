@@ -51,34 +51,41 @@ namespace GIGLS.WebApi.Providers
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
+            var userBVN = String.Empty;
+            var rank = String.Empty;
+            bool isInternational = false;
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
-                if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
-                    //Global Property PasswordExpireDaysCount
-                    var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
-                    if (expiredDayCount == null)
+                    if (user.SystemUserRole != "Dispatch Rider" && user.SystemUserRole != "Captain")
                     {
-                        context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
-                        return;
-                    }
+                        //Global Property PasswordExpireDaysCount
+                        var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
+                        if (expiredDayCount == null)
+                        {
+                            context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
+                            return;
+                        }
+                        isInternational = user.IsInternational;
 
-                    int expiredDays = Convert.ToInt32(expiredDayCount.Value);
+                        int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
-                    //check for password expiry
-                    var LastUpdatePasswordDate = user.PasswordExpireDate;
-                    DateTime TodayDate = DateTime.Now.Date;
-                    var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
+                        //check for password expiry
+                        var LastUpdatePasswordDate = user.PasswordExpireDate;
+                        DateTime TodayDate = DateTime.Now.Date;
+                        var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
 
-                    if (DayDifferent >= expiredDays)
-                    {
-                        //Redirect to user reset page
-                        context.SetError("password_expired", "The user account has expired.");
-                        context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
-                        return;
+                        if (DayDifferent >= expiredDays)
+                        {
+                            //Redirect to user reset page
+                            context.SetError("password_expired", "The user account has expired.");
+                            context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
+                            return;
+                        }
                     }
                 }
 
@@ -105,7 +112,7 @@ namespace GIGLS.WebApi.Providers
                 }
 
                 //differentiate expire toke time
-                if(user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
+                if (user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
                 {
                     context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
                 }
@@ -113,14 +120,18 @@ namespace GIGLS.WebApi.Providers
                 if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
                 {
                     context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                    isInternational = user.IsInternational;
                 }
 
-                if(user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
                 {
                     var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                     user.Organisation = ecommerce.Name;
-                    user.FirstName = ecommerce.Name;
-                    user.LastName = ecommerce.Name;
+                    user.FirstName = ecommerce.FirstName == null ? user.FirstName : ecommerce.FirstName;
+                    user.LastName = ecommerce.LastName == null ? user.LastName : ecommerce.LastName;
+                    userBVN = ecommerce.BVN;
+                    rank = ecommerce.Rank.ToString();
+                    isInternational = user.IsInternational;
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
@@ -142,7 +153,15 @@ namespace GIGLS.WebApi.Providers
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl},
                     { "IsMagaya", user.IsMagaya.ToString()},
-                    { "IsInternational", user.IsInternational.ToString()}
+                    { "IsInternational", isInternational.ToString()},
+                    { "BVN", userBVN},
+                    { "Rank", rank},
+                    { "ReferralCode", user.RegistrationReferrercode},
+                    { "CountryType", user.CountryType},
+                    { "IsRequestNewPassword", user.IsRequestNewPassword.ToString()},
+                    { "WalletAddress", user.WalletAddress},
+                    { "PrivateKey", user.PrivateKey},
+                    { "PublicKey", user.PublicKey},
                 };
 
                 //get claims for the user

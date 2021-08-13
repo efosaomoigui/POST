@@ -18,6 +18,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string State { get; set; }
         [MaxLength(200)]
         public string URL { get; set; }
+        [MaxLength(300)]
+        public string storeImage { get; set; }
         public int CountryId { get; set; }
+
     }
 }

@@ -12,4 +12,11 @@ namespace GIGLS.Core.Enums
         Agility,
         Intl
     }
+
+    public enum ShipmentReportType
+    {
+        Daily,
+        Monthly,
+        Normal
+    }
 }

@@ -59,7 +59,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Shipment with waybill {waybill} does not exist");
             }
-            
+
             //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
 
@@ -92,6 +92,20 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<object> ProcessShipmentCancel(Shipment shipment, string userId, string cancelReason)
         {
+            var preshipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == shipment.Waybill);
+
+            if (preshipment != null)
+            {
+                if (preshipment.shipmentstatus == "Shipment created" || preshipment.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipment.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString())
+                {
+                    preshipment.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                }
+                else
+                {
+                    throw new GenericException($"GIG Go Shipment cannot be cancelled because it has a current status of {preshipment.shipmentstatus}.");
+                }
+            }
+
             var newCancel = new ShipmentCancel
             {
                 Waybill = shipment.Waybill,

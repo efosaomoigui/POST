@@ -263,12 +263,14 @@ namespace GIGLS.Services.Implementation.User
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
             user.UserName = userDto.Username;
+            user.RegistrationReferrercode = userDto.RegistrationReferrercode;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
             user.PictureUrl = userDto.PictureUrl;
             user.UserActiveCountryId = userDto.UserActiveCountryId;
+            user.AssignedEcommerceCustomer = userDto.AssignedEcommerceCustomer;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -785,7 +787,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -827,6 +829,12 @@ namespace GIGLS.Services.Implementation.User
             return gigGOServiceCenter;
         }
 
+        public async Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetInternationalOutBoundServiceCentre();
+            return gigGOServiceCenter;
+        }
+
 
         //change user password by Admin
         public async Task<IdentityResult> ResetPassword(string userid, string password)
@@ -839,6 +847,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = true;
             var result = await _unitOfWork.User.ResetPassword(userid, password);
             await _unitOfWork.CompleteAsync();
             return result;
@@ -858,6 +867,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
+            user.IsRequestNewPassword = false;
             var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
             await _unitOfWork.CompleteAsync();
             return result;
@@ -1279,7 +1289,8 @@ namespace GIGLS.Services.Implementation.User
                         CountryName = country.CountryName,
                         CurrencyRatio = country.CurrencyRatio,
                         CurrencyCode = country.CurrencyCode,
-                        CurrencySymbol = country.CurrencySymbol
+                        CurrencySymbol = country.CurrencySymbol,
+                        CourierEnable = country.CourierEnable
                     };
                     priviledgeCountrys.Add(countryDTO);
                 }
@@ -1309,6 +1320,7 @@ namespace GIGLS.Services.Implementation.User
 
                 //set countryId
                 user.UserActiveCountryId = country.CountryId;
+                user.CountryType = country.CountryCode;
                 await _unitOfWork.CompleteAsync();
                 result = true;
             }
@@ -1506,6 +1518,29 @@ namespace GIGLS.Services.Implementation.User
             user.DashboardAccess = val;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
+        }
+
+        public async Task<UserDTO> GetEmployeeUserByEmail(string email)
+        {
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    throw new GenericException("Email is empty or Not Valid!");
+            //}
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!"): email.Trim();
+            var user = await _unitOfWork.User.GetEmployeeUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        {
+            email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!") : email.Trim();
+            return  _unitOfWork.User.GetPartnerUsersByEmail2(email);
         }
     }
 }

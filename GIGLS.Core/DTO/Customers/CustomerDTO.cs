@@ -64,7 +64,49 @@ namespace GIGLS.Core.DTO.Customers
         public IdentificationType IdentificationType { get; set; }
         public string IdentifictionNumber { get; set; }
         public string IdentificationImage { get; set; } 
-        public string IdentificationNumber { get; set; }  
+        public string IdentificationNumber { get; set; }
+        public string AccountName { get; set; }
 
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
+        public Rank Rank { get; set; }
+
+    }
+
+
+    public class NewCustomerDTO
+    {
+        //CustomerDTO
+        public CustomerType CustomerType { get; set; }
+
+        public string CustomerName
+        {
+            get
+            {
+                if (CustomerType.Equals(CustomerType.Company))
+                {
+                    return Name;
+                }
+                else
+                {
+                    return string.Format($"{FirstName} {LastName}");
+                }
+            }
+        }
+
+        // CompanyDTO
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string State { get; set; }
+        public string Address { get; set; }
+        public string PhoneNumber { get; set; }
+        public CompanyType CompanyType { get; set; }
+        // IndividualCustomerDTO
+        public int IndividualCustomerId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string CustomerCode { get; set; }
+        public int UserActiveCountryId { get; set; }
     }
 }

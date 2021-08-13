@@ -112,7 +112,7 @@ namespace GIGLS.Services.Implementation
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
 
-                    if (userdto.IsActive)
+                    if (userdto.IsActive  && userdto.UserActiveCountryId == 1)
                     {
                         await CalculateReferralBonus(userdto);
                     }

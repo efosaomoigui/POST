@@ -14,6 +14,7 @@ using GIGLS.Core.View;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -665,7 +666,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get current user
             try
-            {
+            {          
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUser = await _userService.GetUserById(currentUserId);
                 var userClaims = await _userService.GetClaimsAsync(currentUserId);
@@ -684,11 +685,11 @@ namespace GIGLS.Services.Implementation.Dashboard
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
 
-                if (!currentUser.DashboardAccess)
-                {
-                    dashboardDTO = await GetClaimDetails(claimValue);
-                    return dashboardDTO;
-                }
+                //if (!currentUser.DashboardAccess)
+                //{
+                //    dashboardDTO = await GetClaimDetails(claimValue);
+                //    return dashboardDTO;
+                //}
 
 
                 if (claimValue[0] == "Public")
@@ -700,7 +701,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                 }
                 else if (claimValue[0] == "Global")
                 {
-                    dashboardDTO = await GetDashboardForGlobal(dashboardFilterCriteria);
+                    dashboardDTO = await GetDashboardForGlobal(dashboardFilterCriteria, currentUser.DashboardAccess);
                 }
                 else if (claimValue[0] == "Region")
                 {
@@ -718,12 +719,12 @@ namespace GIGLS.Services.Implementation.Dashboard
                 {
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
+                dashboardDTO.DashboardAccess = currentUser.DashboardAccess;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
             return dashboardDTO;
         }
 
@@ -801,28 +802,25 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && serviceCenterId == s.DepartureServiceCentreId && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
-            //get customer 
-            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate).Count();
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
-            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
-
+            //get customers data
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -854,26 +852,20 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
-
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
 
-            // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
-            //customers
-            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).Count();
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
-            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
-
+            //Get customers data
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
 
@@ -881,7 +873,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -899,7 +892,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get the service centre
             var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre).ToArray();
+            var serviceCentres = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre).ToArray();
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
 
             //get startDate and endDate
@@ -907,25 +900,22 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
-            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+            //Get Data about Shipment Created, Ordered, Invoice
+            var result = await GetShipmentData(queryDate, serviceCenterIds, dashboardFilterCriteria);
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
-            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = result.ShipmentsOrderedByServiceCenter;
 
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+            dashboardDTO.TotalShipmentDelivered = result.TotalShipmentDelivered;
+            dashboardDTO.TotalShipmentOrdered = result.TotalShipmentOrdered;
 
             //customers
-            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).Count();
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
-            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+            var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
@@ -934,7 +924,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
@@ -1003,24 +994,39 @@ namespace GIGLS.Services.Implementation.Dashboard
 
         }
 
-        private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria, bool dashboardAccess)
         {
             var dashboardDTO = new DashboardDTO();
+            dashboardDTO.DashboardAccess = dashboardAccess;
 
-            //get startDate and endDate
-            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
-            var startDate = queryDate.Item1;
-            var endDate = queryDate.Item2;
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+
+            //If No Date Supplied
+            if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
+            {
+                startDate = DateTime.Now.AddMonths(-2);
+                startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day);
+                dashboardFilterCriteria.StartDate = startDate;
+                dashboardFilterCriteria.EndDate = endDate;
+            }
+            else
+            {
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
 
             int[] serviceCenterIds = { };   // empty array
             var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
-            s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
+            s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
 
             //filter by country
-            var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
+            var TotalShipmentDeliveredQueryable =  _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
                 s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid
                 && s.DateCreated >= startDate
-                && s.DateCreated < endDate);
+                && s.DateCreated <= endDate);
 
             if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
             {
@@ -1030,32 +1036,119 @@ namespace GIGLS.Services.Implementation.Dashboard
                 TotalShipmentDeliveredQueryable = TotalShipmentDeliveredQueryable.Where(s =>
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
 
-                //customers
-                int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate && c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-                int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate && i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
-                dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+                //customers and service center
+                var customersData = await GetCustomerAndServiceCentreData(dashboardFilterCriteria, dashboardDTO);
 
                 //Update the ActiveCountryId in the User entity
                 string currentUserId = await _userService.GetCurrentUserId();
                 var userEntity = await _uow.User.GetUserById(currentUserId);
                 userEntity.UserActiveCountryId = (int)dashboardFilterCriteria.ActiveCountryId;
 
-                dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
-                dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
+                if (dashboardAccess)
+                {
+                    dashboardDTO.WalletBalance = await GetWalletBalanceForAllCustomers(userEntity.UserActiveCountryId);
+                    dashboardDTO.WalletTransactionSummary = await GetWalletTransactionSummary(dashboardFilterCriteria);
+                    dashboardDTO.WalletPaymentLogSummary = await GetWalletPaymentSummary(dashboardFilterCriteria);
+                    dashboardDTO.WalletBreakdown = await GetWalletBreakdown(userEntity.UserActiveCountryId);
 
-                dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
-                //get all earnings
-                var earnings = _uow.FinancialReport.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CountryId == dashboardFilterCriteria.ActiveCountryId);
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal = earnings.Select(x => x.Earnings).DefaultIfEmpty(0).Sum();
+                    dashboardDTO.EarningsBreakdownDTO = new EarningsBreakdownDTO();
 
-                var demmurage = earnings.Where(x => x.Demurrage > 0).Select(x => x.Demurrage).DefaultIfEmpty(0).Sum();
+                    //get outstanding corporate payments
+                    if (dashboardFilterCriteria.ActiveCountryId == 1)
+                    {
+                        var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
+                        dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
 
-                var intlShipments = _uow.Invoice.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentStatus == PaymentStatus.Paid &&
-               s.PaymentMethod == PaymentType.Cash.ToString() && s.IsInternational == true).Select(x => x.Amount).DefaultIfEmpty(0).Sum();
+                        //get all earnings
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetTotalFinancialReportEarnings(dashboardFilterCriteria);
+                        var demmurage = await _uow.FinancialReport.GetTotalFinancialReportDemurrage(dashboardFilterCriteria);
 
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal += intlShipments;
-                dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
-                _uow.Complete();
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal += demmurage;
+                    }
+
+                    dashboardDTO.TotalMonthlyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly);
+                    dashboardDTO.TotalDailyShipmentOrdered = await GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily);
+
+                    dashboardDTO.TotalMonthlyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Monthly), 2);
+                    dashboardDTO.TotalDailyWeightOfShipmentOrdered = Math.Round(await GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, ShipmentReportType.Daily), 2);
+
+                    //Only for countries that are not in Nigeria
+                    var earningsBreakdown = new EarningsBreakdownByCustomerDTO();
+                    var earningsBreakdownMonthly = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.EarningsBreakdownOfEcommerceDTO = new EarningsBreakdownOfEcommerceDTO();
+
+                    if (dashboardFilterCriteria.ActiveCountryId != 1)
+                    {
+                        earningsBreakdown = await GetIntlRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
+                        earningsBreakdownMonthly = await GetIntlRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
+
+                        //Get revenue for Class and Basic Customers (Shipment Table)
+                        var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncomeInternational", dashboardFilterCriteria);
+                        var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncomeInternational", dashboardFilterCriteria);
+
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue;
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue;
+
+                        dashboardDTO.EarningsBreakdownDTO.GrandTotal = await GetInternationalTotalEarnings(dashboardFilterCriteria);
+
+                    }
+                    else if (dashboardFilterCriteria.ActiveCountryId == 1)
+                    {
+                        earningsBreakdown = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Normal);
+                        earningsBreakdownMonthly = await GetRevenueBreakdownByCustomerType(dashboardFilterCriteria, ShipmentReportType.Monthly);
+
+                        //Get revenue for Class and Basic Customers (Shipment Table)
+                        var classRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerIncome", dashboardFilterCriteria);
+                        var basicRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerIncome", dashboardFilterCriteria);
+
+                        //Get revenue for Class and Basic Customers (PreShipmentMobile Table)
+                        var classMobileRevenue = await GetBasicOrClassCustomersIncome("ClassCustomerMobileIncome", dashboardFilterCriteria);
+                        var basicMobileRevenue = await GetBasicOrClassCustomersIncome("BasicCustomerMobileIncome", dashboardFilterCriteria);
+
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Class = classRevenue + classMobileRevenue;
+                        dashboardDTO.EarningsBreakdownOfEcommerceDTO.Basic = basicRevenue + basicMobileRevenue;
+                        
+                    }
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Individual = earningsBreakdown.Individual;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdown.Ecommerce;
+                    dashboardDTO.EarningsBreakdownByCustomerDTO.Corporate = earningsBreakdown.Corporate;
+
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Individual = earningsBreakdownMonthly.Individual;
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Ecommerce = earningsBreakdownMonthly.Ecommerce;
+                    dashboardDTO.MonthlyEarningsBreakdownByCustomerDTO.Corporate = earningsBreakdownMonthly.Corporate;
+                                     
+
+                    //Get number of class subscriptions
+                    var classSubscriptions = await GetClassSubscriptions(dashboardFilterCriteria);
+                    dashboardDTO.ClassSubscriptionsCount = classSubscriptions;
+
+                    dashboardDTO.OutboundShipmentsReportDTO = new OutboundShipmentsReportDTO();
+
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.OutboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 0);
+                    dashboardDTO.OutboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 0);
+
+                    dashboardDTO.InboundShipmentsReportDTO = new InboundShipmentsReportDTO();
+
+                    //If Param Type is 0, it is outbound , if param type is 1, it is inbound
+                    dashboardDTO.InboundShipmentsReportDTO.Weight = await GetSumOfWeightOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    dashboardDTO.InboundShipmentsReportDTO.Shipments = await GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, 1);
+                    //dashboardDTO.InboundShipmentsReportDTO.Revenue = await GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, 1);
+
+                    //Get count of vehicles dispatched
+                    dashboardDTO.VehiclesDispatched = await GetCountOfVehiclesOrTripsOfMovementManifest("DispatchedVehiclesCount", dashboardFilterCriteria);
+
+                    //Get number of trips of completed
+                    dashboardDTO.TripsCompleted = await GetCountOfVehiclesOrTripsOfMovementManifest("TripsCount", dashboardFilterCriteria);
+                }
+                //_uow.Complete();
             }
 
             //set for TargetAmount and TargetOrder
@@ -1078,17 +1171,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             //await PopulateCustomer(dashboardDTO);
 
             // populate graph data
-            await PopulateGraphDataByDate(dashboardDTO);
+            //await PopulateGraphDataByDate(dashboardDTO);
+            await PopulateGraphDataByDateGlobal(dashboardDTO, startDate, endDate);
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;
-
-            //get outstanding corporate payments
-            if(dashboardFilterCriteria.ActiveCountryId == 1)
-            {
-                var outstandingPayments = _uow.Wallet.GetAllAsQueryable().Where(s => s.CompanyType == CompanyType.Corporate.ToString() && s.Balance < 0).Sum(x => x.Balance);
-                dashboardDTO.OutstandingCorporatePayment = System.Math.Abs(outstandingPayments);
-            }
 
             return dashboardDTO;
         }
@@ -1098,6 +1185,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             var graphDataList = new List<GraphDataDTO>();
             var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
             int currentMonth = DateTime.Now.Month;
+
+            if (dashboardDTO.DashboardAccess)
+            {
+                var threeMonthsAgo = DateTime.Now.AddMonths(-2);
+                currentMonth = threeMonthsAgo.Month;
+            }
 
             //use this date as the next year of when we launched Agility to cater for
             //month we have not launch agility that will be empty
@@ -1147,10 +1240,72 @@ namespace GIGLS.Services.Implementation.Dashboard
 
         }
 
+        private async Task PopulateGraphDataByDateGlobal(DashboardDTO dashboardDTO, DateTime startDate, DateTime endDate)
+        {
+            var graphDataList = new List<GraphDataDTO>();
+            var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
+
+            dashboardDTO.CurrentMonthGraphData = new GraphDataDTO();
+
+            //use this date as the next year of when we launched Agility to cater for
+            //month we have not launch agility that will be empty
+            int year = startDate.Year;
+            int startMonth = startDate.Month;
+            int endMonth = endDate.Month;
+
+            //fill GraphDataDTO by month
+            foreach (DateTime date in EachMonth(startDate, endDate))
+            {
+                var month = date.Month;
+
+                var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
+                    s => s.DateCreated.Month == month && s.IsFromMobile == false);
+
+                var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
+                if (firstDataToGetYear != null)
+                {
+                    year = firstDataToGetYear.DateCreated.Year;
+                }
+                else if (dashboardDTO.ServiceCentre != null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.ServiceCentre.DateCreated.Year;
+                }
+                else if (dashboardDTO.Station != null && dashboardDTO.ServiceCentre == null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.Station.DateCreated.Year;
+                }
+
+                var graphData = new GraphDataDTO
+                {
+                    CalculationDay = 1,
+                    ShipmentMonth = month,
+                    ShipmentYear = year,
+                    TotalShipmentByMonth = thisMonthShipments.Count(),
+                    TotalSalesByMonth = (from a in thisMonthShipments
+                                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
+                };
+
+                graphDataList.Add(graphData);
+
+                dashboardDTO.CurrentMonthGraphData.TotalShipmentByMonth += graphData.TotalShipmentByMonth;
+                dashboardDTO.CurrentMonthGraphData.TotalSalesByMonth += graphData.TotalSalesByMonth;
+            }
+
+            dashboardDTO.GraphData = graphDataList;
+            await Task.FromResult(0);
+
+        }
+
+        private IEnumerable<DateTime> EachMonth(DateTime from, DateTime thru)
+        {
+            for (var month = from.Date; month.Date <= thru.Date; month = month.AddMonths(1))
+                yield return month;
+        }
+
         private async Task PopulateGraphDataByDateInMagaya(DashboardDTO dashboardDTO)
         {
             var graphDataList = new List<GraphDataDTO>();
-            var shipmentsOrderedByServiceCenter =  dashboardDTO.MagayaShipmentOrdered;
+            var shipmentsOrderedByServiceCenter = dashboardDTO.MagayaShipmentOrdered;
             int currentMonth = DateTime.Now.Month;
 
             //month we have not launch agility that will be empty
@@ -1206,11 +1361,33 @@ namespace GIGLS.Services.Implementation.Dashboard
             return await _uow.Wallet.GetTotalWalletBalance(countryId);
         }
 
+        //Get Total Earnings in Financial Reports 
+        private async Task<decimal> GetTotalFinancialReportEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetTotalFinancialReportEarnings(dashboardFilterCriteria);
+        }
+
+        //Get Total Earnings in Financial Reports 
+        private async Task<decimal> GetInternationalTotalEarnings(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.FinancialReport.GetInternationalTotalEarnings(dashboardFilterCriteria);
+        }
+
+        private async Task<WalletBreakdown> GetWalletBreakdown(int countryId)
+        {
+            return await _uow.Wallet.GetWalletBreakdown(countryId);
+        }
 
         //Get Wallet Transaction Credit
         private async Task<WalletTransactionSummary> GetWalletTransactionSummary(DashboardFilterCriteria dashboardFilterCriteria)
         {
             return await _uow.WalletTransaction.GetWalletTransactionSummary(dashboardFilterCriteria);
+        }
+
+        //Get Wallet Transaction Credit
+        private async Task<WalletPaymentLogSummary> GetWalletPaymentSummary(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.WalletTransaction.GetWalletPaymentSummary(dashboardFilterCriteria);
         }
 
         //Get Claim for Non-Dashboard Access
@@ -1256,5 +1433,159 @@ namespace GIGLS.Services.Implementation.Dashboard
             return earningsBreakdownDTO;
 
         }
+
+        //Get Data about Shipment Created, Shipment Ordered, Invoice for service center, station or region
+        private async Task<DashboardDTO> GetShipmentData(Tuple<DateTime, DateTime> queryDate, int[] serviceCenterIds, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated <= endDate && s.IsFromMobile == false && s.PaymentStatus == PaymentStatus.Paid);
+            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+           
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.PaymentStatus == PaymentStatus.Paid 
+                                                    && s.DateCreated >= startDate && s.DateCreated <= endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            
+            return dashboardDTO;
+        }
+
+        //Get Breakdown of types of customers
+        private async Task<DashboardDTO> GetCustomerAndServiceCentreData(DashboardFilterCriteria dashboardFilterCriteria, DashboardDTO dashboardDTO)
+        {
+            //get customer 
+            var result = await _uow.Company.GetNoOfBasicAndClassCustomers(dashboardFilterCriteria);
+            int individualCustomer = await _uow.IndividualCustomer.GetCountOfIndividualCustomers(dashboardFilterCriteria);
+            dashboardDTO.TotalCustomers = result.EcommerceClass + result.EcommerceBasic + individualCustomer;
+
+            dashboardDTO.CustomerBreakdownDTO = new CustomerBreakdownDTO
+            {
+                Individual = individualCustomer,
+                EcommerceBasic = result.EcommerceBasic,
+                EcommerceClass = result.EcommerceClass,
+            };
+
+            var serviceCenters = await GetServiceCentersData(dashboardFilterCriteria);
+
+            dashboardDTO.ServiceCentreBreakdownDTO = new ServiceCentreBreakdownDTO
+            {
+                WalkIn = serviceCenters.WalkIn,
+                Hub = serviceCenters.Hub,
+                Gateway = serviceCenters.Gateway,
+                Total = serviceCenters.Total
+            };
+
+            return dashboardDTO;
+        }
+
+        //Get Breakdown of Service Centers
+        private async Task<ServiceCentreBreakdownDTO> GetServiceCentersData(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.ServiceCentre.GetServiceCentresData((int)dashboardFilterCriteria.ActiveCountryId);
+
+            return result;
+        }
+
+        private async Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            var result = await  _uow.Invoice.GetCountOfMonthlyOrDailyShipmentCreated(dashboardFilterCriteria, shipmentReportType);
+            return result;
+        }
+
+        //Get Sum  of Monthly 0r Daily Weight of Shipments Created
+        private async Task<double> GetSumOfMonthlyOrDailyWeightOfShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            var result = await _uow.Shipment.GetSumOfMonthlyOrDailyWeightOfShipmentCreated(dashboardFilterCriteria, shipmentReportType);
+            return result;
+        }
+
+        //Get  Earnings in Financial Reports By Customer Types
+        private async Task<FinancialBreakdownByCustomerTypeDTO> GetFinancialSummaryByCustomerType(string procedureName, DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            return await _uow.FinancialReport.GetFinancialSummaryByCustomerType(procedureName, dashboardFilterCriteria,shipmentReportType);
+        }
+
+        //Get  Revenue by Basic or Class Customers 
+        private async Task<decimal> GetBasicOrClassCustomersIncome(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetBasicOrClassCustomersIncome(procedureName, dashboardFilterCriteria);
+        }
+
+        //Get  Number of Class Subscriptions 
+        private async Task<int> GetClassSubscriptions(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await _uow.Company.GetClassSubscriptions(dashboardFilterCriteria);
+        }
+
+        //Get Number of Outbound Or Inbound Shipments Created
+        private async Task<int> GetCountOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            var result = await _uow.IntlShipmentRequest.GetCountOfOutboundShipmentCreated(dashboardFilterCriteria, queryType);
+            return result;
+        }
+
+        //Get Sum  of Outbound Or Inbound Shipments Weight
+        private async Task<double> GetSumOfWeightOfOutboundShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            var result = await _uow.IntlShipmentRequest.GetSumOfOutboundWeightOfShipmentCreated(dashboardFilterCriteria, queryType);
+            return result;
+        }
+
+        //Get Total Earnings in Financial Reports For Outbound Shipments
+        private async Task<decimal> GetTotalFinancialReportEarningsForOutboundShipments(DashboardFilterCriteria dashboardFilterCriteria, int queryType)
+        {
+            return await _uow.FinancialReport.GetTotalFinancialReportEarningsForOutboundShipments(dashboardFilterCriteria, queryType);
+        }
+
+        //Get Revenue Breakdown by Customer Type 
+        private async Task<EarningsBreakdownByCustomerDTO> GetRevenueBreakdownByCustomerType(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            //Get Revenue By Customer Type for Agility
+            var agilityRevenue = await GetFinancialSummaryByCustomerType("AgilityRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            //Get Revenue By Customer Type for GIGGo
+            var giggoRevenue = await GetFinancialSummaryByCustomerType("GIGGoRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            var earningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+            earningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual + giggoRevenue.Individual;
+            earningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce + giggoRevenue.Ecommerce;
+            earningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate + giggoRevenue.Corporate;
+
+            return earningsBreakdownByCustomerDTO;
+            
+        }
+
+        //Get Revenue Breakdown by Customer Type (International Shipments i.e Shipments not created in Nigeria)
+        private async Task<EarningsBreakdownByCustomerDTO> GetIntlRevenueBreakdownByCustomerType(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            //Get Revenue By Customer Type for Agility
+            var agilityRevenue = await GetFinancialSummaryByCustomerType("IntlRevenueByType", dashboardFilterCriteria, shipmentReportType);
+
+            var earningsBreakdownByCustomerDTO = new EarningsBreakdownByCustomerDTO();
+
+            earningsBreakdownByCustomerDTO.Individual = agilityRevenue.Individual;
+            earningsBreakdownByCustomerDTO.Ecommerce = agilityRevenue.Ecommerce;
+            earningsBreakdownByCustomerDTO.Corporate = agilityRevenue.Corporate;
+
+            return earningsBreakdownByCustomerDTO;
+
+        }
+
+        //Get Count of Vehicles Dispatched or Trips 
+        private async Task<int> GetCountOfVehiclesOrTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var result = await _uow.Shipment.GetCountOfVehiclesAndTripsOfMovementManifest(procedureName, dashboardFilterCriteria);
+            return result;
+        }
+
     }
 }

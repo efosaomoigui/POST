@@ -886,5 +886,35 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/getemployeeuser/{email}")]
+        public async Task<IServiceResponse<UserDTO>> GetEmployeeUserByEmail(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var user = await _userService.GetEmployeeUserByEmail(email);
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = user
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/partnerbyemail/{email}")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetPartnerUsersByEmail(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetPartnerUsersByEmail(email);
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+            });
+        }
     }
 }

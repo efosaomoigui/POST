@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int SupperServiceCentreId { get; set; } 
         public string StationCode { get; set; }
         public int CountryId { get; set; }
+        public int LGAId { get; set; }
         public string Country { get; set; }
         public StationDTO Station { get; set; }
         public List<UserDTO> Users { get; set; }
@@ -39,5 +40,23 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public string FormattedServiceCentreName { get; set; }
         public CountryDTO CountryDTO { get; set; }
         public bool IsPublic { get; set; }
+        public bool HomeDeliveryStatus { get; set; }
+        public bool IsGateway { get; set; }
+        public bool IsConsignable { get; set; }
+        public string CrAccount { get; set; }
+    }
+
+
+    public class WebsiteServiceCentreDTO
+    {
+
+        public int ServiceCentreId { get; set; }
+        public int StationId { get; set; }
+        public string Name { get; set; }
+        public string Code { get; set; }
+        public string Address { get; set; }
+        public bool IsActive { get; set; }
+        public string FormattedServiceCentreName { get; set; }
+
     }
 }

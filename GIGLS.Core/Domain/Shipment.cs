@@ -8,11 +8,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
-
     public class Shipment : BaseDomain, IAuditable
     {
-
-        //Shipment Information
         [Key]
         public int ShipmentId { get; set; }
 
@@ -40,10 +37,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }
-        public virtual ServiceCentre DepartureServiceCentre { get; set; }
-
         public int DestinationServiceCentreId { get; set; }
-        public virtual ServiceCentre DestinationServiceCentre { get; set; }
 
         [MaxLength(200)]
         public string ReceiverName { get; set; }
@@ -73,8 +67,6 @@ namespace GIGL.GIGLS.Core.Domain
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
 
-        //General but optional
-        //public bool IsDomestic { get; set; }
         public DateTime? ExpectedDateOfArrival { get; set; }
         public DateTime? ActualDateOfArrival { get; set; }
 
@@ -155,7 +147,21 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsFromMobile { get; set; }
 
         public bool isInternalShipment { get; set; }
-               
+        public bool IsCargoed { get; set; }
+
+        public InternationalShipmentType InternationalShipmentType { get; set; }
+
+        public bool IsClassShipment { get; set; }
+
+        [MaxLength(500)]
+        public string FileNameUrl { get; set; }
+
+        [MaxLength(100)]
+        public string InternationalWayBill { get; set; }
+        public decimal InternationalShippingCost { get; set; }
+        [MaxLength(50)]
+        public string Courier { get; set; }
+
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable
@@ -198,6 +204,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(50)]
         public string CustomerState { get; set; }
+
+        [MaxLength(150)]
+        public string ItemSenderfullName { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -259,6 +268,13 @@ namespace GIGL.GIGLS.Core.Domain
         public string SenderState { get; set; }
 
         public bool IsProcessed { get; set; }
-    } 
+
+        public bool IsMobile { get; set; }
+        public bool Consolidated { get; set; }
+        [MaxLength(128)]
+        public string ConsolidationId { get; set; }
+        public int RequestProcessingCountryId { get; set; }
+
+    }
 
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
+﻿using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -20,5 +21,10 @@ namespace GIGLS.Core.IServices.Wallet
         //Task<PaystackWebhookDTO> VerifyAndValidateWaybillForVodafoneMobilePayment(string waybill, string pin);
         Task<PaystackWebhookDTO> VerifyAndValidatePaymentUsingOTP(string waybill, string pin);
         Task<GatewayCodeResponse> GetGatewayCode();
+        Task<PaystackWebhookDTO> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO waybillPaymentLog);
+        Task<PaystackWebhookDTO> AddWaybillPaymentLogForIntlShipment(WaybillPaymentLogDTO waybillPaymentLog);
+        Task<List<WaybillPaymentLogDTO>> GetAllWaybillsForFailedPayments();
+        Task<string> GenerateWaybillReferenceCode(string waybill);
+        Task<PaystackWebhookDTO> PayForIntlShipmentUsingPaystack(WaybillPaymentLogDTO waybillPaymentLog);
     }
 }

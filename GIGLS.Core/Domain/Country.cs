@@ -32,5 +32,15 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string TermAndConditionCountry { get; set; }
+
+        [MaxLength(300)]
+        public string CountryFlag { get; set; }
+        public bool IsInternationalShippingCountry { get; set; }
+
+        [MaxLength(100)]
+        public string CourierEnable { get; set; }
+
+        [MaxLength(10)]
+        public string CountryShortCode { get; set; }
     }
 }

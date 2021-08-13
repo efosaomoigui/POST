@@ -519,6 +519,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"NULL INPUT");
             }
 
+            ////Check if the user is a staff at final destination
+            //if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKT)
+            //{
+            //    //Get user priviledge service centers
+            //    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            //    if (serviceCenters.Length == 1 && serviceCenters[0] != shipmentCollection.DestinationServiceCentreId)
+            //    {
+            //        //Block user from releasing shipment if user is not at the destination service center
+            //        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+            //    }
+            //}
+
+
+            if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.ARF || shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.SRC)
+            {
+                //Get user priviledge service centers
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 1 && serviceCenters[0] == shipmentCollection.DestinationServiceCentreId)
+                {
+                    //do nothing
+                }
+                else
+                {
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                }
+            }
+
+
             if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
             {
                 throw new GenericException("Kindly enter Receiver Name, Phone number, Address and State");
@@ -546,33 +574,40 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Reroute");
             }
 
-            //check if the shipment pin corresponds to the pin for the waybill 
-            //if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
-            //{
-            //    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
-            //    if (deliveryNumber != null)
-            //    {
-            //        if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
-            //        {
-            //            if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-            //            {
-            //                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-            //            {
-            //                throw new GenericException($"This Delivery Nubmer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //            }
-            //        }
+            if (!shipmentCollection.IsComingFromDispatch)
+            {
+                //check if the shipment pin corresponds to the pin for the waybill 
+                if (!string.IsNullOrWhiteSpace(shipmentCollection.DeliveryNumber))
+                {
+                    var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+                    if (deliveryNumber != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(deliveryNumber.SenderCode))
+                        {
+                            if (deliveryNumber.SenderCode.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                            {
+                                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                            }
+                        }
+                        else
+                        {
+                            if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                            {
+                                throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                            }
+                        }
 
-            //    }
-            //    else
-            //    {
-            //        throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-            //    }
-            //}
+                    }
+                    else
+                    {
+                        throw new GenericException($"This Delivery Number {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"Kindly provide delivery number");
+                }
+            }
 
             await UpdateShipmentCollection(shipmentCollection);
 
@@ -652,7 +687,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && serviceCenters.Contains(x.DestinationServiceCentreId)
                     && (x.DateCreated <= overdueDate)).ToList();
 
                 shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
@@ -741,7 +776,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
 
                 var shipmentCollectionObj = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && (x.DateCreated <= overdueDate));
 
                 if (serviceCenters.Length > 0)
                 {
@@ -827,7 +862,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
 
                 var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+                    Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.ARF || x.ShipmentScanStatus == ShipmentScanStatus.WC) && (x.DateCreated <= overdueDate));
 
                 if (serviceCenters.Length > 0)
                 {
@@ -1194,6 +1229,33 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria)
+        {
+            try
+            {
+                var shipmentCollectionDTO = await _uow.ShipmentCollection.GetArrivedShipmentCollection(baseFilterCriteria);
+                if (shipmentCollectionDTO.Any())
+                {
+                    foreach (var item in shipmentCollectionDTO)
+                    {
+                        TimeSpan ts = item.ShipmentArrivedDate - item.ShipmentCreatedDate;
+                        item.Age = (int)ts.TotalHours;
+                        if (item.Age < 1)
+                        {
+                            item.Age = 1;
+                        }
+                    }
+                }
+                return shipmentCollectionDTO.OrderBy(x => x.Age).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
 
     }
 }

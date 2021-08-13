@@ -25,6 +25,7 @@ namespace ThirdParty.WebServices.Business
         public string CustomerPhoneNumber { get; set; }
         public string CustomerCity { get; set; }
         public string CustomerState { get; set; }
+        public string ItemSenderfullName { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
@@ -76,6 +77,8 @@ namespace ThirdParty.WebServices.Business
         public string SenderState { get; set; }
 
         public int StationId { get; set; }
+
+        public bool IsMobile { get; set; }
 
         //public bool IsProcessed { get; set; } 
     }

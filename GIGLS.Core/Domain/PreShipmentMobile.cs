@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -165,5 +166,28 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string WaybillImageUrl { get; set; }
         public bool IsFromAgility { get; set; }
+        public int Haulageid { get; set; }
+
+        [MaxLength(200)]
+        public string ReceiverCompanyName { get; set; }
+        [MaxLength(50)]
+        public string ReceiverPostalCode { get; set; }
+        [MaxLength(5)]
+        public string ReceiverStateOrProvinceCode { get; set; }
+        [MaxLength(200)]
+        public string ReceiverCountryCode { get; set; }
+        public decimal InternationalShippingCost { get; set; }
+        [MaxLength(5)]
+        public string ManufacturerCountry { get; set; }
+        [MaxLength(170)]
+        public string ItemDetails { get; set; }
+        public CompanyMap CompanyMap { get; set; }
+        public bool IsInternationalShipment { get; set; }
+        public decimal DeclarationOfValueCheck { get; set; }
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        [MaxLength(300)]
+        public string CustomerCancelReason { get; set; }
+
     }
 }

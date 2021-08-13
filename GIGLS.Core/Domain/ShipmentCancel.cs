@@ -17,6 +17,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(128)]
         public string CancelledBy { get; set; }
+
+        [MaxLength(500)]
         public string CancelReason { get; set; } 
     }
 }

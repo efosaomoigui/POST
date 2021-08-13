@@ -1,13 +1,18 @@
-﻿namespace GIGLS.Core.Domain
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GIGLS.Core.Domain
 {
     public class SubCategory : BaseDomain, IAuditable
     {
         public int SubCategoryId { get; set; }
         public virtual Category Category { get; set; }
         public int CategoryId { get; set; }
-        public string SubCategoryName { get; set; }
 
+        [MaxLength(500)]
+        public string SubCategoryName { get; set; }
         public decimal Weight { get; set; }
+
+        [MaxLength(100)]
         public string WeightRange { get; set; }
     }
 }

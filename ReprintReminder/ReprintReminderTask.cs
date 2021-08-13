@@ -15,7 +15,6 @@ namespace ReprintReminderJob
             }
             catch (Exception ex)
             {
-
                 throw new Exception("Error calling your.0 api: " + ex.ToString());
             }
         }

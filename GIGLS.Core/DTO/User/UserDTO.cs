@@ -95,5 +95,37 @@ namespace GIGLS.Core.DTO.User
 
         public bool IsMagaya { get; set; }
         public bool DashboardAccess { get; set; }
+        public bool IsInternational { get; set; }
+        public string IdentificationImage { get; set; }
+        public string CountryType { get; set; }
+        public int AssignedEcommerceCustomer { get; set; }
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
+        public string WalletAddress { get; set; }
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
+    }
+
+    public class UpdateUserActiveCountryDTO
+    {
+        public int NewCountryId { get; set; }
+        public string UserID { get; set; }
+    }
+
+    public class UserActiveCountryDTO
+    {
+        public int NewCountryId { get; set; }
+        public CountryDTO CountryDTO { get; set; }
+        public decimal WalletBalance { get; set; }
+        public bool HasWallet { get; set; }
+    }
+
+    public class ForgotPasswordDTO
+    {
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

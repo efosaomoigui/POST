@@ -4,6 +4,8 @@
     {
         OGOSMS,
         SCRIPTWALL,
-        TWILIO
+        TWILIO,
+        OGOSMSBANKROUTE,
+        WHATSAPPBOT
     }
 }

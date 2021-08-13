@@ -1,18 +1,22 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -29,15 +33,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
         private readonly INodeService _nodeService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public FlutterwavePaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
-            IPaymentTransactionService paymentTransactionService, INodeService nodeService)
+            IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService)
         {
             _userService = userService;
             _walletService = walletService;
             _paymentTransactionService = paymentTransactionService;
             _uow = uow;
             _nodeService = nodeService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -57,6 +63,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
         {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
             if (refCode.StartsWith("wb"))
             {
                 return WaybillWalletPaymentType.Waybill;
@@ -279,24 +290,29 @@ namespace GIGLS.Services.Implementation.Wallet
                         return verifyResult;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled)
                     {
-                        //3. Process payment for the waybill if successful
-                        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
-                        {
-                            Waybill = paymentLog.Waybill,
-                            PaymentType = PaymentType.Online,
-                            TransactionCode = paymentLog.Reference,
-                            UserId = paymentLog.UserId
-                        };
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                        var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
-
-                        if (processWaybillPayment)
+                        if (checkAmount)
                         {
-                            //2. Update waybill Payment log
-                            paymentLog.IsPaymentSuccessful = true;
-                            paymentLog.IsWaybillSettled = true;
+                            //3. Process payment for the waybill if successful
+                            PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                            {
+                                Waybill = paymentLog.Waybill,
+                                PaymentType = PaymentType.Online,
+                                TransactionCode = paymentLog.Reference,
+                                UserId = paymentLog.UserId
+                            };
+
+                            var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                            if (processWaybillPayment)
+                            {
+                                //2. Update waybill Payment log
+                                paymentLog.IsPaymentSuccessful = true;
+                                paymentLog.IsWaybillSettled = true;
+                            }
                         }
                     }
 
@@ -387,7 +403,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (verifyResult.data != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == reference);
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
 
                     if (paymentLog == null)
                         return verifyResult;
@@ -397,55 +413,76 @@ namespace GIGLS.Services.Implementation.Wallet
                         verifyResult.data.Status = verifyResult.data.Status.ToLower();
                     }
 
+                    bool sendPaymentNotification = false;
+                    var walletDto = new WalletDTO();
                     var userPayload = new UserPayload();
+                    var bonusAddon = new BonusAddOn();
+                    bool checkAmount = false;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited)
                     {
-                        //a. update the wallet for the customer
-                        string customerId = null;  //set customer id to null
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
 
-                        //get wallet detail to get customer code
-                        var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
-
-                        if (walletDto != null)
+                        if (checkAmount)
                         {
-                            //use customer code to get customer id
-                            var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
 
-                            if (user != null)
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                            if (walletDto != null)
                             {
-                                customerId = user.Id;
-                                userPayload.Email = user.Email;
-                                userPayload.UserId = user.Id;
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                }
                             }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = bonusAddon.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Description = bonusAddon.Description,
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = paymentLog.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
                         }
-
-                        //update the wallet
-                        await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
-                        {
-                            WalletId = paymentLog.WalletId,
-                            Amount = verifyResult.data.Amount,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Description = "Funding made through online payment",
-                            PaymentType = PaymentType.Online,
-                            PaymentTypeReference = paymentLog.Reference,
-                            UserId = customerId
-                        }, false);
-                    }
-
-                    //3. update the wallet payment log
-                    if (verifyResult.data.Status.Equals("successful"))
-                    {
-                        paymentLog.IsWalletCredited = true;
                     }
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
                     await _uow.CompleteAsync();
 
+                    if (sendPaymentNotification)
+                    {
+                        await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    }
+
+                    if (bonusAddon.BonusAdded)
+                    {
+                        await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                    }
+
                     //Call Node API for subscription process
-                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
                     {
                         if (userPayload != null)
                         {
@@ -681,6 +718,146 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return response;
+        }
+
+        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(FlutterWebhookDTO verifyResult, int countryId)
+        {
+            BonusAddOn result = new BonusAddOn
+            {
+                Description = "Funding made through debit card.",
+                Amount = verifyResult.data.Amount
+            };
+
+            if(verifyResult.data.Card.CardType != null)
+            {
+                if (verifyResult.data.Card.CardType.Contains("visa"))
+                {
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
+                        result.BonusAdded = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
+        {
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                decimal bonusPercentage = decimal.Parse(global.Value);
+                decimal bonusValue = bonusPercentage / 100M;
+                decimal price = amount * bonusValue;
+                amount = amount + price;
+            }
+            return amount;
+        }
+
+        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        {
+            bool result = false;
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                int.TryParse(bin, out int binInt);
+
+                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+                if (visaList.Contains(binInt))
+                {
+                    result = true;
+                }
+            }
+            return result;
+        }
+
+        private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
+                walletDto.Balance = walletDto.Balance + paymentLog.Amount;
+
+                var message = new MessageDTO()
+                {
+                    CustomerCode = walletDto.CustomerCode,
+                    CustomerName = walletDto.CustomerName,
+                    ToEmail = walletDto.CustomerEmail,
+                    To = walletDto.CustomerEmail,
+                    Currency = walletDto.Country.CurrencySymbol,
+                    Body = walletDto.Balance.ToString("N"),
+                    Amount = paymentLog.Amount.ToString("N"),
+                    Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                };
+
+                //send mail to customer
+                await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        message.ToEmail = email;
+                        await _messageSenderService.SendPaymentNotificationAsync(message);
+                    }
+                }
+            }
+        }
+
+        private async Task SendVisaBonusNotificationAsync(BonusAddOn bonusAddon, FlutterWebhookDTO verifyResult, WalletDTO walletDto)
+        {
+            string body = $"{bonusAddon.Description} / Bin {verifyResult.data.Card.CardBIN} / Ref code {verifyResult.data.TX_Ref}  / Bank {verifyResult.data.Card.Brand}";
+
+            var message = new MessageDTO()
+            {
+                Subject = "Visa Commercial Card Bonus",
+                CustomerCode = walletDto.CustomerEmail,
+                CustomerName = walletDto.CustomerName,
+                Body = body
+            };
+
+            //send a copy to chairman
+            var visaBonusEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBonusEmail.ToString() && s.CountryId == 1);
+
+            if (visaBonusEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] emails = visaBonusEmail.Value.Split(',').ToArray();
+
+                foreach (string email in emails)
+                {
+                    message.ToEmail = email;
+                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+                }
+            }
+        }
+
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
+        {
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
+            shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
+
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿{
   "$schema": "http://schemastore.org/schemas/json/webjobs-list.json",
   "WebJobs": [
-    {
-      "filePath": "../BankDeposit/BankDeposit.csproj"
-    }
+    //{
+    //  "filePath": "../BankDeposit/BankDeposit.csproj"
+    //}
     //,
     //{
     //  "filePath": "../Jobs.AutomatedBankSettlement/Jobs.AutomatedBankSettlement.csproj"

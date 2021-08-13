@@ -43,6 +43,12 @@
         DLP,  //DELAYED PICKUP
         THIRDPARTY, //For 3rd party and gigm captain
         PICKED, // PICKED UP
-        AISN //ARRIVE INTL SHIPMENT TO NIGERIA
+        AISN, //ARRIVE INTL SHIPMENT TO NIGERIA
+        ISFUK, //Item Shipped from UK
+        ODMV, //ON THE MOVE
+        SRFS, //SHIPMENT RECEIVED FROM THE STORE TO GIG HUB OR CENTRE
+        IDH, // International Shipment Depart Houson in Transit
+        IDK, // International Shipment Depart UK in Transit
+        DUBC, // DELAYED PICK UP BY CUSTOMER
     }
 }

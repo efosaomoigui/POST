@@ -19,6 +19,10 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.User;
 using Newtonsoft.Json.Linq;
+using GIGLS.Core.IServices;
+using GIGLS.Core.DTO.Report;
+using System.Data.Entity;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -30,10 +34,12 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IPasswordGenerator _codegenerator;
+        private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -41,6 +47,8 @@ namespace GIGLS.Services.Implementation.Customers
             _userService = userService;
             _globalPropertyService = globalPropertyService;
             _messageSenderService = messageSenderService;
+            _codegenerator = codegenerator;
+            _paystackPaymentService = paystackPaymentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -84,6 +92,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Active;
+                newCompany.RankModificationDate = DateTime.UtcNow;
 
                 //Enable Eligibility so that the customer can create shipment on GIGGO APP
                 newCompany.IsEligible = true;
@@ -189,7 +198,6 @@ namespace GIGLS.Services.Implementation.Customers
                     To = newCompany.Email,
                     Body = password
                 };
-                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
 
                 //send mail to ecommerce team
                 var ecommerceEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.EcommerceEmail.ToString() && s.CountryId == 1);
@@ -206,12 +214,127 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
+                if (newCompany.CompanyType == CompanyType.Corporate)
+                {
+                    var user = await _userService.GetUserByChannelCode(newCompany.CustomerCode);
+                    var corporate = await _uow.Company.GetAsync(x => x.CustomerCode == newCompany.CustomerCode);
+
+                    //first create customer on paystack if customer doesnt exist already
+                    var nubanAcc = new CreateNubanAccountDTO()
+                    {
+                        customer = 0,
+                        email = company.Email,
+                        preferred_bank = company.PrefferedNubanBank,
+                        first_name = company.Name,
+                        last_name = company.Name,
+                        phone = company.PhoneNumber
+                    };
+
+                    var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                    if (nubanCustomer.succeeded)
+                    {
+                        //then call api to create the nuban account for corporate customers
+                        newCompany.NUBANCustomerId = nubanCustomer.data.id;
+                        newCompany.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                        nubanAcc.customer = nubanCustomer.data.id;
+                        var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                        if (customerNubanAccount.succeeded)
+                        {
+                            if (company != null)
+                            {
+                                newCompany.PrefferedNubanBank = company.PrefferedNubanBank;
+                                newCompany.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                message.BankName = company.PrefferedNubanBank;
+                                message.AccountName = customerNubanAccount.data.account_name;
+                                message.AccountNo = customerNubanAccount.data.account_number;
+                                message.ToEmail = company.Email;
+                                message.IsCoporate = true;
+                            }
+                        }
+                    }
+                    var msgObj = new CoporateSignupMessageDTO();
+                    msgObj.Password = password;
+                    msgObj.ToEmail = company.Email;
+                    msgObj.IsCoporate = true;
+                    msgObj.CustomerCode = newCompany.CustomerCode;
+                    msgObj.BankName = message.BankName;
+                    msgObj.AccountName = message.AccountName;
+                    msgObj.AccountNo = message.AccountNo;
+                    _uow.Complete();
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.UserAccountCreation, msgObj);
+                }
+
+                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+
+                if (company.Rank == Rank.Class)
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private async Task SendEmailToAssignEcommerceCustomerRep(Company newCompany)
+        {
+            var message = new MessageDTO()
+            {
+                ToEmail = newCompany.Email,
+                To = newCompany.Email,
+            };
+
+            //Send mail to ecommerce customer with an assigned customer rep
+            //1. Get a customer rep to assign to ecommerce customer
+
+            var customerRepDTO = await GetEcommerceCustomerRep();
+            if (customerRepDTO == null)
+            {
+                throw new GenericException("No customer rep to be assigned");
+            }
+
+            message.EcommerceMessage = new EcommerceCustomerRepMessageDTO
+            {
+                AccountOfficerName = $"{customerRepDTO?.FirstName} {customerRepDTO?.LastName}",
+                AccountOfficerNumber = customerRepDTO?.PhoneNumber,
+                AccountOfficerEmail = customerRepDTO?.Email
+            };
+
+            //2. Send Mail
+            message.MessageTemplate = "AssignEcommerceToCustomerRep";
+            await _messageSenderService.SendMailsEcommerceCustomerRep(message);
+
+            //3. After successful email sending
+            //Store customer rep id on Company AssignedCustomerRep
+            newCompany.AssignedCustomerRep = customerRepDTO.Id;
+            await UpdateCompany(newCompany.CompanyId, Mapper.Map<CompanyDTO>(newCompany));
+
+            //Increase Customer rep assigned ecommerce
+            customerRepDTO.AssignedEcommerceCustomer += 1;
+            await _userService.UpdateUser(customerRepDTO.Id, customerRepDTO);
+            //complete
+            await _uow.CompleteAsync();
+        }
+
+        private async Task<UserDTO> GetEcommerceCustomerRep()
+        {
+            var ecommerceCustomerRepEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.EcommerceCustomerRep.ToString() && s.CountryId == 1);
+            string[] ecommerceCustomerRepEmails = { };
+            if (ecommerceCustomerRepEmail != null)
+            {
+                ecommerceCustomerRepEmails = ecommerceCustomerRepEmail.Value.Split(',').ToArray();
+            }
+            var customerRep = _uow.User.GetCorporateCustomerUsersAsQueryable().Where(s => ecommerceCustomerRepEmails.Contains(s.Email)).OrderBy(s => s.AssignedEcommerceCustomer).FirstOrDefault();
+            //customerReps = customerReps.AsEnumerable();
+            // var customerRep = customerReps.;
+
+            if (customerRep == null)
+            {
+                throw new GenericException("No customer rep to be assigned");
+            }
+            return Mapper.Map<UserDTO>(customerRep);
         }
 
         private async Task<EcommerceAgreement> CheckEcommerceAgreement(int companyId)
@@ -284,6 +407,11 @@ namespace GIGLS.Services.Implementation.Customers
         public Task<List<CompanyDTO>> GetCompanies()
         {
             return _uow.Company.GetCompanies();
+        }
+
+        public Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams)
+        {
+            return _uow.Company.GetCompaniesByEmailOrCode(searchParams);
         }
 
         public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
@@ -378,16 +506,67 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 //Update user 
-                var user = await _userService.GetUserByChannelCode(company.CustomerCode);
-                user.PhoneNumber = companyDto.PhoneNumber;
-                user.LastName = companyDto.Name;
-                user.FirstName = companyDto.Name;
-                user.Email = companyDto.Email;
+                var user = await _uow.User.GetUserByChannelCode(company.CustomerCode);
+                if (user != null)
+                {
+                    UserDTO userDto = Mapper.Map<UserDTO>(user);
+                    user.PhoneNumber = companyDto.PhoneNumber;
+                    user.LastName = companyDto.Name;
+                    user.FirstName = companyDto.Name;
+                    user.Email = companyDto.Email;
+                    await _userService.UpdateUser(user.Id, userDto);
+                }
 
-                await _userService.UpdateUser(user.Id, user);
+                if (companyDto.CompanyType == CompanyType.Corporate)
+                {
+                    //first create customer on paystack if customer doesnt exist already
+                    var nubanAcc = new CreateNubanAccountDTO()
+                    {
+                        customer = 0,
+                        email = company.Email,
+                        preferred_bank = companyDto.PrefferedNubanBank,
+                        first_name = company.Name,
+                        last_name = company.Name,
+                        phone = company.PhoneNumber
+                    };
+                    if (String.IsNullOrEmpty(company.NUBANCustomerCode))
+                    {
+                        var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                        if (nubanCustomer.succeeded)
+                        {
+                            company.NUBANCustomerId = nubanCustomer.data.id;
+                            company.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                            nubanAcc.customer = nubanCustomer.data.id;
+                            var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                            if (customerNubanAccount.succeeded)
+                            {
+                                if (company != null)
+                                {
+                                    company.PrefferedNubanBank = companyDto.PrefferedNubanBank;
+                                    company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                }
+                            }
+                        }
+                    }
+                    else if (!String.IsNullOrEmpty(company.NUBANCustomerCode) && String.IsNullOrEmpty(company.NUBANAccountNo))
+                    {
+                        nubanAcc.customer = company.NUBANCustomerId;
+                        var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                        if (customerNubanAccount.succeeded)
+                        {
+                            if (company != null)
+                            {
+                                company.PrefferedNubanBank = company.PrefferedNubanBank;
+                                company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                            }
+                        }
+                    }
+
+                }
+
                 _uow.Complete();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -541,11 +720,11 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email, Rank? rank)
         {
             try
             {
-                return _uow.Company.GetCompanyByEmail(email);
+                return _uow.Company.GetCompanyByEmail(email, rank);
             }
             catch (Exception)
             {
@@ -619,6 +798,17 @@ namespace GIGLS.Services.Implementation.Customers
                     result.Message = $"Phone Number already exist";
                     return result;
                 }
+
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    if (String.IsNullOrEmpty(company.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Exist = false;
+                        result.Message = $"BVN number not provided for class customer";
+                        return result;
+                    }
+                }
                 var industry = string.Join(",", company.Industry);
                 var productType = string.Join(",", company.ProductType);
 
@@ -638,7 +828,7 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.IsDeleted = false;
                 newCompany.DateCreated = DateTime.UtcNow;
                 newCompany.DateModified = DateTime.UtcNow;
-                newCompany.IsInternational = true;
+                newCompany.IsInternational = company.isInternational;
                 newCompany.ProductType = productType;
                 newCompany.Industry = industry;
                 newCompany.CompanyType = CompanyType.Ecommerce;
@@ -646,6 +836,9 @@ namespace GIGLS.Services.Implementation.Customers
                 newCompany.CustomerCategory = CustomerCategory.Normal;
                 newCompany.ReturnOption = PickupOptions.HOMEDELIVERY.ToString();
                 newCompany.CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
+                newCompany.Rank = Rank.Basic;
+                newCompany.RankModificationDate = DateTime.UtcNow;
+
                 //get user country by code
                 if (!String.IsNullOrEmpty(company.CountryCode))
                 {
@@ -710,9 +903,35 @@ namespace GIGLS.Services.Implementation.Customers
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = newCompany.UserActiveCountryId,
                     IsActive = true,
+                    IsInternational = newCompany.IsInternational,
                 });
                 //complete
                 _uow.Complete();
+
+                //generate user refferal code
+                var userDTO = await _userService.GetUserByChannelCode(newCompany.CustomerCode);
+                var code = await _codegenerator.Generate(5);
+                var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == userDTO.UserChannelCode);
+                if (ReferrerCodeExists == null)
+                {
+                    var referrerCodeDTO = new ReferrerCodeDTO
+                    {
+                        Referrercode = code,
+                        UserId = userDTO.Id,
+                        UserCode = userDTO.UserChannelCode
+                    };
+                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                    _uow.ReferrerCode.Add(referrercode);
+                    await _uow.CompleteAsync();
+                    userDTO.Referrercode = referrercode.Referrercode;
+                    userDTO.RegistrationReferrercode = referrercode.Referrercode;
+                }
+                else
+                {
+                    userDTO.Referrercode = ReferrerCodeExists.Referrercode;
+                    userDTO.RegistrationReferrercode = ReferrerCodeExists.Referrercode;
+                }
+                await _userService.UpdateUser(userDTO.Id, userDTO);
 
                 // add customer to a wallet
                 await _walletService.AddWallet(new WalletDTO
@@ -726,6 +945,33 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
+
+                //SEND EMAIL TO NEW SIGNEE
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                var companyMessagingDTO = new CompanyMessagingDTO();
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    foreach (string email in chairmanEmails)
+                    {
+                        companyMessagingDTO.Emails.Add(email);
+                    }
+                }
+                companyMessagingDTO.Name = company.Name;
+                companyMessagingDTO.Email = company.Email;
+                companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                companyMessagingDTO.Rank = company.Rank;
+                companyMessagingDTO.IsFromMobile = company.IsFromMobile;
+                companyMessagingDTO.UserChannelType = userChannelType;
+                await SendMessageToNewSignUps(companyMessagingDTO);
+
+                //Send Email To Assign Ecommerce Customer Rep to class customers
+                if (company.Rank.ToString().ToLower() == Rank.Class.ToString().ToLower())
+                {
+                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                }
                 return result;
             }
             catch (Exception)
@@ -742,25 +988,129 @@ namespace GIGLS.Services.Implementation.Customers
                 if (userValidationDTO == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Invalid payload";
+                    result.Message = "Invalid payload";
                     return result;
                 }
-                if (String.IsNullOrEmpty(userValidationDTO.UserCode) || userValidationDTO.Rank == null)
+
+                if (String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
                 {
                     result.Succeeded = false;
-                    result.Message = $"User code or rank not provided";
+                    result.Message = "User not provided";
                     return result;
                 }
-                var company = _uow.Company.GetAll().Where(x => x.CustomerCode == userValidationDTO.UserCode).FirstOrDefault();
+
+                if (userValidationDTO.Rank == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Rank not provided";
+                    return result;
+                }
+
+                var user = new UserDTO();
+                if (!String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                    user = await _userService.GetUserById(userValidationDTO.UserID);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+                else if (String.IsNullOrEmpty(userValidationDTO.UserID) && !String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                    user = await _userService.GetUserByChannelCode(userValidationDTO.UserCode);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+                else
+                {
+                    user = await _userService.GetUserById(userValidationDTO.UserID);
+                    if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User does not exist";
+                        return result;
+                    }
+                }
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (company == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Company information does not exist";
+                    result.Message = "Company information does not exist";
                     return result;
                 }
+
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //make the BVN compulsory
+                    if (String.IsNullOrEmpty(userValidationDTO.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User BVN not provided";
+                        return result;
+                    }
+                    company.isCodNeeded = true;
+                }
+                else
+                {
+                    company.isCodNeeded = false;
+                }
+
                 company.Rank = userValidationDTO.Rank;
+                company.BVN = userValidationDTO.BVN;
+                company.RankModificationDate = DateTime.Now;
                 var companyDTO = Mapper.Map<CompanyDTO>(company);
-                _uow.Complete();
+                _uow.RankHistory.Add(new RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = userValidationDTO.RankType
+                });
+                await _uow.CompleteAsync();
+
+                //send email for upgrade customers
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    //send a copy to chairman
+                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+                    if (chairmanEmail != null)
+                    {
+                        //seperate email by comma and send message to those email
+                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                        foreach (string email in chairmanEmails)
+                        {
+                            companyMessagingDTO.Emails.Add(email);
+                        }
+                    }
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //CHeck if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
+                }
+
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
@@ -771,6 +1121,233 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task SendMessageToNewSignUps(object obj)
+        {
+            try
+            {
+                if (obj is CompanyMessagingDTO)
+                {
+                    var company = (CompanyMessagingDTO)obj;
+                    var messageDTO = new MessageDTO
+                    {
+                        CustomerName = company.Name,
+                        To = company.Email,
+                        ToEmail = company.Email
+                    };
+                    if (company.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        messageDTO.MessageTemplate = "IndividualWelcome";
+                        await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                        //await _messageSenderService.SendMessage(MessageType.ISA, EmailSmsType.Email, company);
+                    }
+                    else if (company.UserChannelType == UserChannelType.Partner)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.PSU, EmailSmsType.Email, company);
+                    }
+                    else if (company.IsFromMobile)
+                    {
+                        if (company.Rank == Rank.Class)
+                        {
+                            messageDTO.MessageTemplate = "ClassWelcomeApp";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            //await _messageSenderService.SendMessage(MessageType.ESBA, EmailSmsType.Email, company);
+                            messageDTO.MessageTemplate = "BasicWelcomeApp";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                        }
+                    }
+                    else
+                    {
+                        if (company.Rank == Rank.Class)
+                        {
+                            messageDTO.MessageTemplate = "ClassWelcomeWebiste";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                        }
+                        else if (company.Rank == Rank.Basic)
+                        {
+                            messageDTO.MessageTemplate = "BasicWelcomeWebsite";
+                            await _messageSenderService.SendCustomerRegistrationMails(messageDTO);
+                            //await _messageSenderService.SendMessage(MessageType.ESBW, EmailSmsType.Email, company);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CompanyDTO>> GetClassCustomers(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await _uow.Company.GetCompanies(Rank.Class, filterCriteria);
+        }
+
+        public async Task<CompanyDTO> UpgradeToEcommerce(UpgradeToEcommerce newCompanyDTO)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            CompanyDTO companyDTO = new CompanyDTO();
+            if (UserChannelType.IndividualCustomer.ToString().ToLower() == user.UserChannelType.ToString().ToLower())
+            {
+                var individualInfo = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (individualInfo == null)
+                {
+                    throw new GenericException("This user is not an Individual customer");
+                }
+
+                if (String.IsNullOrEmpty(newCompanyDTO.Name))
+                {
+                    throw new GenericException($"Business name is required");
+                }
+
+                var nameExist = await _uow.Company.GetAsync(x => x.Name.ToLower() == newCompanyDTO.Name.ToLower());
+                if (nameExist != null)
+                {
+                    throw new GenericException($"Business name {newCompanyDTO.Name.ToUpper()} already exist ");
+                }
+                var industry = string.Join(",", newCompanyDTO.Industry);
+                var productType = string.Join(",", newCompanyDTO.ProductType);
+                var company = new Company()
+                {
+                    CompanyStatus = CompanyStatus.Active,
+                    CustomerCode = user.UserChannelCode,
+                    Rank = Rank.Basic,
+                    RankModificationDate = DateTime.Now,
+                    IsEligible = true,
+                    IsDeleted = false,
+                    IsInternational = user.IsInternational,
+                    ProductType = productType,
+                    Industry = industry,
+                    CompanyType = CompanyType.Ecommerce,
+                    CustomerCategory = CustomerCategory.Normal,
+                    ReturnOption = newCompanyDTO.ReturnOption.ToString(),
+                    ReturnServiceCentre = newCompanyDTO.ReturnServiceCentre,
+                    ReturnAddress = newCompanyDTO.ReturnAddress,
+                    Name = newCompanyDTO.Name,
+                    Email = user.Email,
+                    FirstName = newCompanyDTO.FirstName,
+                    LastName = newCompanyDTO.LastName,
+                    City = individualInfo.City,
+                    State = individualInfo.State,
+                    Address = individualInfo.Address,
+                    UserActiveCountryId = user.UserActiveCountryId,
+                    isCodNeeded = false,
+                    IsRegisteredFromMobile = individualInfo.IsRegisteredFromMobile,
+                    PhoneNumber = user.PhoneNumber
+
+                };
+                if (!String.IsNullOrEmpty(user.FirstName))
+                {
+                    CompanyContactPersonDTO personDto = new CompanyContactPersonDTO();
+                    personDto.FirstName = newCompanyDTO.FirstName;
+                    personDto.LastName = newCompanyDTO.LastName;
+                    personDto.Email = user.Email;
+                    personDto.PhoneNumber = user.PhoneNumber;
+                    var person = Mapper.Map<CompanyContactPerson>(personDto);
+                    person.CompanyId = company.CompanyId;
+                    _uow.CompanyContactPerson.Add(person);
+                }
+
+                //also update orgnization,designation,department
+                individualInfo.IsRegisteredFromMobile = false;
+                user.UserChannelType = UserChannelType.Ecommerce;
+                user.Organisation = newCompanyDTO.Name;
+                user.Department = UserChannelType.Ecommerce.ToString();
+                user.Designation = UserChannelType.Ecommerce.ToString();
+                user.FirstName = newCompanyDTO.FirstName;
+                user.LastName = newCompanyDTO.LastName;
+                _uow.Company.Add(company);
+                await _uow.CompleteAsync();
+
+                //update customer wallet
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == individualInfo.CustomerCode);
+                if (wallet != null)
+                {
+                    var newCompany = await _uow.Company.GetAsync(x => x.CustomerCode == individualInfo.CustomerCode);
+                    if (newCompany != null)
+                    {
+                        wallet.CustomerType = CustomerType.Company;
+                        wallet.CompanyType = CompanyType.Ecommerce.ToString();
+                        wallet.CustomerId = newCompany.CompanyId;
+                        await _uow.CompleteAsync();
+                    }
+                }
+                companyDTO = Mapper.Map<CompanyDTO>(company);
+            }
+            return companyDTO;
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUserId);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            filterCriteria.AssignedCustomerRep = currentUserId;
+            return await _uow.Company.GetAssignedCustomers(filterCriteria);
+        }
+
+        //create a nuban account
+        public async Task<CreateNubanAccountResponseDTO> CraeteNubanAccount(CreateNubanAccountDTO nubanAccount)
+        {
+            try
+            {
+
+                var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAccount);
+                return customerNubanAccount;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<JObject> GetNubanProviders()
+        {
+            try
+            {
+
+                var providers = await _paystackPaymentService.GetNubanAccountProviders();
+                return providers;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(BaseFilterCriteria filterCriteria)
+        {
+            //get the user by email 
+            if (!string.IsNullOrEmpty(filterCriteria.AssignedCustomerRepEmail))
+            {
+                filterCriteria.AssignedCustomerRepEmail = filterCriteria.AssignedCustomerRepEmail.Trim();
+            }
+            else
+            {
+                throw new GenericException("Email is invalid");
+            }
+
+            var user = await _uow.User.GetUserByEmail(filterCriteria.AssignedCustomerRepEmail);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist");
+            }
+            filterCriteria.AssignedCustomerRep = user.Id;
+            return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
+        }
     }
-        
+
 }

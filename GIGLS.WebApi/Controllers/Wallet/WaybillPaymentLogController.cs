@@ -52,6 +52,22 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("verifypayment2/{waybill}")]
+        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidateWaybill2([FromUri] string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.VerifyAndValidateWaybill(waybill);
+
+                return new ServiceResponse<PaystackWebhookDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpGet]
         [Route("processpayment/{waybill}/{pin}")]
         public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidatePaymentUsingOTP([FromUri]  string waybill, [FromUri]  string pin)
@@ -67,7 +83,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("{waybill}")]
         public async Task<IServiceResponse<List<WaybillPaymentLogDTO>>> GetWaybillPaymentLogs([FromUri]  string waybill)
@@ -79,6 +95,22 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 return new ServiceResponse<List<WaybillPaymentLogDTO>>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getallwaybillsforfailedpayments")]
+        public async Task<IServiceResponse<List<WaybillPaymentLogDTO>>> GetAllWaybillsForFailedPayments() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.GetAllWaybillsForFailedPayments();
+
+                return new ServiceResponse<List<WaybillPaymentLogDTO>>
+                {
+                    Object = result 
                 };
             });
         }

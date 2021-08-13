@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
@@ -50,6 +51,20 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
+        [HttpPost]
+        [Route("releaseMovementManifest")]
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReleaseMovementManifest(movementManifestVals);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
@@ -87,7 +102,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                     logindetail.Password = logindetail.Password.Trim();
                 }
 
-                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider" && user.SystemUserRole != "Captain")
                 {
                     throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -132,7 +147,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                                 bankName = partner.BankName;
                                 accountName = partner.AccountName;
                                 accountNumber = partner.AccountNumber;
-                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
+                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString() || user.SystemUserRole == "Captain")
                                 {
                                     user.IsVerified = true;
                                     await _portalService.AddWallet(new WalletDTO
@@ -337,7 +352,13 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _portalService.UpdateMobilePickupRequest(PickupRequest);
-
+                if (flag)
+                {
+                    if(PickupRequest.Status.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower() || PickupRequest.Status.ToLower() == MobilePickUpRequestStatus.OnwardProcessing.ToString().ToLower())
+                    {
+                        await _portalService.RemoveShipmentFromQueue(PickupRequest.Waybill);
+                    }
+                }
                 return new ServiceResponse<object>
                 {
                     Object = flag
@@ -627,6 +648,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             });
         }
 
+        [HttpGet]
+        [Route("getManifestsinmovementmanifestformovementdispatch")]
+        public async Task<IServiceResponse<List<MovementDispatchDTO>>> GetManifestsInMovementManifestForMovementDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+
+                return new ServiceResponse<List<MovementDispatchDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
         [HttpPut]
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
@@ -708,6 +744,20 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 return new ServiceResponse<bool>
                 {
                     Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("creditcaptain")]
+        public async Task<IServiceResponse<bool>> CreditCaptainForMovementManifest(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.CreditCaptainForMovementManifestTransaction(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

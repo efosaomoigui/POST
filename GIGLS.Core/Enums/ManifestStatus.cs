@@ -10,8 +10,15 @@
 
     public enum MovementStatus
     {
+        NoMovement,
         InProgress,
         EnRoute,
         ProcessEnded
+    }
+
+    public enum CargoStatus
+    {
+        Unprocessed,
+        Cargoed
     }
 }

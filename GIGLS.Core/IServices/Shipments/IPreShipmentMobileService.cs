@@ -12,6 +12,8 @@ using GIGLS.Core.DTO.Zone;
 using System;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Node;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -85,6 +87,17 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetBatchPreShipmentMobile(string searchParam);
         Task<bool> SendReceiverDeliveryCodeBySMS(PreShipmentMobile preShipmentMobile, string number);
         Task<List<CompanyDTO>> GetBatchPreShipmentMobileOwners();
+        Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
+        Task<bool> AddShipmentToQueue(string waybill);
+        Task<object> GetGIGGOProgressReport();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentCreated();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentAssigned();
+        Task<List<PreShipmentMobileDTO>> GetGIGGOProgressReportForShipmentPicked();
+        Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileTAT(NewFilterOptionsDto newFilterOptionsDto);
+        Task<List<PreShipmentMobileTATDTO>> GetPreshipmentMobileDeliveryTAT(NewFilterOptionsDto newFilterOptionsDto);
+        Task<NewNodeResponse> RemoveNodePendingShipment(PendingNodeShipmentDTO dto);
+        Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile);
+        Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment);
 
     }
 }

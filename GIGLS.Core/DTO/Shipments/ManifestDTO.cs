@@ -39,6 +39,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string SuperManifestCode { get; set; }
         public List<string> ManifestCodes { get; set; }
         public MovementStatus MovementStatus { get; set; }
-
+        public CargoStatus CargoStatus { get; set; }
     }
 }

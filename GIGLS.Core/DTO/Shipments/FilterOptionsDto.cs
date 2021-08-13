@@ -1,4 +1,6 @@
-﻿namespace GIGLS.CORE.DTO.Shipments
+﻿using System;
+
+namespace GIGLS.CORE.DTO.Shipments
 {
     public class FilterOptionsDto
     {
@@ -19,5 +21,13 @@
         public string WaybillFilter { get; set; }
 
         public int? CountryId { get; set; }
+        public string UserId { get; set; }
+    }
+
+    public class NewFilterOptionsDto
+    {
+        public string FilterType { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

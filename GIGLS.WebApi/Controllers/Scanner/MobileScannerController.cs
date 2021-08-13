@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Infrastructure;
@@ -130,6 +131,54 @@ namespace GIGLS.WebApi.Controllers.Scanner
                         Object = jObject
                     };
                 }
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("returnallmovementmanifests")]
+        public async Task<IServiceResponse<IEnumerable<MovementManifestNumberDTO>>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var MovementmanifestNumberMappings = await _manifestGroupMappingService.GetAllManifestMovementManifestNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<MovementManifestNumberDTO>>
+                {
+                    Object = MovementmanifestNumberMappings
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("savemanifesttomovmentmanifest")]
+        public async Task<IServiceResponse<bool>> MovementManifestNumberMapping(MovementManifestNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("updatemovmentmanifest")]
+        public async Task<IServiceResponse<bool>> UpdateMovementManifestNumberMapping(MovementManifestNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
             });
         }
 

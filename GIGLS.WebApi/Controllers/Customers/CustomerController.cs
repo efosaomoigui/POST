@@ -11,6 +11,9 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -160,6 +163,22 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("deliveryno/{deliveryNo}")]
+        public async Task<IServiceResponse<DeliveryNumberDTO>> GetDeliveryNoByWaybill(string deliveryNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _service.GetDeliveryNoByWaybill(deliveryNo);
+
+                return new ServiceResponse<DeliveryNumberDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("shipmentactivities/{waybill}")]
         public async Task<IServiceResponse<List<ShipmentActivityDTO>>> GetShipmentActivities(string waybill)
         {
@@ -176,18 +195,70 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("deliveryno/{deliveryNo}")]
-        public async Task<IServiceResponse<DeliveryNumberDTO>> GetDeliveryNoByWaybill(string deliveryNo)
+        [Route("intlcustomers/{email}/")]
+        public async Task<IServiceResponse<UserDTO>> GetCustomer(string email)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var item = await _service.GetDeliveryNoByWaybill(deliveryNo);
+                var customerObj = await _service.GetInternationalUser(email);
 
-                return new ServiceResponse<DeliveryNumberDTO>
+                return new ServiceResponse<UserDTO>
                 {
-                    Object = item
+                    Object = customerObj
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("deactivateintlcustomer/{email}/")]
+        public async Task<IServiceResponse<bool>> ActivateUser(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.DeactivateInternationalUser(email);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getbycode/{code}")]
+        public async Task<IServiceResponse<object>> GetByCode(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customerObj = await _service.GetByCode(code);
+
+                return new ServiceResponse<object>
+                {
+                    Object = customerObj
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("coporatetransactions")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetCoporateTransactions(DateFilterForDropOff searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _service.GetCoporateMonthlyTransaction(searchOption);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+
     }
 }

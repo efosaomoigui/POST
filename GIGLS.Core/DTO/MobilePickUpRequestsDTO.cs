@@ -52,4 +52,20 @@ namespace GIGLS.Core.DTO
         public string Waybill { get; set; }
     }
 
+    public class ShipmentAssignmentDTO
+    {
+        public string Waybill { get; set; }
+        public string Email { get; set; }
+        public string VehicleType { get; set; }
+
+    }
+
+    public class AssignedShipmentDTO
+    {
+        public string Waybill { get; set; }
+        public string Email { get; set; }
+        public string Message { get; set; }
+        public bool Succeeded { get; set; }
+
+    }
 }

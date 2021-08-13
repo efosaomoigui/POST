@@ -99,6 +99,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 {
                     throw new GenericException("Region information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
+
+                //delete the region service centre mapping
+                var regionMapping = await _uow.RegionServiceCentreMapping.FindAsync(x => x.RegionId == regionId);
+                _uow.RegionServiceCentreMapping.RemoveRange(regionMapping);
                 _uow.Region.Remove(region);
                 _uow.Complete();
             }
@@ -107,6 +111,5 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
-
     }
 }

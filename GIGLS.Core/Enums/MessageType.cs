@@ -57,8 +57,27 @@
         REQMAIL, //International Message for customer
         REQSCA, //International Message for Service centre
         ISTC, //International Shipments Terms and Condition shown on the App
-        AISN, //International Shipment Arrive Nigeria (Paid)
+        IAFDHD, //International Shipment Arrive Final Destination (Home Delivery)
+        IAFDSC, //International Shipment Arrive Final Destination (Terminal Pickup)
         AISNU,  //International Shipment Arrive Nigeria (UnPaid)
-        NODESMS //International Shipments Terms and Condition shown on the App
-    } 
+        AISPNU,  //International Shipment Precessed (UnPaid)
+        NODESMS, //International Shipments Terms and Condition shown on the App
+        IDH, //International Shipment Departs Hub
+        IPC, //International Shipment Payment Confirmation
+        USP, //Unsuccessful Wallet Funding Email Notification
+        ESEAS, //ECOMMERCE SIGNUP EMAIL AND SMS
+        ESCA, //ECOMMERCE SIGN UP CLASS APP
+        ESCW, //ECOMMERCE SIGN UP CLASS WEBSITE
+        ESBA, //ECOMMERCE SIGN UP BASIC APP
+        ESBW, //ECOMMERCE SIGN UP BASIC WEBSITE
+        ISA, // INDIVIDUAL SIGN UP APP
+        PSU, //PARTNER SIGN UP
+        EUCA, //ECOMMERCE UPDATE UP CLASS APP
+        EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
+        ISTC62, //International Shipments Terms and Condition shown on the App for UK
+        ISTC207, //International Shipments Terms and Condition shown on the App for UK
+        REQSCAUK, //International Message for Service centre UK
+        INTPEUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
+        APFS,  //Message for Attempted Pickup From Sender
+    }
 }

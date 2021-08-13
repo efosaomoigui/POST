@@ -4,11 +4,13 @@ namespace GIGLS.CORE.DTO.Report
 {
     public class DateFilterCriteria
     {
+
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int CountryId { get; set; }
         public int ServiceCentreId { get; set; }
         public string FilterValue { get; set; }
+        public string UserId { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database
@@ -17,6 +19,7 @@ namespace GIGLS.CORE.DTO.Report
         /// <returns></returns>
         public Tuple<DateTime, DateTime> getStartDateAndEndDate()
         {
+
             DateFilterCriteria dateFilterCriteria = this;
 
             var startDate = DateTime.Now;

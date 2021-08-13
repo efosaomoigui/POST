@@ -1,9 +1,11 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -158,5 +160,130 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("removefromqueue/{waybill}")]
+        public async Task<IServiceResponse<NewNodeResponse>> RemoveShipmentFromQueue(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.RemoveShipmentFromQueue(waybill);
+                return new ServiceResponse<NewNodeResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("addtoqueue/{waybill}")]
+        public async Task<IServiceResponse<bool>>AddPreShipmentMobileToQueue(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.AddShipmentToQueue(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetGIGGOProgressReport")]
+        public async Task<IServiceResponse<object>> GetGIGGOProgressReport()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReport();
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentCreated")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentCreated()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentCreated();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentAssigned")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentAssigned()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentAssigned();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("GetGIGGOProgressReportForShipmentPicked")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetGIGGOProgressReportForShipmentPicked()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetGIGGOProgressReportForShipmentPicked();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getpreshipmentmobiletat")]
+        public async Task<IServiceResponse<List<PreShipmentMobileTATDTO>>> GetPreshipmentMobileTAT(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetPreshipmentMobileTAT(newFilterOptionsDto);
+                return new ServiceResponse<List<PreShipmentMobileTATDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("getpreshipmentmobiledeliverytat")]
+        public async Task<IServiceResponse<List<PreShipmentMobileTATDTO>>> GetPreshipmentMobileDeliveryTAT(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetPreshipmentMobileDeliveryTAT(newFilterOptionsDto);
+                return new ServiceResponse<List<PreShipmentMobileTATDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("removenodependingshipment")]
+        public async Task<IServiceResponse<NewNodeResponse>> RemoveNodePendingShipment(PendingNodeShipmentDTO dto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.RemoveNodePendingShipment(dto);
+                return new ServiceResponse<NewNodeResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

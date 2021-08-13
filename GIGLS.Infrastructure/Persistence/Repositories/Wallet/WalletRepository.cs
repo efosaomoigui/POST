@@ -72,6 +72,41 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             }
         }
 
+        public async Task<WalletBreakdown> GetWalletBreakdown(int activeCountryId)
+        {
+            try
+            {
+                var result = new WalletBreakdown
+                {
+                    IndividualCustomer = 0,
+                    Ecommerce = 0,
+                };
+
+                SqlParameter countryId = new SqlParameter("@CountryId", activeCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    countryId
+                };
+
+                var summaryResult = await _context.Database.SqlQuery<WalletBreakdown>("WalletBalanceBreakdown " +
+                   "@CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summaryResult != null)
+                {
+                    result.IndividualCustomer = summaryResult.IndividualCustomer;
+                    result.Ecommerce = summaryResult.Ecommerce;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<WalletDTO>> GetOutstaningCorporatePayments()
         {
             try

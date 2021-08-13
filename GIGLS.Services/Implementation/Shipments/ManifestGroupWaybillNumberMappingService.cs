@@ -19,7 +19,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -120,12 +119,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode)  
+        public async Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode)
         {
             try
-            {                
+            {
                 var movementmanifestMappingList = await _uow.MovementManifestNumberMapping.FindAsync(x => x.MovementManifestCode == movementmanifestCode);
-                var movementManifestList = movementmanifestMappingList.ToList();
+                var movementManifestList = movementmanifestMappingList.ToList(); 
 
                 var arrOfVals = movementManifestList.Select(s => s.ManifestNumber).ToArray();
                 var dispatch = await _uow.Dispatch.FindAsync(x => arrOfVals.Contains(x.ManifestNumber));
@@ -133,17 +132,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 var dispatchList = dispatch.ToList();
 
                 var result = movementManifestList.Join(dispatchList, arg => arg.ManifestNumber, arg => arg.ManifestNumber,
-                    (first, second) => new { 
-                        first.MovementManifestNumberMappingId, 
+                    (first, second) => new
+                    {
+                        first.MovementManifestNumberMappingId,
                         first.MovementManifestCode,
-                        first.ManifestNumber, 
-                        second.DepartureServiceCenterId, 
-                        second.DestinationServiceCenterId, 
+                        first.ManifestNumber,
+                        second.DepartureServiceCenterId,
+                        second.DestinationServiceCenterId,
                         second.Departure,
                         second.Destination,
                     });
 
-                var servicecenter =  _uow.ServiceCentre.GetAll();
+                var servicecenter = _uow.ServiceCentre.GetAll();
 
                 var resultList = result.Select(s => new MovementManifestNumberMappingDTOTwo
                 {
@@ -425,21 +425,71 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //map Manifest to Super Manifest
-        public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId) 
+        public async Task UpdateMappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId) 
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var currentServiceCentre = await _userService.GetCurrentServiceCenter(); 
+                var currentServiceCentre = await _userService.GetCurrentServiceCenter();
 
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true &&
-                manifestList.Contains(x.ManifestCode) &&
-                x.MovementStatus == MovementStatus.InProgress &&
-                serviceCenters.Contains(x.DepartureServiceCentreId));
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
+                //remove the manifest mapping as it was there before
+                var movementmanifestmappings = _uow.MovementManifestNumberMapping.GetAll().Where(s => s.MovementManifestCode == movementmanifestCode).ToList();
+                _uow.MovementManifestNumberMapping.RemoveRange(movementmanifestmappings);
+                await _uow.CompleteAsync();
+
+                //convert the list to HashSet to remove duplicate
+                var newManifestList = new HashSet<string>(manifestList);
+                var today = DateTime.Now;
+
+                foreach (var manifestCode in newManifestList)
+                {
+                    var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+
+                    if (manifest == null)
+                    {
+                        throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                    }
+
+                    //Update The Manifest 
+                    manifest.MovementStatus = MovementStatus.InProgress;
+
+                    //insert into movement manifest mapping table
+                    var resultMap = new MovementManifestNumberMapping()
+                    {
+                        MovementManifestCode = movementmanifestCode,
+                        ManifestNumber = manifestCode,
+                        UserId = userId
+                    };
+                    _uow.MovementManifestNumberMapping.Add(resultMap);
+                }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //map Manifest to Super Manifest
+        public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var currentServiceCentre = await _userService.GetCurrentServiceCenter();
+
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
+
+                var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
                 //int manifestByScListCount = manifestByScList.Count;
 
                 //convert the list to HashSet to remove duplicate
@@ -456,7 +506,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //Update The Manifest 
-                    manifest.MovementStatus = MovementStatus.EnRoute;
+                    manifest.MovementStatus = MovementStatus.InProgress;
 
                     //insert into movement manifest mapping table
                     var resultMap = new MovementManifestNumberMapping()
@@ -466,7 +516,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         UserId = userId
                     };
                     _uow.MovementManifestNumberMapping.Add(resultMap);
-
                 }
 
                 //create Code for validation and release code for shipment
@@ -476,8 +525,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var message = new MovementManifestMessageDTO
                 {
                     MovementManifestCode = movementmanifestCode,
-                    DepartureServiceCentre = currentServiceCentre[0],
-                    DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
+                    DepartureServiceCentre = currentServiceCentre[0]
+                    //DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
                 };
 
                 //message.QRCode = deliveryNumber.SenderCode;
@@ -489,7 +538,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationServiceCentreId = destinationScId,
                     MovementManifestCode = movementmanifestCode,
                     UserId = userId,
-                    MovementStatus = MovementStatus.EnRoute,
+                    MovementStatus = MovementStatus.InProgress,
                     DriverCode = driverCode,
                     DestinationServiceCentreCode = destServiceCentreCode
                 };
@@ -503,7 +552,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task SendSMSForMobileShipmentCreation(MovementManifestMessageDTO  smsMessageExtensionDTO, MessageType messageType)
+        private async Task SendSMSForMobileShipmentCreation(MovementManifestMessageDTO smsMessageExtensionDTO, MessageType messageType)
         {
             await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, smsMessageExtensionDTO);
         }
@@ -607,23 +656,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //remove groupWaybillNumber from manifest
         public async Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber)
         {
             try
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
                 var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
-
-                //validate the ids are in the system
-                //if (manifestDTO == null)
-                //{
-                //    throw new GenericException($"No Manifest exists for this code: {manifest}");
-                //}
-                //if (groupWaybillNumberDTO == null)
-                //{
-                //    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
-                //}
 
                 var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
                 if (manifestGroupWaybillNumberMapping != null)
@@ -637,6 +675,37 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //remove groupWaybillNumber from manifest
+        public async Task RemoveManifestFromMovementManifest(string manifest, string movementmanifestcode)
+        {
+            try
+            {
+                var movementmanifestDTO = await _manifestService.GetMovementManifestByCode(movementmanifestcode);
+                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+
+                var movementManifestNumberMapping = _uow.MovementManifestNumberMapping.SingleOrDefault(x => x.ManifestNumber == manifest && x.MovementManifestCode == movementmanifestcode);
+                if (movementManifestNumberMapping != null)
+                {
+                    _uow.MovementManifestNumberMapping.Remove(movementManifestNumberMapping);
+                    _uow.Complete();
+                }
+                 
+                var movementManifestNumberMapping2 = await _manifestService.GetMovementManifestByCode(movementmanifestcode);
+                if (movementManifestNumberMapping2 == null)
+                {
+                    var movementmanifest = _uow.MovementManifestNumber.SingleOrDefault(s => s.MovementManifestCode == movementmanifestcode || 
+                    s.MovementStatus == MovementStatus.InProgress || s.MovementStatus == MovementStatus.EnRoute);
+
+                    movementmanifest.MovementStatus = MovementStatus.ProcessEnded;
+                    _uow.Complete();
+                }
+            }
+            catch (Exception ex)
             {
                 throw;
             }
@@ -703,12 +772,27 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria) 
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetAllManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
         {
             try
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetManifestMovementNumberMappings(serviceCenters, dateFilterCriteria); 
+                var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetManifestMovementNumberMappings(serviceCenters, dateFilterCriteria);
+
+                return manifestManifests;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<MovementManifestNumberDTO>> GetExpectedManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria) 
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetExpectedManifestMovementNumberMappings(serviceCenters, dateFilterCriteria);
 
                 return manifestManifests;
             }
@@ -920,6 +1004,65 @@ namespace GIGLS.Services.Implementation.Shipments
 
             _uow.ShipmentTracking.AddRange(data);
             await _uow.CompleteAsync();
+        }
+
+        //Get Waybill Info In Group Waybill Usin manifest
+        public async Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifest)
+        {
+            try
+            {
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest);
+
+                if (manifestObj == null)
+                {
+                    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                }
+
+                var resultData = await GetGroupWaybillNumbersInManifest(manifestObj.ManifestId);
+
+                var overallResult = new List<GroupWaybillAndWaybillDTO>();
+
+                //Think of an Optimisation
+                if (resultData.Any())
+                {
+                    foreach (var groupShipment in resultData)
+                    {
+                        var groupWaybillData = new GroupWaybillAndWaybillDTO()
+                        {
+                            GroupWaybillCode = groupShipment.GroupWaybillCode,
+                            WaybillsDTO = new List<WaybillInGroupWaybillDTO>()
+                        };
+                        if (groupShipment.WaybillNumbers.Any())
+                        {
+                            foreach (var waybill in groupShipment.WaybillNumbers)
+                            {
+                                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                                var dept = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DepartureServiceCentreId);
+                                var dest = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == shipment.DestinationServiceCentreId);
+                                var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == waybill);
+                                var newWaybillInfo = new WaybillInGroupWaybillDTO()
+                                {
+                                    Value = shipment.DeclarationOfValueCheck == null ? 0.00M : shipment.DeclarationOfValueCheck,
+                                    Weight = shipment.ApproximateItemsWeight,
+                                    Waybill = shipment.Waybill,
+                                    Description = shipment.Description,
+                                    DepartureServiceCentre = dept.Name,
+                                    DestinationServiceCentre = dest.Name,
+                                    PaymentMethod = shipment.PaymentMethod != null ? shipment.PaymentMethod : "N/A",
+                                    PaymentStatus = invoice.PaymentStatus
+                                };
+                                groupWaybillData.WaybillsDTO.Add(newWaybillInfo);
+                            }
+                        }
+                        overallResult.Add(groupWaybillData);
+                    }
+                }
+                return overallResult;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

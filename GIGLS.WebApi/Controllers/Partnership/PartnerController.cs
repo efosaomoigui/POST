@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
@@ -329,6 +331,98 @@ namespace GIGLS.WebApi.Controllers.Partnership
             return await HandleApiOperationAsync(async () =>
             {
                 await _partnerTransactionsService.CreditPartnerTransactionByAdmin(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getunverifiedpartners")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetUnVerfiedPartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetUnVerifiedPartners(filterCriteria);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("contactpartner/{email}/")]
+        public async Task<IServiceResponse<bool>> SendWelcomeMailToPartner(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerService.ContactUnverifiedPartner(email);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getverifiedpartnersbyrange")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerifiedByRangePartners(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetVerifiedByRangePartners(filterCriteria);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("deactivatepartner/{partnerId:int}")]
+        public async Task<IServiceResponse<bool>> DeactivatePartner(int partnerId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerService.DeactivatePartner(partnerId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("riderratings")]
+        public async Task<IServiceResponse<List<RiderRateDTO>>> GetRidersRatings(PaginationDTO pagination)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ratings =await _partnerService.GetRidersRatings(pagination);
+
+                return new ServiceResponse<List<RiderRateDTO>>
+                {
+                    Object = ratings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("updatepartnerdetails")]
+        public async Task<IServiceResponse<bool>> UpdatePartnerDetails(PartnerUpdateDTO update)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 await _partnerService.UpdatePartnerEmailPhoneNumber(update);
+
                 return new ServiceResponse<bool>
                 {
                     Object = true

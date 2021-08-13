@@ -280,7 +280,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var partners = await _uow.Partner.GetVerifiedPartnersAsync(currentUser.UserChannelCode);
+            var partners = await _uow.Partner.GetPartnersAsync(currentUser.UserChannelCode, true);
 
             return partners;
         }

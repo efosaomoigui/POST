@@ -10,7 +10,10 @@ namespace GIGLS.CORE.DTO.Report
         public int StationId { get; set; }
         public int StateId { get; set; }
         public bool fromGigGoDashboard { get; set; }
-
+        public string AssignedCustomerRep { get; set; }
+        public string AssignedCustomerRepEmail { get; set; }
+        public bool ViewAll { get; set; }
+        public string SenderAccountNumber { get; set; }
         /// <summary>
         /// Get the Start Date and End Date for query to the database
         /// </summary>
@@ -27,7 +30,8 @@ namespace GIGLS.CORE.DTO.Report
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
             {
                 startDate = new DateTime(2000, DateTime.Now.Month, DateTime.Now.Day);
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+               // endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = DateTime.Now;
             }
 
             //StartDate has value and EndDate has Value 
@@ -46,7 +50,8 @@ namespace GIGLS.CORE.DTO.Report
                 var tempStartDate = ((DateTime)accountFilterCriteria.StartDate);
                 startDate = new DateTime(tempStartDate.Year, tempStartDate.Month, tempStartDate.Day);
 
-                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                //endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = DateTime.Now;
             }
 
             //StartDate has no value and EndDate has Value

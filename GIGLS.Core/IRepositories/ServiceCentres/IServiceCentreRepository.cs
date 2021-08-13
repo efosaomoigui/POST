@@ -1,5 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,8 +19,12 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
 
         Task<List<ServiceCentreDTO>> GetLocalServiceCentres(int[] countryIds);
         Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code);
-        Task<List<ServiceCentreDTO>> GetServiceCentres(int[] countryIds, bool excludeHub);
+        Task<List<ServiceCentreDTO>> GetServiceCentres(int[] countryIds, bool excludeHub, int stationId = 0);
         Task<List<ServiceCentreDTO>> GetServiceCentresBySingleCountry(int countryId);
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
+        Task<ServiceCentreBreakdownDTO> GetServiceCentresData(int countryId);
+        Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
+        Task<List<ServiceCentreDTO>> GetServiceCentresIsConsignable(int[] countryIds, bool excludeHub, int stationId);
+        Task<string> GetServiceCentresCrAccount(int serviceCentreId);
     }
 }

@@ -26,10 +26,12 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverCity { get; set; }
+        public string LGA { get; set; }
         public PickupOptions PickupOptions { get; set; }
 
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
         public decimal Value { get; set; }
 
         //PreShipment Items

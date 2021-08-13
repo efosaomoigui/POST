@@ -1,13 +1,16 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -129,6 +132,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    IsDelivered = r.IsDelivered,
                                    IsBatchPickUp = r.IsBatchPickUp,
                                    IsCancelled = r.IsCancelled,
+                                   ZoneMapping = r.ZoneMapping,
                                    PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -173,9 +177,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         }
 
         //Get Shipments that have not been paid for by user
-        public Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
+        public async Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
         {
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode && s.IsCancelled == false);
+            var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
+            var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
+            var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
+
 
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -188,11 +196,50 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Departure = dept.Name,
                               Destination = dest.Name,
                               Amount = i.Amount,
+                              Country = _context.Country.Where(c => c.CountryId == i.CountryId).Select(x => new CountryDTO
+                              {
+                                  CurrencySymbol = x.CurrencySymbol,
+                                  CountryCode = x.CountryCode,
+                                  CurrencyCode = x.CurrencyCode,
+                                  CountryName = x.CountryName,
+                              }).FirstOrDefault(),
+                              CountryId = i.CountryId,
                               CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
+                              Description = s.Description,
                               DateCreated = s.DateCreated
                           }).ToList();
 
-            return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
+
+            if (result.Any())
+            {
+               result = await GetEquivalentAmountOfActiveCurrencies(result);
+            }
+            return result.OrderByDescending(x => x.DateCreated).ToList();
+        }
+
+        private async  Task<decimal> GetDiscountForInternationalShipmentBasedOnRank(Rank rank, int countryId)
+        {
+            decimal percentage = 0.00M;
+
+            if (rank == Rank.Class)
+            {
+                var globalProperty =  _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+            else
+            {
+                var globalProperty = _context.GlobalProperty.AsQueryable().Where(s => s.Key == GlobalPropertyType.InternationalBasicClassDiscount.ToString() && s.CountryId == countryId).FirstOrDefault();
+                if (globalProperty != null)
+                {
+                    percentage = Convert.ToDecimal(globalProperty.Value);
+                }
+            }
+
+            decimal discount = ((100M - percentage) / 100M);
+            return discount;
         }
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipments(MobileShipmentFilterCriteria accountFilterCriteria)
@@ -231,9 +278,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
                 //var listCreated = new List<PreShipmentMobileReportDTO>();
 
-               var listCreated = await _context.Database.SqlQuery<PreShipmentMobileReportDTO>("GIGGOReporting " +
-                  "@StartDate, @EndDate, @DepartureStationId, @DestinationStationId, @CountryId, @VehicleType, @CompanyType, @Shipmentstatus",
-                  param).ToListAsync();
+                var listCreated = await _context.Database.SqlQuery<PreShipmentMobileReportDTO>("GIGGOReporting " +
+                   "@StartDate, @EndDate, @DepartureStationId, @DestinationStationId, @CountryId, @VehicleType, @CompanyType, @Shipmentstatus",
+                   param).ToListAsync();
 
                 return await Task.FromResult(listCreated);
             }
@@ -293,5 +340,154 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return shipmentDto;
         }
 
+
+
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
+
+            var address = (from r in preShipments
+                           select new AddressDTO()
+                           {
+                               ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
+                               ReceiverName = r.FirstOrDefault().ReceiverName,
+                               ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
+                               ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
+                               ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Longitude,
+                               ReceiverLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).LGA,
+                               SenderAddress = r.FirstOrDefault().SenderAddress,
+                               SenderName = r.FirstOrDefault().SenderName,
+                               DateCreated = r.FirstOrDefault().DateCreated,
+                               SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().SenderStationId).StationName,
+                               SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
+                               SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
+                               SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
+                           }).Take(5).ToList();
+
+            return address;
+        }
+
+        private async Task<List<OutstandingPaymentsDTO>> GetEquivalentAmountOfActiveCurrencies(List<OutstandingPaymentsDTO> result)
+        {
+            var usCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 207).FirstOrDefault();
+            var ukCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 62).FirstOrDefault();
+            var naijaCountry = _context.Country.AsQueryable().Where(s => s.CountryId == 1).FirstOrDefault();
+            var destCountries = new List<CountryRouteZoneMap>();
+            var countryIds = result.Select(x => x.CountryId);
+            destCountries.AddRange(Context.CountryRouteZoneMap.Where(x => countryIds.Contains(x.DepartureId)));
+            destCountries.AddRange(Context.CountryRouteZoneMap.Where(x => countryIds.Contains(x.DestinationId)));
+            foreach (var i in result)
+            {
+
+                if (i.CountryId == 1)
+                {
+                    var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (usdestCountry != null)
+                    {
+                        i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                        i.DollarAmount = Math.Round((usdestCountry.Rate * (double)i.Amount), 2);
+                        i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    }
+                    if (ukdestCountry != null)
+                    {
+                        i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                        i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                        i.PoundAmount = Math.Round((ukdestCountry.Rate * (double)i.Amount), 2);
+                    }
+                    i.NairaCurrencyCode = naijaCountry.CurrencyCode;
+                    i.NairaCurrencySymbol = naijaCountry.CurrencySymbol;
+                    i.NairaAmount = (double)i.Amount;
+
+                }
+                else if (i.CountryId == 62)
+                {
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (naijadestCountry != null)
+                    {
+                        i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                        i.NairaCurrencySymbol = i.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                        i.NairaAmount = i.CountryId == 1 ? (double)i.Amount : Math.Round((naijadestCountry.Rate * (double)i.Amount), 2);
+                    }
+
+                    var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (usdestCountry != null)
+                    {
+                        i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                        i.DollarAmount = Math.Round((usdestCountry.Rate * (double)i.Amount), 2);
+                        i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    }
+                    i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                    i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                    i.PoundAmount = (double)i.Amount;
+                }
+                else if (i.CountryId == 207)
+                {
+                    var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (naijaCountry != null)
+                    {
+                        i.NairaCurrencyCode = i.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                        i.NairaCurrencySymbol = i.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                        i.NairaAmount = i.CountryId == 1 ? (double)i.Amount : Math.Round((naijadestCountry.Rate * (double)i.Amount), 2);
+                    }
+
+                    var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == i.CountryId).FirstOrDefault();
+                    if (ukdestCountry != null)
+                    {
+                        i.PoundCurrencySymbol = ukCountry.CurrencySymbol;
+                        i.PoundCurrencyCode = ukCountry.CurrencyCode;
+                        i.PoundAmount = Math.Round((ukdestCountry.Rate * (double)i.Amount), 2);
+                    }
+                    i.DollarCurrencyCode = usCountry.CurrencyCode;
+                    i.DollarCurrencySymbol = usCountry.CurrencySymbol;
+                    i.DollarAmount = (double)i.Amount;
+                }
+            }
+            return result;
+        }
+
+
+        public async Task<PreShipmentMobileDTO> GetPreshipmentMobileByWaybill(string waybill)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.Waybill == waybill);
+
+            var preShipmentDTO = (from r in preShipments
+                                  select new PreShipmentMobileDTO()
+                                  {
+                                      ReceiverAddress = r.ReceiverAddress,
+                                      ReceiverName = r.ReceiverName,
+                                      ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.ReceiverStationId).StationName,
+                                      ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Latitude,
+                                      ReceiverLng = Context.Location.FirstOrDefault(x => x.LocationId == r.ReceiverLocation.LocationId).Longitude,
+                                      SenderAddress = r.SenderAddress,
+                                      SenderName = r.SenderName,
+                                      DateCreated = r.DateCreated,
+                                      SenderStationName = Context.Station.FirstOrDefault(x => x.StationId == r.SenderStationId).StationName,
+                                      SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Latitude,
+                                      SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.SenderLocation.LocationId).Longitude,
+                                      PreShipmentMobileId = r.PreShipmentMobileId,
+                                      Waybill = r.Waybill,
+                                      DateModified = r.DateModified,
+                                      ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                      shipmentstatus = r.shipmentstatus,
+                                      GrandTotal = r.GrandTotal,
+                                      IsDelivered = r.IsDelivered,
+                                      IsBatchPickUp = r.IsBatchPickUp,
+                                      IsCancelled = r.IsCancelled,
+                                      CustomerCode = r.CustomerCode,
+                                      VehicleType = r.VehicleType,
+                                      ZoneMapping = r.ZoneMapping,
+                                      SenderLocality = r.SenderLocality,
+                                      PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
+                                             .Select(y => new PreShipmentItemMobileDTO
+                                             {
+                                                 PreShipmentItemMobileId = y.PreShipmentItemMobileId,
+                                                 Description = y.Description
+                                             }).ToList()
+                                  }).ToList();
+
+            return preShipmentDTO.FirstOrDefault();
+
+        }
     }
 }

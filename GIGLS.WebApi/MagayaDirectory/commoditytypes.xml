@@ -3,77 +3,96 @@
   <DescriptionType>
     <itemNo>2</itemNo>
     <description>AUTO PART</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>3</itemNo>
     <description>BABY ITEMS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>4</itemNo>
     <description>BAG</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>5</itemNo>
     <description>BEAUTY SUPPLY</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>6</itemNo>
     <description>CBD OIL</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>7</itemNo>
     <description>CHILDREN CLOTHES</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>8</itemNo>
     <description>CLOTHES</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>9</itemNo>
     <description>COMPUTER</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>10</itemNo>
     <description>DIAPERS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>11</itemNo>
     <description>DRONE CAMERA</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>12</itemNo>
     <description>ELECTRONIC ITEM</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>13</itemNo>
     <description>HOUSEHOLD ITEMS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>14</itemNo>
     <description>MEDICATIONS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>15</itemNo>
     <description>NEW LAPTOP</description>
+    <minimum>50</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>16</itemNo>
     <description>PERSONAL EFFECTS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>17</itemNo>
     <description>SHOES</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>18</itemNo>
     <description>SUPPLEMENTS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>19</itemNo>
     <description>USED CELL PHONE</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
   <DescriptionType>
     <itemNo>20</itemNo>
     <description>USED LAPTOPS</description>
+    <minimum>0.0</minimum>
   </DescriptionType>
 </Description>

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.OnlinePayment
 {
@@ -12,16 +14,58 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Message { get; set; }
         public bool Status { get; set; }
         public Data data { get; set; }
+
+        //waybill Grand Total
+        public decimal Amount { get; set; }
     }
 
     public class Data
     {
+        public Data()
+        {
+            Authorization = new Authorization();
+        }
         public string Status { get; set; }
         public string Reference { get; set; }
+        public string Authorization_url { get; set; }
         public decimal Amount { get; set; }
         public string Gateway_Response { get; set; }
         public string Display_Text { get; set; }
         public string Message { get; set; }
+        public Authorization Authorization { get; set; }
+    }
+
+    public class Authorization
+    {
+        [JsonProperty("authorization_code")]
+        public string AuthorizationCode { get; set; }
+
+        [JsonProperty("card_type")]
+        public string CardType { get; set; }
+
+        [JsonProperty("last4")]
+        public string Last4 { get; set; }
+
+        [JsonProperty("exp_month")]
+        public string ExpMonth { get; set; }
+
+        [JsonProperty("exp_year")]
+        public string ExpYear { get; set; }
+
+        [JsonProperty("bin")]
+        public string Bin { get; set; }
+
+        [JsonProperty("bank")]
+        public string Bank { get; set; }
+
+        [JsonProperty("channel")]
+        public string Channel { get; set; }
+
+        [JsonProperty("reusable")]
+        public bool? Reusable { get; set; }
+
+        [JsonProperty("country_code")]
+        public string CountryCode { get; set; }
     }
 
     public class PaymentResponse
@@ -30,6 +74,8 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Message { get; set; }
         public string GatewayResponse { get; set; }
         public string Status { get; set; }
+        public bool ResponseStatus { get; set; }
+
     }
 
     public enum WaybillWalletPaymentType
@@ -64,6 +110,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public FlutterResponseData()
         {
             validateInstructions = new ValidateInstructions();
+            Card = new Card();
         }
         public string Status { get; set; }
         public int Id { get; set; }
@@ -80,6 +127,29 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ChargeCode { get; set; }
         public string Processor_Response { get; set; }
         public ValidateInstructions validateInstructions { get; set; }
+        public Card Card { get; set; }
+    }
+
+    public class Card
+    {
+        [JsonProperty("expirymonth")]
+        public string ExpiryMonth { get; set; }
+
+        [JsonProperty("expiryyear")]
+        public string ExpiryYear { get; set; }
+
+        [JsonProperty("cardBIN")]
+        public string CardBIN { get; set; }
+
+        [JsonProperty("last4digits")]
+        public string Last4Digits { get; set; }
+
+        [JsonProperty("brand")]
+        public string Brand { get; set; }
+
+        [JsonProperty("type")]
+        public string CardType { get; set; }
+
     }
 
     public class ValidateInstructions
@@ -96,5 +166,125 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Transaction_Ref { get; set; }
     }
     
+    public class BonusAddOn
+    {
+        public string Description { get; set; }
+        public decimal Amount { get; set; }
+        public bool BonusAdded { get; set; }
+    }
+
+
+    public class CreateNubanAccountDTO
+    {
+        public int customer { get; set; }
+        public string preferred_bank { get; set; }
+        public string email { get; set; }
+        public string phone { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+    }
+
+
+
+    public class CreateNubanAccountResponseDTO
+    {
+        public CreateNubanAccountResponseDTO()
+        {
+            data = new NubanDataResponse();
+        }
+        public string status { get; set; }
+        public string message { get; set; }
+        public NubanDataResponse data { get; set; }
+        public bool succeeded { get; set; }
+    }
+
+    public class NubanDataResponse
+    {
+        public NubanDataResponse()
+        {
+            bank = new NubanBank();
+            assignment = new NubanAssignment();
+            customer = new NubanCustomer();
+        }
+        public NubanAssignment assignment { get; set; }
+        public NubanCustomer customer { get; set; }
+        public string account_name { get; set; }
+        public string account_number { get; set; }
+        public string assigned { get; set; }
+        public string currency { get; set; }
+        public string active { get; set; }
+        public NubanBank bank { get; set; }
+    }
+
+    public class NubanBank
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string slug { get; set; }
+    }
+
+    public class NubanCustomer
+    {
+        public int id { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string email { get; set; }
+        public string customer_code { get; set; }
+        public string phone { get; set; }
+        public string risk_action { get; set; }
+
+    }
+
+
+    public class NubanAssignment
+    {
+        public int integration { get; set; }
+        public int assignee_id { get; set; }
+        public string assignee_type { get; set; }
+        public bool expired { get; set; }
+        public string account_type { get; set; }
+        public DateTime assigned_at { get; set; }
+        public string phone { get; set; }
+        public string risk_action { get; set; }
+
+    }
+
+
+    public class NubanCustomerDataResponse
+    {
+      public string email { get; set; }
+      public int integration { get; set; }
+      public int id { get; set; }
+      public string domain { get; set; }
+      public string customer_code { get; set; }
+      public bool identified { get; set; }
+      public string identifications { get; set; }
+      public string createdAt { get; set; }
+      public string updatedAt { get; set; }
+    }
+
+    public class NubanCreateCustomerDTO
+    {
+        public NubanCreateCustomerDTO()
+        {
+            data = new NubanCustomerDataResponse();
+        }
+        public string status { get; set; }
+        public string message { get; set; }
+        public NubanCustomerDataResponse data { get; set; }
+        public bool succeeded { get; set; }
+    }
+
+    public class NubanCustomerResponse
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string CustomerCode { get; set; }
+        public string Reference { get; set; }
+        public decimal Amount { get; set; }
+    }
+
 
 }

@@ -9,6 +9,7 @@ namespace GIGLS.Core.DTO
     public class CancelShipmentDTO
     {
         public string Waybill { get; set; }
+        public string CancelReason { get; set; }
         public string Userchanneltype { get; set; }
     }
 }

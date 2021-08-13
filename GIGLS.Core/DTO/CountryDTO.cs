@@ -24,6 +24,12 @@ namespace GIGLS.Core.DTO
         public string ContactEmail { get; set; }
         public string TermAndConditionAmount { get; set; }
         public string TermAndConditionCountry { get; set; }
+        public string CountryFlag { get; set; }
+        public bool IsInternationalShippingCountry { get; set; }
+        public string CourierEnable { get; set; }
+        public List<string> CourierList { get; set; }
+        public string CountryShortCode { get; set; }
+
     }
     public class NewCountryDTO 
     {
@@ -40,4 +46,20 @@ namespace GIGLS.Core.DTO
         public string CurrencyCode { get; set; }
         public int StationId { get; set; }
     }
+
+
+    public class WebsiteCountryDTO
+    {
+        public WebsiteCountryDTO()
+        {
+            States = new List<WebsiteStateDTO>();
+        }
+        public int CountryId { get; set; }
+        public string CountryName { get; set; }
+        public string CountryCode { get; set; }
+        public bool IsActive { get; set; }
+        public List<WebsiteStateDTO> States { get; set; }
+
+    }
+
 }

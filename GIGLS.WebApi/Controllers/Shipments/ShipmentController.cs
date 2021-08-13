@@ -1,22 +1,23 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.CORE.IServices.Report;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.User;
-using System;
-using GIGLS.Core.DTO.Report;
-using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -32,7 +33,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         private readonly IShipmentContactService _shipmentContactService;
 
         public ShipmentController(IShipmentService service, IShipmentReportService reportService,
-            IUserService userService,IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
+            IUserService userService, IPreShipmentService preshipmentService, ICustomerPortalService customerPortalService, IShipmentContactService shipmentContactService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
@@ -41,29 +42,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _customerPortalService = customerPortalService;
             _shipmentContactService = shipmentContactService;
         }
-
-
-        //public Task<IEnumerable<StateDTO>> GetStatesAsync(int pageSize = 10, int page = 1)
-        //{
-        //    var states = Context.State.ToList();
-        //    var subresult = states.Skip(pageSize * (page - 1)).Take(pageSize);
-        //    var stateDto = Mapper.Map<IEnumerable<StateDTO>>(subresult);
-        //    return Task.FromResult(stateDto);
-        //}
-
-        //[HttpGet]
-        //[Route("all")]
-        //public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments()
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var shipments = await _service.GetShipments();
-        //        return new ServiceResponse<IEnumerable<ShipmentDTO>>
-        //        {
-        //            Object = shipments
-        //        };
-        //    });
-        //}
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
@@ -130,6 +108,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //Update SenderAddress for corporate customers
                 ShipmentDTO.SenderAddress = null;
                 ShipmentDTO.SenderState = null;
+                ShipmentDTO.ShipmentScanStatus = ShipmentScanStatus.CRT;
                 if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
                 {
                     ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;
@@ -224,36 +203,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{ShipmentId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(ShipmentId);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{ShipmentId:int}")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(int ShipmentId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(ShipmentId);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("{waybill}/waybill")]
-        public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.DeleteShipment(waybill);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("{waybill}/waybill")]
+        //public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.DeleteShipment(waybill);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
@@ -399,13 +378,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("releaseMovementManifest/{movementmanifestcode}/{code}")]
-        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(string movementmanifestcode, string code)
+        public async Task<IServiceResponse<bool>> ReleaseMovementManifest(ReleaseMovementManifestDto movementManifestVals)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.ReleaseMovementManifest(movementmanifestcode, code);
+                var centres = await _service.ReleaseMovementManifest(movementManifestVals);
                 return new ServiceResponse<bool>
                 {
                     Object = centres
@@ -415,7 +394,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("checkreleasemovementmanifest/{movementmanifestcode}")] 
+        [Route("checkreleasemovementmanifest/{movementmanifestcode}")]
         public async Task<IServiceResponse<bool>> CheckReleaseManifest(string movementmanifestcode)
         {
             return await HandleApiOperationAsync(async () =>
@@ -581,6 +560,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySalesByServiceCentre
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{waybill}/waybillbyservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySaleByWaybillForServiceCentre(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetWaybillForServiceCentre(waybill);
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = shipment
                 };
             });
         }
@@ -902,5 +896,108 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getmagayashipmentstocargo")]
+        public async Task<IServiceResponse<List<CargoMagayaShipmentDTO>>> GetCargoMagayaShipments(BaseFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCargoMagayaShipments(baseFilterCriteria);
+                return new ServiceResponse<List<CargoMagayaShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("cargomagayashipments")]
+        public async Task<IServiceResponse<bool>> GetCargoMagayaShipments(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCargoed = await _service.MarkMagayaShipmentsAsCargoed(cargoMagayaShipmentDTOs);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipmentCargoed
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("addinternationalshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.AddInternationalShipment(shipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("getinternationalprice")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> GetInternationalShipmentPrice(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetInternationalShipmentPrice(shipmentDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("ProcessIntlShipmentTransactions")]
+        public async Task<IServiceResponse<object>> ProcessIntlShipment(ShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ProcessInternationalShipmentOnAgility(shipmentDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("generalpayment")]
+        public async Task<IServiceResponse<bool>> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ProcessGeneralPaymentLinksForShipmentsOnAgility(paymentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("payforwaybillbywallet")]
+        public async Task<IServiceResponse<object>> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.PayForWaybillByWallet(paymentDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

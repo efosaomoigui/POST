@@ -258,6 +258,79 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletId(int walletId, PaginationDTO pagination)
+        {
+            // get the wallet owner information
+            var wallet = await _walletService.GetWalletById(walletId);
+            var walletTransactions = new List<WalletTransaction>();
+            //get the customer info
+            //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
+            int totalCount;
+            if (pagination == null)
+            {
+                pagination = new PaginationDTO
+                {
+                    Page = 1,
+                    PageSize = 20
+                };
+            }
+            if (pagination.StartDate != null && pagination.EndDate != null)
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId && s.DateCreated >= pagination.StartDate && s.DateCreated <= pagination.EndDate).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+
+            }
+            else
+            {
+                walletTransactions = _uow.WalletTransaction.Query(s => s.WalletId == walletId).SelectPage(pagination.Page, pagination.PageSize, out totalCount).OrderByDescending(s => s.DateCreated).ToList();
+            }
+            if (!walletTransactions.Any())
+            {
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = new List<WalletTransactionDTO>(),
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = wallet.CustomerName,
+                    WalletId = walletId,
+                    CurrencyCode = wallet.Country.CurrencyCode,
+                    CurrencySymbol = wallet.Country.CurrencySymbol
+                };
+            }
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+
+            var countryIds = walletTransactionDTOList.Select(x => x.TransactionCountryId).ToList();
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+            // get the service centre
+            foreach (var item in walletTransactionDTOList)
+            {
+                var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
+                item.ServiceCentre = serviceCentre;
+                var transactionCountry = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId);
+                if (transactionCountry != null)
+                {
+                    item.CurrencyCode = transactionCountry.CurrencyCode;
+                    item.CurrencySymbol = transactionCountry.CurrencySymbol;
+                }
+                else
+                {
+                    item.CurrencyCode = wallet.Country.CurrencyCode;
+                    item.CurrencySymbol = wallet.Country.CurrencySymbol;
+                }
+            }
+
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = wallet.CustomerName,
+                WalletId = walletId,
+                CurrencyCode = wallet.Country.CurrencyCode,
+                CurrencySymbol = wallet.Country.CurrencySymbol
+            };
+        }
+
+
         public async Task RemoveWalletTransaction(int walletTransactionId)
         {
             var walletTransaction = await _uow.WalletTransaction.GetAsync(walletTransactionId);
@@ -382,6 +455,23 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+            var countryIds = walletTransactionDTOList.Select(x => x.TransactionCountryId).ToList();
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+            // get the service centre
+            foreach (var item in walletTransactionDTOList)
+            {
+                var transactionCountry = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId);
+                if (transactionCountry != null)
+                {
+                    item.CurrencyCode = transactionCountry.CurrencyCode;
+                    item.CurrencySymbol = transactionCountry.CurrencySymbol;
+                }
+                else
+                {
+                    item.CurrencyCode = country.CurrencyCode;
+                    item.CurrencySymbol = country.CurrencySymbol;
+                }
+            }
 
             return new WalletTransactionSummaryDTO
             {
@@ -419,6 +509,26 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletTransactionDTOList = await _uow.WalletTransaction.GetWalletTransactionMobile(wallet.WalletId, filterCriteria);
+            if (walletTransactionDTOList.Any())
+            {
+                var countryIds = walletTransactionDTOList.Select(x => x.TransactionCountryId).ToList();
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId)).ToList();
+                // get the service centre
+                foreach (var item in walletTransactionDTOList)
+                {
+                    var transactionCountry = countries.FirstOrDefault(x => x.CountryId == item.TransactionCountryId);
+                    if (transactionCountry != null)
+                    {
+                        item.CurrencyCode = transactionCountry.CurrencyCode;
+                        item.CurrencySymbol = transactionCountry.CurrencySymbol;
+                    }
+                    else
+                    {
+                        item.CurrencyCode = country.CurrencyCode;
+                        item.CurrencySymbol = country.CurrencySymbol;
+                    }
+                }
+            }
             return new ModifiedWalletTransactionSummaryDTO
             {
                 WalletTransactions = walletTransactionDTOList,

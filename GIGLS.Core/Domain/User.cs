@@ -54,6 +54,14 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(100)]
         public string IdentificationNumber { get; set; }
         public bool DashboardAccess { get; set; }
+        public string CountryType { get; set; }
+        public int AssignedEcommerceCustomer { get; set; }
+        public bool IsRequestNewPassword { get; set; }
+        public string WalletAddress { get; set; }
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
+
+
 
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)

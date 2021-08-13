@@ -33,5 +33,9 @@ namespace GIGLS.Core.Domain.Wallet
         [MaxLength(100)]
         public string PaymentTypeReference { get; set; }
         public decimal BalanceAfterTransaction { get; set; }
+
+        [MaxLength(100)]
+        public string Manifest { get; set; }
+        public int TransactionCountryId { get; set; }
     }
 }

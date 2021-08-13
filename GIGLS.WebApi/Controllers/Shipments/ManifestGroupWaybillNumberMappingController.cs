@@ -73,6 +73,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost] 
+        [Route("expectedmovementmanifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<MovementManifestNumberDTO>>> GetExpectedManifestMovementManifestNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var MovementmanifestNumberMappings = await _service.GetExpectedManifestMovementManifestNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<MovementManifestNumberDTO>>
+                {
+                    Object = MovementmanifestNumberMappings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("supermanifestbydate")]
         public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
@@ -111,6 +127,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.MappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId); 
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("updatemovmentmanifest")]
+        public async Task<IServiceResponse<bool>> UpdateMovementManifestNumberMapping(MovementManifestNumberMappingDTO data) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -299,6 +330,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
+        [Route("RemoveManifestFromMovementManifest/{movementmanifest}/{manifestnumber}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromMovementManifest(string movementmanifest, string manifestnumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveManifestFromMovementManifest(manifestnumber, movementmanifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
         [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
         public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
         {
@@ -371,6 +417,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<string>
                 {
                     Object = manifestSearch
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifests/{manifestCode}")]
+        public async Task<IServiceResponse<List<GroupWaybillAndWaybillDTO>>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetGroupWaybillDataInManifest(manifestCode);
+
+                return new ServiceResponse<List<GroupWaybillAndWaybillDTO>>
+                {
+                    Object = result
                 };
             });
         }

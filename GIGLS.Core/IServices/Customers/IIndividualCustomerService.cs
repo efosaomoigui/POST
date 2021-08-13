@@ -14,5 +14,6 @@ namespace GIGLS.Core.IServices.Customers
         Task DeleteCustomer(int customerId);
         Task<IndividualCustomerDTO> GetCustomerByPhoneNumber(string phoneNumber);
         Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData);
+        Task<object> GetByCode(string customerCode);
     }
 }

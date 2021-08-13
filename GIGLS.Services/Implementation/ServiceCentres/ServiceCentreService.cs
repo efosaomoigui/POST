@@ -16,16 +16,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
-        public ServiceCentreService()
+        public ServiceCentreService(IUnitOfWork uow)
         {
-
-        }
-        public ServiceCentreService(IGlobalPropertyService globalPropertyService, IUnitOfWork uow)
-        {
-            _globalPropertyService = globalPropertyService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -131,6 +125,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centreDto.StationName = centre.Station.StationName;
                 centreDto.StationCode = centre.Station.StationCode;
                 centreDto.FormattedServiceCentreName = centre.FormattedServiceCentreName;
+                centreDto.SupperServiceCentreId = centre.Station.SuperServiceCentreId;
                 return centreDto;
             }
             catch (Exception)
@@ -166,7 +161,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
-        }       
+        }
         public async Task<IEnumerable<ServiceCentreDTO>> GetActiveServiceCentres()
         {
             try
@@ -208,6 +203,27 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 if (centre == null)
                 {
                     throw new GenericException("Error: A GIGGO Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre()
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(s => s.Code.ToLower() == "iob", "Station");
+                if (centre == null)
+                {
+                    throw new GenericException("Error: International Out Bound Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
@@ -287,7 +303,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 }
 
                 //1. update the old service centre code to the new one in Number Generator Monitor if they are different
-                if(centre.Code.ToLower() != service.Code.ToLower())
+                if (centre.Code.ToLower() != service.Code.ToLower())
                 {
                     var numberGenerator = await _uow.NumberGeneratorMonitor.FindAsync(x => x.ServiceCentreCode == centre.Code);
 
@@ -311,6 +327,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.TargetAmount = service.TargetAmount;
                 centre.TargetOrder = service.TargetOrder;
                 centre.IsHUB = service.IsHUB;
+                centre.IsGateway = service.IsGateway;
+                centre.LGAId = service.LGAId;
+                centre.Longitude = service.Longitude;
+                centre.Latitude = service.Latitude;
                 centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
                 _uow.Complete();
             }
@@ -392,13 +412,15 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 //Get all service centre
                 int[] countryIds = new int[] { countryId };
                 bool excludehub = true;
-                
+                int stationId = 0;
+
                 if (serviceCenterIds.StationId == 4)
                 {
                     excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
                 }
 
-                return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub);
+                return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub, stationId);
             }
             catch (Exception)
             {
@@ -429,5 +451,49 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId);
+
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = true;
+                int stationId = 0;
+
+                if (serviceCenterIds.StationId == 4)
+                {
+                    excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
+                }
+
+                return await _uow.ServiceCentre.GetServiceCentresIsConsignable(countryIds, excludehub, stationId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ServiceCentreConsignableState(int serviceCentreId, bool isconsignable)
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
+                if (centre == null)
+                {
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                centre.IsConsignable = isconsignable;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
+

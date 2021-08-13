@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +10,6 @@ namespace GIGL.GIGLS.Core.Domain
     {
         public IndividualCustomer()
         {
-            Shipments = new HashSet<Shipment>();
         }
         public int IndividualCustomerId { get; set; }
 
@@ -40,7 +38,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string CustomerCode { get; set; }
         public string Password { get; set; }
 
-        public virtual ICollection<Shipment> Shipments { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
     }
 }

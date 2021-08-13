@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
@@ -12,5 +13,6 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string UserId { get; set; }
         public bool IsRead { get; set; }
+        public MessageAction MesageActions { get; set; }
     }
 }

@@ -9,6 +9,19 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
+using System;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO;
+using System.Configuration;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Infrastructure;
+using System.Net;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -17,12 +30,19 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICustomerPortalService _portalService;
         private readonly IQRAndBarcodeService _qrandbarcodeService;
         private readonly IUnitOfWork _uow;
+        private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
+        private readonly IScanService _scanService;
+        private readonly IWaybillPaymentLogService _waybillPaymentLogService;
 
-        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow)
+        public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, IWaybillPaymentLogService waybillPaymentLogService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
+            _manifestGroupWaybillNumberMappingService = manifestGroupWaybillNumberMappingService;
+            _scanService = scanService;
             _uow = uow;
+            _waybillPaymentLogService = waybillPaymentLogService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -51,7 +71,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result.IsBalanceSufficient,
                 result.Zone,
                 result.WaybillImage,
-                result.WaybillImageFormat
+                result.WaybillImageFormat,
+                result.PaymentUrl
             };
         }
 
@@ -103,6 +124,41 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<PreShipmentMobileDTO> GetPreShipmentMobileByWaybill(string waybillNumber)
         {
             return await _uow.PreShipmentMobile.GetBasicPreShipmentMobileDetail(waybillNumber);
+        }
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByStation(int stationId)
+        {
+            return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+        }
+
+        public async Task<UserDTO> CheckUserPhoneNo(UserValidationFor3rdParty user)
+        {
+
+            var registerUser = await _portalService.CheckUserPhoneNo(user);
+            return registerUser;
+
+        }
+
+        //Get manifests (by date) owned by logged in service center
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetManifestsInServiceCenter(DateFilterCriteria dateFilterCriteria)
+        {
+            return await _manifestGroupWaybillNumberMappingService.GetAllManifestGroupWayBillNumberMappings(dateFilterCriteria);
+        }
+
+        //Get waybill information and group waybill from Manifest
+        public async Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode)
+        {
+            return await _manifestGroupWaybillNumberMappingService.GetGroupWaybillDataInManifest(manifestCode);
+        }
+
+        public async Task<bool> ItemShippedFromUKScan(string manifestCode)
+        {
+            await _scanService.ItemShippedFromUKScan(manifestCode);
+            return true;
+        }
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await _portalService.GetGoogleAddressDetails(location);
         }
 
         //Price API

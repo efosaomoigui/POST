@@ -18,6 +18,11 @@ using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.Domain.Expenses;
+using GIGLS.Core.Domain.Route;
+using GIGLS.Core.Domain.DHL;
+using GIGLS.Core.Domain.Archived;
+using System.Data.Entity.Infrastructure.Annotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -126,6 +131,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<Dispatch> Dispatch { get; set; }
         public DbSet<MovementDispatch> MovementDispatch { get; set; }
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
+        public DbSet<CaptainBonusByZoneMaping> CaptainBonusByZoneMaping { get; set; }
 
         //Partner
         public DbSet<Partner> Partners { get; set; }
@@ -291,9 +297,29 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentContact> ShipmentContact { get; set; }
         public DbSet<ShipmentContactHistory> ShipmentContactHistory { get; set; }
         public DbSet<ShipmentTimeMonitor> ShipmentTimeMonitor { get; set; }
+        public DbSet<InternationalShipmentWaybill> InternationalShipmentWaybill { get; set; }
+        public DbSet<RankHistory> RankHistory { get; set; }
+        public DbSet<PriceCategory> PriceCategory { get; set; }
+        public DbSet<CustomerInvoice> CustomerInvoice { get; set; }
+        public DbSet<WaybillCharge> WaybillCharge { get; set; }
+
+        //routes
+        public DbSet<Route> Routes { get; }
+
+        //cellulant
+        public DbSet<TransferDetails> TransferDetails { get; set; }
 
         #endregion
 
+
+        #region Archive Entities
+        public DbSet<Shipment_Archive> Shipment_Archive { get; set; }
+        public DbSet<ShipmentItem_Archive> ShipmentItem_Archive { get; set; }
+        public DbSet<Invoice_Archive> Invoice_Archive { get; set; }
+        public DbSet<GeneralLedger_Archive> GeneralLedger_Archive { get; set; }
+        public DbSet<TransitWaybillNumber_Archive> TransitWaybillNumber_Archive { get; set; }
+
+        #endregion
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -310,7 +336,6 @@ namespace GIGLS.Infrastructure.Persistence
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
 
         }
-
         #region Customize to handle Date and Delete status of Entities
         public override int SaveChanges()
         {

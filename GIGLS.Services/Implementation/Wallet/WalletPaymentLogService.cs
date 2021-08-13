@@ -97,8 +97,46 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //Get the Customer Activity country
             var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-            walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            //walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            if (walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            }
 
+            //if the country is not Nigeria or Ghana, block it
+            if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76 && walletPaymentLogDto.PaymentCountryId != 207)
+            {
+                throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            if (wallet != null)
+            {
+                walletPaymentLogDto.WalletId = wallet.WalletId;
+            }
+
+            var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+            walletPaymentLog.Wallet = null;
+            _uow.WalletPaymentLog.Add(walletPaymentLog);
+            await _uow.CompleteAsync();
+            return new { id = walletPaymentLog.WalletPaymentLogId };
+        }
+
+        public async Task<object> AddWalletPaymentLogAnonymousUser(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            //Get the Customer Activity country
+            var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+
+            if(user == null)
+            {
+                throw new GenericException("User information does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            if (walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            }
             //set Nigeria as default country if no country assign for the customer
             if (walletPaymentLogDto.PaymentCountryId == 0)
             {
@@ -133,7 +171,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //Get the Customer Activity country
             var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-            walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            //walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            if (walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+            }
 
             //set Nigeria as default country if no country assign for the customer
             if (walletPaymentLogDto.PaymentCountryId == 0)

@@ -214,5 +214,23 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<bool> CheckHomeDeliveryAllowed(int lgaID)
+        {
+            try
+            {
+                bool allowed = false;
+                var item = await _uow.LGA.GetAsync( x => x.LGAId == lgaID);
+                if (item != null && item.HomeDeliveryStatus == true)
+                {
+                    allowed = true;
+                }
+                return allowed;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -360,5 +360,24 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.Email.Equals(searchParam) || x.UserChannelCode.Contains(searchParam)).FirstOrDefault();
             return Task.FromResult(user);
         }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetEmployeeUserByEmail(string email)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(email) && x.IsDeleted == false && x.UserType != UserType.System
+                        && x.UserChannelType == UserChannelType.Employee).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email)
+        {
+            var user = _userManager.Users.Where(x =>email.Contains(x.Email) &&x.IsActive == true && x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner || x.UserChannelType == UserChannelType.Employee);
+            return Task.FromResult(user.ToList());
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail2(string email)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(email) && x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x=>x.FirstName).AsEnumerable());
+        }
     }
 }

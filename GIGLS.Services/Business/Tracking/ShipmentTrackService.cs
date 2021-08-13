@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.Shipments;
 using System;
 using System.Collections.Generic;
@@ -31,11 +32,12 @@ namespace GIGLS.Services.Business.Tracking
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber)
         {
             var result = await _shipmentTrackingService.GetShipmentTrackings(waybillNumber);
+            var shipment = new ShipmentDTO();
 
             if (result.Any())
             {
                 //get shipment Details
-                var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
+                shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
                 string manifest = null;
                 string ManifestTypeValue = ManifestType.Delivery.ToString(); //Default
 
@@ -135,7 +137,6 @@ namespace GIGLS.Services.Business.Tracking
 
             //Replace the placeholders in Scan Status
             await ResolveScanStatusPlaceholders(result);
-
             return result;
         }
 
@@ -149,10 +150,15 @@ namespace GIGLS.Services.Business.Tracking
                 "CUSTOMER",
                 "DEPARTURE SERVICE CENTRE",
                 "DESTINATION SERVICE CENTRE",
+                "STORE NAME",
             };
 
             foreach (var shipmentTrackingDTO in result)
             {
+                if(shipmentTrackingDTO.User == "International Shipping")
+                {
+                    continue;
+                }
                 //1. {0} - Service Centre
                 if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{0}"))
                 {
@@ -195,6 +201,28 @@ namespace GIGLS.Services.Business.Tracking
                         //map the array
                         strArray[3] = destinationServiceCentre.Name;
                     }
+                }
+
+                //4. {4} - ITEM RECEIVED IN THE HUB OR CENTRE FROM STORE
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{4}"))
+                {
+                    //map the array
+                   var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentTrackingDTO.ServiceCentreId);
+                    //get Shipment information
+                    var shipmentInfo = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentTrackingDTO.Waybill);
+                    if (shipmentInfo.DepartureCountryId == 207)
+                    {
+                        strArray[4] = "AT OUR HOUSTON PROCESSING CENTER";
+                    }
+                    else if (shipmentInfo.DepartureCountryId == 62)
+                    {
+                        strArray[4] = "AT OUR UK PROCESSING CENTRE";
+                    }
+                    else
+                    {
+                        strArray[4] = shipmentTrackingDTO.Location;
+                    }
+                    shipmentTrackingDTO.Location = centre.Name;
                 }
 
                 //populate the Incident message

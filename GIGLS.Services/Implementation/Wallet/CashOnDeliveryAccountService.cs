@@ -17,6 +17,7 @@ using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
 using System;
 using System.Net;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -134,8 +135,27 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Cash on Delivery Wallet information does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var countryIds = account.Select(x => x.CountryId).ToList();
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => countryIds.Contains(x.CountryId));
             var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account.OrderByDescending(x => x.DateCreated));
             var walletDto = Mapper.Map<WalletDTO>(wallet);
+
+            //add cod waybills
+            for (int i = 0; i < accountDto.Count; i++)
+            {
+                var countryId = accountDto[i].CountryId;
+                var country = countries.Where(x => x.CountryId == countryId).FirstOrDefault();
+                if (country != null)
+                {
+                    var countryDTO = Mapper.Map<CountryDTO>(country);
+                    accountDto[i].Country = countryDTO;
+                }
+                if (accountDto[i].CreditDebitType == CreditDebitType.Credit)
+                {
+                    var des = accountDto[i].Description.Split(' ');
+                    accountDto[i].Waybill = des.LastOrDefault();
+                }
+            }
 
             //set the customer name
             // handle Company customers
@@ -148,15 +168,15 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == wallet.CustomerId);
-                walletDto.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +  $"{individualCustomerDTO.LastName}");
+                walletDto.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
             }
-            
+
             var balance = new CashOnDeliveryBalanceDTO
             {
                 Balance = wallet.Balance,
-                Wallet = walletDto                
+                Wallet = walletDto
             };
-                       
+
             return new CashOnDeliveryAccountSummaryDTO
             {
                 CashOnDeliveryAccount = accountDto,
@@ -164,7 +184,8 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        
+
+
         public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccountByStatus(string walletNumber, CODStatus status)
         {
             var wallet = await _walletService.GetWalletById(walletNumber);

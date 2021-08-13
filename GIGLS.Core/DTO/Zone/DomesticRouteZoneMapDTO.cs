@@ -16,7 +16,6 @@ namespace GIGLS.Core.DTO.Zone
         public StationDTO Destination { get; set; }
 
         public bool Status { get; set; }
-
-        
+        public int ETA { get; set; }
     }
 }

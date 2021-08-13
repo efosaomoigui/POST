@@ -19,5 +19,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> AddShipmentPackage(ShipmentPackagePriceDTO shipmentPackagePriceDto);
         Task<List<ShipmentPackagingTransactionsDTO>> GetShipmentPackageTransactions(BankDepositFilterCriteria filterCriteria);
         Task<List<ServiceCenterPackageDTO>> GetShipmentPackageForServiceCenter();
+        Task<List<NewShipmentPackagePriceDTO>> GetPreciseShipmentPackagePrices();
     }
 }

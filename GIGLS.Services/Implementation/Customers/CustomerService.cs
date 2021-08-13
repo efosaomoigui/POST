@@ -14,6 +14,11 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
 using GIGLS.Core.Domain;
+using GIGLS.Infrastructure;
+using System.Net;
+using GIGLS.Core.DTO.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -30,7 +35,7 @@ namespace GIGLS.Services.Implementation.Customers
             _companyService = companyService;
             MapperConfig.Initialize();
         }
-        
+
         private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
         {
             var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
@@ -57,13 +62,11 @@ namespace GIGLS.Services.Implementation.Customers
 
                     if(companyByCode == null)
                     {
-                        var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
-                        || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                        //var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                        //|| c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
-                        foreach (var item in CompanyByName)
-                        {
-                            companyId = item.CompanyId;
-                        }
+                        var CompanyByName = await _uow.Company.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email);
+                        companyId = CompanyByName.CompanyId;
                     }
                     else
                     {
@@ -133,7 +136,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public async Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO) 
+        public async Task<CustomerDTO> CreateCustomerIntl(CustomerDTO customerDTO)
         {
             try
             {
@@ -247,16 +250,14 @@ namespace GIGLS.Services.Implementation.Customers
                     var companyDTO = await _companyService.GetCompanyById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(companyDTO);
                     customerDTO.CustomerType = CustomerType.Company;
-
                     return customerDTO;
-                }                
+                }
                 else
                 {
                     // handle IndividualCustomers
                     var individualCustomerDTO = await _individualCustomerService.GetCustomerById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
                     customerDTO.CustomerType = CustomerType.IndividualCustomer;
-
                     return customerDTO;
                 }
             }
@@ -433,7 +434,7 @@ namespace GIGLS.Services.Implementation.Customers
             var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
             var url = ConfigurationManager.AppSettings["NodeGetShipmentByWaybill"];
             nodeURL = $"{nodeURL}{url}?waybillNumber={waybill}&exPickUpList=yes&exUpdate=yes&exActivejobs=yes";
-         
+
             HttpResponseMessage response = await client.GetAsync(nodeURL);
             response.EnsureSuccessStatusCode();
             string jObject = await response.Content.ReadAsStringAsync();
@@ -444,7 +445,7 @@ namespace GIGLS.Services.Implementation.Customers
                 foreach (var item in result.Data.ApiList)
                 {
                     //get actions performed on shipment
-                   int actionIndx = item.Url.LastIndexOf('/');
+                    int actionIndx = item.Url.LastIndexOf('/');
                     actionIndx++;
                     var action = item.Url.Substring(actionIndx);
                     var partnerName = String.Empty;
@@ -455,7 +456,7 @@ namespace GIGLS.Services.Implementation.Customers
                         if (partnerInfo != null)
                         {
                             partnerName = partnerInfo.PartnerName;
-                            partnerPhoneNo = partnerInfo.PhoneNumber; 
+                            partnerPhoneNo = partnerInfo.PhoneNumber;
                         }
                     }
                     var obj = new ShipmentActivityDTO
@@ -468,7 +469,7 @@ namespace GIGLS.Services.Implementation.Customers
                     };
                     if (item.StatusCode == "200")
                     {
-                        obj.ActionResult = "SUCCESSFUL"; 
+                        obj.ActionResult = "SUCCESSFUL";
                     }
                     else
                     {
@@ -477,9 +478,177 @@ namespace GIGLS.Services.Implementation.Customers
                     obj.PhoneNo = partnerPhoneNo;
                     obj.Waybill = waybill;
                     shipmentActivity.Add(obj);
-                } 
+                }
             }
             return shipmentActivity;
+        }
+
+        public async Task<Object> GetCustomerBySearchParam(string customerType, SearchOption option)
+        {
+            try
+            {
+                var result = new object();
+                if (option.Option.StartsWith("0"))
+                {
+                    option.Option = option.Option.Remove(0, 1);
+                }
+                CustomerSearchOption search = new CustomerSearchOption();
+                search.SearchData = option.Option;
+                if (customerType.ToLower() == "individual")
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(option.Option);
+                    result = individualCustomerDTO.FirstOrDefault();
+                }
+                else if (customerType.ToLower() == CompanyType.Corporate.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Corporate, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
+                            }
+                        }
+                        result = coporate;
+                    }
+                }
+                else if (customerType.ToLower() == CompanyType.Ecommerce.ToString().ToLower())
+                {
+                    search.CustomerType = FilterCustomerType.Corporate;
+                    var coporates = await _companyService.GetCompanies(CompanyType.Ecommerce, search);
+                    if (coporates.Any())
+                    {
+                        var coporate = coporates.FirstOrDefault();
+                        if (coporate != null)
+                        {
+                            if (coporate.CompanyStatus == CompanyStatus.Pending || coporate.CompanyStatus == CompanyStatus.Suspended)
+                            {
+                                throw new GenericException($"Customer is suspended or pending");
+                            }
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == coporate.CustomerCode);
+                            if (wallet != null)
+                            {
+                                coporate.WalletBalance = wallet.Balance;
+                                coporate.WalletAmount = wallet.Balance;
+                            }
+                        }
+                        result = coporate;
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"Invalid customer type");
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<GIGL.GIGLS.Core.Domain.User> GetInternationalCustomer(string email)
+        {
+            var user = await _uow.User.GetUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+            else if (user.IsInternational == false)
+            {
+                throw new GenericException($"{user.Email} is not an International User", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return user;
+        }
+
+        public async Task<UserDTO> GetInternationalUser(string email)
+        {
+            var user = await GetInternationalCustomer(email); 
+
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<bool> DeactivateInternationalUser(string email)
+        {
+            var user = await GetInternationalCustomer(email);
+
+
+            user.IsInternational = false;
+            await _uow.User.UpdateUser(user.Id, user);
+            return true;
+
+        }
+
+        public async Task<object> GetByCode(string customerCode)
+        {
+            try
+            {
+                var customer = await _individualCustomerService.GetByCode(customerCode);
+                return customer;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetCoporateMonthlyTransaction(DateFilterForDropOff filter)
+        {
+            try
+            {
+                var transactions = new List<InvoiceViewDTO>();
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                else if(filter != null && filter.StartDate != null && filter.EndDate == null)
+                {
+                    filter.EndDate = DateTime.Now;
+                }
+                var coporateTransactions = await _uow.Shipment.GetCoporateTransactions(filter);
+                if (coporateTransactions.Any())
+                {
+                    transactions = coporateTransactions.GroupBy(x => x.CustomerCode).Select(s => new InvoiceViewDTO
+                    {
+                        Waybill = s.FirstOrDefault().Waybill,
+                        DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
+                        DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
+                        DepartureServiceCentreName = s.FirstOrDefault().DepartureServiceCentreName,
+                        DestinationServiceCentreName = s.FirstOrDefault().DestinationServiceCentreName,
+                        Amount = s.Sum(x => x.Amount),
+                        DateCreated = s.FirstOrDefault().DateCreated,
+                        CompanyType = s.FirstOrDefault().CompanyType,
+                        CustomerCode = s.FirstOrDefault().CustomerCode,
+                        ApproximateItemsWeight = s.FirstOrDefault().ApproximateItemsWeight,
+                        CustomerType = s.FirstOrDefault().CustomerType,
+                        SenderName = s.FirstOrDefault().SenderName,
+                        CustomerId = s.FirstOrDefault().CustomerId,
+                        Email = s.FirstOrDefault().Email,
+                        PhoneNumber = s.FirstOrDefault().PhoneNumber,
+                    }).ToList();
+                }
+                return transactions;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

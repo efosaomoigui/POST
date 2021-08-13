@@ -83,6 +83,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipmentPackagePrices;
         }
 
+        public async Task<List<NewShipmentPackagePriceDTO>> GetPreciseShipmentPackagePrices()
+        {
+            var shipmentPackagePrices = await _uow.ShipmentPackagePrice.GetShipmentPackagePrices();
+            var newShipmentPackagePrices = Mapper.Map<List<NewShipmentPackagePriceDTO>>(shipmentPackagePrices);
+            return newShipmentPackagePrices;
+        }
+
         public async Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePriceByCountry()
         {
             var countryIds = await _userService.GetUserActiveCountryId();

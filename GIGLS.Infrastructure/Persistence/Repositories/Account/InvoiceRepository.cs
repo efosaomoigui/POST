@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Account;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
@@ -185,7 +185,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
-            
+
             //declare parameters for the stored procedure
             SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
             SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
@@ -195,7 +195,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
             //var sc = (serviceCentreIds.Length == 0) ? serviceCentreIds[0] : 0;
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc);
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -224,7 +224,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 throw ex;
             }
 
-            return await Task.FromResult(listCreated); 
+            return await Task.FromResult(listCreated);
         }
 
 
@@ -243,7 +243,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc);
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -272,13 +272,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 throw ex;
             }
 
-            return await Task.FromResult(listCreated); 
+            return await Task.FromResult(listCreated);
         }
 
         //Shipent Monitors
         //Stored Procedure version
         public async Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGroupedx(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
-        {            
+        {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
@@ -319,7 +319,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 throw ex;
             }
 
-            return await Task.FromResult(listCreated); 
+            return await Task.FromResult(listCreated);
         }
 
 
@@ -339,9 +339,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
 
-            var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;  
+            var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
             //var sc = (serviceCentreIds.Length == 0) ? 0 : serviceCentreIds;  //we need contain function to handle list of service centre fixing -- bug
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc);
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -370,7 +370,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 throw ex;
             }
 
-            return await Task.FromResult(listCreated); 
+            return await Task.FromResult(listCreated);
         }
 
         public async Task<List<InvoiceMonitorDTO>> GetShipmentWaitingForCollection(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
@@ -382,7 +382,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
             SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
             SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
-                       
+
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc);
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
@@ -836,6 +836,55 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var results = result.ToList();
             return await Task.FromResult(results);
         }
+
+        public async Task<int> GetCountOfMonthlyOrDailyShipmentCreated(DashboardFilterCriteria dashboardFilterCriteria, ShipmentReportType shipmentReportType)
+        {
+            try
+            {
+                int result = 0;
+
+                DateTime dt = DateTime.Today;
+                var beginningDate = dt;
+                var endingDate = DateTime.Now;
+
+                if (shipmentReportType == ShipmentReportType.Monthly)
+                {
+                    beginningDate = new DateTime(dt.Year, dt.Month, 1);
+                }
+                else if (shipmentReportType == ShipmentReportType.Daily)
+                {
+                    beginningDate = dt;
+                }
+                
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", beginningDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", endingDate);
+                SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate,
+                    countryId
+                };
+
+                var summary = await Context.Database.SqlQuery<int>("MonthlyShipmentCreated " +
+                   "@StartDate, @EndDate, @CountryId",
+                   param).FirstOrDefaultAsync();
+
+                if (summary != null)
+                {
+                    result = summary;
+                }
+
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
     }
 }

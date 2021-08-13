@@ -1,19 +1,19 @@
-﻿using GIGLS.CORE.IServices.Report;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using GIGLS.Core;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.Enums;
-using System;
 using GIGLS.Core.DTO.Customers;
-using System.Linq;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.IServices.Report;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -60,7 +60,7 @@ namespace GIGLS.Services.Implementation.Report
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.creditDebitType = CreditDebitType.Credit;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
-             
+
             foreach (var item in generalLedgerDTO)
             {
                 var user = await _uow.User.GetUserById(item.UserId);
@@ -108,7 +108,7 @@ namespace GIGLS.Services.Implementation.Report
             var invoices = await _uow.Invoice.GetInvoicesAsync(accountFilterCriteria, serviceCenterIds);
 
             //get shipment info
-            foreach(var item in invoices)
+            foreach (var item in invoices)
             {
                 var shipmentDTO = await _shipmentService.GetShipment(item.Waybill);
                 var user = await _uow.User.GetUserById(shipmentDTO.UserId);
@@ -128,7 +128,7 @@ namespace GIGLS.Services.Implementation.Report
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesFromViewAsyncFromSP(accountFilterCriteria, serviceCenterIds);
 
-            foreach(var item in invoices)
+            foreach (var item in invoices)
             {
                 //get CustomerDetails
                 if (item.CustomerType.Contains("Individual"))
@@ -155,7 +155,7 @@ namespace GIGLS.Services.Implementation.Report
 
                 //Update to change the Corporate Paid status from 'Paid' to 'Credit'
                 item.PaymentStatusDisplay = item.PaymentStatus.ToString();
-                if ((CompanyType.Corporate.ToString() == item.CompanyType) 
+                if ((CompanyType.Corporate.ToString() == item.CompanyType)
                     && (PaymentStatus.Paid == item.PaymentStatus))
                 {
                     item.PaymentStatusDisplay = "Credit";
@@ -165,7 +165,7 @@ namespace GIGLS.Services.Implementation.Report
             return invoices;
         }
 
-        public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromViewPlusDeliveryTime(AccountFilterCriteria accountFilterCriteria) 
+        public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromViewPlusDeliveryTime(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(accountFilterCriteria, serviceCenterIds);
@@ -210,7 +210,9 @@ namespace GIGLS.Services.Implementation.Report
         //Get Earnings Breakdown
         public async Task<EarningsBreakdownDTO> GetEarningsBreakdown(DashboardFilterCriteria dashboardFilter)
         {
-            if(dashboardFilter.ActiveCountryId == null)
+            string currencySymbol = null;
+
+            if (dashboardFilter.ActiveCountryId == null)
             {
                 CountryDTO userActiveCountry = null;
 
@@ -235,10 +237,21 @@ namespace GIGLS.Services.Implementation.Report
                         }
                     }
                 }
+
                 dashboardFilter.ActiveCountryId = userActiveCountry.CountryId;
+                currencySymbol = userActiveCountry.CurrencySymbol;
+            }
+            else
+            {
+                var userActiveCountryFromEntity = await _countryService.GetCountryById((int)dashboardFilter.ActiveCountryId);
+                if (userActiveCountryFromEntity.CurrencySymbol != null)
+                {
+                    currencySymbol = userActiveCountryFromEntity.CurrencySymbol;
+                }
             }
 
             var earnings = await _uow.FinancialReport.GetEarningsBreakdown(dashboardFilter);
+            earnings.CurrencySymbol = currencySymbol;
 
             return earnings;
 
@@ -276,14 +289,63 @@ namespace GIGLS.Services.Implementation.Report
             }
             var earnings = new List<FinancialReportDTO>();
 
-            if(accountFilter.CompanyType == ReportSource.Intl.ToString())
+            if (accountFilter.ServiceCenterId == 3)
             {
-                earnings = await _uow.FinancialReport.GetIntlReportBreakdown(accountFilter);
+                earnings = await _uow.FinancialReport.GetFinancialReportBreakdownForDemurrage(accountFilter);
             }
             else
             {
                 earnings = await _uow.FinancialReport.GetFinancialReportBreakdown(accountFilter);
             }
+
+            return earnings;
+
+        }
+
+        //Get Each Wallet Payment Breakdown
+        public async Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter)
+        {
+            var result = await _uow.WalletPaymentLog.GetWalletPaymentLogBreakdown(dashboardFilter);
+
+            return result;
+
+        }
+
+        //Get  Financial Breakdown of Outbound Or Inbound Shipments
+        //Outbound is 0 and Inbound is 1
+        public async Task<List<OutboundFinancialReportDTO>> GetFinancialBreakdownOfOutboundShipments(AccountFilterCriteria accountFilter, int queryType)
+        {
+            if (accountFilter.CountryId == 0)
+            {
+                CountryDTO userActiveCountry = null;
+
+                //set user active country from PriviledgeCountrys
+                var countries = await _userService.GetPriviledgeCountrys();
+                if (countries.Count == 1)
+                {
+                    userActiveCountry = countries[0];
+                }
+                else
+                {
+                    //If UserActive Country is already set in the UserEntity, use that value
+                    string currentUserId = await _userService.GetCurrentUserId();
+                    var currentUser = await _userService.GetUserById(currentUserId);
+
+                    if (currentUser.UserActiveCountryId > 0)
+                    {
+                        var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                        if (userActiveCountryFromEntity.CurrencySymbol != null)
+                        {
+                            userActiveCountry = userActiveCountryFromEntity;
+                        }
+                    }
+                }
+                accountFilter.CountryId = userActiveCountry.CountryId;
+            }
+
+            var earnings = new List<OutboundFinancialReportDTO>();
+
+            earnings = await _uow.FinancialReport.GetFinancialReportOfOutboundShipmentsBreakdown(accountFilter, queryType);
 
             return earnings;
 

@@ -14,6 +14,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<List<WalletTransactionDTO>> GetWalletTransactionsCredit(AccountFilterCriteria accountFilterCriteria);
         Task<WalletTransactionDTO> GetWalletTransactionById(int walletTransactionId);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletId(int walletId);
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletId(int walletId,PaginationDTO pagination);
         Task<object> AddWalletTransaction(WalletTransactionDTO walletTransaction);
         Task UpdateWalletTransaction(int walletTransactionId, WalletTransactionDTO walletTransaction);
         Task RemoveWalletTransaction(int walletTransactionId);

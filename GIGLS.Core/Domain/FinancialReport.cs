@@ -14,5 +14,6 @@ namespace GIGLS.Core.Domain
         public decimal Earnings { get; set; }
         public decimal Demurrage { get; set; }
         public int CountryId { get; set; }
+        public double ConversionRate { get; set; }
     }
 }

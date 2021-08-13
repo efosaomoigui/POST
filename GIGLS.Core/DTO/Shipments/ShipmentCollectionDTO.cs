@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.CORE.DTO.Shipments
 {
@@ -62,5 +63,57 @@ namespace GIGLS.CORE.DTO.Shipments
         public int NoOfContact { get; set; }
 
 
+    }
+
+
+    public class ShipmentCollectionDTOForFastTrack
+    {
+        public string Waybill { get; set; }
+        public string Name { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string Location { get; set; }
+
+        //IsCashOnDelivery Processing
+        public string WalletNumber { get; set; }
+        public bool IsCashOnDelivery { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; }
+        public string Description { get; set; }
+
+        //Who processed the collection
+        public string UserId { get; set; }
+
+        //original service centres
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public PaymentType PaymentType { get; set; }
+        public string PaymentTypeReference { get; set; }
+
+        //boolean to check if release is coming from mobile
+        public bool IsComingFromDispatch { get; set; }
+
+        public string ReceiverArea { get; set; }
+        public string DeliveryNumber { get; set; }
+        //Demurrage Information
+        public NewDemurrageDTO Demurrage { get; set; }
+
+    }
+
+    public class ShipmentCollectionDTOForArrived
+    {
+        public string Waybill { get; set; }
+        public string UserId { get; set; }
+        public DateTime ShipmentCreatedDate { get; set; }
+        public DateTime ShipmentArrivedDate { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public int Age { get; set; }
+        public int ShipmentStatus { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
     }
 }

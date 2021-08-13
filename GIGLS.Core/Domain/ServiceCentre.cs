@@ -41,10 +41,14 @@ namespace GIGL.GIGLS.Core.Domain
         public double? Longitude { get; set; }
 
         public bool IsHUB { get; set; }
+        public bool IsGateway { get; set; }
 
         [MaxLength(128)]
         public string FormattedServiceCentreName { get; set; }
         public bool IsPublic { get; set; }
+        public int LGAId { get; set; }
+        public bool IsConsignable { get; set; }
+        public string CrAccount { get; set; }
 
     }
 }

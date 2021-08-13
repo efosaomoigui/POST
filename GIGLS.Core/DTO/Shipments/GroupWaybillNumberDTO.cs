@@ -46,6 +46,36 @@ namespace GIGLS.Core.DTO.Shipments
         public ServiceCentre DestinationServiceCentre { get; set; }
 
         public List<string> ManifestNumbers { get; set; } 
-        public List<object> ManifestNumbersWithDate { get; set; } 
+        public List<object> ManifestNumbersWithDate { get; set; }
+
+        public string DriverCode { get; set; }
+        public string DestinationServiceCentreCode { get; set; } 
+    }
+
+    public class ReleaseMovementManifestDto
+    {
+        // string movementManifestCode, string code, string userid, string flag
+        public string movementManifestCode { get; set; }
+        public string code { get; set; }
+        public string userid { get; set; }
+        public MovementManifestActivationTypes  flag { get; set; } 
+    }
+
+    public class GroupWaybillAndWaybillDTO 
+    {
+        public string GroupWaybillCode { get; set; }
+        public List<WaybillInGroupWaybillDTO> WaybillsDTO { get; set; }
+    }
+
+    public class WaybillInGroupWaybillDTO
+    {
+        public string Waybill { get; set; }
+        public decimal? Value { get; set; }
+        public string Description { get; set; }
+        public double Weight { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string DestinationServiceCentre { get; set; }
+        public string PaymentMethod { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
     }
 }
