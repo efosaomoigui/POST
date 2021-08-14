@@ -490,6 +490,9 @@
     </Content>
     <Content Include="ReportTemplate\dailysales.xlsx" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -499,7 +502,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
