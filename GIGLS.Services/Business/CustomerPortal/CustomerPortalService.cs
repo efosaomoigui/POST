@@ -3368,6 +3368,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("please ensure departure and destination is selected!", $"{(int)HttpStatusCode.BadRequest}");
             }
+            if (quickQuotePriceDTO.DepartureCountryId == 1)
+            {
+                throw new GenericException("No price definition for Nigeria outbound, please select another country", $"{(int)HttpStatusCode.BadRequest}");
+            }
             if (quickQuotePriceDTO.PriceCategoryId.Any())
             {
                 var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
