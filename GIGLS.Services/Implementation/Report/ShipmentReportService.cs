@@ -996,9 +996,13 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice)
         {
             bool res = false;
-            var now = DateTime.Now;
-            DateTime firstDay = new DateTime(now.Year, now.Month, 1);
-            DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+            var now = DateTime.Today;
+            var month = new DateTime(now.Year, now.Month, 1);
+            var firstDay = month.AddMonths(-1);
+            var lastDay = month.AddDays(-1);
+            //var now = DateTime.Now;
+            //DateTime firstDay = new DateTime(now.Year, now.AddMonths(-1), 1);
+            //DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
             var invoice = await _uow.CustomerInvoice.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode && x.DateCreated >= firstDay && x.DateCreated <= lastDay);
             if (invoice != null)
             {

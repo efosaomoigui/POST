@@ -44,17 +44,15 @@ namespace GIGLS.WebApi.Controllers.CustomerInvoice
                 using (var client = new System.Net.Http.HttpClient())
                 {
                     //setup client
-                    string apiBaseUri = "http://localhost/giglsresourceapi/";
+                    //string apiBaseUri = "http://localhost/giglsresourceapi/";
+                    string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/";
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-
                     System.Net.Http.HttpResponseMessage responseMessage = client.GetAsync("api/report/getcustomerinvoice").Result;
-
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        throw new GenericException("Error calling your.0 api: ");
+                        return false;
                     }
                 }
 

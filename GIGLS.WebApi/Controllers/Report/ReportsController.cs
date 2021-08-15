@@ -372,7 +372,7 @@ namespace GIGLS.WebApi.Controllers.Report
                 var now = DateTime.Now;
                 DateTime firstDay = new DateTime(now.Year, now.Month, 1);
                 DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
-                if (lastDay.Date == now.Date)
+                if (firstDay.Date == now.Date)
                 {
                     var shipments = await _shipmentService.GetMonthlyCoporateTransactions();
                     if (shipments.Any())
