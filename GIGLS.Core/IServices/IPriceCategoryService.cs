@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices
         Task UpdatePriceCategory(int priceCategoryId, PriceCategoryDTO priceCategory);
         Task DeletePriceCategory(int priceCategoryId);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId);
+        Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int countryId);
     }
 }
