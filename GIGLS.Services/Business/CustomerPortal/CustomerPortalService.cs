@@ -3821,5 +3821,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
+
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId)
+        {         
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(destcountryId, deptcountryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+
+        }
     }
 }

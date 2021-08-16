@@ -2361,12 +2361,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
 
         [HttpGet]
-        [Route("getcategoriesbycountry/{countryId}")]
-        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        [Route("getcategoriesbycountry/{destcountryId}/{deptcountryId}")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int destcountryId, int deptcountryId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var item = await _portalService.GetPriceCategoriesByCountry(countryId);
+                var item = await _portalService.GetPriceCategoriesBothCountries(destcountryId, deptcountryId);
                 return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
                 {
                     Object = item
