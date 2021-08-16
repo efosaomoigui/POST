@@ -3374,10 +3374,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (quickQuotePriceDTO.PriceCategoryId.Any())
             {
-                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId).ToList();
                 foreach (var item in quickQuotePriceDTO.PriceCategoryId)
                 {
-                    var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
+                    var itemCategory = categories.Where(x => x.PriceCategoryId == item).FirstOrDefault();
                     if (itemCategory.CategoryMinimumWeight == 0)
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
