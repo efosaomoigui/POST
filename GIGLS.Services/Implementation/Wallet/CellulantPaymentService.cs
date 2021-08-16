@@ -1,10 +1,14 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility.CellulantEncryptionService;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -105,6 +109,21 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return transferDetailsDto;
+        }
+
+        public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
+        {
+            string accessKey = "<YOUR_ACCESS_KEY>";
+            string ivKey = "<YOUR_IV_KEY>";
+            string secretKey = "<YOUR_SECRET_KEY>";
+
+            ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
+
+            string json = JsonConvert.SerializeObject(payload).Replace("/", "\\/");
+
+            string encParams = encryption.EncryptData(json);
+            var result = new CellulantResponseDTO { param = encParams, accessKey = accessKey, countryCode = payload.countryCode };
+            return result;
         }
 
         private async Task<string> GetServiceCentreCrAccount()

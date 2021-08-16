@@ -1,8 +1,10 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,5 +54,22 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
                 };
             });
         }
+
+        [HttpPost]
+        [Route("checkoutencryption")]
+        public async Task<IServiceResponse<CellulantResponseDTO>> CheckoutEncrption(CellulantPayloadDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _cellulantService.CheckoutEncryption(payload);
+
+                return new ServiceResponse<CellulantResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
+
