@@ -98,6 +98,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<NewNodeResponse> RemoveNodePendingShipment(PendingNodeShipmentDTO dto);
         Task<object> CancelShipmentWithReason(CancelShipmentDTO cancelPreShipmentMobile);
         Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment);
+        Task<MobilePriceDTO> GetPriceQuote(PreShipmentMobileDTO preShipment);
+        Task<decimal> CalculateBikePriceBasedonLocation(PreShipmentMobileDTO item);
 
     }
 }
