@@ -238,6 +238,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> GetCellulantKey();
         Task<string> Decrypt(string encrytedKey);
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO);
+        Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
     }
 }

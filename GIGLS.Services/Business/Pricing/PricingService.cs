@@ -930,7 +930,10 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             PackagePrice = PackagePrice + deliveryOptionPrice;
-            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            if (String.IsNullOrEmpty(pricingDto.CustomerCode))
+            {
+                PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice); 
+            }
             return PackagePrice;
         }
 
@@ -1071,7 +1074,10 @@ namespace GIGLS.Services.Business.Pricing
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
 
-            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
+            if (!String.IsNullOrEmpty(pricingDto.CustomerCode))
+            {
+                shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice); 
+            }
             return shipmentTotalPrice;
         }
 

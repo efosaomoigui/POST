@@ -2345,6 +2345,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("getintlquickqoute")]
         public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
@@ -2359,7 +2360,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("getcategoriesbycountry/{destcountryId}/{deptcountryId}")]
         public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int destcountryId, int deptcountryId)
@@ -2602,5 +2603,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return response;
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("getpricequote")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceQoute(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceQoute(PreshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
     }
 }
