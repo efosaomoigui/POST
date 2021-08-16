@@ -45,5 +45,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifestCode);
         Task<bool> ItemShippedFromUKScan(string manifestCode);
         Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
+        Task<string> GetCellulantKey();
+        Task<string> Decrypt(string encrytedKey);
+        Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
     }
 }

@@ -33,9 +33,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IManifestGroupWaybillNumberMappingService _manifestGroupWaybillNumberMappingService;
         private readonly IScanService _scanService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly ICellulantPaymentService _cellulantPaymentService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
-                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, IWaybillPaymentLogService waybillPaymentLogService)
+                            IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, 
+                            IWaybillPaymentLogService waybillPaymentLogService, ICellulantPaymentService cellulantPaymentService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
@@ -43,6 +45,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _scanService = scanService;
             _uow = uow;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _cellulantPaymentService = cellulantPaymentService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -161,6 +164,20 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetGoogleAddressDetails(location);
         }
 
+        public async Task<string> GetCellulantKey()
+        {
+            return await _cellulantPaymentService.GetCellulantKey();
+        }
+
+        public async Task<string> Decrypt(string encrytedKey)
+        {
+            return await _cellulantPaymentService.DecryptKey(encrytedKey);
+        }
+
+        public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
+        {
+            return await _cellulantPaymentService.AddCellulantTransferDetails(transferDetailsDTO);
+        }
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{
