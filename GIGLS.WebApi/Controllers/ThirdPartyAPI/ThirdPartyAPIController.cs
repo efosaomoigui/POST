@@ -16,6 +16,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -443,5 +445,39 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addtransferdetails")]
+        public async Task<IServiceResponse<object>> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _thirdPartyAPIService.GetCellulantKey();
+                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
+                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
+                    if (token == key)
+                    {
+                        result = await _thirdPartyAPIService.AddCellulantTransferDetails(TransferDetailsDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
     }
 }

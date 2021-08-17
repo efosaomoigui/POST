@@ -3813,7 +3813,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
-                if(transferDetailsDTO.ResponseCode == "00")
+                if (transferDetailsDTO.ResponseCode == "00")
                 {
                     transferDetailsDTO.TransactionStatus = "success";
                 }
