@@ -166,6 +166,7 @@ namespace GIGLS.Services.Business.DHL
             var content = new ShippingContent();
             var lineItem = new LineItem();
             var weight = new ShippingWeight();
+            string signatureName = SignatureName(shipmentDTO);
 
             var signatureTitle = "Mr.";
             if (shipmentDTO.CustomerDetails.Gender == Gender.Female)
@@ -185,7 +186,7 @@ namespace GIGLS.Services.Business.DHL
                     {
                         Number = "4010097858",
                         Date = DateTime.UtcNow.ToString("yyyy-MM-dd"),
-                        SignatureName = shipmentDTO.CustomerDetails.CustomerName,
+                        SignatureName = signatureName,
                         SignatureTitle = signatureTitle
                     }
                 }
@@ -266,6 +267,22 @@ namespace GIGLS.Services.Business.DHL
                 count++;
             }
             return content;
+        }
+
+        private static string SignatureName(InternationalShipmentDTO shipmentDTO)
+        {
+            var signatureName = string.Empty;
+            if (shipmentDTO.CustomerDetails.CustomerName.Length > 35)
+            {
+                var splittedName = shipmentDTO.CustomerDetails.CustomerName.Split(' ');
+                signatureName = splittedName[0];
+            }
+            else
+            {
+                signatureName = shipmentDTO.CustomerDetails.CustomerName;
+            }
+
+            return signatureName;
         }
 
         private ShipmentReceiverDetail GetReceiverContact(InternationalShipmentDTO shipmentDTO)
