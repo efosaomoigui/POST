@@ -3845,7 +3845,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
                 return price;
             }
-
+            var country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+            if (country == null)
+            {
+                throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            preShipment.CountryId = country.CountryId;
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
                 && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null
                 && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude != null)
@@ -3874,11 +3879,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     preShipmentItem.CalculatedPrice = individualPrice;
                 };
-                var country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
-                if (country == null)
-                {
-                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
-                }
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = mainCharge,
