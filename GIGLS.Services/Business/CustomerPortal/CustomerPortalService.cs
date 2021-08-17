@@ -3303,10 +3303,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.ServiceCentre.GetActiveServiceCentres();
         }
 
-        public async Task<List<AddressDTO>> GetTopFiveUserAddresses()
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(bool isIntl)
         {
             var currentUserId = await _userService.GetCurrentUserId();
-            return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
+            var user = await _userService.GetUserById(currentUserId);
+            if (isIntl)
+            {
+              return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(user.UserChannelCode); 
+            }
+            else 
+            {
+                return await _uow.PreShipmentMobile.GetTopFiveUserAddresses(currentUserId);
+            }
         }
 
         public async Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry)

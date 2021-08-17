@@ -342,9 +342,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
 
 
-        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID)
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID,  bool isIntl)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).ToList();
+            if (isIntl)
+            {
+                var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).ToList();
+                preShipments = preShipmentsIntl;
+            }
 
             var address = (from r in preShipments
                            select new AddressDTO()

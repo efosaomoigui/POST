@@ -2277,7 +2277,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [Route("useraddresses")]
-        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses()
+        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses(bool isIntl)
         {
             return await HandleApiOperationAsync(async () =>
             {
