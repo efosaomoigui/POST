@@ -3374,10 +3374,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (quickQuotePriceDTO.PriceCategoryId.Any())
             {
-                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => quickQuotePriceDTO.PriceCategoryId.Contains(x.PriceCategoryId)).ToList();
+                var categories = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId).ToList();
                 foreach (var item in quickQuotePriceDTO.PriceCategoryId)
                 {
-                    var itemCategory = categories.Where(x => x.DepartureCountryId == quickQuotePriceDTO.DepartureCountryId && x.CountryId == quickQuotePriceDTO.DestinationCountryId && x.PriceCategoryId == item).FirstOrDefault();
+                    var itemCategory = categories.Where(x => x.PriceCategoryId == item).FirstOrDefault();
                     if (itemCategory.CategoryMinimumWeight == 0)
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
@@ -3819,6 +3819,87 @@ namespace GIGLS.Services.Business.CustomerPortal
             catch (Exception ex)
             {
                 throw;
+            }
+        }
+
+
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId)
+        {         
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(destcountryId, deptcountryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+
+        }
+
+        public async Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment)
+        {
+            if (!preShipment.PreShipmentItems.Any())
+            {
+                throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+            preShipment.ZoneMapping = zoneid.ZoneId;
+
+            if (string.IsNullOrEmpty(preShipment.VehicleType))
+            {
+                var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
+                return price;
+            }
+            var country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+            if (country == null)
+            {
+                throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            preShipment.CountryId = country.CountryId;
+            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
+                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null
+                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude != null)
+            {
+                var basePriceBike = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikeBasePrice, preShipment.CountryId);
+                var basePriceBikeValue = Convert.ToDecimal(basePriceBike.Value);
+                decimal discount = 0.0M;
+                var amount = await _preShipmentMobileService.CalculateBikePriceBasedonLocation(preShipment);
+
+                decimal pickuprice = 0.0M;  
+                decimal pickupValue = 0.0M;
+                decimal mainCharge = basePriceBikeValue + amount;
+                decimal percentage = 0.0M;
+                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
+                percentage = Convert.ToDecimal(discountPercent.Value);
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+                var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
+                calculatedTotal = Math.Round(calculatedTotal);
+                preShipment.DeliveryPrice = (decimal)calculatedTotal;
+
+                discount = Math.Round(mainCharge - (decimal)calculatedTotal);
+                decimal grandTotal = (decimal)calculatedTotal + pickupValue;
+                var countOfItems = preShipment.PreShipmentItems.Count;
+                var individualPrice = grandTotal / countOfItems;
+                foreach (var preShipmentItem in preShipment.PreShipmentItems)
+                {
+                    preShipmentItem.CalculatedPrice = individualPrice;
+                };
+                var returnprice = new MobilePriceDTO()
+                {
+                    MainCharge = mainCharge,
+                    DeliveryPrice = preShipment.DeliveryPrice,
+                    Vat = 0.0M,
+                    PickUpCharge = pickuprice,
+                    InsuranceValue = 0.0M,
+                    GrandTotal = grandTotal,
+                    PreshipmentMobile = preShipment,
+                    CurrencySymbol = country.CurrencySymbol,
+                    CurrencyCode = country.CurrencyCode,
+                    IsWithinProcessingTime = true,
+                    Discount = discount
+                };
+                return returnprice;
+
+            }
+            else
+            {
+                var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
+                return price;
             }
         }
     }

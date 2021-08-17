@@ -930,7 +930,10 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             PackagePrice = PackagePrice + deliveryOptionPrice;
-            PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice);
+            if (String.IsNullOrEmpty(pricingDto.CustomerCode))
+            {
+                PackagePrice = await CalculateCustomerRankPrice(pricingDto, PackagePrice); 
+            }
             return PackagePrice;
         }
 
@@ -1071,7 +1074,10 @@ namespace GIGLS.Services.Business.Pricing
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
 
-            shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice);
+            if (!String.IsNullOrEmpty(pricingDto.CustomerCode))
+            {
+                shipmentTotalPrice = await CalculateCustomerRankPrice(pricingDto, shipmentTotalPrice); 
+            }
             return shipmentTotalPrice;
         }
 
@@ -1578,7 +1584,7 @@ namespace GIGLS.Services.Business.Pricing
             var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
 
             //get item category
-            var itemCategory = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId).FirstOrDefault();
+            var itemCategory = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.PriceCategoryId == pricingDto.PriceCategoryId && x.DepartureCountryId == pricingDto.DepartureCountryId && x.CountryId == pricingDto.CountryId).FirstOrDefault();
             if (itemCategory == null)
             {
                 throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");

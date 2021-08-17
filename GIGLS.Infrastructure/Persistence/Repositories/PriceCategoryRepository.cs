@@ -112,5 +112,35 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                 throw;
             }
         }
+
+
+        public Task<List<PriceCategoryDTO>> GetPriceCategoriesByCountryId(int destCountryId, int deptCountryID)
+        {
+            try
+            {
+                var PriceCategorys = _context.PriceCategory.Where(s => s.CountryId == destCountryId && s.DepartureCountryId == deptCountryID);
+
+                var PriceCategorysDTO = from s in PriceCategorys
+                                        select new PriceCategoryDTO
+                                        {
+                                            PriceCategoryName = s.PriceCategoryName,
+                                            CategoryMinimumPrice = s.CategoryMinimumPrice,
+                                            PricePerWeight = s.PricePerWeight,
+                                            PriceCategoryId = s.PriceCategoryId,
+                                            CountryId = s.CountryId,
+                                            IsActive = s.IsActive,
+                                            CategoryMinimumWeight = s.CategoryMinimumWeight,
+                                            CountryName = _context.Country.Where(x => x.CountryId == destCountryId).FirstOrDefault().CountryName,
+                                            SubminimumPrice = s.SubminimumPrice,
+                                            SubminimumWeight = s.SubminimumWeight
+                                        };
+                return Task.FromResult(PriceCategorysDTO.OrderBy(x => x.PriceCategoryName).ToList());
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

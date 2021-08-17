@@ -2076,6 +2076,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getactivecountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
@@ -2345,6 +2346,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("getintlquickqoute")]
         public async Task<IServiceResponse<QuickQuotePriceDTO>> GetIntlQuickQuote(QuickQuotePriceDTO quickQuotePriceDTO)
@@ -2359,14 +2361,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
-        [Route("getcategoriesbycountry/{countryId}")]
-        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int countryId)
+        [Route("getcategoriesbycountry/{destcountryId}/{deptcountryId}")]
+        public async Task<IServiceResponse<IEnumerable<PriceCategoryDTO>>> GetPriceCategoriesByCountry(int destcountryId, int deptcountryId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var item = await _portalService.GetPriceCategoriesByCountry(countryId);
+                var item = await _portalService.GetPriceCategoriesBothCountries(destcountryId, deptcountryId);
                 return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
                 {
                     Object = item
@@ -2602,5 +2604,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return response;
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("getpricequote")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceQoute(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceQoute(PreshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
     }
 }

@@ -103,10 +103,9 @@ namespace GIGLS.WebApi.Controllers.Business
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var userCountryId = await _pricing.GetUserCountryId();
-                pricingDto.CountryId = userCountryId;
+                //var userCountryId = await _pricing.GetUserCountryId();
+                //pricingDto.CountryId = userCountryId;
                 var price = await _pricing.GetPriceByCategory(pricingDto);
-
                 return new ServiceResponse<decimal>
                 {
                     Object = price
