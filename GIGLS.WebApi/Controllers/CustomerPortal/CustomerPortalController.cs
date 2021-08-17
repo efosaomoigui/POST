@@ -2567,40 +2567,40 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //[AllowAnonymous]
-        //[HttpPost]
-        //[Route("addtransferdetails")]
-        //public async Task<IServiceResponse<object>> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var response = new ServiceResponse<object>();
-        //        var request = Request;
-        //        var headers = request.Headers;
-        //        var result = new object();
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addtransferdetails")]
+        public async Task<IServiceResponse<object>> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
 
-        //        if (headers.Contains("api_key"))
-        //        {
-        //            //var encrytedkey = await _portalService.EncryptCellulantKey();
-        //            var key = await _portalService.GetCellulantKey();
-        //            string apiKey = headers.GetValues("api_key").FirstOrDefault();
-        //            string token = await _portalService.Decrypt(apiKey);
-        //            if (token == key)
-        //            {
-        //                result = await _portalService.AddCellulantTransferDetails(TransferDetailsDTO);
-        //                response.Object = result;
-        //            }
-        //            else
-        //            {
-        //                throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
-        //        }
-        //        return response;
-        //    });
-        //}
+                if (headers.Contains("api_key"))
+                {
+                    //var encrytedkey = await _portalService.EncryptCellulantKey();
+                    var key = await _portalService.GetCellulantKey();
+                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
+                    string token = await _portalService.Decrypt(apiKey);
+                    if (token == key)
+                    {
+                        result = await _portalService.AddCellulantTransferDetails(TransferDetailsDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
     }
 }

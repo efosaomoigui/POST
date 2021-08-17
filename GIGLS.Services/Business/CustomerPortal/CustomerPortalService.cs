@@ -3766,60 +3766,60 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _countryService.GetCountries();
         }
 
-        //public async Task<string> EncryptCellulantKey()
-        //{
-        //    var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
-        //    return await _partnertransactionservice.Encrypt(apiKey);
-        //}
+        public async Task<string> EncryptCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return await _partnertransactionservice.Encrypt(apiKey);
+        }
 
-        //public async Task<string> GetCellulantKey()
-        //{
-        //    var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
-        //    return apiKey;
-        //}
+        public async Task<string> GetCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return apiKey;
+        }
 
-        //public async Task<string> Decrypt(string encrytedKey)
-        //{
-        //    return await _partnertransactionservice.Decrypt(encrytedKey);
-        //}
+        public async Task<string> Decrypt(string encrytedKey)
+        {
+            return await _partnertransactionservice.Decrypt(encrytedKey);
+        }
 
-        //public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
-        //{
-        //    try
-        //    {
-        //        if (transferDetailsDTO is null)
-        //        {
-        //            throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
-        //        }
+        public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
+        {
+            try
+            {
+                if (transferDetailsDTO is null)
+                {
+                    throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
 
-        //        var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
-        //        if (entity)
-        //        {
-        //            throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
-        //        }
+                var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
+                if (entity)
+                {
+                    throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
+                }
 
-        //        if(transferDetailsDTO.ResponseCode == "00")
-        //        {
-        //            transferDetailsDTO.TransactionStatus = "success";
-        //        }
-        //        else if (transferDetailsDTO.ResponseCode == "25")
-        //        {
-        //            transferDetailsDTO.TransactionStatus = "failed";
-        //        }
-        //        else
-        //        {
-        //            transferDetailsDTO.TransactionStatus = "pending";
-        //        }
+                if (transferDetailsDTO.ResponseCode == "00")
+                {
+                    transferDetailsDTO.TransactionStatus = "success";
+                }
+                else if (transferDetailsDTO.ResponseCode == "25")
+                {
+                    transferDetailsDTO.TransactionStatus = "failed";
+                }
+                else
+                {
+                    transferDetailsDTO.TransactionStatus = "pending";
+                }
 
-        //        var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
-        //        _uow.TransferDetails.Add(transferDetails);
-        //        await _uow.CompleteAsync();
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw;
-        //    }
-        //}
+                var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
+                _uow.TransferDetails.Add(transferDetails);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
