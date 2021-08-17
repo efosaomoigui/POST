@@ -10,6 +10,9 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface ICellulantPaymentService : IServiceDependencyMarker
     {
+        Task<string> GetCellulantKey();
+        Task<string> DecryptKey(string encrytedKey);
+        Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
         Task<TransferDetailsDTO> GetAllTransferDetails(string reference);
         Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter);
         Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
