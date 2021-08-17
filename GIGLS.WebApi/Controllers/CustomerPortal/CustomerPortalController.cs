@@ -2076,6 +2076,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getactivecountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getactivecountries()
