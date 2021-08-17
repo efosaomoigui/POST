@@ -2281,7 +2281,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.GetTopFiveUserAddresses();
+                var result = await _portalService.GetTopFiveUserAddresses(isIntl);
 
                 return new ServiceResponse<List<AddressDTO>>
                 {

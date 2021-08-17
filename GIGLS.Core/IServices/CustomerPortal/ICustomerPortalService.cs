@@ -212,7 +212,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<ServiceCentreDTO>> GetActiveServiceCentresBySingleCountry(int countryId, int stationId = 0);
         Task<IEnumerable<CountryDTO>> GetIntlShipingCountries();
         Task<List<ServiceCentreDTO>> GetActiveServiceCentres();
-        Task<List<AddressDTO>> GetTopFiveUserAddresses();
+        Task<List<AddressDTO>> GetTopFiveUserAddresses(bool isIntl);
         Task<UserActiveCountryDTO> UpdateUserActiveCountry(UpdateUserActiveCountryDTO userActiveCountry);
         Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO);
         Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO);
