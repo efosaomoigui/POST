@@ -3378,22 +3378,37 @@ namespace GIGLS.Services.Business.CustomerPortal
                 foreach (var item in quickQuotePriceDTO.PriceCategoryId)
                 {
                     var itemCategory = categories.Where(x => x.PriceCategoryId == item).FirstOrDefault();
-                    if (itemCategory.CategoryMinimumWeight == 0)
+                    if (itemCategory == null)
+                    {
+                        throw new GenericException($"No price definition for this category", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                   
+                    if (itemCategory.SubminimumWeight > 0 && quickQuotePriceDTO.Weight <= itemCategory.SubminimumWeight)
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                         {
-                            priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.SubminimumPrice);
                         }
                     }
+
                     else
                     {
-                        if (quickQuotePriceDTO.Weight < itemCategory.CategoryMinimumWeight)
+                        if (itemCategory.SubminimumWeight == 0)
                         {
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
                             {
                                 priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                             }
                         }
+
+                        else if (itemCategory.SubminimumWeight > 0 && quickQuotePriceDTO.Weight > itemCategory.SubminimumWeight && quickQuotePriceDTO.Weight <= itemCategory.CategoryMinimumWeight)
+                        {
+                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                            {
+                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                            }
+                        }
+
                         else
                         {
                             for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
