@@ -1943,6 +1943,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<MobileShipmentTrackingHistoryDTO> trackShipment(string waybillNumber)
         {
+            // check for special characters
+            Regex rgx = new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
+            var valid = rgx.IsMatch(waybillNumber);
+            if (!valid)
+            {
+                throw new GenericException($"Invalid waybill number", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            if (waybillNumber.Length > 12)
+            {
+                throw new GenericException($"Invalid waybill number", $"{(int)HttpStatusCode.Forbidden}");
+            }
             return await _preShipmentMobileService.TrackShipment(waybillNumber);
         }
         public async Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
