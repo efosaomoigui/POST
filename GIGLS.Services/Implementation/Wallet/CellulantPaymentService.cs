@@ -91,11 +91,12 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var isAdmin = await CheckUserRoleIsAdmin();
             var isRegion = await CheckUserPrivilegeIsRegion();
+            var isAccount = await CheckUserRoleIsAccount();
 
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
-            if (!isAdmin && !isRegion)
+            if (!isAdmin && !isRegion && !isAccount)
             {
                 var crAccount = await GetServiceCentreCrAccount();
 
@@ -118,7 +119,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                    if(isAdmin == true || isAccount == true)
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                    }
                 }
             }
 
@@ -129,10 +133,11 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var isAdmin = await CheckUserRoleIsAdmin();
             var isRegion = await CheckUserPrivilegeIsRegion();
+            var isAccount = await CheckUserRoleIsAccount();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
-            if (!isAdmin && !isRegion)
+            if (!isAdmin && !isRegion && !isAccount)
             {
                 var crAccount = await GetServiceCentreCrAccount();
 
@@ -155,7 +160,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+                    if (isAdmin == true || isAccount == true)
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+                    }
                 }
             }
 
@@ -258,6 +266,30 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 return isAdmin;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<bool> CheckUserRoleIsAccount()
+        {
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var userRoles = await _userService.GetUserRoles(currentUserId);
+
+                bool isAccount = false;
+                foreach (var role in userRoles)
+                {
+                    if (role == "Account")
+                    {
+                        isAccount = true;   // set to true
+                    }
+                }
+
+                return isAccount;
             }
             catch (Exception)
             {
