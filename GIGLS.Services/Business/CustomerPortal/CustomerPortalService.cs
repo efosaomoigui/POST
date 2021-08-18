@@ -1946,7 +1946,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             // check for special characters
             //Regex rgx  new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
             var valid =await CheckSpecialCharacters(waybillNumber);
-            if (!valid)
+            if (valid)
             {
                 throw new GenericException($"Invalid waybill number, special characters not allowed", $"{(int)HttpStatusCode.Forbidden}");
             }
