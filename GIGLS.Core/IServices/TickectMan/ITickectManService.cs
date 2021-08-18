@@ -49,6 +49,8 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
         Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre();
         Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
+        Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter);
+        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
     }
 }
                                                                                   
