@@ -1944,11 +1944,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MobileShipmentTrackingHistoryDTO> trackShipment(string waybillNumber)
         {
             // check for special characters
-            Regex rgx = new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
-            var valid = rgx.IsMatch(waybillNumber);
+            //Regex rgx  new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
+            var valid =await CheckSpecialCharacters(waybillNumber);
             if (!valid)
             {
-                throw new GenericException($"Invalid waybill number", $"{(int)HttpStatusCode.Forbidden}");
+                throw new GenericException($"Invalid waybill number, special characters not allowed", $"{(int)HttpStatusCode.Forbidden}");
             }
             if (waybillNumber.Length > 12)
             {
@@ -3927,6 +3927,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
                 return price;
             }
+        }
+
+        private async Task<bool> CheckSpecialCharacters(string content)
+        {
+            var specialChars = "@,#,%,^,!,$,*,(,),_,+,\\,|,/,?,[,]',:,~,`,>,<,";
+            char[] charList = specialChars.ToCharArray();
+            if (content.Any(c => charList.Contains(c)))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
