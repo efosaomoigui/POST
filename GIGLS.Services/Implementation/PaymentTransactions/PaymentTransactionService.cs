@@ -778,7 +778,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             decimal amountToDebit = invoiceEntity.Amount;
 
-            amountToDebit = await GetActualAmountToDebit(shipment, amountToDebit);
+            amountToDebit = await GetActualAmountToDebitForNotOwner(shipment, amountToDebit, paymentTransaction);
 
             //Additions for Ecommerce customers (Max wallet negative payment limit)
             //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
@@ -852,6 +852,58 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return true;
         }
 
+        private async Task<decimal> GetActualAmountToDebitForNotOwner(Shipment shipment, decimal amountToDebit, PaymentTransactionDTO paymentTransaction)
+        {
+            //1. Get Customer Country detail
+            int customerCountryId = 0;
+            Rank rank = Rank.Basic;
+            var user = await _uow.User.GetUserByChannelCode(paymentTransaction.CustomerCode);
+            if (user != null)
+            {
+                if (UserChannelType.Ecommerce == user.UserChannelType || UserChannelType.Corporate == user.UserChannelType)
+                {
+                    var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == paymentTransaction.CustomerCode.ToLower()).FirstOrDefault();
+                    if (customer != null)
+                    {
+                        customerCountryId = customer.UserActiveCountryId;
+                        rank = customer.Rank;
+                    }
+                }
+                else
+                {
+                    customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == paymentTransaction.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                }
+
+                //check if the customer country is same as the country in the user table
+                if (user.UserActiveCountryId != customerCountryId)
+                {
+                    throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //2. If the customer country !== Departure Country, Convert the payment
+                if (customerCountryId != shipment.DepartureCountryId)
+                {
+                    var countryRateConversion = await _countryRouteZoneMapService.GetZone(customerCountryId, shipment.DepartureCountryId);
+
+                    double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
+
+                    amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+                }
+
+                //3. if the shipment is International Shipment & Payment was initiated before the shipment get to Nigeria
+                //5% discount should be give to the customer
+                if (shipment.IsInternational)
+                {
+                    if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
+                    {
+                        var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
+                        amountToDebit = amountToDebit * discount;
+                    }
+                }
+            }
+
+            return amountToDebit;
+        }
 
     }
 }                                                                                                      

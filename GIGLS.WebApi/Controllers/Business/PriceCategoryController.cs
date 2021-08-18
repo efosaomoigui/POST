@@ -106,7 +106,7 @@ namespace GIGLS.WebApi.Controllers
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var priceCategory = await _priceCategoryService.GetPriceCategoriesByCountry(countryId);
+                var priceCategory = await _priceCategoryService.GetPriceCategoriesBothCountries(countryId);
 
                 return new ServiceResponse<IEnumerable<PriceCategoryDTO>>
                 {

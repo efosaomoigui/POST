@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Stores;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Stores;
+using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Business.Pricing
@@ -15,9 +16,11 @@ namespace GIGLS.Services.Business.Pricing
     public class PriceCategoryService : IPriceCategoryService
     {
         private readonly IUnitOfWork _uow;
-        public PriceCategoryService(IUnitOfWork uow)
+        private readonly IUserService _userService;
+        public PriceCategoryService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
         
@@ -109,6 +112,16 @@ namespace GIGLS.Services.Business.Pricing
         public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesByCountry(int countryId)
         {
             var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(countryId);
+            return Mapper.Map<List<PriceCategoryDTO>>(categories);
+        }
+
+        public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int countryId)
+        {
+            //Use default country
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var userCountryId = currentUser.UserActiveCountryId;
+            var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(countryId,userCountryId);
             return Mapper.Map<List<PriceCategoryDTO>>(categories);
         }
     }
