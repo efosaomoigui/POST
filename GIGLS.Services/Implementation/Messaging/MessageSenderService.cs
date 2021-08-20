@@ -215,6 +215,9 @@ namespace GIGLS.Services.Implementation.Messaging
 
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
+                    // Reduce receiver name logic
+                    var splittedName = invoice.ReceiverName.Split(' ');
+                    var receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
 
                     //map the array
                     strArray[0] = customerName;
@@ -224,7 +227,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[4] = invoice.ReceiverAddress;
                     strArray[5] = demurrageDayCount;
                     strArray[6] = demurragePrice;
-                    strArray[7] = invoice.ReceiverName;
+                    strArray[7] = receiverName;
                     strArray[8] = invoice.Description;
                     strArray[9] = invoice.GrandTotal.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
@@ -1149,7 +1152,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[2] = msgDTO.CustomerCode;
                 if (msgDTO.IsCoporate)
                 {
-                    strArray[3] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}"; 
+                    strArray[3] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
                 }
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -2069,7 +2072,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
                 }
-                
+
                 var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
 
                 if (!getConsent.Contains("success"))
@@ -2176,7 +2179,7 @@ namespace GIGLS.Services.Implementation.Messaging
             return true;
         }
         //Send Whatsapp message using ARF sms format for Home delivery terminal pickup
-        public async Task<string> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        public async Task<string> SendWhatsappMessageTemporal(MessageType messageType, object tracking)
         {
             var result = "";
 
