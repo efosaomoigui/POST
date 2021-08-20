@@ -202,4 +202,14 @@ namespace GIGLS.Core.DTO
         public string CustomerCode { get; set; }
     }
 
+    public class CoporateBankDetailMessageDTO
+    {
+        public string AccountNo { get; set; }
+        public string AccountName { get; set; }
+        public string BankName { get; set; }
+        public bool IsCoporate { get; set; }
+        public string ToEmail { get; set; }
+        public string CustomerCode { get; set; }
+    }
+
 }

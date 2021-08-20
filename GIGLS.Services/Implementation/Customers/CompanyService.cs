@@ -519,6 +519,12 @@ namespace GIGLS.Services.Implementation.Customers
 
                 if (companyDto.CompanyType == CompanyType.Corporate)
                 {
+
+                    var msgObj = new CoporateBankDetailMessageDTO();
+                    msgObj.ToEmail = company.Email;
+                    msgObj.IsCoporate = true;
+                    msgObj.CustomerCode = company.CustomerCode;
+
                     //first create customer on paystack if customer doesnt exist already
                     var nubanAcc = new CreateNubanAccountDTO()
                     {
@@ -544,6 +550,11 @@ namespace GIGLS.Services.Implementation.Customers
                                 {
                                     company.PrefferedNubanBank = companyDto.PrefferedNubanBank;
                                     company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                    company.AccountName = customerNubanAccount.data.account_name;
+                                    msgObj.AccountName = company.AccountName;
+                                    msgObj.AccountNo = company.NUBANAccountNo;
+                                    msgObj.BankName = company.PrefferedNubanBank;
+                                   await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
                                 }
                             }
                         }
@@ -558,6 +569,10 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 company.PrefferedNubanBank = company.PrefferedNubanBank;
                                 company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                msgObj.AccountName = company.AccountName;
+                                msgObj.AccountNo = company.NUBANAccountNo;
+                                msgObj.BankName = company.PrefferedNubanBank;
+                                await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
                             }
                         }
                     }

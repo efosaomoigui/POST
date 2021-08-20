@@ -1404,6 +1404,24 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = intlDTO.CustomerEmail;
             }
 
+            if (obj is CoporateBankDetailMessageDTO)
+            {
+                var strArray = new string[]
+                  {
+                    ""
+                  };
+                var msgDTO = (CoporateBankDetailMessageDTO)obj;
+                if (msgDTO.IsCoporate)
+                {
+                    strArray[0] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
+                }
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = msgDTO.ToEmail;
+            }
+
             return await Task.FromResult(verifySendEmail);
         }
 
