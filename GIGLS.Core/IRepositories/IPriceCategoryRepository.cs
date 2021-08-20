@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories
         Task<List<PriceCategoryDTO>> GetPriceCategoriesByCountryId(int countryId);
         Task<PriceCategoryDTO> GetPriceCategoryById(int priceCategoryId);
         Task<List<PriceCategoryDTO>> GetPriceCategories();
+        Task<List<PriceCategoryDTO>> GetPriceCategoriesByCountryId(int destCountryId, int deptCountryID);
     }
 }
