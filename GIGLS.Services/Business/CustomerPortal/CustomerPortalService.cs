@@ -120,6 +120,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly ICellulantPaymentService _cellulantPaymentService;
         private readonly INodeService _nodeService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -134,7 +135,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, ICellulantPaymentService cellulantPaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -179,6 +180,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
             _nodeService = nodeService;
+            _cellulantPaymentService = cellulantPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -350,6 +352,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         result = await VerifyAndValidateFlutterWavePayment(referenceCode);
                     }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(referenceCode);
+                    }
                     else
                     {
                         result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -383,6 +389,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             PaymentResponse response = new PaymentResponse();
             var result = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateCellulantPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _cellulantPaymentService.VerifyAndValidatePayment(referenceCode);
 
             response.Result = result.Status;
             response.Status = result.data.Status;

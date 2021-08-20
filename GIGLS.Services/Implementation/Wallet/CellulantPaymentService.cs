@@ -1,8 +1,16 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
@@ -18,6 +26,8 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,14 +39,24 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
         private IServiceCentreService _serviceCenterService;
-        public CellulantPaymentService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService)
+        private readonly IWalletService _walletService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly INodeService _nodeService;
+        private readonly IMessageSenderService _messageSenderService;
+        public CellulantPaymentService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService,
+            IWalletService walletService, IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
+            _walletService = walletService;
+            _paymentTransactionService = paymentTransactionService;
+            _nodeService = nodeService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
+        #region Cellulant Transfer Management
         public Task<TransferDetailsDTO> GetAllTransferDetails(string reference)
         {
             throw new NotImplementedException();
@@ -174,20 +194,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return transferDetailsDto;
         }
 
-        public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
-        {
-            string accessKey = "<YOUR_ACCESS_KEY>";
-            string ivKey = "<YOUR_IV_KEY>";
-            string secretKey = "<YOUR_SECRET_KEY>";
-
-            ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
-
-            string json = JsonConvert.SerializeObject(payload).Replace("/", "\\/");
-
-            string encParams = encryption.EncryptData(json);
-            var result = new CellulantResponseDTO { param = encParams, accessKey = accessKey, countryCode = payload.countryCode };
-            return result;
-        }
+        
 
         private async Task<string> GetServiceCentreCrAccount()
         {
@@ -375,5 +382,408 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return cipherText;
         }
+        #endregion
+
+
+        #region Cellulant Payment Gateway
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidatePayment(string reference)
+        {
+            FlutterWebhookDTO webhook = new FlutterWebhookDTO();
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                webhook = await ProcessPaymentForWaybill(reference);
+            }
+            else
+            {
+                webhook = await ProcessPaymentForWallet(reference);
+            }
+
+            return ManageReturnResponse(webhook);
+        }
+
+        private async Task<FlutterWebhookDTO> ProcessPaymentForWaybill(string referenceCode)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyPayment(referenceCode);
+
+            if (verifyResult.Status.Equals("success"))
+            {
+                if (verifyResult.data != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                    if (paymentLog == null)
+                        return verifyResult;
+
+                    //2. if the payment successful
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled)
+                    {
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+
+                        if (checkAmount)
+                        {
+                            //3. Process payment for the waybill if successful
+                            PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                            {
+                                Waybill = paymentLog.Waybill,
+                                PaymentType = PaymentType.Online,
+                                TransactionCode = paymentLog.Reference,
+                                UserId = paymentLog.UserId
+                            };
+
+                            var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                            if (processWaybillPayment)
+                            {
+                                //2. Update waybill Payment log
+                                paymentLog.IsPaymentSuccessful = true;
+                                paymentLog.IsWaybillSettled = true;
+                            }
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = verifyResult.data.Status;
+                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    await _uow.CompleteAsync();
+                }
+            }
+
+            return verifyResult;
+        }
+
+        private async Task<FlutterWebhookDTO> ProcessPaymentForWallet(string reference)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyPayment(reference);
+
+            if (verifyResult.Status.Equals("success"))
+            {
+                if (verifyResult.data != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
+
+                    if (paymentLog == null)
+                        return verifyResult;
+
+                    if (verifyResult.data.Status != null)
+                    {
+                        verifyResult.data.Status = verifyResult.data.Status.ToLower();
+                    }
+
+                    bool sendPaymentNotification = false;
+                    var walletDto = new WalletDTO();
+                    var userPayload = new UserPayload();
+                    var bonusAddon = new BonusAddOn();
+                    bool checkAmount = false;
+
+                    //2. if the payment successful
+                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited)
+                    {
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+
+                        if (checkAmount)
+                        {
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
+
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                            if (walletDto != null)
+                            {
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                }
+                            }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = bonusAddon.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Description = bonusAddon.Description,
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = paymentLog.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = verifyResult.data.Status;
+                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    await _uow.CompleteAsync();
+
+                    if (sendPaymentNotification)
+                    {
+                        await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    }
+
+                    if (bonusAddon.BonusAdded)
+                    {
+                        await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                    }
+
+                    //Call Node API for subscription process
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
+                    {
+                        if (userPayload != null)
+                        {
+                            await _nodeService.WalletNotification(userPayload);
+                        }
+                    }
+                }
+            }
+            return verifyResult;
+        }
+
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
+        {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
+            if (refCode.StartsWith("wb"))
+            {
+                return WaybillWalletPaymentType.Waybill;
+            }
+
+            return WaybillWalletPaymentType.Wallet;
+        }
+
+
+        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(FlutterWebhookDTO verifyResult, int countryId)
+        {
+            BonusAddOn result = new BonusAddOn
+            {
+                Description = "Funding made through debit card.",
+                Amount = verifyResult.data.Amount
+            };
+
+            if (verifyResult.data.Card.CardType != null)
+            {
+                if (verifyResult.data.Card.CardType.Contains("visa"))
+                {
+                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
+                    if (isPresent)
+                    {
+                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
+                        result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
+                        result.BonusAdded = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
+        {
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                decimal bonusPercentage = decimal.Parse(global.Value);
+                decimal bonusValue = bonusPercentage / 100M;
+                decimal price = amount * bonusValue;
+                amount = amount + price;
+            }
+            return amount;
+        }
+
+        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        {
+            bool result = false;
+            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+            if (global != null)
+            {
+                int.TryParse(bin, out int binInt);
+
+                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+                if (visaList.Contains(binInt))
+                {
+                    result = true;
+                }
+            }
+            return result;
+        }
+
+        private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
+                walletDto.Balance = walletDto.Balance + paymentLog.Amount;
+
+                var message = new MessageDTO()
+                {
+                    CustomerCode = walletDto.CustomerCode,
+                    CustomerName = walletDto.CustomerName,
+                    ToEmail = walletDto.CustomerEmail,
+                    To = walletDto.CustomerEmail,
+                    Currency = walletDto.Country.CurrencySymbol,
+                    Body = walletDto.Balance.ToString("N"),
+                    Amount = paymentLog.Amount.ToString("N"),
+                    Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                };
+
+                //send mail to customer
+                await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        message.ToEmail = email;
+                        await _messageSenderService.SendPaymentNotificationAsync(message);
+                    }
+                }
+            }
+        }
+
+        private async Task SendVisaBonusNotificationAsync(BonusAddOn bonusAddon, FlutterWebhookDTO verifyResult, WalletDTO walletDto)
+        {
+            string body = $"{bonusAddon.Description} / Bin {verifyResult.data.Card.CardBIN} / Ref code {verifyResult.data.TX_Ref}  / Bank {verifyResult.data.Card.Brand}";
+
+            var message = new MessageDTO()
+            {
+                Subject = "Visa Commercial Card Bonus",
+                CustomerCode = walletDto.CustomerEmail,
+                CustomerName = walletDto.CustomerName,
+                Body = body
+            };
+
+            //send a copy to chairman
+            var visaBonusEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBonusEmail.ToString() && s.CountryId == 1);
+
+            if (visaBonusEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] emails = visaBonusEmail.Value.Split(',').ToArray();
+
+                foreach (string email in emails)
+                {
+                    message.ToEmail = email;
+                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+                }
+            }
+        }
+
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
+        {
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
+            shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
+
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private PaystackWebhookDTO ManageReturnResponse(FlutterWebhookDTO flutterResponse)
+        {
+            var response = new PaystackWebhookDTO
+            {
+                Message = flutterResponse.Message
+            };
+
+            if (flutterResponse.Status.Equals("success"))
+            {
+                response.Status = true;
+            }
+
+            if (flutterResponse.data != null)
+            {
+                response.data.Status = flutterResponse.data.Status;
+                response.data.Message = flutterResponse.data.Processor_Response;
+                response.data.Gateway_Response = flutterResponse.data.Processor_Response;
+            }
+            else
+            {
+                response.data.Message = flutterResponse.Message;
+                response.data.Gateway_Response = flutterResponse.Message;
+                response.data.Status = flutterResponse.Status;
+            }
+
+            return response;
+        }
+
+        private async Task<FlutterWebhookDTO> VerifyPayment(string reference)
+        {
+            FlutterWebhookDTO result = new FlutterWebhookDTO();
+
+            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
+            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            string authorization = "Bearer " + secretKey;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            //int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
+            //int transactionId = await GetTransactionPaymentIdUsingRefCodeV2(reference);
+            string verifyUrl = flutterSandBox + "transactions/" + reference + "/verify";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("Authorization", authorization);
+
+                var response = await client.GetAsync(verifyUrl);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
+            }
+
+            return result;
+        }
+
+        public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
+        {
+            string accessKey = "<YOUR_ACCESS_KEY>";
+            string ivKey = "<YOUR_IV_KEY>";
+            string secretKey = "<YOUR_SECRET_KEY>";
+
+            ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
+
+            string json = JsonConvert.SerializeObject(payload).Replace("/", "\\/");
+
+            string encParams = encryption.EncryptData(json);
+            var result = new CellulantResponseDTO { param = encParams, accessKey = accessKey, countryCode = payload.countryCode };
+            return result;
+        }
+
+        
+        #endregion
     }
 }
