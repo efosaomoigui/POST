@@ -1408,12 +1408,15 @@ namespace GIGLS.Services.Implementation.Messaging
             {
                 var strArray = new string[]
                   {
+                    "Customer Name",
                     ""
                   };
                 var msgDTO = (CoporateBankDetailMessageDTO)obj;
+                //A. map the array
+                strArray[0] = msgDTO.CustomerName;
                 if (msgDTO.IsCoporate)
                 {
-                    strArray[0] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
+                    strArray[1] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
                 }
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

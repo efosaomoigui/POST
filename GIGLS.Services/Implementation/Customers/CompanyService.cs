@@ -554,7 +554,8 @@ namespace GIGLS.Services.Implementation.Customers
                                     msgObj.AccountName = company.AccountName;
                                     msgObj.AccountNo = company.NUBANAccountNo;
                                     msgObj.BankName = company.PrefferedNubanBank;
-                                   await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
+                                    msgObj.CustomerName = company.Name;
+                                    await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
                                 }
                             }
                         }
@@ -569,9 +570,11 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 company.PrefferedNubanBank = company.PrefferedNubanBank;
                                 company.NUBANAccountNo = customerNubanAccount.data.account_number;
-                                msgObj.AccountName = company.AccountName;
+                                company.NUBANAccountName = customerNubanAccount.data.account_name;
+                                msgObj.AccountName = company.NUBANAccountName;
                                 msgObj.AccountNo = company.NUBANAccountNo;
                                 msgObj.BankName = company.PrefferedNubanBank;
+                                msgObj.CustomerName = company.Name;
                                 await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
                             }
                         }

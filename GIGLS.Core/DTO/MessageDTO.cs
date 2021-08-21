@@ -210,6 +210,7 @@ namespace GIGLS.Core.DTO
         public bool IsCoporate { get; set; }
         public string ToEmail { get; set; }
         public string CustomerCode { get; set; }
+        public string CustomerName { get; set; }
     }
 
 }
