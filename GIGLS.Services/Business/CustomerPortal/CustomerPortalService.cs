@@ -3596,7 +3596,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var nodePayload = new AcceptShipmentPayload()
                 {
                     WaybillNumber = preshipment.Waybill,
-                    PartnerId = partner.UserId,
+                    PartnerId = partner.UserId.ToString(),
                     PartnerInfo = new PartnerPayload()
                     {
                         FullName = partner.PartnerName,
@@ -3613,7 +3613,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Message = res.Data;
                     return result;
                 }
-                preshipment.shipmentstatus = MobilePickUpRequestStatus.Accepted.ToString();
                 // also call the agility api to update mobile shipment
                 var mobilePickUpDTO = new MobilePickUpRequestsDTO()
                 {
@@ -3625,8 +3624,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 };
                 var updateAgilty = await AddMobilePickupRequest(mobilePickUpDTO);
                 result.Succeeded = true;
+                result.Message = res.Message;
                 return result;
-
             }
             catch (Exception ex)
             {
