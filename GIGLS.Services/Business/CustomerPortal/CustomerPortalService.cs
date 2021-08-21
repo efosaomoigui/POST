@@ -3579,7 +3579,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (preshipment.shipmentstatus != "Shipment created")
                 {
-                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to Shipment Created to perform this action.");
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to be Shipment Created to perform this action.", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 if (string.IsNullOrWhiteSpace(partnerInfo.Email))
                 {
