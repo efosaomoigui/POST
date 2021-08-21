@@ -551,7 +551,7 @@ namespace GIGLS.Services.Implementation.Customers
                                     company.PrefferedNubanBank = companyDto.PrefferedNubanBank;
                                     company.NUBANAccountNo = customerNubanAccount.data.account_number;
                                     company.AccountName = customerNubanAccount.data.account_name;
-                                    msgObj.AccountName = company.AccountName;
+                                    msgObj.AccountName = company.NUBANCustomerName;
                                     msgObj.AccountNo = company.NUBANAccountNo;
                                     msgObj.BankName = company.PrefferedNubanBank;
                                     msgObj.CustomerName = company.Name;
@@ -570,8 +570,8 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 company.PrefferedNubanBank = company.PrefferedNubanBank;
                                 company.NUBANAccountNo = customerNubanAccount.data.account_number;
-                                company.NUBANAccountName = customerNubanAccount.data.account_name;
-                                msgObj.AccountName = company.NUBANAccountName;
+                                company.NUBANCustomerName = customerNubanAccount.data.account_name;
+                                msgObj.AccountName = company.NUBANCustomerName;
                                 msgObj.AccountNo = company.NUBANAccountNo;
                                 msgObj.BankName = company.PrefferedNubanBank;
                                 msgObj.CustomerName = company.Name;
