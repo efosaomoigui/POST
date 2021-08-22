@@ -1,4 +1,6 @@
-﻿using GIGLS.Core;
+﻿using AutoMapper;
+using GIGLS.Core;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
@@ -7,8 +9,12 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,15 +38,65 @@ namespace GIGLS.Services.Implementation.Wallet
             throw new NotImplementedException();
         }
 
+        public async Task<string> GetCellulantKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["CellulantKey"];
+            return apiKey;
+        }
+
+        public async Task<string> DecryptKey(string encrytedKey)
+        {
+            return await Decrypt(encrytedKey);
+        }
+
+        public async Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO)
+        {
+            try
+            {
+                if (transferDetailsDTO is null)
+                {
+                    throw new GenericException("invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var entity = await _uow.TransferDetails.ExistAsync(x => x.SessionId == transferDetailsDTO.SessionId);
+                if (entity)
+                {
+                    throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                if (transferDetailsDTO.ResponseCode == "00")
+                {
+                    transferDetailsDTO.TransactionStatus = "success";
+                }
+                else if (transferDetailsDTO.ResponseCode == "25")
+                {
+                    transferDetailsDTO.TransactionStatus = "failed";
+                }
+                else
+                {
+                    transferDetailsDTO.TransactionStatus = "pending";
+                }
+
+                var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
+                _uow.TransferDetails.Add(transferDetails);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter)
         {
             var isAdmin = await CheckUserRoleIsAdmin();
             var isRegion = await CheckUserPrivilegeIsRegion();
+            var isAccount = await CheckUserRoleIsAccount();
 
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
-            if (!isAdmin && !isRegion)
+            if (!isAdmin && !isRegion && !isAccount)
             {
                 var crAccount = await GetServiceCentreCrAccount();
 
@@ -63,7 +119,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                    if(isAdmin == true || isAccount == true)
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                    }
                 }
             }
 
@@ -74,10 +133,11 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var isAdmin = await CheckUserRoleIsAdmin();
             var isRegion = await CheckUserPrivilegeIsRegion();
+            var isAccount = await CheckUserRoleIsAccount();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
-            if (!isAdmin && !isRegion)
+            if (!isAdmin && !isRegion && !isAccount)
             {
                 var crAccount = await GetServiceCentreCrAccount();
 
@@ -100,7 +160,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+                    if (isAdmin == true || isAccount == true)
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+                    }
                 }
             }
 
@@ -210,6 +273,30 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        private async Task<bool> CheckUserRoleIsAccount()
+        {
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var userRoles = await _userService.GetUserRoles(currentUserId);
+
+                bool isAccount = false;
+                foreach (var role in userRoles)
+                {
+                    if (role == "Account")
+                    {
+                        isAccount = true;   // set to true
+                    }
+                }
+
+                return isAccount;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task<bool> CheckUserPrivilegeIsRegion()
         {
             try
@@ -245,6 +332,29 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw;
             }
+        }
+
+        private async Task<string> Decrypt(string cipherText)
+        {
+            string EncryptionKey = "abc123";
+            cipherText = cipherText.Replace(" ", "+");
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Close();
+                    }
+                    cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                }
+            }
+            return cipherText;
         }
     }
 }

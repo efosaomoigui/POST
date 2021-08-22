@@ -1943,6 +1943,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<MobileShipmentTrackingHistoryDTO> trackShipment(string waybillNumber)
         {
+            // check for special characters
+            //Regex rgx  new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
+            var valid =await CheckSpecialCharacters(waybillNumber);
+            if (valid)
+            {
+                throw new GenericException($"Invalid waybill number, special characters not allowed", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            if (waybillNumber.Length > 12)
+            {
+                throw new GenericException($"Invalid waybill number", $"{(int)HttpStatusCode.Forbidden}");
+            }
             return await _preShipmentMobileService.TrackShipment(waybillNumber);
         }
         public async Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
@@ -3568,7 +3579,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (preshipment.shipmentstatus != "Shipment created")
                 {
-                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to Shipment Created to perform this action.");
+                    throw new GenericException($"This waybill {partnerInfo.Waybill} status has to be Shipment Created to perform this action.", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 if (string.IsNullOrWhiteSpace(partnerInfo.Email))
                 {
@@ -3585,7 +3596,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var nodePayload = new AcceptShipmentPayload()
                 {
                     WaybillNumber = preshipment.Waybill,
-                    PartnerId = partner.UserId,
+                    PartnerId = partner.UserId.ToString(),
                     PartnerInfo = new PartnerPayload()
                     {
                         FullName = partner.PartnerName,
@@ -3602,7 +3613,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result.Message = res.Data;
                     return result;
                 }
-                preshipment.shipmentstatus = MobilePickUpRequestStatus.Accepted.ToString();
                 // also call the agility api to update mobile shipment
                 var mobilePickUpDTO = new MobilePickUpRequestsDTO()
                 {
@@ -3614,8 +3624,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 };
                 var updateAgilty = await AddMobilePickupRequest(mobilePickUpDTO);
                 result.Succeeded = true;
+                result.Message = res.Message;
                 return result;
-
             }
             catch (Exception ex)
             {
@@ -3813,7 +3823,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException($"This transfer details with SessionId {transferDetailsDTO.SessionId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
-                if(transferDetailsDTO.ResponseCode == "00")
+                if (transferDetailsDTO.ResponseCode == "00")
                 {
                     transferDetailsDTO.TransactionStatus = "success";
                 }
@@ -3916,6 +3926,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
                 return price;
             }
+        }
+
+        private async Task<bool> CheckSpecialCharacters(string content)
+        {
+            var specialChars = "@,#,%,^,!,$,*,(,),_,+,\\,|,/,?,[,]',:,~,`,>,<,";
+            char[] charList = specialChars.ToCharArray();
+            if (content.Any(c => charList.Contains(c)))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
