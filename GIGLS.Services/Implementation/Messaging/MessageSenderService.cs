@@ -1593,9 +1593,19 @@ namespace GIGLS.Services.Implementation.Messaging
         {
             string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
 
+            //Get Customer details
+            //get CustomerDetails 
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
             var messageDTO = new MessageDTO()
             {
-                CustomerName = shipmentDto.CustomerFirstName,
+                CustomerName = customerObj.FirstName,
                 IntlMessage = new IntlMessageDTO()
                 {
                     Description = shipmentDto.ItemDetails,
