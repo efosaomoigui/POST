@@ -61,7 +61,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"Shipment with waybill: {shipmentDTO.Waybill} already been rerouted.");
                 }
-                
+
                 ////2. check if Shipment has been collected
                 await _collectionService.CheckShipmentCollection(shipmentDTO.Waybill);
 
@@ -73,10 +73,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var trackInfo = await _shipmentTrackService.TrackShipment(originalShipment.Waybill);
 
-                if (serviceCenters.Length == 1 && (serviceCenters[0] == originalDestinationId || 
-                    (trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.AST.ToString() || 
+                if (serviceCenters.Length == 1 && (serviceCenters[0] == originalDestinationId ||
+                    (trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.AST.ToString() ||
                     trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.ARP.ToString() ||
-                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.APT.ToString()) ))
+                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.APT.ToString())))
                 {
                     //do nothing
                 }
@@ -84,7 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                 }
-                               
+
                 ////5. Create new shipment
                 //5.1 Get Existing Shipment information and update rerouting information
                 originalShipment.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
@@ -101,9 +101,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 //5.3 update Shipment Items
                 originalShipment.ShipmentItems = shipmentDTO.ShipmentItems;
 
-                //5.4 update TotalPrice and GrandTotal
-                originalShipment.Total = shipmentDTO.Total;
-                originalShipment.GrandTotal = shipmentDTO.GrandTotal;
+                if (serviceCenters.Length == 1 && (serviceCenters[0] != shipmentDTO.DestinationServiceCentreId))
+                {
+                    for (int i = 0; i < shipmentDTO.ShipmentItems.Count; i++)
+                    {
+                        originalShipment.ShipmentItems[i].Price = 0;
+                    }
+                    //5.4 update TotalPrice and GrandTotal
+                    originalShipment.Total = 0;
+                    originalShipment.GrandTotal = 0;
+                    originalShipment.Vat = 0;
+                    originalShipment.vatvalue_display = 0;
+                    originalShipment.Insurance = 0;
+                }
+                else
+                {
+                    //5.4 update TotalPrice and GrandTotal
+                    originalShipment.Total = shipmentDTO.Total;
+                    originalShipment.GrandTotal = shipmentDTO.GrandTotal;
+                }
 
                 //for international shipment
                 if (shipmentDTO.Waybill.Contains("AWR"))
@@ -111,8 +127,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     originalShipment.Waybill = shipmentDTO.Waybill + "R";
                 }
 
-                 //5.5 Create new shipment
-                 var newShipment = await _shipmentService.AddShipment(originalShipment);
+                //5.5 Create new shipment
+                var newShipment = await _shipmentService.AddShipment(originalShipment);
 
                 ////6. create new shipment reroute
                 var user = await _userService.GetCurrentUserId();
@@ -125,14 +141,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillOld = shipmentDTO.Waybill,
                     RerouteBy = user,
                     RerouteReason = rerouteReason,
-                    ShipmentRerouteInitiator = initiator                
+                    ShipmentRerouteInitiator = initiator
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
-                
+
                 ////4. update shipment collection status to RerouteStatus
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SRR;
                 await _collectionService.UpdateShipmentCollectionForReturn(shipmentCollection);
+
+                if (serviceCenters.Length == 1 && (serviceCenters[0] != shipmentDTO.DestinationServiceCentreId))
+                {
+                    var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentDTO.Waybill));
+                    invoice.Amount = 0;
+                }
 
                 //complete transaction
                 await _uow.CompleteAsync();
