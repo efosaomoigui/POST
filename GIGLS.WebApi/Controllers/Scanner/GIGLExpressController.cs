@@ -544,6 +544,35 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpPost]
+        [Route("transferDetails")]
+        public async Task<IServiceResponse<List<TransferDetailsDTO>>> GetTransferDetailsLogFilter(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.GetTransferDetails(filterCriteria);
+
+                return new ServiceResponse<List<TransferDetailsDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("searchtransferdetails")]
+        public async Task<IServiceResponse<List<TransferDetailsDTO>>> GetTransferDetailsLogFilterByAccountNumber(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _tickectMan.GetTransferDetailsByAccountNumber(filterCriteria.SenderAccountNumber);
+
+                return new ServiceResponse<List<TransferDetailsDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
 
     }
 }
