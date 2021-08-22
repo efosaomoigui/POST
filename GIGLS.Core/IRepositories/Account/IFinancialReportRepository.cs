@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories.Account
@@ -22,5 +23,9 @@ namespace GIGLS.Core.IRepositories.Account
         Task<List<OutboundFinancialReportDTO>> GetFinancialReportOfOutboundShipmentsBreakdown(AccountFilterCriteria accountFilterCriteria, int queryType);
         Task<decimal> GetInternationalTotalEarnings(DashboardFilterCriteria dashboardFilterCriteria);
         Task<decimal> GetCorporateIncomeBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<IQueryable<FinancialReportDemurrageDTO>> GetTotalFinancialReportDemurrageGraph(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<IQueryable<TotalTerminalShipmentDTO>> GetTotalTerminalShipmentGraph(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<IQueryable<CorporateSalesDTO>> GetCorporateIncomeGraph(DashboardFilterCriteria dashboardFilterCriteria);
+        Task<IQueryable<GiGGoIntraCityDTO>> GetTotalGIGGOIntraStateShipmentGraph(DashboardFilterCriteria dashboardFilterCriteria);
     }
 }
