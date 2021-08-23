@@ -332,6 +332,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.Longitude = service.Longitude;
                 centre.Latitude = service.Latitude;
                 centre.FormattedServiceCentreName = service.FormattedServiceCentreName;
+                centre.CrAccount = service.CrAccount;
                 _uow.Complete();
             }
             catch (Exception)

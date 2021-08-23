@@ -819,6 +819,25 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     // handle IndividualCustomers
                     var customer = await _uow.IndividualCustomer.GetAsync(customerId);
+
+                    //Get user by customer code
+                    var user = await _uow.User.GetUserByChannelCode(customer.CustomerCode);
+                    //Update individual customer first and last name if user is not null
+                    //If names are different
+                    if(user != null)
+                    {
+                        if(customer.FirstName != user.FirstName)
+                        {
+                            customer.FirstName = user.FirstName;
+                        }
+
+                        if (customer.LastName != user.LastName)
+                        {
+                            customer.LastName = user.LastName;
+                        }
+                        _uow.Complete();
+                    }
+
                     IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
 
                     //get all countries and set the country name
@@ -1577,9 +1596,19 @@ namespace GIGLS.Services.Implementation.Messaging
         {
             string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
 
+            //Get Customer details
+            //get CustomerDetails 
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
             var messageDTO = new MessageDTO()
             {
-                CustomerName = shipmentDto.CustomerFirstName,
+                CustomerName = customerObj.FirstName,
                 IntlMessage = new IntlMessageDTO()
                 {
                     Description = shipmentDto.ItemDetails,

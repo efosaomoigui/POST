@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -51,6 +52,11 @@ namespace GIGLS.Core.DTO.Dashboard
         public EarningsBreakdownByCustomerDTO MonthlyEarningsBreakdownByCustomerDTO { get; set; }
         public int VehiclesDispatched { get; set; }
         public int TripsCompleted { get; set; }
+        public bool IsGlobal { get; set; }
+        public IQueryable<FinancialReportDemurrageDTO> Demurrage { get; set; }
+        public IQueryable<TotalTerminalShipmentDTO> TotalTerminalShipment { get; set; }
+        public IQueryable<CorporateSalesDTO> CorporateSales { get; set; }
+        public IQueryable<GiGGoIntraCityDTO> GiGGoIntraCities { get; set; }
     }
 
     public class CustomerBreakdownDTO
@@ -69,5 +75,32 @@ namespace GIGLS.Core.DTO.Dashboard
         public int Total { get; set; }
     }
 
+    public class CorporateSalesDTO
+    {
+        public decimal GrandTotal { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int DepartureCountryId { get; set; }
+    }
+
+    public class TotalTerminalShipmentDTO
+    {
+        public decimal GrandTotal { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int DepartureCountryId { get; set; }
+    }
+
+    public class GiGGoIntraCityDTO
+    {
+        public decimal GrandTotal { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int CountryId { get; set; }
+    }
+
+    public class FinancialReportDemurrageDTO
+    {
+        public decimal Demurrage { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int CountryId { get; set; }
+    }
 }
 
