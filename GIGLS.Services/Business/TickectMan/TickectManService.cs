@@ -25,6 +25,8 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
 using Newtonsoft.Json.Linq;
+using GIGLS.Core.DTO.DHL;
+using AutoMapper;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -47,11 +49,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICountryService _countryService;
         private readonly ILGAService _lgaService;
         private readonly ISpecialDomesticPackageService _specialPackageService;
+        private readonly ICustomerPortalService _customerPortalService;
 
         public TickectManService(IUnitOfWork uow,IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
            IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService, ICountryService countryService, ILGAService lgaService,
-           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService) 
+           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService, ICustomerPortalService customerPortalService) 
         {
             _uow = uow;
             _deliveryOptionPriceService = deliveryOptionPriceService;
@@ -69,6 +72,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _lgaService = lgaService;
             _specialPackageService = specialPackageService;
             _invoiceService = invoiceService;
+            _customerPortalService = customerPortalService;
 
         }
 
@@ -381,6 +385,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO)
         {
             return await _invoiceService.ProcessBulkPaymentforWaybills(bulkWaybillPaymentDTO);
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        {
+            return await _countryService.GetCountries();
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            try
+            {
+                var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+                return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment)
+        {
+            return await _customerPortalService.GetPriceQoute(preShipment);
         }
     }
 }

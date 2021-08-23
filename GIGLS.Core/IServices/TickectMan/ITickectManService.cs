@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -49,6 +50,9 @@ namespace GIGLS.Core.IServices.TickectMan
         Task<MobilePriceDTO> GetGIGGOPrice(PreShipmentMobileDTO preShipment);
         Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre();
         Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
+        Task<IEnumerable<CountryDTO>> GetCountries();
+        Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO);
+        Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
     }
 }
                                                                                   
