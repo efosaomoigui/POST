@@ -101,7 +101,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //5.3 update Shipment Items
                 originalShipment.ShipmentItems = shipmentDTO.ShipmentItems;
 
-                if (serviceCenters.Length == 1 && (serviceCenters[0] != shipmentDTO.DestinationServiceCentreId))
+                if (originalDestinationId == shipmentDTO.DestinationServiceCentreId)
                 {
                     for (int i = 0; i < shipmentDTO.ShipmentItems.Count; i++)
                     {
