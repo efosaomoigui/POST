@@ -501,7 +501,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverCity { get; set; }
-
+        public PaymentStatus PaymentStatus { get; set; }
     }
 
     public class ShipmentPaymentDTO
