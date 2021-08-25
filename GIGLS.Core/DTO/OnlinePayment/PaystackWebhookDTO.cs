@@ -75,7 +75,21 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string GatewayResponse { get; set; }
         public string Status { get; set; }
         public bool ResponseStatus { get; set; }
+        //Cellulant Payment Response
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
 
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("statusCode")]
+        public string StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonProperty("receiptNumber")]
+        public string ReceiptNumber { get; set; }
     }
 
     public enum WaybillWalletPaymentType
@@ -286,5 +300,115 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public decimal Amount { get; set; }
     }
 
+    public class Payment
+    {
+        [JsonProperty("MSISDN")]
+        public long MSISDN { get; set; }
+
+        [JsonProperty("payerClientName")]
+        public string PayerClientName { get; set; }
+
+        [JsonProperty("currencyCode")]
+        public string CurrencyCode { get; set; }
+
+        [JsonProperty("amountPaid")]
+        public int AmountPaid { get; set; }
+
+        [JsonProperty("cpgTransactionID")]
+        public string CpgTransactionID { get; set; }
+
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("hubOverallStatus")]
+        public int HubOverallStatus { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("customerName")]
+        public string CustomerName { get; set; }
+
+        [JsonProperty("payerClientCode")]
+        public string PayerClientCode { get; set; }
+
+        [JsonProperty("datePaymentReceived")]
+        public string DatePaymentReceived { get; set; }
+    }
+
+    public class CellulantWebhookDTO
+    {
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("MSISDN")]
+        public string MSISDN { get; set; }
+
+        [JsonProperty("originalRequestCurrencyCode")]
+        public string OriginalRequestCurrencyCode { get; set; }
+
+        [JsonProperty("originalRequestAmount")]
+        public int OriginalRequestAmount { get; set; }
+
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("requestCurrencyCode")]
+        public string RequestCurrencyCode { get; set; }
+
+        [JsonProperty("requestAmount")]
+        public string RequestAmount { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("requestStatusCode")]
+        public int RequestStatusCode { get; set; }
+
+        [JsonProperty("requestStatusDescription")]
+        public string RequestStatusDescription { get; set; }
+
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("requestDate")]
+        public string RequestDate { get; set; }
+
+        [JsonProperty("currencyCode")]
+        public string CurrencyCode { get; set; }
+
+        [JsonProperty("amountPaid")]
+        public int AmountPaid { get; set; }
+
+        [JsonProperty("serviceChargeAmount")]
+        public int ServiceChargeAmount { get; set; }
+
+        [JsonProperty("payments")]
+        public List<Payment> Payments { get; set; }
+
+        [JsonProperty("failedPayments")]
+        public List<object> FailedPayments { get; set; }
+    }
+
+    public class CellulantPaymentResponse
+    {
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("statusCode")]
+        public string StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonProperty("receiptNumber")]
+        public string ReceiptNumber { get; set; }
+    }
 
 }

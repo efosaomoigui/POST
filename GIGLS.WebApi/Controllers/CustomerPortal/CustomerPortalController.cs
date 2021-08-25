@@ -236,6 +236,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        
+
         [HttpGet]
         [Route("gatewaycode")]
         public async Task<IServiceResponse<GatewayCodeResponse>> GetGatewayCode()
@@ -2621,5 +2623,34 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("checkoutencryption")]
+        public async Task<IServiceResponse<CellulantResponseDTO>> CheckOutEncryption(CellulantPayloadDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckoutEncryption(payload);
+
+                return new ServiceResponse<CellulantResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifypayment")]
+        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.VerifyAndValidatePayment(webhook);
+
+                return new ServiceResponse<PaymentResponse>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

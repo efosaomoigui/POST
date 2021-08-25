@@ -387,43 +387,43 @@ namespace GIGLS.Services.Implementation.Wallet
 
         #region Cellulant Payment Gateway
 
-        public async Task<PaystackWebhookDTO> VerifyAndValidatePayment(string reference)
+        public async Task<PaystackWebhookDTO> VerifyAndValidatePayment(CellulantWebhookDTO payload)
         {
-            FlutterWebhookDTO webhook = new FlutterWebhookDTO();
+            CellulantWebhookDTO webhook = new CellulantWebhookDTO();
 
-            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(payload.MerchantTransactionID);
 
             if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                webhook = await ProcessPaymentForWaybill(reference);
+                webhook = await ProcessPaymentForWaybill(payload);
             }
             else
             {
-                webhook = await ProcessPaymentForWallet(reference);
+                webhook = await ProcessPaymentForWallet(payload);
             }
 
             return ManageReturnResponse(webhook);
         }
 
-        private async Task<FlutterWebhookDTO> ProcessPaymentForWaybill(string referenceCode)
+        private async Task<CellulantWebhookDTO> ProcessPaymentForWaybill(CellulantWebhookDTO payload)
         {
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(referenceCode);
+            var verifyResult = payload;
 
-            if (verifyResult.Status.Equals("success"))
+            if (verifyResult.RequestStatusCode.Equals(178))
             {
-                if (verifyResult.data != null)
+                if (verifyResult.Payments != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
                         return verifyResult;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled)
+                    if (verifyResult.RequestStatusDescription.Equals("Request fully paid") && !paymentLog.IsWaybillSettled)
                     {
-                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
 
                         if (checkAmount)
                         {
@@ -447,8 +447,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         }
                     }
 
-                    paymentLog.TransactionStatus = verifyResult.data.Status;
-                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    paymentLog.TransactionStatus = verifyResult.RequestStatusCode.ToString();
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
                     await _uow.CompleteAsync();
                 }
             }
@@ -456,24 +456,24 @@ namespace GIGLS.Services.Implementation.Wallet
             return verifyResult;
         }
 
-        private async Task<FlutterWebhookDTO> ProcessPaymentForWallet(string reference)
+        private async Task<CellulantWebhookDTO> ProcessPaymentForWallet(CellulantWebhookDTO payload)
         {
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(reference);
+            var verifyResult = payload;
 
-            if (verifyResult.Status.Equals("success"))
+            if (verifyResult.RequestStatusCode.Equals(178))
             {
-                if (verifyResult.data != null)
+                if (verifyResult.Payments != null)
                 {
                     //get wallet payment log by reference code
-                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
                         return verifyResult;
 
-                    if (verifyResult.data.Status != null)
+                    if (verifyResult.RequestStatusDescription != null)
                     {
-                        verifyResult.data.Status = verifyResult.data.Status.ToLower();
+                        verifyResult.RequestStatusDescription = verifyResult.RequestStatusDescription.ToLower();
                     }
 
                     bool sendPaymentNotification = false;
@@ -483,9 +483,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     bool checkAmount = false;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWalletCredited)
+                    if (verifyResult.RequestStatusDescription.Equals("request fully paid") && !paymentLog.IsWalletCredited)
                     {
-                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
 
                         if (checkAmount)
                         {
@@ -530,8 +530,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         }
                     }
 
-                    paymentLog.TransactionStatus = verifyResult.data.Status;
-                    paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
+                    paymentLog.TransactionStatus = verifyResult.RequestStatusCode.ToString();
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
                     await _uow.CompleteAsync();
 
                     if (sendPaymentNotification)
@@ -573,12 +573,12 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(FlutterWebhookDTO verifyResult, int countryId)
+        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(CellulantWebhookDTO verifyResult, int countryId)
         {
             BonusAddOn result = new BonusAddOn
             {
                 Description = "Funding made through debit card.",
-                Amount = verifyResult.data.Amount
+                Amount = verifyResult.AmountPaid
             };
 
             if (verifyResult.data.Card.CardType != null)
