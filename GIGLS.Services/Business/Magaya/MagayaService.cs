@@ -2268,7 +2268,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                var shipmentItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => itemIDs.Contains(x.IntlShipmentRequestId)).ToList();
+                var shipmentItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => itemIDs.Contains(x.IntlShipmentRequestItemId)).ToList();
                 if (!shipmentItems.Any())
                 {
                     throw new GenericException("Shipment Item(s) does not exist", $"{(int)HttpStatusCode.NotFound}");
