@@ -367,6 +367,15 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
                                SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
                                SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
+                               SenderPhoneNumber = r.FirstOrDefault().SenderPhoneNumber,
+                               ReceiverCity = r.FirstOrDefault().ReceiverCity,
+                               ReceiverCountry = r.FirstOrDefault().ReceiverCountry,
+                               ReceiverCountryCode = r.FirstOrDefault().ReceiverCountryCode,
+                               ReceiverEmail = r.FirstOrDefault().ReceiverEmail,
+                               ReceiverPhoneNumber = r.FirstOrDefault().ReceiverPhoneNumber,
+                               ReceiverPostalCode = r.FirstOrDefault().ReceiverPostalCode,
+                               ReceiverStateOrProvinceCode = r.FirstOrDefault().ReceiverStateOrProvinceCode,
+                               ReceiverStationId = r.FirstOrDefault().SenderStationId
                            }).Take(5).ToList();
 
             return address;
