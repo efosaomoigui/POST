@@ -152,8 +152,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 if (accountDto[i].CreditDebitType == CreditDebitType.Credit)
                 {
-                    var des = accountDto[i].Description.Split(' ');
-                    accountDto[i].Waybill = des.LastOrDefault();
+                    if (string.IsNullOrWhiteSpace(accountDto[i].Waybill))
+                    {
+                        var des = accountDto[i].Description.Split(' ');
+                        accountDto[i].Waybill = des.LastOrDefault();
+                    }
                 }
             }
 
