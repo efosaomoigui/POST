@@ -714,7 +714,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         //Update shipment to shipment created
                         shipmentToUpdate.shipmentstatus = "Shipment created";
                         var userId = await _userService.GetCurrentUserId();
-                        var user = await _uow.User.GetUserById(userId);
+                        var user = await _uow.User.GetUserById(shipmentToUpdate.UserId);
                         if (user != null)
                         {
 
