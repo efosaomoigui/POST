@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         IQueryable<PreShipmentMobileDTO> GetAllBatchedPreShipment();
         Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID);
         Task<PreShipmentMobileDTO> GetPreshipmentMobileByWaybill(string waybill);
+        Task<CustomerDTO> GetBotUserWithPhoneNo(string phonenumber);
 
     }
 }
