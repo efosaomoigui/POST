@@ -689,28 +689,28 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 var customer = await _uow.Company.GetAsync(x => x.CustomerCode == preshipment.CustomerCode);
                 if (customer != null && customer.TransactionType == WalletTransactionType.BOT)
                 {
-                    //var nodePayload = new CreateShipmentNodeDTO()
-                    //{
-                    //    waybillNumber = preshipment.Waybill,
-                    //    customerId = preshipment.CustomerCode,
-                    //    locality = preshipment.SenderLocality,
-                    //    receiverAddress = preshipment.ReceiverAddress,
-                    //    vehicleType = preshipment.VehicleType,
-                    //    value = preshipment.Value,
-                    //    zone = preshipment.ZoneMapping,
-                    //    senderAddress = preshipment.SenderAddress,
-                    //    receiverLocation = new NodeLocationDTO()
-                    //    {
-                    //        lng = preshipment.ReceiverLng,
-                    //        lat = preshipment.ReceiverLat
-                    //    },
-                    //    senderLocation = new NodeLocationDTO()
-                    //    {
-                    //        lng = preshipment.SenderLng,
-                    //        lat = preshipment.SenderLat
-                    //    }
-                    //};
-                    //await _nodeService.CreateShipment(nodePayload);
+                    var nodePayload = new CreateShipmentNodeDTO()
+                    {
+                        waybillNumber = preshipment.Waybill,
+                        customerId = preshipment.CustomerCode,
+                        locality = preshipment.SenderLocality,
+                        receiverAddress = preshipment.ReceiverAddress,
+                        vehicleType = preshipment.VehicleType,
+                        value = preshipment.Value,
+                        zone = preshipment.ZoneMapping,
+                        senderAddress = preshipment.SenderAddress,
+                        receiverLocation = new NodeLocationDTO()
+                        {
+                            lng = preshipment.ReceiverLng,
+                            lat = preshipment.ReceiverLat
+                        },
+                        senderLocation = new NodeLocationDTO()
+                        {
+                            lng = preshipment.SenderLng,
+                            lat = preshipment.SenderLat
+                        }
+                    };
+                    await _nodeService.CreateShipment(nodePayload);
                     var shipmentToUpdate = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == paymentTransaction.Waybill);
                     if (shipmentToUpdate != null)
                     {
