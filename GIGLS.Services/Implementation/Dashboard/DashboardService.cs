@@ -1006,7 +1006,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             if (!dashboardFilterCriteria.StartDate.HasValue && !dashboardFilterCriteria.EndDate.HasValue)
             {
                 startDate = DateTime.Now.AddMonths(-2);
-                startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day);
+                startDate = new DateTime(startDate.Year, startDate.Month, 1);
                 dashboardFilterCriteria.StartDate = startDate;
                 dashboardFilterCriteria.EndDate = endDate;
             }
