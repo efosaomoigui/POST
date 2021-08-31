@@ -525,6 +525,7 @@ namespace GIGLS.Services.Implementation.Customers
                     msgObj.IsCoporate = true;
                     msgObj.CustomerCode = company.CustomerCode;
                     msgObj.Body = company.Password;
+                    msgObj.MessageTemplate = "CorporateEditDetails";
 
                     //first create customer on paystack if customer doesnt exist already
                     var nubanAcc = new CreateNubanAccountDTO()
