@@ -257,6 +257,7 @@ namespace GIGLS.Services.Implementation.Customers
                     msgObj.ToEmail = company.Email;
                     msgObj.IsCoporate = true;
                     msgObj.CustomerCode = newCompany.CustomerCode;
+                    msgObj.CustomerName = newCompany.Name;
                     msgObj.BankName = message.BankName;
                     msgObj.AccountName = message.AccountName;
                     msgObj.AccountNo = message.AccountNo;
