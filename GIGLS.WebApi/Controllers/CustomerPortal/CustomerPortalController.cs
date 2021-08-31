@@ -144,7 +144,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        
         [HttpPost]
         [Route("addwalletpaymentlog")]
         public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
@@ -159,7 +159,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        
         [HttpPost]
         [Route("addwaybillpaymentlog")]
         public async Task<IServiceResponse<object>> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDTO)
@@ -2623,7 +2623,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("checkoutencryption")]
         public async Task<IServiceResponse<CellulantResponseDTO>> CheckOutEncryption(CellulantPayloadDTO payload)
         {
@@ -2640,13 +2640,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("verifypayment")]
-        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        public async Task<IServiceResponse<CellulantPaymentResponse>> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.VerifyAndValidatePayment(webhook);
 
-                return new ServiceResponse<PaymentResponse>
+                return new ServiceResponse<CellulantPaymentResponse>
                 {
                     Object = result
                 };

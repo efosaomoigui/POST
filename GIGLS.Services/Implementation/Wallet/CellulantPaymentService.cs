@@ -143,7 +143,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    if(isAdmin == true || isAccount == true)
+                    if (isAdmin == true || isAccount == true)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
                     }
@@ -194,7 +194,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return transferDetailsDto;
         }
 
-        
+
 
         private async Task<string> GetServiceCentreCrAccount()
         {
@@ -770,9 +770,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
         {
-            string accessKey = "<YOUR_ACCESS_KEY>";
-            string ivKey = "<YOUR_IV_KEY>";
-            string secretKey = "<YOUR_SECRET_KEY>";
+            string accessKey = ConfigurationManager.AppSettings["CellulantAccessKey"];
+            string ivKey = ConfigurationManager.AppSettings["CellulantIVKey"];
+            string secretKey = ConfigurationManager.AppSettings["CellulantSecretKey"];
 
             ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
 
@@ -783,7 +783,27 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        
+        public async Task<string> TestCellulantPayment(CellulantPayloadDTO payload)
+        {
+            var encryp = await CheckoutEncryption(payload);
+
+            var url = $"https://developer.tingg.africa/checkout/v2/modal/?accessKey= {encryp.accessKey}&params={encryp.param}&countryCode={encryp.countryCode}";
+
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                if (encryp != null)
+                {
+
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    var response = await client.GetAsync(url);
+                    result = await response.Content.ReadAsStringAsync();
+
+                }
+            }
+            return result;
+        }
+
         #endregion
     }
 }
