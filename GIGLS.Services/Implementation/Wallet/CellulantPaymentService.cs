@@ -387,7 +387,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         #region Cellulant Payment Gateway
 
-        public async Task<PaystackWebhookDTO> VerifyAndValidatePayment(CellulantWebhookDTO payload)
+        public async Task<CellulantWebhookDTO> VerifyAndValidatePayment(CellulantWebhookDTO payload)
         {
             CellulantWebhookDTO webhook = new CellulantWebhookDTO();
 
@@ -402,7 +402,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 webhook = await ProcessPaymentForWallet(payload);
             }
 
-            return ManageReturnResponse(webhook);
+            return webhook;
         }
 
         private async Task<CellulantWebhookDTO> ProcessPaymentForWaybill(CellulantWebhookDTO payload)
@@ -509,15 +509,15 @@ namespace GIGLS.Services.Implementation.Wallet
                             }
 
                             //if pay was done using Master VIsa card, give some discount
-                            bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+                            //bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
                             //update the wallet
                             await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                             {
                                 WalletId = paymentLog.WalletId,
-                                Amount = bonusAddon.Amount,
+                                Amount = paymentLog.Amount,
                                 CreditDebitType = CreditDebitType.Credit,
-                                Description = bonusAddon.Description,
+                                Description = verifyResult.RequestStatusDescription,
                                 PaymentType = PaymentType.Online,
                                 PaymentTypeReference = paymentLog.Reference,
                                 UserId = customerId
@@ -539,10 +539,10 @@ namespace GIGLS.Services.Implementation.Wallet
                         await SendPaymentNotificationAsync(walletDto, paymentLog);
                     }
 
-                    if (bonusAddon.BonusAdded)
-                    {
-                        await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
-                    }
+                    //if (bonusAddon.BonusAdded)
+                    //{
+                    //    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                    //}
 
                     //Call Node API for subscription process
                     if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
@@ -573,60 +573,60 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        private async Task<BonusAddOn> ProcessBonusAddOnForCardType(CellulantWebhookDTO verifyResult, int countryId)
-        {
-            BonusAddOn result = new BonusAddOn
-            {
-                Description = "Funding made through debit card.",
-                Amount = verifyResult.AmountPaid
-            };
+        //private async Task<BonusAddOn> ProcessBonusAddOnForCardType(CellulantWebhookDTO verifyResult, int countryId)
+        //{
+        //    BonusAddOn result = new BonusAddOn
+        //    {
+        //        Description = "Funding made through debit card.",
+        //        Amount = verifyResult.AmountPaid
+        //    };
 
-            if (verifyResult.data.Card.CardType != null)
-            {
-                if (verifyResult.data.Card.CardType.Contains("visa"))
-                {
-                    bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
-                    if (isPresent)
-                    {
-                        result.Amount = await CalculateCardBonus(result.Amount, countryId);
-                        result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
-                        result.BonusAdded = true;
-                    }
-                }
-            }
+        //    if (verifyResult.data.Card.CardType != null)
+        //    {
+        //        if (verifyResult.data.Card.CardType.Contains("visa"))
+        //        {
+        //            bool isPresent = await IsTheCardInTheList(verifyResult.data.Card.CardBIN, countryId);
+        //            if (isPresent)
+        //            {
+        //                result.Amount = await CalculateCardBonus(result.Amount, countryId);
+        //                result.Description = $"{result.Description}. Bonus Added for using Visa Commercial Card";
+        //                result.BonusAdded = true;
+        //            }
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
-        {
-            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
-            if (global != null)
-            {
-                decimal bonusPercentage = decimal.Parse(global.Value);
-                decimal bonusValue = bonusPercentage / 100M;
-                decimal price = amount * bonusValue;
-                amount = amount + price;
-            }
-            return amount;
-        }
+        //private async Task<decimal> CalculateCardBonus(decimal amount, int countryId)
+        //{
+        //    var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardBonus.ToString() && s.CountryId == countryId);
+        //    if (global != null)
+        //    {
+        //        decimal bonusPercentage = decimal.Parse(global.Value);
+        //        decimal bonusValue = bonusPercentage / 100M;
+        //        decimal price = amount * bonusValue;
+        //        amount = amount + price;
+        //    }
+        //    return amount;
+        //}
 
-        private async Task<bool> IsTheCardInTheList(string bin, int countryId)
-        {
-            bool result = false;
-            var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
-            if (global != null)
-            {
-                int.TryParse(bin, out int binInt);
+        //private async Task<bool> IsTheCardInTheList(string bin, int countryId)
+        //{
+        //    bool result = false;
+        //    var global = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBusinessCardList.ToString() && s.CountryId == countryId);
+        //    if (global != null)
+        //    {
+        //        int.TryParse(bin, out int binInt);
 
-                List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
-                if (visaList.Contains(binInt))
-                {
-                    result = true;
-                }
-            }
-            return result;
-        }
+        //        List<int> visaList = new List<int>(Array.ConvertAll(global.Value.Split(','), int.Parse));
+        //        if (visaList.Contains(binInt))
+        //        {
+        //            result = true;
+        //        }
+        //    }
+        //    return result;
+        //}
 
         private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
         {
@@ -666,33 +666,33 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        private async Task SendVisaBonusNotificationAsync(BonusAddOn bonusAddon, FlutterWebhookDTO verifyResult, WalletDTO walletDto)
-        {
-            string body = $"{bonusAddon.Description} / Bin {verifyResult.data.Card.CardBIN} / Ref code {verifyResult.data.TX_Ref}  / Bank {verifyResult.data.Card.Brand}";
+        //private async Task SendVisaBonusNotificationAsync(BonusAddOn bonusAddon, FlutterWebhookDTO verifyResult, WalletDTO walletDto)
+        //{
+        //    string body = $"{bonusAddon.Description} / Bin {verifyResult.data.Card.CardBIN} / Ref code {verifyResult.data.TX_Ref}  / Bank {verifyResult.data.Card.Brand}";
 
-            var message = new MessageDTO()
-            {
-                Subject = "Visa Commercial Card Bonus",
-                CustomerCode = walletDto.CustomerEmail,
-                CustomerName = walletDto.CustomerName,
-                Body = body
-            };
+        //    var message = new MessageDTO()
+        //    {
+        //        Subject = "Visa Commercial Card Bonus",
+        //        CustomerCode = walletDto.CustomerEmail,
+        //        CustomerName = walletDto.CustomerName,
+        //        Body = body
+        //    };
 
-            //send a copy to chairman
-            var visaBonusEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBonusEmail.ToString() && s.CountryId == 1);
+        //    //send a copy to chairman
+        //    var visaBonusEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.VisaBonusEmail.ToString() && s.CountryId == 1);
 
-            if (visaBonusEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] emails = visaBonusEmail.Value.Split(',').ToArray();
+        //    if (visaBonusEmail != null)
+        //    {
+        //        //seperate email by comma and send message to those email
+        //        string[] emails = visaBonusEmail.Value.Split(',').ToArray();
 
-                foreach (string email in emails)
-                {
-                    message.ToEmail = email;
-                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
-                }
-            }
-        }
+        //        foreach (string email in emails)
+        //        {
+        //            message.ToEmail = email;
+        //            await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
+        //        }
+        //    }
+        //}
 
         private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
         {

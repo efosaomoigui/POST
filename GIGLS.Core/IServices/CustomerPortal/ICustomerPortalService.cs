@@ -241,6 +241,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
         Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
-        Task<PaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
+        Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
     }
 }

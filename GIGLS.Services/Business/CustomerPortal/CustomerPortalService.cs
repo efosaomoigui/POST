@@ -393,20 +393,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        private async Task<PaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
-        {
-            PaymentResponse response = new PaymentResponse();
-            var result = await _cellulantPaymentService.VerifyAndValidatePayment(webhook);
-
-            response.Result = result.Status;
-            response.Status = result.data.Status;
-            response.Message = result.Message;
-            response.GatewayResponse = result.data.Gateway_Response;
-            response.StatusCode = "183";
-            response.StatusDescription = "Payment processed successfully";
-            response.CheckoutRequestID = webhook.CheckoutRequestID;
-            return response;
-        }
+        
 
         public async Task<GatewayCodeResponse> GetGatewayCode()
         {
@@ -3964,9 +3951,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _cellulantPaymentService.CheckoutEncryption(payload);
         }
 
-        public async Task<PaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
-            PaymentResponse result = new PaymentResponse();
+            CellulantPaymentResponse result = new CellulantPaymentResponse();
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.MerchantTransactionID);
 
@@ -3987,9 +3974,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    result.Result = false;
-                    result.Message = "";
-                    result.GatewayResponse = "Waybill Payment Log Information does not exist";
+                    result.StatusCode = "180";
+                    result.StatusDescription = "Payment was not processed successfully";
+                    result.CheckoutRequestID = webhook.CheckoutRequestID;
                 }
             }
             else
@@ -4006,13 +3993,24 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    result.Result = false;
-                    result.Message = "";
-                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                    result.StatusCode = "180";
+                    result.StatusDescription = "Payment was not processed successfully";
+                    result.CheckoutRequestID = webhook.CheckoutRequestID;
                 }
             }
 
             return result;
+        }
+
+        private async Task<CellulantPaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
+        {
+            CellulantPaymentResponse response = new CellulantPaymentResponse();
+            var result = await _cellulantPaymentService.VerifyAndValidatePayment(webhook);
+
+            response.StatusCode = "183";
+            response.StatusDescription = "Payment processed successfully";
+            response.CheckoutRequestID = webhook.CheckoutRequestID;
+            return response;
         }
     }
 }

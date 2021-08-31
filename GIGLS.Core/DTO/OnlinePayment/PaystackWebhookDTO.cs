@@ -75,21 +75,6 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string GatewayResponse { get; set; }
         public string Status { get; set; }
         public bool ResponseStatus { get; set; }
-        //Cellulant Payment Response
-        [JsonProperty("checkoutRequestID")]
-        public int CheckoutRequestID { get; set; }
-
-        [JsonProperty("merchantTransactionID")]
-        public string MerchantTransactionID { get; set; }
-
-        [JsonProperty("statusCode")]
-        public string StatusCode { get; set; }
-
-        [JsonProperty("statusDescription")]
-        public string StatusDescription { get; set; }
-
-        [JsonProperty("receiptNumber")]
-        public string ReceiptNumber { get; set; }
     }
 
     public enum WaybillWalletPaymentType
