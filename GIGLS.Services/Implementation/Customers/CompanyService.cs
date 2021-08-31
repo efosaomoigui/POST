@@ -264,12 +264,13 @@ namespace GIGLS.Services.Implementation.Customers
                     _uow.Complete();
                     await _messageSenderService.SendConfigCorporateSignUpMessage(msgObj);
                 }
-
-                await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
-
-                if (company.Rank == Rank.Class)
+                if (newCompany.CompanyType == CompanyType.Ecommerce)
                 {
-                    await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                    if (company.Rank == Rank.Class)
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(newCompany);
+                    }
+                    await _messageSenderService.SendEcommerceRegistrationNotificationAsync(message);
                 }
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
