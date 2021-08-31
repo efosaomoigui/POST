@@ -18,5 +18,6 @@ namespace GIGLS.Core.IMessage
         Task<string> SendEmailShipmentARFHomeDeliveryAsync(MessageDTO message);
         Task<string> SendEmailShipmentARFTerminalPickupAsync(MessageDTO message);
         Task<string> SendEmailClassCustomerShipmentCreationAsync(MessageDTO message);
+        Task<string> SendEmailForReceivedItem(MessageDTO message);
     }
 }

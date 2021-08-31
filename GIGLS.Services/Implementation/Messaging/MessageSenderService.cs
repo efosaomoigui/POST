@@ -2305,5 +2305,25 @@ namespace GIGLS.Services.Implementation.Messaging
         //        await LogEmailMessage(messageDTO, result, ex.Message);
         //    }
         //}
+
+        public async Task SendEmailForReceivedItem(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailForReceivedItem(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
     }
 }

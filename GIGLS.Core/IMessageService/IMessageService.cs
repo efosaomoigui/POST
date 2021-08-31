@@ -36,5 +36,6 @@ namespace GIGLS.Core.IMessageService
         Task<string> SendWhatsappMessage(WhatsAppMessageDTO whatsappMessage);
         Task<string> ManageOptInOutForWhatsappNumber(WhatsappNumberDTO whatsappNumber);
         Task<string> SendWhatsappMessageTemporal(MessageType messageType, object tracking);
+        Task SendEmailForReceivedItem(MessageDTO messageDTO);
     }
 }
