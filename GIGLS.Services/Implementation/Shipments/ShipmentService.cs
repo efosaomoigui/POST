@@ -5427,7 +5427,7 @@ namespace GIGLS.Services.Implementation.Shipments
             firstDay = firstDay.AddHours(12).AddMinutes(00);
             lastDay = lastDay.ToUniversalTime();
             lastDay = lastDay.AddHours(23).AddMinutes(59);
-            var shipment = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.DateCreated >= firstDay && x.DateCreated <= lastDay && x.CustomerCode == customerCode);
+            var shipment = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.CustomerCode == customerCode);
             if (shipment != null)
             {
                 if (shipment.PaymentStatus != PaymentStatus.Paid)
