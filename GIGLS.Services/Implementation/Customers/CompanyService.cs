@@ -556,7 +556,7 @@ namespace GIGLS.Services.Implementation.Customers
                                     msgObj.AccountNo = company.NUBANAccountNo;
                                     msgObj.BankName = company.PrefferedNubanBank;
                                     msgObj.CustomerName = company.Name;
-                                    await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
+                                    await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
                                 }
                             }
                         }
