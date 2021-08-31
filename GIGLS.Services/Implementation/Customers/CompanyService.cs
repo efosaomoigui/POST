@@ -520,10 +520,11 @@ namespace GIGLS.Services.Implementation.Customers
                 if (companyDto.CompanyType == CompanyType.Corporate)
                 {
 
-                    var msgObj = new CoporateBankDetailMessageDTO();
+                    var msgObj = new MessageDTO();
                     msgObj.ToEmail = company.Email;
                     msgObj.IsCoporate = true;
                     msgObj.CustomerCode = company.CustomerCode;
+                    msgObj.Body = company.Password;
 
                     //first create customer on paystack if customer doesnt exist already
                     var nubanAcc = new CreateNubanAccountDTO()
@@ -575,7 +576,7 @@ namespace GIGLS.Services.Implementation.Customers
                                 msgObj.AccountNo = company.NUBANAccountNo;
                                 msgObj.BankName = company.PrefferedNubanBank;
                                 msgObj.CustomerName = company.Name;
-                                await _messageSenderService.SendGenericEmailMessage(MessageType.CNAN, msgObj);
+                                await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
                             }
                         }
                     }
