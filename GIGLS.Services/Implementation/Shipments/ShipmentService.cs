@@ -975,14 +975,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //if sender is corporate check for waybill charges
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    //check if this corporate user has an outstanding payment
+                    var outstanding = await CheckCorporateOutstandingPayment(shipmentDTO.CustomerCode);
+                    if (outstanding)
+                    {
+                        //var company = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                        throw new GenericException($"{shipmentDTO.Customer[0].Name} You currently have unsettled invoice. Please make payment to your NUBAN account number before shipment can be created ", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
-
-                // create the Invoice and GeneralLedger
-                await CreateInvoice(shipmentDTO);
-                CreateGeneralLedger(shipmentDTO);
-
                 //if sender is corporate check for waybill charges
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
                 {
@@ -995,15 +1002,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         _uow.WaybillCharge.AddRange(waybillCharges);
                     }
-
-                    //check if this corporate user has an outstanding payment
-                    var outstanding = await CheckCorporateOutstandingPayment(shipmentDTO.CustomerCode);
-                    if (outstanding)
-                    {
-                        //var company = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
-                        throw new GenericException($"{shipmentDTO.Customer[0].Name} You currently have unsettled invoice. Please make payment to your NUBAN account number before shipment can be created ", $"{(int)HttpStatusCode.Forbidden}");
-                    }
                 }
+                // create the Invoice and GeneralLedger
+                await CreateInvoice(shipmentDTO);
+                CreateGeneralLedger(shipmentDTO);
 
                 //QR Code
                 await GenerateDeliveryNumber(newShipment.Waybill);
