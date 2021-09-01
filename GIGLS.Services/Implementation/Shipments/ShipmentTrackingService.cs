@@ -227,7 +227,24 @@ namespace GIGLS.Services.Implementation.Shipments
             //send message
             if (messageType != MessageType.ARF)
             {
-                await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+                if(messageType != MessageType.AD)
+                {
+                    await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+                }
+                else
+                {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+                    if(messageType == MessageType.AD && shipment.AwaitingCollectionCount < 2)
+                    {
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+                    }
+                    // Check if scan is awaiting collection
+                    if (scanStatus.Equals(ShipmentScanStatus.AD))
+                    {
+                        shipment.AwaitingCollectionCount++;
+                    }
+                }
             }
             else
             {
