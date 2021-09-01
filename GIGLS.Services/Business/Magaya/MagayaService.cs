@@ -2327,7 +2327,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             DepartureEmail = deptEmail,
                             DepartureServiceCentre = deptCentre,
                             RequestNumber = request.RequestNumber ,
-                            ToEmail = request.CustomerEmail
+                            ToEmail = request.CustomerEmail,
+                            To = request.CustomerEmail
                         };
                         if (requestItems.Count == 1)
                         {
