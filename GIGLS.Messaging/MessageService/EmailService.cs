@@ -754,7 +754,7 @@ namespace GIGLS.Messaging.MessageService
                 { "Item", message.Item },
                 { "StoreName",message.Store },
                 { "Departure",message.DepartureServiceCentre },
-                { "DepartureEmail", message.DepartureEmail },
+                { "CE_DepartureEmail", message.DepartureEmail },
                 { "RemainingItemNumber", message.ItemCount.ToString() },
                 { "RequestNumber", message.RequestNumber },
             });
