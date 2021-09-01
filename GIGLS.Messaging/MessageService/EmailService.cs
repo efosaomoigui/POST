@@ -756,6 +756,7 @@ namespace GIGLS.Messaging.MessageService
                 { "Departure",message.DepartureServiceCentre },
                 { "DepartureEmail", message.DepartureEmail },
                 { "RemainingItemNumber", message.ItemCount.ToString() },
+                { "RequestNumber", message.RequestNumber },
             });
 
             var response = await client.SendEmailAsync(myMessage);
