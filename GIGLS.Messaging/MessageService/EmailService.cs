@@ -743,7 +743,7 @@ namespace GIGLS.Messaging.MessageService
             //set substitutions
             myMessage.AddSubstitutions(new Dictionary<string, string>
             {
-                { "USERNAME", message.CustomerName },
+                { "USERNAME", message.ToEmail },
                 { "CUSTOMERCODE", message.CustomerCode },
                 { "USERPASSWORD", message.Body }
             });
