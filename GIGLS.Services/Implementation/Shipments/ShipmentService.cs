@@ -4468,6 +4468,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                baseFilterCriteria.ServiceCentreId = await GetServiceCentreId();
                 var shipments = await _uow.Shipment.GetCargoMagayaShipments(baseFilterCriteria);
                 return shipments;
             }
@@ -4475,6 +4476,39 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private async Task<int> GetServiceCentreId()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var userClaims = await _userService.GetClaimsAsync(currentUserId);
+
+            string[] claimValue = null;
+            int serviceCenterId = 0;
+            foreach (var claim in userClaims)
+            {
+                if (claim.Type == "Privilege")
+                {
+                    claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                }
+            }
+
+            if (claimValue == null)
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            if (claimValue[0] == "ServiceCentre")
+            {
+                serviceCenterId = int.Parse(claimValue[1]);
+            }
+            else
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            return serviceCenterId;
         }
 
         public async Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
