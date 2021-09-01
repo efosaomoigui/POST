@@ -215,9 +215,30 @@ namespace GIGLS.Services.Implementation.Messaging
 
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
+
                     // Reduce receiver name logic
+                    var receiverName = string.Empty;
+                    var tempRecName = string.Empty;
+                    var splittitle = "mrs,mr,doc,doctor,master,engineer,eng,chief,prof,professor,miss,bar,barrister,cap,captain".Split(',');
                     var splittedName = invoice.ReceiverName.Split(' ');
-                    var receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
+                    var word = splittedName[0].ToLower(); // FOR DEBUG
+                    foreach (var item in splittitle)
+                    {
+                        if (item.Trim() == word.Trim())
+                        {
+                            tempRecName = splittedName.Length > 1 ? splittedName[0] + " " + splittedName[1] : invoice.ReceiverName;
+                            break;
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(tempRecName))
+                    {
+                        receiverName = tempRecName;
+                    }
+                    else
+                    {
+                        receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
+                    }
 
                     //map the array
                     strArray[0] = customerName;

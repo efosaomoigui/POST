@@ -1,6 +1,7 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -545,6 +546,33 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpPost]
+        [Route("internationalshipmentquote")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.GetInternationalshipmentQuote(quoteDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpGet, Route("allcountry")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var country = await _tickectMan.GetCountries();
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = country
+                };
+            });
+        }
+
+        [HttpPost]
         [Route("transferDetails")]
         public async Task<IServiceResponse<List<TransferDetailsDTO>>> GetTransferDetailsLogFilter(BaseFilterCriteria filterCriteria)
         {
@@ -570,6 +598,20 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<List<TransferDetailsDTO>>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getpricequote")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceQoute(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _tickectMan.GetPriceQoute(PreshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
                 };
             });
         }

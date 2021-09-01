@@ -101,29 +101,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 //5.3 update Shipment Items
                 originalShipment.ShipmentItems = shipmentDTO.ShipmentItems;
 
-                //if (serviceCenters.Length == 1 && (serviceCenters[0] != shipmentDTO.DestinationServiceCentreId))
-                //{
-                //    for (int i = 0; i < shipmentDTO.ShipmentItems.Count; i++)
-                //    {
-                //        originalShipment.ShipmentItems[i].Price = 0;
-                //    }
-                //    //5.4 update TotalPrice and GrandTotal
-                //    originalShipment.Total = 0;
-                //    originalShipment.GrandTotal = 0;
-                //    originalShipment.Vat = 0;
-                //    originalShipment.vatvalue_display = 0;
-                //    originalShipment.Insurance = 0;
-                //}
-                //else
-                //{
-                //    //5.4 update TotalPrice and GrandTotal
-                //    originalShipment.Total = shipmentDTO.Total;
-                //    originalShipment.GrandTotal = shipmentDTO.GrandTotal;
-                //}
-
-                //5.4 update TotalPrice and GrandTotal
-                originalShipment.Total = shipmentDTO.Total;
-                originalShipment.GrandTotal = shipmentDTO.GrandTotal;
+                if (serviceCenters.Length == 1 && (serviceCenters[0] != shipmentDTO.DestinationServiceCentreId) && originalDestinationId == shipmentDTO.DestinationServiceCentreId)
+                {
+                    for (int i = 0; i < shipmentDTO.ShipmentItems.Count; i++)
+                    {
+                        originalShipment.ShipmentItems[i].Price = 0;
+                    }
+                    //5.4 update TotalPrice and GrandTotal
+                    originalShipment.Total = 0;
+                    originalShipment.GrandTotal = 0;
+                    originalShipment.Vat = 0;
+                    originalShipment.vatvalue_display = 0;
+                    originalShipment.Insurance = 0;
+                }
+                else
+                {
+                    //5.4 update TotalPrice and GrandTotal
+                    originalShipment.Total = shipmentDTO.Total;
+                    originalShipment.GrandTotal = shipmentDTO.GrandTotal;
+                }
 
                 //for international shipment
                 if (shipmentDTO.Waybill.Contains("AWR"))

@@ -26,6 +26,8 @@ using GIGLS.Core.IServices.TickectMan;
 using GIGLS.Core.IServices.ServiceCentres;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.DTO.DHL;
+using AutoMapper;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -49,11 +51,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ILGAService _lgaService;
         private readonly ISpecialDomesticPackageService _specialPackageService;
         private readonly ICellulantPaymentService _cellulantService;
+        private readonly ICustomerPortalService _customerPortalService;
 
-        public TickectManService(IUnitOfWork uow,IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
+        public TickectManService(IUnitOfWork uow, IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
            IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService, ICountryService countryService, ILGAService lgaService,
-           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService, ICellulantPaymentService cellulantService) 
+           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService, ICellulantPaymentService cellulantService, ICustomerPortalService customerPortalService)
         {
             _uow = uow;
             _deliveryOptionPriceService = deliveryOptionPriceService;
@@ -72,7 +75,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _specialPackageService = specialPackageService;
             _invoiceService = invoiceService;
             _cellulantService = cellulantService;
-
+            _customerPortalService = customerPortalService;
         }
 
         public async Task<ShipmentDTO> AddShipment(NewShipmentDTO newShipmentDTO)
@@ -110,7 +113,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return shipment;
         }
 
-       
+
         public async Task<IEnumerable<CountryDTO>> GetActiveCountries()
         {
             return await _countryService.GetActiveCountries();
@@ -129,7 +132,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<IEnumerable<DeliveryOptionPriceDTO>> GetDeliveryOptionPrices()
         {
             var deliveryOption = await _deliveryOptionPriceService.GetDeliveryOptionPrices();
-           // deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
+            // deliveryOption = deliveryOption.Where(x => x.Price > 0).ToList();
             return deliveryOption;
         }
 
@@ -140,7 +143,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<NewPricingDTO> GetGrandPriceForShipment(NewShipmentDTO newShipmentDTO)
         {
-           return await _pricing.GetGrandPriceForShipment(newShipmentDTO);
+            return await _pricing.GetGrandPriceForShipment(newShipmentDTO);
         }
 
 
@@ -255,8 +258,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
-                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor; 
-                
+                shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+
                 foreach (var item in shipment.ShipmentItems)
                 {
                     item.Price = Math.Round(item.Price * factor) / factor;
@@ -287,7 +290,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto)
         {
-          return  await _paymentService.ProcessPayment(paymentDto);
+            return await _paymentService.ProcessPayment(paymentDto);
         }
 
         public async Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
@@ -308,7 +311,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<ServiceCentreDTO> GetServiceCentreById(int centreid)
         {
-            
+
             return await _serviceCentreService.GetServiceCentreById(centreid);
         }
 
@@ -394,6 +397,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
         {
             return await _cellulantService.GetTransferDetailsByAccountNumber(accountNumber);
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        {
+            return await _countryService.GetCountries();
+        }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            try
+            {
+                var shipment = Mapper.Map<InternationalShipmentDTO>(quoteDTO);
+                return await _shipmentService.GetInternationalShipmentPrice(shipment);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment)
+        {
+            return await _customerPortalService.GetPriceQoute(preShipment);
         }
     }
 }
