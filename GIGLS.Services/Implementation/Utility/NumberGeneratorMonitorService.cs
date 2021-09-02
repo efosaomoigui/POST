@@ -286,14 +286,14 @@ namespace GIGLS.Services.Implementation.Utility
            // refNo = $"{customerCode.Remove(2)}{startDate.Day}{startYear}{endDate.Day}{endYear}{datewithTime}";
             if (customerInvoice == null)
             {
-                refNo = $"{customerCode}0{startDate.Month}0001";
+                refNo = $"{customerCode}{startDate.Month}{refNo.PadLeft(3, '0')}1";
             }
             else
             {
-                var lastRef = $"{customerCode}0{startDate.Month}";
+                var lastRef = $"{customerCode}{startDate.Month}";
                 var newRef = Convert.ToInt32(customerInvoice.InvoiceRefNo.Substring(lastRef.Length));
                 newRef = newRef + 1;
-                refNo = $"{customerCode}0{startDate.Month}000{newRef}";
+                refNo = $"{customerCode}{startDate.Month}{refNo.PadLeft(3, '0')}{newRef}";
             }
             return refNo;
         }
