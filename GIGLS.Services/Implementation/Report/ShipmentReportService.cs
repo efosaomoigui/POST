@@ -997,9 +997,9 @@ namespace GIGLS.Services.Implementation.Report
         {
             bool res = false;
             var now = DateTime.Today;
-           // var month = new DateTime(now.Year, now.Month, 1);
+            // var month = new DateTime(now.Year, now.Month, 1);
             var firstDay = new DateTime(now.Year, now.Month, 1);
-            var lastDay = firstDay.AddDays(-1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
             //var now = DateTime.Now;
             //DateTime firstDay = new DateTime(now.Year, now.AddMonths(-1), 1);
             //DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
