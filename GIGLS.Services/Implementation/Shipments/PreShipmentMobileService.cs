@@ -46,6 +46,7 @@ using GIGLS.Core.DTO.Node;
 using Newtonsoft.Json;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -76,6 +77,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly INodeService _nodeService;
         private readonly IPaymentService _paymentService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly IServiceCentreService _centreService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -84,7 +86,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
-            INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService)
+            INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -111,6 +113,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _nodeService = nodeService;
             _paymentService = paymentService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _centreService = centreService;
             MapperConfig.Initialize();
         }
 
@@ -5092,11 +5095,11 @@ namespace GIGLS.Services.Implementation.Shipments
                                     }
 
                                     //Fix For Home Delivery for Lagos, Abuja , Port Harcourt For now
-                                    if (preshipmentmobile.ReceiverStationId == 4 || preshipmentmobile.ReceiverStationId == 3 || preshipmentmobile.ReceiverStationId == 30)
-                                    {
-                                        var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
-                                        detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
-                                    }
+                                    //if (preshipmentmobile.ReceiverStationId == 4 || preshipmentmobile.ReceiverStationId == 3 || preshipmentmobile.ReceiverStationId == 30)
+                                    //{
+                                    //    var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
+                                    //    detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                    //}
 
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
@@ -5107,6 +5110,18 @@ namespace GIGLS.Services.Implementation.Shipments
                                     if (!string.IsNullOrWhiteSpace(detail.ReceiverAddress))
                                     {
                                         preshipmentmobile.ReceiverAddress = detail.ReceiverAddress;
+                                    }
+
+                                    var destinationSC = await _centreService.GetServiceCentreById(preshipmentmobile.ReceiverStationId);
+                                    //Get SuperCentre for Home Delivery
+                                    if (preshipmentmobile.IsHomeDelivery)
+                                    {
+                                        //also check that the destination is not a hub
+                                        if (destinationSC.IsHUB != true)
+                                        {
+                                            var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
+                                            detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                        }
                                     }
 
                                     var MobileShipment = new ShipmentDTO
