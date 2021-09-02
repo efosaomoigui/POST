@@ -1457,6 +1457,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 var now = DateTime.Now;
                 DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                firstDay = firstDay.AddMonths(-1);
                 DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
                 filter.StartDate = firstDay;
                 filter.EndDate = lastDay;

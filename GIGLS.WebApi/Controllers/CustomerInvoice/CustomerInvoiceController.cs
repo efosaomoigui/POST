@@ -44,7 +44,7 @@ namespace GIGLS.WebApi.Controllers.CustomerInvoice
                 using (var client = new System.Net.Http.HttpClient())
                 {
                     //setup client
-                    //string apiBaseUri = "http://localhost/giglsresourceapi/";
+                   // string apiBaseUri = "http://localhost/giglsresourceapi/";
                     string apiBaseUri = "https://agilitysystemapidevm.azurewebsites.net/";
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();
