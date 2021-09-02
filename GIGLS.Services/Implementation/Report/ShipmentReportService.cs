@@ -1003,6 +1003,13 @@ namespace GIGLS.Services.Implementation.Report
             //var now = DateTime.Now;
             //DateTime firstDay = new DateTime(now.Year, now.AddMonths(-1), 1);
             //DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+            if (firstDay != null && lastDay != null)
+            {
+                firstDay = firstDay.ToUniversalTime();
+                firstDay = firstDay.AddHours(12).AddMinutes(00);
+                lastDay = lastDay.ToUniversalTime();
+                lastDay = lastDay.AddHours(23).AddMinutes(59);
+            }
             var invoice = await _uow.CustomerInvoice.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode && x.DateCreated >= firstDay && x.DateCreated <= lastDay);
             if (invoice != null)
             {
