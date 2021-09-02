@@ -70,20 +70,6 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
             });
         }
 
-        [HttpPost]
-        [Route("cellulantpayment")]
-        public async Task<IServiceResponse<string>> TestPayment(CellulantPayloadDTO payload)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _cellulantService.TestCellulantPayment(payload);
-
-                return new ServiceResponse<string>
-                {
-                    Object = result
-                };
-            });
-        }
     }
 }
 
