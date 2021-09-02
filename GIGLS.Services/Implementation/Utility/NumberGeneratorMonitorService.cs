@@ -293,7 +293,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var lastRef = $"{customerCode}{startDate.Month}";
                 var newRef = Convert.ToInt32(customerInvoice.InvoiceRefNo.Substring(lastRef.Length));
                 newRef = newRef + 1;
-                refNo = $"{customerCode}{startDate.Month}{refNo.PadLeft(3, '0')}{newRef}";
+                refNo = $"{customerCode}{startDate.Month}{newRef.ToString().PadLeft(3, '0')}";
             }
             return refNo;
         }
