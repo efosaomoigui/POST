@@ -376,7 +376,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                ReceiverPostalCode = r.FirstOrDefault().ReceiverPostalCode,
                                ReceiverStateOrProvinceCode = r.FirstOrDefault().ReceiverStateOrProvinceCode,
                                ReceiverStationId = r.FirstOrDefault().SenderStationId,
-                               DestinationCountryId = r.FirstOrDefault().DestinationCountryId
+                               DestinationCountryId = r.FirstOrDefault().DestinationCountryId ,
+                               ReceiverState = r.FirstOrDefault().ReceiverState
                            }).ToList();
 
             return address;

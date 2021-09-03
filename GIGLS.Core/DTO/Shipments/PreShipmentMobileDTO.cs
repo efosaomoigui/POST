@@ -418,6 +418,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderName { get; set; }
         public string SenderLGA { get; set; }
         public int DestinationCountryId { get; set; }
+        public string ReceiverState { get; set; }
         public DateTime DateCreated { get; set; }
     }
 
