@@ -18,6 +18,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter);
         Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
         Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
-        Task<CellulantWebhookDTO> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
+        Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
     }
 }

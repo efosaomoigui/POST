@@ -4004,13 +4004,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         private async Task<CellulantPaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
         {
-            CellulantPaymentResponse response = new CellulantPaymentResponse();
             var result = await _cellulantPaymentService.VerifyAndValidatePayment(webhook);
 
-            response.StatusCode = "183";
-            response.StatusDescription = "Payment processed successfully";
-            response.CheckoutRequestID = webhook.CheckoutRequestID;
-            return response;
+            return result;
         }
     }
 }

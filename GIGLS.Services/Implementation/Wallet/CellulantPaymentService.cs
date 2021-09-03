@@ -387,25 +387,25 @@ namespace GIGLS.Services.Implementation.Wallet
 
         #region Cellulant Payment Gateway
 
-        public async Task<CellulantWebhookDTO> VerifyAndValidatePayment(CellulantWebhookDTO payload)
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO payload)
         {
-            CellulantWebhookDTO webhook = new CellulantWebhookDTO();
+            CellulantPaymentResponse response = new CellulantPaymentResponse();
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(payload.MerchantTransactionID);
 
             if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
             {
-                webhook = await ProcessPaymentForWaybill(payload);
+                response = await ProcessPaymentForWaybill(payload);
             }
             else
             {
-                webhook = await ProcessPaymentForWallet(payload);
+                response = await ProcessPaymentForWallet(payload);
             }
 
-            return webhook;
+            return response;
         }
 
-        private async Task<CellulantWebhookDTO> ProcessPaymentForWaybill(CellulantWebhookDTO payload)
+        private async Task<CellulantPaymentResponse> ProcessPaymentForWaybill(CellulantWebhookDTO payload)
         {
             //1. verify the payment 
             var verifyResult = payload;
@@ -418,7 +418,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
-                        return verifyResult;
+                        return new CellulantPaymentResponse
+                        {
+                            StatusCode = "180",
+                            StatusDescription = "Payment was not processed successfully",
+                            CheckoutRequestID = payload.CheckoutRequestID
+                        };
 
                     //2. if the payment successful
                     if (verifyResult.RequestStatusDescription.Equals("Request fully paid") && !paymentLog.IsWaybillSettled)
@@ -447,16 +452,21 @@ namespace GIGLS.Services.Implementation.Wallet
                         }
                     }
 
-                    paymentLog.TransactionStatus = verifyResult.RequestStatusCode.ToString();
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
                     paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
                     await _uow.CompleteAsync();
                 }
             }
 
-            return verifyResult;
+            return new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID
+            };
         }
 
-        private async Task<CellulantWebhookDTO> ProcessPaymentForWallet(CellulantWebhookDTO payload)
+        private async Task<CellulantPaymentResponse> ProcessPaymentForWallet(CellulantWebhookDTO payload)
         {
             //1. verify the payment 
             var verifyResult = payload;
@@ -469,7 +479,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
-                        return verifyResult;
+                        return new CellulantPaymentResponse
+                        {
+                            StatusCode = "180",
+                            StatusDescription = "Payment was not processed successfully",
+                            CheckoutRequestID = payload.CheckoutRequestID
+                        };
 
                     if (verifyResult.RequestStatusDescription != null)
                     {
@@ -549,7 +564,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
-            return verifyResult;
+            return new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID
+            };
         }
 
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
@@ -622,6 +642,26 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return false;
+        }
+
+        private string ProcessStatusCode(int code)
+        {
+            switch (code)
+            {
+                case 129:
+                    return "Request has expired with no partial payment received";
+                case 176:
+                    return "Partial payment made for the request and has been marked as closed.";
+                case 178:
+                    return "Full payment made for the request";
+                case 179:
+                    return "Request has expired with one or more partial payments made.";
+                case 99:
+                    return "A failed payment has been received for this request. Request is still open to receive payments";
+                default:
+                    break;
+            }
+            return string.Empty;
         }
 
         public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
