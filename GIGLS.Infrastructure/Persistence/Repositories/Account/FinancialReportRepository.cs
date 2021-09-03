@@ -543,12 +543,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             var summary =  _context.Database.SqlQuery<OutboundFinancialReportDTO>("OutboundShipmentsReport " +
                "@StartDate, @EndDate, @CountryId, @ParamType",
                param).AsQueryable();
-            List<OutboundFinancialReportDTO> result = new List<OutboundFinancialReportDTO>();
+            
             if(accountFilterCriteria.PaymentStatus != null)
             {
-                result = summary.Where(x => x.PaymentStatus == accountFilterCriteria.PaymentStatus).ToList();
+                summary = summary.Where(x => x.PaymentStatus == accountFilterCriteria.PaymentStatus);
             }
-            return await Task.FromResult(result);
+            return await Task.FromResult(summary.OrderByDescending(x => x.DateCreated).ToList());
         }
 
         public async Task<decimal> GetCorporateIncomeBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria)
