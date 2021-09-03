@@ -417,6 +417,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderPhoneNumber { get; set; }
         public string SenderName { get; set; }
         public string SenderLGA { get; set; }
+        public int DestinationCountryId { get; set; }
         public DateTime DateCreated { get; set; }
     }
 

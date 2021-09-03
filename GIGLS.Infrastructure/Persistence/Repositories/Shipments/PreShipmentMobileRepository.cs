@@ -344,7 +344,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID,  bool isIntl)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
             if (isIntl)
             {
                 var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
@@ -354,7 +354,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var address = (from r in preShipments
                            select new AddressDTO()
                            {
-                               ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
+                               ReceiverAddress = r.Key,
                                ReceiverName = r.FirstOrDefault().ReceiverName,
                                ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
                                ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
@@ -375,8 +375,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                ReceiverPhoneNumber = r.FirstOrDefault().ReceiverPhoneNumber,
                                ReceiverPostalCode = r.FirstOrDefault().ReceiverPostalCode,
                                ReceiverStateOrProvinceCode = r.FirstOrDefault().ReceiverStateOrProvinceCode,
-                               ReceiverStationId = r.FirstOrDefault().SenderStationId
-                           }).Take(5).ToList();
+                               ReceiverStationId = r.FirstOrDefault().SenderStationId,
+                               DestinationCountryId = r.FirstOrDefault().DestinationCountryId
+                           }).ToList();
 
             return address;
         }
