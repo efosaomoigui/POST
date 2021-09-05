@@ -1447,6 +1447,27 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = intlDTO.CustomerEmail;
             }
 
+            if (obj is CoporateBankDetailMessageDTO)
+            {
+                var strArray = new string[]
+                  {
+                    "Customer Name",
+                    ""
+                  };
+                var msgDTO = (CoporateBankDetailMessageDTO)obj;
+                //A. map the array
+                strArray[0] = msgDTO.CustomerName;
+                if (msgDTO.IsCoporate)
+                {
+                    strArray[1] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
+                }
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = msgDTO.ToEmail;
+            }
+
             return await Task.FromResult(verifySendEmail);
         }
 
@@ -2342,5 +2363,28 @@ namespace GIGLS.Services.Implementation.Messaging
                 await LogEmailMessage(messageDTO, result, ex.Message);
             }
         }
+
+        public async Task SendConfigCorporateNubanAccMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateNubanAccMessage(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
     }
 }

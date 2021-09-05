@@ -522,6 +522,14 @@ namespace GIGLS.Services.Implementation.Customers
 
                 if (companyDto.CompanyType == CompanyType.Corporate)
                 {
+
+                    var msgObj = new MessageDTO();
+                    msgObj.ToEmail = company.Email;
+                    msgObj.IsCoporate = true;
+                    msgObj.CustomerCode = company.CustomerCode;
+                    msgObj.Body = company.Password;
+                    msgObj.MessageTemplate = "CorporateEditDetails";
+
                     //first create customer on paystack if customer doesnt exist already
                     var nubanAcc = new CreateNubanAccountDTO()
                     {
@@ -547,6 +555,12 @@ namespace GIGLS.Services.Implementation.Customers
                                 {
                                     company.PrefferedNubanBank = companyDto.PrefferedNubanBank;
                                     company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                    company.AccountName = customerNubanAccount.data.account_name;
+                                    msgObj.AccountName = company.NUBANCustomerName;
+                                    msgObj.AccountNo = company.NUBANAccountNo;
+                                    msgObj.BankName = company.PrefferedNubanBank;
+                                    msgObj.CustomerName = company.Name;
+                                    await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
                                 }
                             }
                         }
@@ -561,6 +575,12 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 company.PrefferedNubanBank = company.PrefferedNubanBank;
                                 company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                company.NUBANCustomerName = customerNubanAccount.data.account_name;
+                                msgObj.AccountName = company.NUBANCustomerName;
+                                msgObj.AccountNo = company.NUBANAccountNo;
+                                msgObj.BankName = company.PrefferedNubanBank;
+                                msgObj.CustomerName = company.Name;
+                                await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
                             }
                         }
                     }

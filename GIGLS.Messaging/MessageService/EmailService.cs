@@ -771,5 +771,52 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
+
+        private async Task<string> ConfigCorporateNubanAccMessage(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Welcome to GIG Logistics";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "USERNAME", message.CustomerName },
+                { "CUSTOMERCODE", message.CustomerCode },
+                { "USERPASSWORD", message.Body },
+                { "ACCOUNTNUMBER", message.AccountNo },
+                { "ACCOUNTNAME", message.AccountName },
+                { "BANKNAME", message.BankName }
+            });
+          
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        public async Task<string> SendConfigCorporateNubanAccMessage(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigCorporateNubanAccMessage(message);
+            }
+            return result;
+        }
     }
 }
