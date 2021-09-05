@@ -545,7 +545,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         }
                     }
 
-                    paymentLog.TransactionStatus = verifyResult.RequestStatusCode.ToString();
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
                     paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
                     await _uow.CompleteAsync();
 
