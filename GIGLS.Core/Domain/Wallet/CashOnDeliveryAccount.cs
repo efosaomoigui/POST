@@ -17,6 +17,8 @@ namespace GIGLS.Core.Domain.Wallet
         public CODStatus CODStatus { get; set; }
 
         public int CountryId { get; set; }
+        [MaxLength(100), MinLength(5)]
+        public string Waybill { get; set; }
     }
 
     public class CashOnDeliveryRegisterAccount : BaseDomain, IAuditable
