@@ -1336,7 +1336,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //To get bonus Details
                 if (customerObj.Rank == Rank.Class)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1345,7 +1345,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 }
                 else if (customerObj.Rank == Rank.Basic)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.NormalCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.BasicRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1929,7 +1929,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         MessageTemplate = "ClassCustomerShipmentCreation"
                     };
 
-                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == customer.UserActiveCountryId);
                     if (globalProperty != null)
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
