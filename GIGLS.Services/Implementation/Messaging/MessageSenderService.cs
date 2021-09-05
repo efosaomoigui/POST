@@ -2326,5 +2326,21 @@ namespace GIGLS.Services.Implementation.Messaging
         //        await LogEmailMessage(messageDTO, result, ex.Message);
         //    }
         //}
+
+        public async Task SendConfigCorporateSignUpMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateSignUpMessage(messageDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
     }
 }
