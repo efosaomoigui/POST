@@ -20,5 +20,6 @@ namespace GIGLS.Core.IMessage
         Task<string> SendEmailClassCustomerShipmentCreationAsync(MessageDTO message);
         Task<string> SendConfigCorporateSignUpMessage(MessageDTO message);
         Task<string> SendConfigCorporateNubanAccMessage(MessageDTO message);
+        Task<string> SendEmailForReceivedItem(MessageDTO message);
     }
 }

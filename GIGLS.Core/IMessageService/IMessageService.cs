@@ -38,5 +38,6 @@ namespace GIGLS.Core.IMessageService
         Task<string> SendWhatsappMessageTemporal(MessageType messageType, object tracking);
         Task SendConfigCorporateSignUpMessage(MessageDTO messageDTO);
         Task SendConfigCorporateNubanAccMessage(MessageDTO messageDTO);
+        Task SendEmailForReceivedItem(MessageDTO messageDTO);
     }
 }
