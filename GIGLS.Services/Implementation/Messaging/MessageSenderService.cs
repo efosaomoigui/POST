@@ -216,6 +216,30 @@ namespace GIGLS.Services.Implementation.Messaging
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
 
+                    // Reduce receiver name logic
+                    var receiverName = string.Empty;
+                    var tempRecName = string.Empty;
+                    var splittitle = "mrs,mr,doc,doctor,master,engineer,eng,chief,prof,professor,miss,bar,barrister,cap,captain".Split(',');
+                    var splittedName = invoice.ReceiverName.Split(' ');
+                    var word = splittedName[0].ToLower(); // FOR DEBUG
+                    foreach (var item in splittitle)
+                    {
+                        if (item.Trim() == word.Trim())
+                        {
+                            tempRecName = splittedName.Length > 1 ? splittedName[0] + " " + splittedName[1] : invoice.ReceiverName;
+                            break;
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(tempRecName))
+                    {
+                        receiverName = tempRecName;
+                    }
+                    else
+                    {
+                        receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
+                    }
+
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = invoice.Waybill;
@@ -224,7 +248,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[4] = invoice.ReceiverAddress;
                     strArray[5] = demurrageDayCount;
                     strArray[6] = demurragePrice;
-                    strArray[7] = invoice.ReceiverName;
+                    strArray[7] = receiverName;
                     strArray[8] = invoice.Description;
                     strArray[9] = invoice.GrandTotal.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
@@ -816,6 +840,25 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     // handle IndividualCustomers
                     var customer = await _uow.IndividualCustomer.GetAsync(customerId);
+
+                    //Get user by customer code
+                    var user = await _uow.User.GetUserByChannelCode(customer.CustomerCode);
+                    //Update individual customer first and last name if user is not null
+                    //If names are different
+                    if(user != null)
+                    {
+                        if(customer.FirstName != user.FirstName)
+                        {
+                            customer.FirstName = user.FirstName;
+                        }
+
+                        if (customer.LastName != user.LastName)
+                        {
+                            customer.LastName = user.LastName;
+                        }
+                        _uow.Complete();
+                    }
+
                     IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
 
                     //get all countries and set the country name
@@ -1149,7 +1192,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[2] = msgDTO.CustomerCode;
                 if (msgDTO.IsCoporate)
                 {
-                    strArray[3] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}"; 
+                    strArray[3] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
                 }
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -1293,7 +1336,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //To get bonus Details
                 if (customerObj.Rank == Rank.Class)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1302,7 +1345,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 }
                 else if (customerObj.Rank == Rank.Basic)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.NormalCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.BasicRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1402,6 +1445,27 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.To = intlDTO.CustomerEmail;
                 messageDTO.ToEmail = intlDTO.CustomerEmail;
+            }
+
+            if (obj is CoporateBankDetailMessageDTO)
+            {
+                var strArray = new string[]
+                  {
+                    "Customer Name",
+                    ""
+                  };
+                var msgDTO = (CoporateBankDetailMessageDTO)obj;
+                //A. map the array
+                strArray[0] = msgDTO.CustomerName;
+                if (msgDTO.IsCoporate)
+                {
+                    strArray[1] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
+                }
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = msgDTO.ToEmail;
             }
 
             return await Task.FromResult(verifySendEmail);
@@ -1574,9 +1638,19 @@ namespace GIGLS.Services.Implementation.Messaging
         {
             string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
 
+            //Get Customer details
+            //get CustomerDetails 
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
             var messageDTO = new MessageDTO()
             {
-                CustomerName = shipmentDto.CustomerFirstName,
+                CustomerName = customerObj.FirstName,
                 IntlMessage = new IntlMessageDTO()
                 {
                     Description = shipmentDto.ItemDetails,
@@ -1876,7 +1950,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         MessageTemplate = "ClassCustomerShipmentCreation"
                     };
 
-                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == customer.UserActiveCountryId);
                     if (globalProperty != null)
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
@@ -2069,7 +2143,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     whatsAppMessage.RecipientWhatsapp = whatsAppMessage.RecipientWhatsapp.Replace("+", string.Empty);
                 }
-                
+
                 var getConsent = await GetConsentDetails(whatsAppMessage.RecipientWhatsapp);
 
                 if (!getConsent.Contains("success"))
@@ -2176,7 +2250,7 @@ namespace GIGLS.Services.Implementation.Messaging
             return true;
         }
         //Send Whatsapp message using ARF sms format for Home delivery terminal pickup
-        public async Task<string> SendWhatsappMessageTemporal( MessageType messageType, object tracking)
+        public async Task<string> SendWhatsappMessageTemporal(MessageType messageType, object tracking)
         {
             var result = "";
 
@@ -2273,5 +2347,64 @@ namespace GIGLS.Services.Implementation.Messaging
         //        await LogEmailMessage(messageDTO, result, ex.Message);
         //    }
         //}
+
+        public async Task SendConfigCorporateSignUpMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateSignUpMessage(messageDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        public async Task SendConfigCorporateNubanAccMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateNubanAccMessage(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+
+        public async Task SendEmailForReceivedItem(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailForReceivedItem(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
     }
 }

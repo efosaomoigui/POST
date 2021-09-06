@@ -27,6 +27,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO;
+using GIGLS.Core.IServices.Customers;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -40,11 +41,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IMessageSenderService _messageSenderService;
         private readonly IFinancialReportService _financialReportService;
         private readonly INodeService _nodeService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INodeService nodeService)
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INodeService nodeService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _userService = userService;
@@ -54,6 +56,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             _messageSenderService = messageSenderService;
             _financialReportService = financialReportService;
             _nodeService = nodeService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
 
             MapperConfig.Initialize();
         }
@@ -714,10 +717,31 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         //Update shipment to shipment created
                         shipmentToUpdate.shipmentstatus = "Shipment created";
                         var userId = await _userService.GetCurrentUserId();
-                        var user = await _uow.User.GetUserById(userId);
-                        if (user != null)
-                        {
 
+                        var user = await _uow.PreShipmentMobile.GetBotUserWithPhoneNo(shipmentToUpdate.SenderPhoneNumber);
+                        if (String.IsNullOrEmpty(user.CustomerCode))
+                        {
+                            //create this user first
+                            var newCustomer = new CustomerDTO()
+                            {
+                                PhoneNumber = shipmentToUpdate.SenderPhoneNumber,
+                                FirstName = shipmentToUpdate.SenderName,
+                                LastName = shipmentToUpdate.SenderName,
+                                UserActiveCountryId = 1,
+                                City = shipmentToUpdate.SenderLocality,
+                                CustomerType = CustomerType.IndividualCustomer,
+                                Address = shipmentToUpdate.SenderAddress,
+                                ReturnAddress = shipmentToUpdate.SenderAddress,
+                                Gender = Gender.Male,
+                                CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual)
+                            };
+                            var newIndCustomer = Mapper.Map<IndividualCustomer>(newCustomer);
+                            _uow.IndividualCustomer.Add(newIndCustomer);
+                            await _uow.CompleteAsync();
+                            user = newCustomer;
+                        }
+                        if (!String.IsNullOrEmpty(user.CustomerCode))
+                        {
                             //Pin Generation 
                             var message = new MobileShipmentCreationMessageDTO
                             {
@@ -734,12 +758,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                             _uow.DeliveryNumber.Add(deliveryNumber);
                             message.QRCode = deliveryNumber.SenderCode;
 
-                            if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                            if (user.CustomerType == CustomerType.IndividualCustomer)
                             {
-                                var indCust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                                var indCust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.CustomerCode);
                                 if (indCust != null)
                                 {
-                                    shipmentToUpdate.CustomerCode = user.UserChannelCode;
+                                    shipmentToUpdate.CustomerCode = user.CustomerCode;
                                     shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
                                     shipmentToUpdate.CompanyType = CompanyType.Client.ToString();
                                     shipmentToUpdate.UserId = userId;
@@ -747,12 +771,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                                     message.SenderName = indCust.FirstName + " " + indCust.LastName;
                                 }
                             }
-                            else if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.Ecommerce)
+                            else 
                             {
-                                var compCust = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                                var compCust = await _uow.Company.GetAsync(x => x.CustomerCode == user.CustomerCode);
                                 if (compCust != null)
                                 {
-                                    shipmentToUpdate.CustomerCode = user.UserChannelCode;
+                                    shipmentToUpdate.CustomerCode = user.CustomerCode;
                                     shipmentToUpdate.CustomerType = CustomerType.IndividualCustomer.ToString();
                                     shipmentToUpdate.CompanyType = compCust.CompanyType.ToString();
                                     shipmentToUpdate.UserId = userId;
@@ -904,6 +928,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             return amountToDebit;
         }
+
+
 
     }
 }                                                                                                      

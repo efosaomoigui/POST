@@ -1,5 +1,7 @@
-﻿using GIGLS.Core.Domain;
+﻿using AutoMapper;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
@@ -488,6 +490,27 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
             return preShipmentDTO.FirstOrDefault();
 
+        }
+
+        public async Task<CustomerDTO> GetBotUserWithPhoneNo(string phonenumber)
+        {
+            CustomerDTO customerDTO = new CustomerDTO();
+            var IndUser = Context.IndividualCustomer.AsQueryable().Where(s => s.PhoneNumber.Contains(phonenumber)).FirstOrDefault();
+            if (IndUser != null)
+            {
+                customerDTO = Mapper.Map<CustomerDTO>(IndUser);
+                customerDTO.CustomerType = CustomerType.IndividualCustomer;
+            }
+            else
+            {
+                var ComUser = Context.Company.AsQueryable().Where(s => s.PhoneNumber.Contains(phonenumber)).FirstOrDefault();
+                if (ComUser != null)
+                {
+                    customerDTO = Mapper.Map<CustomerDTO>(ComUser);
+                    customerDTO.CustomerType = CustomerType.Company;
+                }
+            }
+            return customerDTO;
         }
     }
 }

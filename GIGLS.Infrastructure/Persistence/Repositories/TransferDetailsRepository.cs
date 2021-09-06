@@ -169,6 +169,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         private Task<List<TransferDetailsDTO>> GetListOfTransferDetails(IQueryable<TransferDetails> transferDetails)
         {
             var transferDto = from t in transferDetails
+                              join s in Context.ServiceCentre on t.CrAccount equals s.CrAccount
                               orderby t.DateCreated descending
                               select new TransferDetailsDTO
                               {
@@ -184,7 +185,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   CreatedAt = t.CreatedAt,
                                   DateCreated = t.DateCreated,
                                   ResponseCode = t.ResponseCode,
-                                  TransactionStatus = t.TransactionStatus
+                                  TransactionStatus = t.TransactionStatus,
+                                  ServiceCenterName = s.Name
                               };
             return Task.FromResult(transferDto.ToList());
         }

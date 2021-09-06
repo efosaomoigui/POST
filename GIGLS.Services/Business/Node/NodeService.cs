@@ -178,9 +178,9 @@ namespace GIGLS.Services.Business.Node
 
                 return nodeResponse;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

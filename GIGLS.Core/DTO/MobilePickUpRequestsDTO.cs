@@ -65,7 +65,7 @@ namespace GIGLS.Core.DTO
         public string Waybill { get; set; }
         public string Email { get; set; }
         public string Message { get; set; }
-        public bool Succeeded { get; set; }
+        public bool Succeeded { get; set; } = false;
 
     }
 }

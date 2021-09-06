@@ -588,5 +588,149 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
             }
         }
 
+        public async Task<IQueryable<FinancialReportDemurrageDTO>> GetTotalFinancialReportDemurrageGraph(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                // SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId)
+                ;
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+                   // countryId
+                };
+
+                var summary = _context.Database.SqlQuery<FinancialReportDemurrageDTO>("FinancialReportsDemurrageGraph " +
+                   "@StartDate, @EndDate",
+                   param).AsQueryable();
+
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IQueryable<TotalTerminalShipmentDTO>> GetTotalTerminalShipmentGraph(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                // SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId)
+                ;
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+                   // countryId
+                };
+
+                var summary = _context.Database.SqlQuery<TotalTerminalShipmentDTO>("TotalTerminalShipmentGraph " +
+                   "@StartDate, @EndDate",
+                   param).AsQueryable();
+
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IQueryable<CorporateSalesDTO>> GetCorporateIncomeGraph(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                // SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId)
+                ;
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+                   // countryId
+                };
+
+                var summary = _context.Database.SqlQuery<CorporateSalesDTO>("CorporateIncomeGraph " +
+                   "@StartDate, @EndDate",
+                   param).AsQueryable();
+
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<IQueryable<GiGGoIntraCityDTO>> GetTotalGIGGOIntraStateShipmentGraph(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            try
+            {
+                var StartDate = DateTime.Now;
+                var EndDate = DateTime.Now;
+
+                //get startDate and endDate
+                var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+                StartDate = queryDate.Item1;
+                EndDate = queryDate.Item2;
+
+                //declare parameters for the stored procedure
+                SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+                SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+                // SqlParameter countryId = new SqlParameter("@CountryId", dashboardFilterCriteria.ActiveCountryId)
+                ;
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    startDate,
+                    endDate
+                   // countryId
+                };
+
+                var summary = _context.Database.SqlQuery<GiGGoIntraCityDTO>("TotalGIGGOIntraStateShipmentGraph " +
+                   "@StartDate, @EndDate",
+                   param).AsQueryable();
+
+
+                return await Task.FromResult(summary);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

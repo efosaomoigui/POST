@@ -35,5 +35,6 @@ namespace GIGLS.Core.DTO
         [JsonProperty("ResponseCode")]
         public string ResponseCode { get; set; }
         public string TransactionStatus { get; set; }
+        public string ServiceCenterName { get; set; }
     }
 }

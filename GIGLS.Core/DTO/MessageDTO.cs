@@ -43,6 +43,12 @@ namespace GIGLS.Core.DTO
         public string AccountNo { get; set; }
         public string BankName { get; set; }
         public bool IsCoporate { get; set; }
+        public string Item { get; set; }
+        public int ItemCount { get; set; }
+        public string Store { get; set; }
+        public string DepartureEmail { get; set; }
+        public string DepartureServiceCentre { get; set; }
+        public string RequestNumber { get; set; }
     }
 
     public class NewMessageDTO
@@ -200,6 +206,17 @@ namespace GIGLS.Core.DTO
         public bool IsCoporate { get; set; }
         public string ToEmail { get; set; }
         public string CustomerCode { get; set; }
+    }
+
+    public class CoporateBankDetailMessageDTO
+    {
+        public string AccountNo { get; set; }
+        public string AccountName { get; set; }
+        public string BankName { get; set; }
+        public bool IsCoporate { get; set; }
+        public string ToEmail { get; set; }
+        public string CustomerCode { get; set; }
+        public string CustomerName { get; set; }
     }
 
 }

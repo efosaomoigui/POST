@@ -1479,6 +1479,41 @@ namespace GIGLS.Services.Implementation.Wallet
                         UserId = user.Id
                     }, false);
                     await _uow.CompleteAsync();
+
+                    // also clear outstanding invoices
+                    var shipments = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.CustomerCode == coporateCustomer.CustomerCode && x.PaymentStatus != PaymentStatus.Paid).ToList();
+                    if (shipments.Any())
+                    {
+                        decimal inMemoryBalance = 0m;
+                        var inMemBal = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                        inMemoryBalance = inMemBal.Balance;
+                        foreach (var shipment in shipments)
+                        {
+                            var tempWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == coporateCustomer.CustomerCode);
+                            if (inMemoryBalance >= shipment.Total)
+                            {
+                                tempWallet.Balance = tempWallet.Balance - shipment.Total;
+                                inMemoryBalance = inMemoryBalance - shipment.Total;
+                                await _walletService.UpdateWallet(tempWallet.WalletId, new WalletTransactionDTO()
+                                {
+                                    WalletId = wallet.WalletId,
+                                    Amount = shipment.Total,
+                                    CreditDebitType = CreditDebitType.Debit,
+                                    Description = "Automated Payment for Outstanding Invoice",
+                                    PaymentType = PaymentType.Online,
+                                    PaymentTypeReference = $"{shipment.InvoiceRefNo}-{shipment.CustomerInvoiceId}",
+                                    UserId = user.Id
+                                }, false);
+
+                                shipment.PaymentStatus = PaymentStatus.Paid;
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        await _uow.CompleteAsync();
+                    }
                 }
             }
             catch (Exception ex)

@@ -333,7 +333,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         CurrencySymbol = c.CurrencySymbol
                                     },
                                     Longitude = s.Longitude,
-                                    Latitude = s.Latitude
+                                    Latitude = s.Latitude,
+                                    CrAccount = s.CrAccount
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }

@@ -19,6 +19,7 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
         public string Waybill { get; set; }
+        public int AwaitingCollectionCount { get; set; }
 
         //Senders' Information
         public decimal Value { get; set; }
