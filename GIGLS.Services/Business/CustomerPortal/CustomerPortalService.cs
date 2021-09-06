@@ -3953,6 +3953,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
             CellulantPaymentResponse result = new CellulantPaymentResponse();
+            result.StatusCode = "183";
+            result.StatusDescription = "Payment processed successfully";
+            result.CheckoutRequestID = webhook.CheckoutRequestID;
+            result.MerchantTransactionID = webhook.MerchantTransactionID;
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.MerchantTransactionID);
 
@@ -3971,12 +3975,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         result = await VerifyAndValidateCellulantPayment(webhook);
                     }
                 }
-                else
-                {
-                    result.StatusCode = "180";
-                    result.StatusDescription = "Payment was not processed successfully";
-                    result.CheckoutRequestID = webhook.CheckoutRequestID;
-                }
             }
             else
             {
@@ -3989,12 +3987,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         result = await VerifyAndValidateCellulantPayment(webhook);
                     }
-                }
-                else
-                {
-                    result.StatusCode = "180";
-                    result.StatusDescription = "Payment was not processed successfully";
-                    result.CheckoutRequestID = webhook.CheckoutRequestID;
                 }
             }
 

@@ -413,7 +413,8 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 StatusCode = "183",
                 StatusDescription = "Payment processed successfully",
-                CheckoutRequestID = payload.CheckoutRequestID
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
             };
 
             if (verifyResult.RequestStatusCode.Equals(178))
@@ -470,7 +471,8 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 StatusCode = "183",
                 StatusDescription = "Payment processed successfully",
-                CheckoutRequestID = payload.CheckoutRequestID
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
             };
             if (verifyResult.RequestStatusCode.Equals(178))
             {
