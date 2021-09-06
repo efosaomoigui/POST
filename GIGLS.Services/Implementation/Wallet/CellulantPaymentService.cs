@@ -409,6 +409,12 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //1. verify the payment 
             var verifyResult = payload;
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID
+            };
 
             if (verifyResult.RequestStatusCode.Equals(178))
             {
@@ -418,12 +424,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
-                        return new CellulantPaymentResponse
-                        {
-                            StatusCode = "180",
-                            StatusDescription = "Payment was not processed successfully",
-                            CheckoutRequestID = payload.CheckoutRequestID
-                        };
+                        return result;
 
                     //2. if the payment successful
                     if (verifyResult.RequestStatusDescription.Equals("Request fully paid") && !paymentLog.IsWaybillSettled)
@@ -458,19 +459,19 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-            return new CellulantPaymentResponse
-            {
-                StatusCode = "183",
-                StatusDescription = "Payment processed successfully",
-                CheckoutRequestID = payload.CheckoutRequestID
-            };
+            return result;
         }
 
         private async Task<CellulantPaymentResponse> ProcessPaymentForWallet(CellulantWebhookDTO payload)
         {
             //1. verify the payment 
             var verifyResult = payload;
-
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID
+            };
             if (verifyResult.RequestStatusCode.Equals(178))
             {
                 if (verifyResult.Payments != null)
@@ -479,12 +480,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
                     if (paymentLog == null)
-                        return new CellulantPaymentResponse
-                        {
-                            StatusCode = "180",
-                            StatusDescription = "Payment was not processed successfully",
-                            CheckoutRequestID = payload.CheckoutRequestID
-                        };
+                        return result;
 
                     if (verifyResult.RequestStatusDescription != null)
                     {
@@ -564,12 +560,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
-            return new CellulantPaymentResponse
-            {
-                StatusCode = "183",
-                StatusDescription = "Payment processed successfully",
-                CheckoutRequestID = payload.CheckoutRequestID
-            };
+            return result;
         }
 
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
