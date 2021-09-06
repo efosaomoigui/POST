@@ -265,6 +265,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                     item.Price = Math.Round(item.Price * factor) / factor;
                 }
             }
+            if (!String.IsNullOrEmpty(shipment.Waybill))
+            {
+                var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
+                if (invoiceObj != null)
+                {
+                    shipment.Invoice = invoiceObj;
+                }
+            }
             return shipment;
         }
 
@@ -364,7 +372,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 foreach (var item in items)
                 {
-                    if (item.CustomerType == CustomerType.IndividualCustomer.ToString())
+                    if (item.CompanyType == CustomerType.IndividualCustomer.ToString())
                     {
                         var cust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == item.CustomerCode);
                         if (cust != null)
@@ -421,5 +429,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _customerPortalService.GetPriceQoute(preShipment);
         }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            return await _customerPortalService.GetInternationalshipmentRate(rateDTO);
+        }
+
+        public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await _shipmentService.AddInternationalShipment(shipmentDTO);
+        }
+
     }
 }

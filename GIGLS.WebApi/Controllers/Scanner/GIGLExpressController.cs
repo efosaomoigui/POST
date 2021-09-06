@@ -19,6 +19,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -31,12 +32,12 @@ namespace GIGLS.WebApi.Controllers.Scanner
     public class GIGLExpressController : BaseWebApiController
     {
         private readonly ITickectManService _tickectMan;
-       // private readonly ICustomerPortalService _portalService;
+        // private readonly ICustomerPortalService _portalService;
 
         public GIGLExpressController(ITickectManService tickectMan, ICustomerPortalService portalService) : base(nameof(GIGLExpressController))
         {
             _tickectMan = tickectMan;
-           // _portalService = portalService;
+            // _portalService = portalService;
         }
 
         [AllowAnonymous]
@@ -44,18 +45,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            var user = await _tickectMan.CheckDetailsForMobileScanner(userLoginModel.username);
-
-            if (user.Username != null)
-            {
-                user.Username = user.Username.Trim();
-            }
-
-            if (userLoginModel.Password != null)
-            {
-                userLoginModel.Password = userLoginModel.Password.Trim();
-            }
-
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -63,6 +52,28 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 using (var client = new HttpClient())
                 {
+                    if (userLoginModel == null || string.IsNullOrWhiteSpace(userLoginModel.username))
+                    {
+                        throw new GenericException("Invalid Request Body", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+
+                    var user = await _tickectMan.CheckDetailsForMobileScanner(userLoginModel.username);
+
+                    if (user == null)
+                    {
+                        throw new GenericException("Incorrect Login Details", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+
+                    if (user.Username != null)
+                    {
+                        user.Username = user.Username.Trim();
+                    }
+
+                    if (userLoginModel.Password != null)
+                    {
+                        userLoginModel.Password = userLoginModel.Password.Trim();
+                    }
+
                     //setup client
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();
@@ -81,7 +92,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        throw new GenericException("Incorrect Login Details");
+                        throw new GenericException("Incorrect Login Details", $"{(int)HttpStatusCode.Unauthorized}");
                     }
 
                     //get access token from response body
@@ -92,7 +103,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var centreId = await _tickectMan.GetPriviledgeServiceCenters(user.Id);
                     if (centreId != null)
                     {
-                        var centreInfo =  await _tickectMan.GetServiceCentreById(centreId[0]);
+                        var centreInfo = await _tickectMan.GetServiceCentreById(centreId[0]);
                         if (centreInfo != null)
                         {
                             var centreInfoJson = JObject.FromObject(centreInfo);
@@ -200,7 +211,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                 var shipment = await _tickectMan.AddShipment(newShipmentDTO);
+                var shipment = await _tickectMan.AddShipment(newShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
@@ -257,7 +268,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("releaseshipment")]
         public async Task<IServiceResponse<bool>> ReleaseShipment(ShipmentCollectionDTOForFastTrack shipmentCollectionforDto)
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 await _tickectMan.ReleaseShipmentForCollection(shipmentCollectionforDto);
                 return new ServiceResponse<bool>
                 {
@@ -314,7 +326,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         public IHttpActionResult GetPaymentTypes()
         {
             var types = EnumExtensions.GetValues<PaymentType>();
-           // types.RemoveAt(3);
+            // types.RemoveAt(3);
             return Ok(types);
         }
 
@@ -546,33 +558,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpPost]
-        [Route("internationalshipmentquote")]
-        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipment = await _tickectMan.GetInternationalshipmentQuote(quoteDTO);
-                return new ServiceResponse<List<TotalNetResult>>
-                {
-                    Object = shipment
-                };
-            });
-        }
-
-        [HttpGet, Route("allcountry")]
-        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var country = await _tickectMan.GetCountries();
-                return new ServiceResponse<IEnumerable<CountryDTO>>
-                {
-                    Object = country
-                };
-            });
-        }
-
-        [HttpPost]
         [Route("transferDetails")]
         public async Task<IServiceResponse<List<TransferDetailsDTO>>> GetTransferDetailsLogFilter(BaseFilterCriteria filterCriteria)
         {
@@ -603,6 +588,33 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpPost]
+        [Route("internationalshipmentquote")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentQuote(InternationalShipmentQuoteDTO quoteDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.GetInternationalshipmentQuote(quoteDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpGet, Route("allcountry")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var country = await _tickectMan.GetCountries();
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = country
+                };
+            });
+        }
+
+        [HttpPost]
         [Route("getpricequote")]
         public async Task<IServiceResponse<MobilePriceDTO>> GetPriceQoute(PreShipmentMobileDTO PreshipmentMobile)
         {
@@ -612,6 +624,34 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = Price,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("internationalshipmentrate")]
+        public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.GetInternationalshipmentRate(rateDTO);
+                return new ServiceResponse<List<TotalNetResult>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addinternationalshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _tickectMan.AddInternationalShipment(shipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
                 };
             });
         }
