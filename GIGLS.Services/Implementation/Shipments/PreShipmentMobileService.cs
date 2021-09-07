@@ -5559,6 +5559,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 partner.LastName = user.LastName;
                 partner.PartnerName = user.FirstName + " " + user.LastName;
                 partner.PictureUrl = user.PictureUrl;
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    partner.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    partner.PhoneNumber = user.PhoneNumber;
+                }
             }
         }
         private async Task UpdateCustomer(UserDTO user)
@@ -5569,6 +5577,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 customer.FirstName = user.FirstName;
                 customer.LastName = user.LastName;
                 customer.PictureUrl = user.PictureUrl;
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    customer.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    customer.PhoneNumber = user.PhoneNumber;
+                }
             }
         }
         private async Task UpdateCompany(UserDTO user)
@@ -5593,6 +5609,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         company.Name = user.Organisation;
                     }
 
+                }
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    company.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    company.PhoneNumber = user.PhoneNumber;
                 }
             }
         }
