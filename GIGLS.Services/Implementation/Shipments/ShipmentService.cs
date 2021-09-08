@@ -1432,7 +1432,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoiceForPaymentWaiver(shipmentDTO);
                 CreateGeneralLedgerForPaymentWaiverShipment(shipmentDTO);
 
-                //Create the delivery pin
+                //Create the receiver pin
                 await GenerateReceiverNumber(newShipment.Waybill);
 
                 // complete transaction if all actions are successful
