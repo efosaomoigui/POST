@@ -306,6 +306,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
+            shipmentCollectionforDto.UserId = await _userService.GetCurrentUserId();
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }
 
