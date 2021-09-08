@@ -346,7 +346,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID,  bool isIntl)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && !s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
             if (isIntl)
             {
                 var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
