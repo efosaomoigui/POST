@@ -349,7 +349,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && !s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
             if (isIntl)
             {
-                var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
+                var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
                 preShipments = preShipmentsIntl;
             }
 
