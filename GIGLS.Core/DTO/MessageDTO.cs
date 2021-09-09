@@ -49,6 +49,7 @@ namespace GIGLS.Core.DTO
         public string DepartureEmail { get; set; }
         public string DepartureServiceCentre { get; set; }
         public string RequestNumber { get; set; }
+        public string TrackingId { get; set; }
     }
 
     public class NewMessageDTO

@@ -2270,7 +2270,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 var storeArray = new List<string>();
                 var itemArray = new List<string>();
+                var trackNos = new List<string>();
                 bool lastItem = false;
+                var trackId = string.Empty;
                 var shipmentItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => itemIDs.Contains(x.IntlShipmentRequestItemId)).ToList();
                 var requestIDs = shipmentItems.Select(x => x.IntlShipmentRequestId).ToList();
                 if (!shipmentItems.Any())
@@ -2284,6 +2286,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 {
                     storeArray.Add(shipmentItem.storeName);
                     itemArray.Add(shipmentItem.ItemName);
+                    if (!String.IsNullOrEmpty(shipmentItem.TrackingId))
+                    {
+                        trackNos.Add(shipmentItem.TrackingId); 
+                    }
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}"; 
                 }
@@ -2309,6 +2315,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     {
                         var stores = String.Join(",", storeArray);
                         var items = String.Join(",", itemArray);
+                        if (trackNos.Any())
+                        {
+                            trackId = String.Join(",", trackNos);
+                        }
                         //send message for received item
                         var messageDTO = new MessageDTO
                         {
@@ -2355,7 +2365,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         }
                         else
                         {
-                            //send final item message
+                            //send non consolidated item message item message
+                            if (!String.IsNullOrEmpty(trackId))
+                            {
+                                messageDTO.TrackingId = trackId;
+                            }
                             messageDTO.MessageTemplate = "InternationalRequestReceived";
                             await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                         }
