@@ -525,6 +525,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ITransferDetailsRepository TransferDetails { get; set; }
 
+        [Inject]
+        public IGIGXUserDetailRepository GIGXUserDetail { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
