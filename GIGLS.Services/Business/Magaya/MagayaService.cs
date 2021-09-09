@@ -2368,7 +2368,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             //send non consolidated item message item message
                             if (!String.IsNullOrEmpty(trackId))
                             {
-                                messageDTO.TrackingId = trackId;
+                                messageDTO.TrackingId = $"with trackingId of {trackId}";
                             }
                             messageDTO.MessageTemplate = "InternationalRequestReceived";
                             await _messageSenderService.SendEmailForReceivedItem(messageDTO);
