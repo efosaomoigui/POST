@@ -1610,7 +1610,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
 
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
-                shipmentDto.FullyReceived = true;
+                shipmentDto.FullyReceived = false;
                 //CHECK IF ITEMS HAS BEEN FULLY RECEIVED IF CONSOLIDATED
                 if (shipmentDto.Consolidated)
                 {
