@@ -2636,7 +2636,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("giguserpin")]
+        [Route("addgiguserpin")]
         public async Task<IServiceResponse<bool>> SaveGIGUserPin(GIGXUserDetailDTO userDetails)
         {
             return await HandleApiOperationAsync(async () =>
