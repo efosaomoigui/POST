@@ -309,6 +309,8 @@ namespace GIGLS.Infrastructure.Persistence
         //cellulant
         public DbSet<TransferDetails> TransferDetails { get; set; }
 
+        //PaymentMethod
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
         #endregion
 
 

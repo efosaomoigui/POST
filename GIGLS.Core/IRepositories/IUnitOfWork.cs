@@ -210,6 +210,7 @@ namespace GIGLS.Core
         ICustomerInvoiceRepository CustomerInvoice { get; set; }
         IWaybillChargeRepository WaybillCharge { get; set; }
         ITransferDetailsRepository TransferDetails { get; set; }
+        IPaymentMethodRepository PaymentMethod { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
