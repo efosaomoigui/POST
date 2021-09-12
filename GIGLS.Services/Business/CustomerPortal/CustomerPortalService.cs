@@ -121,6 +121,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly INodeService _nodeService;
+        private readonly IPaymentMethodService _paymentMethodService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -134,7 +135,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IPaymentMethodService paymentMethodService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -179,6 +180,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
             _nodeService = nodeService;
+            _paymentMethodService = paymentMethodService;
             MapperConfig.Initialize();
         }
 
@@ -3927,6 +3929,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
                 return price;
             }
+        }
+
+        public async Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry()
+        {
+            return await _paymentMethodService.GetPaymentMethodByUserActiveCountry();
         }
 
         private async Task<bool> CheckSpecialCharacters(string content)

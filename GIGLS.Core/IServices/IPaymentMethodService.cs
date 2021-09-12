@@ -9,7 +9,7 @@ namespace GIGLS.Core.IServices
 {
     public interface IPaymentMethodService : IServiceDependencyMarker
     {
-        Task<bool> AddCellulantTransferDetails(PaymentMethodDTO paymentMethodDTO);
+        Task<bool> AddPaymentMethod(PaymentMethodDTO paymentMethodDTO);
         Task<List<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry();
     }
 }

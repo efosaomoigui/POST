@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation
             MapperConfig.Initialize();
         }
 
-        public async Task<bool> AddCellulantTransferDetails(PaymentMethodDTO paymentMethodDTO)
+        public async Task<bool> AddPaymentMethod(PaymentMethodDTO paymentMethodDTO)
         {
             try
             {
