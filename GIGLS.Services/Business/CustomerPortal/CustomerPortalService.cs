@@ -3952,7 +3952,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var gigxUser = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
             if (gigxUser == null)
             {
-                var userPin = _gigxService.AddGIGXUserDetail(userDetails);
+                var userPin = await _gigxService.AddGIGXUserDetail(userDetails);
             }
             else
             {
