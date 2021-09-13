@@ -636,12 +636,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 //generate paymentref
                 var today = DateTime.Now;
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+                var desc = (chargeWalletDTO.IsFireBase) ? "Customer subscription" : chargeWalletDTO.Description;
+
                 await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
                     Amount = chargeWalletDTO.Amount,
                     CreditDebitType = CreditDebitType.Debit,
-                    Description = "Customer subscription",
+                    Description = desc,
                     PaymentType = PaymentType.Wallet,
                     PaymentTypeReference = referenceNo,
                     UserId = chargeWalletDTO.UserId
