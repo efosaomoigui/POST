@@ -2623,12 +2623,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("checkforuserpin")]
-        public async Task<IServiceResponse<GIGXUserPinDTO>> CheckIfUserHasPin()
+        public async Task<IServiceResponse<bool>> CheckIfUserHasPin()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.CheckIfUserHasPin();
-                return new ServiceResponse<GIGXUserPinDTO>
+                return new ServiceResponse<bool>
                 {
                     Object = result
                 };
@@ -2651,12 +2651,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("verifyuserpin")]
-        public async Task<IServiceResponse<bool>> VerifyUserPin(GIGXUserDetailDTO userDetails)
+        public async Task<IServiceResponse<GIGXUserPinDTO>> VerifyUserPin(GIGXUserDetailDTO userDetails)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.VerifyUserPin(userDetails);
-                return new ServiceResponse<bool>
+                return new ServiceResponse<GIGXUserPinDTO>
                 {
                     Object = result
                 };
