@@ -12,7 +12,7 @@ namespace GIGLS.Core.DTO.User
     {
         public int GIGXUserDetailId { get; set; }
         public string CustomerCode { get; set; }
-        public string CustomerPin { get; set; }
+        public int CustomerPin { get; set; }
         public string WalletAddress { get; set; }
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }

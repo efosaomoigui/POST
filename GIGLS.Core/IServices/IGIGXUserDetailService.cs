@@ -7,7 +7,7 @@ namespace GIGLS.Core.IServices
 {
     public interface IGIGXUserDetailService : IServiceDependencyMarker
     {
-        Task<object> AddGIGXUserDetail(GIGXUserDetailDTO gIGXUserDetailDTO);
-        Task<GIGXUserPinDTO> CheckIfUserHasPin();
+        Task<bool> AddGIGXUserDetail(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<bool> CheckIfUserHasPin();
     }
 }

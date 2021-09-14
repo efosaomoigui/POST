@@ -26,7 +26,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             MapperConfig.Initialize();
         }
 
-        public async Task<object> AddGIGXUserDetail(GIGXUserDetailDTO gIGXUserDetailDTO)
+        public async Task<bool> AddGIGXUserDetail(GIGXUserDetailDTO gIGXUserDetailDTO)
         {
 
             try
@@ -42,7 +42,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                 var gigxUser = new GIGXUserDetail
                 {
                     CustomerCode = user.UserChannelCode,
-                    CustomerPin = gIGXUserDetailDTO.CustomerPin,
+                    CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim(),
                     PrivateKey = gIGXUserDetailDTO.PrivateKey,
                     PublicKey = gIGXUserDetailDTO.PublicKey,
                     WalletAddress = gIGXUserDetailDTO.WalletAddress
@@ -50,7 +50,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
 
                 _uow.GIGXUserDetail.Add(gigxUser);
                 await _uow.CompleteAsync();
-                return new { gigx = gigxUser };
+                return true;
             }
             catch (Exception ex)
             {
@@ -59,7 +59,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             }
         }
 
-        public async Task<GIGXUserPinDTO> CheckIfUserHasPin()
+        public async Task<bool> CheckIfUserHasPin()
         {
             // get the current user info
             GIGXUserPinDTO gigxusersDTO = new GIGXUserPinDTO();
@@ -67,10 +67,26 @@ namespace GIGLS.Services.Implementation.BankSettlement
             var currentUserId = await _userService.GetCurrentUserId();
             var user = await _userService.GetUserById(currentUserId);
             var userPin = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
-            if (userPin != null && !String.IsNullOrEmpty(userPin.CustomerPin))
+            if (userPin != null && userPin.CustomerPin > 0)
             {
                 gigxusersDTO.HasPin = true;
+            }
+            return gigxusersDTO.HasPin;
+        }
+
+        public async Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            // get the current user info
+            GIGXUserPinDTO gigxusersDTO = new GIGXUserPinDTO();
+            gigxusersDTO.HasPin = true;
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var pin = gIGXUserDetailDTO.CustomerPin.ToString();
+            var userPin = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
+            if (userPin != null && !String.IsNullOrEmpty(pin) && userPin.CustomerPin == gIGXUserDetailDTO.CustomerPin)
+            {
                 gigxusersDTO.GIGXUserDetailDTO = userPin;
+                gigxusersDTO.GIGXUserDetailDTO.CustomerPin = 0;
             }
             return gigxusersDTO;
         }
