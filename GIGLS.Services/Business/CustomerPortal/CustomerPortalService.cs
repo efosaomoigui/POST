@@ -3939,7 +3939,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide valid user details");
             }
 
-            if (string.IsNullOrWhiteSpace(userDetails.CustomerPin))
+            if (userDetails.CustomerPin <= 0)
             {
                 throw new GenericException("Customer pin is required");
             }
@@ -3961,15 +3961,23 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     throw new GenericException("Customer already has a pin");
                 }
-                userDetail.CustomerPin = userDetails.CustomerPin;
+                userDetail.CustomerPin = userDetails.CustomerPin.ToString();
             }
             await _uow.CompleteAsync();
             return true;
         }
 
-        public async Task<GIGXUserPinDTO> CheckIfUserHasPin()
+        public async Task<bool> CheckIfUserHasPin()
         {
             return await _gigxService.CheckIfUserHasPin();
+        }
+        public async Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            if (gIGXUserDetailDTO.CustomerPin <= 0)
+            {
+                throw new GenericException("Customer pin is required");
+            }
+            return await _gigxService.VerifyUserPin(gIGXUserDetailDTO);
         }
     }
 }
