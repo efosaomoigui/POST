@@ -2302,7 +2302,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
-                        deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglhouston@giglogistics.com" : houstonEmail; //houston email
+                        deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
                         deptCentre = "Houston, United States";
                     }
                     else if (userInfo.UserActiveCountryId == 62)
