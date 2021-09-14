@@ -9,8 +9,8 @@ namespace GIGLS.Core.DTO.ServiceCentres
 {
     public class PlaceLocationDTO : BaseDomainDTO
     {
-        public int LocationId { get; set; }
-        public string LocationName { get; set; }
+        public int PlaceLocationId { get; set; }
+        public string PlaceLocationName { get; set; }
         public string StateName { get; set; }
         public int StateId { get; set; }
         public string BaseStation { get; set; }

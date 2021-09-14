@@ -8,8 +8,8 @@ namespace GIGLS.Core.Domain
 {
     public class PlaceLocation : BaseDomain, IAuditable
     {
-        public int LocationId { get; set; }
-        public string LocationName { get; set; }
+        public int PlaceLocationId { get; set; }
+        public string PlaceLocationName { get; set; }
         public string StateName { get; set; }
         public int StateId { get; set; }
         public string BaseStation { get; set; }

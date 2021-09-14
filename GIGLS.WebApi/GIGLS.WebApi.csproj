@@ -400,7 +400,7 @@
     <Compile Include="Controllers\Scanner\GIGLExpressController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
-    <Compile Include="Controllers\ServiceCentres\LocationController.cs" />
+    <Compile Include="Controllers\ServiceCentres\PlaceLocationController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />

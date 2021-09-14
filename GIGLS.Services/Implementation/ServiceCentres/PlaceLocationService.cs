@@ -29,7 +29,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var state = await GetState(locationDto.StateId);
                 var serviceCentre = await GetServiceCentre(locationDto.BaseStationId);
 
-                var lga = await _uow.PlaceLocation.GetAsync(x => x.LocationName.ToLower() == locationDto.LocationName.ToLower() && x.StateId == locationDto.StateId);
+                var lga = await _uow.PlaceLocation.GetAsync(x => x.PlaceLocationName.ToLower() == locationDto.PlaceLocationName.ToLower() && x.StateId == locationDto.StateId);
 
                 if (lga != null)
                 {
@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var newlocation = Mapper.Map<PlaceLocation>(locationDto);
                 _uow.PlaceLocation.Add(newlocation);
                 await _uow.CompleteAsync();
-                return new { Id = newlocation.LocationId };
+                return new { Id = newlocation.PlaceLocationId };
             }
             catch (Exception)
             {
@@ -170,8 +170,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var location = await _uow.PlaceLocation.GetAsync(locationId);
 
                 //To check if the update already exists
-                var locations = await _uow.PlaceLocation.ExistAsync(c => c.LocationName.ToLower() == locationDto.LocationName.ToLower() && c.StateId == locationDto.StateId);
-                if (location == null || locationDto.LocationId != locationId)
+                var locations = await _uow.PlaceLocation.ExistAsync(c => c.PlaceLocationName.ToLower() == locationDto.PlaceLocationName.ToLower() && c.StateId == locationDto.StateId);
+                if (location == null || locationDto.PlaceLocationId != locationId)
                 {
                     throw new GenericException("Location Information does not exist");
                 }
@@ -179,7 +179,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 {
                     throw new GenericException("Location Information already exists");
                 }
-                location.LocationName = locationDto.LocationName;
+                location.PlaceLocationName = locationDto.PlaceLocationName;
                 location.StateName = state.StateName;
                 location.StateId = state.StateId;
                 location.BaseStation = centre.Name;

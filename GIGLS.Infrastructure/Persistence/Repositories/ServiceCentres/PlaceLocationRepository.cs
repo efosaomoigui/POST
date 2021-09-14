@@ -21,7 +21,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.ServiceCentres
 
         public Task<PlaceLocationDTO> GetLocationById(int locationId)
         {
-            var location = Context.PlaceLocation.Where(x => x.LocationId == locationId);
+            var location = Context.PlaceLocation.Where(x => x.PlaceLocationId == locationId);
             var locationDto = GetLocation(location);
             return locationDto;
         }
@@ -41,8 +41,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.ServiceCentres
                               orderby p.DateCreated ascending
                               select new PlaceLocationDTO
                               {
-                                  LocationId = p.LocationId,
-                                  LocationName =p.LocationName,
+                                  PlaceLocationId = p.PlaceLocationId,
+                                  PlaceLocationName =p.PlaceLocationName,
                                   BaseStation = s.Name,
                                   BaseStationId = s.ServiceCentreId,
                                   StateId = st.StateId,
@@ -64,8 +64,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.ServiceCentres
                               orderby p.DateCreated ascending
                               select new PlaceLocationDTO
                               {
-                                  LocationId = p.LocationId,
-                                  LocationName = p.LocationName,
+                                  PlaceLocationId = p.PlaceLocationId,
+                                  PlaceLocationName = p.PlaceLocationName,
                                   BaseStation = s.Name,
                                   BaseStationId = s.ServiceCentreId,
                                   StateId = st.StateId,

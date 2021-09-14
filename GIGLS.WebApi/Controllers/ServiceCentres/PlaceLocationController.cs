@@ -6,18 +6,19 @@ using GIGLS.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
+using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
-    [RoutePrefix("api/location")]
-    public class LocationController : BaseWebApiController
+    [RoutePrefix("api/placelocation")]
+    public class PlaceLocationController : BaseWebApiController
     {
         private IPlaceLocationService _locationService;
-        public LocationController(IPlaceLocationService locationService) : base(nameof(LocationController))
+        public PlaceLocationController(IPlaceLocationService locationService) : base(nameof(PlaceLocationController))
         {
             _locationService = locationService;
         }
@@ -45,10 +46,10 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var lga = await _locationService.GetLocationById(locationId);
+                var location = await _locationService.GetLocationById(locationId);
                 return new ServiceResponse<PlaceLocationDTO>
                 {
-                    Object = lga
+                    Object = location
                 };
             });
         }
@@ -60,10 +61,10 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var lga = await _locationService.AddLocation(locationDto);
+                var location = await _locationService.AddLocation(locationDto);
                 return new ServiceResponse<object>
                 {
-                    Object = lga
+                    Object = location
                 };
             });
         }
