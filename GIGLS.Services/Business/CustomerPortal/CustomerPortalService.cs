@@ -1945,7 +1945,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             // check for special characters
             //Regex rgx  new Regex(@"^[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]$");
-            var valid =await CheckSpecialCharacters(waybillNumber);
+            var valid = await CheckSpecialCharacters(waybillNumber);
             if (valid)
             {
                 throw new GenericException($"Invalid waybill number, special characters not allowed", $"{(int)HttpStatusCode.Forbidden}");
@@ -2948,7 +2948,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}"); 
+                    throw new GenericException("Waybill  Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             if (invoice.PaymentStatus == PaymentStatus.Paid)
@@ -3393,7 +3393,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException($"No price definition for this category", $"{(int)HttpStatusCode.BadRequest}");
                     }
-                   
+
                     if (itemCategory.SubminimumWeight > 0 && quickQuotePriceDTO.Weight <= itemCategory.SubminimumWeight)
                     {
                         for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
@@ -3849,7 +3849,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
 
         public async Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId)
-        {         
+        {
             var categories = await _uow.PriceCategory.GetPriceCategoriesByCountryId(destcountryId, deptcountryId);
             return Mapper.Map<List<PriceCategoryDTO>>(categories);
 
@@ -3885,7 +3885,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 decimal discount = 0.0M;
                 var amount = await _preShipmentMobileService.CalculateBikePriceBasedonLocation(preShipment);
 
-                decimal pickuprice = 0.0M;  
+                decimal pickuprice = 0.0M;
                 decimal pickupValue = 0.0M;
                 decimal mainCharge = basePriceBikeValue + amount;
                 decimal percentage = 0.0M;
@@ -3934,6 +3934,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             char[] charList = specialChars.ToCharArray();
             if (content.Any(c => charList.Contains(c)))
             {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> DeleteInboundShipment(string requestNo)
+        {
+            var intlShipment = _uow.IntlShipmentRequest.SingleOrDefault(x => x.RequestNumber == requestNo);
+            if (intlShipment.IsProcessed == false)
+            {
+                intlShipment.IsDeleted = true;
+                await _uow.CompleteAsync();
                 return true;
             }
             return false;

@@ -4726,7 +4726,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Partner.Remove(partner);
                 }
                 await _uow.CompleteAsync();
-                return true; ;
+                return true;
             }
             catch
             {

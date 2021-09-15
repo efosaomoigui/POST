@@ -2621,5 +2621,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpDelete]
+        [Route("deleteinboundshipment/{requestNo}")]
+        public async Task<IServiceResponse<bool>> DeleteInboundShipment(string requestNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var inboundShepment = await _portalService.DeleteInboundShipment(requestNo);
+                return new ServiceResponse<bool>
+                {
+                    Object = inboundShepment
+                };
+            });
+        }
+
     }
 }
