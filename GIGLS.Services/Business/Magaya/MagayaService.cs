@@ -1598,6 +1598,28 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
+        public async Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber) 
+        {
+            try
+            {
+
+                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.ShipmentRequestItems.Find(s => s.TrackingId == requestNumber).TrackingId.Equals(requestNumber));
+                var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+
+                if (shipment == null)
+                {
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                await _messageSenderService.SendShipmentRegisteredWithGigGoMails(shipmentDto);
+                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId)
         {
             try

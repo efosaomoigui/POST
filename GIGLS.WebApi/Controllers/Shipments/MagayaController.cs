@@ -144,6 +144,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("internationalShipmentRequestscan/{requestNumber}")]
+        public async Task<IServiceResponse<IntlShipmentRequestDTO>> GetShipmentByScan(string trackingno)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetShipmentRequest(trackingno);
+                return new ServiceResponse<IntlShipmentRequestDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getMagayaCharge")]
         public async Task<IServiceResponse<Dictionary<string, double>>> getMagayaCharge(TheChargeCombo chargecombo)
