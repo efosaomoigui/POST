@@ -361,6 +361,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
+                //set some null value to 0
+                shipmentDto.CashOnDeliveryAmount = shipmentDto.CashOnDeliveryAmount == null ? 0 : shipmentDto.CashOnDeliveryAmount;
                 return shipmentDto;
             }
             catch (Exception)
