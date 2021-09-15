@@ -3971,7 +3971,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _gigxService.CheckIfUserHasPin();
         }
-        public async Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        public async Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
         {
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
             {

@@ -242,6 +242,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
         Task<bool> SaveGIGUserPin(GIGXUserDetailDTO userDetails);
         Task<bool> CheckIfUserHasPin();
-        Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
     }
 }
