@@ -586,6 +586,7 @@
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\CountryType.cs" />
+    <Compile Include="Enums\BillType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />

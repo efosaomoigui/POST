@@ -26,8 +26,7 @@ namespace GIGLS.Core.DTO.Wallet
     {
         public string UserId { get; set; }
         public decimal Amount { get; set; }
-        public string Description { get; set; }
-        public bool IsFireBase { get; set; }
+        public BillType BillType { get; set; }
 
     }
 }
