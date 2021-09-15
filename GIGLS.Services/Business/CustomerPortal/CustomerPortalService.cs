@@ -3939,7 +3939,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide valid user details");
             }
 
-            if (userDetails.CustomerPin <= 0)
+            if (String.IsNullOrEmpty(userDetails.CustomerPin))
             {
                 throw new GenericException("Customer pin is required");
             }
@@ -3973,7 +3973,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
         {
-            if (gIGXUserDetailDTO.CustomerPin <= 0)
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
             {
                 throw new GenericException("Customer pin is required");
             }

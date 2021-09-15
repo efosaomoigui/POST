@@ -67,7 +67,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             var currentUserId = await _userService.GetCurrentUserId();
             var user = await _userService.GetUserById(currentUserId);
             var userPin = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
-            if (userPin != null && userPin.CustomerPin > 0)
+            if (userPin != null && !String.IsNullOrEmpty(userPin.CustomerPin))
             {
                 gigxusersDTO.HasPin = true;
             }
@@ -86,7 +86,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             if (userPin != null && !String.IsNullOrEmpty(pin) && userPin.CustomerPin == gIGXUserDetailDTO.CustomerPin)
             {
                 gigxusersDTO.GIGXUserDetailDTO = userPin;
-                gigxusersDTO.GIGXUserDetailDTO.CustomerPin = 0;
+                gigxusersDTO.GIGXUserDetailDTO.CustomerPin = null;
             }
             return gigxusersDTO;
         }

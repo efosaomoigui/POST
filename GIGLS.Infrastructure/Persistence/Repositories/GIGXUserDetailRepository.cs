@@ -31,7 +31,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                   {
                                     GIGXUserDetailId = r.GIGXUserDetailId,
                                     CustomerCode = r.CustomerCode,
-                                    CustomerPin = (string.IsNullOrEmpty(r.CustomerPin)) ? 0 : Convert.ToInt32(r.CustomerPin),
+                                    CustomerPin = r.CustomerPin,
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
@@ -59,7 +59,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 {
                                     GIGXUserDetailId = r.GIGXUserDetailId,
                                     CustomerCode = r.CustomerCode,
-                                    CustomerPin = (string.IsNullOrEmpty(r.CustomerPin)) ? 0 : Convert.ToInt32(r.CustomerPin),
+                                    CustomerPin = r.CustomerPin,
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
@@ -86,7 +86,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 {
                                     GIGXUserDetailId = r.GIGXUserDetailId,
                                     CustomerCode = r.CustomerCode,
-                                    CustomerPin = (string.IsNullOrEmpty(r.CustomerPin)) ? 0 : Convert.ToInt32(r.CustomerPin),
+                                    CustomerPin = r.CustomerPin,
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
