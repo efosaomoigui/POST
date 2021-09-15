@@ -9,6 +9,6 @@ namespace GIGLS.Core.IServices
     {
         Task<bool> AddGIGXUserDetail(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<bool> CheckIfUserHasPin();
-        Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
     }
 }

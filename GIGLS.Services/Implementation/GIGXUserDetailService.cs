@@ -36,6 +36,11 @@ namespace GIGLS.Services.Implementation.BankSettlement
                     throw new GenericException($"User already have a pin");
                 }
 
+                if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerPin.ToLower() == gIGXUserDetailDTO.CustomerPin.ToLower()))
+                {
+                    throw new GenericException($"Pin already in use");
+                }
+
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
@@ -74,11 +79,10 @@ namespace GIGLS.Services.Implementation.BankSettlement
             return gigxusersDTO.HasPin;
         }
 
-        public async Task<GIGXUserPinDTO> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        public async Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
         {
             // get the current user info
             GIGXUserPinDTO gigxusersDTO = new GIGXUserPinDTO();
-            gigxusersDTO.HasPin = true;
             var currentUserId = await _userService.GetCurrentUserId();
             var user = await _userService.GetUserById(currentUserId);
             var pin = gIGXUserDetailDTO.CustomerPin.ToString();
@@ -87,8 +91,9 @@ namespace GIGLS.Services.Implementation.BankSettlement
             {
                 gigxusersDTO.GIGXUserDetailDTO = userPin;
                 gigxusersDTO.GIGXUserDetailDTO.CustomerPin = null;
+                gigxusersDTO.HasPin = true;
             }
-            return gigxusersDTO;
+            return gigxusersDTO.HasPin;
         }
 
     }
