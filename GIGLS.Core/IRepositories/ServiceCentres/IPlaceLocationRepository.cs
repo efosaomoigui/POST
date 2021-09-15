@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
     {
         Task<IEnumerable<PlaceLocationDTO>> GetLocations();
         Task<PlaceLocationDTO> GetLocationById(int locationId);
+        Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId);
     }
 }

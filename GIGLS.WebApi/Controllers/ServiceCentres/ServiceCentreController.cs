@@ -355,5 +355,20 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getservicecentresbystate/{stateId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresByState(int stateId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetServiceCentresByState(stateId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
     }
 }

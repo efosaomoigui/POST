@@ -19,5 +19,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task UpdateExpressHomeDeliveryLocation(int locationId, bool status);
         Task UpdateExtraMileDeliveryLocation(int locationId, bool status);
         Task UpdateGIGGOLocation(int locationId, bool status);
+        Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId);
     }
 }

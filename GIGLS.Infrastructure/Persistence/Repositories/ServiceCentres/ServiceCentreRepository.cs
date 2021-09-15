@@ -750,5 +750,48 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
+
+        public Task<List<ServiceCentreDTO>> GetServiceCentresByState(int stateId)
+        {
+            try
+            {
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == true && s.IsPublic == true);
+                var centreDto = new List<ServiceCentreDTO>();
+
+                var centreDtos = from s in centres
+                                 join sc in _context.Station on s.StationId equals sc.StationId
+                                 join st in _context.State on sc.StateId equals st.StateId
+                                 where st.StateId == stateId
+                                 select new ServiceCentreDTO
+                                 {
+                                     Name = s.Name,
+                                     Address = s.Address,
+                                     City = s.City,
+                                     Email = s.Email,
+                                     PhoneNumber = s.PhoneNumber,
+                                     ServiceCentreId = s.ServiceCentreId,
+                                     Code = s.Code,
+                                     IsActive = s.IsActive,
+                                     TargetAmount = s.TargetAmount,
+                                     TargetOrder = s.TargetOrder,
+                                     StationId = s.StationId,
+                                     StationName = sc.StationName,
+                                     StationCode = sc.StationCode,
+                                     IsDefault = s.IsDefault,
+                                     Longitude = s.Longitude,
+                                     Latitude = s.Latitude,
+                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
+                                     IsPublic = s.IsPublic,
+                                 };
+                centreDto = centreDtos.ToList();
+
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

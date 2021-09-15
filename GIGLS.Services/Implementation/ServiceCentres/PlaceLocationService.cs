@@ -89,6 +89,11 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             return await _uow.PlaceLocation.GetLocations();
         }
 
+        public async Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId)
+        {
+            return await _uow.PlaceLocation.GetLocationsByStateId(stateId);
+        }
+
         public async Task UpdateExpressHomeDeliveryLocation(int locationId, bool status)
         {
             try
@@ -184,6 +189,11 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 location.StateId = state.StateId;
                 location.BaseStation = centre.Name;
                 location.BaseStationId = centre.ServiceCentreId;
+                location.IsExpressHomeDelivery = locationDto.IsExpressHomeDelivery;
+                location.IsExtraMileDelivery = locationDto.IsExtraMileDelivery;
+                location.IsHomeDelivery = locationDto.IsHomeDelivery;
+                location.IsNormalHomeDelivery = locationDto.IsNormalHomeDelivery;
+                location.IsGIGGO = locationDto.IsGIGGO;
 
                 _uow.Complete();
 

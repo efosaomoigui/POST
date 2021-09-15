@@ -38,6 +38,20 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{stateId:int}/state")]
+        public async Task<IServiceResponse<IEnumerable<PlaceLocationDTO>>> GetLocationsByState(int stateId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var location = await _locationService.GetLocationsByStateId(stateId);
+                return new ServiceResponse<IEnumerable<PlaceLocationDTO>>
+                {
+                    Object = location
+                };
+            });
+        }
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]

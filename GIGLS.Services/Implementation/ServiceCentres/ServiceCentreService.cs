@@ -495,6 +495,18 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByState(int stateId)
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetServiceCentresByState(stateId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
 

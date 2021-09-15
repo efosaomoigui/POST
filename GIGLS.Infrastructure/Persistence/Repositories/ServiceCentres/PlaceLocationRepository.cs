@@ -33,6 +33,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.ServiceCentres
             return locationDto;
         }
 
+        public Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId)
+        {
+            var location = Context.PlaceLocation.Where(x => x.StateId == stateId);
+            var locationDto = GetListOfLocations(location);
+            return locationDto;
+        }
+
         private Task<IEnumerable<PlaceLocationDTO>> GetListOfLocations(IQueryable<PlaceLocation> locations)
         {
             var locationdto = from p in locations
