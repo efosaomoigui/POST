@@ -636,7 +636,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 //generate paymentref
                 var today = DateTime.Now;
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
-                var desc = (chargeWalletDTO.IsFireBase) ? "Customer subscription" : chargeWalletDTO.Description;
+                var desc = (chargeWalletDTO.BillType == BillType.ClassSubscription) ? "Customer subscription" 
+                    : (chargeWalletDTO.BillType == BillType.DATABUNDLE) ? "Data bundle Top up" : (chargeWalletDTO.BillType == BillType.ELECTRICITY) ? "Electricity unity Top up"
+                    : (chargeWalletDTO.BillType == BillType.AIRTIME) ? "Airtime Top up" : "Customer subscription";
 
                 await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {

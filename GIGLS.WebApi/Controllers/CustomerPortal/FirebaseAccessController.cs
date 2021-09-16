@@ -320,7 +320,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     string token = headers.GetValues("api_key").FirstOrDefault();
                     if (token == key)
                     {
-                        chargeWalletDTO.IsFireBase = true;
                         var result = await _portalService.ChargeWallet(chargeWalletDTO);
                         response.Object = result;
                     }

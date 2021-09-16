@@ -5,7 +5,7 @@
         ClassSubscription,
         DSTV,
         AIRTIME,
-        DATA,
+        DATABUNDLE,
         ELECTRICITY
     }
 }
