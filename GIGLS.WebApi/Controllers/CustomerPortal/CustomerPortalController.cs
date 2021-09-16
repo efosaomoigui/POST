@@ -2635,5 +2635,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("getwalletbalance/{customerCode}")]
+        public async Task<IServiceResponse<decimal>> GetWalletBalance(string customerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var wallet = await _portalService.GetWalletBalance(customerCode);
+                return new ServiceResponse<decimal>
+                {
+                    Object = wallet.Balance
+                };
+            });
+        }
+
     }
 }

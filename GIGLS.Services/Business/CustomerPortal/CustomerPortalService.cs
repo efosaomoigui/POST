@@ -3950,5 +3950,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return false;
         }
+
+        public async Task<WalletDTO> GetWalletBalance(string customerCode)
+        {
+            return await _walletService.GetWalletBalance(customerCode);
+        }
+
     }
 }

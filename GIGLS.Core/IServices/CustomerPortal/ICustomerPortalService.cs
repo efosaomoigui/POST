@@ -241,5 +241,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
         Task<bool> DeleteInboundShipment(string requestNo);
+        Task<WalletDTO> GetWalletBalance(string customerCode); 
     }
 }
