@@ -797,5 +797,78 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        public async Task<ResponseDTO> ReverseWallet(string reference)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                var walletLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
+                if (walletLog == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet Payment does not exist";
+                    return result;
+                }
+
+                var user = await _uow.User.GetUserById(walletLog.UserId);
+                if (user == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"user does not exist";
+                    return result;
+                }
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
+                //charge wallet
+                if (walletLog.IsWalletCredited)
+                {
+                    if ((wallet.Balance + walletLog.Amount) >= 0)
+                    {
+                        wallet.Balance += walletLog.Amount;
+                    }
+                }
+                else
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet is not yet charged";
+                    return result;
+                }
+
+
+                await _uow.CompleteAsync();
+
+                //update wallet transaction
+                //generate paymentref
+                var today = DateTime.Now;
+                var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+                var desc = "Wallet Payment reversal";
+
+                await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = walletLog.Amount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Description = desc,
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = referenceNo,
+                    UserId = walletLog.UserId
+                }, false);
+                result.Succeeded = true;
+                result.Message = $"Wallet payment successfully reversed";
+                result.Entity = new { transactionId = referenceNo };
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }
