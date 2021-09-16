@@ -5044,7 +5044,10 @@ namespace GIGLS.Services.Implementation.Shipments
                             else
                             {
                                 var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                customer = Mapper.Map<CustomerDTO>(individual);
+                                if (individual != null)
+                                {
+                                    customer = Mapper.Map<CustomerDTO>(individual); 
+                                }
                             }
 
                             var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
@@ -5071,6 +5074,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
+                                        preshipmentmobile.CustomerType = CustomerType.Company.ToString();
 
                                         if (companyid.Rank == Rank.Class)
                                         {
@@ -5080,8 +5084,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                     else
                                     {
                                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                        customerid = CustomerId.IndividualCustomerId;
+                                        if (CustomerId != null)
+                                        {
+                                            customerid = CustomerId.IndividualCustomerId;
+                                            preshipmentmobile.CustomerType = CustomerType.IndividualCustomer.ToString(); 
+                                        }
+                                        else
+                                        {
+                                            var partnerID = await _uow.Partner.GetAsync(s => s.PartnerCode == preshipmentmobile.CustomerCode);
+                                            customerid = partnerID.PartnerId;
+                                            preshipmentmobile.CustomerType = CustomerType.Partner.ToString();
+                                        }
                                     }
+                                    
 
                                     var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
 
