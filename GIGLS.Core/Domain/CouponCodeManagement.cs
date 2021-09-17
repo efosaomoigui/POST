@@ -9,6 +9,6 @@ namespace GIGLS.Core.Domain
         public string CouponCode { get; set; }
         public CouponDiscountType DiscountType { get; set; }
         public bool IsCouponCodeUsed { get; set; }
-        public DateTime ValidityPeriod { get; set; }
+        public DateTime ExpiryDay { get; set; }
     }
 }
