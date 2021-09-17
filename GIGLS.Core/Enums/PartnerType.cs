@@ -6,6 +6,7 @@
         Individual,
         Ecommerce,
         DeliveryPartner,
-        InternalDeliveryPartner
+        InternalDeliveryPartner,
+        Captain
     }
 }
