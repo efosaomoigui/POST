@@ -2297,8 +2297,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var requests =  _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).ToList();
                 if (requests.Any())
                 {
+                    const int countryId = 1;
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
+                    var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
@@ -2331,6 +2333,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             ToEmail = request.CustomerEmail,
                             To = request.CustomerEmail
                         };
+                        var emailToChairman = new MessageDTO
+                        {
+                            CustomerName = request.CustomerFirstName,
+                            Item = items,
+                            Store = stores,
+                            DepartureEmail = deptEmail,
+                            DepartureServiceCentre = deptCentre,
+                            RequestNumber = request.RequestNumber,
+                            ToEmail = request.CustomerEmail,
+                            To = chairmanEmail
+                        };
                         if (request.Consolidated)
                         {
                             var requestItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.IntlShipmentRequestId == request.IntlShipmentRequestId).ToList();
@@ -2347,6 +2360,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                                 //send single item message
                                 messageDTO.MessageTemplate = "InternationalOutboundReceived";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                             }
 
                             else if (requestItems.Count > 1 && !lastItem)
@@ -2354,6 +2368,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                                 //send item received message
                                 messageDTO.MessageTemplate = "ConsolidateItemReceived";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                             }
 
                             else
@@ -2361,7 +2376,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                                 //send final item message
                                 messageDTO.MessageTemplate = "ConsolidatedFinalItemReceived";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                            } 
+                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
+                            }
                         }
                         else
                         {
@@ -2382,6 +2398,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 throw;
             }
         }
+
         public async Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID)
         {
             try

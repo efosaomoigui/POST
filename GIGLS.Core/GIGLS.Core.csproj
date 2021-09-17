@@ -158,6 +158,7 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\CouponCodeManagement.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -572,6 +573,7 @@
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
