@@ -361,6 +361,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
+                //set some null value to 0
+                shipmentDto.CashOnDeliveryAmount = shipmentDto.CashOnDeliveryAmount == null ? 0 : shipmentDto.CashOnDeliveryAmount;
                 return shipmentDto;
             }
             catch (Exception)
@@ -982,14 +984,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //if sender is corporate check for waybill charges
+                if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
+                {
+                    //check if this corporate user has an outstanding payment
+                    var outstanding = await CheckCorporateOutstandingPayment(shipmentDTO.CustomerCode);
+                    if (outstanding)
+                    {
+                        //var company = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                        throw new GenericException($"{shipmentDTO.Customer[0].Name} You currently have unsettled invoice. Please make payment to your NUBAN account number before shipment can be created ", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
-
-                // create the Invoice and GeneralLedger
-                await CreateInvoice(shipmentDTO);
-                CreateGeneralLedger(shipmentDTO);
-
                 //if sender is corporate check for waybill charges
                 if (shipmentDTO.CompanyType == CompanyType.Corporate.ToString())
                 {
@@ -1003,6 +1012,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         _uow.WaybillCharge.AddRange(waybillCharges);
                     }
                 }
+                // create the Invoice and GeneralLedger
+                await CreateInvoice(shipmentDTO);
+                CreateGeneralLedger(shipmentDTO);
 
                 //QR Code
                 await GenerateDeliveryNumber(newShipment.Waybill);
@@ -1421,6 +1433,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 // create the Invoice and GeneralLedger
                 await CreateInvoiceForPaymentWaiver(shipmentDTO);
                 CreateGeneralLedgerForPaymentWaiverShipment(shipmentDTO);
+
+                //Create the receiver pin
+                await GenerateReceiverNumber(newShipment.Waybill);
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
@@ -4468,6 +4483,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                baseFilterCriteria.ServiceCentreId = await GetServiceCentreId();
                 var shipments = await _uow.Shipment.GetCargoMagayaShipments(baseFilterCriteria);
                 return shipments;
             }
@@ -4475,6 +4491,39 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private async Task<int> GetServiceCentreId()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var userClaims = await _userService.GetClaimsAsync(currentUserId);
+
+            string[] claimValue = null;
+            int serviceCenterId = 0;
+            foreach (var claim in userClaims)
+            {
+                if (claim.Type == "Privilege")
+                {
+                    claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                }
+            }
+
+            if (claimValue == null)
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            if (claimValue[0] == "ServiceCentre")
+            {
+                serviceCenterId = int.Parse(claimValue[1]);
+            }
+            else
+            {
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
+            return serviceCenterId;
         }
 
         public async Task<bool> MarkMagayaShipmentsAsCargoed(List<CargoMagayaShipmentDTO> cargoMagayaShipmentDTOs)
@@ -5458,5 +5507,58 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
+        public async Task<bool> CheckCorporateOutstandingPayment(string customerCode)
+        {
+            var now = DateTime.Now;
+            DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+            DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+            firstDay = firstDay.ToUniversalTime();
+            firstDay = firstDay.AddHours(12).AddMinutes(00);
+            lastDay = lastDay.ToUniversalTime();
+            lastDay = lastDay.AddHours(23).AddMinutes(59);
+            var shipment = _uow.CustomerInvoice.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).FirstOrDefault(x => x.CustomerCode == customerCode);
+            if (shipment != null)
+            {
+                if (shipment.PaymentStatus != PaymentStatus.Paid)
+                {
+                    //check if last generated is up to 15 days
+                    var dateDiff = (now - shipment.DateCreated).TotalDays;
+                    if (dateDiff >= 15)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private async Task GenerateReceiverNumber(string waybill)
+        {
+            int maxSize = 6;
+            char[] chars = new char[54];
+            string a;
+            a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                ReceiverCode = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            _uow.DeliveryNumber.Add(number);
+        }
     }
 }

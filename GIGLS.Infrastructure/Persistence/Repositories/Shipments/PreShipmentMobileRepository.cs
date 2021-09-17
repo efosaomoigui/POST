@@ -344,14 +344,19 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
 
 
-        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID)
+        public async Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID,  bool isIntl)
         {
-            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress);
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && !s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
+            if (isIntl)
+            {
+                var preShipmentsIntl = Context.PresShipmentMobile.AsQueryable().Where(s => s.UserId == userID && s.IsInternationalShipment).OrderByDescending(x => x.DateCreated).GroupBy(x => x.ReceiverAddress).Take(5);
+                preShipments = preShipmentsIntl;
+            }
 
             var address = (from r in preShipments
                            select new AddressDTO()
                            {
-                               ReceiverAddress = r.FirstOrDefault().ReceiverAddress,
+                               ReceiverAddress = r.Key,
                                ReceiverName = r.FirstOrDefault().ReceiverName,
                                ReceiverStationName = Context.Station.FirstOrDefault(x => x.StationId == r.FirstOrDefault().ReceiverStationId).StationName,
                                ReceiverLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().ReceiverLocation.LocationId).Latitude,
@@ -364,7 +369,18 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                SenderLat = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Latitude,
                                SenderLng = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).Longitude,
                                SenderLGA = Context.Location.FirstOrDefault(x => x.LocationId == r.FirstOrDefault().SenderLocation.LocationId).LGA,
-                           }).Take(5).ToList();
+                               SenderPhoneNumber = r.FirstOrDefault().SenderPhoneNumber,
+                               ReceiverCity = r.FirstOrDefault().ReceiverCity,
+                               ReceiverCountry = r.FirstOrDefault().ReceiverCountry,
+                               ReceiverCountryCode = r.FirstOrDefault().ReceiverCountryCode,
+                               ReceiverEmail = r.FirstOrDefault().ReceiverEmail,
+                               ReceiverPhoneNumber = r.FirstOrDefault().ReceiverPhoneNumber,
+                               ReceiverPostalCode = r.FirstOrDefault().ReceiverPostalCode,
+                               ReceiverStateOrProvinceCode = r.FirstOrDefault().ReceiverStateOrProvinceCode,
+                               ReceiverStationId = r.FirstOrDefault().SenderStationId,
+                               DestinationCountryId = r.FirstOrDefault().DestinationCountryId ,
+                               ReceiverState = r.FirstOrDefault().ReceiverState
+                           }).ToList();
 
             return address;
         }

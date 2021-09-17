@@ -1336,7 +1336,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //To get bonus Details
                 if (customerObj.Rank == Rank.Class)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1345,7 +1345,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 }
                 else if (customerObj.Rank == Rank.Basic)
                 {
-                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.NormalCustomerDiscount.ToString() && s.CountryId == 1);
+                    var discount = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.BasicRankPercentage.ToString() && s.CountryId == 1);
 
                     if (discount != null)
                     {
@@ -1445,6 +1445,27 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.To = intlDTO.CustomerEmail;
                 messageDTO.ToEmail = intlDTO.CustomerEmail;
+            }
+
+            if (obj is CoporateBankDetailMessageDTO)
+            {
+                var strArray = new string[]
+                  {
+                    "Customer Name",
+                    ""
+                  };
+                var msgDTO = (CoporateBankDetailMessageDTO)obj;
+                //A. map the array
+                strArray[0] = msgDTO.CustomerName;
+                if (msgDTO.IsCoporate)
+                {
+                    strArray[1] = $"AccountNo : {msgDTO.AccountNo}{System.Environment.NewLine} AcccountName : {msgDTO.AccountName} {System.Environment.NewLine} BankName : {msgDTO.BankName}";
+                }
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = msgDTO.ToEmail;
             }
 
             return await Task.FromResult(verifySendEmail);
@@ -1929,7 +1950,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         MessageTemplate = "ClassCustomerShipmentCreation"
                     };
 
-                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassCustomerDiscount.ToString() && s.CountryId == customer.UserActiveCountryId);
+                    var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ClassRankPercentage.ToString() && s.CountryId == customer.UserActiveCountryId);
                     if (globalProperty != null)
                     {
                         decimal percentage = Convert.ToDecimal(globalProperty.Value);
@@ -2326,5 +2347,64 @@ namespace GIGLS.Services.Implementation.Messaging
         //        await LogEmailMessage(messageDTO, result, ex.Message);
         //    }
         //}
+
+        public async Task SendConfigCorporateSignUpMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateSignUpMessage(messageDTO);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        public async Task SendConfigCorporateNubanAccMessage(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendConfigCorporateNubanAccMessage(messageDTO);
+                }
+
+                //send email if there is email address
+                if (messageDTO.ToEmail != null)
+                {
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+
+        public async Task SendEmailForReceivedItem(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailForReceivedItem(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
     }
 }

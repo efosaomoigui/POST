@@ -4,6 +4,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -280,7 +281,20 @@ namespace GIGLS.Services.Implementation.Utility
             var startYear = startDate.Year.ToString().Substring(2);
             var endYear = endDate.Year.ToString().Substring(2);
             var datewithTime = DateTime.Now.ToUniversalTime().ToString("yyyyMMdd\\THHmmssfff");
-            var refNo = $"{customerCode.Remove(2)}{startDate.Day}{startYear}{endDate.Day}{endYear}{datewithTime}";
+            var refNo = String.Empty;
+            var customerInvoice = _uow.CustomerInvoice.GetAllAsQueryable().Where(x => x.CustomerCode == customerCode && x.DateCreated >= startDate && x.DateCreated <= endDate).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+           // refNo = $"{customerCode.Remove(2)}{startDate.Day}{startYear}{endDate.Day}{endYear}{datewithTime}";
+            if (customerInvoice == null)
+            {
+                refNo = $"{customerCode}{startDate.Month}{refNo.PadLeft(3, '0')}1";
+            }
+            else
+            {
+                var lastRef = $"{customerCode}{startDate.Month}";
+                var newRef = Convert.ToInt32(customerInvoice.InvoiceRefNo.Substring(lastRef.Length));
+                newRef = newRef + 1;
+                refNo = $"{customerCode}{startDate.Month}{newRef.ToString().PadLeft(3, '0')}";
+            }
             return refNo;
         }
     }

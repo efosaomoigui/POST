@@ -5047,7 +5047,10 @@ namespace GIGLS.Services.Implementation.Shipments
                             else
                             {
                                 var individual = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                customer = Mapper.Map<CustomerDTO>(individual);
+                                if (individual != null)
+                                {
+                                    customer = Mapper.Map<CustomerDTO>(individual); 
+                                }
                             }
 
                             var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
@@ -5074,6 +5077,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                     if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
+                                        preshipmentmobile.CustomerType = CustomerType.Company.ToString();
 
                                         if (companyid.Rank == Rank.Class)
                                         {
@@ -5083,8 +5087,19 @@ namespace GIGLS.Services.Implementation.Shipments
                                     else
                                     {
                                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                        customerid = CustomerId.IndividualCustomerId;
+                                        if (CustomerId != null)
+                                        {
+                                            customerid = CustomerId.IndividualCustomerId;
+                                            preshipmentmobile.CustomerType = CustomerType.IndividualCustomer.ToString(); 
+                                        }
+                                        else
+                                        {
+                                            var partnerID = await _uow.Partner.GetAsync(s => s.PartnerCode == preshipmentmobile.CustomerCode);
+                                            customerid = partnerID.PartnerId;
+                                            preshipmentmobile.CustomerType = CustomerType.Partner.ToString();
+                                        }
                                     }
+                                    
 
                                     var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
 
@@ -5574,6 +5589,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 partner.LastName = user.LastName;
                 partner.PartnerName = user.FirstName + " " + user.LastName;
                 partner.PictureUrl = user.PictureUrl;
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    partner.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    partner.PhoneNumber = user.PhoneNumber;
+                }
             }
         }
         private async Task UpdateCustomer(UserDTO user)
@@ -5584,6 +5607,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 customer.FirstName = user.FirstName;
                 customer.LastName = user.LastName;
                 customer.PictureUrl = user.PictureUrl;
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    customer.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    customer.PhoneNumber = user.PhoneNumber;
+                }
             }
         }
         private async Task UpdateCompany(UserDTO user)
@@ -5608,6 +5639,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         company.Name = user.Organisation;
                     }
 
+                }
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    company.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    company.PhoneNumber = user.PhoneNumber;
                 }
             }
         }

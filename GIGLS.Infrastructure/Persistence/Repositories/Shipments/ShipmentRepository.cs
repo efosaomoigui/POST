@@ -1030,15 +1030,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //declare parameters for the stored procedure
                 SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
                 SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
+                SqlParameter serviceCenterId = new SqlParameter("@serviceCenterId", baseFilterCriteria.ServiceCentreId);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     startDate,
-                    endDate
+                    endDate,
+                    serviceCenterId
                 };
 
                 var result = _context.Database.SqlQuery<CargoMagayaShipmentDTO>("MagayaShipmentForCargo " +
-                   "@StartDate, @EndDate",
+                   "@StartDate, @EndDate, @serviceCenterId",
                    param).ToList();
 
 
