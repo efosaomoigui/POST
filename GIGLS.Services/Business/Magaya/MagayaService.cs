@@ -2388,6 +2388,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             }
                             messageDTO.MessageTemplate = "InternationalRequestReceived";
                             await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                            await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                         }
                     }
                 }
