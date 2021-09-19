@@ -114,7 +114,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
                         && x.UserChannelType == UserChannelType.Employee
-                        && (x.SystemUserRole == "Captain")).AsEnumerable();
+                        && (x.SystemUserRole == "Captain" && x.Designation == "Captain")).AsEnumerable();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
