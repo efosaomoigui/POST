@@ -334,6 +334,7 @@
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
+    <Compile Include="DTO\CouponManagementDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
@@ -692,6 +693,7 @@
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
+    <Compile Include="IRepositories\ICouponManagementRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
     <Compile Include="IRepositories\IGiglgoStationRepository.cs" />

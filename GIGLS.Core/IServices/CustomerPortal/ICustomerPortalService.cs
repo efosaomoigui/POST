@@ -240,5 +240,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO);
         Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
+        Task<List<string>> GenerateCouponCode(int number);
+        Task<bool> CreateCoupon(CreateCouponManagementDTO couponDto);
+        Task<decimal> GetCouponAmount(string couponCode, decimal amount);
     }
 }

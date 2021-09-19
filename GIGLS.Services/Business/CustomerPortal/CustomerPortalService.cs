@@ -3939,5 +3939,65 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return false;
         }
+
+        public async Task<List<string>> GenerateCouponCode(int number)
+        {
+            try
+            {
+                var couponCodes = new List<string>();
+                for (int i = 0; i < number; i++)
+                {
+                    var tagNumber = await _preShipmentMobileService.GenerateDeliveryCode();
+                    var couponCode = Mapper.Map<string>(tagNumber);
+                    couponCodes.Add(couponCode);
+                }
+                return couponCodes;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> CreateCoupon(CreateCouponManagementDTO couponDto)
+        {
+            try
+            {
+                var couponList = new List<CouponCodeManagement>();
+                foreach (var code in couponDto.CouponCode)
+                {
+                    var coupon = JObject.FromObject(couponDto).ToObject<CouponCodeManagement>();
+                    coupon.CouponCode = code;
+                    couponList.Add(coupon);
+                }
+                 _uow.CouponManagement.AddRange(couponList);
+                _uow.Complete();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw; 
+            }
+        }
+
+        public Task<decimal> GetCouponAmount(string couponCode, decimal amount)
+        {
+            decimal computedAmount = 0;
+            var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == couponCode && x.IsCouponCodeUsed == false);
+            if(coupon == null)
+            {
+                throw new GenericException($"Coupon code {couponCode} does not exists or has been used", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if(coupon.DiscountType == CouponDiscountType.Percentage)
+            {
+                var couponPer = (Convert.ToDecimal(coupon.CouponCodeValue) / 100) * amount;
+                computedAmount = amount - couponPer;
+            }
+            if (coupon.DiscountType == CouponDiscountType.Flat)
+            {
+                computedAmount = amount - Convert.ToDecimal(coupon.CouponCodeValue);
+            }
+            return Task.FromResult(computedAmount);
+        }
     }
 }
