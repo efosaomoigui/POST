@@ -602,7 +602,7 @@ namespace GIGLS.Services.Implementation.Partnership
                         pagination.EndDate = pagination.EndDate.Value.AddHours(23).AddMinutes(59);
                     }
                     var captainIds = captains.Select(x => x.Id).ToList();
-                    var walletTransactions = _uow.PartnerTransactions.GetAllAsQueryable().Where(x => captainIds.Contains(x.UserId) && x.DateCreated >= pagination.StartDate && x.DateCreated <= pagination.EndDate).GroupBy(x => x.UserId).ToList();
+                    var walletTransactions = _uow.PartnerTransactions.GetAllAsQueryable().Where(x => captainIds.Contains(x.UserId) && x.DateCreated >= pagination.StartDate && x.DateCreated <= pagination.EndDate && !String.IsNullOrEmpty(x.Manifest)).GroupBy(x => x.UserId).ToList();
                     if (walletTransactions.Any())
                     {
                         transactions = (from r in walletTransactions
