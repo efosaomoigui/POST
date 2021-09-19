@@ -536,20 +536,21 @@ namespace GIGLS.Services.Implementation.Partnership
 
                         //debit user wallet; check before deducting
                         var wallet = walletbalance.FirstOrDefault(x => x.CustomerCode == existingParntner.UserChannelCode);
-                        if (wallet == null)
-                        {
-                            throw new GenericException($"user {partner.PartnerName} does not have a wallet");
-                        }
-                        if ((wallet.Balance - partner.Amount) <= 0)
-                        {
-                            throw new GenericException($"insufficient wallet balance for user {partner.PartnerName}");
-                        }
+                        //if (wallet == null)
+                        //{
+                        //    throw new GenericException($"user {partner.PartnerName} does not have a wallet");
+                        //}
+                        //if ((wallet.Balance - partner.Amount) <= 0)
+                        //{
+                        //    throw new GenericException($"insufficient wallet balance for user {partner.PartnerName}");
+                        //}
                         if (wallet != null)
                         {
-                            if ((wallet.Balance - partner.Amount) >= 0)
-                            {
-                                wallet.Balance = wallet.Balance - partner.Amount;
-                            }
+                            //if ((wallet.Balance - partner.Amount) >= 0)
+                            //{
+                            //    wallet.Balance = wallet.Balance - partner.Amount;
+                            //}
+                            wallet.Balance = wallet.Balance - partner.Amount;
                             var addtransaction = new WalletTransaction
                             {
                                 WalletId = wallet.WalletId,
