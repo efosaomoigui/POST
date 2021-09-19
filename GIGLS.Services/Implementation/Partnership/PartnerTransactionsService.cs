@@ -556,7 +556,7 @@ namespace GIGLS.Services.Implementation.Partnership
                                 CreditDebitType = CreditDebitType.Debit,
                                 Amount = partner.Amount,
                                 ServiceCentreId = serviceCentre[0],
-                                Description = "Debit for shipment delivery payout",
+                                Description = "Debit for bonus credit for timely delivery payout",
                                 PaymentType = PaymentType.Transfer,
                                 UserId = existingParntner.Id,
                                 DateOfEntry = DateTime.Now,
