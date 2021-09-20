@@ -845,9 +845,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 //update wallet transaction
                 //generate paymentref
-                var today = DateTime.Now;
-                var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
-                var desc = "Wallet payment reversal";
+                var desc = $"{walletTrans.Description} refund";
 
                 await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
@@ -856,12 +854,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     CreditDebitType = CreditDebitType.Credit,
                     Description = desc,
                     PaymentType = PaymentType.Wallet,
-                    PaymentTypeReference = referenceNo,
+                    PaymentTypeReference = walletTrans.PaymentTypeReference,
                     UserId = walletTrans.UserId
                 }, false);
                 result.Succeeded = true;
-                result.Message = $"Wallet payment successfully reversed";
-                result.Entity = new { transactionId = referenceNo };
+                result.Message = $"Wallet payment charge successfully refunded";
+                result.Entity = new { transactionId = reference };
                 return result;
             }
             catch (Exception ex)
