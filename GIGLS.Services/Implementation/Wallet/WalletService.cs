@@ -847,7 +847,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 //generate paymentref
                 var desc = $"{walletTrans.Description} refund";
 
-                await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                await UpdateWalletForReverse(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
                     Amount = walletTrans.Amount,
@@ -866,6 +866,62 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw;
             }
+        }
+
+        private async Task UpdateWalletForReverse(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
+        {
+            var wallet = await _uow.Wallet.GetAsync(walletId);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //verify second time to reduce multiple credit of account
+            if (!string.IsNullOrWhiteSpace(walletTransactionDTO.PaymentTypeReference))
+            {
+                var walletTrans = await  _uow.WalletTransaction.GetAsync(x => x.PaymentTypeReference == walletTransactionDTO.PaymentTypeReference);
+
+                if (walletTrans != null && walletTrans.CreditDebitType == CreditDebitType.Credit)
+                {
+                    throw new GenericException("Account Already Credited, Kindly check your wallet", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+            }
+
+            //Manage want every customer to be eligible
+            //await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
+
+            if (walletTransactionDTO.UserId == null)
+            {
+                walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
+            }
+            var user = await _userService.GetUserById(walletTransactionDTO.UserId);
+
+            var serviceCenterIds = new int[] { };
+            if (hasServiceCentre == true)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+
+            if (serviceCenterIds.Length < 1)
+            {
+                serviceCenterIds = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
+            }
+
+            var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
+            newWalletTransaction.WalletId = walletId;
+            newWalletTransaction.DateOfEntry = DateTime.Now;
+            newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
+            newWalletTransaction.UserId = walletTransactionDTO.UserId;
+            newWalletTransaction.TransactionCountryId = user.UserActiveCountryId;
+            
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance;
+            
+            _uow.WalletTransaction.Add(newWalletTransaction);
+            await _uow.CompleteAsync();
+
         }
     }
 }
