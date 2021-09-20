@@ -5612,32 +5612,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.IsCancelled = true;
 
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == cancelPreShipmentMobile.Waybill);
-                if (invoice.PaymentStatus == PaymentStatus.Paid)
-                {
-                    //2. Reverse accounting entries
-
-                    //2.3 Create new entry in General Ledger for Invoice amount (debit)
-
-                    ////--start--///Set the DepartureCountryId
-                    int countryIdFromServiceCentreId = shipment.DepartureCountryId;
-                    ////--end--///Set the DepartureCountryId
-
-                    var generalLedger = new GeneralLedger()
-                    {
-                        DateOfEntry = DateTime.Now,
-                        ServiceCentreId = shipment.DepartureServiceCentreId,
-                        CountryId = countryIdFromServiceCentreId,
-                        UserId = currentUserId,
-                        Amount = invoice.Amount,
-                        CreditDebitType = CreditDebitType.Debit,
-                        Description = "Debit for Shipment Cancellation",
-                        IsDeferred = false,
-                        Waybill = cancelPreShipmentMobile.Waybill,
-                        PaymentServiceType = PaymentServiceType.Shipment
-                    };
-                    _uow.GeneralLedger.Add(generalLedger);
-                }
-
                 //2.2 Update Invoice PaymentStatus to cancelled
                 invoice.PaymentStatus = PaymentStatus.Cancelled;
 
