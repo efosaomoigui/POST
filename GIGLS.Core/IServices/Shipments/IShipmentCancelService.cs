@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Report;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,5 +12,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ShipmentCancelDTO>> GetShipmentCancels(ShipmentCollectionFilterCriteria collectionFilterCriteria);
         Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill);
         Task<object> AddShipmentCancel(string waybill,ShipmentCancelDTO shipmentCancelDTO);
+        Task<object> ProcessShipmentCancel(Shipment shipment, string userId, string cancelReason);
     }
 }

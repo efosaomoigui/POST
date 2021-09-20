@@ -4220,6 +4220,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         report.IsDeleted = true;
                     }
                 }
+                //also cancel shipment if its on shipment table already
+                var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == Waybill);
+                if (shipment != null)
+                {
+                    var newCancel = new CancelShipmentDTO
+                    {
+                        Waybill = Waybill,
+                        CancelReason = "None"
+                    };
+                    var user = await _userService.GetCurrentUserId();
+                    var res = await _shipmentService.CancelShipmentForGIGGOExtension(newCancel);
+                }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
             }
@@ -7072,6 +7084,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         report.IsDeleted = true;
                     }
+                }
+
+                //also cancel shipment if its on shipment table already
+                var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == cancelPreShipmentMobile.Waybill);
+                if (shipment != null)
+                {
+                    var user = await _userService.GetCurrentUserId();
+                    var res = await _shipmentService.CancelShipmentForGIGGOExtension(cancelPreShipmentMobile);
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };

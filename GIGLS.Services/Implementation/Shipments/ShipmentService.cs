@@ -3739,7 +3739,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             CreditDebitType = CreditDebitType.Credit,
                             PaymentType = PaymentType.Wallet,
                             Waybill = waybill,
-                            Description = "Credit for Shipment Cancellation"
+                            Description = "Credit for Shipment Cancellation",
+       
                         };
                         if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
                         {
@@ -5559,6 +5560,112 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = waybill
             };
             _uow.DeliveryNumber.Add(number);
+        }
+
+        public async Task<bool> CancelShipmentForGIGGOExtension(CancelShipmentDTO cancelPreShipmentMobile)
+        {
+            var boolRresult = false;
+            try
+            {
+                //Check if waybill sales has already been deposited
+                //remove from bank deposit order if it is there
+                var currentUserId = await _userService.GetCurrentUserId();
+                var bankDepositOrder = await _uow.BankProcessingOrderForShipmentAndCOD.GetAsync(s => s.Waybill == cancelPreShipmentMobile.Waybill && s.DepositType == DepositType.Shipment);
+
+                if (bankDepositOrder != null)
+                {
+                    if (bankDepositOrder.Status != DepositStatus.Deposited && bankDepositOrder.Status != DepositStatus.Verified)
+                    {
+                        var bankDeposit = await _uow.BankProcessingOrderCodes.GetAsync(s => s.Code == bankDepositOrder.RefCode);
+                        bankDeposit.TotalAmount = bankDeposit.TotalAmount - bankDepositOrder.GrandTotal;
+                        bankDepositOrder.IsDeleted = true;
+                    }
+                }
+
+
+                //1. check if there is a dispatch for the waybill (Manifest -> Group -> Waybill)
+                //If there is, throw an exception (since, the shipment has already left the terminal)
+                var groupwaybillMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(s => s.WaybillNumber == cancelPreShipmentMobile.Waybill);
+                if (groupwaybillMapping != null)
+                {
+                    var mainfestMapping = _uow.ManifestGroupWaybillNumberMapping.
+                        SingleOrDefault(s => s.GroupWaybillNumber == groupwaybillMapping.GroupWaybillNumber);
+
+                    if (mainfestMapping != null)
+                    {
+                        var dispatch = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == mainfestMapping.ManifestCode);
+
+                        if (dispatch != null)
+                        {
+                            throw new GenericException($"Error Cancelling the Shipment." +
+                                $" The shipment with waybill number {cancelPreShipmentMobile.Waybill} has already been dispatched by" +
+                                $" vehicle number {dispatch.RegistrationNumber}.");
+                        }
+                    }
+
+                    //remove waybill from manifest and groupwaybill
+                    await RemoveWaybillNumberFromGroupForCancelledShipment(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
+                }
+
+                //2.1 Update shipment to cancelled
+                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == cancelPreShipmentMobile.Waybill);
+                shipment.IsCancelled = true;
+
+                var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == cancelPreShipmentMobile.Waybill);
+                if (invoice.PaymentStatus == PaymentStatus.Paid)
+                {
+                    //2. Reverse accounting entries
+
+                    //2.3 Create new entry in General Ledger for Invoice amount (debit)
+
+                    ////--start--///Set the DepartureCountryId
+                    int countryIdFromServiceCentreId = shipment.DepartureCountryId;
+                    ////--end--///Set the DepartureCountryId
+
+                    var generalLedger = new GeneralLedger()
+                    {
+                        DateOfEntry = DateTime.Now,
+                        ServiceCentreId = shipment.DepartureServiceCentreId,
+                        CountryId = countryIdFromServiceCentreId,
+                        UserId = currentUserId,
+                        Amount = invoice.Amount,
+                        CreditDebitType = CreditDebitType.Debit,
+                        Description = "Debit for Shipment Cancellation",
+                        IsDeferred = false,
+                        Waybill = cancelPreShipmentMobile.Waybill,
+                        PaymentServiceType = PaymentServiceType.Shipment
+                    };
+                    _uow.GeneralLedger.Add(generalLedger);
+                }
+
+                //2.2 Update Invoice PaymentStatus to cancelled
+                invoice.PaymentStatus = PaymentStatus.Cancelled;
+
+                //2.5 Scan the Shipment for cancellation
+                await ScanShipment(new ScanDTO
+                {
+                    WaybillNumber = cancelPreShipmentMobile.Waybill,
+                    ShipmentScanStatus = ShipmentScanStatus.SSC
+                });
+
+                var newCancel = new ShipmentCancel
+                {
+                    Waybill = shipment.Waybill,
+                    CreatedBy = shipment.UserId,
+                    ShipmentCreatedDate = shipment.DateCreated,
+                    CancelledBy = currentUserId,
+                    CancelReason = cancelPreShipmentMobile.CancelReason
+                };
+
+                _uow.ShipmentCancel.Add(newCancel);
+                boolRresult = true;
+
+                return boolRresult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

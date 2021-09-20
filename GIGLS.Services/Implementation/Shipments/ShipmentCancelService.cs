@@ -96,7 +96,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (preshipment != null)
             {
-                if (preshipment.shipmentstatus == "Shipment created" || preshipment.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipment.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString())
+                if (preshipment.shipmentstatus == "Shipment created" || preshipment.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipment.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipment.shipmentstatus == "Shipment created" || preshipment.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipment.shipmentstatus == "Pending Cancellation")
                 {
                     preshipment.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                 }
