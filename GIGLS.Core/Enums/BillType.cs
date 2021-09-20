@@ -3,9 +3,9 @@
     public enum BillType
     {
         ClassSubscription,
-        DSTV,
+        TVSUB,
         AIRTIME,
-        DATABUNDLE,
+        DATASUB,
         ELECTRICITY
     }
 }
