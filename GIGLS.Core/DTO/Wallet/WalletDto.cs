@@ -25,6 +25,8 @@ namespace GIGLS.Core.DTO.Wallet
     public class ChargeWalletDTO
     {
         public string UserId { get; set; }
+        public string ReferenceNo { get; set; }
+        public string Description { get; set; }
         public decimal Amount { get; set; }
         public BillType BillType { get; set; }
 
