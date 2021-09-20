@@ -802,19 +802,19 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 var result = new ResponseDTO();
-                var walletLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
-                if (walletLog == null)
+                var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.PaymentTypeReference == reference);
+                if (walletTrans == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"Wallet Payment does not exist";
+                    result.Message = $"Wallet transaction does not exist";
                     return result;
                 }
 
-                var user = await _uow.User.GetUserById(walletLog.UserId);
+                var user = await _uow.User.GetUserById(walletTrans.UserId);
                 if (user == null)
                 {
                     result.Succeeded = false;
-                    result.Message = $"user does not exist";
+                    result.Message = $"User does not exist";
                     return result;
                 }
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
@@ -826,11 +826,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //charge wallet
-                if (walletLog.IsWalletCredited)
+                if (walletTrans.CreditDebitType == CreditDebitType.Debit)
                 {
-                    if ((wallet.Balance + walletLog.Amount) >= 0)
+                    if ((wallet.Balance + walletTrans.Amount) >= 0)
                     {
-                        wallet.Balance += walletLog.Amount;
+                        wallet.Balance += walletTrans.Amount;
                     }
                 }
                 else
@@ -847,17 +847,17 @@ namespace GIGLS.Services.Implementation.Wallet
                 //generate paymentref
                 var today = DateTime.Now;
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
-                var desc = "Wallet Payment reversal";
+                var desc = "Wallet payment reversal";
 
                 await UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
-                    Amount = walletLog.Amount,
+                    Amount = walletTrans.Amount,
                     CreditDebitType = CreditDebitType.Credit,
                     Description = desc,
                     PaymentType = PaymentType.Wallet,
                     PaymentTypeReference = referenceNo,
-                    UserId = walletLog.UserId
+                    UserId = walletTrans.UserId
                 }, false);
                 result.Succeeded = true;
                 result.Message = $"Wallet payment successfully reversed";
@@ -866,7 +866,6 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }

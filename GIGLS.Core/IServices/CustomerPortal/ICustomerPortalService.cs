@@ -240,5 +240,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO TransferDetailsDTO);
         Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
+        Task<ResponseDTO> ReverseWallet(string reference);
     }
 }
