@@ -1598,6 +1598,35 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
+        public async Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string trackId)  
+        {
+            try
+            {
+                var shipmentItem = await _uow.IntlShipmentRequestItem.GetAsync(x => x.TrackingId.Equals(trackId));
+                if (shipmentItem == null)
+                {
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                //var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.ShipmentRequestItems.Find(s => s.TrackingId == trackId));
+                var shipment = await _uow.IntlShipmentRequest.GetAsync(x => x.IntlShipmentRequestId.Equals(shipmentItem.IntlShipmentRequestId));
+
+                if (shipment == null)
+                {
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+
+                await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
+                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IntlShipmentRequestDTO> GetShipmentRequest(int shipmentRequestId)
         {
             try
@@ -1657,7 +1686,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentDto.UserActiveCountryId = customer.UserActiveCountryId;
                     shipmentDto.CustomerCode = customer.CustomerCode;
                 }
-
 
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
                 shipmentDto.CustomerAddress = shipmentDto.SenderAddress;
