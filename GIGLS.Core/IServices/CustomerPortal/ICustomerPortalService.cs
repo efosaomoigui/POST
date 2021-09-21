@@ -243,5 +243,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> SaveGIGUserPin(GIGXUserDetailDTO userDetails);
         Task<bool> CheckIfUserHasPin();
         Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<ResponseDTO> ReverseWallet(string reference);
     }
 }
