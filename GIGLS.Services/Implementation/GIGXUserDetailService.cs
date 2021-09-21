@@ -31,15 +31,15 @@ namespace GIGLS.Services.Implementation.BankSettlement
 
             try
             {
-                if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerCode.ToLower() == gIGXUserDetailDTO.CustomerCode.ToLower()))
+                if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerCode.ToLower() == gIGXUserDetailDTO.CustomerCode.ToLower() && !String.IsNullOrEmpty(v.CustomerPin)))
                 {
-                    throw new GenericException($"User already have a pin");
+                    throw new GenericException($"user already have a pin");
                 }
 
-                if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerPin.ToLower() == gIGXUserDetailDTO.CustomerPin.ToLower()))
-                {
-                    throw new GenericException($"Pin already in use");
-                }
+                //if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerPin.ToLower() == gIGXUserDetailDTO.CustomerPin.ToLower()))
+                //{
+                //    throw new GenericException($"Pin already in use");
+                //}
 
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
