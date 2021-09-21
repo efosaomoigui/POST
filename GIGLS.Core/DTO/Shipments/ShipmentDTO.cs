@@ -486,6 +486,7 @@ namespace GIGLS.Core.DTO.Shipments
         public List<int> PackageOptionIds { get; set; } = new List<int>();
         public int TimeInSeconds { get; set; }
         public List<WaybillChargeDTO> WaybillCharges { get; set; }
+        public string TempCode { get; set; }
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {

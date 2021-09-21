@@ -231,8 +231,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<CustomerDTO> GetCorporateCustomer(string customerCode);
         Task<ShipmentDTO> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO);
         Task<NewPricingDTO> GetGrandPriceForShipment(CorporateShipmentDTO corporateShipmentDTO);
-        Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails);
-        Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails();
+        Task<bool> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails);
+        Task<GIGXUserDetailDTO> GetGIGXUserWalletDetails();
         Task<IEnumerable<CountryDTO>> GetCountries();
         Task<string> EncryptCellulantKey();
         Task<string> GetCellulantKey();
@@ -245,5 +245,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<string>> GenerateCouponCode(int number);
         Task<bool> CreateCoupon(CreateCouponManagementDTO couponDto);
         Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount);
+        Task<bool> SaveGIGUserPin(GIGXUserDetailDTO userDetails);
+        Task<bool> CheckIfUserHasPin();
+        Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<ResponseDTO> ReverseWallet(string reference);
     }
 }

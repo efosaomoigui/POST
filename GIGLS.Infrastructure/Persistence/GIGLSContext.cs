@@ -310,6 +310,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<TransferDetails> TransferDetails { get; set; }
         public DbSet<CouponCodeManagement> CouponCodeManagement { get; set; }
 
+        public DbSet<GIGXUserDetail> GIGXUserDetail { get; set; }
 
         #endregion
 

@@ -21,6 +21,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Node;
 using GIGLS.Core.IServices.Node;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -31,15 +32,17 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICompanyService _companyService;
         private readonly INodeService _nodeService;
+        private readonly IUserService _userService;
 
         public PartnerService(IUnitOfWork uow, IWalletService walletService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService, INodeService nodeService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService, ICompanyService companyService, INodeService nodeService, IUserService userService)
         {
             _uow = uow;
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _companyService = companyService;
             _nodeService = nodeService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -569,5 +572,61 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw ex;
             }
         }
+
+        public async Task<List<CaptainTransactionDTO>> GetCaptainTransactions(PaginationDTO pagination)
+        {
+            try
+            {
+                var transactions = new List<CaptainTransactionDTO>();
+                var captains = await _uow.User.GetCaptains();
+                if (captains.Any())
+                {
+                    if (pagination != null && pagination.StartDate == null && pagination.EndDate == null)
+                    {
+                        var now = DateTime.Now;
+                        DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                        DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                        pagination.StartDate = firstDay;
+                        pagination.EndDate = DateTime.Now;
+                    }
+                    else if (pagination != null && pagination.StartDate != null && pagination.EndDate == null)
+                    {
+                        pagination.EndDate = DateTime.Now;
+                    }
+
+                    if (pagination != null && pagination.StartDate != null && pagination.EndDate != null)
+                    {
+                        pagination.StartDate = pagination.StartDate.Value.ToUniversalTime();
+                        pagination.StartDate = pagination.StartDate.Value.AddHours(12).AddMinutes(00);
+                        pagination.EndDate = pagination.EndDate.Value.ToUniversalTime();
+                        pagination.EndDate = pagination.EndDate.Value.AddHours(23).AddMinutes(59);
+                    }
+                    var captainIds = captains.Select(x => x.Id).ToList();
+                    var walletTransactions = _uow.PartnerTransactions.GetAllAsQueryable().Where(x => captainIds.Contains(x.UserId) && x.DateCreated >= pagination.StartDate && x.DateCreated <= pagination.EndDate && !String.IsNullOrEmpty(x.Manifest)).GroupBy(x => x.UserId).ToList();
+                    if (walletTransactions.Any())
+                    {
+                        transactions = (from r in walletTransactions
+                                        select new CaptainTransactionDTO()
+                                        {
+                                            PartnerCode = captains.FirstOrDefault(x => x.Id == r.Key).UserChannelCode,
+                                            PartnerName = $"{captains.FirstOrDefault(x => x.Id == r.Key).FirstName} {captains.FirstOrDefault(x => x.Id == r.Key).LastName}",
+                                            PartnerEmail = captains.FirstOrDefault(x => x.Id == r.Key).Email,
+                                            PartnerType = captains.FirstOrDefault(x => x.Id == r.Key).SystemUserRole,
+                                            Amount = r.Sum(x => x.AmountReceived),
+
+                                        }).ToList();
+
+                    }
+                }
+                return transactions;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
     }
 }

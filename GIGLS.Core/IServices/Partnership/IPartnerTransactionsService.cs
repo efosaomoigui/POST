@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<string> Encrypt(string clearText);
         Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO transactionsDTO);
         Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
+        Task ProcessCaptainTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto);
     }
 }
