@@ -2663,5 +2663,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPut]
+        [Route("chargewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChargeWallet(responseDTO);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result,
+                };
+            });
+        }
+
     }
 }
