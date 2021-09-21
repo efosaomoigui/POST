@@ -147,6 +147,7 @@
     <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\GIGXUserDetail.cs" />
     <Compile Include="Domain\Bank.cs" />
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
@@ -539,6 +540,7 @@
     <Compile Include="DTO\User\RankHistoryDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\User\GIGXUserDetailDTO.cs" />
     <Compile Include="DTO\User\UserValidationDTO.cs" />
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
@@ -687,6 +689,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
@@ -849,6 +852,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\IGIGXUserDetailService.cs" />
     <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />

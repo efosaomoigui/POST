@@ -2531,7 +2531,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPut]
         [Route("gigxuserdetails")]
-        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -2545,12 +2545,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getgigxuserwalletdetails")]
-        public async Task<IServiceResponse<GIGXUserDetailsDTO>> GetGIGXUserWalletDetails()
+        public async Task<IServiceResponse<GIGXUserDetailDTO>> GetGIGXUserWalletDetails()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.GetGIGXUserWalletDetails();
-                return new ServiceResponse<GIGXUserDetailsDTO>
+                return new ServiceResponse<GIGXUserDetailDTO>
                 {
                     Object = result
                 };
@@ -2617,6 +2617,48 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = Price,
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("checkforuserpin")]
+        public async Task<IServiceResponse<bool>> CheckIfUserHasPin()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckIfUserHasPin();
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addgiguserpin")]
+        public async Task<IServiceResponse<bool>> SaveGIGUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SaveGIGUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifyuserpin")]
+        public async Task<IServiceResponse<bool>> VerifyUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.VerifyUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
                 };
             });
         }

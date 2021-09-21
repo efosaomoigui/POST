@@ -308,6 +308,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //cellulant
         public DbSet<TransferDetails> TransferDetails { get; set; }
+        public DbSet<GIGXUserDetail> GIGXUserDetail { get; set; }
 
         #endregion
 
