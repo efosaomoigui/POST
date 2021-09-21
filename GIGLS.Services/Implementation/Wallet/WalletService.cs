@@ -810,6 +810,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                //check if wallet already credited
+                var checks =  _uow.WalletTransaction.Find(x => x.PaymentTypeReference == reference);
+                foreach(var check in checks)
+                {
+                    if (check.CreditDebitType == CreditDebitType.Credit)
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"Wallet already credited";
+                        return result;
+                    }
+                }
+                
                 var user = await _uow.User.GetUserById(walletTrans.UserId);
                 if (user == null)
                 {
