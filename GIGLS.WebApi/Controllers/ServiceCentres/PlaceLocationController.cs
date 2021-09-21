@@ -18,9 +18,13 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
     public class PlaceLocationController : BaseWebApiController
     {
         private IPlaceLocationService _locationService;
-        public PlaceLocationController(IPlaceLocationService locationService) : base(nameof(PlaceLocationController))
+        private IStationService _stationService;
+        private IServiceCentreService _serviceCentreService;
+        public PlaceLocationController(IPlaceLocationService locationService, IStationService stationService, IServiceCentreService serviceCentreService) : base(nameof(PlaceLocationController))
         {
             _locationService = locationService;
+            _stationService = stationService;
+            _serviceCentreService = serviceCentreService;
         }
         // GET: Location
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -46,6 +50,23 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             return await HandleApiOperationAsync(async () =>
             {
                 var location = await _locationService.GetLocationsByStateId(stateId);
+                return new ServiceResponse<IEnumerable<PlaceLocationDTO>>
+                {
+                    Object = location
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{serviceCentreId:int}/station")]
+        public async Task<IServiceResponse<IEnumerable<PlaceLocationDTO>>> GetLocationsByStation(int serviceCentreId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var serviceCenter = await _serviceCentreService.GetServiceCentreById(serviceCentreId);
+                var station = await _stationService.GetStationById(serviceCenter.StationId);
+                var location = await _locationService.GetLocationsByStateId(station.StateId);
                 return new ServiceResponse<IEnumerable<PlaceLocationDTO>>
                 {
                     Object = location
