@@ -3979,15 +3979,19 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount)
+        public async Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount)
         {
             decimal computedAmount = 0;
             var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == couponCode && x.IsCouponCodeUsed == false);
-            if(coupon == null)
+            if (coupon == null)
             {
                 throw new GenericException($"Coupon code {couponCode} does not exists or has been used", $"{(int)HttpStatusCode.BadRequest}");
             }
-            if(coupon.DiscountType == CouponDiscountType.Percentage)
+            if (DateTime.Now.Date > coupon.ExpiryDay.Date)
+            {
+                throw new GenericException($"The coupon code has expired", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (coupon.DiscountType == CouponDiscountType.Percentage)
             {
                 var couponPer = (Convert.ToDecimal(coupon.CouponCodeValue) / 100) * amount;
                 computedAmount = amount - couponPer;
@@ -3996,7 +4000,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 computedAmount = amount - Convert.ToDecimal(coupon.CouponCodeValue);
             }
-            return Task.FromResult(computedAmount);
+            if (computedAmount < 0)
+            {
+                return 0;
+            }
+            return computedAmount;
         }
     }
 }
