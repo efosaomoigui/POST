@@ -242,5 +242,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
         Task<bool> DeleteInboundShipment(string requestNo);
         Task<WalletDTO> GetWalletBalance(string customerCode); 
+        Task<List<string>> GenerateCouponCode(int number);
+        Task<bool> CreateCoupon(CreateCouponManagementDTO couponDto);
+        Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount);
     }
 }

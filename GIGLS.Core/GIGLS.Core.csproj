@@ -158,6 +158,7 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\CouponCodeManagement.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -333,6 +334,7 @@
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
+    <Compile Include="DTO\CouponManagementDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
@@ -572,6 +574,7 @@
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
@@ -690,6 +693,7 @@
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
+    <Compile Include="IRepositories\ICouponManagementRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
     <Compile Include="IRepositories\IGiglgoStationRepository.cs" />

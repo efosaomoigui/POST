@@ -524,6 +524,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ITransferDetailsRepository TransferDetails { get; set; }
+        [Inject]
+        public ICouponManagementRepository CouponManagement { get; set; }
 
         public int Complete()
         {
