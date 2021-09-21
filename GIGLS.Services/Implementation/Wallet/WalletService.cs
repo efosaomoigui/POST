@@ -797,5 +797,143 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        public async Task<ResponseDTO> ReverseWallet(string reference)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.PaymentTypeReference == reference);
+                if (walletTrans == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet transaction does not exist";
+                    return result;
+                }
+
+                //check if wallet already credited
+                var checks =  _uow.WalletTransaction.Find(x => x.PaymentTypeReference == reference);
+                foreach(var check in checks)
+                {
+                    if (check.CreditDebitType == CreditDebitType.Credit)
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"Wallet already credited";
+                        return result;
+                    }
+                }
+                
+                var user = await _uow.User.GetUserById(walletTrans.UserId);
+                if (user == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"User does not exist";
+                    return result;
+                }
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
+                //charge wallet
+                if (walletTrans.CreditDebitType == CreditDebitType.Debit)
+                {
+                    if ((wallet.Balance + walletTrans.Amount) >= 0)
+                    {
+                        wallet.Balance += walletTrans.Amount;
+                    }
+                }
+                else
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet is not yet charged";
+                    return result;
+                }
+
+
+                await _uow.CompleteAsync();
+
+                //update wallet transaction
+                //generate paymentref
+                var desc = $"{walletTrans.Description} refund";
+
+                await UpdateWalletForReverse(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = walletTrans.Amount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Description = desc,
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = walletTrans.PaymentTypeReference,
+                    UserId = walletTrans.UserId
+                }, false);
+                result.Succeeded = true;
+                result.Message = $"Wallet payment charge successfully refunded";
+                result.Entity = new { transactionId = reference };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateWalletForReverse(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
+        {
+            var wallet = await _uow.Wallet.GetAsync(walletId);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //verify second time to reduce multiple credit of account
+            if (!string.IsNullOrWhiteSpace(walletTransactionDTO.PaymentTypeReference))
+            {
+                var walletTrans = await  _uow.WalletTransaction.GetAsync(x => x.PaymentTypeReference == walletTransactionDTO.PaymentTypeReference);
+
+                if (walletTrans != null && walletTrans.CreditDebitType == CreditDebitType.Credit)
+                {
+                    throw new GenericException("Account Already Credited, Kindly check your wallet", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+            }
+
+            //Manage want every customer to be eligible
+            //await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
+
+            if (walletTransactionDTO.UserId == null)
+            {
+                walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
+            }
+            var user = await _userService.GetUserById(walletTransactionDTO.UserId);
+
+            var serviceCenterIds = new int[] { };
+            if (hasServiceCentre == true)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+
+            if (serviceCenterIds.Length < 1)
+            {
+                serviceCenterIds = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
+            }
+
+            var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
+            newWalletTransaction.WalletId = walletId;
+            newWalletTransaction.DateOfEntry = DateTime.Now;
+            newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
+            newWalletTransaction.UserId = walletTransactionDTO.UserId;
+            newWalletTransaction.TransactionCountryId = user.UserActiveCountryId;
+            
+                newWalletTransaction.BalanceAfterTransaction = wallet.Balance;
+            
+            _uow.WalletTransaction.Add(newWalletTransaction);
+            await _uow.CompleteAsync();
+
+        }
     }
 }

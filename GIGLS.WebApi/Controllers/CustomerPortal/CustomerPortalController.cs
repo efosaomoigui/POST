@@ -2621,5 +2621,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPut]
+        [Route("{reference}/reversewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ReverseWallet(string reference)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReverseWallet(reference);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
