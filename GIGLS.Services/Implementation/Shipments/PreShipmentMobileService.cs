@@ -523,6 +523,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
                 }
 
+                // update and apply coupon 
+                if (preShipmentDTO.IsCoupon)
+                {
+                    PreshipmentPriceDTO.GrandTotal = await ComputeCouponAmount(preShipmentDTO.CouponCode, PreshipmentPriceDTO.GrandTotal.Value);
+                    var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == preShipmentDTO.CouponCode);
+                    coupon.IsCouponCodeUsed = true;
+                }
+
                 decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                 decimal actualAmountToDebit = shipmentGrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
@@ -7242,6 +7250,26 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private Task<decimal> ComputeCouponAmount(string couponCode, decimal amount)
+        {
+            decimal computedAmount = 0;
+            var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == couponCode && x.IsCouponCodeUsed == false);
+            if (coupon == null)
+            {
+                throw new GenericException($"Coupon code {couponCode} does not exists or has been used", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (coupon.DiscountType == CouponDiscountType.Percentage)
+            {
+                var couponPer = (Convert.ToDecimal(coupon.CouponCodeValue) / 100) * amount;
+                computedAmount = amount - couponPer;
+            }
+            if (coupon.DiscountType == CouponDiscountType.Flat)
+            {
+                computedAmount = amount - Convert.ToDecimal(coupon.CouponCodeValue);
+            }
+            return Task.FromResult(computedAmount);
         }
 
 

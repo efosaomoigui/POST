@@ -2635,7 +2635,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("createCoupon")]
         public async Task<IServiceResponse<bool>> CreateCoupon(CreateCouponManagementDTO couponDto)
         {
@@ -2645,6 +2645,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = isCreated
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcomputecouponamount/{couponCode}/{amount}")]
+        public async Task<IServiceResponse<decimal>> GetComputeCouponAmount(string couponCode, decimal amount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var computedAmount = await _portalService.GetComputeCouponAmount(couponCode, amount);
+                return new ServiceResponse<decimal>
+                {
+                    Object = computedAmount
                 };
             });
         }

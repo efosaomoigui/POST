@@ -1887,7 +1887,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
             }
-
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
@@ -3948,8 +3947,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 for (int i = 0; i < number; i++)
                 {
                     var tagNumber = await _preShipmentMobileService.GenerateDeliveryCode();
-                    var couponCode = Mapper.Map<string>(tagNumber);
-                    couponCodes.Add(couponCode);
+                    //var couponCode = Mapper.Map<string>(tagNumber);
+                    couponCodes.Add(tagNumber);
                 }
                 return couponCodes;
             }
@@ -3980,7 +3979,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public Task<decimal> GetCouponAmount(string couponCode, decimal amount)
+        public Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount)
         {
             decimal computedAmount = 0;
             var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == couponCode && x.IsCouponCodeUsed == false);
