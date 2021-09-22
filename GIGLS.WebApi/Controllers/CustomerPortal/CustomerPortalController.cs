@@ -722,7 +722,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var userDto = await _portalService.ValidateOTP(otp);
-                if (userDto != null && userDto.IsActive == true)
+                if (userDto != null && userDto.IsActive == true && otp.isPINCreation == false)
                 {
                     string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
                     string getTokenResponse;
@@ -772,6 +772,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             ReferrerCode = userDto.Referrercode
                         };
                     }
+                }
+                else if (userDto != null && userDto.IsActive == true && otp.isPINCreation == true)
+                {
+                    var data = new { IsActive = true };
+
+                    var jObject = JObject.FromObject(data);
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Code = $"{(int)HttpStatusCode.OK}",
+                        ShortDescription = "OTP validation successful",
+                        Object = jObject
+                    };
                 }
                 else
                 {
