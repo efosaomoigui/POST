@@ -1617,9 +1617,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
 
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+                List<int> lsItems = shipment.ShipmentRequestItems.FindAll(x => x.TrackingId == trackId).Select(x => x.IntlShipmentRequestId).ToList();
 
-                await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
-                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+                await this.UpdateReceived(lsItems);
+
+                //await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
+                return shipmentDto;
             }
             catch (Exception)
             {
@@ -2309,6 +2312,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}"; 
                 }
+
                 _uow.Complete();
                 return true;
             }

@@ -756,6 +756,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
+
                 //get the current user
                 string userId = await _userService.GetCurrentUserId();
 
