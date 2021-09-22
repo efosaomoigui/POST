@@ -175,7 +175,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var location = await _uow.PlaceLocation.GetAsync(locationId);
 
                 //To check if the update already exists
-                var locations = await _uow.PlaceLocation.ExistAsync(c => c.PlaceLocationName.ToLower() == locationDto.PlaceLocationName.ToLower() && c.StateId == locationDto.StateId);
+                var locations = await _uow.PlaceLocation.ExistAsync(c => c.PlaceLocationName.ToLower() == locationDto.PlaceLocationName.ToLower() && c.StateId == locationDto.StateId && c.BaseStationId == locationDto.BaseStationId);
                 if (location == null || locationDto.PlaceLocationId != locationId)
                 {
                     throw new GenericException("Location Information does not exist");

@@ -71,6 +71,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUPSService _UPSService;
         private readonly IInternationalPriceService _internationalPriceService;
         private readonly ICountryService _countryService;
+        private readonly IPlaceLocationService _locationService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -83,7 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService)
+            ICountryService countryService, IPlaceLocationService locationService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -107,6 +108,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _UPSService = uPSService;
             _internationalPriceService = internationalPriceService;
             _countryService = countryService;
+            _locationService = locationService;
             MapperConfig.Initialize();
         }
 
@@ -1671,15 +1673,23 @@ namespace GIGLS.Services.Implementation.Shipments
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            //Get SuperCentre for Home Delivery
+            ////Get SuperCentre for Home Delivery
+            //if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            //{
+            //    //also check that the destination is not a hub
+            //    if (destinationSC.IsHUB != true)
+            //    {
+            //        var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+            //        shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+            //    }
+            //}
+
+            ////Get Hub for Home Delivery
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
-                //also check that the destination is not a hub
-                if (destinationSC.IsHUB != true)
-                {
-                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
-                }
+                //get location base station and set as destination service centre
+                    var location = await _locationService.GetLocationById(shipmentDTO.HomeDeliveryLocation);
+                    shipmentDTO.DestinationServiceCentreId = location.BaseStationId;
             }
 
             // get deliveryOptionIds and set the first value in shipment
