@@ -14,6 +14,7 @@ namespace GIGLS.Core.DTO.Partnership
         public DateTime DateProcessed { get; set; }
 
         public string PartnerName { get; set; }
+        public string PartnerType { get; set; }
 
         public DateTime? StartDate { get; set; }
 

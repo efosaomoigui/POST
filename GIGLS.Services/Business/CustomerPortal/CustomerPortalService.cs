@@ -121,6 +121,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly INodeService _nodeService;
+        private readonly IGIGXUserDetailService _gigxService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -134,7 +135,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -179,6 +180,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _movementManifestService = movementManifestService;
             _waybillPaymentLogService = waybillPaymentLogService;
             _nodeService = nodeService;
+            _gigxService = gigxService;
             MapperConfig.Initialize();
         }
 
@@ -3664,7 +3666,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.CancelShipmentWithNoChargeAndReason(cancelPreShipmentMobile);
         }
 
-        public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails)
         {
             if (userDetails is null)
             {
@@ -3693,11 +3695,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("User does not exit");
             }
-
-            user.WalletAddress = userDetails.WalletAddress.Trim();
-            user.PrivateKey = userDetails.PrivateKey.Trim();
-            user.PublicKey = userDetails.PublicKey.Trim();
-            await _uow.CompleteAsync();
+            var gigxUser = _gigxService.AddGIGXUserDetail(userDetails);
             return true;
         }
 
@@ -3767,7 +3765,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return price;
         }
 
-        public async Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails()
+        public async Task<GIGXUserDetailDTO> GetGIGXUserWalletDetails()
         {
             var userId = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(userId);
@@ -3777,13 +3775,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("User does not exit");
             }
 
-            var result = new GIGXUserDetailsDTO
-            {
-                WalletAddress = user.WalletAddress,
-                PrivateKey = user.PrivateKey,
-                PublicKey = user.PublicKey
-            };
-
+            var result = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
             return result;
         }
         public async Task<IEnumerable<CountryDTO>> GetCountries()
@@ -3928,6 +3920,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<ResponseDTO> ReverseWallet(string reference)
+        {
+            if (string.IsNullOrEmpty(reference))
+            {
+                throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            return await _walletService.ReverseWallet(reference);
+        }
+
         private async Task<bool> CheckSpecialCharacters(string content)
         {
             var specialChars = "@,#,%,^,!,$,*,(,),_,+,\\,|,/,?,[,]',:,~,`,>,<,";
@@ -3938,6 +3940,24 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return false;
         }
+
+        public async Task<bool> DeleteInboundShipment(string requestNo)
+        {
+            var intlShipment = _uow.IntlShipmentRequest.SingleOrDefault(x => x.RequestNumber == requestNo);
+            if (intlShipment.IsProcessed == false)
+            {
+                intlShipment.IsDeleted = true;
+                await _uow.CompleteAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<WalletDTO> GetWalletBalance(string customerCode)
+        {
+            return await _walletService.GetWalletBalance(customerCode);
+        }
+
 
         private async Task<List<string>> GenerateCouponCode(int number)
         {
@@ -4010,6 +4030,54 @@ namespace GIGLS.Services.Business.CustomerPortal
                 return 0;
             }
             return computedAmount;
+        }
+
+        public async Task<bool> SaveGIGUserPin(GIGXUserDetailDTO userDetails)
+        {
+            if (userDetails is null)
+            {
+                throw new GenericException("Please provide valid user details");
+            }
+
+            if (String.IsNullOrEmpty(userDetails.CustomerPin))
+            {
+                throw new GenericException("Customer pin is required");
+            }
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+            if (user is null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            var gigxUser = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
+            if (gigxUser == null)
+            {
+                var userPin = await _gigxService.AddGIGXUserDetail(userDetails);
+            }
+            else
+            {
+               var userDetail = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (!String.IsNullOrEmpty(userDetail.CustomerPin))
+                {
+                    throw new GenericException("Customer already has a pin");
+                }
+                userDetail.CustomerPin = userDetails.CustomerPin.ToString();
+            }
+            await _uow.CompleteAsync();
+            return true;
+        }
+
+        public async Task<bool> CheckIfUserHasPin()
+        {
+            return await _gigxService.CheckIfUserHasPin();
+        }
+        public async Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
+            {
+                throw new GenericException("Customer pin is required");
+            }
+            return await _gigxService.VerifyUserPin(gIGXUserDetailDTO);
         }
     }
 }

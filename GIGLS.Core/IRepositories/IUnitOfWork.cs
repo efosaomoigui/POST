@@ -211,6 +211,8 @@ namespace GIGLS.Core
         IWaybillChargeRepository WaybillCharge { get; set; }
         ITransferDetailsRepository TransferDetails { get; set; }
         ICouponManagementRepository CouponManagement { get; set; }
+        IGIGXUserDetailRepository GIGXUserDetail { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

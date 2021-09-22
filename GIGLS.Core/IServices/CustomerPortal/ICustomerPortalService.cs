@@ -231,8 +231,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<CustomerDTO> GetCorporateCustomer(string customerCode);
         Task<ShipmentDTO> CreateCorporateShipment(CorporateShipmentDTO corporateShipmentDTO);
         Task<NewPricingDTO> GetGrandPriceForShipment(CorporateShipmentDTO corporateShipmentDTO);
-        Task<bool> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails);
-        Task<GIGXUserDetailsDTO> GetGIGXUserWalletDetails();
+        Task<bool> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails);
+        Task<GIGXUserDetailDTO> GetGIGXUserWalletDetails();
         Task<IEnumerable<CountryDTO>> GetCountries();
         Task<string> EncryptCellulantKey();
         Task<string> GetCellulantKey();
@@ -241,6 +241,12 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceQoute(PreShipmentMobileDTO preShipment);
         Task<IEnumerable<PriceCategoryDTO>> GetPriceCategoriesBothCountries(int destcountryId, int deptcountryId);
         Task<List<string>> CreateCoupon(CouponManagementDTO couponDto);
+        Task<bool> DeleteInboundShipment(string requestNo);
+        Task<WalletDTO> GetWalletBalance(string customerCode); 
         Task<decimal> GetComputeCouponAmount(string couponCode, decimal amount);
+        Task<bool> SaveGIGUserPin(GIGXUserDetailDTO userDetails);
+        Task<bool> CheckIfUserHasPin();
+        Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<ResponseDTO> ReverseWallet(string reference);
     }
 }

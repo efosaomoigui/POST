@@ -2288,13 +2288,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     itemArray.Add(shipmentItem.ItemName);
                     if (!String.IsNullOrEmpty(shipmentItem.TrackingId))
                     {
-                        trackNos.Add(shipmentItem.TrackingId); 
+                        trackNos.Add(shipmentItem.TrackingId);
                     }
                     shipmentItem.Received = true;
-                    shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}"; 
+                    shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
                 }
                 _uow.Complete();
-                var requests =  _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).ToList();
+                var requests = _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).ToList();
                 if (requests.Any())
                 {
                     const int countryId = 1;
@@ -2390,7 +2390,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                         }
-                    } 
+                    }
                 }
                 return true;
             }
