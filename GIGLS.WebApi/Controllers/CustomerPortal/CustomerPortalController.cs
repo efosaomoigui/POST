@@ -2649,20 +2649,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
-        [Route("generatecouponcode/{number}")]
-        public async Task<IServiceResponse<List<string>>> GenerateCouponCode(int number)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var preShipment = await _portalService.GenerateCouponCode(number);
-                return new ServiceResponse<List<string>>
-                {
-                    Object = preShipment
-                };
-            });
-        }
-
+       
         [HttpPost]
         [Route("createCoupon")]
         public async Task<IServiceResponse<List<string>>> CreateCoupon(CouponManagementDTO couponDto)
