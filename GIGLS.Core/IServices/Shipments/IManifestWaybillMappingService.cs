@@ -35,7 +35,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestWaybillMappingDTO>> GetAllCODShipmentOnDeliveryManifestl(DateFilterCriteria dateFilterCriteria);
         Task<List<PreshipmentManifestDTO>> GetAllManifestForPreShipmentMobile();
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForDispatch();
-        Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end);
+        Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria);
     }
 
 
