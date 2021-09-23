@@ -39,7 +39,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             CategoryMinimumWeight = s.CategoryMinimumWeight,
                                             CountryName = _context.Country.Where(x => x.CountryId == countryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
-                                            SubminimumWeight = s.SubminimumWeight
+                                            SubminimumWeight = s.SubminimumWeight,
+                                            IsHazardous = s.IsHazardous
                                         };
                 return Task.FromResult(PriceCategorysDTO.OrderBy(x => x.PriceCategoryName).ToList());
 
@@ -70,7 +71,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             CountryName = _context.Country.Where(x => x.CountryId == s.CountryId).FirstOrDefault().CountryName,
                                             DepartureCountryName = _context.Country.Where(x => x.CountryId == s.DepartureCountryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
-                                            SubminimumWeight = s.SubminimumWeight
+                                            SubminimumWeight = s.SubminimumWeight,
+                                            IsHazardous = s.IsHazardous
                                         };
                 return Task.FromResult(PriceCategorysDTO.FirstOrDefault());
 
@@ -132,7 +134,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             CategoryMinimumWeight = s.CategoryMinimumWeight,
                                             CountryName = _context.Country.Where(x => x.CountryId == destCountryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
-                                            SubminimumWeight = s.SubminimumWeight
+                                            SubminimumWeight = s.SubminimumWeight,
+                                            IsHazardous = s.IsHazardous
                                         };
                 return Task.FromResult(PriceCategorysDTO.OrderBy(x => x.PriceCategoryName).ToList());
 

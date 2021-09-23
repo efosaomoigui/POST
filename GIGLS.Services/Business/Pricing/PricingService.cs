@@ -1625,6 +1625,11 @@ namespace GIGLS.Services.Business.Pricing
                     }
                 }
             }
+            if (itemCategory != null && itemCategory.IsHazardous)
+            {
+                //get hazardous extra charge from global property
+                var hazardousMatCharge = null;
+            }
             return price;
         }
 
