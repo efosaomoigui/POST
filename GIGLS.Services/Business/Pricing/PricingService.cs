@@ -1628,7 +1628,7 @@ namespace GIGLS.Services.Business.Pricing
             if (itemCategory != null && itemCategory.IsHazardous)
             {
                 //get hazardous extra charge from global property
-                var hazardousMatCharge = null;
+                var hazardousMatCharge = _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.Hazardous.ToString())
             }
             return price;
         }

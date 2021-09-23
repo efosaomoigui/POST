@@ -91,6 +91,7 @@
         InternationalBasicClassDiscount,
         OthersMinUK,
         EcommerceCustomerRep,
-        PlannedShippingDateAndTime
+        PlannedShippingDateAndTime,
+        Hazardous
     }
 }
