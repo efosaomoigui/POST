@@ -3964,7 +3964,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<List<string>> GenerateCouponCode(int number)
+        private async Task<List<string>> GenerateCouponCode(int number)
         {
             try
             {
@@ -3972,7 +3972,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 for (int i = 0; i < number; i++)
                 {
                     var tagNumber = await _preShipmentMobileService.GenerateDeliveryCode();
-                    //var couponCode = Mapper.Map<string>(tagNumber);
                     couponCodes.Add(tagNumber);
                 }
                 return couponCodes;
@@ -3983,24 +3982,30 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<bool> CreateCoupon(CreateCouponManagementDTO couponDto)
+        public async Task<List<string>> CreateCoupon(CouponManagementDTO couponDto)
         {
             try
             {
+                if (couponDto.CouponCodeValue < 1)
+                {
+                    throw new GenericException($"Coupon value must be greater than one", $"{(int)HttpStatusCode.BadRequest}");
+                }
                 var couponList = new List<CouponCodeManagement>();
-                foreach (var code in couponDto.CouponCode)
+                var couponCodes = await GenerateCouponCode(couponDto.Number);
+                foreach (var code in couponCodes)
                 {
                     var coupon = JObject.FromObject(couponDto).ToObject<CouponCodeManagement>();
                     coupon.CouponCode = code;
+                    couponDto.IsCouponCodeUsed = false;
                     couponList.Add(coupon);
                 }
-                 _uow.CouponManagement.AddRange(couponList);
+                _uow.CouponManagement.AddRange(couponList);
                 _uow.Complete();
-                return true;
+                return couponCodes;
             }
             catch (Exception ex)
             {
-                throw; 
+                throw;
             }
         }
 
