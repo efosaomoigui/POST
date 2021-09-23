@@ -10,5 +10,6 @@
 
         public string PhoneNumber { get; set; }
         public string EmailAddress { get; set; }
+        public bool isPINCreation { get; set; }
     }
 }

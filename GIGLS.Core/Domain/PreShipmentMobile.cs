@@ -188,6 +188,8 @@ namespace GIGLS.Core.Domain
         public int DestinationCountryId { get; set; }
         [MaxLength(300)]
         public string CustomerCancelReason { get; set; }
-
+        public bool IsCoupon { get; set; }
+        [MaxLength(50)]
+        public string CouponCode { get; set; }
     }
 }

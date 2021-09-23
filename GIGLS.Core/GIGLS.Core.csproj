@@ -147,6 +147,7 @@
     <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\GIGXUserDetail.cs" />
     <Compile Include="Domain\Bank.cs" />
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\CouponCodeManagement.cs" />
     <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
@@ -334,6 +336,7 @@
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
+    <Compile Include="DTO\CouponManagementDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
@@ -541,6 +544,7 @@
     <Compile Include="DTO\User\RankHistoryDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\User\GIGXUserDetailDTO.cs" />
     <Compile Include="DTO\User\UserValidationDTO.cs" />
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
@@ -574,6 +578,7 @@
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
@@ -588,6 +593,7 @@
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\CountryType.cs" />
+    <Compile Include="Enums\BillType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />
@@ -689,9 +695,11 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
+    <Compile Include="IRepositories\ICouponManagementRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
     <Compile Include="IRepositories\IGiglgoStationRepository.cs" />
@@ -852,6 +860,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\IGIGXUserDetailService.cs" />
     <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />

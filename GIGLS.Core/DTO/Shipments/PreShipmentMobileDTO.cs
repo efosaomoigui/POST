@@ -187,7 +187,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double? ReceiverLng { get; set; }
         public double? SenderLat { get; set; }
         public double? SenderLng { get; set; }
-
+        public bool IsCoupon { get; set; }
+        public string CouponCode { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -480,5 +481,14 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public string PartnerId { get; set; } // UserId
         public string WaybillNumber { get; set; }
+    }
+
+    public class CaptainTransactionDTO
+    {
+        public string PartnerCode { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerEmail { get; set; }
+        public decimal Amount { get; set; }
+        public string PartnerType { get; set; }
     }
 }

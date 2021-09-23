@@ -1785,6 +1785,101 @@ namespace GIGLS.Services.Implementation.Messaging
 
         }
 
+        //Handle Shipment Request Comfirmation
+        public async Task SendShipmentRequestConfirmation(IntlShipmentRequestDTO shipmentDto)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            //var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountry.CountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    Description = shipmentDto.ItemDetails,
+                    //DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    //DestinationCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId).Name,
+                    DeliveryOption = shipmentDto.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
+                    RequestCode = shipmentDto.RequestNumber
+                    //StoreOfPurchase = storeName
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Overseas Shipment Request Acknowledgement ({""}) ",
+                MessageTemplate = "OverseasShippingRequest"
+            };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    //messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
+                    messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
+                }
+            }
+
+            await SendOverseasMails(messageDTO);
+
+        }
+
+
+
+        //Handle Payment Confirmation Mail for Overseas Shipment Register Comfirmation
+        public async Task SendShipmentRegisteredWithGigGoMails(IntlShipmentRequestDTO shipmentDto) 
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountry.CountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                //Waybill = shipmentDto.RequestNumber,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}"
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Payment Confirmation",
+                MessageTemplate = "OverseasPaymentConfirmation"
+            };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
+                    messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
+                }
+            }
+
+            await SendOverseasMails(messageDTO);
+
+        }
+
         //Handle Payment Confirmation Mail for Overseas Shipment
         public async Task SendOverseasPaymentConfirmationMails(ShipmentDTO shipmentDto)
         {

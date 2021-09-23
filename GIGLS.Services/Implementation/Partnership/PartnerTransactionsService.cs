@@ -188,6 +188,7 @@ namespace GIGLS.Services.Implementation.Partnership
                     partner.GIGGOServiceCenter = gigGOServiceCenter.ServiceCentreId;
                     partner.ProcessedBy = processedBy;
                     partner.UserId = existingParntner.UserId;
+                    partner.PartnerType = existingParntner.PartnerType.ToString();
 
                     newPaymentLogDto.Add(partner);
                 }
@@ -247,7 +248,8 @@ namespace GIGLS.Services.Implementation.Partnership
                 ProcessedBy = partner.ProcessedBy,
                 PartnerName = partner.PartnerName,
                 StartDate = partner.filterCriteria.StartDate,
-                EndDate = partner.filterCriteria.EndDate
+                EndDate = partner.filterCriteria.EndDate,
+                PartnerType = partner.PartnerType
             };
             await _partnerPayoutService.AddPartnerPayout(processedByData);
         }
@@ -490,6 +492,101 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+
+        public async Task ProcessCaptainTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto)
+        {
+
+            try
+            {
+                //Get current User
+                var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var processedBy = user.Email;
+                var serviceCentre = await _userService.GetPriviledgeServiceCenters();
+
+
+                var walletTransactions = new List<WalletTransaction>();
+                var partnerPayOuts = new List<PartnerPayout>();
+
+                var codes = paymentLogDto.Select(x => x.Code).ToList();
+                var walletbalance = _uow.Wallet.GetAllAsQueryable().Where(x => codes.Contains(x.CustomerCode)).ToList();
+
+                //Process users payment
+                List<ExternalPartnerTransactionsPaymentDTO> newPaymentLogDto = new List<ExternalPartnerTransactionsPaymentDTO>();
+                foreach (var partner in paymentLogDto)
+                {
+                    var existingParntner = await _uow.User.GetUserByChannelCode(partner.Code);
+                    if (existingParntner != null)
+                    {
+                        // Get Date Info
+                        var queryDate = partner.filterCriteria.getStartDateAndEndDate();
+                        var startDate = queryDate.Item1;
+                        var endDate = queryDate.Item2;
+                        partner.filterCriteria.StartDate = startDate;
+                        partner.filterCriteria.EndDate = endDate;
+
+                        //set operating user
+                        partner.ProcessedBy = processedBy;
+                        partner.UserId = currentUserId;
+                        newPaymentLogDto.Add(partner);
+
+                        //debit user wallet; check before deducting
+                        var wallet = walletbalance.FirstOrDefault(x => x.CustomerCode == existingParntner.UserChannelCode);
+                        //if (wallet == null)
+                        //{
+                        //    throw new GenericException($"user {partner.PartnerName} does not have a wallet");
+                        //}
+                        //if ((wallet.Balance - partner.Amount) <= 0)
+                        //{
+                        //    throw new GenericException($"insufficient wallet balance for user {partner.PartnerName}");
+                        //}
+                        if (wallet != null)
+                        {
+                            //if ((wallet.Balance - partner.Amount) >= 0)
+                            //{
+                            //    wallet.Balance = wallet.Balance - partner.Amount;
+                            //}
+                            wallet.Balance = wallet.Balance - partner.Amount;
+                            var addtransaction = new WalletTransaction
+                            {
+                                WalletId = wallet.WalletId,
+                                CreditDebitType = CreditDebitType.Debit,
+                                Amount = partner.Amount,
+                                ServiceCentreId = serviceCentre[0],
+                                Description = "Debit for bonus credit for timely delivery payout",
+                                PaymentType = PaymentType.Transfer,
+                                UserId = existingParntner.Id,
+                                DateOfEntry = DateTime.Now,
+                            };
+                            walletTransactions.Add(addtransaction);
+                        }
+
+                        //also add to partnerpayout table
+                        var processedByData = new PartnerPayout
+                        {
+                            Amount = partner.Amount,
+                            ProcessedBy = partner.ProcessedBy,
+                            PartnerName = partner.PartnerName,
+                            StartDate = partner.filterCriteria.StartDate.Value,
+                            EndDate = partner.filterCriteria.EndDate.Value,
+                            PartnerType = PartnerType.Captain,
+                            DateProcessed = DateTime.Now
+                        };
+                        partnerPayOuts.Add(processedByData);
+                    }
+                }
+
+                _uow.PartnerPayout.AddRange(partnerPayOuts);
+                _uow.WalletTransaction.AddRange(walletTransactions);
+                await _uow.CompleteAsync();
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }

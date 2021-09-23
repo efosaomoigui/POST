@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -147,6 +148,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch()  
         {
             return await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+        }
+
+        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end) 
+        {
+            return await _portalService.getManifestsinmovementmanifestDispatchCompleted(start, end);
         }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch() 

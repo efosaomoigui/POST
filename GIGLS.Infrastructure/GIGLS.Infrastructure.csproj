@@ -131,6 +131,7 @@
     <Compile Include="Persistence\Repositories\ActivationCampaignEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\Archived\InvoiceArchiveRepository.cs" />
     <Compile Include="Persistence\Repositories\Archived\ShipmentArchiveRepository.cs" />
+    <Compile Include="Persistence\Repositories\GIGXUserDetailRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CodPayOutListRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="Persistence\Repositories\CategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\Client\ClientNodeRepository.cs" />
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
+    <Compile Include="Persistence\Repositories\CouponManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\EcommerceAgreementRepository.cs" />

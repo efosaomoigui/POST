@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.Partnership
@@ -19,5 +20,6 @@ namespace GIGLS.Core.Domain.Partnership
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public PartnerType PartnerType { get; set; }
     }
 }
