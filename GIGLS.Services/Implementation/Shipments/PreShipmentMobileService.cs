@@ -5135,14 +5135,14 @@ namespace GIGLS.Services.Implementation.Shipments
                                         preshipmentmobile.ReceiverAddress = detail.ReceiverAddress;
                                     }
 
-                                    var destinationSC = await _centreService.GetServiceCentreById(preshipmentmobile.ReceiverStationId);
+                                    var destinationSC = await _centreService.GetServiceCentreById(detail.ReceiverServiceCentreId);
                                     //Get SuperCentre for Home Delivery
                                     if (preshipmentmobile.IsHomeDelivery)
                                     {
                                         //also check that the destination is not a hub
                                         if (destinationSC.IsHUB != true)
                                         {
-                                            var stationData = await _uow.Station.GetAsync(x => x.StationId == preshipmentmobile.ReceiverStationId);
+                                            var stationData = await _uow.Station.GetAsync(x => x.StationId == destinationSC.StationId);
                                             detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
                                         }
                                     }
