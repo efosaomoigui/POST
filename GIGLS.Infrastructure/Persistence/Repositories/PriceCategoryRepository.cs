@@ -104,7 +104,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                     DepartureCountryId = s.DepartureCountryId,
                                     DepartureCountryName = _context.Country.Where(x => x.CountryId == s.DepartureCountryId).FirstOrDefault().CountryName,
                                     SubminimumPrice = s.SubminimumPrice,
-                                    SubminimumWeight = s.SubminimumWeight
+                                    SubminimumWeight = s.SubminimumWeight,
+                                    IsHazardous = s.IsHazardous
                                 };
                 return Task.FromResult(categoriesDTO.OrderBy(x => x.PriceCategoryName).ToList());
 
