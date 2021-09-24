@@ -5363,6 +5363,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 currentUser.FirstName = user.FirstName;
                 currentUser.LastName = user.LastName;
                 currentUser.PictureUrl = user.PictureUrl;
+                if (!String.IsNullOrEmpty(user.Email))
+                {
+                    currentUser.Email = user.Email;
+                }
+                if (!String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    currentUser.PhoneNumber = user.PhoneNumber;
+                }
                 await _userService.UpdateUser(currentUser.Id, currentUser);
 
                 string userChannelType = currentUser.UserChannelType.ToString();
