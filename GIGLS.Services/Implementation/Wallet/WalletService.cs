@@ -619,6 +619,17 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                //add xtra charge for tv or electricity
+                if (chargeWalletDTO.BillType == BillType.TVSUB || chargeWalletDTO.BillType == BillType.ELECTRICITY)
+                {
+                    var subCharge = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.SubscriptionCharge.ToString());
+                    if (subCharge != null)
+                    {
+                        var chargeAmount = Convert.ToDecimal(subCharge.Value);
+                        chargeWalletDTO.Amount = chargeWalletDTO.Amount + chargeAmount;
+                    }
+                }
+
                 //charge wallet
                 if ((wallet.Balance - chargeWalletDTO.Amount) >= 0)
                 {
