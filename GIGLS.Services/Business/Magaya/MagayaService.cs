@@ -1618,9 +1618,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
                 //List<int> lsItems = shipment.ShipmentRequestItems.FindAll(x => x.TrackingId == trackId).Select(x => x.IntlShipmentRequestId).ToList();
-                //List<int> lsItems =  _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.TrackingId.Equals(trackId)).Select(x => x.IntlShipmentRequestItemId).ToList();
-                List<int> lsItems = new List<int>();
-                lsItems.Add(shipmentItem.IntlShipmentRequestItemId);
+                List<int> lsItems =  _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.TrackingId.Equals(trackId)).Select(x => x.IntlShipmentRequestItemId).ToList();
                 await UpdateReceived(lsItems);
 
                 //await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
