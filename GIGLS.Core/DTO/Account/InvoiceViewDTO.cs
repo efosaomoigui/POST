@@ -228,6 +228,9 @@ namespace GIGLS.Core.DTO.Account
         public DateTime EndDate { get; set; }
         public List<InvoiceViewDTO> InvoiceViewDTOs { get; set; }
         public List<InvoiceChargeDTO> InvoiceCharges { get; set; }
+        public string BankName { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNo { get; set; }
 
     }
 

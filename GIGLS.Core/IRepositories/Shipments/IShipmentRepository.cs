@@ -33,6 +33,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<InvoiceViewDTO>> GetCoporateTransactions(DateFilterForDropOff filter);
         Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter);
         Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria);
+        Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

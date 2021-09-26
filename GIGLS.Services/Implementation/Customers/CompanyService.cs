@@ -244,6 +244,7 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 newCompany.PrefferedNubanBank = company.PrefferedNubanBank;
                                 newCompany.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                newCompany.NUBANCustomerName = customerNubanAccount.data.account_name;
                                 message.BankName = company.PrefferedNubanBank;
                                 message.AccountName = customerNubanAccount.data.account_name;
                                 message.AccountNo = customerNubanAccount.data.account_number;
@@ -561,6 +562,7 @@ namespace GIGLS.Services.Implementation.Customers
                                     msgObj.BankName = company.PrefferedNubanBank;
                                     msgObj.CustomerName = company.Name;
                                     await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
+                                    company.NUBANCustomerName = customerNubanAccount.data.account_name;
                                 }
                             }
                         }

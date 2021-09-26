@@ -1449,6 +1449,99 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
+        public Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions()
+        {
+            // filter by cancelled shipments
+            DateFilterForDropOff filter = new DateFilterForDropOff();
+            var customerInvoices = new List<CustomerInvoiceDTO>();
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                firstDay = firstDay.AddMonths(-1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+
+            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate);
+            List<InvoiceViewDTO> result = (from s in shipments.GroupBy(c => new { c.CustomerCode, c.Waybill})
+
+                                           join dept in Context.ServiceCentre on s.FirstOrDefault().DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.FirstOrDefault().DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join cust in Context.Company on s.FirstOrDefault().CustomerCode equals cust.CustomerCode
+                                           where s.FirstOrDefault().CompanyType == CompanyType.Corporate.ToString()
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.FirstOrDefault().Waybill,
+                                               DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
+                                               DepartureStationId = dept.StationId,
+                                               DestinationStationId = dest.StationId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = s.FirstOrDefault().GrandTotal,
+                                               Vat = s.FirstOrDefault().Vat.Value,
+                                               DateCreated = s.FirstOrDefault().DateCreated,
+                                               CompanyType = s.FirstOrDefault().CompanyType,
+                                               CustomerCode = s.FirstOrDefault().CustomerCode,
+                                               ApproximateItemsWeight = s.FirstOrDefault().ApproximateItemsWeight,
+                                               CustomerType = s.FirstOrDefault().CustomerType,
+                                               SenderName = cust.Name,
+                                               CustomerId = s.FirstOrDefault().CustomerId,
+                                               Email = cust.Email,
+                                               PhoneNumber = cust.PhoneNumber,
+                                               Name = cust.Name,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            if (resultDto.Any())
+            {
+                var customerCodes = result.Select(x => x.CustomerCode).ToList();
+                var customers = _context.Company.AsQueryable().Where(x => customerCodes.Contains(x.CustomerCode)).ToList();
+                var IDs = new List<int>();
+                var destStationsIDs = resultDto.Select(x => x.DestinationStationId);
+                var deptStationsIDs = resultDto.Select(x => x.DepartureStationId);
+                IDs.AddRange(destStationsIDs);
+                IDs.AddRange(deptStationsIDs);
+                var stations = _context.Station.AsQueryable().Where(x => IDs.Contains(x.StationId)).ToList();
+
+
+                foreach (var item in resultDto)
+                {
+                    var customerInvoice = new CustomerInvoiceDTO();
+                    customerInvoice.InvoiceViewDTOs.AddRange(resultDto);
+                    customerInvoice.Total = item.Amount;
+                    customerInvoice.TotalVat = item.Vat;
+                    customerInvoice.InvoiceRefNo = "";
+                    customerInvoice.CustomerName = customers.FirstOrDefault(x => x.CustomerCode == item.CustomerCode).Name;
+                    customerInvoice.PhoneNumber = item.PhoneNumber;
+                    customerInvoice.Email = item.Email;
+                    customerInvoice.CustomerCode = item.CustomerCode;
+                    customerInvoice.DateCreated = DateTime.Now;
+                    customerInvoice.CreatedBy = $"System";
+                    customerInvoice.AccountName = customers.FirstOrDefault(x => x.CustomerCode == item.CustomerCode).NUBANCustomerName;
+                    customerInvoice.AccountNo = customers.FirstOrDefault(x => x.CustomerCode == item.CustomerCode).NUBANAccountNo;
+                    customerInvoice.BankName = customers.FirstOrDefault(x => x.CustomerCode == item.CustomerCode).PrefferedNubanBank;
+                    var custExist = customerInvoices.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+                    if(custExist == null)
+                    {
+                        customerInvoices.Add(customerInvoice);
+                    }
+                    item.DestinationServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DestinationStationId).StationName;
+                    item.DepartureServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DepartureStationId).StationName;
+                }
+
+            }
+            return Task.FromResult(customerInvoices);
+        }
     }
 
 

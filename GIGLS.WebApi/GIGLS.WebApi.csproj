@@ -406,6 +406,7 @@
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
     <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ShipmentScan\ScanStatusController.cs" />
+    <Compile Include="Controllers\CustomerInvoice\CustomerInvoiceController.cs" />
     <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />

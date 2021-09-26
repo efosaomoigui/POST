@@ -146,6 +146,65 @@ namespace GIGLS.Services.Implementation.Shipments
             return string.Format("{0:yyyyMMddHHmmss}_{1}", DateTime.Now, filename);
         }
 
+        public static async Task<string> UploadFileToBlobAsync(string strFileName, byte[] fileData, string fileMimeType)
+        {
+            try
+            {
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["AzureBlobStorageConnectionString"].ToString());
+                CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
+                string strContainerName = "uploads";
+                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(strContainerName);
+                string fileName = GenerateFileName(strFileName);
+
+                //if (await cloudBlobContainer.CreateIfNotExistsAsync())
+                //{
+                //    await cloudBlobContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+                //}
+
+                if (fileName != null && fileData != null)
+                {
+                    CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(fileName);
+                    cloudBlockBlob.Properties.ContentType = fileMimeType;
+                    await cloudBlockBlob.UploadFromByteArrayAsync(fileData, 0, fileData.Length);
+                    return cloudBlockBlob.Uri.AbsoluteUri;
+                }
+                return "";
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
+
+        public static string GenerateFileName(string fileName)
+        {
+            string strFileName = string.Empty;
+            string[] strName = fileName.Split('.');
+            strFileName = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd") + "/" + DateTime.Now.ToUniversalTime().ToString("yyyyMMdd\\THHmmssfff") + "." + strName[strName.Length - 1];
+            return strFileName;
+        }
+
+
+        public static async void DeleteBlobData(string fileUrl)
+        {
+            Uri uriObj = new Uri(fileUrl);
+            string BlobName = Path.GetFileName(uriObj.LocalPath);
+
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["AzureBlobStorageConnectionString"].ToString());
+            CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
+            string strContainerName = "uploads";
+            CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(strContainerName);
+
+            string pathPrefix = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd") + "/";
+            CloudBlobDirectory blobDirectory = cloudBlobContainer.GetDirectoryReference(pathPrefix);
+            // get block blob refarence    
+            CloudBlockBlob blockBlob = blobDirectory.GetBlockBlobReference(BlobName);
+
+            // delete blob from container        
+            await blockBlob.DeleteAsync();
+        }
+
+
     }
 }
 
