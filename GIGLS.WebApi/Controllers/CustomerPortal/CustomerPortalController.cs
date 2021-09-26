@@ -2649,6 +2649,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("getwalletbalance/{customerCode}")]
         public async Task<IServiceResponse<decimal>> GetWalletBalance(string customerCode)
         {
