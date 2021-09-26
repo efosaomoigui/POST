@@ -611,7 +611,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsConsignable == true);
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
                                 select new ServiceCentreDTO
@@ -633,7 +633,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     Longitude = s.Longitude,
                                     Latitude = s.Latitude,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
-                                    IsPublic = s.IsPublic
+                                    IsPublic = s.IsPublic,
+                                    IsConsignable = s.IsConsignable
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
