@@ -94,5 +94,7 @@
         PlannedShippingDateAndTime,
         SubscriptionCharge
 
+        PlannedShippingDateAndTime,
+        Hazardous
     }
 }

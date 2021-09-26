@@ -18,5 +18,6 @@ namespace GIGLS.Core.Domain
         public int DepartureCountryId { get; set; }
         public decimal SubminimumWeight { get; set; }
         public decimal SubminimumPrice { get; set; }
+        public bool IsHazardous { get; set; }
     }
 }

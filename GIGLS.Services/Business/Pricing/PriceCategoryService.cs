@@ -101,6 +101,7 @@ namespace GIGLS.Services.Business.Pricing
                 cattoModify.IsActive = priceCategory.IsActive;
                 cattoModify.SubminimumPrice = priceCategory.SubminimumPrice;
                 cattoModify.SubminimumWeight = priceCategory.SubminimumWeight;
+                cattoModify.IsHazardous = priceCategory.IsHazardous;
                 _uow.Complete();
             }
             catch (Exception)
