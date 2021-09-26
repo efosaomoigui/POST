@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.DHL;
@@ -89,6 +90,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> ProcessInternationalShipmentOnAgility(ShipmentDTO shipmentDTO);
         Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO);
         Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO);
+        Task<bool> CancelShipmentForGIGGOExtension(CancelShipmentDTO cancelPreShipmentMobile);
 
     }
 
