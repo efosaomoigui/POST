@@ -540,11 +540,15 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Account
                     paramType
             };
 
-            var summary = await _context.Database.SqlQuery<OutboundFinancialReportDTO>("OutboundShipmentsReport " +
+            var summary =  _context.Database.SqlQuery<OutboundFinancialReportDTO>("OutboundShipmentsReport " +
                "@StartDate, @EndDate, @CountryId, @ParamType",
-               param).ToListAsync();
-
-            return await Task.FromResult(summary);
+               param).AsQueryable();
+            
+            if(accountFilterCriteria.PaymentStatus != null)
+            {
+                summary = summary.Where(x => x.PaymentStatus == accountFilterCriteria.PaymentStatus);
+            }
+            return await Task.FromResult(summary.OrderByDescending(x => x.DateCreated).ToList());
         }
 
         public async Task<decimal> GetCorporateIncomeBreakdownSummary(DashboardFilterCriteria dashboardFilterCriteria)
