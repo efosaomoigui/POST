@@ -92,9 +92,7 @@
         OthersMinUK,
         EcommerceCustomerRep,
         PlannedShippingDateAndTime,
-        SubscriptionCharge
-
-        PlannedShippingDateAndTime,
+        SubscriptionCharge,
         Hazardous
     }
 }
