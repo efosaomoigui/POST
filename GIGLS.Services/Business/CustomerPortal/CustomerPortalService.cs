@@ -2367,6 +2367,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                             });
                         }
 
+                        //update shipment table if scan is delivered and shipment exist on shipment table
+                        if (mobilePickUpRequestsDTO.Status == delivered && preShipmentMobile.ZoneMapping == 1 && preShipmentMobile.IsFromAgility == true)
+                        {
+                            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
+                            if (shipment != null && shipment.IsFromMobile == true)
+                            {
+                                shipment.ShipmentScanStatus = ShipmentScanStatus.OKC;
+                            }
+                        }
+
                         await _uow.CompleteAsync();
                     }
                 }
