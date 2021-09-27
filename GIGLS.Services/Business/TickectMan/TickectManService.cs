@@ -271,6 +271,27 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (invoiceObj != null)
                 {
                     shipment.Invoice = invoiceObj;
+                    if (shipment.Invoice.Shipment.GrandTotal > 0)
+                    {
+                        decimal factor = 0;
+                        if (shipment.CompanyType == CompanyType.Corporate.ToString() || shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                        {
+                            factor = Convert.ToDecimal(Math.Pow(10, 0));
+                        }
+                        else
+                        {
+                            factor = Convert.ToDecimal(Math.Pow(10, -2));
+                        }
+                        shipment.Invoice.Shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
+                        shipment.Invoice.Shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
+                        shipment.Invoice.Shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
+                        shipment.Invoice.Shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
+                        shipment.Invoice.Shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+                        shipment.Invoice.Shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                        shipment.Invoice.Shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                        shipment.Invoice.Shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
+                        shipment.Invoice.Shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+                    }
                 }
             }
             return shipment;
