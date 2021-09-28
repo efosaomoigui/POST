@@ -4146,7 +4146,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 var ticketMannResponse = new TicketMannResponseDTO();
                 // Call ticket mann
-                var url = $"https://live.ticketmann.co/api/quickteller/QueryTransaction?requestReferencevalue=";
+                var url = ConfigurationManager.AppSettings["TicketMannUrl"];
                 url = $"{url}{reference}";
 
                 using (var client = new HttpClient())
