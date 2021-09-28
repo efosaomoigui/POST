@@ -4171,7 +4171,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     response = "transaction was successfull";
                 }
             }
-            
 
             return response;
         }
