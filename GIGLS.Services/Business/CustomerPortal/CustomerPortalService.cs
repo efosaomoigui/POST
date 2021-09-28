@@ -73,6 +73,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
+using System.Text;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -4083,6 +4084,80 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Customer pin is required");
             }
             return await _gigxService.VerifyUserPin(gIGXUserDetailDTO);
+        }
+
+        public async Task<string> BillTransactionRefund(string emailOrCode)
+        {
+            var response = "";
+            if (string.IsNullOrWhiteSpace( emailOrCode))
+            {
+                throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var userDetails = await _uow.User.GetUserByEmailorCustomerCode(emailOrCode);
+            if (userDetails is null)
+            {
+                throw new GenericException("User does not exit", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            //Get Last User Wallet transaction
+            //var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL"));
+            var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL")).ToList();
+            var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
+
+            if (walletTrans is null)
+            {
+                throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            //Call Ticket Mann
+            var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
+            
+            if(ticketMannResponse is null)
+            {
+                throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            if (ticketMannResponse.Payload.Status.Contains("Failed"))
+            {
+                if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
+                {
+                    throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                var result = await ReverseWallet(walletTrans.PaymentTypeReference);
+                response = result.Message;
+            }
+            else
+            {
+                response = "Success";
+            }
+
+            return response;
+        }
+
+        private async Task<TicketMannResponseDTO> GetBillTransaction(string reference)
+        {
+            try
+            {
+                var ticketMannResponse = new TicketMannResponseDTO();
+                // Call ticket mann
+                var url = $"https://live.ticketmann.co/api/quickteller/QueryTransaction?requestReferencevalue=";
+                url = $"{url}{reference}";
+
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync(url);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<TicketMannResponseDTO>(result);
+                    ticketMannResponse = jObject;
+                }
+
+                return ticketMannResponse;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

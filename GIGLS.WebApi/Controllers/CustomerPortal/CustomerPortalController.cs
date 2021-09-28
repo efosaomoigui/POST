@@ -2761,5 +2761,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPut]
+        [Route("{emailorcode}/billtransactionrefund")]
+        public async Task<IServiceResponse<string>> BillTransactionRefund(string emailorcode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.BillTransactionRefund(emailorcode);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
