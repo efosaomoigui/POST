@@ -5136,7 +5136,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
-                if (paymentType == PaymentType.Wallet)
+                if (paymentType == PaymentType.Wallet && shipmentDTO.IsFromMobile == false)
                 {
                     var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(shipmentDTO.CustomerDetails.CustomerCode));
                     var wallet = walletEnumeration.FirstOrDefault();
