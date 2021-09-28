@@ -480,6 +480,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
+                preShipmentDTO.ReceiverStateOrProvinceCode = preShipmentDTO.ReceiverStateOrProvinceCode.Length > 2 ? preShipmentDTO.ReceiverCountryCode : preShipmentDTO.ReceiverStateOrProvinceCode;
 
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 if (country == null)
