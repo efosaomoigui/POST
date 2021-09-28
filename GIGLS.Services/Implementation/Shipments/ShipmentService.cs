@@ -4741,6 +4741,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var pickupPrice = Convert.ToDecimal(globalValue.Value);
                 total.GrandTotal = total.GrandTotal + pickupPrice;
             }
+
+            // format to two decimal place
+            total.Discount = Math.Round(total.Discount, 2);
+            total.Amount = Math.Round(total.Amount, 2);
+            total.VAT = Math.Round(total.VAT, 2);
+            total.Insurance = Math.Round(total.Insurance, 2);
+            total.GrandTotal = Math.Round(total.GrandTotal, 2);
+
             //Get Insurance
             //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
             //{

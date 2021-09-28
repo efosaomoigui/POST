@@ -5076,6 +5076,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
                             shipment = Mapper.Map<InternationalShipmentDTO>(preshipmentmobile);
                             shipment.ShipmentItems = shipmentItems;
+                            shipment.DeclarationOfValueCheck = preshipmentmobile.PreShipmentItems.Sum(x => Convert.ToInt32(x.Value));
+                            shipment.ItemDetails = preshipmentmobile.PreShipmentItems[0].Description;
                             shipment.CustomerDetails = customer;
                             shipment.IsFromMobile = true;
                             var result = await _shipmentService.AddInternationalShipment(shipment);

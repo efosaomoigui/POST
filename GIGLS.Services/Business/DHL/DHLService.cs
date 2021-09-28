@@ -240,11 +240,8 @@ namespace GIGLS.Services.Business.DHL
                         }
                     };
 
-                    weight = new ShippingWeight
-                    {
-                        NetValue = (float)Math.Round(netValue, 2),
-                        GrossValue = (float)Math.Round(netValue, 2),
-                    };
+                    weight.NetValue = (float)Math.Round(netValue, 2) != 0 ? (float)Math.Round(netValue, 2) : 1;
+                    weight.GrossValue = (float)Math.Round(netValue, 2) != 0 ? (float)Math.Round(netValue, 2) : 1;
                 }
                 content.Packages.Add(package);
                 lineItem = new LineItem
@@ -327,7 +324,7 @@ namespace GIGLS.Services.Business.DHL
         private ShipmentShipperDetail GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
             string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
-            string phoneNumber = ConfigurationManager.AppSettings["UPSGIGPhoneNumber"];
+            string phoneNumber = ConfigurationManager.AppSettings["DHLGIGPhoneNumber"];
 
             var shipper = new ShipmentShipperDetail
             {
@@ -582,7 +579,7 @@ namespace GIGLS.Services.Business.DHL
             var tmpDate = DateTime.Today;
             if (tmpDate.DayOfWeek == DayOfWeek.Friday)
             {
-               return tmpDate = tmpDate.AddDays(3);
+                return tmpDate = tmpDate.AddDays(3);
             }
             else if (tmpDate.DayOfWeek == DayOfWeek.Saturday)
             {
