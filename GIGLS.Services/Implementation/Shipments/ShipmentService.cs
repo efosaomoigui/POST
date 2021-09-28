@@ -4748,6 +4748,8 @@ namespace GIGLS.Services.Implementation.Shipments
             total.VAT = Math.Round(total.VAT, 2);
             total.Insurance = Math.Round(total.Insurance, 2);
             total.GrandTotal = Math.Round(total.GrandTotal, 2);
+            total.InternationalShippingCost = Math.Round(total.InternationalShippingCost, 2);
+
 
             //Get Insurance
             //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
