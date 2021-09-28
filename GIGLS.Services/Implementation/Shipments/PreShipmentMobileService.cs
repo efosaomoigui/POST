@@ -123,8 +123,20 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //null DateCreated
                 preShipment.DateCreated = DateTime.Now;
+                // check if it is international shipment
+                if (preShipment.IsInternationalShipment)
+                {
+                    preShipment.ReceiverStationId = 4;
+                    preShipment.ReceiverLat = 6.54887241412068;
+                    preShipment.ReceiverLng = 3.3891275341873115;
+                    preShipment.ZoneMapping = 2;
+                }
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
+                if (preShipment.IsInternationalShipment)
+                {
+                    preShipment.ZoneMapping = 2;
+                }
                 var newPreShipment = await CreatePreShipment(preShipment);
                 //await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
@@ -155,7 +167,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -523,7 +535,26 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
                     preShipmentDTO.IsFromShipment = true;
-                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                    if (preShipmentDTO.IsInternationalShipment)
+                    {
+                        var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipmentDTO.PreShipmentItems);
+                        var shipment = Mapper.Map<InternationalShipmentDTO>(preShipmentDTO);
+                        shipment.ShipmentItems = shipmentItems;
+                        shipment.IsFromMobile = true;
+                        var isWithinProcessingTime = await WithinProcessingTime(preShipmentDTO.CountryId);
+                        var intlData = await _shipmentService.GetInternationalShipmentPrice(shipment);
+                        var result = intlData.FirstOrDefault(x => x.CompanyMap == preShipmentDTO.CompanyMap);
+                        PreshipmentPriceDTO.Discount = result.Discount;
+                        PreshipmentPriceDTO.InsuranceValue = result.Insurance;
+                        PreshipmentPriceDTO.GrandTotal = result.GrandTotal;
+                        PreshipmentPriceDTO.Vat = result.VAT;
+                        PreshipmentPriceDTO.PreshipmentMobile = preShipmentDTO;
+                        PreshipmentPriceDTO.IsWithinProcessingTime = isWithinProcessingTime;
+                    }
+                    else
+                    {
+                        PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                    }
                 }
 
                 // update and apply coupon 
@@ -1496,7 +1527,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
                 //    percentage = Convert.ToDecimal(discountPercent.Value);
-                //}
+                
                 //else
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
