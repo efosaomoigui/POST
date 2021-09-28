@@ -4086,7 +4086,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _gigxService.VerifyUserPin(gIGXUserDetailDTO);
         }
 
-        public async Task<string> BillTransactionRefund(string emailOrCode, int amount)
+        public async Task<string> BillTransactionRefund(string emailOrCode, decimal amount)
         {
             var response = "";
             if (string.IsNullOrWhiteSpace( emailOrCode))
@@ -4094,9 +4094,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            if (amount is null )
+            if (amount <= 0 )
             {
-                throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
+                throw new GenericException("Please provide a valid amount", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             var userDetails = await _uow.User.GetUserByEmailorCustomerCode(emailOrCode);
@@ -4107,7 +4107,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             //Get Last User Wallet transaction
             //var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL"));
-            var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL")).ToList();
+            var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL") && x.Amount == amount).ToList();
             var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
             if (walletTrans is null)

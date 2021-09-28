@@ -249,6 +249,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<ResponseDTO> ReverseWallet(string reference);
         Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end);
-        Task<string> BillTransactionRefund(string emailOrCode);
+        Task<string> BillTransactionRefund(string emailOrCode, decimal amount);
     }
 }

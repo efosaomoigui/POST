@@ -2763,12 +2763,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPut]
-        [Route("{emailorcode}/{amount:int}/billtransactionrefund")]
-        public async Task<IServiceResponse<string>> BillTransactionRefund(string emailorcode, int amount)
+        [Route("{emailorcode}/{amount}/billtransactionrefund")]
+        public async Task<IServiceResponse<string>> BillTransactionRefund(string emailorcode, decimal amount)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.BillTransactionRefund(emailorcode);
+                var result = await _portalService.BillTransactionRefund(emailorcode, amount);
                 return new ServiceResponse<string>
                 {
                     Object = result
