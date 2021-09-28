@@ -4099,43 +4099,79 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide a valid amount", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            var userDetails = await _uow.User.GetUserByEmailorCustomerCode(emailOrCode);
-            if (userDetails is null)
+            if (emailOrCode.StartsWith("2012GIGL"))
             {
-                throw new GenericException("User does not exit", $"{(int)HttpStatusCode.BadRequest}");
-            }
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x =>  x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode) && x.Amount == amount).ToList();
+                var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
-            //Get Last User Wallet transaction
-            //var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL"));
-            var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL") && x.Amount == amount).ToList();
-            var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
-
-            if (walletTrans is null)
-            {
-                throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
-            }
-
-            //Call Ticket Mann
-            var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
-            
-            if(ticketMannResponse is null)
-            {
-                throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
-            }
-
-            if (ticketMannResponse.Payload.Status.Contains("Failed"))
-            {
-                if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
+                if (walletTrans is null)
                 {
-                    throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
                 }
-                var result = await ReverseWallet(walletTrans.PaymentTypeReference);
-                response = result.Message;
+
+                //Call Ticket Mann
+                var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
+
+                if (ticketMannResponse is null)
+                {
+                    throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                if (ticketMannResponse.Payload.Status.Contains("Failed"))
+                {
+                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
+                    {
+                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    var result = await ReverseWallet(walletTrans.PaymentTypeReference);
+                    response = result.Message;
+                }
+                else
+                {
+                    response = "transaction was successfull";
+                }
             }
             else
             {
-                response = "transaction was successfull";
+                var userDetails = await _uow.User.GetUserByEmailorCustomerCode(emailOrCode);
+                if (userDetails is null)
+                {
+                    throw new GenericException("User does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                //Get Last User Wallet transaction
+                //var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL"));
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.UserId.Equals(userDetails.Id) && x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Contains("2012GIGL") && x.Amount == amount).ToList();
+                var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
+
+                if (walletTrans is null)
+                {
+                    throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                //Call Ticket Mann
+                var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
+
+                if (ticketMannResponse is null)
+                {
+                    throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                if (ticketMannResponse.Payload.Status.Contains("Failed"))
+                {
+                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
+                    {
+                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    var result = await ReverseWallet(walletTrans.PaymentTypeReference);
+                    response = result.Message;
+                }
+                else
+                {
+                    response = "transaction was successfull";
+                }
             }
+            
 
             return response;
         }
