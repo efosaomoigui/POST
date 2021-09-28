@@ -4086,10 +4086,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _gigxService.VerifyUserPin(gIGXUserDetailDTO);
         }
 
-        public async Task<string> BillTransactionRefund(string emailOrCode)
+        public async Task<string> BillTransactionRefund(string emailOrCode, int amount)
         {
             var response = "";
             if (string.IsNullOrWhiteSpace( emailOrCode))
+            {
+                throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            if (amount is null )
             {
                 throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
             }
@@ -4129,7 +4134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                response = "Success";
+                response = "transaction was successfull";
             }
 
             return response;
