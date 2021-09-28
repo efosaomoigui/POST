@@ -539,7 +539,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipmentDTO.PreShipmentItems);
                         var shipment = Mapper.Map<InternationalShipmentDTO>(preShipmentDTO);
+                        for (int i = 0; i < preShipmentDTO.PreShipmentItems.Count(); i++)
+                        {
+                            shipmentItems[i].Price = Convert.ToInt32(preShipmentDTO.PreShipmentItems[i].Value);
+                            // Quick fixes
+                            if (shipmentItems[i].Weight == 0)
+                            {
+                                shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.Document;
+                            }
+                            else
+                            {
+                                shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.NonDocument;
+                            }
+                        }
                         shipment.ShipmentItems = shipmentItems;
+                        shipment.DeclarationOfValueCheck = shipment.ShipmentItems.Sum(x => x.Price);
+                        shipment.ItemDetails = shipment.ShipmentItems[0].Description;
                         shipment.IsFromMobile = true;
                         var isWithinProcessingTime = await WithinProcessingTime(preShipmentDTO.CountryId);
                         var intlData = await _shipmentService.GetInternationalShipmentPrice(shipment);
@@ -5106,9 +5121,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                             var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preshipmentmobile.PreShipmentItems);
                             shipment = Mapper.Map<InternationalShipmentDTO>(preshipmentmobile);
+                            for (int i = 0; i < preshipmentmobile.PreShipmentItems.Count(); i++)
+                            {
+                                shipmentItems[i].Price = Convert.ToInt32(preshipmentmobile.PreShipmentItems[i].Value);
+                                // Quick fixes
+                                if (shipmentItems[i].Weight == 0)
+                                {
+                                    shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.Document;
+                                }
+                                else
+                                {
+                                    shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.NonDocument;
+                                }
+                            }
                             shipment.ShipmentItems = shipmentItems;
-                            shipment.DeclarationOfValueCheck = preshipmentmobile.PreShipmentItems.Sum(x => Convert.ToInt32(x.Value));
-                            shipment.ItemDetails = preshipmentmobile.PreShipmentItems[0].Description;
+                            shipment.DeclarationOfValueCheck = shipment.ShipmentItems.Sum(x => x.Price);
+                            shipment.ItemDetails = shipment.ShipmentItems[0].Description;
                             shipment.CustomerDetails = customer;
                             shipment.IsFromMobile = true;
                             var result = await _shipmentService.AddInternationalShipment(shipment);

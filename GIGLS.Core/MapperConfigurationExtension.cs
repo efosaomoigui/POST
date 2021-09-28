@@ -518,6 +518,12 @@ namespace GIGLS.Core
                 config.CreateMap<Invoice_Archive, InvoiceDTO>();
                 config.CreateMap<TransitWaybillNumber_Archive, TransitWaybillNumberDTO>();
 
+                config.CreateMap<ShipmentItemDTO, PreShipmentItemMobileDTO>();
+                config.CreateMap<PreShipmentItemMobileDTO, ShipmentItemDTO>();
+
+                config.CreateMap<InternationalShipmentDTO, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, InternationalShipmentDTO>();
+
             });
 
             isInit = true;
