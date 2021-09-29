@@ -536,7 +536,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
                     preShipmentDTO.IsFromShipment = true;
-                    if (preShipmentDTO.IsInternationalShipment)
+                    if (preShipmentDTO.IsInternationalShipment != null && preShipmentDTO.IsInternationalShipment)
                     {
                         var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipmentDTO.PreShipmentItems);
                         var shipment = Mapper.Map<InternationalShipmentDTO>(preShipmentDTO);
