@@ -124,7 +124,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //null DateCreated
                 preShipment.DateCreated = DateTime.Now;
                 // check if it is international shipment
-                if (preShipment.IsInternationalShipment)
+                if (preShipment.IsInternationalShipment && preShipment.IsInternationalShipment != null)
                 {
                     preShipment.ReceiverStationId = 4;
                     preShipment.ReceiverLat = 6.54887241412068;
@@ -133,7 +133,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
-                if (preShipment.IsInternationalShipment)
+                if (preShipment.IsInternationalShipment && preShipment.IsInternationalShipment != null)
                 {
                     preShipment.ZoneMapping = 2;
                 }
@@ -5102,7 +5102,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("Shipment has already been approved!!!", $"{(int)HttpStatusCode.Forbidden}");
                         }
-                        if (preshipmentmobile.IsApproved != true && preshipmentmobile.IsInternationalShipment == true)
+                        if (preshipmentmobile.IsApproved != true && preshipmentmobile.IsInternationalShipment == true && preshipmentmobile.IsInternationalShipment != null)
                         {
                             var shipment = new InternationalShipmentDTO();
                             var customer = new CustomerDTO();
