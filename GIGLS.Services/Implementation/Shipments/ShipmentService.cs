@@ -4740,6 +4740,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var globalValue = await _globalPropertyService.GetGlobalProperty(globalProperty, countryId);
                 var pickupPrice = Convert.ToDecimal(globalValue.Value);
                 total.GrandTotal = total.GrandTotal + pickupPrice;
+
+                var IsWithinProcessingTime = await WithinProcessingTime(countryId);
+                total.IsWithinProcessingTime = IsWithinProcessingTime;
             }
 
             // format to two decimal place
@@ -5650,6 +5653,21 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private async Task<bool> WithinProcessingTime(int CountryId)
+        {
+            bool IsWithinTime = false;
+            var Startime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpStartTime, CountryId);
+            var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId);
+            TimeSpan start = new TimeSpan(Convert.ToInt32(Startime.Value), 0, 0);
+            TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);
+            TimeSpan now = DateTime.Now.TimeOfDay;
+            if (now > start && now < end)
+            {
+                IsWithinTime = true;
+            }
+            return IsWithinTime;
         }
     }
 }
