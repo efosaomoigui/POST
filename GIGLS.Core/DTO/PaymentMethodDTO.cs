@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO
 {
-    public class PaymentMethodDTO : BaseDomainDTO
+    public class PaymentMethodDTO 
     {
         public int PaymentMethodId { get; set; }
         public string PaymentMethodName { get; set; }
