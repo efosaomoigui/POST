@@ -4128,7 +4128,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 RefNo = transac.PaymentTypeReference,
                 ToEmail = currentUser.Email,
                 To = currentUser.Email,
-                Item = transac.Description,
+                Item = desc,
                 BillType = billType.ToString().ToUpper(),
                 Amount = subAmount.ToString(),
                 Charge = charge ,
