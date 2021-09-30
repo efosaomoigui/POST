@@ -93,6 +93,7 @@
         EcommerceCustomerRep,
         PlannedShippingDateAndTime,
         SubscriptionCharge,
-        Hazardous
+        Hazardous,
+        GoFaster
     }
 }
