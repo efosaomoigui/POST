@@ -4119,7 +4119,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "transaction was successfull";
+                    response = "Transaction was successfull";
                 }
                 else
                 {
@@ -4159,7 +4159,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "transaction was successfull";
+                    response = "Transaction was successfull";
                 }
                 else
                 {
