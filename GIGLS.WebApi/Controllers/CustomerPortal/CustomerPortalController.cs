@@ -2775,5 +2775,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpGet]
+        [Route("getpaymentmethod")]
+        public async Task<IServiceResponse<IEnumerable<PaymentMethodDTO>>> GetPaymentMethod()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PaymentMethod = await _portalService.GetPaymentMethodByUserActiveCountry();
+                return new ServiceResponse<IEnumerable<PaymentMethodDTO>>
+                {
+                    Object = PaymentMethod,
+                };
+            });
+        }
+
     }
 }

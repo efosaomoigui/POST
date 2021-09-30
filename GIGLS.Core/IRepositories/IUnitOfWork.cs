@@ -212,6 +212,7 @@ namespace GIGLS.Core
         ITransferDetailsRepository TransferDetails { get; set; }
         ICouponManagementRepository CouponManagement { get; set; }
         IGIGXUserDetailRepository GIGXUserDetail { get; set; }
+        IPaymentMethodRepository PaymentMethod { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

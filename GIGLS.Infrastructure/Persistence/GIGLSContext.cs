@@ -312,6 +312,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<GIGXUserDetail> GIGXUserDetail { get; set; }
 
+        //PaymentMethod
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
         #endregion
 
 

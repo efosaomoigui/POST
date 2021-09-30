@@ -160,6 +160,7 @@
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
     <Compile Include="Domain\CouponCodeManagement.cs" />
+    <Compile Include="Domain\PaymentMethod.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -426,6 +427,7 @@
     <Compile Include="DTO\Partnership\PartnerTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\SummaryTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\VehicleTypeDTO.cs" />
+    <Compile Include="DTO\PaymentMethodDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
@@ -707,6 +709,7 @@
     <Compile Include="IRepositories\INotificationRepository.cs" />
     <Compile Include="IRepositories\InternationalRequest\IInternationalRequestReceiverRepository.cs" />
     <Compile Include="IRepositories\IOTPRepository.cs" />
+    <Compile Include="IRepositories\IPaymentMethodRepository.cs" />
     <Compile Include="IRepositories\IQueryFluent.cs" />
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
@@ -871,6 +874,7 @@
     <Compile Include="IServices\INotificationService.cs" />
     <Compile Include="IServices\InternationalRequest\IInternationalRequestReceiverService.cs" />
     <Compile Include="IServices\IOTPService.cs" />
+    <Compile Include="IServices\IPaymentMethodService.cs" />
     <Compile Include="IServices\IReferrerCodeService.cs" />
     <Compile Include="IServices\IRiderDeliveryService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />

@@ -123,6 +123,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly INodeService _nodeService;
         private readonly IGIGXUserDetailService _gigxService;
+        private readonly IPaymentMethodService _paymentMethodService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -137,6 +138,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
             IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IPaymentMethodService paymentMethodService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -182,6 +184,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _waybillPaymentLogService = waybillPaymentLogService;
             _nodeService = nodeService;
             _gigxService = gigxService;
+            _paymentMethodService = paymentMethodService;
             MapperConfig.Initialize();
         }
 
@@ -3934,6 +3937,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var price = await _preShipmentMobileService.GetPriceQuote(preShipment);
                 return price;
             }
+        }
+
+        public async Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry()
+        {
+            return await _paymentMethodService.GetPaymentMethodByUserActiveCountry();
         }
 
         public async Task<ResponseDTO> ReverseWallet(string reference)

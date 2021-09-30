@@ -250,5 +250,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<ResponseDTO> ReverseWallet(string reference);
         Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end);
         Task<string> BillTransactionRefund(string emailOrCode, decimal amount);
+        Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry();
     }
 }

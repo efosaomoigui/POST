@@ -530,6 +530,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IGIGXUserDetailRepository GIGXUserDetail { get; set; }
 
+        [Inject]
+        public IPaymentMethodRepository PaymentMethod { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
