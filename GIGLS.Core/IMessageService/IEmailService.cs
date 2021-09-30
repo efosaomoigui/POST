@@ -22,5 +22,6 @@ namespace GIGLS.Core.IMessage
         Task<string> SendConfigCorporateNubanAccMessage(MessageDTO message);
         Task<string> SendEmailForReceivedItem(MessageDTO message);
         Task<string> ConfigSendGridMonthlyCorporateTransactions(MessageDTO message);
+        Task<string> SendEmailForService(MessageDTO message);
     }
 }

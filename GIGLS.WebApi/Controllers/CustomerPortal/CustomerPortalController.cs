@@ -2761,5 +2761,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("sendservicesms")]
+        public async Task<IServiceResponse<bool>> SendServiceSMS(ServiceSMS serviceSMS)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SendServiceSMS(serviceSMS);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

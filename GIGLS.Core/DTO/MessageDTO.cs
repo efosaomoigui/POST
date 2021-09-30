@@ -55,6 +55,10 @@ namespace GIGLS.Core.DTO
         public string DepartureServiceCentre { get; set; }
         public string RequestNumber { get; set; }
         public string TrackingId { get; set; }
+        public string BillType { get; set; }
+        public string RefNo { get; set; }
+        public string Charge { get; set; }
+        public string ToTal { get; set; }
     }
 
     public class NewMessageDTO
