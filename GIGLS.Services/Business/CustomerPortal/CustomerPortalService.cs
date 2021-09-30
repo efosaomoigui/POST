@@ -137,8 +137,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService)
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IPaymentMethodService paymentMethodService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
