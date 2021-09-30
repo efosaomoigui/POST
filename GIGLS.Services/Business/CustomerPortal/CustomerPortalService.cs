@@ -4117,7 +4117,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                if (ticketMannResponse.Payload.Status.Contains("Failed"))
+                if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
+                {
+                    response = "transaction was successfull";
+                }
+                else
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4125,10 +4129,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
-                }
-                else
-                {
-                    response = "transaction was successfull";
                 }
             }
             else
@@ -4157,7 +4157,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                if (ticketMannResponse.Payload.Status.Contains("Failed"))
+                if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
+                {
+                    response = "transaction was successfull";
+                }
+                else
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4165,10 +4169,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
-                }
-                else
-                {
-                    response = "transaction was successfull";
                 }
             }
 
