@@ -4117,7 +4117,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 }
             }
-            var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Payment for electricity unity Top up"
+            var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
                     : (serviceSMS.BillType == BillType.AIRTIME) ? "Payment for airtime Top up" : (serviceSMS.BillType == BillType.DATASUB) ? "Payment for data subcription" : "Customer subscription";
 					
 					
