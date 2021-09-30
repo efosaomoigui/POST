@@ -63,5 +63,6 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> GetEmployeeUserByEmail(string email);
         Task<List<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email);
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail2(string email);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorCustomerCode(string emailOrCode);
     }
 }

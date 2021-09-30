@@ -524,6 +524,7 @@
     <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\TicketMannResponseDTO.cs" />
     <Compile Include="DTO\TransferDetailsDTO.cs" />
     <Compile Include="DTO\UPS\LabelDescription.cs" />
     <Compile Include="DTO\UPS\LabelImageFormat.cs" />
