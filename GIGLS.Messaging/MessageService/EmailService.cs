@@ -919,5 +919,51 @@ namespace GIGLS.Messaging.MessageService
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
         }
+
+        public async Task<string> SendEmailForService(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendEmailForService(message);
+            }
+            return result;
+        }
+
+        private async Task<string> ConfigSendEmailForService(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Successful Payment Notification";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions 
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "FirstName", message.CustomerName },
+                { "S_ReferenceNo", message.RefNo },
+                { "S_Description",message.Item },
+                { "S_Amount", message.Amount},
+                { "S_Charge", message.Charge },
+                { "S_DateCreated", DateTime.Now.ToString() },
+                { "S_Total", message.ToTal},
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
     }
 }

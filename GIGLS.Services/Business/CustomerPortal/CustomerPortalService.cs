@@ -4216,5 +4216,61 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
+        public async Task<bool> SendServiceSMS(ServiceSMS serviceSMS)
+        {
+            if (serviceSMS == null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            //get wallet transaction with refNo
+            var transac = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.PaymentTypeReference == serviceSMS.ReferenceNo).FirstOrDefault();
+            if (transac == null)
+            {
+                throw new GenericException("reference no does not exist");
+            }
+            BillType billType = (BillType)Enum.Parse(typeof(BillType), serviceSMS.BillType.ToString());
+            string charge = String.Empty;
+            var total = transac.Amount;
+            var subAmount = transac.Amount;
+            //add xtra charge for tv or electricity
+            if (BillType.TVSUB == billType || BillType.ELECTRICITY == billType)
+            {
+                var subCharge = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.SubscriptionCharge.ToString());
+                if (subCharge != null)
+                {
+                    var chargeAmount = Convert.ToDecimal(subCharge.Value);
+                    subAmount = transac.Amount - chargeAmount;
+                    charge = chargeAmount.ToString();
+
+                }
+            }
+            var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
+                    : (serviceSMS.BillType == BillType.AIRTIME) ? "Payment for airtime Top up" : (serviceSMS.BillType == BillType.DATASUB) ? "Payment for data subcription" : "Customer subscription";
+					
+					
+            //send message for service rendered
+            var messageDTO = new MessageDTO
+            {
+                CustomerName = $"{currentUser.FirstName} {currentUser.LastName}",
+                RefNo = transac.PaymentTypeReference,
+                ToEmail = currentUser.Email,
+                To = currentUser.Email,
+                Item = desc,
+                BillType = billType.ToString().ToUpper(),
+                Amount = subAmount.ToString(),
+                Charge = charge ,
+                ToTal = transac.Amount.ToString()
+            };
+            messageDTO.MessageTemplate = "ServiceSMSNotification";
+            await _messageSenderService.SendEmailForService(messageDTO);
+            return true;
+        }
+
+
     }
 }
