@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.DHL
         public CompanyMap CompanyMap { get; set; }
         public decimal InternationalShippingCost { get; set; }
         public string ShipmentMethod { get; set; } = "Express";
+        public bool IsWithinProcessingTime { get; set; }
     }
 }
