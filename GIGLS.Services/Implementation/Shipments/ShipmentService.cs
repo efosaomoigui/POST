@@ -5309,7 +5309,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var internationalCustomerWeekValue = Convert.ToBoolean(internationalCustomerWeek.Value);
             if (internationalCustomerWeekValue)
             {
-                if (shipmentDTO.IsInternational && shipmentDTO.FileNameUrl != null && internationalCustomerWeekValue)
+                if (shipmentDTO.IsInternational && shipmentDTO.Courier != null && internationalCustomerWeekValue)
                 {
                     await ProcessDiscountPaymentForInternationalCustomerWeek(shipmentDTO);
 
@@ -5744,12 +5744,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         var shipmentDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeekDiscount, countryId);
                         decimal percentage = Convert.ToDecimal(shipmentDiscount.Value);
                         decimal discountRate = ((100M - percentage) / 100M);
-                        var discountPrice = shipment.GrandTotal * discountRate;
-                        discountPrice = Math.Round(discountPrice, 2);
-                        var discountedPrice = shipment.GrandTotal - discountPrice;
-                        shipment.DiscountValue = discountPrice;
-                        shipment.GrandTotal = discountedPrice;
-                        shipment.AppliedDiscount = discountRate;
+                        var discountedPrice = shipment.GrandTotal * discountRate;
+                        discountedPrice = Math.Round(discountedPrice, 2);
+                        var discountAmount = shipment.GrandTotal - discountedPrice;
+                        shipment.DiscountValue = discountAmount;
+                        shipment.GrandTotal = Math.Ceiling( discountedPrice);
+                        shipment.AppliedDiscount = percentage;
                         processDiscount = true;
                         shipment.CustomerSelected = true;
                     }
@@ -5772,7 +5772,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 return processDiscount;
             int countryId = 1;
             
-            if(shipment.IsInternational && shipment.FileNameUrl != null)
+            if(shipment.IsInternational && shipment.Courier != null)
             {
                 var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeekDate, countryId);
 
@@ -5804,12 +5804,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         var shipmentDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeekDiscount, countryId);
                         decimal percentage = Convert.ToDecimal(shipmentDiscount.Value);
                         decimal discountRate = ((100M - percentage) / 100M);
-                        var discountPrice = shipment.GrandTotal * discountRate;
-                        discountPrice = Math.Round(discountPrice, 2);
-                        var discountedPrice = shipment.GrandTotal - discountPrice;
-                        shipment.DiscountValue = discountPrice;
-                        shipment.GrandTotal = discountedPrice;
-                        shipment.AppliedDiscount = discountRate;
+                        var discountedPrice = shipment.GrandTotal * discountRate;
+                        discountedPrice = Math.Round(discountedPrice, 2);
+                        var discountAmount = shipment.GrandTotal - discountedPrice;
+                        shipment.DiscountValue = discountAmount;
+                        shipment.GrandTotal = Math.Ceiling(discountedPrice);
+                        shipment.AppliedDiscount = percentage;
                         processDiscount = true;
                         shipment.CustomerSelected = true;
                     }
