@@ -1828,22 +1828,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.IsGrouped = true;
             }
 
-            //Process Customer Week Discount
+            //Process Domestic Customer Week Discount
             var domesticCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeek, 1);
-            var internationalCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeek, 1);
             var domesticCustomerWeekValue = Convert.ToBoolean( domesticCustomerWeek.Value);
-            var internationalCustomerWeekValue = Convert.ToBoolean(internationalCustomerWeek.Value);
-            if (domesticCustomerWeekValue || internationalCustomerWeekValue)
+            if (domesticCustomerWeekValue)
             {
-                if(shipmentDTO.IsInternational && shipmentDTO.FileNameUrl != null && internationalCustomerWeekValue)
-                {
-                    await ProcessDiscountPaymentForInternationalCustomerWeek(shipmentDTO);
-
-                    newShipment.GrandTotal = shipmentDTO.GrandTotal;
-                    newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;
-                    newShipment.DiscountValue = shipmentDTO.DiscountValue;
-                }
-
                 if (!shipmentDTO.IsInternational && domesticCustomerWeekValue)
                 {
                     await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
@@ -5312,6 +5301,22 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentDTO.IsGIGGOExtension)
             {
                 newShipment.IsGrouped = true;
+            }
+
+            //Process International customer week  
+
+            var internationalCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeek, 1);
+            var internationalCustomerWeekValue = Convert.ToBoolean(internationalCustomerWeek.Value);
+            if (internationalCustomerWeekValue)
+            {
+                if (shipmentDTO.IsInternational && shipmentDTO.FileNameUrl != null && internationalCustomerWeekValue)
+                {
+                    await ProcessDiscountPaymentForInternationalCustomerWeek(shipmentDTO);
+
+                    newShipment.GrandTotal = shipmentDTO.GrandTotal;
+                    newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;
+                    newShipment.DiscountValue = shipmentDTO.DiscountValue;
+                }
             }
             _uow.Shipment.Add(newShipment);
 
