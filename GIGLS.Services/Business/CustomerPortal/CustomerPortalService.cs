@@ -2911,9 +2911,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
         }
 
-        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end)
+        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria)
         {
-            return await _manifestWaybillMappingService.getManifestsinmovementmanifestDispatchCompleted(start, end);
+            return await _manifestWaybillMappingService.getManifestsinmovementmanifestDispatchCompleted(dateFilterCriteria);
         }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()

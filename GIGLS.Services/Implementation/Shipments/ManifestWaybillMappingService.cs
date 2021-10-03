@@ -747,15 +747,21 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end)   
+        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria)   
         {
             try
             {
                 //get the current user
+                var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+
+                //get the current user
                 string userId = await _userService.GetCurrentUserId();
 
                 //get the dispatch for the user
-                var userDispatchs = await _uow.MovementDispatch.GetMovementmanifestDispatchForPartnerCompleted(userId,start, end);
+                var userDispatchs = await _uow.MovementDispatch.GetMovementmanifestDispatchForPartnerCompleted(userId, startDate, endDate);
 
                 if (!userDispatchs.Any())
                 {
