@@ -1617,9 +1617,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
 
                 var shipmentDto = Mapper.Map<IntlShipmentRequestDTO>(shipment);
+                //List<int> lsItems = shipment.ShipmentRequestItems.FindAll(x => x.TrackingId == trackId).Select(x => x.IntlShipmentRequestId).ToList();
+                List<int> lsItems =  _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.TrackingId.Equals(trackId)).Select(x => x.IntlShipmentRequestItemId).ToList();
+                await UpdateReceived(lsItems);
 
-                await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
-                return await GetShipmentRequest(shipment.IntlShipmentRequestId);
+                //await _messageSenderService.SendShipmentRequestConfirmation(shipmentDto);
+                return shipmentDto;
             }
             catch (Exception)
             {
@@ -2288,7 +2291,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public async Task<bool> UpdateReceived(List<int> itemIDs)
+        public async Task<bool> UpdateReceived(List<int> itemIDs, bool isTracking)
         {
             try
             {
@@ -2321,6 +2324,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
                 }
+
                 _uow.Complete();
                 var requests = _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).ToList();
                 if (requests.Any())
@@ -2328,7 +2332,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     const int countryId = 1;
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
+                    var emailList = new List<string>();
                     var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
+                    if (!String.IsNullOrEmpty(chairmanEmail))
+                    {
+                        var emails = chairmanEmail.Split(',');
+                        foreach (var item in emails)
+                        {
+                            emailList.Add(item);
+                        }
+                    }
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
@@ -2341,12 +2354,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
                         deptCentre = "United Kingdom";
                     }
+                    storeArray = storeArray.GroupBy(x => x).Select(x => x.FirstOrDefault()).ToList();
                     foreach (var request in requests)
                     {
                         var stores = String.Join(",", storeArray);
                         var items = String.Join(",", itemArray);
                         if (trackNos.Any())
                         {
+                            trackNos = trackNos.GroupBy(x => x).Select(x => x.FirstOrDefault()).ToList();
                             trackId = String.Join(",", trackNos);
                         }
                         //send message for received item
@@ -2359,64 +2374,71 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             DepartureServiceCentre = deptCentre,
                             RequestNumber = request.RequestNumber,
                             ToEmail = request.CustomerEmail,
-                            To = request.CustomerEmail
+                            To = request.CustomerEmail,
+                            Emails = emailList
                         };
-                        var emailToChairman = new MessageDTO
+                        if (!String.IsNullOrEmpty(trackId))
                         {
-                            CustomerName = request.CustomerFirstName,
-                            Item = items,
-                            Store = stores,
-                            DepartureEmail = deptEmail,
-                            DepartureServiceCentre = deptCentre,
-                            RequestNumber = request.RequestNumber,
-                            ToEmail = request.CustomerEmail,
-                            To = chairmanEmail
-                        };
+                            messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                        }
                         if (request.Consolidated)
                         {
                             var requestItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.IntlShipmentRequestId == request.IntlShipmentRequestId).ToList();
                             var remRequestItem = requestItems.Where(x => !x.Received).ToList();
                             var allRequest = requestItems.Where(x => x.Received).ToList();
                             messageDTO.ItemCount = remRequestItem.Count;
-                            if (requestItems.Count > 1 && requestItems.Count == allRequest.Count)
-                            {
-                                lastItem = true;
-                            }
 
-                            if (requestItems.Count == 1)
+                            if (isTracking)
                             {
-                                //send single item message
-                                messageDTO.MessageTemplate = "InternationalOutboundReceived";
+                                //send tracking item by scan message
+                                messageDTO.MessageTemplate = "GenericItemReceived";
+                                messageDTO.Item = "item";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                             }
-
-                            else if (requestItems.Count > 1 && !lastItem)
-                            {
-                                //send item received message
-                                messageDTO.MessageTemplate = "ConsolidateItemReceived";
-                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
-                            }
-
                             else
                             {
-                                //send final item message
-                                messageDTO.MessageTemplate = "ConsolidatedFinalItemReceived";
-                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
+                                if (requestItems.Count > 1 && requestItems.Count == allRequest.Count)
+                                {
+                                    lastItem = true;
+                                }
+
+                                if (requestItems.Count == 1)
+                                {
+                                    //send single item message
+                                    messageDTO.MessageTemplate = "InternationalOutboundReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                }
+
+                                else if (requestItems.Count > 1 && !lastItem)
+                                {
+                                    //send item received message
+                                    messageDTO.MessageTemplate = "ConsolidateItemReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                }
+
+                                else
+                                {
+                                    //send final item message
+                                    messageDTO.MessageTemplate = "ConsolidatedFinalItemReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                } 
                             }
                         }
                         else
                         {
-                            //send non consolidated item message item message
-                            if (!String.IsNullOrEmpty(trackId))
+                            if (isTracking)
                             {
-                                messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                                //send tracking item by scan message
+                                messageDTO.MessageTemplate = "GenericItemReceived";
+                                messageDTO.Item = "item";
+                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
-                            messageDTO.MessageTemplate = "InternationalRequestReceived";
-                            await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                            await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
+                            //send non consolidated item message item message
+                            else
+                            {
+                                messageDTO.MessageTemplate = "InternationalRequestReceived";
+                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                            }
                         }
                     }
                 }

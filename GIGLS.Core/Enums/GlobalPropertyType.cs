@@ -93,6 +93,14 @@
         EcommerceCustomerRep,
         PlannedShippingDateAndTime,
         SubscriptionCharge,
-        Hazardous
+        Hazardous,
+        GoFaster,
+        DomesticCustomerWeek,
+        InternationalCustomerWeek,
+        DomesticCustomerWeekDate,
+        InternationalCustomerWeekDate,
+        DomesticCustomerWeekDiscount,
+        InternationalCustomerWeekDiscount,
+        CustomerWeekCountValue
     }
 }

@@ -2911,9 +2911,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _manifestWaybillMappingService.GetManifestsInMovementManifestForDispatch();
         }
 
-        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateTime start, DateTime end)
+        public async Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria)
         {
-            return await _manifestWaybillMappingService.getManifestsinmovementmanifestDispatchCompleted(start, end);
+            return await _manifestWaybillMappingService.getManifestsinmovementmanifestDispatchCompleted(dateFilterCriteria);
         }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
@@ -4251,9 +4251,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
                     : (serviceSMS.BillType == BillType.AIRTIME) ? "Payment for airtime Top up" : (serviceSMS.BillType == BillType.DATASUB) ? "Payment for data subcription" : "Customer subscription";
-					
-					
+
+
             //send message for service rendered
+            var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == 1).Value;
             var messageDTO = new MessageDTO
             {
                 CustomerName = $"{currentUser.FirstName} {currentUser.LastName}",
@@ -4266,6 +4267,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Charge = charge ,
                 ToTal = transac.Amount.ToString()
             };
+            if (!String.IsNullOrEmpty(chairmanEmail))
+            {
+                //split email by comma
+                var emails = chairmanEmail.Split(',');
+                foreach (var item in emails)
+                {
+                    messageDTO.Emails.Add(item);
+                }
+            }
+
             messageDTO.MessageTemplate = "ServiceSMSNotification";
             await _messageSenderService.SendEmailForService(messageDTO);
             return true;

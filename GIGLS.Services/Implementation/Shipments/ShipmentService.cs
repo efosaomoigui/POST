@@ -1827,6 +1827,23 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 newShipment.IsGrouped = true;
             }
+
+            //Process Domestic Customer Week Discount
+            var domesticCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeek, 1);
+            var domesticCustomerWeekValue = Convert.ToBoolean( domesticCustomerWeek.Value);
+            if (domesticCustomerWeekValue)
+            {
+                if (!shipmentDTO.IsInternational && domesticCustomerWeekValue)
+                {
+                    await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
+
+                    newShipment.GrandTotal = shipmentDTO.GrandTotal;
+                    newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;
+                    newShipment.DiscountValue = shipmentDTO.DiscountValue;
+                }
+            }
+
+            
             _uow.Shipment.Add(newShipment);
 
             //save into DeliveryOptionMapping table
@@ -2006,6 +2023,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     CountryId = shipmentDTO.DepartureCountryId
                 };
             }
+
 
             _uow.Invoice.Add(invoice);
             return invoiceNo;
@@ -3740,7 +3758,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             PaymentType = PaymentType.Wallet,
                             Waybill = waybill,
                             Description = "Credit for Shipment Cancellation",
-       
+
                         };
                         if (newWalletTransaction.CreditDebitType == CreditDebitType.Credit)
                         {
@@ -5284,6 +5302,22 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 newShipment.IsGrouped = true;
             }
+
+            //Process International customer week  
+
+            var internationalCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeek, 1);
+            var internationalCustomerWeekValue = Convert.ToBoolean(internationalCustomerWeek.Value);
+            if (internationalCustomerWeekValue)
+            {
+                if (shipmentDTO.IsInternational && shipmentDTO.Courier != null && internationalCustomerWeekValue)
+                {
+                    await ProcessDiscountPaymentForInternationalCustomerWeek(shipmentDTO);
+
+                    newShipment.GrandTotal = shipmentDTO.GrandTotal;
+                    newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;
+                    newShipment.DiscountValue = shipmentDTO.DiscountValue;
+                }
+            }
             _uow.Shipment.Add(newShipment);
 
             //save into DeliveryOptionMapping table
@@ -5668,6 +5702,125 @@ namespace GIGLS.Services.Implementation.Shipments
                 IsWithinTime = true;
             }
             return IsWithinTime;
+        }
+
+        //Process Discount Payment Domestic for Customer Week
+        private async Task<bool> ProcessDiscountPaymentForDomesticCustomerWeek(ShipmentDTO shipment)
+        {
+            var processDiscount = false;
+
+            if (shipment == null)
+                return processDiscount;
+            int countryId = 1;
+            if (!shipment.IsInternational)
+            {
+                var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeekDate, countryId);
+
+                if (customerWeek == null)
+                    return processDiscount;
+
+                var customerWeekDate = Convert.ToDateTime(customerWeek.Value);
+                var startDate = DateTime.Now.Date;
+
+                if (startDate.ToLongDateString() == customerWeekDate.ToLongDateString())
+                {
+                    var endDate = startDate.AddDays(1);
+
+                    var count = 0;
+                    var data = _uow.Shipment.GetAllAsQueryable()
+                        .Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
+
+                    count = data.Where(x => x.IsInternational == false).Count();
+
+                    var shipmentCount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekCountValue, countryId);
+
+                    if (shipmentCount == null)
+                        return processDiscount;
+
+                    int shipmentCountValue = int.Parse(shipmentCount.Value);
+
+                    if (count < shipmentCountValue)
+                    {
+                        var shipmentDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeekDiscount, countryId);
+                        decimal percentage = Convert.ToDecimal(shipmentDiscount.Value);
+                        decimal discountRate = ((100M - percentage) / 100M);
+                        var discountedPrice = shipment.GrandTotal * discountRate;
+                        discountedPrice = Math.Round(discountedPrice, 2);
+                        var discountAmount = shipment.GrandTotal - discountedPrice;
+                        shipment.DiscountValue = discountAmount;
+                        shipment.GrandTotal = Math.Ceiling( discountedPrice);
+                        shipment.AppliedDiscount = percentage;
+                        processDiscount = true;
+                        shipment.CustomerSelected = true;
+                    }
+                    else
+                    {
+                        return processDiscount;
+                    }
+                }
+            }
+            
+            return processDiscount;
+        }
+
+        //Process Discount Payment International for Customer Week
+        private async Task<bool> ProcessDiscountPaymentForInternationalCustomerWeek(ShipmentDTO shipment)
+        {
+            var processDiscount = false;
+
+            if (shipment == null)
+                return processDiscount;
+            int countryId = 1;
+            
+            if(shipment.IsInternational && shipment.Courier != null)
+            {
+                var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeekDate, countryId);
+
+                if (customerWeek == null)
+                    return processDiscount;
+
+                var customerWeekDate = Convert.ToDateTime(customerWeek.Value);
+                var startDate = DateTime.Now.Date;
+
+                if (startDate.ToLongDateString() == customerWeekDate.ToLongDateString())
+                {
+                    var endDate = startDate.AddDays(1);
+
+                    var count = 0;
+                    var data = _uow.Shipment.GetAllAsQueryable()
+                        .Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
+
+                    count = data.Where(x => x.IsInternational == true && x.FileNameUrl != null).Count();
+
+                    var shipmentCount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekCountValue, countryId);
+
+                    if (shipmentCount == null)
+                        return processDiscount;
+
+                    int shipmentCountValue = int.Parse(shipmentCount.Value);
+
+                    if (count < shipmentCountValue)
+                    {
+                        var shipmentDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeekDiscount, countryId);
+                        decimal percentage = Convert.ToDecimal(shipmentDiscount.Value);
+                        decimal discountRate = ((100M - percentage) / 100M);
+                        var discountedPrice = shipment.GrandTotal * discountRate;
+                        discountedPrice = Math.Round(discountedPrice, 2);
+                        var discountAmount = shipment.GrandTotal - discountedPrice;
+                        shipment.DiscountValue = discountAmount;
+                        shipment.GrandTotal = Math.Ceiling(discountedPrice);
+                        shipment.AppliedDiscount = percentage;
+                        processDiscount = true;
+                        shipment.CustomerSelected = true;
+                    }
+                    else
+                    {
+                        return processDiscount;
+                    }
+                }
+            }
+
+            return processDiscount;
         }
     }
 }
