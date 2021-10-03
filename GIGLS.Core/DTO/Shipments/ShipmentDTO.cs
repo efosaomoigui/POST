@@ -168,6 +168,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? InternationalShippingCost { get; set; } = 0;
         public string Courier { get; set; }
         public bool CustomerSelected { get; set; }
+        public bool ExpressDelivery { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

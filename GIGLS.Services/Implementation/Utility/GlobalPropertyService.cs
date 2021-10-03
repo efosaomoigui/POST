@@ -216,5 +216,19 @@ namespace GIGLS.Services.Implementation.Utility
                 throw;
             }
         }
+
+        public async Task<decimal> GetGoFasterPercentageInGlobalProperty(int countryId)
+        {
+            try
+            {
+                var discountPercent = await GetGlobalProperty(GlobalPropertyType.GoFaster, countryId);
+                decimal discount = Convert.ToDecimal(discountPercent.Value);
+                return discount;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
