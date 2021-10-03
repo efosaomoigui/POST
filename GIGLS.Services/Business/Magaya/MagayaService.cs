@@ -2373,17 +2373,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             To = request.CustomerEmail,
                             Emails = emailList
                         };
+                        if (!String.IsNullOrEmpty(trackId))
+                        {
+                            messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                        }
                         if (request.Consolidated)
                         {
                             var requestItems = _uow.IntlShipmentRequestItem.GetAllAsQueryable().Where(x => x.IntlShipmentRequestId == request.IntlShipmentRequestId).ToList();
                             var remRequestItem = requestItems.Where(x => !x.Received).ToList();
                             var allRequest = requestItems.Where(x => x.Received).ToList();
                             messageDTO.ItemCount = remRequestItem.Count;
-
-                            if (!String.IsNullOrEmpty(trackId))
-                            {
-                                messageDTO.TrackingId = $"with tracking Id of {trackId}";
-                            }
 
                             if (isTracking)
                             {
