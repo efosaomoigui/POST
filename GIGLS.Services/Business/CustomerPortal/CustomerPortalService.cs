@@ -4269,7 +4269,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             };
             if (!String.IsNullOrEmpty(chairmanEmail))
             {
-                messageDTO.Emails.Add(chairmanEmail); 
+                //split email by comma
+                var emails = chairmanEmail.Split(',');
+                foreach (var item in emails)
+                {
+                    messageDTO.Emails.Add(item);
+                }
             }
 
             messageDTO.MessageTemplate = "ServiceSMSNotification";
