@@ -2388,7 +2388,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             {
                                 //send tracking item by scan message
                                 messageDTO.MessageTemplate = "GenericItemReceived";
-                                messageDTO.Item = null;
+                                messageDTO.Item = "item";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
                             else
@@ -2426,7 +2426,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             {
                                 //send tracking item by scan message
                                 messageDTO.MessageTemplate = "GenericItemReceived";
-                                messageDTO.Item = null;
+                                messageDTO.Item = "item";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
                             //send non consolidated item message item message
