@@ -15,6 +15,7 @@ using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -370,7 +371,9 @@ namespace GIGLS.WebApi.Controllers.Report
             try
             {
                 var now = DateTime.Now;
-                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                var res = ConfigurationManager.AppSettings["InvoicingDay"];
+                var day = Convert.ToInt32(res);
+                DateTime firstDay = new DateTime(now.Year, now.Month, day);
                 DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
                 if (firstDay.Date == now.Date)
                 {
