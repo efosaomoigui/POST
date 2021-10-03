@@ -524,6 +524,9 @@ namespace GIGLS.Core
                 config.CreateMap<InternationalShipmentDTO, PreShipmentMobileDTO>();
                 config.CreateMap<PreShipmentMobileDTO, InternationalShipmentDTO>();
 
+                config.CreateMap<ShipmentDTO, PreShipmentMobile>();
+                config.CreateMap<PreShipmentMobile, ShipmentDTO>();
+
             });
 
             isInit = true;
