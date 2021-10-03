@@ -94,8 +94,7 @@
         PlannedShippingDateAndTime,
         SubscriptionCharge,
         Hazardous,
-        GoFaster
-        Hazardous,
+        GoFaster,
         DomesticCustomerWeek,
         InternationalCustomerWeek,
         DomesticCustomerWeekDate,
