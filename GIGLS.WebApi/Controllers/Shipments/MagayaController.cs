@@ -601,7 +601,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var res = await _service.UpdateReceived(ItemIDs);
+                bool isTracking = false;
+                var res = await _service.UpdateReceived(ItemIDs, isTracking);
 
                 return new ServiceResponse<bool>
                 {
