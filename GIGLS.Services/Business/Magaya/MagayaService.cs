@@ -2380,6 +2380,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             var allRequest = requestItems.Where(x => x.Received).ToList();
                             messageDTO.ItemCount = remRequestItem.Count;
 
+                            if (!String.IsNullOrEmpty(trackId))
+                            {
+                                messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                            }
+
                             if (isTracking)
                             {
                                 //send tracking item by scan message
@@ -2426,9 +2431,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
                             //send non consolidated item message item message
-                            else if (!String.IsNullOrEmpty(trackId))
+                            else
                             {
-                                messageDTO.TrackingId = $"with tracking Id of {trackId}";
                                 messageDTO.MessageTemplate = "InternationalRequestReceived";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
