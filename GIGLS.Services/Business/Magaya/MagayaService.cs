@@ -2288,7 +2288,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public async Task<bool> UpdateReceived(List<int> itemIDs)
+        public async Task<bool> UpdateReceived(List<int> itemIDs, bool isTracking)
         {
             try
             {
@@ -2328,7 +2328,16 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     const int countryId = 1;
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
+                    var emailList = new List<string>();
                     var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
+                    if (!String.IsNullOrEmpty(chairmanEmail))
+                    {
+                        var emails = chairmanEmail.Split(',');
+                        foreach (var item in emails)
+                        {
+                            emailList.Add(item);
+                        }
+                    }
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
@@ -2341,12 +2350,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
                         deptCentre = "United Kingdom";
                     }
+                    storeArray = storeArray.GroupBy(x => x).Select(x => x.FirstOrDefault()).ToList();
                     foreach (var request in requests)
                     {
                         var stores = String.Join(",", storeArray);
                         var items = String.Join(",", itemArray);
                         if (trackNos.Any())
                         {
+                            trackNos = trackNos.GroupBy(x => x).Select(x => x.FirstOrDefault()).ToList();
                             trackId = String.Join(",", trackNos);
                         }
                         //send message for received item
@@ -2359,18 +2370,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             DepartureServiceCentre = deptCentre,
                             RequestNumber = request.RequestNumber,
                             ToEmail = request.CustomerEmail,
-                            To = request.CustomerEmail
-                        };
-                        var emailToChairman = new MessageDTO
-                        {
-                            CustomerName = request.CustomerFirstName,
-                            Item = items,
-                            Store = stores,
-                            DepartureEmail = deptEmail,
-                            DepartureServiceCentre = deptCentre,
-                            RequestNumber = request.RequestNumber,
-                            ToEmail = request.CustomerEmail,
-                            To = chairmanEmail
+                            To = request.CustomerEmail,
+                            Emails = emailList
                         };
                         if (request.Consolidated)
                         {
@@ -2378,45 +2379,57 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             var remRequestItem = requestItems.Where(x => !x.Received).ToList();
                             var allRequest = requestItems.Where(x => x.Received).ToList();
                             messageDTO.ItemCount = remRequestItem.Count;
-                            if (requestItems.Count > 1 && requestItems.Count == allRequest.Count)
-                            {
-                                lastItem = true;
-                            }
 
-                            if (requestItems.Count == 1)
+                            if (isTracking)
                             {
-                                //send single item message
-                                messageDTO.MessageTemplate = "InternationalOutboundReceived";
+                                //send tracking item by scan message
+                                messageDTO.MessageTemplate = "GenericItemReceived";
                                 await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                             }
-
-                            else if (requestItems.Count > 1 && !lastItem)
-                            {
-                                //send item received message
-                                messageDTO.MessageTemplate = "ConsolidateItemReceived";
-                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
-                            }
-
                             else
                             {
-                                //send final item message
-                                messageDTO.MessageTemplate = "ConsolidatedFinalItemReceived";
-                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                                await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
+                                if (requestItems.Count > 1 && requestItems.Count == allRequest.Count)
+                                {
+                                    lastItem = true;
+                                }
+
+                                if (requestItems.Count == 1)
+                                {
+                                    //send single item message
+                                    messageDTO.MessageTemplate = "InternationalOutboundReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                }
+
+                                else if (requestItems.Count > 1 && !lastItem)
+                                {
+                                    //send item received message
+                                    messageDTO.MessageTemplate = "ConsolidateItemReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                }
+
+                                else
+                                {
+                                    //send final item message
+                                    messageDTO.MessageTemplate = "ConsolidatedFinalItemReceived";
+                                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                                } 
                             }
                         }
                         else
                         {
+                            if (isTracking)
+                            {
+                                //send tracking item by scan message
+                                messageDTO.MessageTemplate = "GenericItemReceived";
+                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                            }
                             //send non consolidated item message item message
-                            if (!String.IsNullOrEmpty(trackId))
+                            else if (!String.IsNullOrEmpty(trackId))
                             {
                                 messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                                messageDTO.MessageTemplate = "InternationalRequestReceived";
+                                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                             }
-                            messageDTO.MessageTemplate = "InternationalRequestReceived";
-                            await _messageSenderService.SendEmailForReceivedItem(messageDTO);
-                            await _messageSenderService.SendEmailForReceivedItem(emailToChairman);
                         }
                     }
                 }
