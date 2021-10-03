@@ -7469,6 +7469,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DeliveryOptionId = 6;
                 shipment.Insurance = totalNet.Insurance;
                 shipment.Vat = totalNet.VAT;
+                shipment.vatvalue_display = totalNet.VAT;
                 shipment.GrandTotal = totalNet.GrandTotal;
                 shipment.Total = totalNet.Amount;
                 shipment.ApproximateItemsWeight = 0.00;
