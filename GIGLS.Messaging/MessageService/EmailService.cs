@@ -840,7 +840,7 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
             if (string.IsNullOrWhiteSpace(message.Subject))
             {
-                message.Subject = "Welcome to GIG Logistics";
+                message.Subject = "Overseas Shipment Receipt Notification";
             }
             myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
