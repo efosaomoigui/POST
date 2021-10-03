@@ -4870,6 +4870,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.GrandTotal = priceUpdate.GrandTotal;
                 shipment.Insurance = priceUpdate.Insurance;
                 shipment.Vat = priceUpdate.VAT;
+                shipment.vatvalue_display = priceUpdate.VAT;
 
                 //Block account that has been suspended/pending from create shipment
                 if (shipment.CustomerDetails.CustomerType == CustomerType.Company)
