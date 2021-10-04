@@ -1455,6 +1455,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             // filter by cancelled shipments
             DateFilterForDropOff filter = new DateFilterForDropOff();
             var customerInvoices = new List<CustomerInvoiceDTO>();
+            var invioceViewList = new List<InvoiceViewDTO>();
             var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
             if (filter != null && filter.StartDate == null && filter.EndDate == null)
             {
@@ -1473,39 +1474,48 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
             }
 
-            shipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate);
-            List<InvoiceViewDTO> result = (from s in shipments.GroupBy(c => new { c.CustomerCode, c.Waybill})
+            var monthShipments = shipments.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate && x.CompanyType == CompanyType.Corporate.ToString()).GroupBy(c => new { c.CustomerCode}).ToList();
+            if (monthShipments.Any())
+            {
+                var customerCodes = monthShipments.Select(x => x.FirstOrDefault().CustomerCode).ToList();
+                var DesCentres = monthShipments.Select(x => x.FirstOrDefault().DestinationServiceCentreId).ToList();
+                var DepCentres = monthShipments.Select(x => x.FirstOrDefault().DepartureServiceCentreId).ToList();
 
-                                           join dept in Context.ServiceCentre on s.FirstOrDefault().DepartureServiceCentreId equals dept.ServiceCentreId
-                                           join dest in Context.ServiceCentre on s.FirstOrDefault().DestinationServiceCentreId equals dest.ServiceCentreId
-                                           join cust in Context.Company on s.FirstOrDefault().CustomerCode equals cust.CustomerCode
-                                           where s.FirstOrDefault().CompanyType == CompanyType.Corporate.ToString()
-                                           select new InvoiceViewDTO
-                                           {
-                                               Waybill = s.FirstOrDefault().Waybill,
-                                               DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
-                                               DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
-                                               DepartureStationId = dept.StationId,
-                                               DestinationStationId = dest.StationId,
-                                               DepartureServiceCentreName = dept.Name,
-                                               DestinationServiceCentreName = dest.Name,
-                                               Amount = s.FirstOrDefault().GrandTotal,
-                                               Vat = s.FirstOrDefault().Vat.Value,
-                                               DateCreated = s.FirstOrDefault().DateCreated,
-                                               CompanyType = s.FirstOrDefault().CompanyType,
-                                               CustomerCode = s.FirstOrDefault().CustomerCode,
-                                               ApproximateItemsWeight = s.FirstOrDefault().ApproximateItemsWeight,
-                                               CustomerType = s.FirstOrDefault().CustomerType,
-                                               SenderName = cust.Name,
-                                               CustomerId = s.FirstOrDefault().CustomerId,
-                                               Email = cust.Email,
-                                               PhoneNumber = cust.PhoneNumber,
-                                               Name = cust.Name,
-                                           }).ToList();
-            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+                var allCustomer = Context.Company.Where(x => customerCodes.Contains(x.CustomerCode)).ToList();
+                var allCentres = Context.ServiceCentre.Where(x => DesCentres.Contains(x.ServiceCentreId)).ToList();
+                allCentres.AddRange(Context.ServiceCentre.Where(x => DepCentres.Contains(x.ServiceCentreId)).ToList());
+
+                foreach (var s in monthShipments)
+                {
+                    var newInv = new InvoiceViewDTO();
+
+                    newInv.Waybill = s.FirstOrDefault().Waybill;
+                    newInv.DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId;
+                    newInv.DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId;
+                    newInv.DepartureStationId = allCentres.FirstOrDefault(x => x.ServiceCentreId == s.FirstOrDefault().DepartureServiceCentreId).StationId;
+                    newInv.DestinationStationId = allCentres.FirstOrDefault(x => x.ServiceCentreId == s.FirstOrDefault().DestinationServiceCentreId).StationId;
+                    newInv.DepartureServiceCentreName = allCentres.FirstOrDefault(x => x.ServiceCentreId == s.FirstOrDefault().DepartureServiceCentreId).Name;
+                    newInv.DestinationServiceCentreName = allCentres.FirstOrDefault(x => x.ServiceCentreId == s.FirstOrDefault().DestinationServiceCentreId).Name;
+                    newInv.Amount = s.FirstOrDefault().GrandTotal;
+                    newInv.Vat = s.FirstOrDefault().Vat.HasValue ? s.FirstOrDefault().Vat.Value : 0m;
+                    newInv.DateCreated = s.FirstOrDefault().DateCreated;
+                    newInv.CompanyType = s.FirstOrDefault().CompanyType;
+                    newInv.CustomerCode = s.FirstOrDefault().CustomerCode;
+                    newInv.ApproximateItemsWeight = s.FirstOrDefault().ApproximateItemsWeight;
+                    newInv.CustomerType = s.FirstOrDefault().CustomerType;
+                    newInv.SenderName = allCustomer.FirstOrDefault(x => x.CustomerCode == s.FirstOrDefault().CustomerCode).Name;
+                    newInv.CustomerId = s.FirstOrDefault().CustomerId;
+                    newInv.Email = allCustomer.FirstOrDefault(x => x.CustomerCode == s.FirstOrDefault().CustomerCode).Email;
+                    newInv.PhoneNumber = allCustomer.FirstOrDefault(x => x.CustomerCode == s.FirstOrDefault().CustomerCode).PhoneNumber;
+                    newInv.Name = allCustomer.FirstOrDefault(x => x.CustomerCode == s.FirstOrDefault().CustomerCode).Name;
+                    invioceViewList.Add(newInv);
+                }
+            }
+          
+            var resultDto = invioceViewList.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             if (resultDto.Any())
             {
-                var customerCodes = result.Select(x => x.CustomerCode).ToList();
+                var customerCodes = invioceViewList.Select(x => x.CustomerCode).ToList();
                 var customers = _context.Company.AsQueryable().Where(x => customerCodes.Contains(x.CustomerCode)).ToList();
                 var IDs = new List<int>();
                 var destStationsIDs = resultDto.Select(x => x.DestinationStationId);
