@@ -2803,5 +2803,33 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPut]
+        [Route("changeuserpin")]
+        public async Task<IServiceResponse<bool>> ChangeUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChangeUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("resetuserpin")]
+        public async Task<IServiceResponse<bool>> ResetUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ResetUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

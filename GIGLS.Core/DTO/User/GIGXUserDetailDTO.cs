@@ -16,6 +16,7 @@ namespace GIGLS.Core.DTO.User
         public string WalletAddress { get; set; }
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
+        public string CustomerNewPin { get; set; }
     }
 
 

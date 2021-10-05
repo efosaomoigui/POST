@@ -96,5 +96,59 @@ namespace GIGLS.Services.Implementation.BankSettlement
             return gigxusersDTO.HasPin;
         }
 
+        public async Task<bool> ChangeUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            try
+            {
+                bool result = false;
+                // get the current user info
+                var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var oldPin = gIGXUserDetailDTO.CustomerPin.ToString();
+                var newPin = gIGXUserDetailDTO.CustomerNewPin.ToString();
+                var userPin = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                if (userPin != null && userPin.CustomerPin != gIGXUserDetailDTO.CustomerPin)
+                {
+                    throw new GenericException($"Old pin is incorrect. Provide correct old pin.");
+                }
+                if (userPin != null && !String.IsNullOrEmpty(oldPin) && !String.IsNullOrEmpty(newPin) && userPin.CustomerPin == gIGXUserDetailDTO.CustomerPin)
+                {
+                    userPin.CustomerPin = newPin;
+                    result = true;
+                }
+                await _uow.CompleteAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            try
+            {
+                bool result = false;
+                // get the current user info
+                var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var newPin = gIGXUserDetailDTO.CustomerNewPin.ToString();
+                var userPin = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                
+                if (userPin != null && !String.IsNullOrEmpty(newPin))
+                {
+                    userPin.CustomerPin = newPin;
+                    result = true;
+                }
+                await _uow.CompleteAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
