@@ -4264,7 +4264,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Item = desc,
                 BillType = billType.ToString().ToUpper(),
                 Amount = subAmount.ToString(),
-                Charge = charge ,
+                Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0" ,
                 ToTal = transac.Amount.ToString()
             };
             if (!String.IsNullOrEmpty(chairmanEmail))

@@ -897,17 +897,17 @@ namespace GIGLS.Messaging.MessageService
 
             var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
             var client = new SendGridClient(apiKey);
-            if (message.Emails != null && message.Emails.Any())
-            {
-                //set BCCs
-                var bccEmails = new List<EmailAddress>();
-                foreach (var item in message.Emails)
-                {
-                    var bccEmail = new EmailAddress(item, fromName);
-                    bccEmails.Add(bccEmail);
-                }
-                myMessage.AddBccs(bccEmails);
-            }
+            //if (message.Emails != null && message.Emails.Any())
+            //{
+            //    //set BCCs
+            //    var bccEmails = new List<EmailAddress>();
+            //    foreach (var item in message.Emails)
+            //    {
+            //        var bccEmail = new EmailAddress(item, fromName);
+            //        bccEmails.Add(bccEmail);
+            //        myMessage.AddBccs(bccEmails);
+            //    }
+            //}
             var invoice = new InvoiceData();
             invoice.Total = message.CustomerInvoice.InvoiceViewDTOs.Sum(x => x.Amount);
             //set substitutions
@@ -967,8 +967,9 @@ namespace GIGLS.Messaging.MessageService
                 {
                     var bccEmail = new EmailAddress(item, fromName);
                     bccEmails.Add(bccEmail);
+                    myMessage.AddBccs(bccEmails);
+                    break;
                 }
-                myMessage.AddBccs(bccEmails);
             }
             //set substitutions 
             myMessage.AddSubstitutions(new Dictionary<string, string>
