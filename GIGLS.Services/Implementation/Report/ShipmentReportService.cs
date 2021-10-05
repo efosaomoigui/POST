@@ -1017,6 +1017,18 @@ namespace GIGLS.Services.Implementation.Report
             }
             return res;
         }
+        public async Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            try
+            {
+                return await _uow.Shipment.GetCoporateInvoiceList(filter);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
 
     }
 }

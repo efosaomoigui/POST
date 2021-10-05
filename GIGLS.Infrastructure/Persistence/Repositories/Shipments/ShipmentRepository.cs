@@ -1553,6 +1553,52 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return Task.FromResult(customerInvoices);
         }
+
+        public Task<List<CustomerInvoiceDTO>> GetCoporateInvoiceList(DateFilterForDropOff filter)
+        {
+            // filter by cancelled shipments
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                firstDay = firstDay.AddMonths(-1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            var customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate);
+            if (!String.IsNullOrEmpty(filter.ReferenceNo))
+            {
+               customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.InvoiceRefNo.ToLower() == filter.ReferenceNo.ToLower());
+            }
+            if (!String.IsNullOrEmpty(filter.CustomerCode))
+            {
+                customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.InvoiceRefNo == filter.CustomerCode);
+            }
+
+            List<CustomerInvoiceDTO> result = (from s in customerInvoiceList
+                                               select new CustomerInvoiceDTO
+                                               {
+                                                   Total = s.Total,
+                                                   DateCreated = s.DateCreated,
+                                                   CustomerName = s.CustomerName,
+                                                   CustomerCode = s.CustomerCode,
+                                                   InvoiceRefNo = s.InvoiceRefNo,
+                                                   PaymentStatus = s.PaymentStatus,
+                                                   PhoneNo = s.PhoneNumber,
+                                                   Email = s.Email,
+                                                   PhoneNumber = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).PhoneNumber,
+                                               }).ToList();
+
+            return Task.FromResult(result);
+        }
     }
 
 

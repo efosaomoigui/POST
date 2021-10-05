@@ -418,5 +418,21 @@ namespace GIGLS.WebApi.Controllers.Report
 
 
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customerinvoicelist")]
+        public async Task<IServiceResponse<List<CustomerInvoiceDTO>>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetCustomerInvoiceList(filter);
+
+                return new ServiceResponse<List<CustomerInvoiceDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
     }
 }

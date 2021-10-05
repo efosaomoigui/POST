@@ -30,5 +30,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<bool> AddCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
         Task<bool> CreateNUBAN(CustomerInvoiceDTO customerInvoice);
         Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice);
+        Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter);
     }
 }
