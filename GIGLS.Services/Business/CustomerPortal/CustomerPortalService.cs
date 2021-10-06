@@ -4254,7 +4254,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
 
             //send message for service rendered
-            var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == 1).Value;
             var messageDTO = new MessageDTO
             {
                 CustomerName = $"{currentUser.FirstName} {currentUser.LastName}",
@@ -4267,24 +4266,37 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0" ,
                 ToTal = transac.Amount.ToString()
             };
-            if (!String.IsNullOrEmpty(chairmanEmail))
-            {
-                //split email by comma
-                var emails = chairmanEmail.Split(',');
-                //only take the hotmail
-                var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
-                if (hotmail != null)
-                {
-                    messageDTO.Emails.Add(hotmail);
-                }
-                //foreach (var item in emails)
-                //{
-                //    messageDTO.Emails.Add(item);
-                //}
-            }
+            //if (!String.IsNullOrEmpty(chairmanEmail))
+            //{
+            //    //split email by comma
+            //    var emails = chairmanEmail.Split(',');
+            //    //only take the hotmail
+            //    var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
+            //    if (hotmail != null)
+            //    {
+            //        messageDTO.Emails.Add(hotmail);
+            //    }
+            //    //foreach (var item in emails)
+            //    //{
+            //    //    messageDTO.Emails.Add(item);
+            //    //}
+            //}
 
             messageDTO.MessageTemplate = "ServiceSMSNotification";
             await _messageSenderService.SendEmailForService(messageDTO);
+            //Send Mail to chairman
+            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            if (chairmanEmail != null)
+            {
+                //seperate email by comma and send message to those email
+                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                foreach (string email in chairmanEmails)
+                {
+                    messageDTO.ToEmail = email;
+                    await _messageSenderService.SendEmailForService(messageDTO);
+                }
+            }
             return true;
         }
 
