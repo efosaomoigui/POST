@@ -231,7 +231,7 @@ namespace GIGLS.Core.DTO.Account
         public string BankName { get; set; }
         public string AccountName { get; set; }
         public string AccountNo { get; set; }
-        public string PhoneNo { get; set; }
+        public string PaymentStatusDisplay { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
 
     }

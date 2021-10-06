@@ -1576,13 +1576,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate);
             if (!String.IsNullOrEmpty(filter.ReferenceNo))
             {
-               customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.InvoiceRefNo.ToLower() == filter.ReferenceNo.ToLower());
+               customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.InvoiceRefNo.ToLower() == filter.ReferenceNo.ToLower() || x.CustomerCode == filter.ReferenceNo);
             }
-            if (!String.IsNullOrEmpty(filter.CustomerCode))
-            {
-                customerInvoiceList = _context.CustomerInvoice.AsQueryable().Where(x => x.InvoiceRefNo == filter.CustomerCode);
-            }
-
+            
             List<CustomerInvoiceDTO> result = (from s in customerInvoiceList
                                                select new CustomerInvoiceDTO
                                                {
@@ -1592,9 +1588,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                    CustomerCode = s.CustomerCode,
                                                    InvoiceRefNo = s.InvoiceRefNo,
                                                    PaymentStatus = s.PaymentStatus,
-                                                   PhoneNo = s.PhoneNumber,
+                                                   PaymentStatusDisplay = s.PaymentStatus == PaymentStatus.Pending ? PaymentStatus.Pending.ToString():PaymentStatus.Paid.ToString(),
                                                    Email = s.Email,
-                                                   PhoneNumber = Context.Company.FirstOrDefault(c => c.CustomerCode == s.CustomerCode).PhoneNumber,
+                                                   PhoneNumber = s.PhoneNumber,
                                                }).ToList();
 
             return Task.FromResult(result);
