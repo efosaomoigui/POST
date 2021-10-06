@@ -253,5 +253,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry();
         Task<bool> SendServiceSMS(ServiceSMS serviceSMS);
         Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria);
+        Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction);
     }
 }

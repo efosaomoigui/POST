@@ -550,6 +550,7 @@
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResultComparer.cs" />
+    <Compile Include="DTO\ValidateBillTransactionDTO.cs" />
     <Compile Include="DTO\Vendors\VendorDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
