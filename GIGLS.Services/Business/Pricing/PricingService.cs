@@ -1602,9 +1602,20 @@ namespace GIGLS.Services.Business.Pricing
             {
                 if (itemCategory.SubminimumWeight == 0)
                 {
-                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    if (itemCategory.CategoryMinimumWeight <= pricingDto.Weight)
                     {
-                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                            price = price + priceValue;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        } 
                     }
                 }
 
