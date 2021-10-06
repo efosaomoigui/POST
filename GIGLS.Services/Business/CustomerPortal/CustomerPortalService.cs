@@ -4271,10 +4271,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 //split email by comma
                 var emails = chairmanEmail.Split(',');
-                foreach (var item in emails)
+                //only take the hotmail
+                var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
+                if (hotmail != null)
                 {
-                    messageDTO.Emails.Add(item);
+                    messageDTO.Emails.Add(hotmail);
                 }
+                //foreach (var item in emails)
+                //{
+                //    messageDTO.Emails.Add(item);
+                //}
             }
 
             messageDTO.MessageTemplate = "ServiceSMSNotification";

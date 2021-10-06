@@ -1003,20 +1003,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 //send mail to customer
                 await _messageSenderService.SendPaymentNotificationAsync(message);
 
-                //send a copy to chairman
-                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                ////send a copy to chairman
+                //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-                if (chairmanEmail != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                //if (chairmanEmail != null)
+                //{
+                //    //seperate email by comma and send message to those email
+                //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                    foreach (string email in chairmanEmails)
-                    {
-                        message.ToEmail = email;
-                        await _messageSenderService.SendPaymentNotificationAsync(message);
-                    }
-                }
+                //    foreach (string email in chairmanEmails)
+                //    {
+                //        message.ToEmail = email;
+                //        await _messageSenderService.SendPaymentNotificationAsync(message);
+                //    }
+                //}
             }
         }
 
@@ -1043,20 +1043,20 @@ namespace GIGLS.Services.Implementation.Wallet
                     //send mail to customer
                     await _messageSenderService.SendPaymentNotificationAsync(message);
 
-                    //send a copy to chairman
-                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    ////send a copy to chairman
+                    //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-                    if (chairmanEmail != null)
-                    {
-                        //seperate email by comma and send message to those email
-                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    //if (chairmanEmail != null)
+                    //{
+                    //    //seperate email by comma and send message to those email
+                    //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                        foreach (string email in chairmanEmails)
-                        {
-                            message.ToEmail = email;
-                            await _messageSenderService.SendPaymentNotificationAsync(message);
-                        }
-                    }
+                    //    foreach (string email in chairmanEmails)
+                    //    {
+                    //        message.ToEmail = email;
+                    //        await _messageSenderService.SendPaymentNotificationAsync(message);
+                    //    }
+                    //}
                 }
             }
         }

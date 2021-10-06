@@ -1769,19 +1769,19 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                foreach (string email in chairmanEmails)
-                {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
-                }
-            }
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
 
         }
 
@@ -1923,19 +1923,19 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                foreach (string email in chairmanEmails)
-                {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
-                }
-            }
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
 
         }
 
@@ -1982,19 +1982,19 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                foreach (string email in chairmanEmails)
-                {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
-                }
-            }
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
 
         }
 
