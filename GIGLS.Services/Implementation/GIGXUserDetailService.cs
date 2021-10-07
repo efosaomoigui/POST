@@ -110,7 +110,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
 
                 if (userPin != null && userPin.CustomerPin != gIGXUserDetailDTO.CustomerPin)
                 {
-                    throw new GenericException($"Old pin is incorrect. Provide correct old pin.");
+                    throw new GenericException($"Old pin is incorrect. Please provide correct pin.");
                 }
                 if (userPin != null && !String.IsNullOrEmpty(oldPin) && !String.IsNullOrEmpty(newPin) && userPin.CustomerPin == gIGXUserDetailDTO.CustomerPin)
                 {
