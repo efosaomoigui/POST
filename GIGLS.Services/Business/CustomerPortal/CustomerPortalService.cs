@@ -4298,6 +4298,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
         {
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerCode))
+            {
+                throw new GenericException("Customer code is required");
+            }
+
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
             {
                 throw new GenericException("Customer new pin is required");

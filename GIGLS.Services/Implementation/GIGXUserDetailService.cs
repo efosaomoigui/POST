@@ -131,15 +131,12 @@ namespace GIGLS.Services.Implementation.BankSettlement
             try
             {
                 bool result = false;
-                // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
-                var user = await _userService.GetUserById(currentUserId);
-                var newPin = gIGXUserDetailDTO.CustomerNewPin.ToString();
-                var userPin = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                var userPin = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == gIGXUserDetailDTO.CustomerCode);
                 
-                if (userPin != null && !String.IsNullOrEmpty(newPin))
+                if (userPin != null)
                 {
-                    userPin.CustomerPin = newPin;
+                    userPin.CustomerPin = gIGXUserDetailDTO.CustomerNewPin;
                     result = true;
                 }
                 await _uow.CompleteAsync();
