@@ -87,7 +87,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             PreShipmentItemId = x.PreShipmentItemId,
                                                                             ItemValue = x.ItemValue
                                                                         }).ToList()
-                                                }).ToList();
+                                                }).Take(200).ToList();
             if (shipmentDto.Any())
             {
                 for (int i = 0; i < shipmentDto.Count; i++)
