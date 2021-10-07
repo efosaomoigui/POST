@@ -4282,6 +4282,32 @@ namespace GIGLS.Services.Business.CustomerPortal
             return true;
         }
 
+        public async Task<bool> ChangeUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
+            {
+                throw new GenericException("Customer old pin is required");
+            }
 
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
+            {
+                throw new GenericException("Customer new pin is required");
+            }
+            return await _gigxService.ChangeUserPin(gIGXUserDetailDTO);
+        }
+
+        public async Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO)
+        {
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerCode))
+            {
+                throw new GenericException("Customer code is required");
+            }
+
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
+            {
+                throw new GenericException("Customer new pin is required");
+            }
+            return await _gigxService.ResetUserPin(gIGXUserDetailDTO);
+        }
     }
 }
