@@ -2333,15 +2333,21 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
                     var emailList = new List<string>();
-                    var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
-                    if (!String.IsNullOrEmpty(chairmanEmail))
-                    {
-                        var emails = chairmanEmail.Split(',');
-                        foreach (var item in emails)
-                        {
-                            emailList.Add(item);
-                        }
-                    }
+                    //var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
+                    //if (!String.IsNullOrEmpty(chairmanEmail))
+                    //{
+                    //    var emails = chairmanEmail.Split(',');
+                    //    var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
+                    //    if (hotmail != null)
+                    //    {
+                    //        emailList.Add(hotmail);
+                    //    }
+                    //    emailList.Add(hotmail);
+                    //    //foreach (var item in emails)
+                    //    //{
+                    //    //    emailList.Add(item);
+                    //    //}
+                    //}
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
