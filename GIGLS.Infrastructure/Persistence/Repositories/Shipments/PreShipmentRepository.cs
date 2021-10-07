@@ -50,6 +50,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
 
+            if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+            {
+                //Take current 200 records
+                dropOffs = dropOffs.Take(200);
+            }
+
             List<PreShipmentDTO> shipmentDto = (from r in dropOffs
                                                 select new PreShipmentDTO()
                                                 {
@@ -87,7 +93,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             PreShipmentItemId = x.PreShipmentItemId,
                                                                             ItemValue = x.ItemValue
                                                                         }).ToList()
-                                                }).Take(200).ToList();
+                                                }).ToList();
             if (shipmentDto.Any())
             {
                 for (int i = 0; i < shipmentDto.Count; i++)
