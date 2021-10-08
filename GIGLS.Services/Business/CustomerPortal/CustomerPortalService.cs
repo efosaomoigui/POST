@@ -4111,14 +4111,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            if (amount <= 0 )
-            {
-                throw new GenericException("Please provide a valid amount", $"{(int)HttpStatusCode.Forbidden}");
-            }
-
             if (emailOrCode.StartsWith("2012GIGL"))
             {
-                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x =>  x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode) && x.Amount == amount).ToList();
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x =>  x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode)).ToList();
                 var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
                 if (walletTrans is null)
@@ -4150,6 +4145,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
+                if (amount <= 0)
+                {
+                    throw new GenericException("Please provide a valid amount", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 var userDetails = await _uow.User.GetUserByEmailorCustomerCode(emailOrCode);
                 if (userDetails is null)
                 {
@@ -4320,6 +4320,48 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("Customer code is required");
             }
+        public async Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction)
+        {
+            var response = "";
+            if (string.IsNullOrWhiteSpace(billTransaction.Reference))
+            {
+                throw new GenericException("Invalid reference code", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            if (billTransaction.Reference.StartsWith("2012GIGL"))
+            {
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(billTransaction.Reference)).ToList();
+                var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
+
+                if (walletTrans is null)
+                {
+                    throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                //Call Ticket Mann
+                var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
+
+                if (ticketMannResponse is null)
+                {
+                    throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
+                {
+                    response = "Transaction was successfull";
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
+                    {
+                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    var result = await ReverseWallet(walletTrans.PaymentTypeReference);
+                    response = result.Message;
+                }
+            }
+            return response;
+        }
 
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
             {

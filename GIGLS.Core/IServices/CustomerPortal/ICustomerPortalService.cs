@@ -255,5 +255,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria);
         Task<bool> ChangeUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction);
     }
 }

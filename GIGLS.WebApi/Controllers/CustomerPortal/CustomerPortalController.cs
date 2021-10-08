@@ -2831,5 +2831,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPut]
+        [Route("validatebillspayment")]
+        public async Task<IServiceResponse<string>> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ValidateBillsPaymentRefund(billTransaction);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
