@@ -4320,6 +4320,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("Customer code is required");
             }
+
+            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
+            {
+                throw new GenericException("Customer new pin is required");
+            }
+            return await _gigxService.ResetUserPin(gIGXUserDetailDTO);
+        }
+
         public async Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction)
         {
             var response = "";
@@ -4361,13 +4369,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
             return response;
-        }
-
-            if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
-            {
-                throw new GenericException("Customer new pin is required");
-            }
-            return await _gigxService.ResetUserPin(gIGXUserDetailDTO);
         }
     }
 }
