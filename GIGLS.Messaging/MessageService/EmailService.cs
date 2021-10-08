@@ -948,7 +948,7 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
             if (string.IsNullOrWhiteSpace(message.Subject))
             {
-                message.Subject = "Successful Payment Notification";
+                message.Subject = "Successful Bills Payment Notification";
             }
             myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
