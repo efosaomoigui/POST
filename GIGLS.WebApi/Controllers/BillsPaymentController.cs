@@ -26,8 +26,8 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
-        [Route("searchByEmailCode")]
-        public async Task<IServiceResponse<MerchantSalesPayload>> GetCompanyByEmail(DateFilterCriteria searchDTO)
+        [Route("report")]
+        public async Task<IServiceResponse<MerchantSalesPayload>> GetBillsPaymentSummary(DateFilterCriteria searchDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
