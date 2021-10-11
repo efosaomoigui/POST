@@ -3430,6 +3430,22 @@ namespace GIGLS.Services.Business.CustomerPortal
                             {
                                 priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
                             }
+
+                            if (itemCategory.CategoryMinimumWeight <= quickQuotePriceDTO.Weight)
+                            {
+                                for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                                {
+                                    var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
+                                    priceDTO.Price = priceDTO.Price + priceValue;
+                                }
+                            }
+                            else
+                            {
+                                for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
+                                {
+                                    priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                                }
+                            }
                         }
 
                         else if (itemCategory.SubminimumWeight > 0 && quickQuotePriceDTO.Weight > itemCategory.SubminimumWeight && quickQuotePriceDTO.Weight <= itemCategory.CategoryMinimumWeight)
@@ -3447,6 +3463,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 var priceValue = itemCategory.PricePerWeight * quickQuotePriceDTO.Weight;
                                 priceDTO.Price = priceDTO.Price + priceValue;
                             }
+                        }
+                    }
+
+                    if (itemCategory != null && itemCategory.IsHazardous)
+                    {
+                        //get hazardous extra charge from global property
+                        var hazardousMatCharge = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.Hazardous.ToString() && x.CountryId == quickQuotePriceDTO.DepartureCountryId);
+                        if (hazardousMatCharge != null)
+                        {
+                            var hazCharge = Convert.ToDecimal(hazardousMatCharge.Value);
+                            priceDTO.Price = priceDTO.Price + hazCharge;
                         }
                     }
                 }

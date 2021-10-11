@@ -339,6 +339,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
                 {
                     checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+                    if (!checkAmount && paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                    {
+                        checkAmount = true;
+                    }
 
                     if (checkAmount)
                     {
