@@ -3426,11 +3426,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (itemCategory.SubminimumWeight == 0)
                         {
-                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
-                            {
-                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
-                            }
-
                             if (itemCategory.CategoryMinimumWeight <= quickQuotePriceDTO.Weight)
                             {
                                 for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
