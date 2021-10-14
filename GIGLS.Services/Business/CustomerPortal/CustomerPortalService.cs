@@ -4153,9 +4153,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
-                else
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4163,6 +4163,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
             else
@@ -4198,9 +4202,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
-                else
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4208,6 +4212,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
 
