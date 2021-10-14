@@ -4380,7 +4380,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     response = "Transaction was successfull";
                 }
-                else
+                else if(ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4388,6 +4388,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Transaction is pending. We will refund you when transaction is complete";
                 }
             }
             return response;
