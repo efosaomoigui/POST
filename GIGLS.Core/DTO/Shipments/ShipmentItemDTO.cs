@@ -80,5 +80,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ItemCount { get; set; }
         public bool Received { get; set; }
         public string ReceivedBy { get; set; }
+        public string CourierService { get; set; }
+        public string ItemUniqueNo { get; set; }
     }
 }

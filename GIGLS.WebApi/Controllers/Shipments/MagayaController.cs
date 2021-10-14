@@ -610,5 +610,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("updaterequest")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentRequest(IntlShipmentRequestDTO requestDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.UpdateIntlShipmentRequest(requestDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+                };
+            });
+        }
     }
 }

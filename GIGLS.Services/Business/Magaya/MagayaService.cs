@@ -2508,7 +2508,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-
         public  async Task<bool> SendMessageToIntlTeam(int countryId, IntlShipmentRequestDTO castObj)
         {
             if (countryId == 207)
@@ -2526,6 +2525,33 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return true;
         }
 
+        public async Task<bool>UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == requestDTO.RequestNumber).FirstOrDefault();
+                foreach (var item in shipments.ShipmentRequestItems)
+                {
+                    //get current from the sent payload
+                    var currentItem = requestDTO.ShipmentRequestItems.Find(x => x.IntlShipmentRequestItemId == item.IntlShipmentRequestItemId);
+                    if (currentItem != null)
+                    {
+                        item.Weight = currentItem.Weight;
+                        item.Quantity = currentItem.Quantity;
+                        item.CourierService = currentItem.CourierService;
+                        item.ItemUniqueNo = currentItem.ItemUniqueNo; 
+                    }
+                }
+                _uow.Complete();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
     }
 

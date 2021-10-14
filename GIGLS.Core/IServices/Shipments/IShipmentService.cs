@@ -136,6 +136,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateReceived(List<int> itemIDs,bool isTracking);
         Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID);
         Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber);
+        Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
     }
 
 

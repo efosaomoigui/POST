@@ -1633,8 +1633,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             ReceivedBy = b.ReceivedBy,
                             ItemCount = b.ItemCount,
                             RequestProcessingCountryId = a.RequestProcessingCountryId,
-
-
+                            ReceivedDate = b.ReceivedDate,
+                            CourierService = b.CourierService
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
 
@@ -1704,6 +1704,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
                                            RequestProcessingCountryId = a.RequestProcessingCountryId,
+                                           ReceivedDate = a.ReceivedDate,
+                                           CourierService = a.CourierService
 
                                        }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1768,6 +1770,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        ItemSenderfullName = a.ItemSenderfullName,
                                        ItemValue = a.ItemValue,
                                        RequestProcessingCountryId = a.RequestProcessingCountryId,
+                                       ReceivedDate = a.ReceivedDate,
+                                       CourierService = a.CourierService
 
                                    }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
                                    || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue || s.ItemSenderfullName == filterValue || s.storeName == filterValue)).ToList();
@@ -2113,6 +2117,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           ReceivedBy = b.ReceivedBy,
                           ItemCount = b.ItemCount,
                           RequestProcessingCountryId = a.RequestProcessingCountryId,
+                          ReceivedDate = b.ReceivedDate,
+                          CourierService = b.CourierService
 
                       }
                   ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -2197,6 +2203,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                            ReceivedBy = b.ReceivedBy,
                            ItemCount = b.ItemCount,
                            RequestProcessingCountryId = a.RequestProcessingCountryId,
+                           ReceivedDate = b.ReceivedDate,
+                           CourierService = b.CourierService
 
                        }
                    ).Where(a => a.IsProcessed == false && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
