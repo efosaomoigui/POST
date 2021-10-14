@@ -4378,7 +4378,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
                 else if(ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
@@ -4391,7 +4391,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    response = "Transaction is pending. We will refund you when transaction is complete";
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
             return response;
