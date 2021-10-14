@@ -507,6 +507,23 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresWithHUBForStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = false;
+                int stationId = 0;
+
+                return await _uow.ServiceCentre.GetServiceCentresIsHub(countryIds, excludehub, stationId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
 

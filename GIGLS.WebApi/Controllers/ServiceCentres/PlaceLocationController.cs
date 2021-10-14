@@ -59,8 +59,8 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{serviceCentreId:int}/station")]
-        public async Task<IServiceResponse<IEnumerable<PlaceLocationDTO>>> GetLocationsByStation(int serviceCentreId)
+        [Route("{serviceCentreId:int}/servicecentre")]
+        public async Task<IServiceResponse<IEnumerable<PlaceLocationDTO>>> GetLocationsByServiceCentre(int serviceCentreId)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -205,6 +205,22 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 return new ServiceResponse<object>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{stationId:int}/station")]
+        public async Task<IServiceResponse<IEnumerable<PlaceLocationDTO>>> GetLocationsByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var station = await _stationService.GetStationById(stationId);
+                var location = await _locationService.GetLocationsByStateId(station.StateId);
+                return new ServiceResponse<IEnumerable<PlaceLocationDTO>>
+                {
+                    Object = location
                 };
             });
         }

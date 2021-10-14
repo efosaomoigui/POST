@@ -219,7 +219,31 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
-
+        public Task<List<StationDTO>> GetStationsByUserCountry(int[] countryIds)
+        {
+            try
+            {
+                var stations = Context.Station;
+                var stationDto = from s in stations
+                                 join st in Context.State on s.StateId equals st.StateId
+                                 join c in Context.Country on st.CountryId equals c.CountryId
+                                 where countryIds.Contains(c.CountryId)
+                                 select new StationDTO
+                                 {
+                                     StationId = s.StationId,
+                                     StationName = s.StationName,
+                                     StationCode = s.StationCode,
+                                     StateId = s.StateId,
+                                     StateName = st.StateName,
+                                     Country = c.CountryName
+                                 };
+                return Task.FromResult(stationDto.OrderBy(x => x.StationName).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
 

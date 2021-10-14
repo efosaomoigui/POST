@@ -89,7 +89,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> ProcessInternationalShipmentOnAgility(ShipmentDTO shipmentDTO);
         Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO);
         Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO);
-
+        Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

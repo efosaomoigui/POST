@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.Zone
         Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
         Task<DomesticRouteZoneMapDTO> GetZoneMobile(int departure, int destination);
         Task<int> GetZoneETA(int departure, int destination);
+        Task<DomesticRouteZoneMapDTO> GetZoneByStation(int departure, int destinationStation);
     }
 }

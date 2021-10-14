@@ -5570,5 +5570,18 @@ namespace GIGLS.Services.Implementation.Shipments
             };
             _uow.DeliveryNumber.Add(number);
         }
+
+        public async Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation)
+        {
+            // use currentUser login servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenters.Length > 1)
+            {
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            }
+
+            var zone = await _domesticRouteZoneMapService.GetZoneByStation(serviceCenters[0], destinationStation);
+            return zone;
+        }
     }
 }
