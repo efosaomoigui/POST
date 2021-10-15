@@ -5157,19 +5157,19 @@ namespace GIGLS.Services.Implementation.Shipments
                             if (shipment.CompanyMap == CompanyMap.DHL)
                             {
                                 intlShipmentPrice = response.FirstOrDefault(x => x.CompanyMap == CompanyMap.DHL);
-                                if (intlShipmentPrice.GrandTotal != preshipmentmobile.GrandTotal)
-                                {
-                                    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
-                                }
+                                //if (intlShipmentPrice.GrandTotal != preshipmentmobile.GrandTotal)
+                                //{
+                                //    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
+                                //}
                                 intlShipment = await _dhlService.CreateInternationalShipment(shipment);
                             }
                             else if (shipment.CompanyMap == CompanyMap.UPS)
                             {
                                 intlShipmentPrice = response.FirstOrDefault(x => x.CompanyMap == CompanyMap.UPS);
-                                if (intlShipmentPrice.GrandTotal != preshipmentmobile.GrandTotal)
-                                {
-                                    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
-                                }
+                                //if (intlShipmentPrice.GrandTotal != preshipmentmobile.GrandTotal)
+                                //{
+                                //    throw new GenericException($"There was an issue processing your request, shipment pricing is not accurate");
+                                //}
                                 intlShipment = await _uPSService.CreateInternationalShipment(shipment);
                             }
 
