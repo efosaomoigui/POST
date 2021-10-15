@@ -3426,11 +3426,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (itemCategory.SubminimumWeight == 0)
                         {
-                            for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
-                            {
-                                priceDTO.Price = priceDTO.Price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
-                            }
-
                             if (itemCategory.CategoryMinimumWeight <= quickQuotePriceDTO.Weight)
                             {
                                 for (int i = 1; i <= quickQuotePriceDTO.Quantity; i++)
@@ -4158,9 +4153,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
-                else
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4168,6 +4163,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
             else
@@ -4203,9 +4202,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
-                else
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4213,6 +4212,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
 
@@ -4383,9 +4386,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
                 {
-                    response = "Transaction was successfull";
+                    response = "Transaction was successful";
                 }
-                else
+                else if(ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
@@ -4393,6 +4396,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var result = await ReverseWallet(walletTrans.PaymentTypeReference);
                     response = result.Message;
+                }
+                else
+                {
+                    response = "Your transaction will be verified shortly and the purchased value fulfilled";
                 }
             }
             return response;

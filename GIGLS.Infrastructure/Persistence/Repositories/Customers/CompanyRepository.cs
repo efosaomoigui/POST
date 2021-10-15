@@ -698,7 +698,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companiesDto = new List<CompanyDTO>();
                 if (!string.IsNullOrEmpty(filterCriteria.AssignedCustomerRep))
                 {
-                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep && s.Rank == Rank.Class);
+                    var companies = _context.Company.Where(s => s.AssignedCustomerRep == filterCriteria.AssignedCustomerRep);
 
                     if (filterCriteria.StartDate != null )
                     {
