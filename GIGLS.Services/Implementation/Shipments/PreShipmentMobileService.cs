@@ -576,6 +576,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         PreshipmentPriceDTO.Vat = result.VAT;
                         PreshipmentPriceDTO.PreshipmentMobile = preShipmentDTO;
                         PreshipmentPriceDTO.IsWithinProcessingTime = isWithinProcessingTime;
+                        PreshipmentPriceDTO.InternationalShippingCost = result.InternationalShippingCost;
                     }
                     else
                     {
