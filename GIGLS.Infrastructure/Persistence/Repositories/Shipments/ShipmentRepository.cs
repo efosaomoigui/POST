@@ -1553,6 +1553,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return Task.FromResult(customerInvoices);
         }
+
+        public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational);
+            shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID  && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate);
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where i.PaymentStatus == PaymentStatus.Paid
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               CustomerType = s.CustomerType,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos,
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            return Task.FromResult(resultDto);
+        }
     }
 
 

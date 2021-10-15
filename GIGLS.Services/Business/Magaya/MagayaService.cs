@@ -2553,6 +2553,12 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
+        public Task<List<ShipmentDTO>> getIntlShipmentRequests(NewFilterOptionsDto filterOptionsDto)
+        {
+            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            return result;
+        }
+
     }
 
 

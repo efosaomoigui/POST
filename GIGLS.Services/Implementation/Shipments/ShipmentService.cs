@@ -5823,5 +5823,19 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return processDiscount;
         }
+
+        public async Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                filterOptionsDto.ServiceCentreID = serviceCenters[0];
+                return await _uow.Shipment.GetIntlPaidWaybillForServiceCentre(filterOptionsDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
