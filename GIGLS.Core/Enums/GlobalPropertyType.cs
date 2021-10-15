@@ -101,6 +101,7 @@
         InternationalCustomerWeekDate,
         DomesticCustomerWeekDiscount,
         InternationalCustomerWeekDiscount,
-        CustomerWeekCountValue
+        CustomerWeekCountValue,
+        IsIntlShipmentHoliday
     }
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.DHL;
+﻿using GIGLS.Core;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
@@ -22,13 +23,13 @@ namespace GIGLS.Services.Business.DHL
     public class DHLService : IDHLService
     {
         private readonly IUserService _userService;
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryService _countryService;
-        public DHLService(IUserService userService, IGlobalPropertyService globalPropertyService, ICountryService countryService)
+        private readonly IUnitOfWork _uow;
+        public DHLService(IUserService userService, ICountryService countryService, IUnitOfWork uow)
         {
             _userService = userService;
-            _globalPropertyService = globalPropertyService;
             _countryService = countryService;
+            _uow = uow;
         }
 
         public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
@@ -574,10 +575,25 @@ namespace GIGLS.Services.Business.DHL
             {
                 countryId = await _userService.GetUserActiveCountryId();
             }
-            var shipTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PlannedShippingDateAndTime, countryId);
+            var globalPropery = _uow.GlobalProperty.GetAll();
+            var shipTime = globalPropery.SingleOrDefault(x => x.Key == GlobalPropertyType.PlannedShippingDateAndTime.ToString() && x.CountryId == countryId);
+            if (shipTime == null)
+            {
+                throw new GenericException($"Global Property '{shipTime.Key}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var holiday = globalPropery.SingleOrDefault(x => x.Key == GlobalPropertyType.IsIntlShipmentHoliday.ToString() && x.CountryId == countryId);
+            if (holiday == null)
+            {
+                throw new GenericException($"Global Property '{holiday.Key}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
             int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
+            int isHoliday = Convert.ToInt32(holiday.Value) != null ? Convert.ToInt32(holiday.Value) : 0;
             var tmpDate = DateTime.Today;
-            if (tmpDate.DayOfWeek == DayOfWeek.Friday)
+            if (isHoliday == 1)
+            {
+                return tmpDate.AddDays(shipDays);
+            }
+            else if (tmpDate.DayOfWeek == DayOfWeek.Friday)
             {
                 return tmpDate = tmpDate.AddDays(3);
             }
