@@ -5384,6 +5384,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.ShipmentReroute = null;
             shipmentDTO.DeliveryOption = null;
             shipmentDTO.IsInternational = true;
+            shipmentDTO.RequestNumber = shipments.RequestNumber;
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {
@@ -5824,18 +5825,144 @@ namespace GIGLS.Services.Implementation.Shipments
             return processDiscount;
         }
 
-        public async Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
+        public async Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter)
         {
             try
             {
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                if (filter != null && filter.StartDate != null && filter.EndDate != null)
+                {
+                    filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                    filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                    filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                    filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                filterOptionsDto.ServiceCentreID = serviceCenters[0];
-                return await _uow.Shipment.GetIntlPaidWaybillForServiceCentre(filterOptionsDto);
+                filter.ServiceCentreID = serviceCenters[0];
+                return await _uow.Shipment.GetIntlPaidWaybillForServiceCentre(filter);
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        public async Task<List<ShipmentExportDTO>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter)
+        {
+            try
+            {
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                if (filter != null && filter.StartDate != null && filter.EndDate != null)
+                {
+                    filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                    filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                    filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                    filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
+                return await _uow.ShipmentExport.GetShipmentExportNotYetExported(filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos)
+        {
+            try
+            {
+                var exports = new List<ShipmentExport>();
+                var userId = await _userService.GetCurrentUserId();
+                var requests = dtos.Select(x => x.RequestNumber).ToList();
+                var waybills = dtos.Select(x => x.Waybill).ToList();
+                var intlShipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => requests.Contains(x.RequestNumber)).ToList();
+                var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                for (int i = 0; i < intlShipments.Count; i++)
+                {
+                    var request = intlShipments[i];
+                    foreach (var item in request.ShipmentRequestItems)
+                    {
+                        var export = new ShipmentExport() { 
+                         RequestNumber = request.RequestNumber,
+                         Waybill = shipments.FirstOrDefault(x => x.RequestNumber == request.RequestNumber).Waybill,
+                         Weight = item.Weight,
+                         Quantity = item.Quantity,
+                         ItemUniqueNo = item.ItemUniqueNo,
+                         CourierService = item.CourierService,
+                         UserId = userId,
+                        };
+
+                        exports.Add(export);
+                    }
+                }
+
+                if (exports.Any())
+                {
+                    foreach (var item in shipments)
+                    {
+                        item.IsExported = true;
+                    }
+                    _uow.ShipmentExport.AddRange(exports);
+                    _uow.Complete();
+                }
+
+                //also update the shipments to exported true
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> ExportShipments(List<ShipmentExportDTO> dtos)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var cargos = new List<CargoMagayaShipmentDTO>();
+                var waybills = dtos.Select(x => x.Waybill);
+                var waybillInfo = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var exportInfo = _uow.ShipmentExport.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                foreach (var item in exportInfo)
+                {
+                    item.IsExported = true;
+                    item.DateModified = DateTime.Now;
+                    item.ExportedBy = userId;
+                    var cargoObj = new CargoMagayaShipmentDTO()
+                    {
+                        Waybill = item.Waybill,
+                    };
+                    cargos.Add(cargoObj);
+                }
+                var cargoWaybill = await MarkMagayaShipmentsAsCargoed(cargos);
+                if (!cargoWaybill)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
     }
 }

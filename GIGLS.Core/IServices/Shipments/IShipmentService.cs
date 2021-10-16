@@ -91,6 +91,10 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO);
         Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO);
         Task<bool> CancelShipmentForGIGGOExtension(CancelShipmentDTO cancelPreShipmentMobile);
+        Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
+        Task<List<ShipmentExportDTO>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter);
+        Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos);
+        Task<bool> ExportShipments(List<ShipmentExportDTO> dtos);
 
     }
 
@@ -137,6 +141,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID);
         Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber);
         Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
+        Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
     }
 
 

@@ -2,6 +2,7 @@
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -857,6 +858,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         user = await _userService.GetUserById(customerUserId);
                         customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
                     }
+
+                    shipmentDTO.RequestNumber = shipmentReq.RequestNumber;
                 }
 
                 //PickUp Options
@@ -2553,9 +2556,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-        public Task<List<ShipmentDTO>> getIntlShipmentRequests(NewFilterOptionsDto filterOptionsDto)
+        public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter)
         {
-            var result = _shipmentService.GetIntlTransactionShipments(filterOptionsDto);
+            var result = _shipmentService.GetIntlPaidWaybillForServiceCentre(filter);
             return result;
         }
 

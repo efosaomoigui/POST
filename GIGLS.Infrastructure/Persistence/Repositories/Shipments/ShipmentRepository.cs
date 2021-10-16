@@ -1557,12 +1557,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
         {
             // filter by cancelled shipments
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational);
-            shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID  && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate);
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational && !s.IsExported);
+            if (filterOptionsDto != null && !String.IsNullOrEmpty(filterOptionsDto.FilterType))
+            {
+                shipments = _context.Shipment.AsQueryable().Where(x => x.Waybill == filterOptionsDto.FilterType || x.RequestNumber == filterOptionsDto.FilterType);
+            }
+            else
+            {
+                shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate); 
+            }
             List<InvoiceViewDTO> result = (from s in shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join c in Context.Users on s.CustomerCode equals c.UserChannelCode
                                            where i.PaymentStatus == PaymentStatus.Paid
                                            select new InvoiceViewDTO
                                            {
@@ -1583,6 +1591,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                CustomerType = s.CustomerType,
                                                Transfer = i.Transfer,
                                                Pos = i.Pos,
+                                               SenderName = c.FirstName + " " + c.LastName,
+                                               SenderAddress = s.SenderAddress,
+                                               PhoneNumber = c.PhoneNumber,
+                                               IsExported = s.IsExported,
+                                               RequestNumber = s.RequestNumber
+                                               
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);

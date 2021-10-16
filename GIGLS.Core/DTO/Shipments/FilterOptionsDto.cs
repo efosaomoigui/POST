@@ -28,7 +28,7 @@ namespace GIGLS.CORE.DTO.Shipments
     {
         public string FilterType { get; set; }
         public int ServiceCentreID { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
