@@ -73,7 +73,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string CourierService { get; set; }
         [MaxLength(300)]
         public string ItemUniqueNo { get; set; }
-        public  DateTime ReceivedDate { get; set; }
+        public  DateTime? ReceivedDate { get; set; }
 
     }
 }

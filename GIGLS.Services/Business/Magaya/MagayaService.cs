@@ -2326,6 +2326,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
+                    shipmentItem.ReceivedDate = DateTime.Now;
                 }
 
                 _uow.Complete();
