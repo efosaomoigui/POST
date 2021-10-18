@@ -285,5 +285,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("cancelledshipmentreport")]
+        public async Task<IServiceResponse<IEnumerable<CancelledShipmentDTO>>> GetCancelledShipment()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var canceledShipment = await _preShipmentMobileService.GetCanceledShipment();
+                return new ServiceResponse<IEnumerable<CancelledShipmentDTO>>
+                {
+                    Object = canceledShipment
+                };
+            });
+        }
+
     }
 }

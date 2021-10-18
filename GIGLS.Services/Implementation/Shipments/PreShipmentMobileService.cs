@@ -7500,6 +7500,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment()
+        {
+            var canceledShipment = await _uow.PreShipmentMobile
+                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString() && x.CustomerCancelReason != null);
+            return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
+        }
+
 
     }
 }

@@ -100,6 +100,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> CancelShipmentWithNoChargeAndReason(CancelShipmentDTO shipment);
         Task<MobilePriceDTO> GetPriceQuote(PreShipmentMobileDTO preShipment);
         Task<decimal> CalculateBikePriceBasedonLocation(PreShipmentMobileDTO item);
-
+        Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment();
     }
 }
