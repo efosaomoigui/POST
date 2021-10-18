@@ -13,6 +13,7 @@ namespace GIGLS.Core.DTO.DHL
         public string ResponseResult { get; set; }
         public CompanyMap OutBoundChannel { get; set; }
         public string PdfFormat { get; set; }
+        public bool IsFromMobile { get; set; }
 
         //public string ImageFormat { get; set; }
         //public string GraphicImage { get; set; }

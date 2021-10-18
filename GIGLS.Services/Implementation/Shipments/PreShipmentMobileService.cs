@@ -5182,6 +5182,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                             var result = Mapper.Map<Core.Domain.DHL.InternationalShipmentWaybill>(intlShipment);
+                            result.IsFromMobile = true;
                             _uow.InternationalShipmentWaybill.Add(result);
 
                             preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
