@@ -883,6 +883,7 @@
     <Compile Include="IServices\IStateService.cs" />
     <Compile Include="IServices\IPriceCategoryService.cs" />
     <Compile Include="IServices\ISubCategoryService.cs" />
+    <Compile Include="IServices\ITicketMannService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />
     <Compile Include="IServices\JobCards\IJobCardService.cs" />
