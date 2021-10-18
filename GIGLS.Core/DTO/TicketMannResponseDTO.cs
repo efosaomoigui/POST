@@ -68,4 +68,41 @@ namespace GIGLS.Core.DTO
         [JsonProperty("responseCode")]
         public string ResponseCode { get; set; }
     }
+
+    public class MerchantSalesPayload
+    {
+        [JsonProperty("merchantName")]
+        public string MerchantName { get; set; }
+
+        [JsonProperty("airtime")]
+        public double Airtime { get; set; }
+
+        [JsonProperty("dataSub")]
+        public double DataSub { get; set; }
+
+        [JsonProperty("tvSub")]
+        public double TvSub { get; set; }
+
+        [JsonProperty("electricity")]
+        public double Electricity { get; set; }
+
+        [JsonProperty("totaldue")]
+        public double Totaldue { get; set; }
+    }
+
+    public class MerchantSalesDTO
+    {
+        public MerchantSalesDTO()
+        {
+            Payload = new List<MerchantSalesPayload>();
+        }
+        [JsonProperty("code")]
+        public int Code { get; set; }
+
+        [JsonProperty("shortDescription")]
+        public string ShortDescription { get; set; }
+
+        [JsonProperty("payload")]
+        public List<MerchantSalesPayload> Payload { get; set; }
+    }
 }
