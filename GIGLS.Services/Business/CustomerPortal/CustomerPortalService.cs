@@ -4324,6 +4324,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 foreach (string email in chairmanEmails)
                 {
                     messageDTO.ToEmail = email;
+                    messageDTO.To = email;
                     await _messageSenderService.SendEmailForService(messageDTO);
                 }
             }
