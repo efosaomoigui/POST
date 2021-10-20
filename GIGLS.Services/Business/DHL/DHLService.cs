@@ -270,7 +270,9 @@ namespace GIGLS.Services.Business.DHL
         private static string SignatureName(InternationalShipmentDTO shipmentDTO)
         {
             var signatureName = string.Empty;
-            if (shipmentDTO.CustomerDetails.CustomerName.Length > 35)
+            var customer = shipmentDTO.CustomerDetails;
+            var customerName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name;
+            if (customerName.Length > 35)
             {
                 var splittedName = shipmentDTO.CustomerDetails.CustomerName.Split(' ');
                 signatureName = splittedName[0];
