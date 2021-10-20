@@ -597,6 +597,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.Message = $"Invalid payload";
                     return result;
                 }
+
+                if (chargeWalletDTO.Amount <= 0)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Invalid amount";
+                    return result;
+                }
+
                 if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount == 0)
                 {
                     result.Succeeded = false;
