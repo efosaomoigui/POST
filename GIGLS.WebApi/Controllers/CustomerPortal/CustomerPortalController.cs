@@ -1880,6 +1880,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
+                //set default values if payload is null
+                if (filterCriteria == null)
+                {
+                    filterCriteria = new ShipmentCollectionFilterCriteria
+                    {
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+
                 var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
 
                 return new ServiceResponse<List<PreShipmentDTO>>

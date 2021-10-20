@@ -418,5 +418,37 @@ namespace GIGLS.WebApi.Controllers.Report
 
 
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customerinvoicelist")]
+        public async Task<IServiceResponse<List<CustomerInvoiceDTO>>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetCustomerInvoiceList(filter);
+
+                return new ServiceResponse<List<CustomerInvoiceDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("markaspaid")]
+        public async Task<IServiceResponse<bool>> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.MarkInvoiceasPaid(customerInvoices);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = report
+                };
+            });
+        }
     }
 }

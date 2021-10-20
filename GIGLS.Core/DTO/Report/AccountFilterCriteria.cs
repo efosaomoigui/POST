@@ -29,6 +29,7 @@ namespace GIGLS.CORE.DTO.Report
         public DateTime? EndDate { get; set; }
         public string CustomerCode { get; set; }
         public string CustomerId { get; set; }
+        public string ReferenceNo { get; set; }
         public string UserId { get; set; }
     }
     public class AccountFilterCriteria2

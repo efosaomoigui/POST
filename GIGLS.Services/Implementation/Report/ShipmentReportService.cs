@@ -1017,6 +1017,46 @@ namespace GIGLS.Services.Implementation.Report
             }
             return res;
         }
+        public async Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            try
+            {
+                return await _uow.Shipment.GetCoporateInvoiceList(filter);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public async Task<bool> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices)
+        {
+            try
+            {
+                if (customerInvoices.Any())
+                {
+                    var refNos = customerInvoices.Select(c => c.InvoiceRefNo).ToList();
+                    var invoices = _uow.CustomerInvoice.GetAllAsQueryable().Where(x => refNos.Contains(x.InvoiceRefNo)).ToList();
+                    if (invoices.Any())
+                    {
+                        foreach (var item in invoices)
+                        {
+                            item.PaymentStatus = PaymentStatus.Paid;
+                            item.DateModified = DateTime.Now;
+                            item.UserID = await _userService.GetCurrentUserId();
+                        }
+                        await _uow.CompleteAsync();
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
 
     }
 }

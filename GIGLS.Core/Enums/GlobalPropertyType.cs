@@ -102,6 +102,7 @@
         DomesticCustomerWeekDiscount,
         InternationalCustomerWeekDiscount,
         CustomerWeekCountValue,
-        IsIntlShipmentHoliday
+        IsIntlShipmentHoliday,
+        DaysBeforeRestriction
     }
 }

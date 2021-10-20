@@ -5571,11 +5571,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (shipment.PaymentStatus != PaymentStatus.Paid)
                 {
-                    //check if last generated is up to 15 days
-                    var dateDiff = (now - shipment.DateCreated).TotalDays;
-                    if (dateDiff >= 15)
+                    //check if last generated is up to 40 days
+                    var daysBeforeRestriction = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.DaysBeforeRestriction.ToString());
+                    if (daysBeforeRestriction != null)
                     {
-                        return true;
+                        var numberOfDays = Convert.ToInt32(daysBeforeRestriction.Value);
+                        var dateDiff = (now - shipment.DateCreated).TotalDays;
+                        if (dateDiff >= numberOfDays)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
