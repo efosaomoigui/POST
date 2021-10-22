@@ -1685,12 +1685,12 @@ namespace GIGLS.Services.Implementation.Shipments
             //}
 
             ////Get Hub for Home Delivery
-            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
-            {
-                //get location base station and set as destination service centre
-                    var location = await _locationService.GetLocationById(shipmentDTO.HomeDeliveryLocation);
-                    shipmentDTO.DestinationServiceCentreId = location.BaseStationId;
-            }
+            //if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            //{
+            //    //get location base station and set as destination service centre
+            //        var location = await _locationService.GetLocationById(shipmentDTO.HomeDeliveryLocation);
+            //        shipmentDTO.DestinationServiceCentreId = location.BaseStationId;
+            //}
 
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
