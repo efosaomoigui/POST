@@ -7465,7 +7465,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DestinationServiceCentreId = destination.ServiceCentreId;
                 shipment.PickupOptions = mobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER;
                 shipment.IsClassShipment = customer.Rank == Rank.Class ? true : false;
-                shipment.CustomerId = customer.CompanyId;
+                shipment.CustomerId = customer.CompanyId == 0 ? customer.IndividualCustomerId : customer.CompanyId;
                 shipment.IsCashOnDelivery = false;
                 shipment.UserId = currentUserId;
                 shipment.DeliveryOptionId = 6;
@@ -7483,6 +7483,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.PackageOptionIds = detail.PackageOptionIds;
                 shipment.DeclarationOfValueCheck = declarationOfValueCheck;
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
+                shipment.Courier = mobile.CompanyMap.ToString();
                 shipment.ShipmentItems = mobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                 {
                     Description = s.Description,
