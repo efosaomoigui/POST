@@ -281,7 +281,6 @@ namespace GIGLS.Services.Business.DHL
             {
                 signatureName = customerName;
             }
-
             return signatureName;
         }
 
@@ -363,7 +362,6 @@ namespace GIGLS.Services.Business.DHL
             output.ImageOptions.Add(image2);
             var image3 = new ImageOption { InvoiceType = "commercial", TypeCode = "invoice", IsRequested = true, LanguageCode = "eng" };
             output.ImageOptions.Add(image3);
-
             return output;
         }
 
