@@ -1030,11 +1030,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [HttpPost]
         [Route("exportshipments")]
-        public async Task<IServiceResponse<bool>> ExportShipments(List<ShipmentExportDTO> shipments)
+        public async Task<IServiceResponse<bool>> ExportShipments(InternationalCargoManifestDTO shipment)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _service.ExportShipments(shipments);
+                var result = await _service.ExportFlightManifest(shipment);
                 return new ServiceResponse<bool>
                 {
                     Object = result

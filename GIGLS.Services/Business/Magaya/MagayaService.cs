@@ -2336,22 +2336,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     const int countryId = 1;
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
-                    var emailList = new List<string>();
-                    //var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
-                    //if (!String.IsNullOrEmpty(chairmanEmail))
-                    //{
-                    //    var emails = chairmanEmail.Split(',');
-                    //    var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
-                    //    if (hotmail != null)
-                    //    {
-                    //        emailList.Add(hotmail);
-                    //    }
-                    //    emailList.Add(hotmail);
-                    //    //foreach (var item in emails)
-                    //    //{
-                    //    //    emailList.Add(item);
-                    //    //}
-                    //}
+                   
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
@@ -2384,8 +2369,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             DepartureServiceCentre = deptCentre,
                             RequestNumber = request.RequestNumber,
                             ToEmail = request.CustomerEmail,
-                            To = request.CustomerEmail,
-                            Emails = emailList
+                            To = request.CustomerEmail
                         };
                         if (!String.IsNullOrEmpty(trackId))
                         {
@@ -2533,6 +2517,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         {
             try
             {
+                var shipmentItems = new List<IntlShipmentRequestItem>();
                 var userId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(userId);
                 var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == requestDTO.RequestNumber).FirstOrDefault();
@@ -2545,9 +2530,23 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         item.Weight = currentItem.Weight;
                         item.Quantity = currentItem.Quantity;
                         item.CourierService = currentItem.CourierService;
-                        item.ItemUniqueNo = currentItem.ItemUniqueNo; 
+                        item.ItemUniqueNo = currentItem.ItemUniqueNo;
+                        item.ItemState = currentItem.ItemState;
+                        item.Length = currentItem.Length;
+                        item.Width = currentItem.Width;
+                        item.Height = currentItem.Height;
+                        if (item.ItemState == ItemState.Damaged)
+                        {
+                           shipmentItems.Add(item);
+                        }
                     }
                 }
+                //also send a mail for damaged goods
+                if (shipmentItems.Any())
+                {
+                  var emailSent = await SendEmailForDamagedItems(shipmentItems);
+                }
+
                 _uow.Complete();
                 return true;
             }
@@ -2561,6 +2560,54 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         {
             var result = _shipmentService.GetIntlPaidWaybillForServiceCentre(filter);
             return result;
+        }
+
+        private async Task<bool> SendEmailForDamagedItems(List<IntlShipmentRequestItem> shipmentItems)
+        {
+            var requestIDs = shipmentItems.Select(x => x.IntlShipmentRequestId).ToList();
+            var request = _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).FirstOrDefault();
+            const int countryId = 1;
+            var deptEmail = string.Empty;
+            var deptCentre = string.Empty;
+            var trackId = string.Empty;
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+            if (user.UserActiveCountryId == 207)
+            {
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
+                deptCentre = "Houston, United States";
+            }
+            else if (user.UserActiveCountryId == 62)
+            {
+                string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                deptCentre = "United Kingdom";
+            }
+
+            //send message for received item
+            foreach (var item in shipmentItems)
+            {
+                var messageDTO = new MessageDTO
+                {
+                    CustomerName = request.CustomerFirstName,
+                    Item = item.ItemName,
+                    Store = item.storeName,
+                    DepartureEmail = deptEmail,
+                    DepartureServiceCentre = deptCentre,
+                    RequestNumber = request.RequestNumber,
+                    ToEmail = "collechizzy@gmail.com",
+                    To = "collechizzy@gmail.com"
+                };
+                if (!String.IsNullOrEmpty(item.TrackingId))
+                {
+                    messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                }
+                //send item received message
+                messageDTO.MessageTemplate = "DamagedItemsReceived";
+                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+            }
+            return true;
         }
 
     }

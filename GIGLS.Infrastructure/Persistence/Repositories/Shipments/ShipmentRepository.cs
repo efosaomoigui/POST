@@ -1682,7 +1682,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             ItemCount = b.ItemCount,
                             RequestProcessingCountryId = a.RequestProcessingCountryId,
                             ReceivedDate = b.ReceivedDate,
-                            CourierService = b.CourierService
+                            CourierService = b.CourierService,
+                            ItemState = b.ItemState
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
 
@@ -1753,7 +1754,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            ItemValue = a.ItemValue,
                                            RequestProcessingCountryId = a.RequestProcessingCountryId,
                                            ReceivedDate = a.ReceivedDate,
-                                           CourierService = a.CourierService
+                                           CourierService = a.CourierService,
+                                           ItemState = a.ItemState
 
                                        }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1819,7 +1821,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        ItemValue = a.ItemValue,
                                        RequestProcessingCountryId = a.RequestProcessingCountryId,
                                        ReceivedDate = a.ReceivedDate,
-                                       CourierService = a.CourierService
+                                       CourierService = a.CourierService,
+                                       ItemState = a.ItemState
 
                                    }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
                                    || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue || s.ItemSenderfullName == filterValue || s.storeName == filterValue)).ToList();
@@ -1934,7 +1937,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       ItemSenderfullName = x.ItemSenderfullName,
                                                       Received = x.Received,
                                                       ReceivedBy = x.ReceivedBy,
-                                                      ItemCount = x.ItemCount
+                                                      ItemCount = x.ItemCount,
+                                                      ItemState = x.ItemState,
+                                                      CourierService = x.CourierService,
+                                                      ReceivedDate = x.ReceivedDate
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -2166,7 +2172,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           ItemCount = b.ItemCount,
                           RequestProcessingCountryId = a.RequestProcessingCountryId,
                           ReceivedDate = b.ReceivedDate,
-                          CourierService = b.CourierService
+                          CourierService = b.CourierService,
+                          ItemState = b.ItemState
 
                       }
                   ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue

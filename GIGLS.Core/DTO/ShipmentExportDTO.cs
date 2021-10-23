@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,10 @@ namespace GIGLS.Core.DTO
         public string ItemUniqueNo { get; set; }
         public string CourierService { get; set; }
         public bool IsExported { get; set; }
+        public double Length { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+        public ItemState ItemState { get; set; }
+        public string ItemName { get; set; }
     }
 }

@@ -71,6 +71,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUPSService _UPSService;
         private readonly IInternationalPriceService _internationalPriceService;
         private readonly ICountryService _countryService;
+        private readonly IInternationalCargoManifestService _intlCargoManifest;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -83,7 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -107,6 +108,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _UPSService = uPSService;
             _internationalPriceService = internationalPriceService;
             _countryService = countryService;
+            _intlCargoManifest = intlCargoManifest;
             MapperConfig.Initialize();
         }
 
@@ -5905,6 +5907,11 @@ namespace GIGLS.Services.Implementation.Shipments
                          ItemUniqueNo = item.ItemUniqueNo,
                          CourierService = item.CourierService,
                          UserId = userId,
+                         Length = item.Length,
+                         Width = item.Width,
+                         Height = item.Height,
+                         ItemState = item.ItemState,
+                         ItemName = item.ItemName
                         };
 
                         exports.Add(export);
@@ -5950,6 +5957,52 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     cargos.Add(cargoObj);
                 }
+                var cargoWaybill = await MarkMagayaShipmentsAsCargoed(cargos);
+                if (!cargoWaybill)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> ExportFlightManifest(InternationalCargoManifestDTO dtos)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+                var serviceCentreId = serviceCentreIds[0];
+                var cargos = new List<CargoMagayaShipmentDTO>();
+                var waybills = dtos.InternationalCargoManifestDetails.Select(x => x.Waybill);
+                var exportIds = dtos.InternationalCargoManifestDetails.Select(x => x.ShipmentExportId);
+                var waybillInfo = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var exportInfo = _uow.ShipmentExport.GetAll().Where(x => exportIds.Contains(x.ShipmentExportId)).ToList();
+                foreach (var item in exportInfo)
+                {
+                    item.IsExported = true;
+                    item.DateModified = DateTime.Now;
+                    item.ExportedBy = userId;
+                    var cargoObj = new CargoMagayaShipmentDTO()
+                    {
+                        Waybill = item.Waybill,
+                    };
+                    cargos.Add(cargoObj);
+                }
+
+                //create flight manifest
+                var serviceCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == serviceCentreId);
+                dtos.DepartureCountry = user.UserActiveCountryId;
+                dtos.DestinationCountry = 1;
+                dtos.UserId = userId;
+                dtos.CargoedBy = user.FirstName + ' ' + user.LastName;
+                dtos.ManifestNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, serviceCentre.Code);
+                var manifest = _intlCargoManifest.AddCargoManifest(dtos);
                 var cargoWaybill = await MarkMagayaShipmentsAsCargoed(cargos);
                 if (!cargoWaybill)
                 {

@@ -214,6 +214,8 @@ namespace GIGLS.Core
         IGIGXUserDetailRepository GIGXUserDetail { get; set; }
         IPaymentMethodRepository PaymentMethod { get; set; }
         IShipmentExportRepository ShipmentExport { get; set; }
+        IInternationalCargoManifestRepository InternationalCargoManifest { get; set; }
+        IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

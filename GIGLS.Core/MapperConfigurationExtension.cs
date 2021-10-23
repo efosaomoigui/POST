@@ -510,6 +510,12 @@ namespace GIGLS.Core
                 config.CreateMap<TransferDetails, TransferDetailsDTO>();
                 config.CreateMap<TransferDetailsDTO, TransferDetails>();
 
+                config.CreateMap<InternationalCargoManifestDetail, InternationalCargoManifestDetailDTO>();
+                config.CreateMap<InternationalCargoManifestDetailDTO, InternationalCargoManifestDetail>();
+
+                config.CreateMap<InternationalCargoManifest, InternationalCargoManifestDTO>();
+                config.CreateMap<InternationalCargoManifestDTO, InternationalCargoManifest>();
+
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
                 config.CreateMap<ShipmentItem_Archive, ShipmentItem>();

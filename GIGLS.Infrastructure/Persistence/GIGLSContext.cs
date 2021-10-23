@@ -315,6 +315,8 @@ namespace GIGLS.Infrastructure.Persistence
         //PaymentMethod
         public DbSet<PaymentMethod> PaymentMethod { get; set; }
         public DbSet<ShipmentExport> ShipmentExport { get; set; }
+        public DbSet<InternationalCargoManifest> InternationalCargoManifest { get; set; }
+        public DbSet<InternationalCargoManifestDetail> InternationalCargoManifestDetail { get; set; }
         #endregion
 
 

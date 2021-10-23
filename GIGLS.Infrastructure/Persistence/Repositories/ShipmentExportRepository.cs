@@ -38,8 +38,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     Weight = r.Weight,
                                     DateCreated = r.DateCreated,
                                     CourierService = r.CourierService,   
-                                    IsExported = r.IsExported   
-                                  }).OrderByDescending(x => x.DateCreated).ToList();
+                                    IsExported = r.IsExported,
+                                    Length = r.Length,
+                                    Width = r.Width,
+                                    ItemState = r.ItemState,
+                                    Height = r.Height,
+                                    ItemName = r.ItemName
+                        }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
             }
@@ -68,7 +73,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             DateCreated = r.DateCreated,
                             CourierService = r.CourierService,
                             IsExported = r.IsExported,
-                            Waybill = r.Waybill
+                            Waybill = r.Waybill,
+                            Length = r.Length,
+                            Width = r.Width,
+                            ItemState = r.ItemState,
+                            Height = r.Height,
+                            ItemName = r.ItemName
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
@@ -106,7 +116,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             DateCreated = r.DateCreated,
                             CourierService = r.CourierService,
                             IsExported = r.IsExported,
-                            Waybill = r.Waybill
+                            Waybill = r.Waybill,
+                            Length = r.Length,
+                            Width = r.Width,
+                            ItemState = r.ItemState,
+                            Height = r.Height,
+                            ItemName = r.ItemName
+                            
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());

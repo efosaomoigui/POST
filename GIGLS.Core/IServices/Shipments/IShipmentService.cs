@@ -95,6 +95,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ShipmentExportDTO>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter);
         Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos);
         Task<bool> ExportShipments(List<ShipmentExportDTO> dtos);
+        Task<bool> ExportFlightManifest(InternationalCargoManifestDTO dtos);
 
     }
 
@@ -142,6 +143,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber);
         Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
+
     }
 
 

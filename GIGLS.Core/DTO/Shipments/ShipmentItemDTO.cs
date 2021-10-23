@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -82,5 +83,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceivedBy { get; set; }
         public string CourierService { get; set; }
         public string ItemUniqueNo { get; set; }
+        public ItemState ItemState { get; set; }
+        public DateTime? ReceivedDate { get; set; }
     }
 }
