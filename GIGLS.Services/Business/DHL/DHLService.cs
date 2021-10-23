@@ -274,12 +274,12 @@ namespace GIGLS.Services.Business.DHL
             var customerName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name;
             if (customerName.Length > 35)
             {
-                var splittedName = shipmentDTO.CustomerDetails.CustomerName.Split(' ');
+                var splittedName = customerName.Split(' ');
                 signatureName = splittedName[0];
             }
             else
             {
-                signatureName = shipmentDTO.CustomerDetails.CustomerName;
+                signatureName = customerName;
             }
 
             return signatureName;
@@ -328,7 +328,7 @@ namespace GIGLS.Services.Business.DHL
         {
             string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
             string phoneNumber = ConfigurationManager.AppSettings["DHLGIGPhoneNumber"];
-
+            var customer = shipmentDTO.CustomerDetails;
             var shipper = new ShipmentShipperDetail
             {
                 ContactInformation = new ContactInformation
@@ -337,7 +337,7 @@ namespace GIGLS.Services.Business.DHL
                     Phone = phoneNumber,
                     MobilePhone = phoneNumber,
                     CompanyName = "GIG LOGISTICS",
-                    FullName = shipmentDTO.CustomerDetails.CustomerName
+                    FullName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name,
                 },
                 PostalAddress = new PostalAddress
                 {
