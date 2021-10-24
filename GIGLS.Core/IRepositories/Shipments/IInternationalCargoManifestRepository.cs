@@ -10,7 +10,8 @@ namespace GIGLS.Core.IRepositories
 {
     public interface IInternationalCargoManifestRepository : IRepository<InternationalCargoManifest>
     {
-        Task<List<ShipmentExportDTO>> GetShipmentExport();
-        
+        Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter);
+        Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoID);
+
     }
 }

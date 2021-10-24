@@ -1042,5 +1042,33 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpPost]
+        [Route("getintlcargomanifest")]
+        public async Task<IServiceResponse<List<InternationalCargoManifestDTO>>> GetIntlCargoManifests(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetIntlCargoManifests(filter);
+                return new ServiceResponse<List<InternationalCargoManifestDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getintlcargomanifestbyid/{cargoID:int}")]
+        public async Task<IServiceResponse<InternationalCargoManifestDTO>> GetShipmentContactHistoryByWaybill(int cargoID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _service.GetIntlCargoManifestByID(cargoID);
+                return new ServiceResponse<InternationalCargoManifestDTO>
+                {
+                    Object = item
+                };
+            });
+        }
+
     }
 }

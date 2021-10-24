@@ -6016,6 +6016,14 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter)
+        {
+           return await _intlCargoManifest.GetIntlCargoManifests(filter);
+        }
 
+        public async Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId)
+        {
+            return await _intlCargoManifest.GetIntlCargoManifestByID(cargoId);
+        }
     }
 }

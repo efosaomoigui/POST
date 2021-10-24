@@ -23,6 +23,8 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IInternationalCargoManifestService : IServiceDependencyMarker
     {
         Task<InternationalCargoManifestDTO> AddCargoManifest(InternationalCargoManifestDTO cargoManifest);
+        Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter);
+        Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoID);
     }
 
 

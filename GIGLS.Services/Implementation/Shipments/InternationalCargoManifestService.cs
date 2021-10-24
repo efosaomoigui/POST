@@ -69,5 +69,30 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.Complete();
             return cargoManifest;
         }
+
+        public async Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoID)
+        {
+            return await _uow.InternationalCargoManifest.GetIntlCargoManifestByID(cargoID);
+        }
+
+        public async Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter)
+        {
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            return await _uow.InternationalCargoManifest.GetIntlCargoManifests(filter);
+        }
     }
 }

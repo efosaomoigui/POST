@@ -31,6 +31,9 @@ namespace GIGLS.Core.DTO
         
         public string CargoedBy { get; set; }
         public List<InternationalCargoManifestDetailDTO> InternationalCargoManifestDetails { get; set; }
+        public string DestinationCountryName { get; set; }
+
+        public string DepartureCountryName { get; set; }
     }
 
 

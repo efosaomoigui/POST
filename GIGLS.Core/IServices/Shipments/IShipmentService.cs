@@ -96,7 +96,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos);
         Task<bool> ExportShipments(List<ShipmentExportDTO> dtos);
         Task<bool> ExportFlightManifest(InternationalCargoManifestDTO dtos);
-
+        Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter);
+        Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
