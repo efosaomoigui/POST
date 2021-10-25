@@ -80,5 +80,7 @@
         INTPEUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
         APFS,  //Message for Attempted Pickup From Sender
         CNAN,  //Message for Coporate Customer NUBAN ACCOUNT Generation
+        CRTGH, //1ST SCAN FOR EVERY SHIPMENT OUTSIDE NIGERIA
+        ARFGH, //WHEN SHIPMENT ARRIVED FINAL DESTINATION OUTSIDE NIGERIA
     }
 }
