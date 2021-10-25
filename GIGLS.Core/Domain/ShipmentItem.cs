@@ -75,6 +75,8 @@ namespace GIGL.GIGLS.Core.Domain
         public string ItemUniqueNo { get; set; }
         public  DateTime? ReceivedDate { get; set; }
         public ItemState ItemState { get; set; }
+        [MaxLength(128)]
+        public string ItemRequestCode { get; set; }
 
     }
 }

@@ -2535,6 +2535,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         item.Length = currentItem.Length;
                         item.Width = currentItem.Width;
                         item.Height = currentItem.Height;
+                        item.ItemRequestCode = currentItem.ItemRequestCode;
                         if (item.ItemState == ItemState.Damaged)
                         {
                            shipmentItems.Add(item);

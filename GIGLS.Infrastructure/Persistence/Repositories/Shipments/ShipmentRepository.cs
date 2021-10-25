@@ -1940,7 +1940,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       ItemCount = x.ItemCount,
                                                       ItemState = x.ItemState,
                                                       CourierService = x.CourierService,
-                                                      ReceivedDate = x.ReceivedDate
+                                                      ReceivedDate = x.ReceivedDate,
+                                                      ItemRequestCode = x.ItemRequestCode
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -2173,7 +2174,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           RequestProcessingCountryId = a.RequestProcessingCountryId,
                           ReceivedDate = b.ReceivedDate,
                           CourierService = b.CourierService,
-                          ItemState = b.ItemState
+                          ItemState = b.ItemState,
+                          ItemRequestCode = b.ItemRequestCode
 
                       }
                   ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -2367,7 +2369,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                                     ItemSenderfullName = x.ItemSenderfullName,
                                                                                     Received = x.Received,
                                                                                     ReceivedBy = x.ReceivedBy,
-                                                                                    ItemCount = x.ItemCount
+                                                                                    ItemCount = x.ItemCount,
+                                                                                    ItemRequestCode = x.ItemRequestCode
                                                                                 }).ToList()
                                                         }).ToList();
 
