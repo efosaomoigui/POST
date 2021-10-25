@@ -253,7 +253,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             else
             {
-                await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                var countryId = await _userService.GetUserActiveCountryId();
+                if (countryId == 1)
+                {
+                    await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                }
+                else
+                {
+                    messageType = MessageType.ARFGH;
+                    await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                }
+                
                 var shipment = await _uow.Shipment.GetAsync(s => s.Waybill.Equals(tracking.Waybill));
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
 
