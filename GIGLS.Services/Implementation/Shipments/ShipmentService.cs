@@ -5893,6 +5893,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var requests = dtos.Select(x => x.RequestNumber).ToList();
                 var waybills = dtos.Select(x => x.Waybill).ToList();
                 var intlShipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => requests.Contains(x.RequestNumber)).ToList();
+                if (!intlShipments.Any())
+                {
+                    throw new GenericException("Request not found", $"{(int)HttpStatusCode.NotFound}");
+                }
                 var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
                 for (int i = 0; i < intlShipments.Count; i++)
                 {
