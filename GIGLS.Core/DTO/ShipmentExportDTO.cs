@@ -23,5 +23,6 @@ namespace GIGLS.Core.DTO
         public double Height { get; set; }
         public ItemState ItemState { get; set; }
         public string ItemName { get; set; }
+        public string ItemRequestCode { get; set; }
     }
 }

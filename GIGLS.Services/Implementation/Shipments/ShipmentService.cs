@@ -5915,7 +5915,8 @@ namespace GIGLS.Services.Implementation.Shipments
                          Width = item.Width,
                          Height = item.Height,
                          ItemState = item.ItemState,
-                         ItemName = item.ItemName
+                         ItemName = item.ItemName,
+                         ItemRequestCode = item.ItemRequestCode
                         };
 
                         exports.Add(export);

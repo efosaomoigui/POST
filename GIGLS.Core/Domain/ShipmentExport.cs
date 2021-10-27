@@ -29,6 +29,8 @@ namespace GIGLS.Core.Domain
         public double Width { get; set; }
         public double Height { get; set; }
         public ItemState ItemState { get; set; }
+        [MaxLength(128)]
+        public string ItemRequestCode { get; set; }
 
     }
 }
