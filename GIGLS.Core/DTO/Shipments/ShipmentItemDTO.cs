@@ -86,5 +86,7 @@ namespace GIGLS.Core.DTO.Shipments
         public ItemState ItemState { get; set; }
         public DateTime? ReceivedDate { get; set; }
         public string ItemRequestCode { get; set; }
+        public string ItemStateDescription { get; set; }
+        public int NoOfPackageReceived { get; set; }
     }
 }

@@ -1683,7 +1683,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             RequestProcessingCountryId = a.RequestProcessingCountryId,
                             ReceivedDate = b.ReceivedDate,
                             CourierService = b.CourierService,
-                            ItemState = b.ItemState
+                            ItemState = b.ItemState,
+                            ItemStateDescription = b.ItemStateDescription,
+                            NoOfPackageReceived = b.NoOfPackageReceived,
+                            ItemUniqueNo = b.ItemUniqueNo,
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
 
@@ -1755,7 +1758,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            RequestProcessingCountryId = a.RequestProcessingCountryId,
                                            ReceivedDate = a.ReceivedDate,
                                            CourierService = a.CourierService,
-                                           ItemState = a.ItemState
+                                           ItemState = a.ItemState,
+                                           ItemStateLevel = a.ItemStateDescription,
+                                           NoOfPackageReceived = a.NoOfPackageReceived,
+                                           ItemUniqueNo = a.ItemUniqueNo,
 
                                        }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1822,7 +1828,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        RequestProcessingCountryId = a.RequestProcessingCountryId,
                                        ReceivedDate = a.ReceivedDate,
                                        CourierService = a.CourierService,
-                                       ItemState = a.ItemState
+                                       ItemState = a.ItemState,
+                                       ItemStateLevel = a.ItemStateDescription,
+                                       NoOfPackageReceived = a.NoOfPackageReceived,
+                                       ItemUniqueNo = a.ItemUniqueNo
 
                                    }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
                                    || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue || s.ItemSenderfullName == filterValue || s.storeName == filterValue)).ToList();
@@ -1941,7 +1950,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       ItemState = x.ItemState,
                                                       CourierService = x.CourierService,
                                                       ReceivedDate = x.ReceivedDate,
-                                                      ItemRequestCode = x.ItemRequestCode
+                                                      ItemRequestCode = x.ItemRequestCode,
+                                                      ItemUniqueNo = x.ItemUniqueNo,
+                                                      ItemValue = x.ItemValue,
+                                                      NoOfPackageReceived = x.NoOfPackageReceived,
+                                                      ItemStateLevel = x.ItemStateDescription
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -2175,7 +2188,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           ReceivedDate = b.ReceivedDate,
                           CourierService = b.CourierService,
                           ItemState = b.ItemState,
-                          ItemRequestCode = b.ItemRequestCode
+                          ItemRequestCode = b.ItemRequestCode,
+                          ItemStateLevel = b.ItemStateDescription,
+                          NoOfPackageReceived = b.NoOfPackageReceived,
+                          ItemUniqueNo = b.ItemUniqueNo,
 
                       }
                   ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -2261,7 +2277,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                            ItemCount = b.ItemCount,
                            RequestProcessingCountryId = a.RequestProcessingCountryId,
                            ReceivedDate = b.ReceivedDate,
-                           CourierService = b.CourierService
+                           CourierService = b.CourierService,
+                           ItemStateLevel = b.ItemStateDescription,
+                           NoOfPackageReceived = b.NoOfPackageReceived,
+                           ItemUniqueNo = b.ItemUniqueNo,
+                           ItemState = b.ItemState,
 
                        }
                    ).Where(a => a.IsProcessed == false && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
@@ -2370,7 +2390,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                                     Received = x.Received,
                                                                                     ReceivedBy = x.ReceivedBy,
                                                                                     ItemCount = x.ItemCount,
-                                                                                    ItemRequestCode = x.ItemRequestCode
+                                                                                    ItemRequestCode = x.ItemRequestCode,
+                                                                                    ItemUniqueNo = x.ItemUniqueNo,
+                                                                                    ItemState = x.ItemState,
+                                                                                    ItemStateLevel = x.ItemStateDescription
                                                                                 }).ToList()
                                                         }).ToList();
 

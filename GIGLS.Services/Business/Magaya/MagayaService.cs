@@ -2536,6 +2536,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         item.Width = currentItem.Width;
                         item.Height = currentItem.Height;
                         item.ItemRequestCode = currentItem.ItemRequestCode;
+                        item.NoOfPackageReceived = currentItem.NoOfPackageReceived;
+                        item.ItemStateDescription = currentItem.ItemStateDescription;
                         if (item.ItemState == ItemState.Damaged)
                         {
                            shipmentItems.Add(item);
@@ -2597,8 +2599,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     DepartureEmail = deptEmail,
                     DepartureServiceCentre = deptCentre,
                     RequestNumber = request.RequestNumber,
-                    ToEmail = "collechizzy@gmail.com",
-                    To = "collechizzy@gmail.com"
+                    DamageDescription = item.ItemStateDescription,
+                    ToEmail = request.CustomerEmail,
+                    To = request.CustomerEmail
                 };
                 if (!String.IsNullOrEmpty(item.TrackingId))
                 {

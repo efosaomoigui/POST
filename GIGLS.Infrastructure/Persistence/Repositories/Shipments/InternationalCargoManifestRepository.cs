@@ -34,7 +34,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                               FlightDate = s.FlightDate,
                                                               ManifestNo = s.ManifestNo,
                                                               DateCreated = s.DateCreated,
-                                                              DestinationCountryName = dest.CountryName,
+                                                              DestinationCountryName = s.DestinationCountry == 1 ? "Lagos, Nigeria" : dept.CountryName,
                                                               DepartureCountryName = dept.CountryName,
                                                               InternationalCargoManifestId = s.InternationalCargoManifestId,
                                                               InternationalCargoManifestDetails = Context.InternationalCargoManifestDetail.Where(i => i.InternationalCargoManifestId == s.InternationalCargoManifestId).Select(x => new InternationalCargoManifestDetailDTO
@@ -78,7 +78,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                              FlightDate = s.FlightDate,
                                              ManifestNo = s.ManifestNo,
                                              DateCreated = s.DateCreated,
-                                             DestinationCountryName = dest.CountryName,
+                                             DestinationCountryName = s.DestinationCountry == 1 ? "Lagos, Nigeria" : dept.CountryName,
                                              DepartureCountryName = dept.CountryName,
                                              InternationalCargoManifestId = s.InternationalCargoManifestId,
                                            }).ToList();
