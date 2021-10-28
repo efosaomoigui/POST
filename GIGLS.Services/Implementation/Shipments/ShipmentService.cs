@@ -5916,7 +5916,8 @@ namespace GIGLS.Services.Implementation.Shipments
                          Height = item.Height,
                          ItemState = item.ItemState,
                          ItemName = item.ItemName,
-                         ItemRequestCode = item.ItemRequestCode
+                         ItemRequestCode = item.ItemRequestCode,
+                         NoOfPackageReceived = item.NoOfPackageReceived
                         };
 
                         exports.Add(export);

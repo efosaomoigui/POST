@@ -24,5 +24,6 @@ namespace GIGLS.Core.DTO
         public ItemState ItemState { get; set; }
         public string ItemName { get; set; }
         public string ItemRequestCode { get; set; }
+        public int NoOfPackageReceived { get; set; }
     }
 }

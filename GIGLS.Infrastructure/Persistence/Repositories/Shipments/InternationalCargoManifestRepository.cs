@@ -50,6 +50,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                                   RequestNumber = x.RequestNumber,
                                                                   Waybill = x.Waybill,
                                                                   CourierService = x.CourierService,
+                                                                  ItemRequestCode = x.ItemRequestCode,
+                                                                  NoOfPackageReceived = x.NoOfPackageReceived
                                                                  
                                                               }).ToList()
                                                           }).FirstOrDefault();

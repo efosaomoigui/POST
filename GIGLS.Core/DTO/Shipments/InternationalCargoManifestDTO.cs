@@ -58,5 +58,7 @@ namespace GIGLS.Core.DTO
         public ItemState ItemState { get; set; }
         public int InternationalCargoManifestId { get; set; }
         public int ShipmentExportId { get; set; }
+        public string ItemRequestCode { get; set; }
+        public int NoOfPackageReceived { get; set; }
     }
 }

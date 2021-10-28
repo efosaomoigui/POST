@@ -31,6 +31,7 @@ namespace GIGLS.Core.Domain
         public ItemState ItemState { get; set; }
         [MaxLength(128)]
         public string ItemRequestCode { get; set; }
+        public int NoOfPackageReceived { get; set; }
 
     }
 }

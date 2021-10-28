@@ -26,6 +26,9 @@ namespace GIGLS.Core.Domain
         public double Height { get; set; }
         public ItemState ItemState { get; set; }
         public int InternationalCargoManifestId { get; set; }
+        [MaxLength(128)]
+        public string ItemRequestCode { get; set; }
+        public int NoOfPackageReceived { get; set; }
         public virtual InternationalCargoManifest InternationalCargoManifest { get; set; }
 
     }

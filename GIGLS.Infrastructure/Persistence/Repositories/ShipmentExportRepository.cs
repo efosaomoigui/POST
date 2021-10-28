@@ -80,7 +80,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             ItemState = r.ItemState,
                             Height = r.Height,
                             ItemName = r.ItemName,
-                            ItemRequestCode = r.ItemRequestCode
+                            ItemRequestCode = r.ItemRequestCode,
+                            NoOfPackageReceived = r.NoOfPackageReceived
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
@@ -124,7 +125,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             ItemState = r.ItemState,
                             Height = r.Height,
                             ItemName = r.ItemName,
-                            ItemRequestCode = r.ItemRequestCode
+                            ItemRequestCode = r.ItemRequestCode,
+                            NoOfPackageReceived = r.NoOfPackageReceived
 
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
