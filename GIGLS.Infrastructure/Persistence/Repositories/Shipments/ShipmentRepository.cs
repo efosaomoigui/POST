@@ -1596,8 +1596,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(result);
         }
-    }
-
 
         public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
         {
@@ -1609,7 +1607,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             else
             {
-                shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate); 
+                shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate);
             }
             List<InvoiceViewDTO> result = (from s in shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -1641,12 +1639,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PhoneNumber = c.PhoneNumber,
                                                IsExported = s.IsExported,
                                                RequestNumber = s.RequestNumber
-                                               
+
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
         }
+
     }
+
+}
 
 
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
@@ -2539,6 +2540,4 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
-
-    }
 }
