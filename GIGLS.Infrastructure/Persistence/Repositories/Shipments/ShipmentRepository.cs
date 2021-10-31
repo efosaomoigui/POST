@@ -1215,6 +1215,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            FileNameUrl = r.FileNameUrl,
                                            InternationalWayBill = r.InternationalWayBill,
                                            ExpressDelivery = r.ExpressDelivery,
+                                           RequestNumber = r.RequestNumber,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
@@ -1598,6 +1599,56 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
     }
 
 
+        public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto)
+        {
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational && !s.IsExported);
+            if (filterOptionsDto != null && !String.IsNullOrEmpty(filterOptionsDto.FilterType))
+            {
+                shipments = _context.Shipment.AsQueryable().Where(x => x.Waybill == filterOptionsDto.FilterType || x.RequestNumber == filterOptionsDto.FilterType);
+            }
+            else
+            {
+                shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate); 
+            }
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join c in Context.Users on s.CustomerCode equals c.UserChannelCode
+                                           where i.PaymentStatus == PaymentStatus.Paid
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               CompanyType = s.CompanyType,
+                                               CustomerCode = s.CustomerCode,
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               CustomerType = s.CustomerType,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos,
+                                               SenderName = c.FirstName + " " + c.LastName,
+                                               SenderAddress = s.SenderAddress,
+                                               PhoneNumber = c.PhoneNumber,
+                                               IsExported = s.IsExported,
+                                               RequestNumber = s.RequestNumber
+                                               
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+            return Task.FromResult(resultDto);
+        }
+    }
+
+
     public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIGLSContext>, IIntlShipmentRequestRepository
     {
         private GIGLSContext _context;
@@ -1675,8 +1726,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                             ReceivedBy = b.ReceivedBy,
                             ItemCount = b.ItemCount,
                             RequestProcessingCountryId = a.RequestProcessingCountryId,
-
-
+                            ReceivedDate = b.ReceivedDate,
+                            CourierService = b.CourierService,
+                            ItemState = b.ItemState,
+                            ItemStateDescription = b.ItemStateDescription,
+                            NoOfPackageReceived = b.NoOfPackageReceived,
+                            ItemUniqueNo = b.ItemUniqueNo,
+                            ItemRequestCode = b.ItemRequestCode
                         }
                     ).Where(a => a.IsProcessed == false).ToList();
 
@@ -1746,6 +1802,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            ItemSenderfullName = a.ItemSenderfullName,
                                            ItemValue = a.ItemValue,
                                            RequestProcessingCountryId = a.RequestProcessingCountryId,
+                                           ReceivedDate = a.ReceivedDate,
+                                           CourierService = a.CourierService,
+                                           ItemState = a.ItemState,
+                                           ItemStateDescription = a.ItemStateDescription,
+                                           NoOfPackageReceived = a.NoOfPackageReceived,
+                                           ItemUniqueNo = a.ItemUniqueNo,
+                                           ItemRequestCode = a.ItemRequestCode
 
                                        }).Where(b => b.IsProcessed == false).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
@@ -1810,6 +1873,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        ItemSenderfullName = a.ItemSenderfullName,
                                        ItemValue = a.ItemValue,
                                        RequestProcessingCountryId = a.RequestProcessingCountryId,
+                                       ReceivedDate = a.ReceivedDate,
+                                       CourierService = a.CourierService,
+                                       ItemState = a.ItemState,
+                                       ItemStateDescription = a.ItemStateDescription,
+                                       NoOfPackageReceived = a.NoOfPackageReceived,
+                                       ItemUniqueNo = a.ItemUniqueNo,
+                                       ItemRequestCode = a.ItemRequestCode
 
                                    }).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue
                                    || s.CustomerFirstName == filterValue || s.CustomerLastName == filterValue || s.ItemSenderfullName == filterValue || s.storeName == filterValue)).ToList();
@@ -1924,7 +1994,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       ItemSenderfullName = x.ItemSenderfullName,
                                                       Received = x.Received,
                                                       ReceivedBy = x.ReceivedBy,
-                                                      ItemCount = x.ItemCount
+                                                      ItemCount = x.ItemCount,
+                                                      ItemState = x.ItemState,
+                                                      CourierService = x.CourierService,
+                                                      ReceivedDate = x.ReceivedDate,
+                                                      ItemRequestCode = x.ItemRequestCode,
+                                                      ItemUniqueNo = x.ItemUniqueNo,
+                                                      ItemValue = x.ItemValue,
+                                                      NoOfPackageReceived = x.NoOfPackageReceived,
+                                                      ItemStateDescription = x.ItemStateDescription
 
                                                   }).ToList(),
                                                   ReceiverAddress = r.ReceiverAddress,
@@ -2155,6 +2233,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                           ReceivedBy = b.ReceivedBy,
                           ItemCount = b.ItemCount,
                           RequestProcessingCountryId = a.RequestProcessingCountryId,
+                          ReceivedDate = b.ReceivedDate,
+                          CourierService = b.CourierService,
+                          ItemState = b.ItemState,
+                          ItemRequestCode = b.ItemRequestCode,
+                          ItemStateDescription = b.ItemStateDescription,
+                          NoOfPackageReceived = b.NoOfPackageReceived,
+                          ItemUniqueNo = b.ItemUniqueNo,
 
                       }
                   ).Where(b => b.IsProcessed == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -2239,6 +2324,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                            ReceivedBy = b.ReceivedBy,
                            ItemCount = b.ItemCount,
                            RequestProcessingCountryId = a.RequestProcessingCountryId,
+                           ReceivedDate = b.ReceivedDate,
+                           CourierService = b.CourierService,
+                           ItemStateDescription = b.ItemStateDescription,
+                           NoOfPackageReceived = b.NoOfPackageReceived,
+                           ItemUniqueNo = b.ItemUniqueNo,
+                           ItemState = b.ItemState,
 
                        }
                    ).Where(a => a.IsProcessed == false && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
@@ -2346,7 +2437,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                                     ItemSenderfullName = x.ItemSenderfullName,
                                                                                     Received = x.Received,
                                                                                     ReceivedBy = x.ReceivedBy,
-                                                                                    ItemCount = x.ItemCount
+                                                                                    ItemCount = x.ItemCount,
+                                                                                    ItemRequestCode = x.ItemRequestCode,
+                                                                                    ItemUniqueNo = x.ItemUniqueNo,
+                                                                                    ItemState = x.ItemState,
+                                                                                    ItemStateDescription = x.ItemStateDescription
                                                                                 }).ToList()
                                                         }).ToList();
 

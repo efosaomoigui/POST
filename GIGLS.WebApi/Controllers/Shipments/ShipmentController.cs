@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -995,6 +996,76 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<object>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getshipmentsforexport")]
+        public async Task<IServiceResponse<List<ShipmentExportDTO>>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetShipmentExportNotYetExported(filter);
+                return new ServiceResponse<List<ShipmentExportDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("markshipmentsreadyforexport")]
+        public async Task<IServiceResponse<bool>> MarkShipmentsReadyForExport(List<InvoiceViewDTO> shipments)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.MarkShipmentsReadyForExport(shipments);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("exportshipments")]
+        public async Task<IServiceResponse<bool>> ExportShipments(InternationalCargoManifestDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ExportFlightManifest(shipment);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getintlcargomanifest")]
+        public async Task<IServiceResponse<List<InternationalCargoManifestDTO>>> GetIntlCargoManifests(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetIntlCargoManifests(filter);
+                return new ServiceResponse<List<InternationalCargoManifestDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getintlcargomanifestbyid/{cargoID:int}")]
+        public async Task<IServiceResponse<InternationalCargoManifestDTO>> GetShipmentContactHistoryByWaybill(int cargoID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var item = await _service.GetIntlCargoManifestByID(cargoID);
+                return new ServiceResponse<InternationalCargoManifestDTO>
+                {
+                    Object = item
                 };
             });
         }

@@ -35,6 +35,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<int> GetCountOfVehiclesAndTripsOfMovementManifest(string procedureName, DashboardFilterCriteria dashboardFilterCriteria);
         Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
         Task<List<CustomerInvoiceDTO>> GetCoporateInvoiceList(DateFilterForDropOff filter);
+        Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

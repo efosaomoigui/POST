@@ -59,6 +59,7 @@ namespace GIGLS.Core.DTO
         public string RefNo { get; set; }
         public string Charge { get; set; }
         public string ToTal { get; set; }
+        public string DamageDescription { get; set; }
     }
 
     public class NewMessageDTO

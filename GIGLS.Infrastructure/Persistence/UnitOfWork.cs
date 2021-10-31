@@ -533,6 +533,14 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPaymentMethodRepository PaymentMethod { get; set; }
 
+        [Inject]
+        public IShipmentExportRepository ShipmentExport { get; set; }
+
+        [Inject]
+        public IInternationalCargoManifestRepository InternationalCargoManifest { get; set; }
+        [Inject]
+        public IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

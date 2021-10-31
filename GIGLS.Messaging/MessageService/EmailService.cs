@@ -872,6 +872,7 @@ namespace GIGLS.Messaging.MessageService
                 { "RemainingItemNumber", message.ItemCount.ToString() },
                 { "RequestNumber", message.RequestNumber },
                 { "CE_TrackNumber", message.TrackingId },
+                { "CE_DamageDescription", message.DamageDescription },
             });
 
             var response = await client.SendEmailAsync(myMessage);

@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -607,6 +608,34 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<bool>
                 {
                     Object = res
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updaterequest")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentRequest(IntlShipmentRequestDTO requestDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.UpdateIntlShipmentRequest(requestDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getpaidintlshipments")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetIntlPaidShipments(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetIntlPaidWaybillForServiceCentre(filter);
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = shipment
                 };
             });
         }
