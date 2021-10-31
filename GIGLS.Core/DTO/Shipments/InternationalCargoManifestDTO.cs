@@ -55,10 +55,12 @@ namespace GIGLS.Core.DTO
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
-        public ItemState ItemState { get; set; }
         public int InternationalCargoManifestId { get; set; }
         public int ShipmentExportId { get; set; }
         public string ItemRequestCode { get; set; }
         public int NoOfPackageReceived { get; set; }
+        public string Description { get; set; }
+        public decimal GrandTotal { get; set; }
+        public decimal DeclaredValue { get; set; }
     }
 }

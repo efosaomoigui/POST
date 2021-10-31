@@ -34,7 +34,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                               FlightDate = s.FlightDate,
                                                               ManifestNo = s.ManifestNo,
                                                               DateCreated = s.DateCreated,
-                                                              DestinationCountryName = s.DestinationCountry == 1 ? "Lagos, Nigeria" : dept.CountryName,
+                                                              DestinationCountryName = s.DestinationCountry == 1 ? "LAGOS, NIGERIA" : dept.CountryName,
                                                               DepartureCountryName = dept.CountryName,
                                                               InternationalCargoManifestId = s.InternationalCargoManifestId,
                                                               InternationalCargoManifestDetails = Context.InternationalCargoManifestDetail.Where(i => i.InternationalCargoManifestId == s.InternationalCargoManifestId).Select(x => new InternationalCargoManifestDetailDTO
@@ -45,13 +45,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                                   Weight = x.Weight,
                                                                   Width = x.Width,
                                                                   ItemName = x.ItemName,
-                                                                  ItemState = x.ItemState,
                                                                   ItemUniqueNo = x.ItemUniqueNo,
                                                                   RequestNumber = x.RequestNumber,
                                                                   Waybill = x.Waybill,
                                                                   CourierService = x.CourierService,
                                                                   ItemRequestCode = x.ItemRequestCode,
-                                                                  NoOfPackageReceived = x.NoOfPackageReceived
+                                                                  NoOfPackageReceived = x.NoOfPackageReceived,
+                                                                  Description = x.Description,
+                                                                  GrandTotal = x.GrandTotal,
+                                                                  DeclaredValue = x.DeclaredValue
+                                                                  
                                                                  
                                                               }).ToList()
                                                           }).FirstOrDefault();
@@ -80,7 +83,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                              FlightDate = s.FlightDate,
                                              ManifestNo = s.ManifestNo,
                                              DateCreated = s.DateCreated,
-                                             DestinationCountryName = s.DestinationCountry == 1 ? "Lagos, Nigeria" : dept.CountryName,
+                                             DestinationCountryName = s.DestinationCountry == 1 ? "LAGOS, NIGERIA" : dept.CountryName,
                                              DepartureCountryName = dept.CountryName,
                                              InternationalCargoManifestId = s.InternationalCargoManifestId,
                                            }).ToList();

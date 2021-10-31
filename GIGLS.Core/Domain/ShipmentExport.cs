@@ -14,11 +14,11 @@ namespace GIGLS.Core.Domain
         public string Waybill { get; set; }
         public double Weight { get; set; }
         public int Quantity { get; set; }
-        [MaxLength(300)]
+        [MaxLength(500)]
         public string ItemUniqueNo { get; set; }
-        [MaxLength(300)]
+        [MaxLength(500)]
         public string CourierService { get; set; }
-        [MaxLength(300)]
+        [MaxLength(500)]
         public string ItemName { get; set; }
         public bool IsExported { get; set; }
         [MaxLength(128)]
@@ -28,10 +28,13 @@ namespace GIGLS.Core.Domain
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
-        public ItemState ItemState { get; set; }
-        [MaxLength(128)]
+        [MaxLength(500)]
         public string ItemRequestCode { get; set; }
         public int NoOfPackageReceived { get; set; }
+        [MaxLength(500)]
+        public string Description { get; set; }
+        public decimal GrandTotal { get; set; }
+        public decimal DeclaredValue { get; set; }
 
     }
 }

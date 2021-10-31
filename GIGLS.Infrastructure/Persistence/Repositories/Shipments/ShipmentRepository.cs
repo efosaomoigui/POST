@@ -1215,6 +1215,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            FileNameUrl = r.FileNameUrl,
                                            InternationalWayBill = r.InternationalWayBill,
                                            ExpressDelivery = r.ExpressDelivery,
+                                           RequestNumber = r.RequestNumber,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,

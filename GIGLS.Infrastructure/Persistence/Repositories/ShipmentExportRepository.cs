@@ -41,10 +41,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     IsExported = r.IsExported,
                                     Length = r.Length,
                                     Width = r.Width,
-                                    ItemState = r.ItemState,
                                     Height = r.Height,
                                     ItemName = r.ItemName,
-                                    ItemRequestCode = r.ItemRequestCode
+                                    ItemRequestCode = r.ItemRequestCode ,
+                                    GrandTotal = r.GrandTotal,
+                                    Description = r.Description,
+                                    DeclaredValue = r.DeclaredValue
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
@@ -77,11 +79,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             Waybill = r.Waybill,
                             Length = r.Length,
                             Width = r.Width,
-                            ItemState = r.ItemState,
                             Height = r.Height,
                             ItemName = r.ItemName,
                             ItemRequestCode = r.ItemRequestCode,
-                            NoOfPackageReceived = r.NoOfPackageReceived
+                            NoOfPackageReceived = r.NoOfPackageReceived,
+                            GrandTotal = r.GrandTotal,
+                            Description = r.Description,
+                            DeclaredValue = r.DeclaredValue
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
@@ -122,11 +126,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             Waybill = r.Waybill,
                             Length = r.Length,
                             Width = r.Width,
-                            ItemState = r.ItemState,
                             Height = r.Height,
                             ItemName = r.ItemName,
                             ItemRequestCode = r.ItemRequestCode,
-                            NoOfPackageReceived = r.NoOfPackageReceived
+                            NoOfPackageReceived = r.NoOfPackageReceived,
+                            GrandTotal = r.GrandTotal,
+                            Description = r.Description,
+                            DeclaredValue = r.DeclaredValue
+                            
 
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
