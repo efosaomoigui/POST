@@ -11,5 +11,6 @@ namespace GIGLS.Core.IRepositories
         Task<List<StateDTO>> GetStatesAsync(int pageSize, int page);
         int GetStatesTotal();
         Task<StateDTO> GetStateById(int stateId);
+        Task<IEnumerable<StateDTO>> GetStateByCountryId(int countryId);
     }
 }

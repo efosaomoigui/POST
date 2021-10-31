@@ -1070,5 +1070,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("zonestation/{stationId:int}")]
+        public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZoneByStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _service.GetZoneByStation(stationId);
+
+                return new ServiceResponse<DomesticRouteZoneMapDTO>
+                {
+                    Object = zone
+                };
+            });
+        }
     }
 }

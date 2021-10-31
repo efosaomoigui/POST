@@ -311,6 +311,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CouponCodeManagement> CouponCodeManagement { get; set; }
 
         public DbSet<GIGXUserDetail> GIGXUserDetail { get; set; }
+        public DbSet<PlaceLocation> PlaceLocation { get; set; }
 
         //PaymentMethod
         public DbSet<PaymentMethod> PaymentMethod { get; set; }

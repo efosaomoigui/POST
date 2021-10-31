@@ -99,6 +99,21 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
-        
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getstatesbyactivecountry")]
+        public async Task<IServiceResponse< IEnumerable<StateDTO>>> GetStatesByUserActiveCountry()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var state = await _stateService.GetStatesByUserActiveCountryId();
+
+                return new ServiceResponse<IEnumerable<StateDTO>>
+                {
+                    Object = state
+                };
+            });
+        }
     }
 }

@@ -164,6 +164,7 @@
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
     <Compile Include="Domain\CouponCodeManagement.cs" />
     <Compile Include="Domain\PaymentMethod.cs" />
+    <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -442,6 +443,7 @@
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\MobileShipmentFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentContactFilterCriteria.cs" />
+    <Compile Include="DTO\ServiceCentres\PlaceLocationDTO.cs" />
     <Compile Include="DTO\ShipmentAndPreShipmentParamDTO.cs" />
     <Compile Include="DTO\PreShipmentSummaryDTO.cs" />
     <Compile Include="DTO\ReferrerCodeDTO.cs" />
@@ -747,6 +749,7 @@
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
     <Compile Include="IRepositories\Routes\IRouteRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IPlaceLocationRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
@@ -915,6 +918,7 @@
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
     <Compile Include="IServices\RouteServices\IRouteService.cs" />
     <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
+    <Compile Include="IServices\ServiceCentres\IPlaceLocationService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />

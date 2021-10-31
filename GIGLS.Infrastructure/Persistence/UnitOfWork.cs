@@ -529,6 +529,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IGIGXUserDetailRepository GIGXUserDetail { get; set; }
+        [Inject]
+        public IPlaceLocationRepository PlaceLocation { get; set; }
 
         [Inject]
         public IPaymentMethodRepository PaymentMethod { get; set; }
