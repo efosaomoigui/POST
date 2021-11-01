@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices
         Task UpdateState(int stateId, StateDTO state);
         Task RemoveState(int stateId);
         int GetStatesTotal();
+        Task<IEnumerable<StateDTO>> GetStatesByUserActiveCountryId();
     }
 }

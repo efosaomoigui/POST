@@ -31,5 +31,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
         Task<List<ServiceCentreDTO>> GetIsConsignableServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId);
         Task ServiceCentreConsignableState(int serviceCentreId, bool isconsignable);
+        Task<List<ServiceCentreDTO>> GetServiceCentresByState(int stateId);
+        Task<List<ServiceCentreDTO>> GetServiceCentresWithHUBForStation(int usersServiceCentresId, int countryId);
     }
 }

@@ -169,6 +169,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string Courier { get; set; }
         public bool CustomerSelected { get; set; }
         public bool ExpressDelivery { get; set; }
+        //Place Location
+        public int HomeDeliveryLocation { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -351,6 +353,13 @@ namespace GIGLS.Core.DTO.Shipments
         public bool Received { get; set; }
         public string ReceivedBy { get; set; }
         public int RequestProcessingCountryId { get; set; }
+        public string CourierService { get; set; }
+        public string ItemUniqueNo { get; set; }
+        public DateTime? ReceivedDate { get; set; }
+        public ItemState ItemState { get; set; }
+        public string ItemRequestCode { get; set; }
+        public string ItemStateDescription { get; set; }
+        public int NoOfPackageReceived { get; set; }
     }
 
     public class InternationalShipmentDTO : BaseDomainDTO

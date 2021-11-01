@@ -193,6 +193,19 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
-
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("usercountry")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStationsByUserCountry()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetStationsByUserCountry();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
     }
 }

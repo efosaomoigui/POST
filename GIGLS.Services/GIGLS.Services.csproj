@@ -290,6 +290,7 @@
     <Compile Include="Implementation\RiderDeliveryService.cs" />
     <Compile Include="Implementation\Routes\RouteService.cs" />
     <Compile Include="Implementation\ServiceCentres\LGAService.cs" />
+    <Compile Include="Implementation\ServiceCentres\PlaceLocationService.cs" />
     <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
     <Compile Include="Implementation\ServiceCentres\StationService.cs" />
@@ -324,6 +325,7 @@
     <Compile Include="Implementation\Shipments\ShipmentPackageService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentReturnService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentService.cs" />
+    <Compile Include="Implementation\Shipments\InternationalCargoManifestService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
     <Compile Include="Implementation\Shipments\SuperManifestService.cs" />

@@ -210,9 +210,13 @@ namespace GIGLS.Core
         ICustomerInvoiceRepository CustomerInvoice { get; set; }
         IWaybillChargeRepository WaybillCharge { get; set; }
         ITransferDetailsRepository TransferDetails { get; set; }
+        IPlaceLocationRepository PlaceLocation { get; set; }
         ICouponManagementRepository CouponManagement { get; set; }
         IGIGXUserDetailRepository GIGXUserDetail { get; set; }
         IPaymentMethodRepository PaymentMethod { get; set; }
+        IShipmentExportRepository ShipmentExport { get; set; }
+        IInternationalCargoManifestRepository InternationalCargoManifest { get; set; }
+        IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
