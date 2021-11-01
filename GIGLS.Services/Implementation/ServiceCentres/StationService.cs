@@ -218,5 +218,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             var countryIds = await _userService.GetPriviledgeCountryIds();
             return await _uow.Station.GetStationsByUserCountry(countryIds);
         }
+
+        public async Task<List<StationDTO>> GetStationsByCountry(int countryId)
+        {
+            return await _uow.Station.GetStationsByCountry(countryId);
+        }
     }
 }
