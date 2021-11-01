@@ -1554,7 +1554,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
                 //    percentage = Convert.ToDecimal(discountPercent.Value);
-                
+
                 //else
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
@@ -4753,7 +4753,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         QRCode = number
                     };
 
-                    await SendSMSForMobileShipmentCreation(message, MessageType.RMCS); 
+                    await SendSMSForMobileShipmentCreation(message, MessageType.RMCS);
                 }
                 return true;
             }
@@ -6620,7 +6620,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
                         }
 
-                    } 
+                    }
                 }
                 else if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
@@ -6795,7 +6795,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!String.IsNullOrEmpty(newFilterOptionsDto.FilterType) && newFilterOptionsDto.FilterType == "OverdueTATIntrastate")
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                   // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24).ToList();
+                    // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6807,7 +6807,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                   // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
+                    // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -7142,7 +7142,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                 }
 
-                else 
+                else
                 {
                     if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
                     {
@@ -7518,7 +7518,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var canceledShipment = await _uow.PreShipmentMobile
                   .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
-                  && x.CustomerCancelReason != null && x.DateCreated >= startDate && x.DateCreated < endDate);
+                  && x.DateCreated >= startDate && x.DateCreated < endDate);
             return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
         }
 
@@ -7526,7 +7526,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var canceledShipment = await _uow.PreShipmentMobile
                   .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
-                  && x.CustomerCancelReason != null && x.Waybill == waybill);
+                   && x.Waybill == waybill);
             return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
         }
 
