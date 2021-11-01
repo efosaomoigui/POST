@@ -7502,10 +7502,31 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment()
+        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(DateFilterCriteria dateFilterCriteria)
+        {
+            if (dateFilterCriteria == null)
+            {
+                dateFilterCriteria = new DateFilterCriteria
+                {
+                    StartDate = null,
+                    EndDate = null
+                };
+            }
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var canceledShipment = await _uow.PreShipmentMobile
+                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
+                  && x.CustomerCancelReason != null && x.DateCreated >= startDate && x.DateCreated < endDate);
+            return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
+        }
+
+        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(string waybill)
         {
             var canceledShipment = await _uow.PreShipmentMobile
-                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString() && x.CustomerCancelReason != null);
+                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
+                  && x.CustomerCancelReason != null && x.Waybill == waybill);
             return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
         }
 
