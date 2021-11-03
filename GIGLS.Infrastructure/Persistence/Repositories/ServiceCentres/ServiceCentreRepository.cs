@@ -757,7 +757,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsHUB == true && s.IsConsignable == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsConsignable == true);
                 var centreDto = new List<ServiceCentreDTO>();
 
                 var centreDtos = from s in centres
