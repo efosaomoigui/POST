@@ -1084,5 +1084,33 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getunIdentifiedintlshipments")]
+        public async Task<IServiceResponse<List<UnidentifiedItemsForInternationalShippingDTO>>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetUnIdentifiedIntlShipments(filter);
+                return new ServiceResponse<List<UnidentifiedItemsForInternationalShippingDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addunIdentifiedintlshipments")]
+        public async Task<IServiceResponse<bool>> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> shipments)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.AddUnIdentifiedIntlShipments(shipments);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

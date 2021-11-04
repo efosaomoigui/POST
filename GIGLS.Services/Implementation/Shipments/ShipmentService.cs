@@ -5397,6 +5397,24 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.DeliveryOption = null;
             shipmentDTO.IsInternational = true;
             shipmentDTO.RequestNumber = shipments.RequestNumber;
+
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            intlRequest.IsProcessed = true;
+            var trackingNos = intlRequest.ShipmentRequestItems.Select(x => x.TrackingId).ToList();
+            var unIdentifiedItems = _uow.UnidentifiedItemsForInternationalShipping.GetAllAsQueryable().Where(x => trackingNos.Contains(x.TrackingNo)).ToList();
+            foreach (var item in intlRequest.ShipmentRequestItems)
+            {
+                item.Received = true;
+                item.ReceivedBy = user.FirstName + " " + user.LastName;
+                //check to see if any of unidentified is being processed
+                var unId = unIdentifiedItems.Where(x => x.TrackingNo.Equals(item.TrackingId)).FirstOrDefault();
+                if (unId != null)
+                {
+                    unId.IsProcessed = true;
+                }
+            }
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {
@@ -5433,16 +5451,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks, null);
-                }
-
-                // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
-                var user = await _userService.GetUserById(currentUserId);
-                intlRequest.IsProcessed = true;
-                foreach (var item in intlRequest.ShipmentRequestItems)
-                {
-                    item.Received = true;
-                    item.ReceivedBy = user.FirstName + " " + user.LastName;
                 }
                 _uow.Complete();
             }
@@ -6064,5 +6072,51 @@ namespace GIGLS.Services.Implementation.Shipments
             var zone = await _domesticRouteZoneMapService.GetZoneByStation(serviceCenters[0], destinationStation);
             return zone;
         }
+
+        public async Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+        {
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            return await _uow.IntlShipmentRequest.GetUnIdentifiedIntlShipments(filter);
+        }
+
+        public async Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos)
+        {
+            try
+            {
+                var items = new List<UnidentifiedItemsForInternationalShipping>();
+                var userId = await _userService.GetCurrentUserId();
+                foreach (var item in dtos)
+                {
+                    var shipItem = Mapper.Map<UnidentifiedItemsForInternationalShipping>(item);
+                    shipItem.UserId = userId;
+                    items.Add(shipItem);
+                }
+                if (items.Any())
+                {
+                    _uow.UnidentifiedItemsForInternationalShipping.AddRange(items);
+                    _uow.Complete();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }

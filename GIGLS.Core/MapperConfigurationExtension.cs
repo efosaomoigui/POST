@@ -536,6 +536,9 @@ namespace GIGLS.Core
                 config.CreateMap<CancelledShipmentDTO, PreShipmentMobile>();
                 config.CreateMap<PreShipmentMobile, CancelledShipmentDTO>();
 
+                config.CreateMap<UnidentifiedItemsForInternationalShippingDTO, UnidentifiedItemsForInternationalShipping>();
+                config.CreateMap<UnidentifiedItemsForInternationalShipping, UnidentifiedItemsForInternationalShippingDTO>();
+
             });
 
             isInit = true;

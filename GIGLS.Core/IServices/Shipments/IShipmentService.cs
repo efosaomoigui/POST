@@ -99,6 +99,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter);
         Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId);
         Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation);
+        Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter);
+        Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
