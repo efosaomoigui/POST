@@ -7,6 +7,7 @@ using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -888,7 +889,8 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
             if (string.IsNullOrWhiteSpace(message.Subject))
             {
-                message.Subject = "Welcome to GIG Logistics";
+               var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(message.CustomerInvoice.InvoiceDate.Month);
+                message.Subject = $"Delivery Invoice for the month of {monthName}";
             }
             myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
@@ -926,7 +928,7 @@ namespace GIGLS.Messaging.MessageService
                 { "CI_AccountName",message.CustomerInvoice.AccountName },
                 { "CI_PDFLink",message.PDF},
             });
-           
+
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
         }

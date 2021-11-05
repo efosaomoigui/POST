@@ -236,6 +236,7 @@ namespace GIGLS.Core.DTO.Account
         public string AccountNo { get; set; }
         public string PaymentStatusDisplay { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+        public DateTime InvoiceDate { get; set; }
 
     }
 

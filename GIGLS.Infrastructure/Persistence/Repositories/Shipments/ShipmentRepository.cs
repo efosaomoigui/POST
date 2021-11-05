@@ -1394,7 +1394,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 customerInvoice.Email = customer.Email;
                 customerInvoice.CustomerCode = customer.CustomerCode;
                 customerInvoice.DateCreated = DateTime.Now;
-                customerInvoice.CreatedBy = $"{user.FirstName} {user.LastName}";
+                if (user != null)
+                {
+                    customerInvoice.CreatedBy = $"{user.FirstName} {user.LastName}"; 
+                }
             }
             return Task.FromResult(customerInvoice);
         }
