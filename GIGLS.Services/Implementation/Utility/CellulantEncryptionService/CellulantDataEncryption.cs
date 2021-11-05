@@ -15,8 +15,8 @@ namespace GIGLS.Services.Implementation.Utility.CellulantEncryptionService
 
         public CellulantDataEncryption(string ivKey, string secretKey)
         {
-            _ivKey = ivKey;
-            _secretKey = secretKey;
+            this._ivKey = ivKey;
+            this._secretKey = secretKey;
         }
 
         public string EncryptData(string payload)
@@ -28,8 +28,8 @@ namespace GIGLS.Services.Implementation.Utility.CellulantEncryptionService
             {
                 aes.KeySize = 256;
                 aes.BlockSize = 128;
-                aes.Key = Encoding.UTF8.GetBytes(HashString(_ivKey).Substring(0, 16));
-                aes.IV = Encoding.UTF8.GetBytes(HashString(_secretKey).Substring(0, 16));
+                aes.Key = Encoding.UTF8.GetBytes(HashString(this._secretKey).Substring(0, 32));
+                aes.IV = Encoding.UTF8.GetBytes(HashString(this._ivKey).Substring(0, 16));
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
 
@@ -48,7 +48,7 @@ namespace GIGLS.Services.Implementation.Utility.CellulantEncryptionService
                     }
                 }
             }
-            return Convert.ToBase64String(encrypted);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(Convert.ToBase64String(encrypted)));
         }
 
         private string HashString(string str)

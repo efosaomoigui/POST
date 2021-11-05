@@ -662,10 +662,10 @@ namespace GIGLS.Services.Implementation.Wallet
             string accessKey = ConfigurationManager.AppSettings["CellulantAccessKey"];
             string ivKey = ConfigurationManager.AppSettings["CellulantIVKey"];
             string secretKey = ConfigurationManager.AppSettings["CellulantSecretKey"];
-            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+            //string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
 
             ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
-            payload.serviceCode = serviceCode;
+            //payload.serviceCode = serviceCode;
 
             string json = JsonConvert.SerializeObject(payload).Replace("/", "\\/");
 

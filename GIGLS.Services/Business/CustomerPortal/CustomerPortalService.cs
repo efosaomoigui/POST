@@ -3947,6 +3947,39 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
         {
+            if (payload == null)
+            {
+                throw new GenericException($"Payload is invalid");
+            }
+
+            if (string.IsNullOrEmpty(payload.merchantTransactionID))
+            {
+                throw new GenericException($"TransactionID is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.requestAmount))
+            {
+                throw new GenericException($"Request Amount is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.currencyCode))
+            {
+                throw new GenericException($"Currency Code is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.accountNumber))
+            {
+                throw new GenericException($"Account Number is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.paymentWebhookUrl))
+            {
+                throw new GenericException($"WebhookUrl is required");
+            }
+
+            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+            payload.serviceCode = serviceCode;
+
             return await _cellulantPaymentService.CheckoutEncryption(payload);
         }
 
