@@ -5388,6 +5388,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
             }
 
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            intlRequest.IsProcessed = true;
+            foreach (var item in intlRequest.ShipmentRequestItems)
+            {
+                item.Received = true;
+                item.ReceivedBy = user.FirstName + " " + user.LastName;
+            }
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
             shipmentDTO.Demurrage = null;
@@ -5433,16 +5442,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks, null);
-                }
-
-                // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
-                var user = await _userService.GetUserById(currentUserId);
-                intlRequest.IsProcessed = true;
-                foreach (var item in intlRequest.ShipmentRequestItems)
-                {
-                    item.Received = true;
-                    item.ReceivedBy = user.FirstName + " " + user.LastName;
                 }
                 _uow.Complete();
             }
