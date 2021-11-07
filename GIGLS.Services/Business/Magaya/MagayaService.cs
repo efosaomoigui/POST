@@ -1386,7 +1386,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     ItemSenderfullName = c.ItemSenderfullName,
                     ItemCount = c.ItemCount,
                     Received = c.Received,
-                    ReceivedBy = c.ReceivedBy
+                    ReceivedBy = c.ReceivedBy,
+                    ReceivedDate = DateTime.UtcNow
                 }).ToList()
             };
 
@@ -2326,7 +2327,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
-                    shipmentItem.ReceivedDate = DateTime.Now;
+                    shipmentItem.ReceivedDate = DateTime.UtcNow;
                 }
 
                 _uow.Complete();
