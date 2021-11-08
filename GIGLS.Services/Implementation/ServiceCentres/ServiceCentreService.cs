@@ -415,11 +415,11 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 bool excludehub = false;
                 int stationId = 0;
 
-                //if (serviceCenterIds.StationId == 4)
-                //{
-                //    excludehub = false;
-                //    //stationId = serviceCenterIds.StationId;
-                //}
+                if (serviceCenterIds.StationId == 4)
+                {
+                    excludehub = false;
+                    //stationId = serviceCenterIds.StationId;
+                }
 
                 return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub, stationId);
             }
