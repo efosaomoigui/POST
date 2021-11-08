@@ -5394,8 +5394,12 @@ namespace GIGLS.Services.Implementation.Shipments
             intlRequest.IsProcessed = true;
             foreach (var item in intlRequest.ShipmentRequestItems)
             {
-                item.Received = true;
-                item.ReceivedBy = user.FirstName + " " + user.LastName;
+                if (!item.Received)
+                {
+                    item.Received = true;
+                    item.ReceivedBy = user.FirstName + " " + user.LastName;
+                    item.ReceivedDate = DateTime.UtcNow;
+                }
             }
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
