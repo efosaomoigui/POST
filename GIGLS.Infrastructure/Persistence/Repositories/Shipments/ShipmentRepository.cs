@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -2543,4 +2544,43 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
+
+    public Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+    {
+       
+        var requests = _context.UnidentifiedItemsForInternationalShipping.AsQueryable();
+
+        if (filter.StartDate == null && filter.EndDate == null)
+        {
+            //Last 20 days
+            filter.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+            filter.EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+        }
+
+        requests = requests.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate).OrderByDescending(s => s.DateCreated);
+
+        List<UnidentifiedItemsForInternationalShippingDTO> requestsDTO = (from r in requests
+                                                    select new UnidentifiedItemsForInternationalShippingDTO()
+                                                    {
+                                                        UnidentifiedItemsForInternationalShippingId = r.UnidentifiedItemsForInternationalShippingId,
+                                                        TrackingNo = r.TrackingNo,
+                                                        CustomerName = r.CustomerName,
+                                                        CustomerEmail = r.CustomerEmail,
+                                                        CustomerPhoneNo = r.CustomerPhoneNo,
+                                                        DateCreated = r.DateCreated,
+                                                        DateModified = r.DateModified,
+                                                        IsProcessed = r.IsProcessed,
+                                                        Quantity = r.Quantity,
+                                                        Length = r.Length,
+                                                        Width = r.Width,
+                                                        Height = r.Height,
+                                                        Weight = r.Weight,
+                                                        UserId = r.UserId,
+                                                        ItemName = r.ItemName,
+                                                        NoOfPackageReceived = r.NoOfPackageReceived
+                                                    }).ToList();
+
+        return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
+    }
+
 }

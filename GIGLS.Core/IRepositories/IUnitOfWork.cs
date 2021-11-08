@@ -217,6 +217,7 @@ namespace GIGLS.Core
         IShipmentExportRepository ShipmentExport { get; set; }
         IInternationalCargoManifestRepository InternationalCargoManifest { get; set; }
         IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
+        IUnidentifiedItemsForInternationalShippingRepository UnidentifiedItemsForInternationalShipping { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

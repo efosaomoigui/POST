@@ -147,6 +147,7 @@
     <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
     <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
     <Compile Include="Domain\InternationalCargoManifest.cs" />
     <Compile Include="Domain\ShipmentExport.cs" />
@@ -474,6 +475,7 @@
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
+    <Compile Include="DTO\Shipments\UnidentifiedItemsForInternationalShippingDTO.cs" />
     <Compile Include="DTO\Shipments\MobileGroupCodeWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
@@ -758,6 +760,7 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IUnidentifiedItemsForInternationalShippingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IInternationalCargoManifestRepository.cs" />
     <Compile Include="IRepositories\Shipments\IInternationalShipmentWaybillRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
