@@ -43,6 +43,7 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -6102,6 +6103,29 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var item in dtos)
                 {
                     var shipItem = Mapper.Map<UnidentifiedItemsForInternationalShipping>(item);
+                    //check for negative values
+                    if (shipItem.Quantity <= 0)
+                    {
+                        throw new GenericException("Invalid quantity");
+                    }
+                    if (shipItem.NoOfPackageReceived <= 0)
+                    {
+                        throw new GenericException("Invalid No. of parcel");
+                    }
+                    if (shipItem.Weight < 0 || shipItem.Length < 0 || shipItem.Height < 0)
+                    {
+                        throw new GenericException("Invalid volume metrics");
+                    }
+
+                    //also validate phoneno
+                    if (!String.IsNullOrEmpty(shipItem.CustomerPhoneNo))
+                    {
+                        bool IsPhone = Regex.IsMatch(shipItem.CustomerPhoneNo, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                        if (!IsPhone)
+                        {
+                            throw new GenericException("Invalid phone number");
+                        }
+                    }
                     shipItem.UserId = userId;
                     items.Add(shipItem);
                 }
