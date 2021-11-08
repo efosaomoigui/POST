@@ -5389,19 +5389,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
             }
 
-            // get the current user info
-            var currentUserId = await _userService.GetCurrentUserId();
-            var user = await _userService.GetUserById(currentUserId);
-            intlRequest.IsProcessed = true;
-            foreach (var item in intlRequest.ShipmentRequestItems)
-            {
-                if (!item.Received)
-                {
-                    item.Received = true;
-                    item.ReceivedBy = user.FirstName + " " + user.LastName;
-                    item.ReceivedDate = DateTime.UtcNow;
-                }
-            }
+           
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
             shipmentDTO.Demurrage = null;
@@ -5422,6 +5410,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 item.Received = true;
                 item.ReceivedBy = user.FirstName + " " + user.LastName;
+                item.ReceivedDate = DateTime.UtcNow;
                 //check to see if any of unidentified is being processed
                 var unId = unIdentifiedItems.Where(x => x.TrackingNo.Equals(item.TrackingId)).FirstOrDefault();
                 if (unId != null)
