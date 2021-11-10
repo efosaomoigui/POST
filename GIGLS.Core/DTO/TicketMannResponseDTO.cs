@@ -105,4 +105,70 @@ namespace GIGLS.Core.DTO
         [JsonProperty("payload")]
         public List<MerchantSalesPayload> Payload { get; set; }
     }
+
+    public class CustomerTransactionsDTO
+    {
+        [JsonProperty("code")]
+        public int Code { get; set; }
+
+        [JsonProperty("shortDescription")]
+        public string ShortDescription { get; set; }
+
+        [JsonProperty("payload")]
+        public CustomerTransactionsPayload Payload { get; set; }
+    }
+
+    public class CustomerTransactions
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("merchantId")]
+        public int MerchantId { get; set; }
+
+        [JsonProperty("merchantName")]
+        public string MerchantName { get; set; }
+
+        [JsonProperty("paymentReference")]
+        public string PaymentReference { get; set; }
+
+        [JsonProperty("amount")]
+        public double Amount { get; set; }
+
+        [JsonProperty("transactionStatus")]
+        public string TransactionStatus { get; set; }
+
+        [JsonProperty("dateofTransaction")]
+        public DateTime DateofTransaction { get; set; }
+
+        [JsonProperty("customerPhone")]
+        public string CustomerPhone { get; set; }
+
+        [JsonProperty("customerUniqueId")]
+        public string CustomerUniqueId { get; set; }
+
+        [JsonProperty("transactionType")]
+        public int TransactionType { get; set; }
+
+        [JsonProperty("pushnotificationMSG")]
+        public string PushnotificationMSG { get; set; }
+    }
+
+    public class CustomerTransactionsPayload
+    {
+        [JsonProperty("totalSuccessful")]
+        public string TotalSuccessful { get; set; }
+
+        [JsonProperty("transactions")]
+        public List<CustomerTransactions> Transactions { get; set; }
+    }
+
+    public class CustomerTransactionFilter
+    {
+        [JsonProperty("endDate")]
+        public string EndDate { get; set; }
+
+        [JsonProperty("startDate")]
+        public string StartDate { get; set; }
+    }
 }
