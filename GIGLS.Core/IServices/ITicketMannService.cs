@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices
     {
         Task<string> GetToken();
         Task<MerchantSalesDTO> GetMerchantSalesSummary(DateFilterCriteria filter);
+        Task<CustomerTransactionsDTO> GetCustomerTransactionsSummary(DateFilterCriteria filter);
     }
 }
