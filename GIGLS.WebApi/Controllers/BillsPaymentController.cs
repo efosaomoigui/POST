@@ -39,5 +39,21 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customertransactions")]
+        public async Task<IServiceResponse<CustomerTransactionsPayload>> GetBillsPaymentSummaryForCustomerTransactions(DateFilterCriteria searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _service.GetCustomerTransactionsSummary(searchDTO);
+
+                return new ServiceResponse<CustomerTransactionsPayload>
+                {
+                    Object = response.Payload
+                };
+            });
+        }
     }
 }
