@@ -213,6 +213,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         IsHUB = s.IsHUB,
                                         IsGateway = s.IsGateway,
                                         HomeDeliveryStatus = t.HomeDeliveryStatus,
+                                        IsConsignable = s.IsConsignable
                                     };
                     return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
                 }
