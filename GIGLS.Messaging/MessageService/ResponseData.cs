@@ -36,4 +36,19 @@ namespace GIGLS.Messaging.MessageService
         [JsonProperty("messageId")]
         public string MessageId { get; set; }
     }
+
+    public class RouteResponseData
+    {
+        [JsonProperty("cost")]
+        public string Cost { get; set; }
+
+        [JsonProperty("pages")]
+        public string Pages { get; set; }
+
+        [JsonProperty("recipients")]
+        public string NumberOfReceiver { get; set; }
+
+        [JsonProperty("messageId")]
+        public string MessageId { get; set; }
+    }
 }
