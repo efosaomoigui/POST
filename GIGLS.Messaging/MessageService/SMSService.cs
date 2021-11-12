@@ -16,6 +16,8 @@ using Twilio.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Text;
+using System.Web;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -47,6 +49,11 @@ namespace GIGLS.Messaging.MessageService
                     case SMSSenderPlatform.OGOSMSBANKROUTE:
                         result = await SendSMSUsingOGOSMSBankChannelAsync(message);
                         break;
+
+                    case SMSSenderPlatform.ROUTESMS:
+                        result = await SendSMSUsingROUTESMSBankChannelAsync(message);
+                        break;
+
                     default:
                         break;
                 }
@@ -308,5 +315,44 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
+        // Use Route Sms Bank Channel
+        private async Task<string> SendSMSUsingROUTESMSBankChannelAsync(MessageDTO message)
+        {
+            string result = "";
+
+            try
+            {
+                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var routeURL = ConfigurationManager.AppSettings["RouteBaseUrl"];
+                var password = ConfigurationManager.AppSettings["RoutePassword"];
+                var username = ConfigurationManager.AppSettings["RouteUsername"];
+
+                //var finalBodyEncoded = Encoding.Default.GetBytes(message.FinalBody);
+                //var finalBodyUTF = Encoding.UTF8.GetString(finalBodyEncoded);
+                var finalBodyEncoded = HttpUtility.UrlEncodeUnicode(message.FinalBody);
+                //ogosms url format
+                //http://ngn.rmlconnect.net:8080/bulksms/bulksms?username=xxxxxxxx&password=xxxxxx&type=0&dlr=1&destination=xxxxxxxxxx&source=Demo&message=Demo%20Message
+
+                var finalURL = $"{routeURL}?username={username}&password={password}&type={1}&dlr={0}&destination={message.To}&source={message.From}&message={finalBodyEncoded}";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+               // httpWebRequest.
+
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    using (var sr = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                        result = sr.ReadToEnd();
+                    }
+                }
+
+                //result = FomatBankChannelResponseMessage(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return await Task.FromResult(result);
+        }
     }
 }
