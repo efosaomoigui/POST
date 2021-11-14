@@ -100,5 +100,61 @@ namespace GIGLS.Services.Implementation
                 return result;
             }
         }
+
+        public async Task<CustomerTransactionsDTO> GetCustomerTransactionsSummary(DateFilterCriteria filter)
+        {
+            CustomerTransactionsDTO result = new CustomerTransactionsDTO();
+            
+            if (filter.StartDate == null)
+            {
+                throw new GenericException("Start date is required", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            if (filter.EndDate == null)
+            {
+                throw new GenericException("End date is required", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            CustomerTransactionFilter payload = new CustomerTransactionFilter
+            {
+                StartDate = filter.StartDate.Value.ToString("yyyy-MM-dd"),
+                EndDate = filter.EndDate.Value.ToString("yyyy-MM-dd")
+            };
+
+            string token = await GetToken();
+            using (var client = new HttpClient())
+            {
+                //Get login details
+                var url = ConfigurationManager.AppSettings["TicketMannBaseUrl"];
+                var customerTransactions = ConfigurationManager.AppSettings["TicketMannCustomerTransactions"];
+                url = $"{url}/{customerTransactions}";
+
+                //setup client
+                client.BaseAddress = new Uri(url);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //Convert payload to string content / serialize
+                var json = JsonConvert.SerializeObject(payload);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(url, data);
+                string resultJson = await response.Content.ReadAsStringAsync();
+                var jObject = JsonConvert.DeserializeObject<CustomerTransactionsDTO>(resultJson);
+                result = jObject;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                if (result.Payload.Transactions.Any())
+                {
+                    result.Payload.Transactions = result.Payload.Transactions.OrderByDescending(x => x.DateofTransaction).ToList();
+                }
+                return result;
+            }
+        }
     }
 }
