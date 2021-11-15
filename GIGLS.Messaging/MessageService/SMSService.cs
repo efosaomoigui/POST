@@ -326,6 +326,7 @@ namespace GIGLS.Messaging.MessageService
                 var routeURL = ConfigurationManager.AppSettings["RouteBaseUrl"];
                 var password = ConfigurationManager.AppSettings["RoutePassword"];
                 var username = ConfigurationManager.AppSettings["RouteUsername"];
+                var source = ConfigurationManager.AppSettings["RouteSource"];
 
                 //var finalBodyEncoded = Encoding.Default.GetBytes(message.FinalBody);
                 //var finalBodyUTF = Encoding.UTF8.GetString(finalBodyEncoded);
