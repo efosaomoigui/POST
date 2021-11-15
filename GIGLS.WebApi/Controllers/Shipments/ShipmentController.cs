@@ -1112,5 +1112,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unidentifieditem/{ItemID:int}")]
+        public async Task<IServiceResponse<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipmentByID(int ItemID)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetUnIdentifiedIntlShipmentByID(ItemID);
+                return new ServiceResponse<UnidentifiedItemsForInternationalShippingDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }

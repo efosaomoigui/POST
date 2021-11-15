@@ -6096,6 +6096,11 @@ namespace GIGLS.Services.Implementation.Shipments
             return await _uow.IntlShipmentRequest.GetUnIdentifiedIntlShipments(filter);
         }
 
+        public async Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
+        {
+            return await _uow.IntlShipmentRequest.GetUnIdentifiedIntlShipmentByID(itemID);
+        }
+
         public async Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos)
         {
             try

@@ -21,6 +21,7 @@ namespace GIGLS.Core.Domain
         [MaxLength(128)]
         public string UserId { get; set; }
         public bool IsProcessed { get; set; }
+        [MaxLength(300)]
         public string ItemName { get; set; }
         public double Length { get; set; }
         public double Width { get; set; }
@@ -28,6 +29,16 @@ namespace GIGLS.Core.Domain
         public double Weight { get; set; }
         public int NoOfPackageReceived { get; set; }
         public int Quantity { get; set; }
+        [MaxLength(300)]
+        public string ItemDescription { get; set; }
+        [MaxLength(300)]
+        public string StoreName { get; set; }
+        [MaxLength(128)]
+        public string ItemUniqueNo { get; set; }
+        [MaxLength(300)]
+        public string CourierService { get; set; }
+        [MaxLength(300)]
+        public string ItemStateDescription { get; set; }
 
 
     }
