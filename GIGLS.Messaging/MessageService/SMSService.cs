@@ -327,16 +327,19 @@ namespace GIGLS.Messaging.MessageService
                 var password = ConfigurationManager.AppSettings["RoutePassword"];
                 var username = ConfigurationManager.AppSettings["RouteUsername"];
                 var source = ConfigurationManager.AppSettings["RouteSource"];
+                var type = ConfigurationManager.AppSettings["RouteType"];
 
-                //var finalBodyEncoded = Encoding.Default.GetBytes(message.FinalBody);
-                //var finalBodyUTF = Encoding.UTF8.GetString(finalBodyEncoded);
+                //Replace + with empty char
+                if (message.To.Contains("+"))
+                {
+                    message.To = message.To.Replace("+", string.Empty);
+                }
+
                 var finalBodyEncoded = HttpUtility.UrlEncodeUnicode(message.FinalBody);
-                //ogosms url format
-                //http://ngn.rmlconnect.net:8080/bulksms/bulksms?username=xxxxxxxx&password=xxxxxx&type=0&dlr=1&destination=xxxxxxxxxx&source=Demo&message=Demo%20Message
 
-                var finalURL = $"{routeURL}?username={username}&password={password}&type={1}&dlr={0}&destination={message.To}&source={message.From}&message={finalBodyEncoded}";
+                //Set final Url with parameters
+                var finalURL = $"{routeURL}?username={username}&password={password}&type={type}&dlr={0}&destination={message.To}&source={source}&message={finalBodyEncoded}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
-               // httpWebRequest.
 
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
                 {
