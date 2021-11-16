@@ -28,5 +28,6 @@ namespace GIGLS.Core.DTO
         public string Description { get; set; }
         public decimal GrandTotal { get; set; }
         public decimal DeclaredValue { get; set; }
+        public string CustomerName { get; set; }
     }
 }

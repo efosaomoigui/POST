@@ -121,6 +121,7 @@ namespace GIGLS.Core.DTO.Account
         public decimal? DeclarationOfValueCheck { get; set; }
         public bool IsExported { get; set; }
         public string RequestNumber { get; set; }
+        public bool IsProcessed { get; set; }
     }
      
     public class InvoiceViewDTOUNGROUPED

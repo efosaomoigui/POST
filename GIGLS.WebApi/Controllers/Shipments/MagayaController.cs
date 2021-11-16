@@ -639,5 +639,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getprocessedintlshipment")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetProcessedIntlShipment(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetProcessedIntlShipment(filter);
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }

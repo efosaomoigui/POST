@@ -35,6 +35,9 @@ namespace GIGLS.Core.Domain
         public string Description { get; set; }
         public decimal GrandTotal { get; set; }
         public decimal DeclaredValue { get; set; }
+        public ItemState ItemState { get; set; }
+        [MaxLength(500)]
+        public string CustomerName { get; set; }
 
     }
 }

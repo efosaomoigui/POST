@@ -5910,6 +5910,69 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
+        //public async Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos)
+        //{
+        //    try
+        //    {
+        //        var exports = new List<ShipmentExport>();
+        //        var userId = await _userService.GetCurrentUserId();
+        //        var requests = dtos.Select(x => x.RequestNumber).ToList();
+        //        var waybills = dtos.Select(x => x.Waybill).ToList();
+        //        var intlShipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => requests.Contains(x.RequestNumber)).ToList();
+        //        if (!intlShipments.Any())
+        //        {
+        //            throw new GenericException("Request not found", $"{(int)HttpStatusCode.NotFound}");
+        //        }
+        //        var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+        //        foreach (var item in shipments)
+        //        {
+        //            var shipment = await _uow.Shipment.GetShipment(item.Waybill);
+        //            var request = intlShipments.FirstOrDefault(x => x.RequestNumber == shipment.RequestNumber);
+        //            var itemUniqueNo = request.ShipmentRequestItems.Select(x => x.ItemUniqueNo).ToList();
+        //            var courier = request.ShipmentRequestItems.Select(x => x.CourierService).ToList();
+        //            var itemNames = request.ShipmentRequestItems.Select(x => x.ItemName).ToList();
+        //            var itemRequestCodes = request.ShipmentRequestItems.Select(x => x.ItemRequestCode).ToList();
+        //            var export = new ShipmentExport()
+        //            {
+        //                RequestNumber = shipment.RequestNumber,
+        //                Waybill = shipment.Waybill,
+        //                Weight = shipment.ShipmentItems.Sum(x => x.Weight),
+        //                Quantity = shipment.ShipmentItems.Sum(x => x.Quantity),
+        //                ItemUniqueNo = itemUniqueNo.Any() ? String.Join(",", itemUniqueNo) : String.Empty,
+        //                CourierService = courier.Any() ? String.Join(",", courier) : String.Empty,
+        //                UserId = userId,
+        //                Length = shipment.ShipmentItems.Sum(x => x.Length),
+        //                Width = shipment.ShipmentItems.Sum(x => x.Width),
+        //                Height = shipment.ShipmentItems.Sum(x => x.Height),
+        //                ItemName = itemNames.Any() ? String.Join(",", itemNames) : String.Empty,
+        //                ItemRequestCode = itemRequestCodes.Any() ? String.Join(",", itemRequestCodes) : String.Empty,
+        //                NoOfPackageReceived = request.ShipmentRequestItems.Sum(x => x.NoOfPackageReceived),
+        //                Description = shipment.Description,
+        //                GrandTotal = shipment.GrandTotal,
+        //                DeclaredValue = shipment.DeclarationOfValueCheck.HasValue ? shipment.DeclarationOfValueCheck.Value : 0
+        //            };
+
+        //            exports.Add(export);
+        //        }
+        //        if (exports.Any())
+        //        {
+        //            foreach (var item in shipments)
+        //            {
+        //                item.IsExported = true;
+        //            }
+        //            _uow.ShipmentExport.AddRange(exports);
+        //            _uow.Complete();
+        //        }
+
+        //        //also update the shipments to exported true
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         public async Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos)
         {
             try
@@ -5924,36 +5987,41 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Request not found", $"{(int)HttpStatusCode.NotFound}");
                 }
                 var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
-                foreach (var item in shipments)
+                for (int i = 0; i < intlShipments.Count; i++)
                 {
-                    var shipment = await _uow.Shipment.GetShipment(item.Waybill);
-                    var request = intlShipments.FirstOrDefault(x => x.RequestNumber == shipment.RequestNumber);
-                    var itemUniqueNo = request.ShipmentRequestItems.Select(x => x.ItemUniqueNo).ToList();
-                    var courier = request.ShipmentRequestItems.Select(x => x.CourierService).ToList();
-                    var itemNames = request.ShipmentRequestItems.Select(x => x.ItemName).ToList();
-                    var itemRequestCodes = request.ShipmentRequestItems.Select(x => x.ItemRequestCode).ToList();
-                    var export = new ShipmentExport()
+                    var request = intlShipments[i];
+                    foreach (var item in request.ShipmentRequestItems)
                     {
-                        RequestNumber = shipment.RequestNumber,
-                        Waybill = shipment.Waybill,
-                        Weight = shipment.ShipmentItems.Sum(x => x.Weight),
-                        Quantity = shipment.ShipmentItems.Sum(x => x.Quantity),
-                        ItemUniqueNo = itemUniqueNo.Any() ? String.Join(",", itemUniqueNo) : String.Empty,
-                        CourierService = courier.Any() ? String.Join(",", courier) : String.Empty,
-                        UserId = userId,
-                        Length = shipment.ShipmentItems.Sum(x => x.Length),
-                        Width = shipment.ShipmentItems.Sum(x => x.Width),
-                        Height = shipment.ShipmentItems.Sum(x => x.Height),
-                        ItemName = itemNames.Any() ? String.Join(",", itemNames) : String.Empty,
-                        ItemRequestCode = itemRequestCodes.Any() ? String.Join(",", itemRequestCodes) : String.Empty,
-                        NoOfPackageReceived = request.ShipmentRequestItems.Sum(x => x.NoOfPackageReceived),
-                        Description = shipment.Description,
-                        GrandTotal = shipment.GrandTotal,
-                        DeclaredValue = shipment.DeclarationOfValueCheck.HasValue ? shipment.DeclarationOfValueCheck.Value : 0
-                    };
+                        var export = new ShipmentExport()
+                        {
+                            RequestNumber = request.RequestNumber,
+                            Weight = item.Weight,
+                            Quantity = item.Quantity,
+                            ItemUniqueNo = item.ItemUniqueNo,
+                            CourierService = item.CourierService,
+                            UserId = userId,
+                            Length = item.Length,
+                            Width = item.Width,
+                            Height = item.Height,
+                            ItemState = item.ItemState,
+                            ItemName = item.ItemName,
+                            ItemRequestCode = item.ItemRequestCode,
+                            NoOfPackageReceived = item.NoOfPackageReceived,
+                            CustomerName = request.CustomerFirstName + " " + request.CustomerLastName,
+                        };
+                        var shipment = shipments.FirstOrDefault(x => x.RequestNumber == request.RequestNumber);
+                        if (shipment != null)
+                        {
+                            export.Description = shipment.Description;
+                            export.GrandTotal = shipment.GrandTotal;
+                            export.DeclaredValue = shipment.DeclarationOfValueCheck.HasValue ? shipment.DeclarationOfValueCheck.Value : 0;
+                            export.Waybill = shipment.Waybill;
+                        }
 
-                    exports.Add(export);
+                        exports.Add(export);
+                    }
                 }
+
                 if (exports.Any())
                 {
                     foreach (var item in shipments)

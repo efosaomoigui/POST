@@ -2545,7 +2545,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-    public Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+        public Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
     {
        
         var requests = _context.UnidentifiedItemsForInternationalShipping.AsQueryable();
@@ -2586,7 +2586,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
     }
-    public Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
+        public Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
     {
 
         var requests = _context.UnidentifiedItemsForInternationalShipping.AsQueryable();
@@ -2618,6 +2618,59 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                           }).ToList();
 
         return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).FirstOrDefault());
+    }
+
+    public Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filterOptionsDto)
+    {
+        // filter by cancelled shipments
+        var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational);
+        if (filterOptionsDto != null && !String.IsNullOrEmpty(filterOptionsDto.FilterType))
+        {
+            shipments = _context.Shipment.AsQueryable().Where(x => x.Waybill == filterOptionsDto.FilterType || x.RequestNumber == filterOptionsDto.FilterType);
+        }
+        else
+        {
+            shipments = shipments.Where(x => x.DepartureServiceCentreId == filterOptionsDto.ServiceCentreID && x.DateCreated >= filterOptionsDto.StartDate && x.DateCreated <= filterOptionsDto.EndDate);
+        }
+        List<InvoiceViewDTO> result = (from s in shipments
+                                       join i in Context.Invoice on s.Waybill equals i.Waybill
+                                       join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                       join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                       join c in Context.Users on s.CustomerCode equals c.UserChannelCode
+                                       join user in Context.Users on s.UserId equals user.Id
+                                       join r in Context.IntlShipmentRequest on s.RequestNumber equals r.RequestNumber
+                                       where r.IsProcessed == true
+                                       select new InvoiceViewDTO
+                                       {
+                                           Waybill = s.Waybill,
+                                           DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                           DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                           DepartureServiceCentreName = dept.Name,
+                                           DestinationServiceCentreName = dest.Name,
+                                           Amount = i.Amount,
+                                           PaymentMethod = i.PaymentMethod,
+                                           PaymentStatus = i.PaymentStatus,
+                                           DateCreated = i.DateCreated,
+                                           CompanyType = s.CompanyType,
+                                           CustomerCode = s.CustomerCode,
+                                           PaymentTypeReference = i.PaymentTypeReference,
+                                           ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                           Cash = i.Cash,
+                                           CustomerType = s.CustomerType,
+                                           Transfer = i.Transfer,
+                                           Pos = i.Pos,
+                                           SenderName = c.FirstName + " " + c.LastName,
+                                           SenderAddress = s.SenderAddress,
+                                           PhoneNumber = c.PhoneNumber,
+                                           IsExported = s.IsExported,
+                                           RequestNumber = s.RequestNumber,
+                                           UserId = s.UserId,
+                                           UserName = user.FirstName + " " + user.LastName,
+                                           IsProcessed = r.IsProcessed
+
+                                       }).ToList();
+        var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+        return Task.FromResult(resultDto);
     }
 
 }
