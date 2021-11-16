@@ -261,7 +261,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.AD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                         if (deliveryNumber != null)

@@ -266,7 +266,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 var countryId = await _userService.GetUserActiveCountryId();
                 if (countryId == 1)
                 {
-                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                    if (shipmentObjDTO.ExpressDelivery)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.CRTGF, EmailSmsType.SMS, smsData);
+                    }
+                    else
+                    {
+                        await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                    }
+                    
                 }
                 else
                 {

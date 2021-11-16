@@ -256,7 +256,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 var countryId = await _userService.GetUserActiveCountryId();
                 if (countryId == 1)
                 {
-                    await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                    //Get shipment Details
+                    var shipmentDto = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+                    if (shipmentDto.ExpressDelivery)
+                    {
+                        //Send sms for Go Faster shipment to receiver and sender
+                        messageType = MessageType.ARFGFS;
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+
+                        messageType = MessageType.ARFGFR;
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                    }
+                    else
+                    {
+                        await _messageSenderService.SendMessage(messageType, EmailSmsType.SMS, tracking);
+                    }
+                    
                 }
                 else
                 {
