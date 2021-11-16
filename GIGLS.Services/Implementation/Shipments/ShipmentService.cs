@@ -6008,6 +6008,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             ItemRequestCode = item.ItemRequestCode,
                             NoOfPackageReceived = item.NoOfPackageReceived,
                             CustomerName = request.CustomerFirstName + " " + request.CustomerLastName,
+                            ItemValue = item.ItemValue
                         };
                         var shipment = shipments.FirstOrDefault(x => x.RequestNumber == request.RequestNumber);
                         if (shipment != null)

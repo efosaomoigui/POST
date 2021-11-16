@@ -38,6 +38,7 @@ namespace GIGLS.Core.Domain
         public ItemState ItemState { get; set; }
         [MaxLength(500)]
         public string CustomerName { get; set; }
+        public decimal ItemValue { get; set; }
 
     }
 }
