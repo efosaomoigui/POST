@@ -132,9 +132,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                             NoOfPackageReceived = r.NoOfPackageReceived,
                             GrandTotal = r.GrandTotal,
                             Description = r.Description,
-                            DeclaredValue = r.DeclaredValue
-                            
-
+                            DeclaredValue = r.DeclaredValue ,
+                            CustomerName = r.CustomerName,
+                            ItemState = r.ItemState
                         }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(dtos.OrderByDescending(x => x.DateCreated).ToList());
