@@ -6183,6 +6183,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException("Invalid quantity");
                     }
+                    if (shipItem.Weight <= 0)
+                    {
+                        throw new GenericException("Invalid weight");
+                    }
                     if (shipItem.NoOfPackageReceived <= 0)
                     {
                         throw new GenericException("Invalid No. of parcel");
