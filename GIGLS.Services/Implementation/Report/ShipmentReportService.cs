@@ -1101,6 +1101,19 @@ namespace GIGLS.Services.Implementation.Report
         }
         public async Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter)
         {
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                filter.StartDate = now.Date;
+                filter.EndDate = now.Date;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(00).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
             return await _uow.Shipment.GetGoFasterShipmentsByServiceCentre(filter);
         }
 
