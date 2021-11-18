@@ -149,6 +149,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
         Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
 
     }
 

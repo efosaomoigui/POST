@@ -2622,6 +2622,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             var result = await _uow.IntlShipmentRequest.GetProcessedIntlShipment(filter);
             return result;
         }
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetIntlReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
 
     }
 
