@@ -2615,6 +2615,19 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return true;
         }
 
+        public async Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            filter.ServiceCentreID = serviceCenterIds[0];
+            var result = await _uow.IntlShipmentRequest.GetProcessedIntlShipment(filter);
+            return result;
+        }
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetIntlReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
+
     }
 
 

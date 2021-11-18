@@ -639,5 +639,42 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getprocessedintlshipment")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetProcessedIntlShipment(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetProcessedIntlShipment(filter);
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getreceivedintlshipmentrequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlReceivedShipmentRequest(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
     }
 }

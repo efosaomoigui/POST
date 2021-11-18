@@ -101,6 +101,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation);
         Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter);
         Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos);
+        Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
@@ -147,6 +148,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber);
         Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
+        Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
 
     }
 
