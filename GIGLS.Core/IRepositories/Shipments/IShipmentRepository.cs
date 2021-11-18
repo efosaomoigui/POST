@@ -37,6 +37,8 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
         Task<List<CustomerInvoiceDTO>> GetCoporateInvoiceList(DateFilterForDropOff filter);
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipments(NewFilterOptionsDto filterOptionsDto);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filterOptionsDto);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

@@ -36,6 +36,7 @@ using GIGLS.Core.IServices.Wallet;
 using Image = iTextSharp.text.Image;
 using System.Configuration;
 using Font = iTextSharp.text.Font;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -225,7 +226,7 @@ namespace GIGLS.Services.Implementation.Report
                 //1.2 Add to report list
                 scanStatusReportList.Add(scanStatusReportDTO);
             }
-            
+
             var result = await Task.FromResult(scanStatusReportList);
             return result;
         }
@@ -243,7 +244,7 @@ namespace GIGLS.Services.Implementation.Report
 
             foreach (var shipmentScanStatusName in shipmentScanStatusValues)
             {
-                var count_status = queryableList.Where(s => s.ServiceCentreId == serviceCentreId && 
+                var count_status = queryableList.Where(s => s.ServiceCentreId == serviceCentreId &&
                 s.Status == shipmentScanStatusName).Select(x => x.ShipmentTrackingId).Count();
                 scanStatusReportDTO.StatusCountMap.Add(shipmentScanStatusName, count_status);
             }
@@ -262,7 +263,7 @@ namespace GIGLS.Services.Implementation.Report
             };
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            
+
             try
             {
                 if (baseFilterCriteria.ServiceCentreId > 0)
@@ -280,9 +281,9 @@ namespace GIGLS.Services.Implementation.Report
                 {
                     var stations = _uow.Station.GetAllAsQueryable().Where(x => x.StateId == baseFilterCriteria.StateId).Select(x => x.StationId);
                     serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
-                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();                                        
+                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();
                 }
-                
+
                 dashboardDTO = await GetShipmentProgressSummary(serviceCenterIds, baseFilterCriteria);
             }
             catch (Exception ex)
@@ -350,7 +351,7 @@ namespace GIGLS.Services.Implementation.Report
             //dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybillsResult.Count();
 
             var shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenterId.Contains(x.DestinationServiceCentreId)  
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenterId.Contains(x.DestinationServiceCentreId)
                 && x.DateCreated >= startDate && x.DateCreated < endDate);
 
             if (baseFilterCriteria.IsCOD)
@@ -385,10 +386,10 @@ namespace GIGLS.Services.Implementation.Report
             allShipmentsQueryable = allShipmentsQueryable.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.CRT);
 
             dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Count();
-            
+
             //4. Get Total Shipment Delivered   
             //4a. Get collected shipment by date filtering : use current date if not date selected
-            if(baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
+            if (baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
             {
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
@@ -486,7 +487,7 @@ namespace GIGLS.Services.Implementation.Report
             var queryDate = baseFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
-            
+
             //3. Get Total Shipment Expected filter by date using Date Created
             //3a. Get shipments coming to the service centre 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
@@ -534,7 +535,7 @@ namespace GIGLS.Services.Implementation.Report
             var queryDate = baseFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
-            
+
             var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
                 .Where(s => s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate);
             allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
@@ -584,7 +585,7 @@ namespace GIGLS.Services.Implementation.Report
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-            
+
             //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
             //    .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
             //    && serviceCenterId.Contains(x.DestinationServiceCentreId) && x.DateCreated >= startDate && x.DateCreated < endDate);
@@ -699,7 +700,7 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria)
         {
-            if(accountFilterCriteria == null)
+            if (accountFilterCriteria == null)
             {
                 accountFilterCriteria = new MobileShipmentFilterCriteria
                 {
@@ -741,7 +742,7 @@ namespace GIGLS.Services.Implementation.Report
                         item.DestinationServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DestinationStationId).StationName;
                         item.DepartureServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DepartureStationId).StationName;
                     }
-                    result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
+                    result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode, filter.StartDate.Value, filter.EndDate.Value);
                 }
                 return result;
             }
@@ -771,8 +772,8 @@ namespace GIGLS.Services.Implementation.Report
                 customerInvoice.UserID = await _userService.GetCurrentUserId();
                 customerInvoice.Waybills = string.Join(",", waybills);
                 _uow.CustomerInvoice.Add(customerInvoice);
-               await _uow.CompleteAsync();
-               return true;
+                await _uow.CompleteAsync();
+                return true;
             }
             catch (Exception ex)
             {
@@ -806,7 +807,7 @@ namespace GIGLS.Services.Implementation.Report
                 string[] headers = { "Waybill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
                 float[] widths = new float[] { 45, 45, 78, 30, 45, 78, 78, 151, 150 };
 
-               
+
                 PdfPTable table = new PdfPTable(headers.Length);
                 var imageURL = ConfigurationManager.AppSettings["InvoiceImg"];
                 Image pngImg = Image.GetInstance(imageURL);
@@ -830,11 +831,11 @@ namespace GIGLS.Services.Implementation.Report
 
                 cell = new PdfPCell(new Phrase("Invoice Detail"));
                 cell.Colspan = 6;
-               // cell.PaddingLeft = 50;
+                // cell.PaddingLeft = 50;
                 cell.HorizontalAlignment = Element.ALIGN_CENTER;
                 cell.VerticalAlignment = Element.ALIGN_CENTER;
                 table.AddCell(cell);
-               
+
 
                 for (int i = 0; i < 1; i++)
                 {
@@ -891,7 +892,7 @@ namespace GIGLS.Services.Implementation.Report
                     cell.VerticalAlignment = Element.ALIGN_CENTER;
                     table.AddCell(cell);
                 }
-                
+
                 document.Add(pngImg);
                 document.Add(table);
                 document.Close();
@@ -922,7 +923,7 @@ namespace GIGLS.Services.Implementation.Report
                 }
                 var customerInvoice = JObject.FromObject(customerInvoiceDTO).ToObject<CustomerInvoice>();
                 var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
-               // customerInvoice.UserID = await _userService.GetCurrentUserId();
+                // customerInvoice.UserID = await _userService.GetCurrentUserId();
                 customerInvoice.Waybills = string.Join(",", waybills);
                 customerInvoice.Total = customerInvoiceDTO.InvoiceViewDTOs.Sum(x => x.Amount);
                 _uow.CustomerInvoice.Add(customerInvoice);
@@ -1056,6 +1057,51 @@ namespace GIGLS.Services.Implementation.Report
                 throw ex;
             }
 
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetGoFasterReport(NewFilterOptionsDto filter)
+        {
+            var result = new List<InvoiceViewDTO>();
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                filter.StartDate = now.Date;
+                filter.EndDate = now.Date;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(00).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            var shipments = await _uow.Shipment.GetGoFasterShipments(filter);
+            //group shipment by service centre
+            if (shipments.Any())
+            {
+                result = shipments.GroupBy(x => new { x.DepartureServiceCentreId }).Select(s => new InvoiceViewDTO
+                {
+                    Waybill = s.FirstOrDefault().Waybill,
+                    DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
+                    DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
+                    DepartureServiceCentreName = s.FirstOrDefault().DepartureServiceCentreName,
+                    DestinationServiceCentreName = s.FirstOrDefault().DestinationServiceCentreName,
+                    Amount = s.Sum(x => x.Amount),
+                    DateCreated = s.FirstOrDefault().DateCreated,
+                    CompanyType = s.FirstOrDefault().CompanyType,
+                    CustomerCode = s.FirstOrDefault().CustomerCode,
+                    ApproximateItemsWeight = s.Sum(x => x.ApproximateItemsWeight),
+                    TotalWeight = s.Sum(x => x.ApproximateItemsWeight),
+                    TotalShipment = s.Count(),
+                    Cash = s.Sum(x => x.Cash),
+                    CustomerType = s.FirstOrDefault().CustomerType
+                }).ToList();
+            }
+            return result;
+        }
+        public async Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter)
+        {
+            return await _uow.Shipment.GetGoFasterShipmentsByServiceCentre(filter);
         }
 
     }

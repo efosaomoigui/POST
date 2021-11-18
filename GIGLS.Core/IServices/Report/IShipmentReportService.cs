@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,5 +33,7 @@ namespace GIGLS.CORE.IServices.Report
         Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice);
         Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter);
         Task<bool> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices);
+        Task<List<InvoiceViewDTO>> GetGoFasterReport(NewFilterOptionsDto filter);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter);
     }
 }
