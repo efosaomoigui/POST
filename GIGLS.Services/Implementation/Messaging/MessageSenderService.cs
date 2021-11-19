@@ -213,7 +213,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
-                    var customerName = customerObj.CustomerName;
+                    var customerName = customerObj.FirstName;
                     var demurrageAmount = demurragePrice;
 
                     // Reduce receiver name logic
