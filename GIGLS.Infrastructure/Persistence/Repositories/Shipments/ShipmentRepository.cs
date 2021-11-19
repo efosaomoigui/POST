@@ -981,7 +981,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Cash = i.Cash,
                                                Transfer = i.Transfer,
                                                Pos = i.Pos,
-                                               DeclarationOfValueCheck = s.DeclarationOfValueCheck
+                                               DeclarationOfValueCheck = s.DeclarationOfValueCheck,
+                                               ExpressDelivery = s.ExpressDelivery
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);

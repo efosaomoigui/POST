@@ -122,6 +122,7 @@ namespace GIGLS.Core.DTO.Account
         public bool IsExported { get; set; }
         public string RequestNumber { get; set; }
         public bool IsProcessed { get; set; }
+        public bool ExpressDelivery { get; set; }
     }
      
     public class InvoiceViewDTOUNGROUPED
