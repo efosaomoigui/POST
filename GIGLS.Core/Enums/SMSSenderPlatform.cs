@@ -6,6 +6,7 @@
         SCRIPTWALL,
         TWILIO,
         OGOSMSBANKROUTE,
-        WHATSAPPBOT
+        WHATSAPPBOT,
+        ROUTESMS
     }
 }
