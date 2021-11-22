@@ -1096,6 +1096,8 @@ namespace GIGLS.Services.Implementation.Report
                     Cash = s.Sum(x => x.Cash),
                     CustomerType = s.FirstOrDefault().CustomerType
                 }).ToList();
+
+                result = result.OrderByDescending(x => x.TotalShipment).ToList();
             }
             return result;
         }
