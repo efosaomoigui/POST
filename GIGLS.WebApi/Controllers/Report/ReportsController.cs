@@ -382,6 +382,16 @@ namespace GIGLS.WebApi.Controllers.Report
                     {
                         foreach (var item in shipments)
                         {
+                            DateFilterForDropOff filter = new DateFilterForDropOff();
+                            filter.CustomerCode = item.CustomerCode;
+                            DateTime fDay = new DateTime(now.Year, now.Month, 1);
+                            fDay = fDay.AddMonths(-1);
+                            DateTime lDay = fDay.AddMonths(1).AddDays(-1);
+                            filter.StartDate = fDay;
+                            filter.EndDate = lDay;
+                            var invoice = await GetCoporateTransactionsByCode(filter);
+                            item.InvoiceViewDTOs = invoice.Object.InvoiceViewDTOs;
+                            item.InvoiceDate = filter.StartDate.Value;
                             //send email to customer
                             var message = new MessageDTO()
                             {

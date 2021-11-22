@@ -91,7 +91,17 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ProcessGeneralPaymentLinksForShipmentsOnAgility(GeneralPaymentDTO paymentDTO);
         Task<bool> PayForWaybillByWallet(ShipmentPaymentDTO paymentDTO);
         Task<bool> CancelShipmentForGIGGOExtension(CancelShipmentDTO cancelPreShipmentMobile);
-
+        Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
+        Task<List<ShipmentExportDTO>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter);
+        Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos);
+        Task<bool> ExportShipments(List<ShipmentExportDTO> dtos);
+        Task<bool> ExportFlightManifest(InternationalCargoManifestDTO dtos);
+        Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter);
+        Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId);
+        Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation);
+        Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter);
+        Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos);
+        Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
@@ -136,6 +146,11 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateReceived(List<int> itemIDs,bool isTracking);
         Task<List<IntlShipmentRequestDTO>> GetConsolidatedShipmentRequestForUser(int countryID);
         Task<IntlShipmentRequestDTO> GetShipmentRequestByScan(string requestNumber);
+        Task<bool> UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO);
+        Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
+        Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
+
     }
 
 

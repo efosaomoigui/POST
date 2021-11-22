@@ -1554,7 +1554,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOIntraStateBikeDiscount, preShipment.CountryId);
                 //    percentage = Convert.ToDecimal(discountPercent.Value);
-                
+
                 //else
                 //{
                 //    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
@@ -4753,7 +4753,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         QRCode = number
                     };
 
-                    await SendSMSForMobileShipmentCreation(message, MessageType.RMCS); 
+                    await SendSMSForMobileShipmentCreation(message, MessageType.RMCS);
                 }
                 return true;
             }
@@ -6620,7 +6620,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             await _messageSenderService.SendMessage(messageType, EmailSmsType.All, trackingDTO);
                         }
 
-                    } 
+                    }
                 }
                 else if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
@@ -6783,7 +6783,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = new List<PreShipmentMobile>();
                 var preshipmentmobileTATDTO = new List<PreShipmentMobileTATDTO>();
 
-                var range = (int)(newFilterOptionsDto.EndDate - newFilterOptionsDto.StartDate).TotalDays;
+                var range = (int)(newFilterOptionsDto.EndDate.Value - newFilterOptionsDto.StartDate.Value).TotalDays;
                 if (range > 32)
                 {
                     throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
@@ -6795,7 +6795,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!String.IsNullOrEmpty(newFilterOptionsDto.FilterType) && newFilterOptionsDto.FilterType == "OverdueTATIntrastate")
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                   // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24).ToList();
+                    // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor24Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -6807,7 +6807,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping > 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).OrderByDescending(x => x.DateCreated).ToList();
-                   // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
+                    // preshipmentmobile = preshipmentmobile.Where(x => (int)(dateFor72Hours - x.DateCreated).TotalHours > 24).ToList();
                     if (preshipmentmobile.Any())
                     {
                         var waybills = preshipmentmobile.Select(x => x.Waybill).ToList();
@@ -7031,7 +7031,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //    throw new GenericException($"This report can not pull more than a month record ", $"{(int)HttpStatusCode.BadRequest}");
                 //}
 
-                var dateFor24Hours = newFilterOptionsDto.StartDate.AddHours(24);
+                var dateFor24Hours = newFilterOptionsDto.StartDate.Value.AddHours(24);
 
                 preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.ZoneMapping == 1 && x.DateCreated >= newFilterOptionsDto.StartDate && x.DateCreated <= newFilterOptionsDto.EndDate && x.IsCancelled == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString()).OrderByDescending(x => x.DateCreated).ToList();
                 preshipmentmobile = preshipmentmobile.Where(x => (int)(x.DateModified - x.DateCreated).TotalHours > 24).ToList();
@@ -7142,7 +7142,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                 }
 
-                else 
+                else
                 {
                     if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PendingCancellation.ToString() || preshipmentmobile.shipmentstatus.ToLower() == "pending cancellation")
                     {
@@ -7502,10 +7502,31 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment()
+        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(DateFilterCriteria dateFilterCriteria)
+        {
+            if (dateFilterCriteria == null)
+            {
+                dateFilterCriteria = new DateFilterCriteria
+                {
+                    StartDate = null,
+                    EndDate = null
+                };
+            }
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var canceledShipment = await _uow.PreShipmentMobile
+                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
+                  && x.DateCreated >= startDate && x.DateCreated < endDate);
+            return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
+        }
+
+        public async Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(string waybill)
         {
             var canceledShipment = await _uow.PreShipmentMobile
-                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString() && x.CustomerCancelReason != null);
+                  .FindAsync(x => x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString()
+                   && x.Waybill == waybill);
             return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
         }
 

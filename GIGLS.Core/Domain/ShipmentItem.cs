@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GIGL.GIGLS.Core.Domain
@@ -68,6 +69,17 @@ namespace GIGL.GIGLS.Core.Domain
         public bool Received { get; set; }
         [MaxLength (128)]
         public string ReceivedBy { get; set; }
+        [MaxLength(300)]
+        public string CourierService { get; set; }
+        [MaxLength(300)]
+        public string ItemUniqueNo { get; set; }
+        public  DateTime? ReceivedDate { get; set; }
+        public ItemState ItemState { get; set; }
+        [MaxLength(128)]
+        public string ItemRequestCode { get; set; }
+        [MaxLength(500)]
+        public string ItemStateDescription { get; set; }
+        public int NoOfPackageReceived { get; set; }
 
     }
 }

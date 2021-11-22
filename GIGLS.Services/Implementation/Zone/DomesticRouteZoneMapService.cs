@@ -143,5 +143,21 @@ namespace GIGLS.Services.Implementation.Zone
 
             return await Task.FromResult(eta);
         }
+
+        public async Task<DomesticRouteZoneMapDTO> GetZoneByStation(int departure, int destinationStation)
+        {
+            // get serviceCenters
+            var departureServiceCenter = _unitOfWork.ServiceCentre.Get(departure);
+
+            // use Stations
+            var routeZoneMap = await _unitOfWork.DomesticRouteZoneMap.GetAsync(r =>
+                r.DepartureId == departureServiceCenter.StationId &&
+                r.DestinationId == destinationStation, "Zone,Destination,Departure");
+
+            if (routeZoneMap == null)
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
+
+            return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
+        }
     }
 }

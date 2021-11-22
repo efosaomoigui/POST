@@ -46,6 +46,7 @@ namespace GIGLS.Core.DTO.Account
         //Receiver Information
         public string ReceiverName { get; set; }
         public string SenderName { get; set; }
+        public string SenderAddress { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
@@ -118,6 +119,10 @@ namespace GIGLS.Core.DTO.Account
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; }
+        public bool IsExported { get; set; }
+        public string RequestNumber { get; set; }
+        public bool IsProcessed { get; set; }
+        public bool ExpressDelivery { get; set; }
     }
      
     public class InvoiceViewDTOUNGROUPED
@@ -233,6 +238,7 @@ namespace GIGLS.Core.DTO.Account
         public string AccountNo { get; set; }
         public string PaymentStatusDisplay { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+        public DateTime InvoiceDate { get; set; }
 
     }
 

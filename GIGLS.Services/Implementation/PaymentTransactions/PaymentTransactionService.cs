@@ -261,7 +261,25 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
                 //    await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO); 
                 //}
-                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+
+                //Set sms template for Ghana or other coutry
+                var countryId = await _userService.GetUserActiveCountryId();
+                if (countryId == 1)
+                {
+                    if (shipmentObjDTO.ExpressDelivery)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.CRTGF, EmailSmsType.SMS, smsData);
+                    }
+                    else
+                    {
+                        await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
+                    }
+                    
+                }
+                else
+                {
+                    await _messageSenderService.SendMessage(MessageType.CRTGH, EmailSmsType.SMS, smsData);
+                }
                 await _messageSenderService.SendEmailToCustomerForShipmentCreation(shipmentObjDTO);
             }
            

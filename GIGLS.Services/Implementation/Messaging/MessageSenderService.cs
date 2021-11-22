@@ -182,7 +182,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var country = new Country();
 
                     //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
                     {
                         //use the destination country details 
                         country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DestinationCountryId);
@@ -213,7 +213,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
-                    var customerName = customerObj.CustomerName;
+                    var customerName = customerObj.FirstName;
                     var demurrageAmount = demurragePrice;
 
                     // Reduce receiver name logic
@@ -261,7 +261,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                         if (deliveryNumber != null)

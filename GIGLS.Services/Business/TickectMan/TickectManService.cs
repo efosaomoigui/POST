@@ -259,6 +259,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
                 shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+                shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
 
                 foreach (var item in shipment.ShipmentItems)
                 {
@@ -291,6 +292,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         shipment.Invoice.Shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                         shipment.Invoice.Shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
                         shipment.Invoice.Shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+                        shipment.Invoice.Shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
                     }
                 }
             }

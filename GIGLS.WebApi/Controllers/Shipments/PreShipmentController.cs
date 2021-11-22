@@ -286,13 +286,28 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("cancelledshipmentreport")]
-        public async Task<IServiceResponse<IEnumerable<CancelledShipmentDTO>>> GetCancelledShipment()
+        public async Task<IServiceResponse<IEnumerable<CancelledShipmentDTO>>> GetCancelledShipment(DateFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var canceledShipment = await _preShipmentMobileService.GetCanceledShipment();
+                var canceledShipment = await _preShipmentMobileService.GetCanceledShipment(dateFilterCriteria);
+                return new ServiceResponse<IEnumerable<CancelledShipmentDTO>>
+                {
+                    Object = canceledShipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("cancelledshipmentreport/{waybill}")]
+        public async Task<IServiceResponse<IEnumerable<CancelledShipmentDTO>>> GetCancelledShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var canceledShipment = await _preShipmentMobileService.GetCanceledShipment(waybill);
                 return new ServiceResponse<IEnumerable<CancelledShipmentDTO>>
                 {
                     Object = canceledShipment

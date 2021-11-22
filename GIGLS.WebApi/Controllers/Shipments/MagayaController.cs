@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -610,5 +611,70 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("updaterequest")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentRequest(IntlShipmentRequestDTO requestDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.UpdateIntlShipmentRequest(requestDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = res
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getpaidintlshipments")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetIntlPaidShipments(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetIntlPaidWaybillForServiceCentre(filter);
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getprocessedintlshipment")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetProcessedIntlShipment(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetProcessedIntlShipment(filter);
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getreceivedintlshipmentrequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlReceivedShipmentRequest(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
     }
 }

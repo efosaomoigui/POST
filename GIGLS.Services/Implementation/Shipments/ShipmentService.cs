@@ -43,6 +43,7 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -71,6 +72,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUPSService _UPSService;
         private readonly IInternationalPriceService _internationalPriceService;
         private readonly ICountryService _countryService;
+        private readonly IInternationalCargoManifestService _intlCargoManifest;
+        private readonly IPlaceLocationService _locationService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -83,7 +86,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -107,6 +110,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _UPSService = uPSService;
             _internationalPriceService = internationalPriceService;
             _countryService = countryService;
+            _intlCargoManifest = intlCargoManifest;
+            _locationService = locationService;
             MapperConfig.Initialize();
         }
 
@@ -1671,16 +1676,24 @@ namespace GIGLS.Services.Implementation.Shipments
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            //Get SuperCentre for Home Delivery
-            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
-            {
-                //also check that the destination is not a hub
-                if (destinationSC.IsHUB != true)
-                {
-                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
-                }
-            }
+            ////Get SuperCentre for Home Delivery
+            //if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            //{
+            //    //also check that the destination is not a hub
+            //    if (destinationSC.IsHUB != true)
+            //    {
+            //        var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+            //        shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+            //    }
+            //}
+
+            ////Get Hub for Home Delivery
+            //if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            //{
+            //    //get location base station and set as destination service centre
+            //        var location = await _locationService.GetLocationById(shipmentDTO.HomeDeliveryLocation);
+            //        shipmentDTO.DestinationServiceCentreId = location.BaseStationId;
+            //}
 
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
@@ -5376,6 +5389,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
             }
 
+           
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
             shipmentDTO.Demurrage = null;
@@ -5384,6 +5398,26 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.ShipmentReroute = null;
             shipmentDTO.DeliveryOption = null;
             shipmentDTO.IsInternational = true;
+            shipmentDTO.RequestNumber = shipments.RequestNumber;
+
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            intlRequest.IsProcessed = true;
+            var trackingNos = intlRequest.ShipmentRequestItems.Select(x => x.TrackingId).ToList();
+            var unIdentifiedItems = _uow.UnidentifiedItemsForInternationalShipping.GetAllAsQueryable().Where(x => trackingNos.Contains(x.TrackingNo)).ToList();
+            foreach (var item in intlRequest.ShipmentRequestItems)
+            {
+                item.Received = true;
+                item.ReceivedBy = user.FirstName + " " + user.LastName;
+                item.ReceivedDate = DateTime.UtcNow;
+                //check to see if any of unidentified is being processed
+                var unId = unIdentifiedItems.Where(x => x.TrackingNo.Equals(item.TrackingId)).FirstOrDefault();
+                if (unId != null)
+                {
+                    unId.IsProcessed = true;
+                }
+            }
             var shipment = await AddShipment(shipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {
@@ -5420,16 +5454,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     await _messageSenderService.SendOverseasShipmentReceivedMails(shipment, paymentLinks, null);
-                }
-
-                // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
-                var user = await _userService.GetUserById(currentUserId);
-                intlRequest.IsProcessed = true;
-                foreach (var item in intlRequest.ShipmentRequestItems)
-                {
-                    item.Received = true;
-                    item.ReceivedBy = user.FirstName + " " + user.LastName;
                 }
                 _uow.Complete();
             }
@@ -5828,5 +5852,375 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return processDiscount;
         }
+
+        public async Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter)
+        {
+            try
+            {
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                if (filter != null && filter.StartDate != null && filter.EndDate != null)
+                {
+                    filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                    filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                    filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                    filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                filter.ServiceCentreID = serviceCenters[0];
+                return await _uow.Shipment.GetIntlPaidWaybillForServiceCentre(filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ShipmentExportDTO>> GetShipmentExportNotYetExported(NewFilterOptionsDto filter)
+        {
+            try
+            {
+                if (filter != null && filter.StartDate == null && filter.EndDate == null)
+                {
+                    var now = DateTime.Now;
+                    DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    filter.StartDate = firstDay;
+                    filter.EndDate = lastDay;
+                }
+                if (filter != null && filter.StartDate != null && filter.EndDate != null)
+                {
+                    filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                    filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                    filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                    filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
+                return await _uow.ShipmentExport.GetShipmentExportNotYetExported(filter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        //public async Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos)
+        //{
+        //    try
+        //    {
+        //        var exports = new List<ShipmentExport>();
+        //        var userId = await _userService.GetCurrentUserId();
+        //        var requests = dtos.Select(x => x.RequestNumber).ToList();
+        //        var waybills = dtos.Select(x => x.Waybill).ToList();
+        //        var intlShipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => requests.Contains(x.RequestNumber)).ToList();
+        //        if (!intlShipments.Any())
+        //        {
+        //            throw new GenericException("Request not found", $"{(int)HttpStatusCode.NotFound}");
+        //        }
+        //        var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+        //        foreach (var item in shipments)
+        //        {
+        //            var shipment = await _uow.Shipment.GetShipment(item.Waybill);
+        //            var request = intlShipments.FirstOrDefault(x => x.RequestNumber == shipment.RequestNumber);
+        //            var itemUniqueNo = request.ShipmentRequestItems.Select(x => x.ItemUniqueNo).ToList();
+        //            var courier = request.ShipmentRequestItems.Select(x => x.CourierService).ToList();
+        //            var itemNames = request.ShipmentRequestItems.Select(x => x.ItemName).ToList();
+        //            var itemRequestCodes = request.ShipmentRequestItems.Select(x => x.ItemRequestCode).ToList();
+        //            var export = new ShipmentExport()
+        //            {
+        //                RequestNumber = shipment.RequestNumber,
+        //                Waybill = shipment.Waybill,
+        //                Weight = shipment.ShipmentItems.Sum(x => x.Weight),
+        //                Quantity = shipment.ShipmentItems.Sum(x => x.Quantity),
+        //                ItemUniqueNo = itemUniqueNo.Any() ? String.Join(",", itemUniqueNo) : String.Empty,
+        //                CourierService = courier.Any() ? String.Join(",", courier) : String.Empty,
+        //                UserId = userId,
+        //                Length = shipment.ShipmentItems.Sum(x => x.Length),
+        //                Width = shipment.ShipmentItems.Sum(x => x.Width),
+        //                Height = shipment.ShipmentItems.Sum(x => x.Height),
+        //                ItemName = itemNames.Any() ? String.Join(",", itemNames) : String.Empty,
+        //                ItemRequestCode = itemRequestCodes.Any() ? String.Join(",", itemRequestCodes) : String.Empty,
+        //                NoOfPackageReceived = request.ShipmentRequestItems.Sum(x => x.NoOfPackageReceived),
+        //                Description = shipment.Description,
+        //                GrandTotal = shipment.GrandTotal,
+        //                DeclaredValue = shipment.DeclarationOfValueCheck.HasValue ? shipment.DeclarationOfValueCheck.Value : 0
+        //            };
+
+        //            exports.Add(export);
+        //        }
+        //        if (exports.Any())
+        //        {
+        //            foreach (var item in shipments)
+        //            {
+        //                item.IsExported = true;
+        //            }
+        //            _uow.ShipmentExport.AddRange(exports);
+        //            _uow.Complete();
+        //        }
+
+        //        //also update the shipments to exported true
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        public async Task<bool> MarkShipmentsReadyForExport(List<InvoiceViewDTO> dtos)
+        {
+            try
+            {
+                var exports = new List<ShipmentExport>();
+                var userId = await _userService.GetCurrentUserId();
+                var requests = dtos.Select(x => x.RequestNumber).ToList();
+                var waybills = dtos.Select(x => x.Waybill).ToList();
+                var intlShipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => requests.Contains(x.RequestNumber)).ToList();
+                if (!intlShipments.Any())
+                {
+                    throw new GenericException("Request not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                var shipments = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                for (int i = 0; i < intlShipments.Count; i++)
+                {
+                    var request = intlShipments[i];
+                    foreach (var item in request.ShipmentRequestItems)
+                    {
+                        var export = new ShipmentExport()
+                        {
+                            RequestNumber = request.RequestNumber,
+                            Weight = item.Weight,
+                            Quantity = item.Quantity,
+                            ItemUniqueNo = item.ItemUniqueNo,
+                            CourierService = item.CourierService,
+                            UserId = userId,
+                            Length = item.Length,
+                            Width = item.Width,
+                            Height = item.Height,
+                            ItemState = item.ItemState,
+                            ItemName = item.ItemName,
+                            ItemRequestCode = item.ItemRequestCode,
+                            NoOfPackageReceived = item.NoOfPackageReceived,
+                            CustomerName = request.CustomerFirstName + " " + request.CustomerLastName,
+                            ItemValue = item.ItemValue
+                        };
+                        var shipment = shipments.FirstOrDefault(x => x.RequestNumber == request.RequestNumber);
+                        if (shipment != null)
+                        {
+                            export.Description = shipment.Description;
+                            export.GrandTotal = shipment.GrandTotal;
+                            export.DeclaredValue = shipment.DeclarationOfValueCheck.HasValue ? shipment.DeclarationOfValueCheck.Value : 0;
+                            export.Waybill = shipment.Waybill;
+                        }
+
+                        exports.Add(export);
+                    }
+                }
+
+                if (exports.Any())
+                {
+                    foreach (var item in shipments)
+                    {
+                        item.IsExported = true;
+                    }
+                    _uow.ShipmentExport.AddRange(exports);
+                    _uow.Complete();
+                }
+
+                //also update the shipments to exported true
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public async Task<bool> ExportShipments(List<ShipmentExportDTO> dtos)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var cargos = new List<CargoMagayaShipmentDTO>();
+                var waybills = dtos.Select(x => x.Waybill);
+                var waybillInfo = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var exportInfo = _uow.ShipmentExport.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                foreach (var item in exportInfo)
+                {
+                    item.IsExported = true;
+                    item.DateModified = DateTime.Now;
+                    item.ExportedBy = userId;
+                    var cargoObj = new CargoMagayaShipmentDTO()
+                    {
+                        Waybill = item.Waybill,
+                    };
+                    cargos.Add(cargoObj);
+                }
+                var cargoWaybill = await MarkMagayaShipmentsAsCargoed(cargos);
+                if (!cargoWaybill)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> ExportFlightManifest(InternationalCargoManifestDTO dtos)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+                var serviceCentreId = serviceCentreIds[0];
+                var cargos = new List<CargoMagayaShipmentDTO>();
+                var waybills = dtos.InternationalCargoManifestDetails.Select(x => x.Waybill);
+                var exportIds = dtos.InternationalCargoManifestDetails.Select(x => x.ShipmentExportId);
+                var waybillInfo = _uow.Shipment.GetAll().Where(x => waybills.Contains(x.Waybill)).ToList();
+                var exportInfo = _uow.ShipmentExport.GetAll().Where(x => exportIds.Contains(x.ShipmentExportId)).ToList();
+                foreach (var item in exportInfo)
+                {
+                    item.IsExported = true;
+                    item.DateModified = DateTime.Now;
+                    item.ExportedBy = userId;
+                    var cargoObj = new CargoMagayaShipmentDTO()
+                    {
+                        Waybill = item.Waybill,
+                    };
+                    cargos.Add(cargoObj);
+                }
+
+                //create flight manifest
+                var serviceCentre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == serviceCentreId);
+                dtos.DepartureCountry = user.UserActiveCountryId;
+                dtos.DestinationCountry = 1;
+                dtos.UserId = userId;
+                dtos.CargoedBy = user.FirstName + ' ' + user.LastName;
+                dtos.ManifestNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, serviceCentre.Code);
+                var manifest = _intlCargoManifest.AddCargoManifest(dtos);
+                var cargoWaybill = await MarkMagayaShipmentsAsCargoed(cargos);
+                if (!cargoWaybill)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter)
+        {
+           return await _intlCargoManifest.GetIntlCargoManifests(filter);
+        }
+
+        public async Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId)
+        {
+            return await _intlCargoManifest.GetIntlCargoManifestByID(cargoId);
+        }
+
+        public async Task<DomesticRouteZoneMapDTO> GetZoneByStation(int destinationStation)
+        {
+            // use currentUser login servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenters.Length > 1)
+            {
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            }
+
+            var zone = await _domesticRouteZoneMapService.GetZoneByStation(serviceCenters[0], destinationStation);
+            return zone;
+        }
+
+        public async Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+        {
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                DateTime firstDay = new DateTime(now.Year, now.Month, 1);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                filter.StartDate = firstDay;
+                filter.EndDate = lastDay;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(12).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            return await _uow.IntlShipmentRequest.GetUnIdentifiedIntlShipments(filter);
+        }
+
+        public async Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
+        {
+            return await _uow.IntlShipmentRequest.GetUnIdentifiedIntlShipmentByID(itemID);
+        }
+
+        public async Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos)
+        {
+            try
+            {
+                var items = new List<UnidentifiedItemsForInternationalShipping>();
+                var userId = await _userService.GetCurrentUserId();
+                foreach (var item in dtos)
+                {
+                    var shipItem = Mapper.Map<UnidentifiedItemsForInternationalShipping>(item);
+                    //check for negative values
+                    if (shipItem.Quantity <= 0)
+                    {
+                        throw new GenericException("Invalid quantity");
+                    }
+                    if (shipItem.Weight <= 0)
+                    {
+                        throw new GenericException("Invalid weight");
+                    }
+                    if (shipItem.NoOfPackageReceived <= 0)
+                    {
+                        throw new GenericException("Invalid No. of parcel");
+                    }
+                    if (shipItem.Weight < 0 || shipItem.Length < 0 || shipItem.Height < 0)
+                    {
+                        throw new GenericException("Invalid volume metrics");
+                    }
+
+                    //also validate phoneno
+                    if (!String.IsNullOrEmpty(shipItem.CustomerPhoneNo))
+                    {
+                        bool IsPhone = Regex.IsMatch(shipItem.CustomerPhoneNo, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                        if (!IsPhone)
+                        {
+                            throw new GenericException("Invalid phone number");
+                        }
+                    }
+                    shipItem.UserId = userId;
+                    items.Add(shipItem);
+                }
+                if (items.Any())
+                {
+                    _uow.UnidentifiedItemsForInternationalShipping.AddRange(items);
+                    _uow.Complete();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }

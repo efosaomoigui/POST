@@ -2,6 +2,7 @@
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -857,6 +858,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                         user = await _userService.GetUserById(customerUserId);
                         customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
                     }
+
+                    shipmentDTO.RequestNumber = shipmentReq.RequestNumber;
                 }
 
                 //PickUp Options
@@ -1383,7 +1386,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     ItemSenderfullName = c.ItemSenderfullName,
                     ItemCount = c.ItemCount,
                     Received = c.Received,
-                    ReceivedBy = c.ReceivedBy
+                    ReceivedBy = c.ReceivedBy,
+                    ReceivedDate = DateTime.UtcNow
                 }).ToList()
             };
 
@@ -2323,6 +2327,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     }
                     shipmentItem.Received = true;
                     shipmentItem.ReceivedBy = $"{userInfo.FirstName} {userInfo.LastName}";
+                    shipmentItem.ReceivedDate = DateTime.UtcNow;
                 }
 
                 _uow.Complete();
@@ -2332,22 +2337,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     const int countryId = 1;
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
-                    var emailList = new List<string>();
-                    //var chairmanEmail = _uow.GlobalProperty.SingleOrDefault(x => x.Key == GlobalPropertyType.ChairmanEmail.ToString() && x.CountryId == countryId).Value;
-                    //if (!String.IsNullOrEmpty(chairmanEmail))
-                    //{
-                    //    var emails = chairmanEmail.Split(',');
-                    //    var hotmail = emails.Where(x => x.Contains("hotmail")).FirstOrDefault();
-                    //    if (hotmail != null)
-                    //    {
-                    //        emailList.Add(hotmail);
-                    //    }
-                    //    emailList.Add(hotmail);
-                    //    //foreach (var item in emails)
-                    //    //{
-                    //    //    emailList.Add(item);
-                    //    //}
-                    //}
+                   
                     if (userInfo.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
@@ -2380,8 +2370,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                             DepartureServiceCentre = deptCentre,
                             RequestNumber = request.RequestNumber,
                             ToEmail = request.CustomerEmail,
-                            To = request.CustomerEmail,
-                            Emails = emailList
+                            To = request.CustomerEmail
                         };
                         if (!String.IsNullOrEmpty(trackId))
                         {
@@ -2508,7 +2497,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
         }
 
-
         public  async Task<bool> SendMessageToIntlTeam(int countryId, IntlShipmentRequestDTO castObj)
         {
             if (countryId == 207)
@@ -2526,6 +2514,119 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return true;
         }
 
+        public async Task<bool>UpdateIntlShipmentRequest(IntlShipmentRequestDTO requestDTO)
+        {
+            try
+            {
+                var shipmentItems = new List<IntlShipmentRequestItem>();
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                var shipments = _uow.IntlShipmentRequest.GetAll("ShipmentRequestItems").Where(x => x.RequestNumber == requestDTO.RequestNumber).FirstOrDefault();
+                foreach (var item in shipments.ShipmentRequestItems)
+                {
+                    //get current from the sent payload
+                    var currentItem = requestDTO.ShipmentRequestItems.Find(x => x.IntlShipmentRequestItemId == item.IntlShipmentRequestItemId);
+                    if (currentItem != null)
+                    {
+                        item.Weight = currentItem.Weight;
+                        item.Quantity = currentItem.Quantity;
+                        item.CourierService = currentItem.CourierService;
+                        item.ItemUniqueNo = currentItem.ItemUniqueNo;
+                        item.ItemState = currentItem.ItemState;
+                        item.Length = currentItem.Length;
+                        item.Width = currentItem.Width;
+                        item.Height = currentItem.Height;
+                        item.ItemRequestCode = currentItem.ItemRequestCode;
+                        item.NoOfPackageReceived = currentItem.NoOfPackageReceived;
+                        item.ItemStateDescription = currentItem.ItemStateDescription;
+                        if (item.ItemState == ItemState.Damaged)
+                        {
+                           shipmentItems.Add(item);
+                        }
+                    }
+                }
+                //also send a mail for damaged goods
+                if (shipmentItems.Any())
+                {
+                  var emailSent = await SendEmailForDamagedItems(shipmentItems);
+                }
+
+                _uow.Complete();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter)
+        {
+            var result = _shipmentService.GetIntlPaidWaybillForServiceCentre(filter);
+            return result;
+        }
+
+        private async Task<bool> SendEmailForDamagedItems(List<IntlShipmentRequestItem> shipmentItems)
+        {
+            var requestIDs = shipmentItems.Select(x => x.IntlShipmentRequestId).ToList();
+            var request = _uow.IntlShipmentRequest.GetAllAsQueryable().Where(x => requestIDs.Contains(x.IntlShipmentRequestId)).FirstOrDefault();
+            const int countryId = 1;
+            var deptEmail = string.Empty;
+            var deptCentre = string.Empty;
+            var trackId = string.Empty;
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+            if (user.UserActiveCountryId == 207)
+            {
+                string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
+                deptCentre = "Houston, United States";
+            }
+            else if (user.UserActiveCountryId == 62)
+            {
+                string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                deptCentre = "United Kingdom";
+            }
+
+            //send message for received item
+            foreach (var item in shipmentItems)
+            {
+                var messageDTO = new MessageDTO
+                {
+                    CustomerName = request.CustomerFirstName,
+                    Item = item.ItemName,
+                    Store = item.storeName,
+                    DepartureEmail = deptEmail,
+                    DepartureServiceCentre = deptCentre,
+                    RequestNumber = request.RequestNumber,
+                    DamageDescription = item.ItemStateDescription,
+                    ToEmail = request.CustomerEmail,
+                    To = request.CustomerEmail
+                };
+                if (!String.IsNullOrEmpty(item.TrackingId))
+                {
+                    messageDTO.TrackingId = $"with tracking Id of {trackId}";
+                }
+                //send item received message
+                messageDTO.MessageTemplate = "DamagedItemsReceived";
+                await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+            }
+            return true;
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            filter.ServiceCentreID = serviceCenterIds[0];
+            var result = await _uow.IntlShipmentRequest.GetProcessedIntlShipment(filter);
+            return result;
+        }
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetIntlReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
 
     }
 

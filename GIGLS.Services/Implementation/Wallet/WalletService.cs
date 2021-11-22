@@ -597,6 +597,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.Message = $"Invalid payload";
                     return result;
                 }
+                
 
                 if (chargeWalletDTO.Amount <= 0)
                 {
@@ -605,7 +606,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
-                if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount == 0)
+                if (chargeWalletDTO.Amount > 50000)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"We are sorry you have exceeded the maximum limit for airtime recharge.";
+                    return result;
+                }
+
+                if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
                 {
                     result.Succeeded = false;
                     result.Message = $"User or amount not provided";

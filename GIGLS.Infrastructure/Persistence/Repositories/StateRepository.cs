@@ -69,5 +69,29 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
 
             return Task.FromResult(stateDto);
         }
+
+        public Task<IEnumerable<StateDTO>> GetStateByCountryId(int countryId)
+        {
+            var states = Context.State.Where(x => x.CountryId == countryId);
+
+            IEnumerable<StateDTO> stateDto = (from s in states
+                                 select new StateDTO
+                                 {
+                                     StateId = s.StateId,
+                                     StateName = s.StateName,
+                                     StateCode = s.StateCode,
+                                     CountryId = s.CountryId,
+                                     Country = Context.Country.Where(c => c.CountryId == s.CountryId).Select(x => new CountryDTO
+                                     {
+                                         CountryId = x.CountryId,
+                                         CountryCode = x.CountryCode,
+                                         CountryName = x.CountryName
+                                     }).FirstOrDefault(),
+                                     DateCreated = s.DateCreated,
+                                     DateModified = s.DateModified
+                                 }).AsEnumerable();
+
+            return Task.FromResult(stateDto);
+        }
     }
 }

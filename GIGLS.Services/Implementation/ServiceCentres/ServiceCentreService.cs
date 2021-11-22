@@ -412,7 +412,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
 
                 //Get all service centre
                 int[] countryIds = new int[] { countryId };
-                bool excludehub = true;
+                bool excludehub = false;
                 int stationId = 0;
 
                 if (serviceCenterIds.StationId == 4)
@@ -489,6 +489,35 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 }
                 centre.IsConsignable = isconsignable;
                 _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByState(int stateId)
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetServiceCentresByState(stateId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresWithHUBForStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = false;
+                int stationId = 0;
+
+                return await _uow.ServiceCentre.GetServiceCentresIsHub(countryIds, excludehub, stationId);
             }
             catch (Exception)
             {
