@@ -1079,6 +1079,10 @@ namespace GIGLS.Services.Implementation.Report
             //group shipment by service centre
             if (shipments.Any())
             {
+                var allWeight = shipments.Select(x => x.ApproximateItemsWeight).ToArray();
+                int n = allWeight.Length;
+                double freq = maxFreq(allWeight, n);
+               
                 result = shipments.GroupBy(x => new { x.DepartureServiceCentreId }).Select(s => new InvoiceViewDTO
                 {
                     Waybill = s.FirstOrDefault().Waybill,
@@ -1094,7 +1098,8 @@ namespace GIGLS.Services.Implementation.Report
                     TotalWeight = s.Sum(x => x.ApproximateItemsWeight),
                     TotalShipment = s.Count(),
                     Cash = s.Sum(x => x.Cash),
-                    CustomerType = s.FirstOrDefault().CustomerType
+                    CustomerType = s.FirstOrDefault().CustomerType,
+                    TopWeight = freq
                 }).ToList();
 
                 result = result.OrderByDescending(x => x.TotalShipment).ToList();
@@ -1117,6 +1122,32 @@ namespace GIGLS.Services.Implementation.Report
                 filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
             }
             return await _uow.Shipment.GetGoFasterShipmentsByServiceCentre(filter);
+        }
+
+        public double maxFreq(double[] arr, int n)
+        {
+            int res = 0;
+            int count = 1;
+            for (int i = 1; i < n; i++)
+            {
+                if (arr[i] == arr[res])
+                {
+                    count++;
+                }
+                else
+                {
+                    count--;
+                }
+
+                if (count == 0)
+                {
+                    res = i;
+                    count = 1;
+                }
+
+            }
+
+            return arr[res];
         }
 
     }

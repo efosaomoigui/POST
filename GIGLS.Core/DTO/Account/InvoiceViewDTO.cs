@@ -123,6 +123,7 @@ namespace GIGLS.Core.DTO.Account
         public string RequestNumber { get; set; }
         public double TotalWeight { get; set; }
         public decimal TotalShipment { get; set; }
+        public double TopWeight { get; set; }
     }
      
     public class InvoiceViewDTOUNGROUPED
