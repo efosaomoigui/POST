@@ -2628,6 +2628,29 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return result;
         }
 
+        public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto)
+        {
+            var requests = new List<IntlShipmentDTO>();
+            var user = await _uow.User.GetUserByChannelCode(filterOptionsDto.CustomerCode);
+            if (user != null)
+            {
+                var shipmentDtos = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsByUserId(user.Id);
+                if (!shipmentDtos.Item1.Any())
+                {
+                    //TODO: SEND EMAIL TO USER TO REGISTER WITH GIGL
+                    var messageDTO = new MessageDTO
+                    {
+                        CustomerName = user.FirstName + " " + user.LastName,
+                        ToEmail = user.Email,
+                        To = user.Email
+                    };
+                }
+                return shipmentDtos;
+            }
+
+            return new Tuple<List<IntlShipmentDTO>, int>(requests, requests.Count);
+        }
+
     }
 
 

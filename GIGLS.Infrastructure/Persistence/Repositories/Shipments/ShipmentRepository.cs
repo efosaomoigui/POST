@@ -2871,5 +2871,97 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         }
     }
 
+    public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequestsByUserId(string currentUserId)
+    {
+        try
+        {
+            var count = 0;
+            List<IntlShipmentDTO> intlShipmentDTO = new List<IntlShipmentDTO>();
+
+            intlShipmentDTO = _context.IntlShipmentRequest
+          .Join(
+              _context.IntlShipmentRequestItem,
+              a => a.IntlShipmentRequestId,
+              b => b.IntlShipmentRequestId,
+              (a, b) => new IntlShipmentDTO
+              {
+                  IntlShipmentRequestId = a.IntlShipmentRequestId,
+                  RequestNumber = a.RequestNumber,
+                  CustomerFirstName = a.CustomerFirstName,
+                  CustomerLastName = a.CustomerLastName,
+                  CustomerId = a.CustomerId,
+                  CustomerType = a.CustomerType,
+                  CustomerCountryId = a.CustomerCountryId,
+                  CustomerAddress = a.CustomerAddress,
+                  CustomerEmail = a.CustomerEmail,
+                  CustomerPhoneNumber = a.CustomerPhoneNumber,
+                  CustomerCity = a.CustomerCity,
+                  CustomerState = a.CustomerState,
+                  DateCreated = a.DateCreated,
+                  DateModified = a.DateModified,
+                  PickupOptions = a.PickupOptions,
+                  DestinationServiceCentreId = a.DestinationServiceCentreId,
+                  DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == a.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                  {
+                      Code = x.Code,
+                      Name = x.Name
+                  }).FirstOrDefault(),
+                  IntlShipmentRequestItemId = b.IntlShipmentRequestItemId,
+                  Description = b.Description,
+                  ItemName = b.ItemName,
+                  TrackingId = b.TrackingId,
+                  storeName = b.storeName,
+                  ShipmentType = b.ShipmentType,
+                  Weight = b.Weight,
+                  Nature = b.Nature,
+                  Price = b.Price,
+                  Quantity = b.Quantity,
+                  SerialNumber = b.SerialNumber,
+                  IsVolumetric = b.IsVolumetric,
+                  Length = b.Length,
+                  Width = b.Width,
+                  Height = b.Height,
+                  ReceiverAddress = a.ReceiverAddress,
+                  ReceiverCity = a.ReceiverCity,
+                  ReceiverCountry = a.ReceiverCountry,
+                  ReceiverEmail = a.ReceiverEmail,
+                  ReceiverName = a.ReceiverName,
+                  ReceiverPhoneNumber = a.ReceiverPhoneNumber,
+                  ReceiverState = a.ReceiverState,
+                  UserId = a.UserId,
+                  Value = a.Value,
+                  GrandTotal = a.GrandTotal,
+                  SenderAddress = a.SenderAddress,
+                  SenderState = a.SenderState,
+                  ApproximateItemsWeight = a.ApproximateItemsWeight,
+                  DestinationCountryId = a.DestinationCountryId,
+                  IsProcessed = a.IsProcessed,
+                  ItemSenderfullName = b.ItemSenderfullName,
+                  ItemValue = b.ItemValue,
+                  Consolidated = a.Consolidated,
+                  Received = b.Received,
+                  ReceivedBy = b.ReceivedBy,
+                  ItemCount = b.ItemCount,
+                  RequestProcessingCountryId = a.RequestProcessingCountryId,
+                  ReceivedDate = b.ReceivedDate,
+                  CourierService = b.CourierService,
+                  ItemState = b.ItemState,
+                  ItemRequestCode = b.ItemRequestCode,
+                  ItemStateDescription = b.ItemStateDescription,
+                  NoOfPackageReceived = b.NoOfPackageReceived,
+                  ItemUniqueNo = b.ItemUniqueNo,
+
+              }
+          ).Where(b => b.IsProcessed == false).ToList();
+            return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+
+
 
 }

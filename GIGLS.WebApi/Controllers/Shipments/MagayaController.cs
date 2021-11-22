@@ -676,5 +676,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getintlrequestbycode")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlRequestByCustomerCode(filterOptionsDto);
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
     }
 }
