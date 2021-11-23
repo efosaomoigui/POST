@@ -2643,25 +2643,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
         requests = requests.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate).OrderByDescending(s => s.DateCreated);
 
         List<UnidentifiedItemsForInternationalShippingDTO> requestsDTO = (from r in requests
-                                                                          select new UnidentifiedItemsForInternationalShippingDTO()
-                                                                          {
-                                                                              UnidentifiedItemsForInternationalShippingId = r.UnidentifiedItemsForInternationalShippingId,
-                                                                              TrackingNo = r.TrackingNo,
-                                                                              CustomerName = r.CustomerName,
-                                                                              CustomerEmail = r.CustomerEmail,
-                                                                              CustomerPhoneNo = r.CustomerPhoneNo,
-                                                                              DateCreated = r.DateCreated,
-                                                                              DateModified = r.DateModified,
-                                                                              IsProcessed = r.IsProcessed,
-                                                                              Quantity = r.Quantity,
-                                                                              Length = r.Length,
-                                                                              Width = r.Width,
-                                                                              Height = r.Height,
-                                                                              Weight = r.Weight,
-                                                                              UserId = r.UserId,
-                                                                              ItemName = r.ItemName,
-                                                                              NoOfPackageReceived = r.NoOfPackageReceived
-                                                                          }).ToList();
+                                                                        
                                                     select new UnidentifiedItemsForInternationalShippingDTO()
                                                     {
                                                         UnidentifiedItemsForInternationalShippingId = r.UnidentifiedItemsForInternationalShippingId,
