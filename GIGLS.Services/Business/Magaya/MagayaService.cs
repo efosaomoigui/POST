@@ -2638,12 +2638,32 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 if (!shipmentDtos.Item1.Any())
                 {
                     //TODO: SEND EMAIL TO USER TO REGISTER WITH GIGL
+                    var deptEmail = string.Empty;
+                    var deptCentre = string.Empty;
+                    if (user.UserActiveCountryId == 207)
+                    {
+                        string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                        deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
+                        deptCentre = "Houston, United States";
+                    }
+                    else if (user.UserActiveCountryId == 62)
+                    {
+                        string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                        deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                        deptCentre = "United Kingdom";
+                    }
+
                     var messageDTO = new MessageDTO
                     {
                         CustomerName = user.FirstName + " " + user.LastName,
                         ToEmail = user.Email,
-                        To = user.Email
+                        To = user.Email,
+                        DepartureServiceCentre = deptCentre,
+                        DepartureEmail = deptEmail
                     };
+                    //send item received message
+                    messageDTO.MessageTemplate = "UnRegisteredItem";
+                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
                 }
                 return shipmentDtos;
             }
