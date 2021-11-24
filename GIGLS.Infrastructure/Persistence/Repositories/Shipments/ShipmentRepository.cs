@@ -3035,7 +3035,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                   ItemUniqueNo = b.ItemUniqueNo,
 
               }
-          ).Where(b => b.IsProcessed == false).ToList();
+          ).Where(b => b.IsProcessed == false && b.UserId == currentUserId).ToList();
             return new Tuple<List<IntlShipmentDTO>, int>(intlShipmentDTO, count);
         }
         catch (Exception)
