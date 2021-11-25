@@ -103,6 +103,7 @@
         InternationalCustomerWeekDiscount,
         CustomerWeekCountValue,
         IsIntlShipmentHoliday,
-        DaysBeforeRestriction
+        DaysBeforeRestriction,
+        AirtimeAmountLimit
     }
 }
