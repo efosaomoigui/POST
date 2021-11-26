@@ -606,20 +606,23 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
-                var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
-                if (limit == null)
+                if (chargeWalletDTO.BillType != BillType.ClassSubscription)
                 {
-                    result.Succeeded = false;
-                    result.Message = $"Airtime limit does not exist";
-                    return result;
-                }
+                    var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
+                    if (limit == null)
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"Airtime limit does not exist";
+                        return result;
+                    }
 
-                int limitAmount = Convert.ToInt32(limit.Value);
-                if (chargeWalletDTO.Amount > limitAmount)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"We are sorry you have exceeded the maximum limit for airtime recharge.";
-                    return result;
+                    int limitAmount = Convert.ToInt32(limit.Value);
+                    if (chargeWalletDTO.Amount > limitAmount)
+                    {
+                        result.Succeeded = false;
+                        result.Message = $"We are sorry you have exceeded the maximum limit for airtime recharge.";
+                        return result;
+                    } 
                 }
 
                 if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
