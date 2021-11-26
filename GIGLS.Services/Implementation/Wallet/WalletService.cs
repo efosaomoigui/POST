@@ -606,7 +606,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
-                if (chargeWalletDTO.BillType != BillType.ClassSubscription)
+                if (chargeWalletDTO.BillType == BillType.AIRTIME)
                 {
                     var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
                     if (limit == null)
@@ -619,9 +619,19 @@ namespace GIGLS.Services.Implementation.Wallet
                     int limitAmount = Convert.ToInt32(limit.Value);
                     if (chargeWalletDTO.Amount > limitAmount)
                     {
-                        result.Succeeded = false;
-                        result.Message = $"We are sorry you have exceeded the maximum limit for airtime recharge.";
-                        return result;
+                        // get the limit percentage
+                        var serviceFee = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimitPercentage.ToString());
+                        if (serviceFee == null)
+                        {
+                            result.Succeeded = false;
+                            result.Message = $"Airtime limit percentage does not exist";
+                            return result;
+                        }
+                        decimal limitPercentage = decimal.Parse(serviceFee.Value);
+
+                        decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
+                        chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
+
                     } 
                 }
 
