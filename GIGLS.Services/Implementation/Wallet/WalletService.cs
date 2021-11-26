@@ -590,6 +590,8 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
+                _uow.BeginTransaction();
+
                 var result = new ResponseDTO();
                 if (chargeWalletDTO == null)
                 {
@@ -718,7 +720,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.Message = $"Insufficient balance on customer wallet";
                     return result;
                 }
-                await _uow.CompleteAsync();
+                //await _uow.CompleteAsync();
 
                 //update wallet transaction
                 //generate paymentref
@@ -740,6 +742,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     PaymentTypeReference = referenceNo,
                     UserId = chargeWalletDTO.UserId
                 }, false);
+                _uow.Commit();
                 result.Succeeded = true;
                 result.Message = $"Wallet successfully charged";
                 result.Entity = new { transactionId = referenceNo };
@@ -747,7 +750,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             catch (Exception ex)
             {
-
+                _uow.Rollback();
                 throw;
             }
         }
