@@ -544,6 +544,8 @@ namespace GIGLS.Infrastructure.Persistence
         public IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
         [Inject]
         public IUnidentifiedItemsForInternationalShippingRepository UnidentifiedItemsForInternationalShipping { get; set; }
+        [Inject]
+        public IBillsPaymentManagementRepository BillsPaymentManagement { get; set; }
 
         public int Complete()
         {

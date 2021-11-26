@@ -319,6 +319,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<InternationalCargoManifest> InternationalCargoManifest { get; set; }
         public DbSet<InternationalCargoManifestDetail> InternationalCargoManifestDetail { get; set; }
         public DbSet<UnidentifiedItemsForInternationalShipping> UnidentifiedItemsForInternationalShipping { get; set; }
+        public DbSet<BillsPaymentManagement> BillsPaymentManagement { get; set; }
         #endregion
 
 

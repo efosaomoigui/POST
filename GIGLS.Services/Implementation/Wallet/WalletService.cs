@@ -597,7 +597,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.Message = $"Invalid payload";
                     return result;
                 }
-                
+
 
                 if (chargeWalletDTO.Amount <= 0)
                 {
@@ -622,6 +622,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                
+
                 if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
                 {
                     result.Succeeded = false;
@@ -644,6 +646,54 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                // Check if user has exceed threshold for the day
+                if (chargeWalletDTO.BillType == BillType.AIRTIME)
+                {
+                    var checkThreshold = await _uow.BillsPaymentManagement.GetAsync(x => x.UserId == chargeWalletDTO.UserId);
+                    if (checkThreshold != null)
+                    {
+                        var startDate = DateTime.Now.Date;
+
+                        if (startDate.ToLongDateString() == checkThreshold.PurchasedDate.ToLongDateString())
+                        {
+                            //var thresholdLimit = 50000M;
+                            var thresholdLimit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.DailyAirtimeAmountLimit.ToString());
+                            if (thresholdLimit == null)
+                            {
+                                result.Succeeded = false;
+                                result.Message = $"Daily Airtime limit does not exist";
+                                return result;
+                            }
+
+                            decimal dailyLimit = Convert.ToDecimal(thresholdLimit.Value);
+                            if (checkThreshold.PurchasedAmount <= dailyLimit)
+                            {
+                                checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
+                            }
+                            else
+                            {
+                                result.Succeeded = false;
+                                result.Message = $"Maximum airtime amount exceeded.";
+                                return result;
+                            }
+                        }
+                        else
+                        {
+                            checkThreshold.PurchasedDate = DateTime.Now;
+                            checkThreshold.PurchasedAmount = chargeWalletDTO.Amount;
+                        }
+                    }
+                    else
+                    {
+                        _uow.BillsPaymentManagement.Add(new Core.Domain.BillsPaymentManagement
+                        {
+                            UserId = chargeWalletDTO.UserId,
+                            PurchasedAmount = chargeWalletDTO.Amount,
+                            PurchasedDate = DateTime.Now
+                        });
+                    }
+                }
+
                 //add xtra charge for tv or electricity
                 if (chargeWalletDTO.BillType == BillType.TVSUB || chargeWalletDTO.BillType == BillType.ELECTRICITY)
                 {
@@ -654,6 +704,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         chargeWalletDTO.Amount = chargeWalletDTO.Amount + chargeAmount;
                     }
                 }
+
+                
 
                 //charge wallet
                 if ((wallet.Balance - chargeWalletDTO.Amount) >= 0)
@@ -672,7 +724,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 //generate paymentref
                 var today = DateTime.Now;
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
-                var desc = (chargeWalletDTO.BillType == BillType.ClassSubscription) ? "Customer subscription" 
+                var desc = (chargeWalletDTO.BillType == BillType.ClassSubscription) ? "Customer subscription"
                     : chargeWalletDTO.Description;
                 if (chargeWalletDTO.BillType != BillType.ClassSubscription)
                 {
