@@ -21,7 +21,7 @@
         WarehouseServiceCentre,
         PasswordExpireDaysCount,
         EcommerceOverDueDaysCount,
-        HaulageMaximumFixedDistance, 
+        HaulageMaximumFixedDistance,
         BankDepositModuleStartDate,
         globalpropertiesreminderdate,
         UserLoginEmailSendInterval,
@@ -105,8 +105,7 @@
         IsIntlShipmentHoliday,
         DaysBeforeRestriction,
         AirtimeAmountLimit,
+        AirtimeAmountLimitPercentage,
         DailyAirtimeAmountLimit
-        AirtimeAmountLimit,
-        AirtimeAmountLimitPercentage
     }
 }
