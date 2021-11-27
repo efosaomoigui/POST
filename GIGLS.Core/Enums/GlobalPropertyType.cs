@@ -106,5 +106,7 @@
         DaysBeforeRestriction,
         AirtimeAmountLimit,
         DailyAirtimeAmountLimit
+        AirtimeAmountLimit,
+        AirtimeAmountLimitPercentage
     }
 }

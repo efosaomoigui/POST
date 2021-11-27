@@ -37,9 +37,10 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IBankService _bankService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IServiceCentreService _serviceCenter;
+        private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
 
         public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService,
-            IInvoiceService invoiceservice, IBankService bankService, IMessageSenderService messageSenderService, IServiceCentreService serviceCenter)
+            IInvoiceService invoiceservice, IBankService bankService, IMessageSenderService messageSenderService, IServiceCentreService serviceCenter, IRegionServiceCentreMappingService regionServiceCentreMappingService)
         {
             _uow = uow;
             _walletService = walletService;
@@ -51,6 +52,7 @@ namespace GIGLS.Services.Implementation.Wallet
             MapperConfig.Initialize();
             _globalPropertyService = globalPropertyService;
             _serviceCenter = serviceCenter;
+            _regionServiceCentreMappingService = regionServiceCentreMappingService;
         }
 
         public BankShipmentSettlementService()
@@ -1591,6 +1593,27 @@ namespace GIGLS.Services.Implementation.Wallet
         public Task<IEnumerable<BankDTO>> GetBanks()
         {
             return _bankService.GetBanks();
+        }
+
+        public async Task<List<BankProcessingOrderCodesDTO>> GetRegionalAndECOBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria)
+        {
+            int[] serviceCenterIds = { };
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var userRoles = await _userService.GetUserRoles(currentUserId);
+            
+            if (currentUser.SystemUserRole.Contains("Ecommerce"))
+            {
+                //get ecommerce hub
+                var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(44);
+                serviceCenterIds = regionServiceCentreMappingDTOList.Where(s => s.ServiceCentre != null).Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+            }
+            else
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type, dateFilterCriteria, serviceCenterIds);
+            return await Task.FromResult(result);
         }
     }
 }

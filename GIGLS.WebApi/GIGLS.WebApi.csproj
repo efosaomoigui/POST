@@ -339,6 +339,7 @@
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BankSettlement\BankController.cs" />
     <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankProcessingOrderForAllController.cs" />
     <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
     <Compile Include="Controllers\BankSettlement\CODProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
@@ -509,6 +510,7 @@
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Location\" />
     <Folder Include="Views\Reminder\" />
+    <Folder Include="Views\Test\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
