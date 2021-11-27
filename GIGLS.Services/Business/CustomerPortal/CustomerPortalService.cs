@@ -4279,6 +4279,22 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 }
             }
+
+
+            if (BillType.AIRTIME == billType)
+            {
+                var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
+                var serviceFee = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimitPercentage.ToString());
+                int limitAmount = Convert.ToInt32(limit.Value);
+                if (serviceFee != null && transac.Amount > limitAmount)
+                {
+                    decimal limitPercentage = decimal.Parse(serviceFee.Value);
+                    decimal chargeAmount = (transac.Amount * limitPercentage / 100M);
+                    subAmount = transac.Amount - chargeAmount;
+                    charge = chargeAmount.ToString();
+                }
+            }
+
             var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
                     : (serviceSMS.BillType == BillType.AIRTIME) ? "Payment for airtime Top up" : (serviceSMS.BillType == BillType.DATASUB) ? "Payment for data subcription" : "Customer subscription";
 
