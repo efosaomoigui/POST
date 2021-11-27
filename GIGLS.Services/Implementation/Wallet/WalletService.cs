@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
+using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
@@ -610,6 +612,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (chargeWalletDTO.BillType == BillType.AIRTIME)
                 {
+                    // Check if user has exceed threshold for the day
+                    var checkThreshold = await _uow.BillsPaymentManagement.GetAsync(x => x.UserId == chargeWalletDTO.UserId);
                     var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
                     if (limit == null)
                     {
@@ -618,26 +622,62 @@ namespace GIGLS.Services.Implementation.Wallet
                         return result;
                     }
 
-                    int limitAmount = Convert.ToInt32(limit.Value);
-                    if (chargeWalletDTO.Amount > limitAmount)
+                    decimal limitAmount = Convert.ToDecimal(limit.Value);
+
+                    // get the limit percentage
+                    var serviceFee = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimitPercentage.ToString());
+                    if (serviceFee == null)
                     {
-                        // get the limit percentage
-                        var serviceFee = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimitPercentage.ToString());
-                        if (serviceFee == null)
+                        result.Succeeded = false;
+                        result.Message = $"Airtime limit percentage does not exist";
+                        return result;
+                    }
+
+                    if (checkThreshold != null)
+                    {
+                        var startDate = DateTime.Now.Date;
+
+                        if (startDate.ToLongDateString() == checkThreshold.PurchasedDate.ToLongDateString())
                         {
-                            result.Succeeded = false;
-                            result.Message = $"Airtime limit percentage does not exist";
-                            return result;
+                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount <= limitAmount)
+                            {
+                                checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
+                            }
+                            else
+                            {
+                                AddServiceCharge(chargeWalletDTO, serviceFee, checkThreshold);
+                            }
                         }
-                        decimal limitPercentage = decimal.Parse(serviceFee.Value);
-
-                        decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
-                        chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
-
-                    } 
+                        else
+                        {
+                            checkThreshold.PurchasedDate = DateTime.Now;
+                            
+                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount <= limitAmount)
+                            {
+                                checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
+                            }
+                            else
+                            {
+                                AddServiceCharge(chargeWalletDTO, serviceFee, checkThreshold);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(chargeWalletDTO.Amount > limitAmount)
+                        {
+                            AddServiceCharge(chargeWalletDTO, serviceFee, checkThreshold);
+                        }
+                        _uow.BillsPaymentManagement.Add(new Core.Domain.BillsPaymentManagement
+                        {
+                            UserId = chargeWalletDTO.UserId,
+                            PurchasedAmount = chargeWalletDTO.Amount,
+                            PurchasedDate = DateTime.Now
+                        });
+                    }
                 }
 
-                
+
 
                 if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
                 {
@@ -661,53 +701,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
-                // Check if user has exceed threshold for the day
-                if (chargeWalletDTO.BillType == BillType.AIRTIME)
-                {
-                    var checkThreshold = await _uow.BillsPaymentManagement.GetAsync(x => x.UserId == chargeWalletDTO.UserId);
-                    if (checkThreshold != null)
-                    {
-                        var startDate = DateTime.Now.Date;
 
-                        if (startDate.ToLongDateString() == checkThreshold.PurchasedDate.ToLongDateString())
-                        {
-                            //var thresholdLimit = 50000M;
-                            var thresholdLimit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.DailyAirtimeAmountLimit.ToString());
-                            if (thresholdLimit == null)
-                            {
-                                result.Succeeded = false;
-                                result.Message = $"Daily Airtime limit does not exist";
-                                return result;
-                            }
-
-                            decimal dailyLimit = Convert.ToDecimal(thresholdLimit.Value);
-                            if (checkThreshold.PurchasedAmount <= dailyLimit)
-                            {
-                                checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
-                            }
-                            else
-                            {
-                                result.Succeeded = false;
-                                result.Message = $"Maximum airtime amount exceeded.";
-                                return result;
-                            }
-                        }
-                        else
-                        {
-                            checkThreshold.PurchasedDate = DateTime.Now;
-                            checkThreshold.PurchasedAmount = chargeWalletDTO.Amount;
-                        }
-                    }
-                    else
-                    {
-                        _uow.BillsPaymentManagement.Add(new Core.Domain.BillsPaymentManagement
-                        {
-                            UserId = chargeWalletDTO.UserId,
-                            PurchasedAmount = chargeWalletDTO.Amount,
-                            PurchasedDate = DateTime.Now
-                        });
-                    }
-                }
 
                 //add xtra charge for tv or electricity
                 if (chargeWalletDTO.BillType == BillType.TVSUB || chargeWalletDTO.BillType == BillType.ELECTRICITY)
@@ -720,7 +714,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
 
-                
+
 
                 //charge wallet
                 if ((wallet.Balance - chargeWalletDTO.Amount) >= 0)
@@ -768,6 +762,14 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        private void AddServiceCharge(ChargeWalletDTO chargeWalletDTO, GlobalProperty serviceFee, BillsPaymentManagement checkThreshold)
+        {
+            decimal limitPercentage = decimal.Parse(serviceFee.Value);
+
+            decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
+            chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
+            checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
+        }
 
         public async Task<List<WalletDTO>> GetUserWallets(WalletSearchOption searchOption)
         {
