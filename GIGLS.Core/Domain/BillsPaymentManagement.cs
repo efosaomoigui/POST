@@ -10,7 +10,7 @@ namespace GIGLS.Core.Domain
     public class BillsPaymentManagement : BaseDomain, IAuditable
     {
         public int Id { get; set; }
-        [MaxLength(25)]
+        [MaxLength(100)]
         public string UserId { get; set; }
         public decimal PurchasedAmount { get; set; }
         public DateTime PurchasedDate { get; set; }
