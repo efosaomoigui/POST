@@ -639,7 +639,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                         if (startDate.ToLongDateString() == checkThreshold.PurchasedDate.ToLongDateString())
                         {
-                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount <= limitAmount)
+                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount < limitAmount)
                             {
                                 checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
                             }
@@ -652,7 +652,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         {
                             checkThreshold.PurchasedDate = DateTime.Now;
                             
-                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount <= limitAmount)
+                            if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount < limitAmount)
                             {
                                 checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
                             }
@@ -764,11 +764,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private void AddServiceCharge(ChargeWalletDTO chargeWalletDTO, GlobalProperty serviceFee, BillsPaymentManagement checkThreshold)
         {
+            decimal airtimeAmount = chargeWalletDTO.Amount;
             decimal limitPercentage = decimal.Parse(serviceFee.Value);
-
             decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
             chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
-            checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
+            checkThreshold.PurchasedAmount += airtimeAmount;
         }
 
         public async Task<List<WalletDTO>> GetUserWallets(WalletSearchOption searchOption)
