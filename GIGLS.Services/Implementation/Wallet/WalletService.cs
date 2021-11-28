@@ -651,7 +651,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         else
                         {
                             checkThreshold.PurchasedDate = DateTime.Now;
-                            
+                            checkThreshold.PurchasedAmount = 0.00m;
                             if (chargeWalletDTO.Amount <= limitAmount && checkThreshold.PurchasedAmount < limitAmount)
                             {
                                 checkThreshold.PurchasedAmount += chargeWalletDTO.Amount;
