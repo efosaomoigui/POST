@@ -4101,7 +4101,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-               var userDetail = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                var userDetail = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (!String.IsNullOrEmpty(userDetail.CustomerPin))
                 {
                     throw new GenericException("Customer already has a pin");
@@ -4128,14 +4128,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<string> BillTransactionRefund(string emailOrCode, decimal amount)
         {
             var response = "";
-            if (string.IsNullOrWhiteSpace( emailOrCode))
+            if (string.IsNullOrWhiteSpace(emailOrCode))
             {
                 throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             if (emailOrCode.StartsWith("2012GIGL"))
             {
-                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x =>  x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode)).ToList();
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode)).ToList();
                 var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
                 if (walletTrans is null)
@@ -4279,20 +4279,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 }
             }
+            else
+            {
+                subAmount = transac.Amount - transac.ServiceCharge;
+            }
 
 
             if (BillType.AIRTIME == billType)
             {
-                var limit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimit.ToString());
-                var serviceFee = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeAmountLimitPercentage.ToString());
-                int limitAmount = Convert.ToInt32(limit.Value);
-                if (serviceFee != null && transac.Amount > limitAmount)
-                {
-                    decimal limitPercentage = decimal.Parse(serviceFee.Value);
-                    decimal chargeAmount = (transac.Amount * limitPercentage / 100M);
-                    subAmount = transac.Amount - chargeAmount;
-                    charge = chargeAmount.ToString();
-                }
+                charge = transac.ServiceCharge.ToString();
             }
 
             var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
@@ -4309,7 +4304,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Item = desc,
                 BillType = billType.ToString().ToUpper(),
                 Amount = subAmount.ToString(),
-                Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0" ,
+                Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0",
                 ToTal = transac.Amount.ToString()
             };
             //if (!String.IsNullOrEmpty(chairmanEmail))
@@ -4405,7 +4400,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     response = "Transaction was successful";
                 }
-                else if(ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {
