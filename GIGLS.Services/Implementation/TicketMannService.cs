@@ -88,14 +88,16 @@ namespace GIGLS.Services.Implementation
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var response = await client.GetAsync(url);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
                 string resultJson = await response.Content.ReadAsStringAsync();
                 var jObject = JsonConvert.DeserializeObject<MerchantSalesDTO>(resultJson);
                 result = jObject;
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new GenericException("Operation could not complete successfully:");
-                }
 
                 return result;
             }
@@ -140,18 +142,19 @@ namespace GIGLS.Services.Implementation
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var response = await client.PostAsync(url, data);
-                string resultJson = await response.Content.ReadAsStringAsync();
-                var jObject = JsonConvert.DeserializeObject<CustomerTransactionsDTO>(resultJson);
-                result = jObject;
 
-                if (!response.IsSuccessStatusCode)
+                if (response == null || !response.IsSuccessStatusCode)
                 {
                     throw new GenericException("Operation could not complete successfully:");
                 }
 
+                string resultJson = await response.Content.ReadAsStringAsync();
+                var jObject = JsonConvert.DeserializeObject<CustomerTransactionsDTO>(resultJson);
+                result = jObject;
+                
                 if (result.Payload.Transactions.Any())
                 {
-                    result.Payload.Transactions = result.Payload.Transactions.OrderByDescending(x => x.DateofTransaction).ToList();
+                    result.Payload.Transactions = result.Payload.Transactions.OrderByDescending(x => x.DateofTransaction).Where(x => x.TransactionStatus == "Completed" || x.TransactionStatus == "Complete" || x.TransactionStatus == "Successful" || x.TransactionStatus == "SUCCESSFUL").ToList();
                 }
                 return result;
             }
