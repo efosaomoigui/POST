@@ -37,5 +37,6 @@ namespace GIGLS.Core.Domain.Wallet
         [MaxLength(100)]
         public string Manifest { get; set; }
         public int TransactionCountryId { get; set; }
+        public decimal ServiceCharge { get; set; }
     }
 }

@@ -29,6 +29,6 @@ namespace GIGLS.Core.DTO.Wallet
         public string Description { get; set; }
         public decimal Amount { get; set; }
         public BillType BillType { get; set; }
-
+        public decimal ServiceCharge { get; set; }
     }
 }
