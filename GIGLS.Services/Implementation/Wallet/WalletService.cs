@@ -747,7 +747,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     Description = desc,
                     PaymentType = PaymentType.Wallet,
                     PaymentTypeReference = referenceNo,
-                    UserId = chargeWalletDTO.UserId
+                    UserId = chargeWalletDTO.UserId,
+                    ServiceCharge = chargeWalletDTO.ServiceCharge,
                 }, false);
                 _uow.Commit();
                 result.Succeeded = true;
@@ -768,6 +769,7 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal limitPercentage = decimal.Parse(serviceFee.Value);
             decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
             chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
+            chargeWalletDTO.ServiceCharge = amountToAdd;
             checkThreshold.PurchasedAmount += airtimeAmount;
         }
 
