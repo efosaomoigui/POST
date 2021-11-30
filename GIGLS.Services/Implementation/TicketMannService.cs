@@ -45,16 +45,16 @@ namespace GIGLS.Services.Implementation
                 //setup login data
 
                 HttpResponseMessage responseMessage = await client.PostAsync("Token", formContent);
-                //get access token from response body
-                var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                var jObject = JObject.Parse(responseJson);
-
-                getTokenResponse = jObject.GetValue("access_token").ToString();
 
                 if (!responseMessage.IsSuccessStatusCode)
                 {
                     throw new GenericException("Operation could not complete login successfully:");
                 }
+                //get access token from response body
+                var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                var jObject = JObject.Parse(responseJson);
+
+                getTokenResponse = jObject.GetValue("access_token").ToString();
 
                 return getTokenResponse;
             }
@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation
         public async Task<CustomerTransactionsDTO> GetCustomerTransactionsSummary(DateFilterCriteria filter)
         {
             CustomerTransactionsDTO result = new CustomerTransactionsDTO();
-            
+
             if (filter.StartDate == null)
             {
                 throw new GenericException("Start date is required", $"{(int)HttpStatusCode.Forbidden}");
@@ -151,10 +151,14 @@ namespace GIGLS.Services.Implementation
                 string resultJson = await response.Content.ReadAsStringAsync();
                 var jObject = JsonConvert.DeserializeObject<CustomerTransactionsDTO>(resultJson);
                 result = jObject;
-                
+
                 if (result.Payload.Transactions.Any())
                 {
-                    result.Payload.Transactions = result.Payload.Transactions.OrderByDescending(x => x.DateofTransaction).Where(x => x.TransactionStatus == "Completed" || x.TransactionStatus == "Complete" || x.TransactionStatus == "Successful" || x.TransactionStatus == "SUCCESSFUL").ToList();
+                    var filterList = ConfigurationManager.AppSettings["TicketMannFilterList"];
+                    if (filterList != null)
+                    {
+                        result.Payload.Transactions = result.Payload.Transactions.Where(x => filterList.Contains(x.TransactionStatus)).OrderByDescending(x => x.DateofTransaction).ToList();
+                    }
                 }
                 return result;
             }
