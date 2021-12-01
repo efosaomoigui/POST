@@ -150,8 +150,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filter);
         Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filter);
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
-        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto);  
-
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaReceivedShipmentRequest(DateFilterCriteria filterOptionsDto);
     }
 
 

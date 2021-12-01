@@ -2671,6 +2671,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return new Tuple<List<IntlShipmentDTO>, int>(requests, requests.Count);
         }
 
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetMagayaNotReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetMagayaReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
     }
 
 
