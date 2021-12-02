@@ -661,6 +661,12 @@ namespace GIGLS.Services.Implementation.Wallet
                         if (chargeWalletDTO.Amount >= limitAmount)
                         {
                             var fraudRating = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.FraudRating.ToString());
+                            if (fraudRating == null)
+                            {
+                                result.Succeeded = false;
+                                result.Message = $"Rating does not exist";
+                                return result;
+                            }
                             int fraudRatingValue = Convert.ToInt32(fraudRating.Value);
                             checkThreshold.FraudRating += 1;
 
