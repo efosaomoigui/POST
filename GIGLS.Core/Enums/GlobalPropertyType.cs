@@ -105,6 +105,7 @@
         IsIntlShipmentHoliday,
         DaysBeforeRestriction,
         AirtimeAmountLimit,
-        AirtimeAmountLimitPercentage
+        AirtimeAmountLimitPercentage,
+        FraudRating
     }
 }
