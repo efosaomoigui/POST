@@ -14,5 +14,6 @@ namespace GIGLS.Core.Domain
         public string UserId { get; set; }
         public decimal PurchasedAmount { get; set; }
         public DateTime PurchasedDate { get; set; }
+        public int FraudRating { get; set; }
     }
 }
