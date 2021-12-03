@@ -347,7 +347,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.PaymentTypeReference.Contains("2012GIGL")).AsQueryable();
 
             List<WalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
                                                                select new WalletTransactionDTO()

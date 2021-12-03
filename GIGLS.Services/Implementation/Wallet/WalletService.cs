@@ -610,6 +610,28 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"User or amount not provided";
+                    return result;
+                }
+
+                var user = await _uow.User.GetUserById(chargeWalletDTO.UserId);
+                if (user == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"user does not exist";
+                    return result;
+                }
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
                 if (chargeWalletDTO.BillType == BillType.AIRTIME)
                 {
                     // Check if user has exceed threshold for the day
@@ -635,6 +657,46 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     if (checkThreshold != null)
                     {
+                        // Check for Fraud
+                        if (chargeWalletDTO.Amount >= limitAmount)
+                        {
+                            var fraudRating = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.FraudRating.ToString());
+                            if (fraudRating == null)
+                            {
+                                result.Succeeded = false;
+                                result.Message = $"Rating does not exist";
+                                return result;
+                            }
+                            int fraudRatingValue = Convert.ToInt32(fraudRating.Value);
+                            checkThreshold.FraudRating += 1;
+
+                            if (checkThreshold.FraudRating > fraudRatingValue)
+                            {
+                                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                                var individualCustomer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                                if (user != null)
+                                {
+                                    user.IsDeleted = true;
+                                }
+
+                                if (company != null)
+                                {
+                                    company.IsDeleted = true;
+                                }
+
+                                if (individualCustomer != null)
+                                {
+                                    individualCustomer.IsDeleted = true;
+                                }
+
+                                _uow.Commit();
+                                result.Succeeded = false;
+                                result.Message = $"Cannot proceed with the request";
+                                return result;
+                            }
+                        }
+
                         var startDate = DateTime.Now.Date;
 
                         if (startDate.ToLongDateString() == checkThreshold.PurchasedDate.ToLongDateString())
@@ -664,44 +726,19 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else
                     {
-                        if(chargeWalletDTO.Amount > limitAmount)
+                        if(chargeWalletDTO.Amount >= limitAmount)
                         {
                             AddServiceCharge(chargeWalletDTO, serviceFee, checkThreshold);
                         }
                         _uow.BillsPaymentManagement.Add(new Core.Domain.BillsPaymentManagement
                         {
                             UserId = chargeWalletDTO.UserId,
-                            PurchasedAmount = chargeWalletDTO.Amount,
-                            PurchasedDate = DateTime.Now
+                            PurchasedAmount = (chargeWalletDTO.Amount >= limitAmount) ? chargeWalletDTO.Amount - chargeWalletDTO.ServiceCharge  : chargeWalletDTO.Amount,
+                            PurchasedDate = DateTime.Now,
+                            FraudRating = (chargeWalletDTO.Amount >= limitAmount) ? 1 : 0
                         });
                     }
                 }
-
-
-
-                if (String.IsNullOrEmpty(chargeWalletDTO.UserId) || chargeWalletDTO.Amount <= 0)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"User or amount not provided";
-                    return result;
-                }
-
-                var user = await _uow.User.GetUserById(chargeWalletDTO.UserId);
-                if (user == null)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"user does not exist";
-                    return result;
-                }
-                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
-                if (wallet == null)
-                {
-                    result.Succeeded = false;
-                    result.Message = $"Wallet does not exist";
-                    return result;
-                }
-
-
 
                 //add xtra charge for tv or electricity
                 if (chargeWalletDTO.BillType == BillType.TVSUB || chargeWalletDTO.BillType == BillType.ELECTRICITY)
@@ -713,8 +750,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         chargeWalletDTO.Amount = chargeWalletDTO.Amount + chargeAmount;
                     }
                 }
-
-
 
                 //charge wallet
                 if ((wallet.Balance - chargeWalletDTO.Amount) >= 0)
@@ -770,7 +805,10 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal amountToAdd = (chargeWalletDTO.Amount * limitPercentage / 100M);
             chargeWalletDTO.Amount = chargeWalletDTO.Amount + amountToAdd;
             chargeWalletDTO.ServiceCharge = amountToAdd;
-            checkThreshold.PurchasedAmount += airtimeAmount;
+            if(checkThreshold != null)
+            {
+                checkThreshold.PurchasedAmount += airtimeAmount;
+            }
         }
 
         public async Task<List<WalletDTO>> GetUserWallets(WalletSearchOption searchOption)
