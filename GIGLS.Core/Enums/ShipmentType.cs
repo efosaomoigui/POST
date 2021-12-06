@@ -12,5 +12,10 @@
     {
         NotContacted,
         Contacted
+    }     
+    public enum DeliveryType
+    {
+        GOSTANDARDED,
+        GOFASTER
     }
 }

@@ -837,6 +837,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     var shipmentReq = await GetShipmentRequest(mDto.IntlShipmentRequest.RequestNumber);
                     var shipmentDTlMapped = Mapper.Map<IntlShipmentRequestDTL>(shipmentReq);
                     mDto.IntlShipmentRequest = shipmentDTlMapped;
+                    shipmentDTO.ExpressDelivery = shipmentReq.DeliveryType == DeliveryType.GOFASTER ? true : false;
 
                     var requestDto = mDto.IntlShipmentRequest.ShipmentRequestItems;
 
@@ -875,6 +876,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.CashOnDeliveryAmount = 0;
                 shipmentDTO.ExpectedAmountToCollect = (mDto.ExpectedAmountToCollect == null) ? 0 : decimal.Parse(mDto.ExpectedAmountToCollect);
                 shipmentDTO.ActualAmountCollected = (mDto.ActualAmountCollected == null) ? 0 : decimal.Parse(mDto.ActualAmountCollected);
+
 
                 //General Details comes with role user
                 shipmentDTO.UserId = currentUserId;
@@ -926,7 +928,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.ShipmentHash = "";
                 shipmentDTO.RequestNumber = mDto.RequestNumber;
-
 
                 //Drop Off
                 shipmentDTO.TempCode = "";

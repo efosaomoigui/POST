@@ -35,11 +35,10 @@ namespace GIGLS.Services.Implementation.BankSettlement
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
 
-                var gigxDTO = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
-                var gigx = Mapper.Map<GIGXUserDetail>(gigxDTO);
-                if (gigxDTO != null)
+                var gigx = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (gigx != null)
                 {
-                    bool isNumeric = int.TryParse(gIGXUserDetailDTO.CustomerCode, out int n);
+                    bool isNumeric = int.TryParse(gIGXUserDetailDTO.CustomerPin, out int n);
                     if (isNumeric && n > 0 && !String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
                     {
                         gigx.CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim();
