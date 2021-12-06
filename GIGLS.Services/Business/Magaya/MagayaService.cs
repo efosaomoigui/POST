@@ -1366,6 +1366,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 Consolidated = r.Consolidated,
                 ConsolidationId = r.ConsolidationId,
                 RequestProcessingCountryId = r.RequestProcessingCountryId,
+                DeliveryType = r.DeliveryType,
                 ShipmentRequestItems = r.ShipmentRequestItems.Select(c => new IntlShipmentRequestItem()
                 {
                     Description = c.Description,
