@@ -2636,7 +2636,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
-            if (user != null)
+            else
             {
                 var userId = await _userService.GetCurrentUserId();
                 var systemUser = await _userService.GetUserById(userId);
@@ -2673,8 +2673,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 return shipmentDtos;
             }
-
-            return new Tuple<List<IntlShipmentDTO>, int>(requests, requests.Count);
         }
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
