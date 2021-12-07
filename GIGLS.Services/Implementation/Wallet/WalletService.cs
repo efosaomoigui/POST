@@ -665,7 +665,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             return result;
                         }
                         decimal dailyLimitAmount = Convert.ToDecimal(dailyLimit.Value);
-                        if (checkThreshold.PurchasedAmount >= dailyLimitAmount)
+                        var totalAmount = checkThreshold.PurchasedAmount + chargeWalletDTO.Amount;
+                        if (totalAmount >= dailyLimitAmount)
                         {
                             var blockUser = await BlockUser(user.Id);
                             result.Succeeded = false;
