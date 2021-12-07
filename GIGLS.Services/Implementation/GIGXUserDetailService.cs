@@ -47,6 +47,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                     gigx.PrivateKey = gIGXUserDetailDTO.PrivateKey;
                     gigx.PublicKey = gIGXUserDetailDTO.PublicKey;
                     gigx.WalletAddress = gIGXUserDetailDTO.WalletAddress;
+                    gigx.GIGXEmail = gIGXUserDetailDTO.GIGXEmail;
                 }
                 else
                 {
@@ -56,7 +57,8 @@ namespace GIGLS.Services.Implementation.BankSettlement
                         CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim(),
                         PrivateKey = gIGXUserDetailDTO.PrivateKey,
                         PublicKey = gIGXUserDetailDTO.PublicKey,
-                        WalletAddress = gIGXUserDetailDTO.WalletAddress
+                        WalletAddress = gIGXUserDetailDTO.WalletAddress,
+                        GIGXEmail = gIGXUserDetailDTO.GIGXEmail
                     };
                     _uow.GIGXUserDetail.Add(gigxUser);
                 }

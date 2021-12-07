@@ -13,6 +13,8 @@ namespace GIGLS.Core.Domain
         public string WalletAddress { get; set; }
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
+        [MaxLength(128)]
+        public string GIGXEmail { get; set; }
 
     }
 }
