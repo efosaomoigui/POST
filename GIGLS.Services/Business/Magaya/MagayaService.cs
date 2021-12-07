@@ -2632,21 +2632,27 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         {
             var requests = new List<IntlShipmentDTO>();
             var user = await _uow.User.GetUserByChannelCode(filterOptionsDto.CustomerCode);
-            if (user != null)
+            if (user == null)
             {
+                throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            else
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var systemUser = await _userService.GetUserById(userId);
                 var shipmentDtos = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsByUserId(user.Id);
                 if (!shipmentDtos.Item1.Any())
                 {
                     //TODO: SEND EMAIL TO USER TO REGISTER WITH GIGL
                     var deptEmail = string.Empty;
                     var deptCentre = string.Empty;
-                    if (user.UserActiveCountryId == 207)
+                    if (systemUser.UserActiveCountryId == 207)
                     {
                         string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
                         deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
                         deptCentre = "Houston, United States";
                     }
-                    else if (user.UserActiveCountryId == 62)
+                    else if (systemUser.UserActiveCountryId == 62)
                     {
                         string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
                         deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
@@ -2667,8 +2673,6 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 }
                 return shipmentDtos;
             }
-
-            return new Tuple<List<IntlShipmentDTO>, int>(requests, requests.Count);
         }
 
         public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
