@@ -106,6 +106,7 @@
         DaysBeforeRestriction,
         AirtimeAmountLimit,
         AirtimeAmountLimitPercentage,
-        FraudRating
+        FraudRating,
+        AirtimeMaxDailyTransferLimit
     }
 }
