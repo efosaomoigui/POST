@@ -2843,6 +2843,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                       ItemStateDescription = b.ItemStateDescription,
                       NoOfPackageReceived = b.NoOfPackageReceived,
                       ItemUniqueNo = b.ItemUniqueNo,
+                      DeliveryType = a.DeliveryType
 
                   }
               ).Where(b => b.Received == true).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -2933,6 +2934,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                        NoOfPackageReceived = b.NoOfPackageReceived,
                        ItemUniqueNo = b.ItemUniqueNo,
                        ItemState = b.ItemState,
+                       DeliveryType = a.DeliveryType
 
                    }
                ).Where(a => a.Received == true && a.ReceivedDate >= startDate && a.ReceivedDate < endDate).OrderByDescending(x => x.ReceivedDate).ToList();
@@ -3132,6 +3134,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                       ItemStateDescription = b.ItemStateDescription,
                       NoOfPackageReceived = b.NoOfPackageReceived,
                       ItemUniqueNo = b.ItemUniqueNo,
+                      DeliveryType = a.DeliveryType
 
                   }
               ).Where(b => b.IsProcessed == false && b.Received == false).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -3222,6 +3225,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                        NoOfPackageReceived = b.NoOfPackageReceived,
                        ItemUniqueNo = b.ItemUniqueNo,
                        ItemState = b.ItemState,
+                       DeliveryType = a.DeliveryType
 
                    }
                ).Where(a => a.IsProcessed == false && a.Received == false && a.DateCreated >= startDate && a.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
@@ -3329,6 +3333,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                       ItemStateDescription = b.ItemStateDescription,
                       NoOfPackageReceived = b.NoOfPackageReceived,
                       ItemUniqueNo = b.ItemUniqueNo,
+                      DeliveryType = a.DeliveryType
 
                   }
               ).Where(b => b.Received == true).Where(s => (s.RequestNumber == dateFilterCriteria.FilterValue
@@ -3419,6 +3424,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
                        NoOfPackageReceived = b.NoOfPackageReceived,
                        ItemUniqueNo = b.ItemUniqueNo,
                        ItemState = b.ItemState,
+                       DeliveryType = a.DeliveryType
 
                    }
                ).Where(a => a.Received == true && a.ReceivedDate >= startDate && a.ReceivedDate < endDate).OrderByDescending(x => x.ReceivedDate).ToList();
