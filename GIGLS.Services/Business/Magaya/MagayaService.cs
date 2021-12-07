@@ -2632,6 +2632,10 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         {
             var requests = new List<IntlShipmentDTO>();
             var user = await _uow.User.GetUserByChannelCode(filterOptionsDto.CustomerCode);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
             if (user != null)
             {
                 var userId = await _userService.GetCurrentUserId();
