@@ -643,7 +643,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         result.Message = $"Airtime limit does not exist";
                         return result;
                     }
-
                     decimal limitAmount = Convert.ToDecimal(limit.Value);
 
                     // get the limit percentage
@@ -657,6 +656,24 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     if (checkThreshold != null)
                     {
+                        //check to see if purchased amount has exceeded daily transfer amount
+                        var dailyLimit = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.AirtimeMaxDailyTransferLimit.ToString());
+                        if (dailyLimit == null)
+                        {
+                            result.Succeeded = false;
+                            result.Message = $"Airtime daily limit does not exist";
+                            return result;
+                        }
+                        decimal dailyLimitAmount = Convert.ToDecimal(dailyLimit.Value);
+                        var totalAmount = checkThreshold.PurchasedAmount + chargeWalletDTO.Amount;
+                        if (totalAmount >= dailyLimitAmount)
+                        {
+                            var blockUser = await BlockUser(user.Id);
+                            result.Succeeded = false;
+                            result.Message = $"Cannot proceed with the request";
+                            return result;
+                        }
+
                         // Check for Fraud
                         if (chargeWalletDTO.Amount >= limitAmount)
                         {
@@ -672,25 +689,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                             if (checkThreshold.FraudRating > fraudRatingValue)
                             {
-                                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
-                                var individualCustomer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
-
-                                if (user != null)
-                                {
-                                    user.IsDeleted = true;
-                                }
-
-                                if (company != null)
-                                {
-                                    company.IsDeleted = true;
-                                }
-
-                                if (individualCustomer != null)
-                                {
-                                    individualCustomer.IsDeleted = true;
-                                }
-
-                                _uow.Commit();
+                                var blockUser = await BlockUser(user.Id);
                                 result.Succeeded = false;
                                 result.Message = $"Cannot proceed with the request";
                                 return result;
@@ -865,7 +864,6 @@ namespace GIGLS.Services.Implementation.Wallet
                                 walletsDto.Add(item);
                             }
                         }
-
                     }
                     if (CustomerType.Partner == item.CustomerType)
                     {
@@ -905,6 +903,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (wallet == null)
                 {
                     throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
+                }
+                if (walletDTO.AmountToCharge <= 0)
+                {
+                    throw new GenericException("Invalid amount", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 if (wallet.Balance < walletDTO.AmountToCharge)
                 {
@@ -1086,6 +1088,30 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
 
+        }
+
+        private async Task<bool> BlockUser(string userID)
+        {
+            var user = await _uow.User.GetUserById(userID);
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+            var individualCustomer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+            if (user != null)
+            {
+                user.IsDeleted = true;
+            }
+
+            if (company != null)
+            {
+                company.IsDeleted = true;
+            }
+
+            if (individualCustomer != null)
+            {
+                individualCustomer.IsDeleted = true;
+            }
+            _uow.Commit();
+            return true;
         }
     }
 }
