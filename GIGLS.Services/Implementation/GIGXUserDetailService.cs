@@ -32,6 +32,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             try
             {
                 // get the current user info
+                var result = false;
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
 
@@ -61,7 +62,8 @@ namespace GIGLS.Services.Implementation.BankSettlement
                     _uow.GIGXUserDetail.Add(gigxUser);
                 }
                 await _uow.CompleteAsync();
-                return true;
+                result = true;
+                return result;
             }
             catch (Exception ex)
             {
