@@ -12,5 +12,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string Destination { get; set; }
 
         public List<MobileShipmentTrackingDTO> MobileShipmentTrackings { get; set; }
+        public List<ManifestVisitMonitoringDTO> ManifestVisitMonitorings { get; set; }
     }
 }

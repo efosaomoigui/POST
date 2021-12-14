@@ -23,15 +23,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IShipmentTrackService _shipmentTrackService;
+        private readonly IManifestVisitMonitoringService _monitoringService;
 
 
         public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService,
-            IShipmentTrackService shipmentTrackService)
+            IShipmentTrackService shipmentTrackService, IManifestVisitMonitoringService monitoringService)
         {
             _uow = uow;
             _userService = userService;
             _messageSenderService = messageSenderService;
             _shipmentTrackService = shipmentTrackService;
+            _monitoringService = monitoringService;
 
         }
 
@@ -94,6 +96,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException("Invalid waybill number!!");
                     }
+                }
+
+                // also check for  manifest visit monitoring
+                ///Add Log Visit Reasons for the waybill to the first element
+                var logVisits = await _monitoringService.GetManifestVisitMonitoringByWaybill(waybill);
+                if (logVisits.Any())
+                {
+                    trackings.ManifestVisitMonitorings = logVisits;
                 }
 
                 return trackings;
