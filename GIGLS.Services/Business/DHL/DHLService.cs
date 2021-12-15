@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
@@ -10,6 +11,7 @@ using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -306,7 +308,14 @@ namespace GIGLS.Services.Business.DHL
             postalAddress.ProvinceCode = shipmentDTO.ReceiverStateOrProvinceCode.Trim().Length > 2 || string.IsNullOrEmpty(shipmentDTO.ReceiverStateOrProvinceCode) ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ReceiverStateOrProvinceCode.Trim();
             postalAddress.CountryCode = shipmentDTO.ReceiverCountryCode.Trim();
             postalAddress.countyName = shipmentDTO.ReceiverCountry;
-            if (splittedAddress.Length <= 1)
+            if (!string.IsNullOrEmpty(shipmentDTO.ReceiverAddress2))
+            {
+                var data = SplitTheSentenceAtWord(shipmentDTO.ReceiverAddress2, 45);
+                postalAddress.AddressLine1 = data[0];
+                postalAddress.AddressLine2 = data.Count() > 1 ? data[1] : shipmentDTO.ReceiverCountry;
+                postalAddress.AddressLine3 = data.Count() > 2 ? data[2] : shipmentDTO.ReceiverCountry;
+            }
+            else if (splittedAddress.Length <= 1)
             {
                 postalAddress.AddressLine1 = splittedAddress[0].Length <= 5 ? splittedAddress[0] + splittedAddress[1] : splittedAddress[0];
                 postalAddress.AddressLine2 = shipmentDTO.ReceiverCountry;
@@ -328,26 +337,27 @@ namespace GIGLS.Services.Business.DHL
             string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
             string phoneNumber = ConfigurationManager.AppSettings["DHLGIGPhoneNumber"];
             var customer = shipmentDTO.CustomerDetails;
+            var data = SplitTheSentenceAtWord(customer.Address, 45);
             var shipper = new ShipmentShipperDetail
             {
                 ContactInformation = new ContactInformation
                 {
-                    Email = email,
-                    Phone = phoneNumber,
-                    MobilePhone = phoneNumber,
+                    Email = !string.IsNullOrWhiteSpace(customer.Email) ? customer.Email : email,
+                    Phone = !string.IsNullOrWhiteSpace(customer.PhoneNumber) ? customer.PhoneNumber : phoneNumber,
+                    MobilePhone = !string.IsNullOrWhiteSpace(customer.PhoneNumber) ? customer.PhoneNumber : phoneNumber,
                     CompanyName = "GIG LOGISTICS",
                     FullName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name,
                 },
                 PostalAddress = new PostalAddress
                 {
-                    CityName = "Lagos",
+                    CityName = !string.IsNullOrWhiteSpace(customer.State) ? customer.State : "Lagos",
                     PostalCode = "100001",
-                    ProvinceCode = "NG",
-                    CountryCode = "NG",
-                    countyName = "Nigeria",
-                    AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
-                    AddressLine2 = "Beside Mobile Fuel Station",
-                    AddressLine3 = "Gbagada 100234, Lagos",
+                    ProvinceCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG",
+                    CountryCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG",
+                    countyName = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryName : "Nigeria",
+                    AddressLine1 = data[0],
+                    AddressLine2 = data.Count > 1 ? data[1] : customer.City,
+                    AddressLine3 = data.Count > 2 ? data[2] : customer.State,
                 }
             };
             return shipper;
@@ -429,7 +439,7 @@ namespace GIGLS.Services.Business.DHL
             var shippingDate = await AddWorkdays(shipmentDTO.IsFromMobile, shipmentDTO.DepartureCountryId);
             rateRequest.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
-            rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
+            rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress(shipmentDTO.CustomerDetails);
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
             if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
             {
@@ -481,19 +491,26 @@ namespace GIGLS.Services.Business.DHL
             return rateRequest;
         }
 
-        private RateShipperDetail GetRateShipperAddress()
+        private RateShipperDetail GetRateShipperAddress(CustomerDTO customer)
         {
+            var data = SplitTheSentenceAtWord(customer.Address, 45);
             //Move this detail to web-config for now
-            var address = new RateShipperDetail
-            {
-                CityName = "Lagos",
-                PostalCode = "100001",
-                CountryCode = "NG",
-                CountyName = "Nigeria",
-                AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
-                AddressLine2 = "Beside Mobile Fuel Station",
-                AddressLine3 = "Gbagada 100234, Lagos"
-            };
+            var address = new RateShipperDetail();
+            //CityName = "Lagos";
+            //PostalCode = "100001";
+            //CountryCode = "NG";
+            //CountyName = "Nigeria",
+            //AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way";
+            //AddressLine2 = "Beside Mobile Fuel Station";
+            //AddressLine3 = "Gbagada 100234, Lagos";
+
+            address.CityName = !string.IsNullOrWhiteSpace(customer.State) ? customer.State : "Lagos";
+            address.PostalCode = "100001";
+            address.CountryCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG";
+            address.CountyName = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryName : "Nigeria";
+            address.AddressLine1 = data[0];
+            address.AddressLine2 = data.Count > 1 ? data[1] : customer.City;
+            address.AddressLine3 = data.Count > 2 ? data[2] : customer.State;
             return address;
         }
 
@@ -626,6 +643,70 @@ namespace GIGLS.Services.Business.DHL
                 Value = declareValue,
                 Currency = "NGN"
             };
+        }
+
+        private List<string> SplitTheSentenceAtWord(string originalString, int length)
+        {
+            try
+            {
+                List<string> truncatedStrings = new List<string>();
+                if (originalString == null || originalString.Trim().Length <= length)
+                {
+                    truncatedStrings.Add(originalString);
+                    return truncatedStrings;
+                }
+                int index = originalString.Trim().LastIndexOf(" ");
+
+                while ((index + 3) > length)
+                    index = originalString.Substring(0, index).Trim().LastIndexOf(" ");
+
+                if (index > 0)
+                {
+                    string retValue = originalString.Substring(0, index) + "...";
+                    truncatedStrings.Add(retValue);
+
+                    string shortWord2 = originalString;
+                    if (retValue.EndsWith("..."))
+                    {
+                        shortWord2 = retValue.Replace("...", "");
+                    }
+                    shortWord2 = originalString.Substring(shortWord2.Length);
+
+                    if (shortWord2.Length > length) //truncate it further
+                    {
+                        List<string> retValues = SplitTheSentenceAtWord(shortWord2.TrimStart(), length);
+                        truncatedStrings.AddRange(retValues);
+                    }
+                    else
+                    {
+                        truncatedStrings.Add(shortWord2.TrimStart());
+                    }
+                    return truncatedStrings;
+                }
+                var retVal_Last = originalString.Substring(0, length - 3);
+                truncatedStrings.Add(retVal_Last + "...");
+                if (originalString.Length > length)//truncate it further
+                {
+                    string shortWord3 = originalString;
+                    if (originalString.EndsWith("..."))
+                    {
+                        shortWord3 = originalString.Replace("...", "");
+                    }
+                    shortWord3 = originalString.Substring(retVal_Last.Length);
+                    List<string> retValues = SplitTheSentenceAtWord(shortWord3.TrimStart(), length);
+
+                    truncatedStrings.AddRange(retValues);
+                }
+                else
+                {
+                    truncatedStrings.Add(retVal_Last + "...");
+                }
+                return truncatedStrings;
+            }
+            catch
+            {
+                return new List<string> { originalString };
+            }
         }
 
     }

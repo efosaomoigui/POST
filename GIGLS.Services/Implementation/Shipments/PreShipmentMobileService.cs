@@ -7462,6 +7462,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     shipment.DepartureServiceCentreId = userServiceCenters[0];
                 }
+                shipment.Waybill = mobile.Waybill;
                 shipment.DestinationServiceCentreId = destination.ServiceCentreId;
                 shipment.PickupOptions = mobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER;
                 shipment.IsClassShipment = customer.Rank == Rank.Class ? true : false;

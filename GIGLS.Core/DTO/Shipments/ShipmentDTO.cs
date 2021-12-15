@@ -429,6 +429,8 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal InternationalShippingCost { get; set; }
         public string Waybill { get; set; }
         public InternationalRequestType RequestType { get; set; }
+        public string ReceiverAddress2 { get; set; }
+
     }
 
     public class CODShipmentDTO : BaseDomainDTO
