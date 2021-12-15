@@ -263,6 +263,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ConsolidationId { get; set; }
         public string ItemCount { get; set; }
         public int RequestProcessingCountryId { get; set; }
+        public DeliveryType DeliveryType { get; set; }
 
     }
 
@@ -360,6 +361,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ItemRequestCode { get; set; }
         public string ItemStateDescription { get; set; }
         public int NoOfPackageReceived { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 
     public class InternationalShipmentDTO : BaseDomainDTO
@@ -429,6 +431,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal InternationalShippingCost { get; set; }
         public string Waybill { get; set; }
         public InternationalRequestType RequestType { get; set; }
+        public DeliveryType DeliveryType { get; set; }
         public string ReceiverAddress2 { get; set; }
 
     }

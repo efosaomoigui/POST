@@ -279,6 +279,7 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(128)]
         public string ConsolidationId { get; set; }
         public int RequestProcessingCountryId { get; set; }
+        public DeliveryType DeliveryType { get; set; }
 
     }
 
