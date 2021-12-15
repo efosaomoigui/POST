@@ -12,5 +12,6 @@ namespace GIGLS.Core.IRepositories
 
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByPin(string pin);
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByCode(string customerCode);
+        Task<GIGXUserDetail> GetMGIGXUserDetailByCode(string customerCode);
     }
 }

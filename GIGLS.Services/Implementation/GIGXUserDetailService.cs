@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
 
-                var gigx = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                var gigx =  _uow.GIGXUserDetail.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).FirstOrDefault();
                 if (gigx != null)
                 {
                     bool isNumeric = int.TryParse(gIGXUserDetailDTO.CustomerPin, out int n);

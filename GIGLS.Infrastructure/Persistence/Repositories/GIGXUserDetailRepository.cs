@@ -101,5 +101,34 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
             }
         }
 
+
+        public Task<GIGXUserDetail> GetMGIGXUserDetailByCode(string customerCode)
+        {
+            try
+            {
+                var gigxusers = _context.GIGXUserDetail.AsQueryable().Where(x => x.CustomerCode == customerCode);
+
+                List<GIGXUserDetail> gigxusersDTO = new List<GIGXUserDetail>();
+
+                gigxusersDTO = (from r in gigxusers
+                                select new GIGXUserDetail()
+                                {
+                                    GIGXUserDetailId = r.GIGXUserDetailId,
+                                    CustomerCode = r.CustomerCode,
+                                    CustomerPin = r.CustomerPin,
+                                    PrivateKey = r.PrivateKey,
+                                    PublicKey = r.PublicKey,
+                                    DateCreated = r.DateCreated,
+                                    WalletAddress = r.WalletAddress
+                                }).OrderByDescending(x => x.DateCreated).ToList();
+
+                return Task.FromResult(gigxusersDTO.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
