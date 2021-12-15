@@ -31,31 +31,39 @@ namespace GIGLS.Services.Implementation.BankSettlement
 
             try
             {
-                if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerCode.ToLower() == gIGXUserDetailDTO.CustomerCode.ToLower() && !String.IsNullOrEmpty(v.CustomerPin)))
-                {
-                    throw new GenericException($"user already have a pin");
-                }
-
-                //if (await _uow.GIGXUserDetail.ExistAsync(v => v.CustomerPin.ToLower() == gIGXUserDetailDTO.CustomerPin.ToLower()))
-                //{
-                //    throw new GenericException($"Pin already in use");
-                //}
-
                 // get the current user info
+                var result = false;
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
-                var gigxUser = new GIGXUserDetail
-                {
-                    CustomerCode = user.UserChannelCode,
-                    CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim(),
-                    PrivateKey = gIGXUserDetailDTO.PrivateKey,
-                    PublicKey = gIGXUserDetailDTO.PublicKey,
-                    WalletAddress = gIGXUserDetailDTO.WalletAddress
-                };
 
-                _uow.GIGXUserDetail.Add(gigxUser);
+                var gigx =  _uow.GIGXUserDetail.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).FirstOrDefault();
+                if (gigx != null)
+                {
+                    bool isNumeric = int.TryParse(gIGXUserDetailDTO.CustomerPin, out int n);
+                    if (isNumeric && n > 0 && !String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
+                    {
+                        gigx.CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim();
+                    }
+                    gigx.CustomerCode = user.UserChannelCode;
+                    gigx.PrivateKey = gIGXUserDetailDTO.PrivateKey;
+                    gigx.PublicKey = gIGXUserDetailDTO.PublicKey;
+                    gigx.WalletAddress = gIGXUserDetailDTO.WalletAddress;
+                }
+                else
+                {
+                    var gigxUser = new GIGXUserDetail
+                    {
+                        CustomerCode = user.UserChannelCode,
+                        CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim(),
+                        PrivateKey = gIGXUserDetailDTO.PrivateKey,
+                        PublicKey = gIGXUserDetailDTO.PublicKey,
+                        WalletAddress = gIGXUserDetailDTO.WalletAddress
+                    };
+                    _uow.GIGXUserDetail.Add(gigxUser);
+                }
                 await _uow.CompleteAsync();
-                return true;
+                result = true;
+                return result;
             }
             catch (Exception ex)
             {

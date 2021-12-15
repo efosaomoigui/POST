@@ -3708,35 +3708,45 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails)
         {
-            if (userDetails is null)
+            bool result = false;
+            try
             {
-                throw new GenericException("Please provide valid GIGX user details");
-            }
+                if (userDetails is null)
+                {
+                    throw new GenericException("Please provide valid GIGX user details");
+                }
 
-            if (string.IsNullOrWhiteSpace(userDetails.WalletAddress))
+                if (string.IsNullOrWhiteSpace(userDetails.WalletAddress))
+                {
+                    throw new GenericException("Wallet Address is required");
+                }
+
+                if (string.IsNullOrWhiteSpace(userDetails.PrivateKey))
+                {
+                    throw new GenericException("Private Key is required");
+                }
+
+                if (string.IsNullOrWhiteSpace(userDetails.PublicKey))
+                {
+                    throw new GenericException("Public Key is required");
+                }
+
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(userId);
+
+                if (user is null)
+                {
+                    throw new GenericException("User does not exit");
+                }
+                var gigxUser = _gigxService.AddGIGXUserDetail(userDetails);
+                result = true;
+                return result;
+            }
+            catch (Exception ex)
             {
-                throw new GenericException("Wallet Address is required");
-            }
 
-            if (string.IsNullOrWhiteSpace(userDetails.PrivateKey))
-            {
-                throw new GenericException("Private Key is required");
+                throw ex;
             }
-
-            if (string.IsNullOrWhiteSpace(userDetails.PublicKey))
-            {
-                throw new GenericException("Public Key is required");
-            }
-
-            var userId = await _userService.GetCurrentUserId();
-            var user = await _uow.User.GetUserById(userId);
-
-            if (user is null)
-            {
-                throw new GenericException("User does not exit");
-            }
-            var gigxUser = _gigxService.AddGIGXUserDetail(userDetails);
-            return true;
         }
 
 
@@ -4101,7 +4111,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-               var userDetail = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                var userDetail = await _uow.GIGXUserDetail.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (!String.IsNullOrEmpty(userDetail.CustomerPin))
                 {
                     throw new GenericException("Customer already has a pin");
@@ -4128,14 +4138,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<string> BillTransactionRefund(string emailOrCode, decimal amount)
         {
             var response = "";
-            if (string.IsNullOrWhiteSpace( emailOrCode))
+            if (string.IsNullOrWhiteSpace(emailOrCode))
             {
                 throw new GenericException("Please provide valid email or customer code", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             if (emailOrCode.StartsWith("2012GIGL"))
             {
-                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x =>  x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode)).ToList();
+                var listWatrans = _uow.WalletTransaction.GetAllAsQueryable().Where(x => x.CreditDebitType == CreditDebitType.Debit && x.PaymentTypeReference.Equals(emailOrCode)).ToList();
                 var walletTrans = listWatrans.OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
                 if (walletTrans is null)
@@ -4279,6 +4289,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 }
             }
+            else
+            {
+                subAmount = transac.Amount - transac.ServiceCharge;
+            }
+
+
+            if (BillType.AIRTIME == billType)
+            {
+                charge = transac.ServiceCharge.ToString();
+            }
+
             var desc = (serviceSMS.BillType == BillType.TVSUB) ? "Payment for TV subcription" : (serviceSMS.BillType == BillType.ELECTRICITY) ? "Electricity bill payment"
                     : (serviceSMS.BillType == BillType.AIRTIME) ? "Payment for airtime Top up" : (serviceSMS.BillType == BillType.DATASUB) ? "Payment for data subcription" : "Customer subscription";
 
@@ -4293,7 +4314,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Item = desc,
                 BillType = billType.ToString().ToUpper(),
                 Amount = subAmount.ToString(),
-                Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0" ,
+                Charge = (!String.IsNullOrEmpty(charge)) ? charge : "0",
                 ToTal = transac.Amount.ToString()
             };
             //if (!String.IsNullOrEmpty(chairmanEmail))
@@ -4389,7 +4410,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     response = "Transaction was successful";
                 }
-                else if(ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
+                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
                 {
                     if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
                     {

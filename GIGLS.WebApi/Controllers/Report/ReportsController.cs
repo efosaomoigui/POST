@@ -10,6 +10,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -455,6 +456,37 @@ namespace GIGLS.WebApi.Controllers.Report
                 var report = await _shipmentService.MarkInvoiceasPaid(customerInvoices);
 
                 return new ServiceResponse<bool>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgofasterreport")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetGoFasterReport(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetGoFasterReport(filter);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgofasterreportbycentre")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetGoFasterShipmentsByServiceCentre(filter);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
                 {
                     Object = report
                 };

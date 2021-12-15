@@ -2628,6 +2628,64 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return result;
         }
 
+        public async Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto)
+        {
+            var requests = new List<IntlShipmentDTO>();
+            var user = await _uow.User.GetUserByChannelCode(filterOptionsDto.CustomerCode);
+            if (user == null)
+            {
+                throw new GenericException("user does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            else
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var systemUser = await _userService.GetUserById(userId);
+                var shipmentDtos = await _uow.IntlShipmentRequest.GetIntlShipmentRequestsByUserId(user.Id);
+                if (!shipmentDtos.Item1.Any())
+                {
+                    //TODO: SEND EMAIL TO USER TO REGISTER WITH GIGL
+                    var deptEmail = string.Empty;
+                    var deptCentre = string.Empty;
+                    if (systemUser.UserActiveCountryId == 207)
+                    {
+                        string houstonEmail = ConfigurationManager.AppSettings["HoustonEmail"];
+                        deptEmail = (string.IsNullOrEmpty(houstonEmail)) ? "giglusa@giglogistics.com" : houstonEmail; //houston email
+                        deptCentre = "Houston, United States";
+                    }
+                    else if (systemUser.UserActiveCountryId == 62)
+                    {
+                        string ukEmail = ConfigurationManager.AppSettings["UkEmail"];
+                        deptEmail = (string.IsNullOrEmpty(ukEmail)) ? "gigluk@giglogistics.com" : ukEmail; //UK email
+                        deptCentre = "United Kingdom";
+                    }
+
+                    var messageDTO = new MessageDTO
+                    {
+                        CustomerName = user.FirstName + " " + user.LastName,
+                        ToEmail = user.Email,
+                        To = user.Email,
+                        DepartureServiceCentre = deptCentre,
+                        DepartureEmail = deptEmail
+                    };
+                    //send item received message
+                    messageDTO.MessageTemplate = "UnRegisteredItem";
+                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                }
+                return shipmentDtos;
+            }
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetMagayaNotReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
+
+        public Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            var result = _uow.IntlShipmentRequest.GetMagayaReceivedShipmentRequest(filterOptionsDto);
+            return result;
+        }
     }
 
 

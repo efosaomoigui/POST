@@ -13,7 +13,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [Authorize(Roles = "Admin, ViewAdmin")]
+    [Authorize]
     [RoutePrefix("api/billspayment")]
     public class BillsPaymentController : BaseWebApiController
     {
@@ -24,7 +24,7 @@ namespace GIGLS.WebApi.Controllers
             _service = service;
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
+       // [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("report")]
         public async Task<IServiceResponse<MerchantSalesPayload>> GetBillsPaymentSummary(DateFilterCriteria searchDTO)
@@ -40,7 +40,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
+        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("customertransactions")]
         public async Task<IServiceResponse<CustomerTransactionsPayload>> GetBillsPaymentSummaryForCustomerTransactions(DateFilterCriteria searchDTO)

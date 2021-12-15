@@ -676,5 +676,63 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getintlrequestbycode")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetIntlRequestByCustomerCode(DateFilterCriteria filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetIntlRequestByCustomerCode(filterOptionsDto);
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getmagayanotreceivedshipmentrequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetMagayaNotReceivedShipmentRequest(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getmagayareceivedshipmentrequest")]
+        public async Task<IServiceResponse<Tuple<List<IntlShipmentDTO>, int>>> GetMagayaReceivedShipmentRequest(DateFilterCriteria filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = (int)userActiveCountry?.CountryId;
+            filterOptionsDto.UserId = await _userService.GetCurrentUserId();
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = _service.GetMagayaReceivedShipmentRequest(filterOptionsDto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Tuple<List<IntlShipmentDTO>, int>>()
+                {
+                    Object = result.Result
+                };
+            });
+        }
     }
 }

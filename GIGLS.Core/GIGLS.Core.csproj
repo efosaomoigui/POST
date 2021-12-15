@@ -147,6 +147,7 @@
     <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\BillsPaymentManagement.cs" />
     <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
     <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
     <Compile Include="Domain\InternationalCargoManifest.cs" />
@@ -335,6 +336,7 @@
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\BaseSearchDto.cs" />
+    <Compile Include="DTO\BillsPaymentManagementDTO.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
     <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
@@ -707,6 +709,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
     <Compile Include="IRepositories\IShipmentExportRepository.cs" />
     <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />

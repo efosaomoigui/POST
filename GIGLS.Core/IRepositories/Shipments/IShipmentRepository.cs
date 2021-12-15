@@ -37,6 +37,8 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
         Task<List<CustomerInvoiceDTO>> GetCoporateInvoiceList(DateFilterForDropOff filter);
         Task<List<InvoiceViewDTO>> GetIntlPaidWaybillForServiceCentre(NewFilterOptionsDto filterOptionsDto);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipments(NewFilterOptionsDto filterOptionsDto);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filterOptionsDto);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
@@ -51,5 +53,8 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
         Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filterOptionsDto);
         Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlReceivedShipmentRequest(DateFilterCriteria dateFilterCriteria);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetIntlShipmentRequestsByUserId(string currentUserId);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaNotReceivedShipmentRequest(DateFilterCriteria dateFilterCriteria);
+        Task<Tuple<List<IntlShipmentDTO>, int>> GetMagayaReceivedShipmentRequest(DateFilterCriteria dateFilterCriteria);
     }
 }
