@@ -724,7 +724,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var userDto = await _portalService.ValidateOTP(otp);
-                if (userDto != null && userDto.IsActive == true)
+                if (userDto != null && userDto.IsActive == true && otp.isPINCreation == false)
                 {
                     string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
                     string getTokenResponse;
@@ -774,6 +774,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             ReferrerCode = userDto.Referrercode
                         };
                     }
+                }
+                else if (userDto != null && userDto.IsActive == true && otp.isPINCreation == true)
+                {
+                    var data = new { IsActive = true };
+
+                    var jObject = JObject.FromObject(data);
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Code = $"{(int)HttpStatusCode.OK}",
+                        ShortDescription = "OTP validation successful",
+                        Object = jObject
+                    };
                 }
                 else
                 {
@@ -1869,6 +1882,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
+                //set default values if payload is null
+                if (filterCriteria == null)
+                {
+                    filterCriteria = new ShipmentCollectionFilterCriteria
+                    {
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+
                 var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
 
                 return new ServiceResponse<List<PreShipmentDTO>>
@@ -2280,11 +2303,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [Route("useraddresses")]
-        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses()
+        public async Task<IServiceResponse<List<AddressDTO>>> GetTopFiveUserAddresses(bool isIntl = false)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.GetTopFiveUserAddresses();
+                var result = await _portalService.GetTopFiveUserAddresses(isIntl);
 
                 return new ServiceResponse<List<AddressDTO>>
                 {
@@ -2533,7 +2556,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPut]
         [Route("gigxuserdetails")]
-        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailsDTO userDetails)
+        public async Task<IServiceResponse<object>> SaveGIGXUserDetails(GIGXUserDetailDTO userDetails)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -2547,12 +2570,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getgigxuserwalletdetails")]
-        public async Task<IServiceResponse<GIGXUserDetailsDTO>> GetGIGXUserWalletDetails()
+        public async Task<IServiceResponse<GIGXUserDetailDTO>> GetGIGXUserWalletDetails()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.GetGIGXUserWalletDetails();
-                return new ServiceResponse<GIGXUserDetailsDTO>
+                return new ServiceResponse<GIGXUserDetailDTO>
                 {
                     Object = result
                 };
@@ -2638,6 +2661,217 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpDelete]
+        [Route("deleteinboundshipment/{requestNo}")]
+        public async Task<IServiceResponse<bool>> DeleteInboundShipment(string requestNo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var inboundShepment = await _portalService.DeleteInboundShipment(requestNo);
+                return new ServiceResponse<bool>
+                {
+                    Object = inboundShepment
+                };
+            });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("getwalletbalance/{customerCode}")]
+        public async Task<IServiceResponse<decimal>> GetWalletBalance(string customerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var wallet = await _portalService.GetWalletBalance(customerCode);
+                return new ServiceResponse<decimal>
+                {
+                    Object = wallet.Balance
+                };
+            });
+        }
+
+       
+        [HttpPost]
+        [Route("createCoupon")]
+        public async Task<IServiceResponse<List<string>>> CreateCoupon(CouponManagementDTO couponDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var couponCodes = await _portalService.CreateCoupon(couponDto);
+                return new ServiceResponse<List<string>>
+                {
+                    Object = couponCodes
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcomputecouponamount/{couponCode}/{amount}")]
+        public async Task<IServiceResponse<decimal>> GetComputeCouponAmount(string couponCode, decimal amount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var computedAmount = await _portalService.GetComputeCouponAmount(couponCode, amount);
+                return new ServiceResponse<decimal>
+                {
+                    Object = computedAmount
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("checkforuserpin")]
+        public async Task<IServiceResponse<bool>> CheckIfUserHasPin()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckIfUserHasPin();
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addgiguserpin")]
+        public async Task<IServiceResponse<bool>> SaveGIGUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SaveGIGUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifyuserpin")]
+        public async Task<IServiceResponse<bool>> VerifyUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.VerifyUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("chargewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChargeWallet(responseDTO);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result,
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("{reference}/reversewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ReverseWallet(string reference)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ReverseWallet(reference);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("{emailorcode}/{amount}/billtransactionrefund")]
+        public async Task<IServiceResponse<string>> BillTransactionRefund(string emailorcode, decimal amount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.BillTransactionRefund(emailorcode, amount);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpaymentmethod")]
+        public async Task<IServiceResponse<IEnumerable<PaymentMethodDTO>>> GetPaymentMethod()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PaymentMethod = await _portalService.GetPaymentMethodByUserActiveCountry();
+                return new ServiceResponse<IEnumerable<PaymentMethodDTO>>
+                {
+                    Object = PaymentMethod,
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("sendservicesms")]
+        public async Task<IServiceResponse<bool>> SendServiceSMS(ServiceSMS serviceSMS)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.SendServiceSMS(serviceSMS);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("changeuserpin")]
+        public async Task<IServiceResponse<bool>> ChangeUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChangeUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("resetuserpin")]
+        public async Task<IServiceResponse<bool>> ResetUserPin(GIGXUserDetailDTO userDetails)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ResetUserPin(userDetails);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("validatebillspayment")]
+        public async Task<IServiceResponse<string>> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ValidateBillsPaymentRefund(billTransaction);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
         [AllowAnonymous]
         [HttpPost]
         [Route("verifypayment")]

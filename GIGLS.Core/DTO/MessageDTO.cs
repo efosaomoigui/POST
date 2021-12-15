@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace GIGLS.Core.DTO
         public MessageDTO()
         {
             Emails = new List<string>();
+            InvoiceData = new InvoiceData();
         }
         public int MessageId { get; set; }
         public string Body { get; set; }
@@ -43,12 +45,21 @@ namespace GIGLS.Core.DTO
         public string AccountNo { get; set; }
         public string BankName { get; set; }
         public bool IsCoporate { get; set; }
+        public CustomerInvoiceDTO CustomerInvoice { get; set; }
+        public InvoiceData InvoiceData { get; set; }
+        public string PDF { get; set; }
         public string Item { get; set; }
         public int ItemCount { get; set; }
         public string Store { get; set; }
         public string DepartureEmail { get; set; }
         public string DepartureServiceCentre { get; set; }
         public string RequestNumber { get; set; }
+        public string TrackingId { get; set; }
+        public string BillType { get; set; }
+        public string RefNo { get; set; }
+        public string Charge { get; set; }
+        public string ToTal { get; set; }
+        public string DamageDescription { get; set; }
     }
 
     public class NewMessageDTO
@@ -217,6 +228,25 @@ namespace GIGLS.Core.DTO
         public string ToEmail { get; set; }
         public string CustomerCode { get; set; }
         public string CustomerName { get; set; }
+    }
+
+    public class InvoiceData
+    {
+        public InvoiceData()
+        {
+            InvoiceViewDTOs = new List<InvoiceDetail>();
+        }
+        public decimal Total { get; set; }
+        public List<InvoiceDetail> InvoiceViewDTOs { get; set; }
+    }
+
+    public class InvoiceDetail
+    {
+        public string Waybill { get; set; }
+        public string DepartureServiceCentreName { get; set; }
+        public string DestinationServiceCentreName { get; set; }
+        public string ApproximateItemsWeight { get; set; }
+        public string Amount { get; set; }
     }
 
 }

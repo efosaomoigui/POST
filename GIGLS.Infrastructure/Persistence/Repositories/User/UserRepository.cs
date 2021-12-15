@@ -110,6 +110,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCaptains()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
+                        && x.UserChannelType == UserChannelType.Employee
+                        && (x.SystemUserRole == "Captain" && x.Designation == "Captain")).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
@@ -378,6 +386,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         {
             var user = _userManager.Users.Where(x => x.Email.Equals(email) && x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner).AsEnumerable();
             return Task.FromResult(user.OrderBy(x=>x.FirstName).AsEnumerable());
+        }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorCustomerCode(string emailOrCode)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(emailOrCode) || x.UserChannelCode.Equals(emailOrCode)).ToList();
+            var lastUser = user.LastOrDefault();
+            return Task.FromResult(lastUser);
         }
     }
 }

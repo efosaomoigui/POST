@@ -1602,9 +1602,20 @@ namespace GIGLS.Services.Business.Pricing
             {
                 if (itemCategory.SubminimumWeight == 0)
                 {
-                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    if (itemCategory.CategoryMinimumWeight <= pricingDto.Weight)
                     {
-                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                            price = price + priceValue;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        } 
                     }
                 }
 
@@ -1623,6 +1634,16 @@ namespace GIGLS.Services.Business.Pricing
                         var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
                         price = price + priceValue;
                     }
+                }
+            }
+            if (itemCategory != null && itemCategory.IsHazardous)
+            {
+                //get hazardous extra charge from global property
+                var hazardousMatCharge = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.Hazardous.ToString() && x.CountryId == pricingDto.DepartureCountryId);
+                if (hazardousMatCharge != null)
+                {
+                   var hazCharge = Convert.ToDecimal(hazardousMatCharge.Value);
+                    price = price + hazCharge;
                 }
             }
             return price;

@@ -244,6 +244,7 @@ namespace GIGLS.Services.Implementation.Customers
                             {
                                 newCompany.PrefferedNubanBank = company.PrefferedNubanBank;
                                 newCompany.NUBANAccountNo = customerNubanAccount.data.account_number;
+                                newCompany.NUBANCustomerName = customerNubanAccount.data.account_name;
                                 message.BankName = company.PrefferedNubanBank;
                                 message.AccountName = customerNubanAccount.data.account_name;
                                 message.AccountNo = customerNubanAccount.data.account_number;
@@ -561,6 +562,7 @@ namespace GIGLS.Services.Implementation.Customers
                                     msgObj.BankName = company.PrefferedNubanBank;
                                     msgObj.CustomerName = company.Name;
                                     await _messageSenderService.SendConfigCorporateNubanAccMessage(msgObj);
+                                    company.NUBANCustomerName = customerNubanAccount.data.account_name;
                                 }
                             }
                         }
@@ -968,20 +970,19 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "Signup Successful";
                 result.Succeeded = true;
                 result.Entity = entity;
-
+                var companyMessagingDTO = new CompanyMessagingDTO();
                 //SEND EMAIL TO NEW SIGNEE
                 //send a copy to chairman
-                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-                var companyMessagingDTO = new CompanyMessagingDTO();
-                if (chairmanEmail != null)
-                {
-                    //seperate email by comma and send message to those email
-                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-                    foreach (string email in chairmanEmails)
-                    {
-                        companyMessagingDTO.Emails.Add(email);
-                    }
-                }
+                // var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                //if (chairmanEmail != null)
+                //{
+                //    //seperate email by comma and send message to those email
+                //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                //    foreach (string email in chairmanEmails)
+                //    {
+                //        companyMessagingDTO.Emails.Add(email);
+                //    }
+                //}
                 companyMessagingDTO.Name = company.Name;
                 companyMessagingDTO.Email = company.Email;
                 companyMessagingDTO.PhoneNumber = company.PhoneNumber;
@@ -1101,18 +1102,18 @@ namespace GIGLS.Services.Implementation.Customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
                     //SEND EMAIL TO CLASS CUSTOMERS
-                    //send a copy to chairman
-                    var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
                     var companyMessagingDTO = new CompanyMessagingDTO();
-                    if (chairmanEmail != null)
-                    {
-                        //seperate email by comma and send message to those email
-                        string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-                        foreach (string email in chairmanEmails)
-                        {
-                            companyMessagingDTO.Emails.Add(email);
-                        }
-                    }
+                    //send a copy to chairman
+                    //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    //if (chairmanEmail != null)
+                    //{
+                    //    //seperate email by comma and send message to those email
+                    //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    //    foreach (string email in chairmanEmails)
+                    //    {
+                    //        companyMessagingDTO.Emails.Add(email);
+                    //    }
+                    //}
                     var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
                     companyMessagingDTO.Name = company.Name;
                     companyMessagingDTO.Email = company.Email;

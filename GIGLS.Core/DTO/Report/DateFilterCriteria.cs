@@ -11,6 +11,7 @@ namespace GIGLS.CORE.DTO.Report
         public int ServiceCentreId { get; set; }
         public string FilterValue { get; set; }
         public string UserId { get; set; }
+        public string CustomerCode { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database

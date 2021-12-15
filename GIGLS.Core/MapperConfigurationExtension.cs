@@ -510,6 +510,12 @@ namespace GIGLS.Core
                 config.CreateMap<TransferDetails, TransferDetailsDTO>();
                 config.CreateMap<TransferDetailsDTO, TransferDetails>();
 
+                config.CreateMap<InternationalCargoManifestDetail, InternationalCargoManifestDetailDTO>();
+                config.CreateMap<InternationalCargoManifestDetailDTO, InternationalCargoManifestDetail>();
+
+                config.CreateMap<InternationalCargoManifest, InternationalCargoManifestDTO>();
+                config.CreateMap<InternationalCargoManifestDTO, InternationalCargoManifest>();
+
                 //Archived Marking
                 config.CreateMap<Shipment_Archive, ShipmentDTO>();
                 config.CreateMap<ShipmentItem_Archive, ShipmentItem>();
@@ -517,6 +523,21 @@ namespace GIGLS.Core
                 config.CreateMap<GeneralLedger_Archive, GeneralLedgerDTO>();
                 config.CreateMap<Invoice_Archive, InvoiceDTO>();
                 config.CreateMap<TransitWaybillNumber_Archive, TransitWaybillNumberDTO>();
+
+                config.CreateMap<ShipmentItemDTO, PreShipmentItemMobileDTO>();
+                config.CreateMap<PreShipmentItemMobileDTO, ShipmentItemDTO>();
+
+                config.CreateMap<InternationalShipmentDTO, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, InternationalShipmentDTO>();
+
+                config.CreateMap<ShipmentDTO, PreShipmentMobile>();
+                config.CreateMap<PreShipmentMobile, ShipmentDTO>();
+
+                config.CreateMap<CancelledShipmentDTO, PreShipmentMobile>();
+                config.CreateMap<PreShipmentMobile, CancelledShipmentDTO>();
+
+                config.CreateMap<UnidentifiedItemsForInternationalShippingDTO, UnidentifiedItemsForInternationalShipping>();
+                config.CreateMap<UnidentifiedItemsForInternationalShipping, UnidentifiedItemsForInternationalShippingDTO>();
 
             });
 

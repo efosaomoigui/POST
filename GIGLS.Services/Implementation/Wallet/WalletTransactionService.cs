@@ -624,5 +624,11 @@ namespace GIGLS.Services.Implementation.Wallet
             return await GetWalletTransactionByWalletIdForMobilePaginated(shipmentAndPreShipmentParamDTO);
         }
 
+        public async Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionHistoryByDate(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionHistoryAsync(dateFilter);
+
+            return walletTransactions;
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string CurrencyCode { get; set; }
         public bool? IsWithinProcessingTime { get; set; }
+        public decimal? InternationalShippingCost { get; set; }
     }
 
     public class MultipleMobilePriceDTO

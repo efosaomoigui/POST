@@ -32,6 +32,7 @@ namespace GIGLS.Core.DTO.Wallet
         public int TransactionCountryId { get; set; }
         public string CurrencyCode { get; set; }
         public string CurrencySymbol { get; set; }
+        public decimal ServiceCharge { get; set; }
     }
 
     public class ModifiedWalletTransactionDTO

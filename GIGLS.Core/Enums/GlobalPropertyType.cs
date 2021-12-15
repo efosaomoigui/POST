@@ -21,7 +21,7 @@
         WarehouseServiceCentre,
         PasswordExpireDaysCount,
         EcommerceOverDueDaysCount,
-        HaulageMaximumFixedDistance, 
+        HaulageMaximumFixedDistance,
         BankDepositModuleStartDate,
         globalpropertiesreminderdate,
         UserLoginEmailSendInterval,
@@ -91,6 +91,22 @@
         InternationalBasicClassDiscount,
         OthersMinUK,
         EcommerceCustomerRep,
-        PlannedShippingDateAndTime
+        PlannedShippingDateAndTime,
+        SubscriptionCharge,
+        Hazardous,
+        GoFaster,
+        DomesticCustomerWeek,
+        InternationalCustomerWeek,
+        DomesticCustomerWeekDate,
+        InternationalCustomerWeekDate,
+        DomesticCustomerWeekDiscount,
+        InternationalCustomerWeekDiscount,
+        CustomerWeekCountValue,
+        IsIntlShipmentHoliday,
+        DaysBeforeRestriction,
+        AirtimeAmountLimit,
+        AirtimeAmountLimitPercentage,
+        FraudRating,
+        AirtimeMaxDailyTransferLimit
     }
 }

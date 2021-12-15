@@ -147,6 +147,12 @@
     <Compile Include="Domain\Archived\Shipment_Archive.cs" />
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\BillsPaymentManagement.cs" />
+    <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
+    <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
+    <Compile Include="Domain\InternationalCargoManifest.cs" />
+    <Compile Include="Domain\ShipmentExport.cs" />
+    <Compile Include="Domain\GIGXUserDetail.cs" />
     <Compile Include="Domain\Bank.cs" />
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
@@ -158,6 +164,9 @@
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
+    <Compile Include="Domain\CouponCodeManagement.cs" />
+    <Compile Include="Domain\PaymentMethod.cs" />
+    <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -327,12 +336,14 @@
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\BaseSearchDto.cs" />
+    <Compile Include="DTO\BillsPaymentManagementDTO.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
     <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
+    <Compile Include="DTO\CouponManagementDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
@@ -378,6 +389,7 @@
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
+    <Compile Include="DTO\ShipmentExportDTO.cs" />
     <Compile Include="DTO\GIGXUserDetailsDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
@@ -424,6 +436,7 @@
     <Compile Include="DTO\Partnership\PartnerTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\SummaryTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\VehicleTypeDTO.cs" />
+    <Compile Include="DTO\PaymentMethodDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
@@ -434,6 +447,7 @@
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\MobileShipmentFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentContactFilterCriteria.cs" />
+    <Compile Include="DTO\ServiceCentres\PlaceLocationDTO.cs" />
     <Compile Include="DTO\ShipmentAndPreShipmentParamDTO.cs" />
     <Compile Include="DTO\PreShipmentSummaryDTO.cs" />
     <Compile Include="DTO\ReferrerCodeDTO.cs" />
@@ -464,6 +478,7 @@
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
+    <Compile Include="DTO\Shipments\UnidentifiedItemsForInternationalShippingDTO.cs" />
     <Compile Include="DTO\Shipments\MobileGroupCodeWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
@@ -489,6 +504,7 @@
     <Compile Include="DTO\Shipments\ShipmentContactHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentContactDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDetailDanfoDTO.cs" />
+    <Compile Include="DTO\Shipments\InternationalCargoManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
@@ -522,6 +538,7 @@
     <Compile Include="DTO\Stores\ShipmentPackagingTransactionsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
     <Compile Include="DTO\SubCategoryDTO.cs" />
+    <Compile Include="DTO\TicketMannResponseDTO.cs" />
     <Compile Include="DTO\TransferDetailsDTO.cs" />
     <Compile Include="DTO\UPS\LabelDescription.cs" />
     <Compile Include="DTO\UPS\LabelImageFormat.cs" />
@@ -540,10 +557,12 @@
     <Compile Include="DTO\User\RankHistoryDTO.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\User\GIGXUserDetailDTO.cs" />
     <Compile Include="DTO\User\UserValidationDTO.cs" />
     <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResult.cs" />
     <Compile Include="DTO\Utility\MultipleShipmentResultComparer.cs" />
+    <Compile Include="DTO\ValidateBillTransactionDTO.cs" />
     <Compile Include="DTO\Vendors\VendorDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
@@ -573,6 +592,8 @@
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\ItemState.cs" />
+    <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
@@ -587,6 +608,7 @@
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\CountryType.cs" />
+    <Compile Include="Enums\BillType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\ImageFileType.cs" />
@@ -688,9 +710,13 @@
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
+    <Compile Include="IRepositories\IShipmentExportRepository.cs" />
+    <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
+    <Compile Include="IRepositories\ICouponManagementRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
     <Compile Include="IRepositories\IGiglgoStationRepository.cs" />
@@ -699,6 +725,7 @@
     <Compile Include="IRepositories\INotificationRepository.cs" />
     <Compile Include="IRepositories\InternationalRequest\IInternationalRequestReceiverRepository.cs" />
     <Compile Include="IRepositories\IOTPRepository.cs" />
+    <Compile Include="IRepositories\IPaymentMethodRepository.cs" />
     <Compile Include="IRepositories\IQueryFluent.cs" />
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
@@ -728,6 +755,7 @@
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
     <Compile Include="IRepositories\Routes\IRouteRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\IPlaceLocationRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
@@ -736,6 +764,8 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IUnidentifiedItemsForInternationalShippingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalCargoManifestRepository.cs" />
     <Compile Include="IRepositories\Shipments\IInternationalShipmentWaybillRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
@@ -755,6 +785,7 @@
     <Compile Include="IRepositories\Shipments\IManifestVisitMonitoringRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentMobileRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentContactHistoryRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IInternationalCargoManifestDetailRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentTimeMonitorRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentContactRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentDeliveryOptionMappingRepository.cs" />
@@ -850,6 +881,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\IGIGXUserDetailService.cs" />
     <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
@@ -862,6 +894,7 @@
     <Compile Include="IServices\INotificationService.cs" />
     <Compile Include="IServices\InternationalRequest\IInternationalRequestReceiverService.cs" />
     <Compile Include="IServices\IOTPService.cs" />
+    <Compile Include="IServices\IPaymentMethodService.cs" />
     <Compile Include="IServices\IReferrerCodeService.cs" />
     <Compile Include="IServices\IRiderDeliveryService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
@@ -869,6 +902,7 @@
     <Compile Include="IServices\IStateService.cs" />
     <Compile Include="IServices\IPriceCategoryService.cs" />
     <Compile Include="IServices\ISubCategoryService.cs" />
+    <Compile Include="IServices\ITicketMannService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />
     <Compile Include="IServices\JobCards\IJobCardService.cs" />
@@ -891,6 +925,7 @@
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
     <Compile Include="IServices\RouteServices\IRouteService.cs" />
     <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
+    <Compile Include="IServices\ServiceCentres\IPlaceLocationService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />
@@ -923,6 +958,7 @@
     <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
     <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
     <Compile Include="IServices\Shipments\IPreShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IInternationalCargoManifestService.cs" />
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\ISuperManifestService.cs" />

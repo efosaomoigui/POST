@@ -32,6 +32,7 @@ using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
 using GIGLS.Core.IRepositories.Routes;
 using GIGLS.INFRASTRUCTURE.Persistence.Repositories;
+using System.Data;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -524,6 +525,28 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ITransferDetailsRepository TransferDetails { get; set; }
+        [Inject]
+        public ICouponManagementRepository CouponManagement { get; set; }
+
+        [Inject]
+        public IGIGXUserDetailRepository GIGXUserDetail { get; set; }
+        [Inject]
+        public IPlaceLocationRepository PlaceLocation { get; set; }
+
+        [Inject]
+        public IPaymentMethodRepository PaymentMethod { get; set; }
+
+        [Inject]
+        public IShipmentExportRepository ShipmentExport { get; set; }
+
+        [Inject]
+        public IInternationalCargoManifestRepository InternationalCargoManifest { get; set; }
+        [Inject]
+        public IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
+        [Inject]
+        public IUnidentifiedItemsForInternationalShippingRepository UnidentifiedItemsForInternationalShipping { get; set; }
+        [Inject]
+        public IBillsPaymentManagementRepository BillsPaymentManagement { get; set; }
 
         public int Complete()
         {
@@ -533,6 +556,28 @@ namespace GIGLS.Infrastructure.Persistence
         public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public void BeginTransaction()
+        {
+            _context.Configuration.AutoDetectChangesEnabled = false;
+
+            if (_context.Database.Connection.State != ConnectionState.Open)
+                _context.Database.Connection.Open();
+
+            _context.Database.BeginTransaction();
+        }
+
+        public void Commit()
+        {
+            _context.ChangeTracker.DetectChanges();
+            Complete();
+            _context.Database.CurrentTransaction.Commit();
+        }
+
+        public void Rollback()
+        {
+            _context.Database.CurrentTransaction?.Rollback();
         }
 
         public void Dispose()

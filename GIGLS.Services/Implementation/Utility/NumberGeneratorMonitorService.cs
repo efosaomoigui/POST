@@ -282,6 +282,7 @@ namespace GIGLS.Services.Implementation.Utility
             var endYear = endDate.Year.ToString().Substring(2);
             var datewithTime = DateTime.Now.ToUniversalTime().ToString("yyyyMMdd\\THHmmssfff");
             var refNo = String.Empty;
+            int newRef = 0;
             var customerInvoice = _uow.CustomerInvoice.GetAllAsQueryable().Where(x => x.CustomerCode == customerCode && x.DateCreated >= startDate && x.DateCreated <= endDate).OrderByDescending(x => x.DateCreated).FirstOrDefault();
            // refNo = $"{customerCode.Remove(2)}{startDate.Day}{startYear}{endDate.Day}{endYear}{datewithTime}";
             if (customerInvoice == null)
@@ -291,8 +292,18 @@ namespace GIGLS.Services.Implementation.Utility
             else
             {
                 var lastRef = $"{customerCode}{startDate.Month}";
-                var newRef = Convert.ToInt32(customerInvoice.InvoiceRefNo.Substring(lastRef.Length));
-                newRef = newRef + 1;
+                var refValue = customerInvoice.InvoiceRefNo.Substring(lastRef.Length);
+                var isNumeric = int.TryParse(refValue, out int n);
+                if (isNumeric)
+                {
+                    newRef = Convert.ToInt32(customerInvoice.InvoiceRefNo.Substring(lastRef.Length));
+                    newRef = newRef + 1;
+                }
+                else
+                {
+                    newRef = Convert.ToInt32(refValue.Last());
+                    newRef = newRef + 1;
+                }
                 refNo = $"{customerCode}{startDate.Month}{newRef.ToString().PadLeft(3, '0')}";
             }
             return refNo;

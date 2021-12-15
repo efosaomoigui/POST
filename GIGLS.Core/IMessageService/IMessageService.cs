@@ -39,5 +39,8 @@ namespace GIGLS.Core.IMessageService
         Task SendConfigCorporateSignUpMessage(MessageDTO messageDTO);
         Task SendConfigCorporateNubanAccMessage(MessageDTO messageDTO);
         Task SendEmailForReceivedItem(MessageDTO messageDTO);
+        Task SendShipmentRegisteredWithGigGoMails(IntlShipmentRequestDTO shipmentDto);
+        Task SendShipmentRequestConfirmation(IntlShipmentRequestDTO shipmentDto);
+        Task SendEmailForService(MessageDTO messageDTO);
     }
 }

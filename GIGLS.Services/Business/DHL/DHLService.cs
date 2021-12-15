@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.DHL;
+﻿using GIGLS.Core;
+using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
@@ -22,13 +23,13 @@ namespace GIGLS.Services.Business.DHL
     public class DHLService : IDHLService
     {
         private readonly IUserService _userService;
-        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryService _countryService;
-        public DHLService(IUserService userService, IGlobalPropertyService globalPropertyService, ICountryService countryService)
+        private readonly IUnitOfWork _uow;
+        public DHLService(IUserService userService, ICountryService countryService, IUnitOfWork uow)
         {
             _userService = userService;
-            _globalPropertyService = globalPropertyService;
             _countryService = countryService;
+            _uow = uow;
         }
 
         public async Task<InternationalShipmentWaybillDTO> CreateInternationalShipment(InternationalShipmentDTO shipmentDTO)
@@ -240,11 +241,8 @@ namespace GIGLS.Services.Business.DHL
                         }
                     };
 
-                    weight = new ShippingWeight
-                    {
-                        NetValue = (float)Math.Round(netValue, 2),
-                        GrossValue = (float)Math.Round(netValue, 2),
-                    };
+                    weight.NetValue = (float)Math.Round(netValue, 2) != 0 ? (float)Math.Round(netValue, 2) : 1;
+                    weight.GrossValue = (float)Math.Round(netValue, 2) != 0 ? (float)Math.Round(netValue, 2) : 1;
                 }
                 content.Packages.Add(package);
                 lineItem = new LineItem
@@ -272,16 +270,17 @@ namespace GIGLS.Services.Business.DHL
         private static string SignatureName(InternationalShipmentDTO shipmentDTO)
         {
             var signatureName = string.Empty;
-            if (shipmentDTO.CustomerDetails.CustomerName.Length > 35)
+            var customer = shipmentDTO.CustomerDetails;
+            var customerName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name;
+            if (customerName.Length > 35)
             {
-                var splittedName = shipmentDTO.CustomerDetails.CustomerName.Split(' ');
+                var splittedName = customerName.Split(' ');
                 signatureName = splittedName[0];
             }
             else
             {
-                signatureName = shipmentDTO.CustomerDetails.CustomerName;
+                signatureName = customerName;
             }
-
             return signatureName;
         }
 
@@ -327,8 +326,8 @@ namespace GIGLS.Services.Business.DHL
         private ShipmentShipperDetail GetShipperContact(InternationalShipmentDTO shipmentDTO)
         {
             string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
-            string phoneNumber = ConfigurationManager.AppSettings["UPSGIGPhoneNumber"];
-
+            string phoneNumber = ConfigurationManager.AppSettings["DHLGIGPhoneNumber"];
+            var customer = shipmentDTO.CustomerDetails;
             var shipper = new ShipmentShipperDetail
             {
                 ContactInformation = new ContactInformation
@@ -337,7 +336,7 @@ namespace GIGLS.Services.Business.DHL
                     Phone = phoneNumber,
                     MobilePhone = phoneNumber,
                     CompanyName = "GIG LOGISTICS",
-                    FullName = shipmentDTO.CustomerDetails.CustomerName
+                    FullName = customer.Name == null || string.IsNullOrEmpty(customer.Name) ? $"{customer.FirstName} {customer.LastName}" : customer.Name,
                 },
                 PostalAddress = new PostalAddress
                 {
@@ -363,7 +362,6 @@ namespace GIGLS.Services.Business.DHL
             output.ImageOptions.Add(image2);
             var image3 = new ImageOption { InvoiceType = "commercial", TypeCode = "invoice", IsRequested = true, LanguageCode = "eng" };
             output.ImageOptions.Add(image3);
-
             return output;
         }
 
@@ -577,12 +575,27 @@ namespace GIGLS.Services.Business.DHL
             {
                 countryId = await _userService.GetUserActiveCountryId();
             }
-            var shipTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PlannedShippingDateAndTime, countryId);
-            int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
-            var tmpDate = DateTime.Today;
-            if (tmpDate.DayOfWeek == DayOfWeek.Friday)
+            var globalPropery = _uow.GlobalProperty.GetAll();
+            var shipTime = globalPropery.SingleOrDefault(x => x.Key == GlobalPropertyType.PlannedShippingDateAndTime.ToString() && x.CountryId == countryId);
+            if (shipTime == null)
             {
-               return tmpDate = tmpDate.AddDays(3);
+                throw new GenericException($"Global Property '{shipTime.Key}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var holiday = globalPropery.SingleOrDefault(x => x.Key == GlobalPropertyType.IsIntlShipmentHoliday.ToString() && x.CountryId == countryId);
+            if (holiday == null)
+            {
+                throw new GenericException($"Global Property '{holiday.Key}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            int shipDays = Convert.ToInt32(shipTime.Value) != null ? Convert.ToInt32(shipTime.Value) : 0;
+            int isHoliday = Convert.ToInt32(holiday.Value) != null ? Convert.ToInt32(holiday.Value) : 0;
+            var tmpDate = DateTime.Today;
+            if (isHoliday == 1)
+            {
+                return tmpDate.AddDays(shipDays);
+            }
+            else if (tmpDate.DayOfWeek == DayOfWeek.Friday)
+            {
+                return tmpDate = tmpDate.AddDays(3);
             }
             else if (tmpDate.DayOfWeek == DayOfWeek.Saturday)
             {

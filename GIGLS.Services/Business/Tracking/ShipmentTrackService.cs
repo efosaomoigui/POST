@@ -6,10 +6,12 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Business.Tracking
@@ -38,6 +40,10 @@ namespace GIGLS.Services.Business.Tracking
             {
                 //get shipment Details
                 shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
+                if (shipment == null)
+                {
+                    throw new GenericException("Waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
                 string manifest = null;
                 string ManifestTypeValue = ManifestType.Delivery.ToString(); //Default
 

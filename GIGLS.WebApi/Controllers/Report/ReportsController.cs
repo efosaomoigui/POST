@@ -1,15 +1,23 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessage;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -21,11 +29,15 @@ namespace GIGLS.WebApi.Controllers.Report
     {
         private readonly IShipmentReportService _shipmentService;
         private readonly IAccountReportService _accountService;
+        private readonly IEmailService _emailService;
+        private INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
-        public ReportsController(IShipmentReportService shipmentService, IAccountReportService accountService) : base(nameof(ReportsController))
+        public ReportsController(IShipmentReportService shipmentService, IAccountReportService accountService, IEmailService emailService, INumberGeneratorMonitorService numberGeneratorMonitorService) : base(nameof(ReportsController))
         {
             _shipmentService = shipmentService;
             _accountService = accountService;
+            _emailService = emailService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -346,6 +358,135 @@ namespace GIGLS.WebApi.Controllers.Report
                 var report = await _shipmentService.GenerateCustomerInvoice(customerInvoiceDTO);
 
                 return new ServiceResponse<bool>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getcustomerinvoice")]
+        public async Task<bool> GenerateCustomerInvoice()
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var res = ConfigurationManager.AppSettings["InvoicingDay"];
+                var day = Convert.ToInt32(res);
+                DateTime firstDay = new DateTime(now.Year, now.Month, day);
+                DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                if (firstDay.Date == now.Date)
+                {
+                    var shipments = await _shipmentService.GetMonthlyCoporateTransactions();
+                    if (shipments.Any())
+                    {
+                        foreach (var item in shipments)
+                        {
+                            DateFilterForDropOff filter = new DateFilterForDropOff();
+                            filter.CustomerCode = item.CustomerCode;
+                            DateTime fDay = new DateTime(now.Year, now.Month, 1);
+                            fDay = fDay.AddMonths(-1);
+                            DateTime lDay = fDay.AddMonths(1).AddDays(-1);
+                            filter.StartDate = fDay;
+                            filter.EndDate = lDay;
+                            var invoice = await GetCoporateTransactionsByCode(filter);
+                            item.InvoiceViewDTOs = invoice.Object.InvoiceViewDTOs;
+                            item.InvoiceDate = filter.StartDate.Value;
+                            //send email to customer
+                            var message = new MessageDTO()
+                            {
+                                ToEmail = item.Email,
+                                To = item.Email,
+                            };
+                            var alreadyExist = await _shipmentService.CheckIfInvoiceAlreadyExist(item);
+                            if (!alreadyExist)
+                            {
+                                item.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, item.CustomerCode, firstDay, lastDay);
+                                var pdf = await _shipmentService.GeneratePDF(item);
+                                message.MessageTemplate = "CooperateEmail";
+
+                                //check if user has a nuban account, create if not
+                                var acc = await _shipmentService.CreateNUBAN(item);
+                                if (acc)
+                                {
+                                    message.PDF = pdf;
+                                    message.CustomerInvoice = item;
+                                    var result = await _emailService.ConfigSendGridMonthlyCorporateTransactions(message);
+                                    var saved = await _shipmentService.AddCustomerInvoice(message.CustomerInvoice);
+
+                                }
+                            }
+                        }
+                    } 
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customerinvoicelist")]
+        public async Task<IServiceResponse<List<CustomerInvoiceDTO>>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetCustomerInvoiceList(filter);
+
+                return new ServiceResponse<List<CustomerInvoiceDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("markaspaid")]
+        public async Task<IServiceResponse<bool>> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.MarkInvoiceasPaid(customerInvoices);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgofasterreport")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetGoFasterReport(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetGoFasterReport(filter);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getgofasterreportbycentre")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var report = await _shipmentService.GetGoFasterShipmentsByServiceCentre(filter);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
                 {
                     Object = report
                 };

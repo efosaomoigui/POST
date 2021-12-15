@@ -187,7 +187,8 @@ namespace GIGLS.Core.DTO.Shipments
         public double? ReceiverLng { get; set; }
         public double? SenderLat { get; set; }
         public double? SenderLng { get; set; }
-
+        public bool IsCoupon { get; set; }
+        public string CouponCode { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -402,12 +403,23 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverStationName { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverLGA { get; set; }
+        public string ReceiverCity { get; set; }
+        public string ReceiverPostalCode { get; set; }
+        public string ReceiverStateOrProvinceCode { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverCountryCode { get; set; }
+        public string ReceiverCountry { get; set; }
+        public int ReceiverStationId { get; set; }
         public string SenderAddress { get; set; }
         public double? SenderLat { get; set; }
         public double? SenderLng { get; set; }
         public string SenderStationName { get; set; }
+        public string SenderPhoneNumber { get; set; }
         public string SenderName { get; set; }
         public string SenderLGA { get; set; }
+        public int DestinationCountryId { get; set; }
+        public string ReceiverState { get; set; }
         public DateTime DateCreated { get; set; }
     }
 
@@ -469,5 +481,14 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public string PartnerId { get; set; } // UserId
         public string WaybillNumber { get; set; }
+    }
+
+    public class CaptainTransactionDTO
+    {
+        public string PartnerCode { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerEmail { get; set; }
+        public decimal Amount { get; set; }
+        public string PartnerType { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
@@ -655,6 +656,21 @@ namespace GIGLS.WebApi.Controllers.GIGGo
             return await HandleApiOperationAsync(async () =>
             {
                 var groupWaybillNumbersInManifest = await _portalService.GetManifestsInMovementManifestForMovementDispatch();
+
+                return new ServiceResponse<List<MovementDispatchDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getManifestsinmovementmanifestDispatchCompleted")]
+        public async Task<IServiceResponse<List<MovementDispatchDTO>>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.getManifestsinmovementmanifestDispatchCompleted(dateFilterCriteria);
 
                 return new ServiceResponse<List<MovementDispatchDTO>>
                 {

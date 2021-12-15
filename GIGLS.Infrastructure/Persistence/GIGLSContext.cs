@@ -308,7 +308,18 @@ namespace GIGLS.Infrastructure.Persistence
 
         //cellulant
         public DbSet<TransferDetails> TransferDetails { get; set; }
+        public DbSet<CouponCodeManagement> CouponCodeManagement { get; set; }
 
+        public DbSet<GIGXUserDetail> GIGXUserDetail { get; set; }
+        public DbSet<PlaceLocation> PlaceLocation { get; set; }
+
+        //PaymentMethod
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
+        public DbSet<ShipmentExport> ShipmentExport { get; set; }
+        public DbSet<InternationalCargoManifest> InternationalCargoManifest { get; set; }
+        public DbSet<InternationalCargoManifestDetail> InternationalCargoManifestDetail { get; set; }
+        public DbSet<UnidentifiedItemsForInternationalShipping> UnidentifiedItemsForInternationalShipping { get; set; }
+        public DbSet<BillsPaymentManagement> BillsPaymentManagement { get; set; }
         #endregion
 
 

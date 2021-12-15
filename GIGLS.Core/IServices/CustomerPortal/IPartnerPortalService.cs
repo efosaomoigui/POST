@@ -6,8 +6,10 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -58,5 +60,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<MovementDispatchDTO>> GetManifestsInMovementManifestForMovementDispatch();
         Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO creditPartnerTransactionsDTO);
         Task RemoveShipmentFromQueue(string waybill);
+        Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria);
     }
 }

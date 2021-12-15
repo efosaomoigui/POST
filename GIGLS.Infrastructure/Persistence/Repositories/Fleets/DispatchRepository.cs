@@ -179,11 +179,52 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             _context = context;
         }
 
+        public Task<List<MovementDispatchDTO>> GetMovementmanifestDispatchForPartnerCompleted(string userId, DateTime start, DateTime end) 
+        {
+            try
+            {
+                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy != null && (x.DateCreated >= start && x.DateCreated <= end)).ToList().OrderByDescending(s => s.DateCreated);
+
+                //Note:: === Update movement manifest number field with MovementStatus = ProcessEnded(To be done!)
+                var dispatchDto = (from r in dispatchs
+                                   join m in _context.MovementManifestNumber on r.MovementManifestNumber equals m.MovementManifestCode
+                                   join d in _context.DomesticRouteZoneMap on r.DepartureId equals d.DepartureId into dr
+                                   from drz in dr.DefaultIfEmpty().Where(x => x.DepartureId == r.DepartureId && x.DestinationId == r.DestinationId)
+                                   join c in _context.CaptainBonusByZoneMaping on drz.ZoneId equals c.Zone into cb
+                                   from cbz in cb.DefaultIfEmpty()
+                                   select new MovementDispatchDTO
+                                   {
+                                       DispatchId = r.DispatchId,
+                                       RegistrationNumber = r.RegistrationNumber,
+                                       MovementManifestNumber = r.MovementManifestNumber,
+                                       Amount = r.Amount,
+                                       RescuedDispatchId = r.RescuedDispatchId,
+                                       DriverDetail = r.DriverDetail,
+                                       DispatchedBy = r.DispatchedBy,
+                                       ServiceCentreId = r.ServiceCentreId,
+                                       DepartureId = r.DepartureId,
+                                       DestinationId = r.DestinationId,
+                                       DateCreated = r.DateCreated,
+                                       DateModified = r.DateModified,
+                                       DepartureServiceCenterId = r.DepartureServiceCenterId,
+                                       DestinationServiceCenterId = r.DestinationServiceCenterId,
+                                       IsSuperManifest = r.IsSuperManifest,
+                                       BonusAmount = cbz.BonusAmount
+                                   }).ToList();
+
+                return Task.FromResult(dispatchDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<MovementDispatchDTO>> GetMovementmanifestDispatchForPartner(string userId)
         {
             try
             {
-                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null).ToList();
+                var dispatchs = _context.MovementDispatch.Where(x => x.DriverDetail == userId && x.ReceivedBy == null).ToList().OrderByDescending(s => s.DateCreated).Take(50);
 
                 //Note:: === Update movement manifest number field with MovementStatus = ProcessEnded(To be done!)
                 var dispatchDto = (from r in dispatchs

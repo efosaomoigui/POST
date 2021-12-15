@@ -1,9 +1,13 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.IMessage;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -837,7 +841,7 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
             if (string.IsNullOrWhiteSpace(message.Subject))
             {
-                message.Subject = "Welcome to GIG Logistics";
+                message.Subject = "Overseas Shipment Receipt Notification";
             }
             myMessage.AddTo(message.To);
             myMessage.From = new EmailAddress(fromEmail, fromName);
@@ -847,7 +851,17 @@ namespace GIGLS.Messaging.MessageService
 
             var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
             var client = new SendGridClient(apiKey);
-
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                }
+                myMessage.AddBccs(bccEmails);
+            }
             //set substitutions 
             myMessage.AddSubstitutions(new Dictionary<string, string>
             {
@@ -858,6 +872,118 @@ namespace GIGLS.Messaging.MessageService
                 { "CE_DepartureEmail", message.DepartureEmail },
                 { "RemainingItemNumber", message.ItemCount.ToString() },
                 { "RequestNumber", message.RequestNumber },
+                { "CE_TrackNumber", message.TrackingId },
+                { "CE_DamageDescription", message.DamageDescription },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+
+        public async Task<string> ConfigSendGridMonthlyCorporateTransactions(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+               var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(message.CustomerInvoice.InvoiceDate.Month);
+                message.Subject = $"Delivery Invoice for the month of {monthName}";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+            //if (message.Emails != null && message.Emails.Any())
+            //{
+            //    //set BCCs
+            //    var bccEmails = new List<EmailAddress>();
+            //    foreach (var item in message.Emails)
+            //    {
+            //        var bccEmail = new EmailAddress(item, fromName);
+            //        bccEmails.Add(bccEmail);
+            //        myMessage.AddBccs(bccEmails);
+            //    }
+            //}
+            var invoice = new InvoiceData();
+            invoice.Total = message.CustomerInvoice.InvoiceViewDTOs.Sum(x => x.Amount);
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "CI_CustomerName", message.CustomerInvoice.CustomerName },
+                { "CI_CustomerPhoneNo", message.CustomerInvoice.PhoneNumber },
+                { "CI_Email",message.CustomerInvoice.Email },
+                { "CI_InvoiceRefNo",message.CustomerInvoice.InvoiceRefNo },
+                { "CI_CreatedBy",message.CustomerInvoice.CreatedBy },
+                { "CI_DateCreated",message.CustomerInvoice.DateCreated.ToString() },
+                { "CI_Total",invoice.Total.ToString() },
+                { "CI_BankName",message.CustomerInvoice.BankName },
+                { "Ci_AccountNo",message.CustomerInvoice.AccountNo },
+                { "CI_AccountName",message.CustomerInvoice.AccountName },
+                { "CI_PDFLink",message.PDF},
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        public async Task<string> SendEmailForService(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendEmailForService(message);
+            }
+            return result;
+        }
+
+        private async Task<string> ConfigSendEmailForService(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "Successful Bills Payment Notification";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                    myMessage.AddBccs(bccEmails);
+                    break;
+                }
+            }
+            //set substitutions 
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "FirstName", message.CustomerName },
+                { "S_ReferenceNo", message.RefNo },
+                { "S_Description",message.Item },
+                { "S_Amount", message.Amount},
+                { "S_Charge", message.Charge },
+                { "S_DateCreated", DateTime.Now.ToString() },
+                { "S_Total", message.ToTal},
             });
 
             var response = await client.SendEmailAsync(myMessage);

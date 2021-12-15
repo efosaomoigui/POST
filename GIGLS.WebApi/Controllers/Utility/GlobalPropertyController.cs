@@ -135,5 +135,22 @@ namespace GIGLS.WebApi.Controllers.Utility
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("gofaster")]
+        public async Task<IServiceResponse<decimal>> GetGoFasterPercentageInGlobalProperty()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                int countryId = await _userService.GetUserActiveCountryId();
+                var global = await _globalService.GetGoFasterPercentageInGlobalProperty(countryId);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = global
+                };
+            });
+        }
     }
 }

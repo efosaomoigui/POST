@@ -162,6 +162,10 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal InternationalShippingCost { get; set; }
         [MaxLength(50)]
         public string Courier { get; set; }
+        public bool ExpressDelivery { get; set; }
+        public bool IsExported { get; set; }
+        [MaxLength(128)]
+        public string RequestNumber { get; set; }
 
     }
 

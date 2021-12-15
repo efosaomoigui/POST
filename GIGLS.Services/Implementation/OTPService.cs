@@ -105,7 +105,7 @@ namespace GIGLS.Services.Implementation
                 DateTime LatestTime = DateTime.Now;
                 TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
                 int difference = Convert.ToInt32(span.TotalMinutes);
-                if (difference < 5)
+                if (difference < 10)
                 {
                     //customer activated
                     var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);

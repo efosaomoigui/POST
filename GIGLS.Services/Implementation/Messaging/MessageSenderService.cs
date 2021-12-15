@@ -182,7 +182,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var country = new Country();
 
                     //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
                     {
                         //use the destination country details 
                         country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DestinationCountryId);
@@ -213,7 +213,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
-                    var customerName = customerObj.CustomerName;
+                    var customerName = customerObj.FirstName;
                     var demurrageAmount = demurragePrice;
 
                     // Reduce receiver name logic
@@ -261,7 +261,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[17] = shipmentTrackingDTO.QRCode;
 
                     //Add Delivery Code to ArrivedFinalDestination message
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD)
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
                     {
                         var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                         if (deliveryNumber != null)
@@ -1769,19 +1769,114 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
+
+        }
+
+        //Handle Shipment Request Comfirmation
+        public async Task SendShipmentRequestConfirmation(IntlShipmentRequestDTO shipmentDto)
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
             {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
 
-                foreach (string email in chairmanEmails)
+            //var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountry.CountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                IntlMessage = new IntlMessageDTO()
                 {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
+                    Description = shipmentDto.ItemDetails,
+                    //DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    //DestinationCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId).Name,
+                    DeliveryOption = shipmentDto.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
+                    RequestCode = shipmentDto.RequestNumber
+                    //StoreOfPurchase = storeName
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Overseas Shipment Request Acknowledgement ({""}) ",
+                MessageTemplate = "OverseasShippingRequest"
+            };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    //messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
+                    messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
                 }
             }
+
+            await SendOverseasMails(messageDTO);
+
+        }
+
+
+
+        //Handle Payment Confirmation Mail for Overseas Shipment Register Comfirmation
+        public async Task SendShipmentRegisteredWithGigGoMails(IntlShipmentRequestDTO shipmentDto) 
+        {
+            //get CustomerDetails (
+            if (shipmentDto.CustomerType.Contains("Individual"))
+            {
+                shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
+            var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.DepartureCountry.CountryId);
+
+            var messageDTO = new MessageDTO()
+            {
+                CustomerName = customerObj.FirstName,
+                //Waybill = shipmentDto.RequestNumber,
+                Currency = country.CurrencySymbol,
+                IntlMessage = new IntlMessageDTO()
+                {
+                    ShippingCost = $"{country.CurrencySymbol}{shipmentDto.GrandTotal.ToString()}"
+                },
+                To = customerObj.Email,
+                ToEmail = customerObj.Email,
+                Subject = $"Payment Confirmation",
+                MessageTemplate = "OverseasPaymentConfirmation"
+            };
+
+            if (customerObj.Rank == Rank.Class)
+            {
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == customerObj.UserActiveCountryId);
+                if (globalProperty != null)
+                {
+                    decimal percentage = Convert.ToDecimal(globalProperty.Value);
+                    decimal discount = ((100M - percentage) / 100M);
+                    var discountPrice = shipmentDto.GrandTotal * discount;
+                    messageDTO.IntlMessage.DiscountedShippingCost = $"{country.CurrencySymbol}{discountPrice.ToString()}";
+                    messageDTO.MessageTemplate = "OverseasPaymentConfirmationClass";
+                }
+            }
+
+            await SendOverseasMails(messageDTO);
 
         }
 
@@ -1828,19 +1923,19 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                foreach (string email in chairmanEmails)
-                {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
-                }
-            }
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
 
         }
 
@@ -1887,19 +1982,19 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await SendOverseasMails(messageDTO);
 
-            var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+            //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
 
-            if (chairmanEmail != null)
-            {
-                //seperate email by comma and send message to those email
-                string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+            //if (chairmanEmail != null)
+            //{
+            //    //seperate email by comma and send message to those email
+            //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
 
-                foreach (string email in chairmanEmails)
-                {
-                    messageDTO.ToEmail = email;
-                    await SendOverseasMails(messageDTO);
-                }
-            }
+            //    foreach (string email in chairmanEmails)
+            //    {
+            //        messageDTO.ToEmail = email;
+            //        await SendOverseasMails(messageDTO);
+            //    }
+            //}
 
         }
 
@@ -2395,6 +2490,27 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     result = await _emailService.SendEmailForReceivedItem(messageDTO);
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+
+        public async Task SendEmailForService(MessageDTO messageDTO)
+        {
+            var result = "";
+            try
+            {
+                if (messageDTO != null)
+                {
+                    result = await _emailService.SendEmailForService(messageDTO);
                     if (!string.IsNullOrEmpty(result))
                     {
                         await LogEmailMessage(messageDTO, result);

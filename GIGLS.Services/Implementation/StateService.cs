@@ -2,6 +2,7 @@
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,11 @@ namespace GIGLS.Services.Implementation
     public class StateService : IStateService
     {
         private readonly IUnitOfWork _uow;
-
-        public StateService(IUnitOfWork uow)
+        private IUserService _userService;
+        public StateService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -83,6 +85,24 @@ namespace GIGLS.Services.Implementation
         {
             var states = _uow.State.GetStatesTotal();
             return states;
+        }
+
+        public async Task<IEnumerable<StateDTO>> GetStatesByUserActiveCountryId()
+        {
+            IEnumerable<StateDTO> states = new List<StateDTO>();
+            var countryId = await _userService.GetUserActiveCountryId();
+            
+            if (countryId > 0)
+            {
+                 states = await _uow.State.GetStateByCountryId(countryId);
+                states = states.OrderBy(x => x.StateName).ToList();
+            }
+            else
+            {
+                throw new GenericException("INVALID COUNTRY ID");
+            }
+            
+            return  states;
         }
     }
 }

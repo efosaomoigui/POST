@@ -1,11 +1,13 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,5 +26,14 @@ namespace GIGLS.CORE.IServices.Report
         Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria);
         Task<CustomerInvoiceDTO> GetCoporateTransactionsByCode(DateFilterForDropOff filter);
         Task<bool> GenerateCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
+        Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions();
+        Task<string> GeneratePDF(CustomerInvoiceDTO customerInvoice);
+        Task<bool> AddCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO);
+        Task<bool> CreateNUBAN(CustomerInvoiceDTO customerInvoice);
+        Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice);
+        Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter);
+        Task<bool> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices);
+        Task<List<InvoiceViewDTO>> GetGoFasterReport(NewFilterOptionsDto filter);
+        Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter);
     }
 }

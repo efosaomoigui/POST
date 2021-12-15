@@ -429,5 +429,35 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [HttpPost]
+        [Route("captaintransactions")]
+        public async Task<IServiceResponse<List<CaptainTransactionDTO>>> GetCaptainTransactions(PaginationDTO pagination)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ratings = await _partnerService.GetCaptainTransactions(pagination);
+
+                return new ServiceResponse<List<CaptainTransactionDTO>>
+                {
+                    Object = ratings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("processcaptaintransactions")]
+        public async Task<IServiceResponse<bool>> ProcessCaptainTransactions(List<ExternalPartnerTransactionsPaymentDTO> externalPartnerTransactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.ProcessCaptainTransactions(externalPartnerTransactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

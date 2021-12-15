@@ -212,5 +212,16 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             return await _uow.GiglgoStation.GetGoStationsById(stationId);
         }
+
+        public async Task<List<StationDTO>> GetStationsByUserCountry()
+        {
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            return await _uow.Station.GetStationsByUserCountry(countryIds);
+        }
+
+        public async Task<List<StationDTO>> GetStationsByCountry(int countryId)
+        {
+            return await _uow.Station.GetStationsByCountry(countryId);
+        }
     }
 }

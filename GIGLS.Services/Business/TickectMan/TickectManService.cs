@@ -259,10 +259,41 @@ namespace GIGLS.Services.Business.CustomerPortal
                 shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
                 shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
                 shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+                shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
 
                 foreach (var item in shipment.ShipmentItems)
                 {
                     item.Price = Math.Round(item.Price * factor) / factor;
+                }
+            }
+            if (!String.IsNullOrEmpty(shipment.Waybill))
+            {
+                var invoiceObj = await _invoiceService.GetInvoiceByWaybill(shipment.Waybill);
+                if (invoiceObj != null)
+                {
+                    shipment.Invoice = invoiceObj;
+                    if (shipment.Invoice.Shipment.GrandTotal > 0)
+                    {
+                        decimal factor = 0;
+                        if (shipment.CompanyType == CompanyType.Corporate.ToString() || shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                        {
+                            factor = Convert.ToDecimal(Math.Pow(10, 0));
+                        }
+                        else
+                        {
+                            factor = Convert.ToDecimal(Math.Pow(10, -2));
+                        }
+                        shipment.Invoice.Shipment.GrandTotal = Math.Round(shipment.GrandTotal * factor) / factor;
+                        shipment.Invoice.Shipment.Vat = Math.Round((decimal)shipment.Vat * factor) / factor;
+                        shipment.Invoice.Shipment.vatvalue_display = Math.Round((decimal)shipment.vatvalue_display * factor) / factor;
+                        shipment.Invoice.Shipment.Total = Math.Round((decimal)shipment.Total * factor) / factor;
+                        shipment.Invoice.Shipment.DiscountValue = Math.Round((decimal)shipment.DiscountValue * factor) / factor;
+                        shipment.Invoice.Shipment.InvoiceDiscountValue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                        shipment.Invoice.Shipment.offInvoiceDiscountvalue_display = Math.Round((decimal)shipment.InvoiceDiscountValue_display * factor) / factor;
+                        shipment.Invoice.Shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
+                        shipment.Invoice.Shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
+                        shipment.Invoice.Shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
+                    }
                 }
             }
             return shipment;
@@ -306,6 +337,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
+            shipmentCollectionforDto.UserId = await _userService.GetCurrentUserId();
             await _shipmentCollectionService.ReleaseShipmentForCollection(shipmentCollection);
         }
 
@@ -364,7 +396,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 foreach (var item in items)
                 {
-                    if (item.CustomerType == CustomerType.IndividualCustomer.ToString())
+                    if (item.CompanyType == CustomerType.IndividualCustomer.ToString())
                     {
                         var cust = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == item.CustomerCode);
                         if (cust != null)
@@ -421,5 +453,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _customerPortalService.GetPriceQoute(preShipment);
         }
+
+        public async Task<List<TotalNetResult>> GetInternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
+        {
+            return await _customerPortalService.GetInternationalshipmentRate(rateDTO);
+        }
+
+        public async Task<ShipmentDTO> AddInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await _shipmentService.AddInternationalShipment(shipmentDTO);
+        }
+
     }
 }

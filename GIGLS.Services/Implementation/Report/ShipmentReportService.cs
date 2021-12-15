@@ -28,6 +28,15 @@ using OfficeOpenXml.Drawing;
 using GIGLS.Core.Domain;
 using Newtonsoft.Json.Linq;
 using GIGLS.Core.IServices.Utility;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using GIGLS.Services.Implementation.Shipments;
+using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Wallet;
+using Image = iTextSharp.text.Image;
+using System.Configuration;
+using Font = iTextSharp.text.Font;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -37,13 +46,15 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUserService _userService;
         private IServiceCentreService _serviceCenterService;
         private INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPaystackPaymentService paystackPaymentService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _paystackPaymentService = paystackPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -215,7 +226,7 @@ namespace GIGLS.Services.Implementation.Report
                 //1.2 Add to report list
                 scanStatusReportList.Add(scanStatusReportDTO);
             }
-            
+
             var result = await Task.FromResult(scanStatusReportList);
             return result;
         }
@@ -233,7 +244,7 @@ namespace GIGLS.Services.Implementation.Report
 
             foreach (var shipmentScanStatusName in shipmentScanStatusValues)
             {
-                var count_status = queryableList.Where(s => s.ServiceCentreId == serviceCentreId && 
+                var count_status = queryableList.Where(s => s.ServiceCentreId == serviceCentreId &&
                 s.Status == shipmentScanStatusName).Select(x => x.ShipmentTrackingId).Count();
                 scanStatusReportDTO.StatusCountMap.Add(shipmentScanStatusName, count_status);
             }
@@ -252,7 +263,7 @@ namespace GIGLS.Services.Implementation.Report
             };
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            
+
             try
             {
                 if (baseFilterCriteria.ServiceCentreId > 0)
@@ -270,9 +281,9 @@ namespace GIGLS.Services.Implementation.Report
                 {
                     var stations = _uow.Station.GetAllAsQueryable().Where(x => x.StateId == baseFilterCriteria.StateId).Select(x => x.StationId);
                     serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
-                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();                                        
+                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();
                 }
-                
+
                 dashboardDTO = await GetShipmentProgressSummary(serviceCenterIds, baseFilterCriteria);
             }
             catch (Exception ex)
@@ -340,7 +351,7 @@ namespace GIGLS.Services.Implementation.Report
             //dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybillsResult.Count();
 
             var shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenterId.Contains(x.DestinationServiceCentreId)  
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenterId.Contains(x.DestinationServiceCentreId)
                 && x.DateCreated >= startDate && x.DateCreated < endDate);
 
             if (baseFilterCriteria.IsCOD)
@@ -375,10 +386,10 @@ namespace GIGLS.Services.Implementation.Report
             allShipmentsQueryable = allShipmentsQueryable.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.CRT);
 
             dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Count();
-            
+
             //4. Get Total Shipment Delivered   
             //4a. Get collected shipment by date filtering : use current date if not date selected
-            if(baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
+            if (baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
             {
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
@@ -476,7 +487,7 @@ namespace GIGLS.Services.Implementation.Report
             var queryDate = baseFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
-            
+
             //3. Get Total Shipment Expected filter by date using Date Created
             //3a. Get shipments coming to the service centre 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
@@ -524,7 +535,7 @@ namespace GIGLS.Services.Implementation.Report
             var queryDate = baseFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
-            
+
             var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
                 .Where(s => s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate);
             allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
@@ -574,7 +585,7 @@ namespace GIGLS.Services.Implementation.Report
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-            
+
             //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
             //    .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
             //    && serviceCenterId.Contains(x.DestinationServiceCentreId) && x.DateCreated >= startDate && x.DateCreated < endDate);
@@ -689,7 +700,7 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<PreShipmentMobileReportDTO>> GetPreShipmentMobile(MobileShipmentFilterCriteria accountFilterCriteria)
         {
-            if(accountFilterCriteria == null)
+            if (accountFilterCriteria == null)
             {
                 accountFilterCriteria = new MobileShipmentFilterCriteria
                 {
@@ -731,7 +742,7 @@ namespace GIGLS.Services.Implementation.Report
                         item.DestinationServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DestinationStationId).StationName;
                         item.DepartureServiceCentreName = stations.FirstOrDefault(x => x.StationId == item.DepartureStationId).StationName;
                     }
-                    result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode,filter.StartDate.Value,filter.EndDate.Value);
+                    result.InvoiceRefNo = await _numberGeneratorMonitorService.GenerateInvoiceRefNoWithDate(NumberGeneratorType.Invoice, filter.CustomerCode, filter.StartDate.Value, filter.EndDate.Value);
                 }
                 return result;
             }
@@ -761,8 +772,8 @@ namespace GIGLS.Services.Implementation.Report
                 customerInvoice.UserID = await _userService.GetCurrentUserId();
                 customerInvoice.Waybills = string.Join(",", waybills);
                 _uow.CustomerInvoice.Add(customerInvoice);
-               await _uow.CompleteAsync();
-               return true;
+                await _uow.CompleteAsync();
+                return true;
             }
             catch (Exception ex)
             {
@@ -770,5 +781,374 @@ namespace GIGLS.Services.Implementation.Report
             }
 
         }
+
+        public async Task<List<CustomerInvoiceDTO>> GetMonthlyCoporateTransactions()
+        {
+            try
+            {
+                var shipments = await _uow.Shipment.GetMonthlyCoporateTransactions();
+                return shipments;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<string> GeneratePDF(CustomerInvoiceDTO customerInvoice)
+        {
+            using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
+            {
+                var invoices = customerInvoice.InvoiceViewDTOs;
+                Document document = new Document(PageSize.A4, 10, 10, 10, 10);
+                PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
+                document.Open();
+                string[] headers = { "Waybill", "Dept", "Dest", "Weight(kg)", "Amount(#)", "DateCreated" };
+                float[] widths = new float[] { 45, 45, 78, 30, 45, 78, 78, 151, 150 };
+
+
+                PdfPTable table = new PdfPTable(headers.Length);
+                var imageURL = ConfigurationManager.AppSettings["InvoiceImg"];
+                Image pngImg = Image.GetInstance(imageURL);
+                pngImg.ScaleToFit(570f, 420f);
+                table.SpacingBefore = 20;
+                table.WidthPercentage = 99;
+
+                PdfPCell cell = new PdfPCell();
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                cell.VerticalAlignment = Element.ALIGN_CENTER;
+
+                cell = new PdfPCell(new Phrase($"Bill To: {customerInvoice.CustomerName}{System.Environment.NewLine}{System.Environment.NewLine}Email: {customerInvoice.Email}{System.Environment.NewLine}{System.Environment.NewLine}Invoice Ref No: {customerInvoice.InvoiceRefNo}"));
+                cell.Colspan = 6;
+                table.AddCell(cell);
+
+
+                cell = new PdfPCell(new Phrase());
+                cell = new PdfPCell(new Phrase($"Customer Code: {customerInvoice.CustomerCode.PadRight(20)} Date Created: {invoices.FirstOrDefault().DateCreated.ToString()}{System.Environment.NewLine}"));
+                cell.Colspan = 6;
+                table.AddCell(cell);
+
+                cell = new PdfPCell(new Phrase("Invoice Detail"));
+                cell.Colspan = 6;
+                // cell.PaddingLeft = 50;
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                cell.VerticalAlignment = Element.ALIGN_CENTER;
+                table.AddCell(cell);
+
+
+                for (int i = 0; i < 1; i++)
+                {
+                    cell = new PdfPCell(new Phrase(headers[0]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[1]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[2]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[3]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[4]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(headers[5]));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    break;
+                }
+                foreach (var item in customerInvoice.InvoiceViewDTOs)
+                {
+                    cell = new PdfPCell(new Phrase(item.Waybill));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DepartureServiceCentreName));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DestinationServiceCentreName));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.ApproximateItemsWeight.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.Amount.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                    cell = new PdfPCell(new Phrase(item.DateCreated.ToString()));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table.AddCell(cell);
+                }
+
+                document.Add(pngImg);
+                document.Add(table);
+                document.Close();
+                byte[] bytes = memoryStream.ToArray();
+                memoryStream.Close();
+
+                //save image to blob
+                string filename = string.Empty;
+                string fileMimeType = "application/pdf";
+                var _task = await AzureBlobServiceUtil.UploadFileToBlobAsync(filename, bytes, fileMimeType);
+                string fileUrl = _task;
+                return fileUrl;
+
+            }
+        }
+
+        public async Task<bool> AddCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO)
+        {
+            try
+            {
+                if (customerInvoiceDTO == null)
+                {
+                    throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                if (!customerInvoiceDTO.InvoiceViewDTOs.Any())
+                {
+                    throw new GenericException("Invalid payload, No invoice detail", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var customerInvoice = JObject.FromObject(customerInvoiceDTO).ToObject<CustomerInvoice>();
+                var waybills = customerInvoiceDTO.InvoiceViewDTOs.Select(x => x.Waybill).ToList();
+                // customerInvoice.UserID = await _userService.GetCurrentUserId();
+                customerInvoice.Waybills = string.Join(",", waybills);
+                customerInvoice.Total = customerInvoiceDTO.InvoiceViewDTOs.Sum(x => x.Amount);
+                _uow.CustomerInvoice.Add(customerInvoice);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<bool> CreateNUBAN(CustomerInvoiceDTO customerInvoice)
+        {
+            //first create customer on paystack if customer doesnt exist already
+            var nuban = new CreateNubanAccountResponseDTO();
+            bool res = false;
+            var company = await _uow.Company.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode);
+
+            if (!String.IsNullOrEmpty(company.NUBANAccountNo)) { res = true; return res; }
+
+            var nubanAcc = new CreateNubanAccountDTO()
+            {
+                customer = 0,
+                email = company.Email,
+                preferred_bank = "wema-bank",
+                first_name = company.Name,
+                last_name = company.Name,
+                phone = company.PhoneNumber
+            };
+            if (String.IsNullOrEmpty(company.NUBANCustomerCode))
+            {
+                var nubanCustomer = await _paystackPaymentService.CreateNubanCustomer(nubanAcc);
+                if (nubanCustomer.succeeded)
+                {
+                    company.NUBANCustomerId = nubanCustomer.data.id;
+                    company.NUBANCustomerCode = nubanCustomer.data.customer_code;
+                    nubanAcc.customer = nubanCustomer.data.id;
+                    nuban = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                    if (nuban.succeeded)
+                    {
+                        if (company != null)
+                        {
+                            company.PrefferedNubanBank = nubanAcc.preferred_bank;
+                            company.NUBANAccountNo = nuban.data.account_number;
+                            company.NUBANCustomerName = nuban.data.account_name;
+                        }
+                        res = nuban.succeeded;
+                    }
+                }
+            }
+
+            else if (!String.IsNullOrEmpty(company.NUBANCustomerCode) && String.IsNullOrEmpty(company.NUBANAccountNo))
+            {
+                nubanAcc.customer = company.NUBANCustomerId;
+                var customerNubanAccount = await _paystackPaymentService.CreateUserNubanAccount(nubanAcc);
+                if (customerNubanAccount.succeeded)
+                {
+                    if (company != null)
+                    {
+                        company.PrefferedNubanBank = company.PrefferedNubanBank;
+                        company.NUBANAccountNo = customerNubanAccount.data.account_number;
+                    }
+                }
+                res = customerNubanAccount.succeeded;
+            }
+            return res;
+        }
+
+        public async Task<bool> CheckIfInvoiceAlreadyExist(CustomerInvoiceDTO customerInvoice)
+        {
+            bool res = false;
+            var now = DateTime.Today;
+            // var month = new DateTime(now.Year, now.Month, 1);
+            var firstDay = new DateTime(now.Year, now.Month, 1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
+            //var now = DateTime.Now;
+            //DateTime firstDay = new DateTime(now.Year, now.AddMonths(-1), 1);
+            //DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+            if (firstDay != null && lastDay != null)
+            {
+                firstDay = firstDay.ToUniversalTime();
+                firstDay = firstDay.AddHours(12).AddMinutes(00);
+                lastDay = lastDay.ToUniversalTime();
+                lastDay = lastDay.AddHours(23).AddMinutes(59);
+            }
+            var invoice = await _uow.CustomerInvoice.GetAsync(x => x.CustomerCode == customerInvoice.CustomerCode && x.DateCreated >= firstDay && x.DateCreated <= lastDay);
+            if (invoice != null)
+            {
+                res = true;
+            }
+            return res;
+        }
+        public async Task<List<CustomerInvoiceDTO>> GetCustomerInvoiceList(DateFilterForDropOff filter)
+        {
+            try
+            {
+                return await _uow.Shipment.GetCoporateInvoiceList(filter);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public async Task<bool> MarkInvoiceasPaid(List<CustomerInvoiceDTO> customerInvoices)
+        {
+            try
+            {
+                if (customerInvoices.Any())
+                {
+                    var refNos = customerInvoices.Select(c => c.InvoiceRefNo).ToList();
+                    var invoices = _uow.CustomerInvoice.GetAllAsQueryable().Where(x => refNos.Contains(x.InvoiceRefNo)).ToList();
+                    if (invoices.Any())
+                    {
+                        foreach (var item in invoices)
+                        {
+                            item.PaymentStatus = PaymentStatus.Paid;
+                            item.DateModified = DateTime.Now;
+                            item.UserID = await _userService.GetCurrentUserId();
+                        }
+                        await _uow.CompleteAsync();
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetGoFasterReport(NewFilterOptionsDto filter)
+        {
+            var result = new List<InvoiceViewDTO>();
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                filter.StartDate = now.Date;
+                filter.EndDate = now.Date;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(00).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            var shipments = await _uow.Shipment.GetGoFasterShipments(filter);
+            //group shipment by service centre
+            if (shipments.Any())
+            {
+                var allWeight = shipments.Select(x => x.ApproximateItemsWeight).ToArray();
+                int n = allWeight.Length;
+                double freq = maxFreq(allWeight, n);
+               
+                result = shipments.GroupBy(x => new { x.DepartureServiceCentreId }).Select(s => new InvoiceViewDTO
+                {
+                    Waybill = s.FirstOrDefault().Waybill,
+                    DepartureServiceCentreId = s.FirstOrDefault().DepartureServiceCentreId,
+                    DestinationServiceCentreId = s.FirstOrDefault().DestinationServiceCentreId,
+                    DepartureServiceCentreName = s.FirstOrDefault().DepartureServiceCentreName,
+                    DestinationServiceCentreName = s.FirstOrDefault().DestinationServiceCentreName,
+                    Amount = s.Sum(x => x.Amount),
+                    DateCreated = s.FirstOrDefault().DateCreated,
+                    CompanyType = s.FirstOrDefault().CompanyType,
+                    CustomerCode = s.FirstOrDefault().CustomerCode,
+                    ApproximateItemsWeight = s.Sum(x => x.ApproximateItemsWeight),
+                    TotalWeight = s.Sum(x => x.ApproximateItemsWeight),
+                    TotalShipment = s.Count(),
+                    Cash = s.Sum(x => x.Cash),
+                    CustomerType = s.FirstOrDefault().CustomerType,
+                    TopWeight = freq
+                }).ToList();
+
+                result = result.OrderByDescending(x => x.TotalShipment).ToList();
+            }
+            return result;
+        }
+        public async Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filter)
+        {
+            if (filter != null && filter.StartDate == null && filter.EndDate == null)
+            {
+                var now = DateTime.Now;
+                filter.StartDate = now.Date;
+                filter.EndDate = now.Date;
+            }
+            if (filter != null && filter.StartDate != null && filter.EndDate != null)
+            {
+                filter.StartDate = filter.StartDate.Value.ToUniversalTime();
+                filter.StartDate = filter.StartDate.Value.AddHours(00).AddMinutes(00);
+                filter.EndDate = filter.EndDate.Value.ToUniversalTime();
+                filter.EndDate = filter.EndDate.Value.AddHours(23).AddMinutes(59);
+            }
+            return await _uow.Shipment.GetGoFasterShipmentsByServiceCentre(filter);
+        }
+
+        public double maxFreq(double[] arr, int n)
+        {
+            int res = 0;
+            int count = 1;
+            for (int i = 1; i < n; i++)
+            {
+                if (arr[i] == arr[res])
+                {
+                    count++;
+                }
+                else
+                {
+                    count--;
+                }
+
+                if (count == 0)
+                {
+                    res = i;
+                    count = 1;
+                }
+
+            }
+
+            return arr[res];
+        }
+
     }
 }

@@ -355,5 +355,38 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getservicecentresbystate/{stateId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresByState(int stateId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetServiceCentresByState(stateId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("servicecentrewithhubforstation/{countryId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresWithHUBForStation(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //2. priviledged users service centres
+                var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+
+                var centres = await _service.GetServiceCentresWithHUBForStation(usersServiceCentresId[0], countryId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
     }
 }
