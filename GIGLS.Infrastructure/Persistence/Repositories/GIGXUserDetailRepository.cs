@@ -35,7 +35,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
-                                    WalletAddress = r.WalletAddress   
+                                    WalletAddress = r.WalletAddress,
+                                    GIGXEmail = r.GIGXEmail
                                   }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(gigxusersDTO.OrderByDescending(x => x.DateCreated).ToList());
@@ -63,7 +64,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
-                                    WalletAddress = r.WalletAddress
+                                    WalletAddress = r.WalletAddress,
+                                    GIGXEmail = r.GIGXEmail
                                 }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(gigxusersDTO.FirstOrDefault());
@@ -90,7 +92,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
-                                    WalletAddress = r.WalletAddress
+                                    WalletAddress = r.WalletAddress,
+                                    GIGXEmail = r.GIGXEmail
                                 }).OrderByDescending(x => x.DateCreated).ToList();
 
                 return Task.FromResult(gigxusersDTO.FirstOrDefault());
