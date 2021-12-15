@@ -2646,21 +2646,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpPost]
-        [Route("checkoutencryption")]
-        public async Task<IServiceResponse<CellulantResponseDTO>> CheckOutEncryption(CellulantPayloadDTO payload)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _portalService.CheckoutEncryption(payload);
-
-                return new ServiceResponse<CellulantResponseDTO>
-                {
-                    Object = result
-                };
-            });
-        }
-
         [HttpDelete]
         [Route("deleteinboundshipment/{requestNo}")]
         public async Task<IServiceResponse<bool>> DeleteInboundShipment(string requestNo)
@@ -2872,6 +2857,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("checkoutencryption")]
+        public async Task<IServiceResponse<CellulantResponseDTO>> CheckOutEncryption(CellulantPayloadDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckoutEncryption(payload);
+
+                return new ServiceResponse<CellulantResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost]
         [Route("verifypayment")]
