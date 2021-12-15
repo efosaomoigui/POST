@@ -57,13 +57,14 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
-                var countryId = await _userService.GetUserActiveCountryId();
-                if (countryId < 0)
+                var userId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(userId);
+                if (user.UserActiveCountryId < 0)
                 {
                     throw new GenericException("invalid country Id", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                var result = await _uow.PaymentMethod.GetPaymentMethodByUserActiveCountry(countryId);
+                var result = await _uow.PaymentMethod.GetPaymentMethodByUserActiveCountry(user.UserActiveCountryId);
                 
                 return result;
             }
