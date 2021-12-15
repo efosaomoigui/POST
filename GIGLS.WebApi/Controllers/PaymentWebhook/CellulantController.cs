@@ -70,6 +70,21 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("verifypayment")]
+        public async Task<IServiceResponse<CellulantPaymentResponse>> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _cellulantService.VerifyAndValidatePaymentForWebhook(webhook);
+
+                return new ServiceResponse<CellulantPaymentResponse>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
 

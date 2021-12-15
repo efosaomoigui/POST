@@ -675,5 +675,59 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
         #endregion
+
+        #region Cellulant Webhook
+
+
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook)
+        {
+            CellulantPaymentResponse result = new CellulantPaymentResponse();
+            result.StatusCode = "183";
+            result.StatusDescription = "Payment processed successfully";
+            result.CheckoutRequestID = webhook.CheckoutRequestID;
+            result.MerchantTransactionID = webhook.MerchantTransactionID;
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.MerchantTransactionID);
+
+            var referenceCode = webhook.MerchantTransactionID;
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+            else
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<CellulantPaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
+        {
+            var result = await VerifyAndValidatePayment(webhook);
+
+            return result;
+        }
+        #endregion
     }
 }
