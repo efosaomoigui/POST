@@ -144,7 +144,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        
         [HttpPost]
         [Route("addwalletpaymentlog")]
         public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
@@ -159,7 +159,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        
         [HttpPost]
         [Route("addwaybillpaymentlog")]
         public async Task<IServiceResponse<object>> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDTO)
@@ -235,6 +235,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        
 
         [HttpGet]
         [Route("gatewaycode")]
@@ -2850,6 +2852,37 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var result = await _portalService.ValidateBillsPaymentRefund(billTransaction);
                 return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("checkoutencryption")]
+        public async Task<IServiceResponse<CellulantResponseDTO>> CheckOutEncryption(CellulantPayloadDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckoutEncryption(payload);
+
+                return new ServiceResponse<CellulantResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("verifypayment")]
+        public async Task<IServiceResponse<CellulantPaymentResponse>> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.VerifyAndValidatePayment(webhook);
+
+                return new ServiceResponse<CellulantPaymentResponse>
                 {
                     Object = result
                 };

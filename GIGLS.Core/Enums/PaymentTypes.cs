@@ -23,6 +23,7 @@
         Paystack,
         TheTeller,
         Flutterwave,
-        USSD
+        USSD,
+        Cellulant
     }
 }

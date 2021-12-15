@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace GIGLS.Core.IServices.Wallet
         Task<TransferDetailsDTO> GetAllTransferDetails(string reference);
         Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter);
         Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
-        
+        Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
+        Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
+        Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook);
     }
 }

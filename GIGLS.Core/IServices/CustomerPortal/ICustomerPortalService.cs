@@ -256,5 +256,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ChangeUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction);
+        Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
+        Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
     }
 }

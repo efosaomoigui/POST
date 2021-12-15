@@ -121,6 +121,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentService _shipmentService;
         private readonly IManifestGroupWaybillNumberMappingService _movementManifestService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly ICellulantPaymentService _cellulantPaymentService;
         private readonly INodeService _nodeService;
         private readonly IGIGXUserDetailService _gigxService;
         private readonly IPaymentMethodService _paymentMethodService;
@@ -137,7 +138,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -184,6 +185,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _nodeService = nodeService;
             _gigxService = gigxService;
             _paymentMethodService = paymentMethodService;
+            _cellulantPaymentService = cellulantPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -395,6 +397,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             response.GatewayResponse = result.data.Gateway_Response;
             return response;
         }
+
+        
 
         public async Task<GatewayCodeResponse> GetGatewayCode()
         {
@@ -4425,6 +4429,94 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
             }
             return response;
+        }
+
+        public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
+        {
+            if (payload == null)
+            {
+                throw new GenericException($"Payload is invalid");
+            }
+
+            if (string.IsNullOrEmpty(payload.merchantTransactionID))
+            {
+                throw new GenericException($"TransactionID is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.requestAmount))
+            {
+                throw new GenericException($"Request Amount is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.currencyCode))
+            {
+                throw new GenericException($"Currency Code is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.accountNumber))
+            {
+                throw new GenericException($"Account Number is required");
+            }
+
+            if (string.IsNullOrEmpty(payload.paymentWebhookUrl))
+            {
+                throw new GenericException($"WebhookUrl is required");
+            }
+
+            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+            payload.serviceCode = serviceCode;
+
+            return await _cellulantPaymentService.CheckoutEncryption(payload);
+        }
+
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
+        {
+            CellulantPaymentResponse result = new CellulantPaymentResponse();
+            result.StatusCode = "183";
+            result.StatusDescription = "Payment processed successfully";
+            result.CheckoutRequestID = webhook.CheckoutRequestID;
+            result.MerchantTransactionID = webhook.MerchantTransactionID;
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.MerchantTransactionID);
+
+            var referenceCode = webhook.MerchantTransactionID;
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+            else
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<CellulantPaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
+        {
+            var result = await _cellulantPaymentService.VerifyAndValidatePayment(webhook);
+
+            return result;
         }
     }
 }

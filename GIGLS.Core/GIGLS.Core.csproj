@@ -422,6 +422,7 @@
     <Compile Include="DTO\Node\NodeResponse.cs" />
     <Compile Include="DTO\Node\UserPayload.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\CellulantPayloadDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
     <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />

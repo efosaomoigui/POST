@@ -1,12 +1,24 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Node;
+using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility.CellulantEncryptionService;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -14,6 +26,8 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,14 +39,24 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
         private IServiceCentreService _serviceCenterService;
-        public CellulantPaymentService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService)
+        private readonly IWalletService _walletService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly INodeService _nodeService;
+        private readonly IMessageSenderService _messageSenderService;
+        public CellulantPaymentService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService,
+            IWalletService walletService, IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
+            _walletService = walletService;
+            _paymentTransactionService = paymentTransactionService;
+            _nodeService = nodeService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
+        #region Cellulant Transfer Management
         public Task<TransferDetailsDTO> GetAllTransferDetails(string reference)
         {
             throw new NotImplementedException();
@@ -119,7 +143,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    if(isAdmin == true || isAccount == true)
+                    if (isAdmin == true || isAccount == true)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
                     }
@@ -169,6 +193,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return transferDetailsDto;
         }
+
+
 
         private async Task<string> GetServiceCentreCrAccount()
         {
@@ -356,5 +382,352 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return cipherText;
         }
+        #endregion
+
+
+        #region Cellulant Payment Gateway
+
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO payload)
+        {
+            CellulantPaymentResponse response = new CellulantPaymentResponse();
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(payload.MerchantTransactionID);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                response = await ProcessPaymentForWaybill(payload);
+            }
+            else
+            {
+                response = await ProcessPaymentForWallet(payload);
+            }
+
+            return response;
+        }
+
+        private async Task<CellulantPaymentResponse> ProcessPaymentForWaybill(CellulantWebhookDTO payload)
+        {
+            //1. verify the payment 
+            var verifyResult = payload;
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
+            };
+
+            if (verifyResult.RequestStatusCode.Equals(178))
+            {
+                if (verifyResult.Payments != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
+
+                    if (paymentLog == null)
+                        return result;
+
+                    //2. if the payment successful
+                    if (verifyResult.RequestStatusDescription.Equals("Request fully paid") && !paymentLog.IsWaybillSettled)
+                    {
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
+
+                        if (checkAmount)
+                        {
+                            //3. Process payment for the waybill if successful
+                            PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                            {
+                                Waybill = paymentLog.Waybill,
+                                PaymentType = PaymentType.Online,
+                                TransactionCode = paymentLog.Reference,
+                                UserId = paymentLog.UserId
+                            };
+
+                            var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                            if (processWaybillPayment)
+                            {
+                                //2. Update waybill Payment log
+                                paymentLog.IsPaymentSuccessful = true;
+                                paymentLog.IsWaybillSettled = true;
+                            }
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
+                    await _uow.CompleteAsync();
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<CellulantPaymentResponse> ProcessPaymentForWallet(CellulantWebhookDTO payload)
+        {
+            //1. verify the payment 
+            var verifyResult = payload;
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
+            };
+            if (verifyResult.RequestStatusCode.Equals(178))
+            {
+                if (verifyResult.Payments != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
+
+                    if (paymentLog == null)
+                        return result;
+
+                    if (verifyResult.RequestStatusDescription != null)
+                    {
+                        verifyResult.RequestStatusDescription = verifyResult.RequestStatusDescription.ToLower();
+                    }
+
+                    bool sendPaymentNotification = false;
+                    var walletDto = new WalletDTO();
+                    var userPayload = new UserPayload();
+                    var bonusAddon = new BonusAddOn();
+                    bool checkAmount = false;
+
+                    //2. if the payment successful
+                    if (verifyResult.RequestStatusDescription.Equals("request fully paid") && !paymentLog.IsWalletCredited)
+                    {
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
+
+                        if (checkAmount)
+                        {
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
+
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                            if (walletDto != null)
+                            {
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                }
+                            }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            //bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = paymentLog.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Description = verifyResult.RequestStatusDescription,
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = paymentLog.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
+                    await _uow.CompleteAsync();
+
+                    if (sendPaymentNotification)
+                    {
+                        await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    }
+
+                    //Call Node API for subscription process
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
+                    {
+                        if (userPayload != null)
+                        {
+                            await _nodeService.WalletNotification(userPayload);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
+        {
+            if (!string.IsNullOrWhiteSpace(refCode))
+            {
+                refCode = refCode.ToLower();
+            }
+
+            if (refCode.StartsWith("wb"))
+            {
+                return WaybillWalletPaymentType.Waybill;
+            }
+
+            return WaybillWalletPaymentType.Wallet;
+        }
+
+        private async Task SendPaymentNotificationAsync(WalletDTO walletDto, WalletPaymentLog paymentLog)
+        {
+            if (walletDto != null)
+            {
+                walletDto.Balance = walletDto.Balance + paymentLog.Amount;
+
+                var message = new MessageDTO()
+                {
+                    CustomerCode = walletDto.CustomerCode,
+                    CustomerName = walletDto.CustomerName,
+                    ToEmail = walletDto.CustomerEmail,
+                    To = walletDto.CustomerEmail,
+                    Currency = walletDto.Country.CurrencySymbol,
+                    Body = walletDto.Balance.ToString("N"),
+                    Amount = paymentLog.Amount.ToString("N"),
+                    Date = paymentLog.DateCreated.ToString("dd-MM-yyyy")
+                };
+
+                //send mail to customer
+                await _messageSenderService.SendPaymentNotificationAsync(message);
+
+                //send a copy to chairman
+                var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+
+                if (chairmanEmail != null)
+                {
+                    //seperate email by comma and send message to those email
+                    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+
+                    foreach (string email in chairmanEmails)
+                    {
+                        message.ToEmail = email;
+                        await _messageSenderService.SendPaymentNotificationAsync(message);
+                    }
+                }
+            }
+        }
+
+        private bool ValidatePaymentValue(decimal shipmentAmount, decimal paymentAmount)
+        {
+            var factor = Convert.ToDecimal(Math.Pow(10, 0));
+            paymentAmount = Math.Round(paymentAmount * factor) / factor;
+            shipmentAmount = Math.Round(shipmentAmount * factor) / factor;
+
+            decimal increaseShipmentPrice = shipmentAmount + 1;
+            decimal decreaseShipmentPrice = shipmentAmount - 1;
+
+            if (shipmentAmount == paymentAmount
+                || increaseShipmentPrice == paymentAmount
+                || decreaseShipmentPrice == paymentAmount)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private string ProcessStatusCode(int code)
+        {
+            switch (code)
+            {
+                case 129:
+                    return "Request has expired with no partial payment received";
+                case 176:
+                    return "Partial payment made for the request and has been marked as closed.";
+                case 178:
+                    return "Full payment made for the request";
+                case 179:
+                    return "Request has expired with one or more partial payments made.";
+                case 99:
+                    return "A failed payment has been received for this request. Request is still open to receive payments";
+                default:
+                    break;
+            }
+            return string.Empty;
+        }
+
+        public async Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload)
+        {
+            string accessKey = ConfigurationManager.AppSettings["CellulantAccessKey"];
+            string ivKey = ConfigurationManager.AppSettings["CellulantIVKey"];
+            string secretKey = ConfigurationManager.AppSettings["CellulantSecretKey"];
+            //string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+
+            ICellulantDataEncryption encryption = new CellulantDataEncryption(ivKey, secretKey);
+            //payload.serviceCode = serviceCode;
+
+            string json = JsonConvert.SerializeObject(payload).Replace("/", "\\/");
+
+            string encParams = encryption.EncryptData(json);
+            var result = new CellulantResponseDTO { param = encParams, accessKey = accessKey, countryCode = payload.countryCode };
+            return result;
+        }
+
+        #endregion
+
+        #region Cellulant Webhook
+
+
+        public async Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook)
+        {
+            CellulantPaymentResponse result = new CellulantPaymentResponse();
+            result.StatusCode = "183";
+            result.StatusDescription = "Payment processed successfully";
+            result.CheckoutRequestID = webhook.CheckoutRequestID;
+            result.MerchantTransactionID = webhook.MerchantTransactionID;
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.MerchantTransactionID);
+
+            var referenceCode = webhook.MerchantTransactionID;
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+            else
+            {
+                //1. Get PaymentLog
+                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                if (paymentLog != null)
+                {
+                    if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(webhook);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<CellulantPaymentResponse> VerifyAndValidateCellulantPayment(CellulantWebhookDTO webhook)
+        {
+            var result = await VerifyAndValidatePayment(webhook);
+
+            return result;
+        }
+        #endregion
     }
 }
