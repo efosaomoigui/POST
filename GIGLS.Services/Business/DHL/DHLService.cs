@@ -337,7 +337,6 @@ namespace GIGLS.Services.Business.DHL
             string email = ConfigurationManager.AppSettings["DHLGIGContactEmail"];
             string phoneNumber = ConfigurationManager.AppSettings["DHLGIGPhoneNumber"];
             var customer = shipmentDTO.CustomerDetails;
-            var data = SplitTheSentenceAtWord(customer.Address, 45);
             var shipper = new ShipmentShipperDetail
             {
                 ContactInformation = new ContactInformation
@@ -350,14 +349,14 @@ namespace GIGLS.Services.Business.DHL
                 },
                 PostalAddress = new PostalAddress
                 {
-                    CityName = !string.IsNullOrWhiteSpace(customer.State) ? customer.State : "Lagos",
+                    CityName = "Lagos",
                     PostalCode = "100001",
-                    ProvinceCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG",
-                    CountryCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG",
-                    countyName = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryName : "Nigeria",
-                    AddressLine1 = data[0],
-                    AddressLine2 = data.Count > 1 ? data[1] : customer.City,
-                    AddressLine3 = data.Count > 2 ? data[2] : customer.State,
+                    ProvinceCode = "NG",
+                    CountryCode = "NG",
+                    countyName = "Nigeria",
+                    AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
+                    AddressLine2 = "Beside Mobile Fuel Station",
+                    AddressLine3 = "Gbagada 100234, Lagos"
                 }
             };
             return shipper;
@@ -439,7 +438,7 @@ namespace GIGLS.Services.Business.DHL
             var shippingDate = await AddWorkdays(shipmentDTO.IsFromMobile, shipmentDTO.DepartureCountryId);
             rateRequest.PlannedShippingDateAndTime = shippingDate.ToString("yyyy-MM-ddTHH:mm:ss'GMT+01:00'");
             rateRequest.Accounts.Add(GetAccount());
-            rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress(shipmentDTO.CustomerDetails);
+            rateRequest.CustomerDetails.ShipperDetails = GetRateShipperAddress();
             rateRequest.CustomerDetails.ReceiverDetails = GetRateReceiverAddress(shipmentDTO);
             if (shipmentDTO.CustomerDetails != null && shipmentDTO.CustomerDetails.Rank == Rank.Class && shipmentDTO.DeclarationOfValueCheck >= 100000.00M)
             {
@@ -491,26 +490,18 @@ namespace GIGLS.Services.Business.DHL
             return rateRequest;
         }
 
-        private RateShipperDetail GetRateShipperAddress(CustomerDTO customer)
+        private RateShipperDetail GetRateShipperAddress()
         {
-            var data = SplitTheSentenceAtWord(customer.Address, 45);
-            //Move this detail to web-config for now
-            var address = new RateShipperDetail();
-            //CityName = "Lagos";
-            //PostalCode = "100001";
-            //CountryCode = "NG";
-            //CountyName = "Nigeria",
-            //AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way";
-            //AddressLine2 = "Beside Mobile Fuel Station";
-            //AddressLine3 = "Gbagada 100234, Lagos";
-
-            address.CityName = !string.IsNullOrWhiteSpace(customer.State) ? customer.State : "Lagos";
-            address.PostalCode = "100001";
-            address.CountryCode = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryShortCode : "NG";
-            address.CountyName = customer.Country != null && customer.Country.CountryShortCode != null ? customer.Country.CountryName : "Nigeria";
-            address.AddressLine1 = data[0];
-            address.AddressLine2 = data.Count > 1 ? data[1] : customer.City;
-            address.AddressLine3 = data.Count > 2 ? data[2] : customer.State;
+            var address = new RateShipperDetail
+            {
+                CityName = "Lagos",
+                PostalCode = "100001",
+                CountryCode = "NG",
+                CountyName = "Nigeria",
+                AddressLine1 = "1 Sunday Ogunyade Street, Gbagada Express Way",
+                AddressLine2 = "Beside Mobile Fuel Station",
+                AddressLine3 = "Gbagada 100234, Lagos",
+            };
             return address;
         }
 
