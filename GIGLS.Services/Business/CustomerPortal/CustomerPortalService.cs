@@ -237,6 +237,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
+            //for now block flutter wave untill they sort there issues
+            if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+            {
+                throw new GenericException("Payment method currently not available, try paystack.");
+            }
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
         }

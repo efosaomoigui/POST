@@ -4,7 +4,10 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
@@ -140,6 +143,41 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 return new ServiceResponse<List<WalletDTO>>
                 {
                     Object = walletsObj
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("bulkcreditdebit")]
+        public async Task<IServiceResponse<bool>> BulkCreditDebit()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                HttpResponseMessage result = null;
+                var httpRequest = HttpContext.Current.Request;
+                if (httpRequest.Files.Count > 0)
+                {
+                    var docfiles = new List<string>();
+                    foreach (string file in httpRequest.Files)
+                    {
+                        var postedFile = httpRequest.Files[file];
+                        var filePath = HttpContext.Current.Server.MapPath("~/Images/" + postedFile.FileName);
+                        postedFile.SaveAs(filePath);
+
+                        docfiles.Add(filePath);
+                    }
+                    result = Request.CreateResponse(HttpStatusCode.Created, docfiles);
+                }
+                else
+                {
+                    result = Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }
