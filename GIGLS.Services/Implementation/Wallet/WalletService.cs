@@ -1135,6 +1135,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     //check if user exist
                     var customerCode = dr[0].ToString();
+                    var desc = dr[3].ToString();
+                    var refNo = new Guid().ToString();
                     var user = await _uow.User.GetUserByChannelCode(customerCode);
                     if (user == null)
                     {
@@ -1167,9 +1169,9 @@ namespace GIGLS.Services.Implementation.Wallet
                             WalletId = wallet.WalletId,
                             Amount = amount,
                             CreditDebitType = type,
-                            Description = "",
+                            Description = desc,
                             PaymentType = PaymentType.Wallet,
-                            PaymentTypeReference = "",
+                            PaymentTypeReference = refNo,
                             UserId = user.Id
                         };
                         walletList.Add(walletTransacDTO);
