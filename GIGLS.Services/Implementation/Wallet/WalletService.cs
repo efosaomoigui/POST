@@ -1136,7 +1136,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     //check if user exist
                     var customerCode = dr[0].ToString();
                     var desc = dr[3].ToString();
-                    var refNo = new Guid().ToString();
                     var user = await _uow.User.GetUserByChannelCode(customerCode);
                     if (user == null)
                     {
@@ -1163,6 +1162,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             }
                         }
                         //for successful transactions
+                        var refNo = Guid.NewGuid().ToString();
+                        refNo = refNo + i;
                         CreditDebitType type = (CreditDebitType)Enum.Parse(typeof(CreditDebitType), creditType);
                         var walletTransacDTO = new WalletTransactionDTO()
                         {
