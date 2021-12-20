@@ -16,6 +16,8 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -1112,6 +1114,118 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             _uow.Commit();
             return true;
+        }
+
+
+        public async Task<object> ProcessBulkWalletUpload(string path)
+        {
+            try
+            {
+                var transactions = new object();
+                var result = new List<Dictionary<string, string>>();
+                var res = new Dictionary<string, string>();
+                DataTable dt = await ConvertCSVtoDataTable(path);
+                var walletList = new List<WalletTransactionDTO>();
+                var failedTransactions = new List<string>();
+                var headers = dt.Rows[0].ItemArray;
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    var dr = dt.Rows[i].ItemArray;
+
+                    //check if user exist
+                    var customerCode = dr[0].ToString();
+                    var user = await _uow.User.GetUserByChannelCode(customerCode);
+                    if (user == null)
+                    {
+                        failedTransactions.Add($"Line no {i} --- for customer code {customerCode} does not exist");
+                        continue;
+                    }
+                    var amount = Convert.ToDecimal(dr[1]);
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+                    if (wallet != null)
+                    {
+                        var creditType = dr[2].ToString();
+                        if (creditType.ToLower() == CreditDebitType.Debit.ToString().ToLower())
+                        {
+                            //check if user has enough balance
+                            if (wallet.Balance <= 0 || amount <= 0)
+                            {
+                                failedTransactions.Add($"Line no {i} --- for customer code {customerCode} has 0 balance");
+                                continue;
+                            }
+                            if (amount > wallet.Balance)
+                            {
+                                failedTransactions.Add($"Line no {i} --- for customer code {customerCode} has insufficient balance");
+                                continue;
+                            }
+                        }
+                        //for successful transactions
+                        CreditDebitType type = (CreditDebitType)Enum.Parse(typeof(CreditDebitType), creditType);
+                        var walletTransacDTO = new WalletTransactionDTO()
+                        {
+                            WalletId = wallet.WalletId,
+                            Amount = amount,
+                            CreditDebitType = type,
+                            Description = "",
+                            PaymentType = PaymentType.Wallet,
+                            PaymentTypeReference = "",
+                            UserId = user.Id
+                        };
+                        walletList.Add(walletTransacDTO);
+                    }
+                    else
+                    {
+                        failedTransactions.Add($"Line no {i} --- for customer code {customerCode} does not have a wallet");
+                    }
+
+                }
+                if (walletList.Any())
+                {
+                    foreach (var item in walletList)
+                    {
+                        await UpdateWallet(item.WalletId, item, false);
+                    }
+                }
+
+                if (failedTransactions.Any())
+                {
+                    return new { Succeeded = false, Errors = failedTransactions };
+                }
+
+                return new { Succeeded = true };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        private Task<DataTable> ConvertCSVtoDataTable(string path)
+        {
+            var dt = new DataTable();
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string[] headers = sr.ReadLine().Split(',');
+                foreach (string header in headers)
+                {
+                    dt.Columns.Add(header);
+                }
+
+                while (!sr.EndOfStream)
+                {
+                    string[] rows = sr.ReadLine().Split(',');
+                    if (rows.Length > 1)
+                    {
+                        DataRow dr = dt.NewRow();
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            dr[i] = rows[i].Trim();
+                        }
+                        dt.Rows.Add(dr);
+                    }
+                }
+            }
+            return Task.FromResult(dt);
         }
     }
 }

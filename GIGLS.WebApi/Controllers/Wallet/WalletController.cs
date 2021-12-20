@@ -4,6 +4,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -151,33 +152,33 @@ namespace GIGLS.WebApi.Controllers.Wallet
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("bulkcreditdebit")]
-        public async Task<IServiceResponse<bool>> BulkCreditDebit()
+        public async Task<IServiceResponse<object>> BulkCreditDebit()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                HttpResponseMessage result = null;
+                object result = null;
                 var httpRequest = HttpContext.Current.Request;
                 if (httpRequest.Files.Count > 0)
                 {
-                    var docfiles = new List<string>();
+                    string mainFile = string.Empty;
                     foreach (string file in httpRequest.Files)
                     {
-                        var postedFile = httpRequest.Files[file];
-                        var filePath = HttpContext.Current.Server.MapPath("~/Images/" + postedFile.FileName);
-                        postedFile.SaveAs(filePath);
-
-                        docfiles.Add(filePath);
+                        mainFile = file;
+                        break;
                     }
-                    result = Request.CreateResponse(HttpStatusCode.Created, docfiles);
-                }
-                else
-                {
-                    result = Request.CreateResponse(HttpStatusCode.BadRequest);
-                }
 
-                return new ServiceResponse<bool>
+                    var postedFile = httpRequest.Files[mainFile];
+                    var filePath = HttpContext.Current.Server.MapPath("~/Images/" + postedFile.FileName);
+                    postedFile.SaveAs(filePath);
+                    result = await _walletService.ProcessBulkWalletUpload(filePath);
+
+                    //delete files after processing
+                    File.Delete(filePath);
+                }
+                
+                return new ServiceResponse<object>
                 {
-                    Object = true
+                    Object = result
                 };
             });
         }

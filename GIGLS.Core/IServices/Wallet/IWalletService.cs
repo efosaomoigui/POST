@@ -28,6 +28,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<bool> ChargeUserWallet(WalletDTO walletDTO);
         Task TopUpWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true);
         Task<ResponseDTO> ReverseWallet(string reference);
+        Task<object> ProcessBulkWalletUpload(string path);
     }
 
 }
