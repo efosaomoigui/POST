@@ -309,115 +309,125 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<PaymentResponse> VerifyAndValidateWallet(string referenceCode)
         {
             //1. verify the payment 
-            var verifyResult = await VerifyPayment(referenceCode);
-
-            PaymentResponse result = new PaymentResponse
+            try
             {
-                Result = verifyResult.Status,
-                Message = verifyResult.Message
-            };
-
-            if (verifyResult.Status)
-            {
-                //get wallet payment log by reference code
-                var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
-
-                if (paymentLog == null)
+                var verifyResult = await VerifyPayment(referenceCode);
+                PaymentResponse result = new PaymentResponse
                 {
-                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
-                    return result;
-                }
+                    Result = verifyResult.Status,
+                    Message = verifyResult.Message
+                };
 
-                bool sendPaymentNotification = false;
-                var walletDto = new WalletDTO();
-                var userPayload = new UserPayload();
-                var bonusAddon = new BonusAddOn();
-
-                bool checkAmount = false;
-
-                //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.Status)
                 {
-                    checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
-                    if (!checkAmount && paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
+                    _uow.BeginTransaction();
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+                    if (paymentLog == null)
                     {
-                        checkAmount = true;
+                        result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                        return result;
                     }
 
-                    if (checkAmount)
+                    bool sendPaymentNotification = false;
+                    var walletDto = new WalletDTO();
+                    var userPayload = new UserPayload();
+                    var bonusAddon = new BonusAddOn();
+
+                    bool checkAmount = false;
+
+                    //2. if the payment successful
+                    if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
                     {
-                        //a. update the wallet for the customer
-                        string customerId = null;  //set customer id to null
-
-                        //get wallet detail to get customer code
-                        walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
-
-                        if (walletDto != null)
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.data.Amount);
+                        if (!checkAmount && paymentLog.TransactionType == WalletTransactionType.ClassSubscription)
                         {
-                            //use customer code to get customer id
-                            var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
-
-                            if (user != null)
-                            {
-                                customerId = user.Id;
-                                userPayload.Email = user.Email;
-                                userPayload.UserId = user.Id;
-                                userPayload.Reference = referenceCode;
-                                userPayload.Authorization = verifyResult.data.Authorization;
-                            }
+                            checkAmount = true;
                         }
 
-                        //if pay was done using Master VIsa card, give some discount
-                        bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
-
-                        //update the wallet
-                        await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                        if (checkAmount)
                         {
-                            WalletId = paymentLog.WalletId,
-                            Amount = bonusAddon.Amount,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Description = bonusAddon.Description,
-                            PaymentType = PaymentType.Online,
-                            PaymentTypeReference = verifyResult.data.Reference,
-                            UserId = customerId
-                        }, false);
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
 
-                        //await SendPaymentNotificationAsync(walletDto, paymentLog);
-                        sendPaymentNotification = true;
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
-                        //3. update the wallet payment log
-                        paymentLog.IsWalletCredited = true;
+                            if (walletDto != null)
+                            {
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                    userPayload.Reference = referenceCode;
+                                    userPayload.Authorization = verifyResult.data.Authorization;
+                                }
+                            }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = bonusAddon.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Description = bonusAddon.Description,
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = verifyResult.data.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            //await SendPaymentNotificationAsync(walletDto, paymentLog);
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
+                        }
                     }
-                }
 
-                paymentLog.TransactionStatus = verifyResult.data.Status;
-                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
-                await _uow.CompleteAsync();
+                    paymentLog.TransactionStatus = verifyResult.data.Status;
+                    paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                    _uow.Commit();
+                    // await _uow.CompleteAsync();
 
-                result.GatewayResponse = verifyResult.data.Gateway_Response;
-                result.Status = verifyResult.data.Status;
+                    result.GatewayResponse = verifyResult.data.Gateway_Response;
+                    result.Status = verifyResult.data.Status;
 
-                if (sendPaymentNotification)
-                {
-                    await SendPaymentNotificationAsync(walletDto, paymentLog);
-                }
-
-                if (bonusAddon.BonusAdded)
-                {
-                    await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
-                }
-
-                //Call Node API for subscription process
-                if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
-                {
-                    if (userPayload != null)
+                    if (sendPaymentNotification)
                     {
-                        await _nodeService.WalletNotification(userPayload);
+                        await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    }
+
+                    if (bonusAddon.BonusAdded)
+                    {
+                        await SendVisaBonusNotificationAsync(bonusAddon, verifyResult, walletDto);
+                    }
+
+                    //Call Node API for subscription process
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
+                    {
+                        if (userPayload != null)
+                        {
+                            await _nodeService.WalletNotification(userPayload);
+                        }
                     }
                 }
-            }
 
-            return await Task.FromResult(result);
+                return await Task.FromResult(result);
+            }
+            catch (Exception ex)
+            {
+
+                _uow.Rollback();
+                throw;
+            }
         }
 
         public async Task<PaystackWebhookDTO> VerifyPaymentMobile(string reference, string UserId)
