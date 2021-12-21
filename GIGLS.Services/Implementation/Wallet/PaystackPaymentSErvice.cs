@@ -27,6 +27,7 @@ using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.Shipments;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using System.Data;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -320,7 +321,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (verifyResult.Status)
                 {
-                    _uow.BeginTransaction();
+                    _uow.BeginTransaction(IsolationLevel.RepeatableRead);
                     //get wallet payment log by reference code
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
 
