@@ -568,6 +568,17 @@ namespace GIGLS.Infrastructure.Persistence
             _context.Database.BeginTransaction();
         }
 
+
+        public void BeginTransaction(IsolationLevel isolationLevel)
+        {
+            _context.Configuration.AutoDetectChangesEnabled = false;
+
+            if (_context.Database.Connection.State != ConnectionState.Open)
+                _context.Database.Connection.Open();
+
+            _context.Database.BeginTransaction(isolationLevel);
+        }
+
         public void Commit()
         {
             _context.ChangeTracker.DetectChanges();
