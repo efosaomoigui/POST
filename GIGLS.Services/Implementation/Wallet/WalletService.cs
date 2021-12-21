@@ -1128,7 +1128,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 var walletList = new List<WalletTransactionDTO>();
                 var failedTransactions = new List<string>();
                 var headers = dt.Rows[0].ItemArray;
-
+                _uow.BeginTransaction();
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     var dr = dt.Rows[i].ItemArray;
@@ -1190,6 +1190,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         await UpdateWallet(item.WalletId, item, false);
                     }
                 }
+                _uow.Commit();
 
                 if (failedTransactions.Any())
                 {
@@ -1200,6 +1201,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             catch (Exception ex)
             {
+                _uow.Rollback();
                 throw ex;
             }
         }
