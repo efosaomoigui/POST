@@ -25,6 +25,17 @@ namespace GIGLS.Core.DTO.Shipments
         public string NairaCurrencyCode { get; set; }
         public string NairaCurrencySymbol { get; set; }
         public double NairaAmount { get; set; }
+        public string CediCurrencyCode { get; set; }
+        public string CediCurrencySymbol { get; set; }
+        public double CediAmount { get; set; }
         public DateTime DateCreated { get; set; }
     }
+
+    public class CurrencyEquivalentDTO
+    {
+        public decimal Amount { get; set; }
+        public int CountryId { get; set; }
+    }
+
+
 }

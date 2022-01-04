@@ -2880,5 +2880,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await _portalService.VerifyAndValidatePayment(webhook);
         }
+
+        [HttpPost]
+        [Route("currencyequivalent")]
+        public async Task<IServiceResponse<OutstandingPaymentsDTO>> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var equivalent = await _portalService.GetEquivalentAmountOfActiveCurrency(currencyEquivalent);
+                return new ServiceResponse<OutstandingPaymentsDTO>
+                {
+                    Object = equivalent
+                };
+            });
+        }
     }
 }

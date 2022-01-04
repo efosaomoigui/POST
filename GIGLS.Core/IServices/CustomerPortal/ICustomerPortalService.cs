@@ -258,5 +258,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> ValidateBillsPaymentRefund(ValidateBillTransactionDTO billTransaction);
         Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
         Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
+        Task<OutstandingPaymentsDTO> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent);
     }
 }

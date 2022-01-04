@@ -4523,5 +4523,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return result;
         }
+
+        public async Task<OutstandingPaymentsDTO> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent)
+        {
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var equivalent = await _uow.PreShipmentMobile.GetEquivalentAmountOfActiveCurrency(currencyEquivalent);
+
+            return equivalent;
+
+        }
     }
 }

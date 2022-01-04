@@ -22,6 +22,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<AddressDTO>> GetTopFiveUserAddresses(string userID, bool isIntl);
         Task<PreShipmentMobileDTO> GetPreshipmentMobileByWaybill(string waybill);
         Task<CustomerDTO> GetBotUserWithPhoneNo(string phonenumber);
+        Task<OutstandingPaymentsDTO> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent);
 
     }
 }
