@@ -30,6 +30,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string CurrencyCode { get; set; }
         public WalletTransactionType TransactionType { get; set; }
         public bool isConverted { get; set; }
+        public CardType CardType { get; set; }
     }
 
 }

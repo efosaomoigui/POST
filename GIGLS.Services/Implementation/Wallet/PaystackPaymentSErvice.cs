@@ -28,6 +28,7 @@ using GIGLS.Core.DTO.Shipments;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Data;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -391,7 +392,26 @@ namespace GIGLS.Services.Implementation.Wallet
                                     return result;
                                 }
 
-                                var userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 1 && c.CompanyMap == CompanyMap.GIG);
+                                var userdestCountry = new CountryRouteZoneMap();
+
+                                // Get conversion rate base of card type use
+                                if(paymentLog.CardType == CardType.Naira)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 1 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if(paymentLog.CardType == CardType.Pound)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 62 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if (paymentLog.CardType == CardType.Dollar)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 207 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 76 && c.CompanyMap == CompanyMap.GIG);
+                                }
+
                                 if (userdestCountry == null)
                                 {
                                     result.GatewayResponse = "Country route zone Information does not exist";

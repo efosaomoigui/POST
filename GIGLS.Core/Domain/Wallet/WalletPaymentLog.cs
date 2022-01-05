@@ -38,5 +38,6 @@ namespace GIGLS.Core.Domain.Wallet
 
         public WalletTransactionType TransactionType { get; set; }
         public bool isConverted { get; set; }
+        public CardType CardType { get; set; }
     }
 }
