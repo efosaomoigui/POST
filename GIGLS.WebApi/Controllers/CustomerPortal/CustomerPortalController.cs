@@ -2880,5 +2880,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await _portalService.VerifyAndValidatePayment(webhook);
         }
+
+        [HttpGet]
+        [Route("getpaymentmethod/{countryid:int}")]
+        public async Task<IServiceResponse<IEnumerable<PaymentMethodDTO>>> GetPaymentMethod(int countryid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PaymentMethod = await _portalService.GetPaymentMethodByUserActiveCountry(countryid);
+                return new ServiceResponse<IEnumerable<PaymentMethodDTO>>
+                {
+                    Object = PaymentMethod,
+                };
+            });
+        }
     }
 }
