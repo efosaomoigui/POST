@@ -598,13 +598,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 {
                    result.PoundCurrencySymbol = ukCountry.CurrencySymbol;
                    result.PoundCurrencyCode = ukCountry.CurrencyCode;
-                    result.PoundAmount = Math.Round((ukdestCountry.Rate * (double)result.Amount), 2);
+                    result.PoundAmount = Math.Round((ukdestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
                 if (ghanadestCountry != null)
                 {
                     result.CediCurrencySymbol = ghanaCountry.CurrencySymbol;
                     result.CediCurrencyCode = ghanaCountry.CurrencyCode;
-                    result.CediAmount = Math.Round((ghanadestCountry.Rate * (double)result.Amount), 2);
+                    result.CediAmount = Math.Round((ghanadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
                 result.NairaCurrencyCode = naijaCountry.CurrencyCode;
                 result.NairaCurrencySymbol = naijaCountry.CurrencySymbol;
