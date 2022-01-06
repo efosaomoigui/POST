@@ -844,6 +844,59 @@ namespace GIGLS.Services.Implementation.Wallet
                         //if pay was done using Master VIsa card, give some discount
                         bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
+                        //Convert amount base on country rate if isConverted 
+                        //1. CHeck if is converted equals true
+                        if (paymentLog.isConverted)
+                        {
+                            //2. Get user country id
+                            var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                            if (user == null)
+                            {
+                                result.GatewayResponse = "User Information does not exist";
+                                return result;
+                            }
+
+                            if (user.UserActiveCountryId <= 0)
+                            {
+                                result.GatewayResponse = "User Country Id Information does not exist";
+                                return result;
+                            }
+
+                            var userdestCountry = new CountryRouteZoneMap();
+
+                            // Get conversion rate base of card type use
+                            if (paymentLog.CardType == CardType.Naira)
+                            {
+                                userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 1 && c.CompanyMap == CompanyMap.GIG);
+                            }
+                            else if (paymentLog.CardType == CardType.Pound)
+                            {
+                                userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 62 && c.CompanyMap == CompanyMap.GIG);
+                            }
+                            else if (paymentLog.CardType == CardType.Dollar)
+                            {
+                                userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 207 && c.CompanyMap == CompanyMap.GIG);
+                            }
+                            else
+                            {
+                                userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 76 && c.CompanyMap == CompanyMap.GIG);
+                            }
+
+                            if (userdestCountry == null)
+                            {
+                                result.GatewayResponse = "Country route zone Information does not exist";
+                                return result;
+                            }
+
+                            if (userdestCountry.Rate <= 0)
+                            {
+                                result.GatewayResponse = "Country rate Information does not exist";
+                                return result;
+                            }
+                            //3. Convert base on country rate
+                            var convertedAmount = Math.Round((userdestCountry.Rate * (double)bonusAddon.Amount), 2);
+                            bonusAddon.Amount = (decimal)convertedAmount;
+                        }
                         //update the wallet
                         await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                         {
