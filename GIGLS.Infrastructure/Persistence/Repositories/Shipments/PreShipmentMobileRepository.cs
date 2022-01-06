@@ -677,7 +677,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                     result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
-                var ukdestCountry = destCountries.Where(c => c.DestinationId == ukCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (ukdestCountry != null)
                 {
                    result.PoundCurrencySymbol = ukCountry.CurrencySymbol;
