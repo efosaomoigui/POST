@@ -616,9 +616,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 var naijadestCountry = destCountries.Where(c => c.DestinationId == naijaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (naijadestCountry != null)
                 {
-                    result.NairaCurrencyCode = naijaCountry.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
-                    result.NairaCurrencySymbol = naijaCountry.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
-                    result.NairaAmount = naijaCountry.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
+                    result.NairaCurrencyCode = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                    result.NairaCurrencySymbol = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                    result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
                 var usdestCountry = destCountries.Where(c => c.DestinationId == usCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
@@ -672,9 +672,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 var naijadestCountry = destCountries.Where(c => c.DestinationId == naijaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (naijaCountry != null)
                 {
-                    result.NairaCurrencyCode = naijaCountry.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
-                    result.NairaCurrencySymbol = naijaCountry.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
-                    result.NairaAmount = naijaCountry.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
+                    result.NairaCurrencyCode = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
+                    result.NairaCurrencySymbol = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencySymbol : naijaCountry.CurrencySymbol;
+                    result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
                 var ukdestCountry = destCountries.Where(c => c.DestinationId == ukCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
