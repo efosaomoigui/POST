@@ -22,6 +22,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -478,6 +479,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 if (verifyResult.Payments != null)
                 {
+                    _uow.BeginTransaction(IsolationLevel.RepeatableRead);
                     //get wallet payment log by reference code
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
 
@@ -524,6 +526,56 @@ namespace GIGLS.Services.Implementation.Wallet
                             //if pay was done using Master VIsa card, give some discount
                             //bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
 
+                            //Convert amount base on country rate if isConverted 
+                            //1. CHeck if is converted equals true
+                            if (paymentLog.isConverted)
+                            {
+                                //2. Get user country id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                                if (user == null)
+                                {
+                                    return result;
+                                }
+
+                                if (user.UserActiveCountryId <= 0)
+                                {
+                                    return result;
+                                }
+
+                                var userdestCountry = new CountryRouteZoneMap();
+
+                                // Get conversion rate base of card type use
+                                if (paymentLog.CardType == CardType.Naira)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 1 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if (paymentLog.CardType == CardType.Pound)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 62 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if (paymentLog.CardType == CardType.Dollar)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 207 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 76 && c.CompanyMap == CompanyMap.GIG);
+                                }
+
+                                if (userdestCountry == null)
+                                {
+                                    return result;
+                                }
+
+                                if (userdestCountry.Rate <= 0)
+                                {
+                                    return result;
+                                }
+                                //3. Convert base on country rate
+                                var convertedAmount = Math.Round((userdestCountry.Rate * (double)paymentLog.Amount), 2);
+                                paymentLog.Amount = (decimal)convertedAmount;
+                            }
+
                             //update the wallet
                             await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                             {
@@ -545,7 +597,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
                     paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
-                    await _uow.CompleteAsync();
+                    _uow.Commit();
+                    //await _uow.CompleteAsync();
 
                     if (sendPaymentNotification)
                     {

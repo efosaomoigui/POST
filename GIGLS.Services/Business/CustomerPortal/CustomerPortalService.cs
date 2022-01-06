@@ -4535,5 +4535,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return equivalent;
 
         }
+
+        public async Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid)
+        {
+            return await _paymentMethodService.GetPaymentMethodByUserActiveCountry(countryid);
+        }
     }
 }
