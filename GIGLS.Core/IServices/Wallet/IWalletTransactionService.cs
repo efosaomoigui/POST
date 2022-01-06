@@ -24,5 +24,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<List<WalletTransactionDTO>> GetWalletTransactionsForMobilePaginated(ShipmentAndPreShipmentParamDTO shipmentAndPreShipmentParamDTO);
         Task<List<WalletTransactionDTO>> GetWalletTransactionCreditOrDebit(AccountFilterCriteria accountFilterCriteria);
         Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionHistoryByDate(ShipmentCollectionFilterCriteria dateFilter);
+        Task<WalletCreditTransactionSummaryDTO> GetWalletCreditTransactionHistoryByDate(ShipmentCollectionFilterCriteria dateFilter);
     }
 }

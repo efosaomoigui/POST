@@ -2,6 +2,7 @@
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Wallet;
@@ -14,6 +15,7 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -380,6 +382,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                }).OrderByDescending(s => s.DateOfEntry).ToList();
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
+        }
+
+        public Task<WalletCreditTransactionSummaryDTO> GetWalletCreditTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilter.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CreditDebitType == CreditDebitType.Credit).AsQueryable();
+
+            WalletCreditTransactionSummaryDTO summary = new WalletCreditTransactionSummaryDTO
+            {
+                WalletCreditTransactions = (from w in walletTransactionContext
+                                            join u in Context.Users on w.UserId equals u.Id
+                                            join c in Context.Country on u.UserActiveCountryId equals c.CountryId
+                                            select new WalletCreditTransactionDTO()
+                                            {
+                                                DateOfEntry = w.DateOfEntry,
+                                                Amount = w.Amount,
+                                                Description = w.Description,
+                                                Reference = w.PaymentTypeReference,
+                                                User =  new UserDetailForCreditTransactionDTO
+                                                {
+                                                    CustomerCode = u.UserChannelCode,
+                                                    FirstName = u.FirstName,
+                                                    LastName = u.LastName
+                                                },
+                                                CurrencyCode = c.CurrencySymbol
+                                            }).OrderByDescending(s => s.DateOfEntry).ToList(),
+                TotalAmount = walletTransactionContext.Select(t => t.Amount).Sum()
+            };
+
+            return Task.FromResult(summary);
         }
     }
 }
