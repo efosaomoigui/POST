@@ -220,13 +220,11 @@ namespace GIGLS.Services.Implementation.Wallet
                                 var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
                                 if (user == null)
                                 {
-                                    result = false;
                                     return result;
                                 }
 
                                 if (user.UserActiveCountryId <= 0)
                                 {
-                                    result = false;
                                     return result;
                                 }
 
@@ -252,13 +250,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
                                 if (userdestCountry == null)
                                 {
-                                    result = false;
                                     return result;
                                 }
 
                                 if (userdestCountry.Rate <= 0)
                                 {
-                                    result = false;
                                     return result;
                                 }
                                 //3. Convert base on country rate
