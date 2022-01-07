@@ -585,9 +585,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var result = new OutstandingPaymentsDTO();
             if (currencyEquivalent.CountryId == 1)
             {
-                var usdestCountry = destCountries.Where(c => c.DestinationId == usCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
-                var ukdestCountry = destCountries.Where(c => c.DestinationId == ukCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
-                var ghanadestCountry = destCountries.Where(c => c.DestinationId == ghanaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ghanadestCountry = destCountries.Where(c => c.DepartureId == ghanaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (usdestCountry != null)
                 {
                    result.DollarCurrencySymbol = usCountry.CurrencySymbol;
@@ -613,7 +613,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             }
             else if (currencyEquivalent.CountryId == 62)
             {
-                var naijadestCountry = destCountries.Where(c => c.DestinationId == naijaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (naijadestCountry != null)
                 {
                     result.NairaCurrencyCode = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
@@ -621,14 +621,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                     result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
-                var usdestCountry = destCountries.Where(c => c.DestinationId == usCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var usdestCountry = destCountries.Where(c => c.DepartureId == usCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (usdestCountry != null)
                 {
                     result.DollarCurrencySymbol = usCountry.CurrencySymbol;
                     result.DollarAmount = Math.Round((usdestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                     result.DollarCurrencyCode = usCountry.CurrencyCode;
                 }
-                var ghanadestCountry = destCountries.Where(c => c.DestinationId == ghanaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ghanadestCountry = destCountries.Where(c => c.DepartureId == ghanaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (ghanadestCountry != null)
                 {
                    result.CediCurrencySymbol = ghanaCountry.CurrencySymbol;
@@ -641,7 +641,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             }
             else if (currencyEquivalent.CountryId == 207)
             {
-                var naijadestCountry = destCountries.Where(c => c.DestinationId == naijaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (naijaCountry != null)
                 {
                     result.NairaCurrencyCode = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
@@ -649,14 +649,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                     result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
-                var ukdestCountry = destCountries.Where(c => c.DestinationId == ukCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (ukdestCountry != null)
                 {
                    result.PoundCurrencySymbol = ukCountry.CurrencySymbol;
                    result.PoundCurrencyCode = ukCountry.CurrencyCode;
                    result.PoundAmount = Math.Round((ukdestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
-                var ghanadestCountry = destCountries.Where(c => c.DestinationId == ghanaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ghanadestCountry = destCountries.Where(c => c.DepartureId == ghanaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (ghanadestCountry != null)
                 {
                     result.CediCurrencySymbol = ghanaCountry.CurrencySymbol;
@@ -669,7 +669,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             }
             else if (currencyEquivalent.CountryId == 76)
             {
-                var naijadestCountry = destCountries.Where(c => c.DestinationId == naijaCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var naijadestCountry = destCountries.Where(c => c.DepartureId == naijaCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (naijaCountry != null)
                 {
                     result.NairaCurrencyCode = currencyEquivalent.CountryId == 1 ? naijaCountry.CurrencyCode : naijaCountry.CurrencyCode;
@@ -677,7 +677,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                     result.NairaAmount = currencyEquivalent.CountryId == 1 ? (double)currencyEquivalent.Amount : Math.Round((naijadestCountry.Rate * (double)currencyEquivalent.Amount), 2);
                 }
 
-                var ukdestCountry = destCountries.Where(c => c.DestinationId == ukCountry.CountryId && c.DepartureId == currencyEquivalent.CountryId).FirstOrDefault();
+                var ukdestCountry = destCountries.Where(c => c.DepartureId == ukCountry.CountryId && c.DestinationId == currencyEquivalent.CountryId).FirstOrDefault();
                 if (ukdestCountry != null)
                 {
                    result.PoundCurrencySymbol = ukCountry.CurrencySymbol;
