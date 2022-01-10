@@ -410,10 +410,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                     FirstName = u.FirstName,
                                                     LastName = u.LastName
                                                 },
-                                                CurrencyCode = c.CurrencySymbol
+                                                CurrencyCode = c.CurrencyCode,
+                                                CurrencySymbol = c.CurrencySymbol
                                             }).OrderByDescending(s => s.DateOfEntry).ToList(),
-                TotalAmount = walletTransactionContext.Select(t => t.Amount).Sum()
+                
             };
+
+            summary.NairaAmount  = summary.WalletCreditTransactions.Any() ? summary.WalletCreditTransactions.Where(x => x.CurrencyCode == "NGN").Select(t => t.Amount).Sum() : 0.00m;
+            summary.DollarAmount  = summary.WalletCreditTransactions.Any() ? summary.WalletCreditTransactions.Where(x => x.CurrencyCode == "USD").Select(t => t.Amount).Sum() : 0.00m;
+            summary.CedisAmount  = summary.WalletCreditTransactions.Any() ? summary.WalletCreditTransactions.Where(x => x.CurrencyCode == "GHS").Select(t => t.Amount).Sum() : 0.00m;
+            summary.PoundsAmount  = summary.WalletCreditTransactions.Any() ? summary.WalletCreditTransactions.Where(x => x.CurrencyCode == "GBP").Select(t => t.Amount).Sum() : 0.00m;
 
             return Task.FromResult(summary);
         }

@@ -82,12 +82,16 @@ namespace GIGLS.Core.DTO.Wallet
         public string Description { get; set; }
         public string Reference { get; set; }
         public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
         public UserDetailForCreditTransactionDTO User { get; set; }
     }
 
     public class WalletCreditTransactionSummaryDTO
     {
-        public decimal TotalAmount { get; set; }
+        public decimal NairaAmount { get; set; }
+        public decimal CedisAmount { get; set; }
+        public decimal PoundsAmount { get; set; }
+        public decimal DollarAmount { get; set; }
         public List<WalletCreditTransactionDTO> WalletCreditTransactions { get; set; }
     }
 
