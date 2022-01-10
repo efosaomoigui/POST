@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices
     {
         Task<bool> AddPaymentMethod(PaymentMethodDTO paymentMethodDTO);
         Task<List<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry();
+        Task<List<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid);
     }
 }

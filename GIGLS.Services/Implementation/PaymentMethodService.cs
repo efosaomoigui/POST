@@ -74,5 +74,24 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task<List<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid)
+        {
+            try
+            {
+                if (countryid < 0)
+                {
+                    throw new GenericException("invalid country Id", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var result = await _uow.PaymentMethod.GetPaymentMethodByUserActiveCountry(countryid);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
