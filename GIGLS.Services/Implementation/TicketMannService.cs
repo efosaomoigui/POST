@@ -157,7 +157,7 @@ namespace GIGLS.Services.Implementation
                     var filterList = ConfigurationManager.AppSettings["TicketMannFilterList"];
                     if (filterList != null)
                     {
-                        result.Payload.Transactions = result.Payload.Transactions.Where(x => filterList.Contains(x.TransactionStatus)).OrderByDescending(x => x.DateofTransaction).ToList();
+                        result.Payload.Transactions = result.Payload.Transactions.Where(x => !string.IsNullOrWhiteSpace(x.TransactionStatus) && filterList.Contains(x.TransactionStatus)).OrderByDescending(x => x.DateofTransaction).ToList();
                     }
                 }
                 return result;
