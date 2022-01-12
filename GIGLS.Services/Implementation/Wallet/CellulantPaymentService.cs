@@ -582,7 +582,8 @@ namespace GIGLS.Services.Implementation.Wallet
                                 WalletId = paymentLog.WalletId,
                                 Amount = paymentLog.Amount,
                                 CreditDebitType = CreditDebitType.Credit,
-                                Description = verifyResult.RequestStatusDescription,
+                                // Description = verifyResult.RequestStatusDescription,
+                                Description = "Funding made through debit card",
                                 PaymentType = PaymentType.Online,
                                 PaymentTypeReference = paymentLog.Reference,
                                 UserId = customerId
