@@ -171,6 +171,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool ExpressDelivery { get; set; }
         //Place Location
         public int HomeDeliveryLocation { get; set; }
+        public decimal ExpressCharge { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
