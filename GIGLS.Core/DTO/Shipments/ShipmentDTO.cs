@@ -172,6 +172,7 @@ namespace GIGLS.Core.DTO.Shipments
         //Place Location
         public int HomeDeliveryLocation { get; set; }
         public decimal ExpressCharge { get; set; }
+        public decimal? insurancevalue_display { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -504,6 +505,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int TimeInSeconds { get; set; }
         public List<WaybillChargeDTO> WaybillCharges { get; set; }
         public string TempCode { get; set; }
+        public decimal ShipmentPackagePrice { get; set; }
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {

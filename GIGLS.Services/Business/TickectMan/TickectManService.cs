@@ -52,11 +52,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ISpecialDomesticPackageService _specialPackageService;
         private readonly ICellulantPaymentService _cellulantService;
         private readonly ICustomerPortalService _customerPortalService;
+        private readonly IInsuranceService _insuranceService;
+        private readonly IVATService _vatService;
 
         public TickectManService(IUnitOfWork uow, IDeliveryOptionPriceService deliveryOptionPriceService, IDomesticRouteZoneMapService domesticRouteZoneMapService, IShipmentService shipmentService,
            IShipmentPackagePriceService packagePriceService, ICustomerService customerService, IPricingService pricing,
            IPaymentService paymentService, ICustomerPortalService portalService, IShipmentCollectionService shipmentCollectionService, IServiceCentreService serviceCentreService, IUserService userService, ICountryService countryService, ILGAService lgaService,
-           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService, ICellulantPaymentService cellulantService, ICustomerPortalService customerPortalService)
+           ISpecialDomesticPackageService specialPackageService, IInvoiceService invoiceService, ICellulantPaymentService cellulantService, ICustomerPortalService customerPortalService, IInsuranceService insuranceService, IVATService vatService)
         {
             _uow = uow;
             _deliveryOptionPriceService = deliveryOptionPriceService;
@@ -76,6 +78,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _invoiceService = invoiceService;
             _cellulantService = cellulantService;
             _customerPortalService = customerPortalService;
+            _insuranceService = insuranceService;
+            _vatService = vatService;
         }
 
         public async Task<ShipmentDTO> AddShipment(NewShipmentDTO newShipmentDTO)
@@ -99,6 +103,19 @@ namespace GIGLS.Services.Business.CustomerPortal
             ShipmentDTO.ShipmentReroute = null;
             ShipmentDTO.DeliveryOption = null;
             ShipmentDTO.IsFromMobile = false;
+
+            //Add Insurance value to shipment table
+            var insuranceDTO = await _insuranceService.GetInsuranceByCountry();
+            ShipmentDTO.Insurance = insuranceDTO.Value;
+
+            //Add Vat value to shipment table
+            var vatDTO = await _vatService.GetVATByCountry();
+            ShipmentDTO.Vat = vatDTO.Value;
+
+            //
+            ShipmentDTO.insurancevalue_display = (ShipmentDTO.Insurance / 100) * ShipmentDTO.DeclarationOfValueCheck;
+            ShipmentDTO.vatvalue_display = (ShipmentDTO.Vat / 100) * ShipmentDTO.Total;
+
             var shipment = await _shipmentService.AddShipment(ShipmentDTO);
             if (!String.IsNullOrEmpty(shipment.Waybill))
             {
@@ -296,6 +313,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                 }
             }
+
+            //Calculate Insurance and vat value
+            shipment.Invoice.Shipment.insurancevalue_display = (shipment.Invoice.Shipment.Insurance / 100) * shipment.Invoice.Shipment.DeclarationOfValueCheck;
+
             return shipment;
         }
 
