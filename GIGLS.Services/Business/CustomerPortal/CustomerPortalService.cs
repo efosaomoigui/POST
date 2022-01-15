@@ -4379,7 +4379,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerCode))
             {
-                throw new GenericException("Customer code is required");
+                //use access token
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                gIGXUserDetailDTO.CustomerCode = currentUser.UserChannelCode;
+                //throw new GenericException("Customer code is required");
             }
 
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
