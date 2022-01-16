@@ -166,6 +166,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsExported { get; set; }
         [MaxLength(128)]
         public string RequestNumber { get; set; }
+        public decimal ExpressCharge { get; set; }
 
     }
 
