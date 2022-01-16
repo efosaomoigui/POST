@@ -174,5 +174,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("walletcredittransactionhistory")]
+        public async Task<IServiceResponse<WalletCreditTransactionSummaryDTO>> GetCreditWalletTransactionHistoryByDate(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTransactionSummary = await _walletTransactionService.GetWalletCreditTransactionHistoryByDate(dateFilter);
+
+                return new ServiceResponse<WalletCreditTransactionSummaryDTO>
+                {
+                    Object = walletTransactionSummary
+                };
+            });
+        }
+
     }
 }

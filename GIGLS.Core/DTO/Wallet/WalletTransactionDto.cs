@@ -1,7 +1,9 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -33,6 +35,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string CurrencyCode { get; set; }
         public string CurrencySymbol { get; set; }
         public decimal ServiceCharge { get; set; }
+        public UserDTO User { get; set; }
+        public decimal TotalAmount { get; set; }
     }
 
     public class ModifiedWalletTransactionDTO
@@ -69,5 +73,40 @@ namespace GIGLS.Core.DTO.Wallet
     {
         public decimal IndividualCustomer { get; set; }
         public decimal Ecommerce { get; set; }
+    }
+
+    public class WalletCreditTransactionDTO
+    {
+        public DateTime DateOfEntry { get; set; }
+        public decimal Amount { get; set; }
+        public string Description { get; set; }
+        public string Reference { get; set; }
+        public string CurrencyCode { get; set; }
+        public string CurrencySymbol { get; set; }
+        public UserDetailForCreditTransactionDTO User { get; set; }
+    }
+
+    public class WalletCreditTransactionSummaryDTO
+    {
+        public decimal NairaAmount { get; set; }
+        public decimal CedisAmount { get; set; }
+        public decimal PoundsAmount { get; set; }
+        public decimal DollarAmount { get; set; }
+        public List<WalletCreditTransactionDTO> WalletCreditTransactions { get; set; }
+    }
+
+    public class UserDetailForCreditTransactionDTO
+    {
+        public string CustomerCode { get; set; }
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string CustomerName
+        {
+            get
+            {
+                return $"{FirstName} {LastName}";
+            }
+        }
     }
 }
