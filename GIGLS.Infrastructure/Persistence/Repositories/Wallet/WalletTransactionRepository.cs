@@ -431,16 +431,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CreditDebitType == CreditDebitType.Credit).AsQueryable();
+            var paymentLogs = _context.WalletPaymentLog.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.isConverted == true).AsQueryable();
 
-           List<WalletCreditTransactionConvertedDTO> results = (from w in walletTransactionContext
-                                                                join p in Context.WalletPaymentLog on w.PaymentTypeReference equals p.Reference
+           List<WalletCreditTransactionConvertedDTO> results = (from p in paymentLogs
+                                                                join w in Context.WalletTransactions on p.Reference equals w.PaymentTypeReference
                                                                 join u in Context.Users on w.UserId equals u.Id
                                                                 join c in Context.Country on u.UserActiveCountryId equals c.CountryId
-                                                                  where p.isConverted == true
                                                                   select new WalletCreditTransactionConvertedDTO()
                                                                   {
-                                                                      DateOfEntry = w.DateOfEntry,
+                                                                      DateOfEntry = p.DateCreated,
                                                                       FundedAmount = p.Amount,
                                                                       CardType = p.CardType,
                                                                       EquivalentAmount = w.Amount,
