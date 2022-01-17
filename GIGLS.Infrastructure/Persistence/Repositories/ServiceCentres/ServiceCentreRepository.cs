@@ -645,7 +645,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     Latitude = s.Latitude,
                                     FormattedServiceCentreName = s.FormattedServiceCentreName,
                                     IsPublic = s.IsPublic,
-                                    IsConsignable = s.IsConsignable
+                                    IsConsignable = s.IsConsignable,
+                                    IsHUB = s.IsHUB
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }

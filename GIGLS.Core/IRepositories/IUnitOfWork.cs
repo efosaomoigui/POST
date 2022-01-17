@@ -30,6 +30,7 @@ using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
 using GIGLS.Core.IServices.RouteServices;
 using GIGLS.Core.IRepositories.Routes;
+using System.Data;
 
 namespace GIGLS.Core
 {
@@ -223,6 +224,7 @@ namespace GIGLS.Core
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
         void BeginTransaction();
+        void BeginTransaction(IsolationLevel isolationLevel);
         void Commit();
         void Rollback();
     }

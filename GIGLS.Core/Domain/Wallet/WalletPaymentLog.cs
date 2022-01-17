@@ -37,5 +37,7 @@ namespace GIGLS.Core.Domain.Wallet
         public string PhoneNumber { get; set; }
 
         public WalletTransactionType TransactionType { get; set; }
+        public bool isConverted { get; set; }
+        public CardType CardType { get; set; }
     }
 }

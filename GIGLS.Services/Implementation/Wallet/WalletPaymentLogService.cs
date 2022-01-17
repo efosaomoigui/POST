@@ -103,11 +103,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
             }
 
-            //if the country is not Nigeria or Ghana, block it
-            if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76 && walletPaymentLogDto.PaymentCountryId != 207)
-            {
-                throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
-            }
+            //Commented out on 06/01/2022 to allow convertion of currency to equivalent value of user currency base on card use.
+            ////if the country is not Nigeria or Ghana, block it
+            //if (walletPaymentLogDto.PaymentCountryId != 1 && walletPaymentLogDto.PaymentCountryId != 76 && walletPaymentLogDto.PaymentCountryId != 207)
+            //{
+            //    throw new GenericException("Wallet funding functionality is currently not available for your country", $"{(int)HttpStatusCode.Forbidden}");
+            //}
 
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (wallet != null)

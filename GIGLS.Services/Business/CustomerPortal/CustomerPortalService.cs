@@ -237,6 +237,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
+            //for now block flutter wave untill they sort there issues
+            if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+            {
+                throw new GenericException("Payment method currently not available, try paystack.");
+            }
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
         }
@@ -4374,7 +4379,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerCode))
             {
-                throw new GenericException("Customer code is required");
+                //use access token
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                gIGXUserDetailDTO.CustomerCode = currentUser.UserChannelCode;
+                //throw new GenericException("Customer code is required");
             }
 
             if (String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerNewPin))
@@ -4517,6 +4526,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await _cellulantPaymentService.VerifyAndValidatePayment(webhook);
 
             return result;
+        }
+
+        public async Task<OutstandingPaymentsDTO> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent)
+        {
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var equivalent = await _uow.PreShipmentMobile.GetEquivalentAmountOfActiveCurrency(currencyEquivalent);
+
+            return equivalent;
+
+        }
+
+        public async Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid)
+        {
+            return await _paymentMethodService.GetPaymentMethodByUserActiveCountry(countryid);
         }
     }
 }

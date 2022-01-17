@@ -145,11 +145,12 @@ namespace GIGLS.Services.Implementation.Wallet
                         waybillPaymentLog.PaymentCountryId = user.UserActiveCountryId;
                     }
 
+                    //commented out on 07/01/2020
                     //if the country is not Nigeria or Ghana, block it
-                    if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76 && waybillPaymentLog.PaymentCountryId != 207)
-                    {
-                        throw new GenericException("Payment can not be initiated for this waybill at this time. Try again later", $"{(int)HttpStatusCode.Forbidden}");
-                    }
+                    //if (waybillPaymentLog.PaymentCountryId != 1 && waybillPaymentLog.PaymentCountryId != 76 && waybillPaymentLog.PaymentCountryId != 207)
+                    //{
+                    //    throw new GenericException("Payment can not be initiated for this waybill at this time. Try again later", $"{(int)HttpStatusCode.Forbidden}");
+                    //}
 
                     decimal amountToDebit = await GetActualAmountToDebit(waybillPaymentLog.Waybill, waybillPaymentLog.PaymentCountryId);
 

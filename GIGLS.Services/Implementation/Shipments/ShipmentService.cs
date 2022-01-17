@@ -1789,6 +1789,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
 
                     newShipment.ApproximateItemsWeight += Weight;
+                    shipmentItem.Weight = Weight;
                 }
                 else
                 {
