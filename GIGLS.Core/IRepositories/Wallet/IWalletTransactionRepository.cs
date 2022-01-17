@@ -19,5 +19,6 @@ namespace GIGLS.Core.IRepositories.Wallet
         Task<WalletPaymentLogSummary> GetWalletPaymentSummary(DashboardFilterCriteria dashboardFilterCriteria);
         Task<List<WalletTransactionDTO>> GetWalletTransactionHistoryAsync( ShipmentCollectionFilterCriteria dateFilter);
         Task<WalletCreditTransactionSummaryDTO> GetWalletCreditTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter);
+        Task<List<WalletCreditTransactionConvertedDTO>> GetWalletConversionTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter);
     }
 }

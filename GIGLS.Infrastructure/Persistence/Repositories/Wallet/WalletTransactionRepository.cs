@@ -423,5 +423,41 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
             return Task.FromResult(summary);
         }
+
+        public Task<List<WalletCreditTransactionConvertedDTO>> GetWalletConversionTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilter.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CreditDebitType == CreditDebitType.Credit).AsQueryable();
+
+           List<WalletCreditTransactionConvertedDTO> results = (from w in walletTransactionContext
+                                                                join p in Context.WalletPaymentLog on w.PaymentTypeReference equals p.Reference
+                                                                join u in Context.Users on w.UserId equals u.Id
+                                                                join c in Context.Country on u.UserActiveCountryId equals c.CountryId
+                                                                  where p.isConverted == true
+                                                                  select new WalletCreditTransactionConvertedDTO()
+                                                                  {
+                                                                      DateOfEntry = w.DateOfEntry,
+                                                                      FundedAmount = p.Amount,
+                                                                      CardType = p.CardType,
+                                                                      EquivalentAmount = w.Amount,
+                                                                      Description = w.Description,
+                                                                      Reference = w.PaymentTypeReference,
+                                                                      ProcessingPartner = p.OnlinePaymentType,
+                                                                      User = new UserDetailForCreditTransactionDTO
+                                                                      {
+                                                                          CustomerCode = u.UserChannelCode,
+                                                                          FirstName = u.FirstName,
+                                                                          LastName = u.LastName
+                                                                      },
+                                                                      EquivalentCurrencyCode = c.CurrencyCode,
+                                                                      EquivalentCurrencySymbol = c.CurrencySymbol
+                                                                  }).OrderByDescending(s => s.DateOfEntry).ToList();
+           
+            return Task.FromResult(results);
+        }
     }
 }

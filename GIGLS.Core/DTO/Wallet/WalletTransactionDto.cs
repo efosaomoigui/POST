@@ -109,4 +109,18 @@ namespace GIGLS.Core.DTO.Wallet
             }
         }
     }
+
+    public class WalletCreditTransactionConvertedDTO
+    {
+        public DateTime DateOfEntry { get; set; }
+        public decimal FundedAmount { get; set; }
+        public decimal EquivalentAmount { get; set; }
+        public string Description { get; set; }
+        public string Reference { get; set; }
+        public CardType CardType { get; set; }
+        public string EquivalentCurrencyCode { get; set; }
+        public string EquivalentCurrencySymbol { get; set; }
+        public OnlinePaymentType ProcessingPartner { get; set; }
+        public UserDetailForCreditTransactionDTO User { get; set; }
+    }
 }
