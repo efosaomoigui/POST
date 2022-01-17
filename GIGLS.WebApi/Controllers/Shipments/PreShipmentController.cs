@@ -315,5 +315,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpPost]
+        [Route("getpreshipmentmobilereceiveranditemdetails")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreShipmentMobileReceiverAndItemDetails(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preShipmentMobileService.GetPreShipmentMobileReceiverAndItemDetails(newFilterOptionsDto);
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
     }
 }

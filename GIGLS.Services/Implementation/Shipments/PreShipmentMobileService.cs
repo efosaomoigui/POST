@@ -7531,6 +7531,16 @@ namespace GIGLS.Services.Implementation.Shipments
             return Mapper.Map<IEnumerable<CancelledShipmentDTO>>(canceledShipment);
         }
 
+        public async Task<PreShipmentMobileDTO> GetPreShipmentMobileReceiverAndItemDetails(NewFilterOptionsDto filter)
+        {
+            if (filter == null)
+            {
+                throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var shipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(filter.FilterType);   
+            return shipment;
+        }
+
 
     }
 }

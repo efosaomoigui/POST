@@ -102,5 +102,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<decimal> CalculateBikePriceBasedonLocation(PreShipmentMobileDTO item);
         Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(DateFilterCriteria dateFilterCriteria);
         Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(string waybill);
+        Task<PreShipmentMobileDTO> GetPreShipmentMobileReceiverAndItemDetails(NewFilterOptionsDto filter);
     }
 }
