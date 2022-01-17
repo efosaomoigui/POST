@@ -426,7 +426,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             var dhlTracking = new List<ShipmentTrackingDTO>();
                             var intlTracking = await _DhlService.TrackInternationalShipment(shipment.InternationalWayBill);
-                            if (intlTracking.Shipments.Count > 0 && intlTracking.Shipments != null)
+                            if (intlTracking != null && intlTracking.Shipments.Count > 0 && intlTracking.Shipments != null)
                             {
                                 if (intlTracking.Shipments[0].Events.Count > 0)
                                 {
