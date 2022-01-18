@@ -193,36 +193,8 @@ namespace GIGLS.Services.Implementation
                     throw new GenericException("Wallet transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                //Call Ticket Mann
-                var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
-
-                if (ticketMannResponse is null)
-                {
-                    throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
-                }
-
-                if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
-                {
-                    response = "Transaction was successful";
-                }
-                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
-                {
-                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
-                    {
-                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                    var result = await _walletService.ReverseWallet(walletTrans.PaymentTypeReference);
-                    response = result.Message;
-                }
-                else
-                {
-                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
-                    {
-                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                    var result = await _walletService.ReverseWallet(walletTrans.PaymentTypeReference);
-                    response = result.Message;
-                }
+                //Call ticket mann
+                response = await ValidateBillsPayment(walletTrans.PaymentTypeReference);
             }
             else
             {
@@ -247,35 +219,8 @@ namespace GIGLS.Services.Implementation
                 }
 
                 //Call Ticket Mann
-                var ticketMannResponse = await GetBillTransaction(walletTrans.PaymentTypeReference);
+                response = await ValidateBillsPayment(walletTrans.PaymentTypeReference);
 
-                if (ticketMannResponse is null)
-                {
-                    throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
-                }
-
-                if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
-                {
-                    response = "Transaction was successful";
-                }
-                else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
-                {
-                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
-                    {
-                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                    var result = await _walletService.ReverseWallet(walletTrans.PaymentTypeReference);
-                    response = result.Message;
-                }
-                else
-                {
-                    if (string.IsNullOrWhiteSpace(walletTrans.PaymentTypeReference))
-                    {
-                        throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                    var result = await _walletService.ReverseWallet(walletTrans.PaymentTypeReference);
-                    response = result.Message;
-                }
             }
 
             return response;
@@ -304,6 +249,42 @@ namespace GIGLS.Services.Implementation
             {
                 throw;
             }
+        }
+
+        private async Task<string> ValidateBillsPayment(string reference)
+        {
+            var response = "";
+            //Call Ticket Mann
+            var ticketMannResponse = await GetBillTransaction(reference);
+
+            if (ticketMannResponse is null)
+            {
+                throw new GenericException("Bill transaction does not exit", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Complete"))
+            {
+                response = "Transaction was successful";
+            }
+            else if (ticketMannResponse.Payload.Status != null && ticketMannResponse.Payload.Status.Contains("Failed"))
+            {
+                if (string.IsNullOrWhiteSpace(reference))
+                {
+                    throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                var result = await _walletService.ReverseWallet(reference);
+                response = result.Message;
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(reference))
+                {
+                    throw new GenericException($"Transaction reference cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                var result = await _walletService.ReverseWallet(reference);
+                response = result.Message;
+            }
+            return response;
         }
     }
 }
