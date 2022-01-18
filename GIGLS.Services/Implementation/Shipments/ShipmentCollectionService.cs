@@ -299,6 +299,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.DeliveryAddressImageUrl = shipmentCollectionDto.DeliveryAddressImageUrl;
+            shipmentCollection.ActualDeliveryAddress = shipmentCollectionDto.ActualDeliveryAddress;
 
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO

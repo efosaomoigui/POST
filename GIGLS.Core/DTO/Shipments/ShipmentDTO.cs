@@ -584,5 +584,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string Waybill { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DeliveredDate { get; set; }
+        public string ActualDeliveryAddress { get; set; }
     }
 }

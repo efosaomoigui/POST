@@ -6244,6 +6244,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 receiverInfo.IndentificationUrl = collectionInfo.IndentificationUrl;
                 receiverInfo.DeliveredDate = collectionInfo.DateCreated;
+                receiverInfo.ActualDeliveryAddress = collectionInfo.ActualDeliveryAddress;
             }
             return receiverInfo;
         }
