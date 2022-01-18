@@ -424,7 +424,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             return Task.FromResult(summary);
         }
 
-        public Task<List<WalletCreditTransactionConvertedDTO>> GetWalletConversionTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter)
+        public Task<List<ForexTransactionHistoryDTO>> GetForexTransactionHistoryAsync(ShipmentCollectionFilterCriteria dateFilter)
         {
             //get startDate and endDate
             var queryDate = dateFilter.getStartDateAndEndDate();
@@ -433,11 +433,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
             var paymentLogs = _context.WalletPaymentLog.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.isConverted == true).AsQueryable();
 
-           List<WalletCreditTransactionConvertedDTO> results = (from p in paymentLogs
+           List<ForexTransactionHistoryDTO> results = (from p in paymentLogs
                                                                 join w in Context.WalletTransactions on p.Reference equals w.PaymentTypeReference
                                                                 join u in Context.Users on w.UserId equals u.Id
                                                                 join c in Context.Country on u.UserActiveCountryId equals c.CountryId
-                                                                  select new WalletCreditTransactionConvertedDTO()
+                                                                  select new ForexTransactionHistoryDTO()
                                                                   {
                                                                       DateOfEntry = p.DateCreated,
                                                                       FundedAmount = p.Amount,

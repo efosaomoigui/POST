@@ -110,7 +110,7 @@ namespace GIGLS.Core.DTO.Wallet
         }
     }
 
-    public class WalletCreditTransactionConvertedDTO
+    public class ForexTransactionHistoryDTO
     {
         public DateTime DateOfEntry { get; set; }
         public decimal FundedAmount { get; set; }

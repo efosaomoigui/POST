@@ -637,9 +637,9 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletTransactions;
         }
 
-        public async Task<IEnumerable<WalletCreditTransactionConvertedDTO>> GetWalletConversionTransactionHistory(ShipmentCollectionFilterCriteria dateFilter)
+        public async Task<IEnumerable<ForexTransactionHistoryDTO>> GetForexTransactionHistory(ShipmentCollectionFilterCriteria dateFilter)
         {
-            return await _uow.WalletTransaction.GetWalletConversionTransactionHistoryAsync(dateFilter);
+            return await _uow.WalletTransaction.GetForexTransactionHistoryAsync(dateFilter);
         }
     }
 }
