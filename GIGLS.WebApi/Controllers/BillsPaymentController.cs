@@ -55,5 +55,19 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [HttpPut]
+        [Route("{emailorcode}/{amount}/billtransactionrefund")]
+        public async Task<IServiceResponse<string>> BillTransactionRefund(string emailorcode, decimal amount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.BillTransactionRefund(emailorcode, amount);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
