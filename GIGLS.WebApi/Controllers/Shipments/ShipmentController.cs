@@ -1127,5 +1127,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getshipmentreceiverdetails")]
+        public async Task<IServiceResponse<ReceiverDetailDTO>> GetShipmentReceiverDetails(NewFilterOptionsDto newFilterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetShipmentReceiverDetails(newFilterOptionsDto);
+                return new ServiceResponse<ReceiverDetailDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
