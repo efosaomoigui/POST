@@ -603,8 +603,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         //get actual amount to debit
                         var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
-                        r.DepartureId == country.CountryId &&
-                        r.DestinationId == user.UserActiveCountryId, "Zone,Destination,Departure");
+                        r.DestinationId == country.CountryId &&
+                        r.DepartureId == user.UserActiveCountryId, "Zone,Destination,Departure");
                         if (countryRateConversion == null)
                             throw new GenericException("The Mapping of Route to Zone does not exist");
 
