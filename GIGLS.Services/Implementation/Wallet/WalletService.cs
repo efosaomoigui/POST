@@ -634,6 +634,21 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
                 }
 
+                //get actual amount to debit
+                decimal actualAmountToDebit = chargeWalletDTO.Amount;
+                if (user.UserActiveCountryId != 1)
+                {
+                    var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
+                   r.DestinationId == 1 &&
+                   r.DepartureId == user.UserActiveCountryId, "Zone,Destination,Departure");
+                    if (countryRateConversion == null)
+                        throw new GenericException("The Mapping of Route to Zone does not exist");
+
+                    double amountToDebitDouble = countryRateConversion.Rate * (double)chargeWalletDTO.Amount;
+                    actualAmountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+                }
+                chargeWalletDTO.Amount = actualAmountToDebit;
+
                 if (chargeWalletDTO.BillType == BillType.AIRTIME)
                 {
                     // Check if user has exceed threshold for the day
