@@ -112,12 +112,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                 gigxusersDTO = (from r in gigxusers
                                 select new GIGXUserDetail()
                                 {
-                                    GIGXUserDetailId = r.GIGXUserDetailId,
-                                    CustomerCode = r.CustomerCode,
-                                    CustomerPin = r.CustomerPin,
-                                    PrivateKey = r.PrivateKey,
-                                    PublicKey = r.PublicKey,
-                                    DateCreated = r.DateCreated,
+                                    GIGXEmail = r.GIGXEmail,
                                     WalletAddress = r.WalletAddress
                                 }).OrderByDescending(x => x.DateCreated).ToList();
 
