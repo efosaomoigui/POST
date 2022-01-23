@@ -150,7 +150,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                     GIGXEmail = r.GIGXEmail,
                                     DateCreated = r.DateCreated
                                 }).OrderByDescending(x => x.DateCreated).ToList();
-                if (!String.IsNullOrEmpty(gigxusers.FirstOrDefault().CustomerPin))
+                if (gigxusers != null && !String.IsNullOrEmpty(gigxusers.FirstOrDefault().CustomerPin))
                 {
                     gigxusersDTO.FirstOrDefault().HasPin = true;
                 }
