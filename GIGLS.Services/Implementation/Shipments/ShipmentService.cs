@@ -6223,5 +6223,31 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<ReceiverDetailDTO> GetShipmentReceiverDetails(NewFilterOptionsDto filter)
+        {
+            var receiverInfo = new ReceiverDetailDTO();
+            if (filter == null)
+            {
+                throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == filter.FilterType);
+            if (shipment != null)
+            {
+                receiverInfo.Waybill = shipment.Waybill;
+                receiverInfo.ReceiverName = shipment.ReceiverName;
+                receiverInfo.ReceiverAddress = shipment.ReceiverAddress;
+                receiverInfo.ReceiverPhoneNumber = shipment.ReceiverPhoneNumber;
+                receiverInfo.DateCreated = shipment.DateCreated;
+            }
+            var collectionInfo = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == filter.FilterType);
+            if (collectionInfo != null)
+            {
+                receiverInfo.IndentificationUrl = collectionInfo.IndentificationUrl;
+                receiverInfo.DeliveredDate = collectionInfo.DateCreated;
+                receiverInfo.ActualDeliveryAddress = collectionInfo.ActualDeliveryAddress;
+            }
+            return receiverInfo;
+        }
+
     }
 }

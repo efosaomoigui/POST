@@ -45,5 +45,8 @@ namespace GIGLS.CORE.Domain
 
         [MaxLength(500)]
         public string DeliveryAddressImageUrl { get; set; }
+
+        [MaxLength(500)]
+        public string ActualDeliveryAddress { get; set; }
     }
 }
