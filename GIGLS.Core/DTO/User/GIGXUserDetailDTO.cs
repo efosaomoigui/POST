@@ -18,6 +18,7 @@ namespace GIGLS.Core.DTO.User
         public string PublicKey { get; set; }
         public string CustomerNewPin { get; set; }
         public string GIGXEmail { get; set; }
+        public bool HasPin { get; set; }
     }
 
 
