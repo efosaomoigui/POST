@@ -4551,5 +4551,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _paymentMethodService.GetPaymentMethodByUserActiveCountry(countryid);
         }
+        public async Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew()
+        {
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(userId);
+
+            if (user is null)
+            {
+                throw new GenericException("User does not exit");
+            }
+
+            var result = await _uow.GIGXUserDetail.GetGIGXUserDetailByCodeNew(user.UserChannelCode);
+            return result;
+        }
     }
 }

@@ -85,6 +85,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                 gigxusersDTO = (from r in gigxusers
                                 select new GIGXUserDetailDTO()
                                 {
+                                    GIGXUserDetailId = r.GIGXUserDetailId,
+                                    CustomerCode = r.CustomerCode,
+                                    PrivateKey = r.PrivateKey,
+                                    PublicKey = r.PublicKey,
+                                    DateCreated = r.DateCreated,
                                     WalletAddress = r.WalletAddress,
                                     GIGXEmail = r.GIGXEmail
                                 }).OrderByDescending(x => x.DateCreated).ToList();
@@ -112,10 +117,40 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                 gigxusersDTO = (from r in gigxusers
                                 select new GIGXUserDetail()
                                 {
-                                    GIGXEmail = r.GIGXEmail,
-                                    WalletAddress = r.WalletAddress
+                                    GIGXUserDetailId = r.GIGXUserDetailId,
+                                    CustomerCode = r.CustomerCode,
+                                    PrivateKey = r.PrivateKey,
+                                    PublicKey = r.PublicKey,
+                                    DateCreated = r.DateCreated,
+                                    WalletAddress = r.WalletAddress,
+                                    GIGXEmail = r.GIGXEmail
                                 }).OrderByDescending(x => x.DateCreated).ToList();
 
+                return Task.FromResult(gigxusersDTO.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode)
+        {
+            try
+            {
+                var gigxusers = _context.GIGXUserDetail.AsQueryable().Where(x => x.CustomerCode == customerCode);
+                List<GIGXUserDetailDTO> gigxusersDTO = new List<GIGXUserDetailDTO>();
+
+                gigxusersDTO = (from r in gigxusers
+                                select new GIGXUserDetailDTO()
+                                {
+                                    WalletAddress = r.WalletAddress,
+                                    GIGXEmail = r.GIGXEmail
+                                }).OrderByDescending(x => x.DateCreated).ToList();
+                if (!String.IsNullOrEmpty(gigxusersDTO.FirstOrDefault().CustomerPin))
+                {
+                    gigxusersDTO.FirstOrDefault().HasPin = true;
+                }
                 return Task.FromResult(gigxusersDTO.FirstOrDefault());
             }
             catch (Exception)
