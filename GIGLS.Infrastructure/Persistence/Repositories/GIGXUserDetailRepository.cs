@@ -87,6 +87,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 {
                                     GIGXUserDetailId = r.GIGXUserDetailId,
                                     CustomerCode = r.CustomerCode,
+                                    CustomerPin = r.CustomerPin,
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
@@ -119,6 +120,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 {
                                     GIGXUserDetailId = r.GIGXUserDetailId,
                                     CustomerCode = r.CustomerCode,
+                                    CustomerPin = r.CustomerPin,
                                     PrivateKey = r.PrivateKey,
                                     PublicKey = r.PublicKey,
                                     DateCreated = r.DateCreated,
@@ -145,9 +147,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 select new GIGXUserDetailDTO()
                                 {
                                     WalletAddress = r.WalletAddress,
-                                    GIGXEmail = r.GIGXEmail
+                                    GIGXEmail = r.GIGXEmail,
+                                    DateCreated = r.DateCreated
                                 }).OrderByDescending(x => x.DateCreated).ToList();
-                if (!String.IsNullOrEmpty(gigxusersDTO.FirstOrDefault().CustomerPin))
+                if (!String.IsNullOrEmpty(gigxusers.FirstOrDefault().CustomerPin))
                 {
                     gigxusersDTO.FirstOrDefault().HasPin = true;
                 }
