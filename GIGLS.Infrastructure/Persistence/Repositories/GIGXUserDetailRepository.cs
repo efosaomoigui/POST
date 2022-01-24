@@ -148,11 +148,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                                 {
                                     WalletAddress = r.WalletAddress,
                                     GIGXEmail = r.GIGXEmail,
-                                    DateCreated = r.DateCreated
+                                    DateCreated = r.DateCreated,
+                                    CustomerPin = r.CustomerPin
                                 }).OrderByDescending(x => x.DateCreated).ToList();
-                if (gigxusers != null && !String.IsNullOrEmpty(gigxusers.FirstOrDefault().CustomerPin))
+                if (gigxusersDTO.Count > 0 &&!String.IsNullOrEmpty(gigxusersDTO.FirstOrDefault().CustomerPin))
                 {
                     gigxusersDTO.FirstOrDefault().HasPin = true;
+                    gigxusersDTO.FirstOrDefault().CustomerPin = null;
                 }
                 return Task.FromResult(gigxusersDTO.FirstOrDefault());
             }
