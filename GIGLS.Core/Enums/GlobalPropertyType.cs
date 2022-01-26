@@ -107,6 +107,7 @@
         AirtimeAmountLimit,
         AirtimeAmountLimitPercentage,
         FraudRating,
-        AirtimeMaxDailyTransferLimit
+        AirtimeMaxDailyTransferLimit,
+        PartnerDeliveryPrice
     }
 }

@@ -91,16 +91,27 @@ namespace GIGLS.Services.Implementation.Partnership
         public async Task<decimal> GetPriceForPartner(PartnerPayDTO partnerpay)
         {
             var TotalPrice = 0.0M;
+            var percentageAmount = 0.0M;
+            var partnerPrice = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.PartnerDeliveryPrice.ToString());
+            if (partnerPrice != null)
+            {
+                var price = Convert.ToDecimal(partnerPrice.Value);
+                percentageAmount = (price * 0.01m);
+            }
+            if (partnerPrice == null)
+            {
+                percentageAmount = 0.8m;
+            }
             if (partnerpay.ZoneMapping == 1)
             {
                 var TotalAmount = (partnerpay.ShipmentPrice);
-                var amount = (0.8M * TotalAmount);
+                var amount = (percentageAmount * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }
             else
             {
                 var TotalAmount = (partnerpay.PickUprice);
-                var amount = (0.8M * TotalAmount);
+                var amount = (percentageAmount * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }
             return await Task.FromResult(TotalPrice);

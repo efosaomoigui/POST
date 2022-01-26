@@ -35,6 +35,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                 var result = false;
                 var currentUserId = await _userService.GetCurrentUserId();
                 var user = await _userService.GetUserById(currentUserId);
+                var pin = String.Empty;
 
                 var gigx =  _uow.GIGXUserDetail.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).FirstOrDefault();
                 if (gigx != null)
@@ -43,6 +44,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                     if (isNumeric && n > 0 && !String.IsNullOrEmpty(gIGXUserDetailDTO.CustomerPin))
                     {
                         gigx.CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim();
+                        pin = gigx.CustomerPin;
                     }
                     gigx.CustomerCode = user.UserChannelCode;
                     gigx.PrivateKey = gIGXUserDetailDTO.PrivateKey;
@@ -55,7 +57,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                     var gigxUser = new GIGXUserDetail
                     {
                         CustomerCode = user.UserChannelCode,
-                        CustomerPin = gIGXUserDetailDTO.CustomerPin.ToString().Trim(),
+                        CustomerPin = pin,
                         PrivateKey = gIGXUserDetailDTO.PrivateKey,
                         PublicKey = gIGXUserDetailDTO.PublicKey,
                         WalletAddress = gIGXUserDetailDTO.WalletAddress,
