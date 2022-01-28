@@ -1084,6 +1084,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //{
                 //await SendEmailToCustomerForShipmentCreation(newShipment);
                 //}
+
+                //also group and manifest shipment(grouping and manifesting should consider go standard and faster)
+
+
                 return newShipment;
             }
             catch (Exception ex)
@@ -6248,6 +6252,182 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return receiverInfo;
         }
+
+
+
+
+        #region IMPLEMENTING GROUPING AND MANIFESTING
+
+        //map waybillNumber to groupWaybillNumber
+        public async Task MappingWaybillNumberToGroup(string waybill)
+        {
+            try
+            {
+                // get the service centres of login user
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 0)
+                {
+                    throw new GenericException("Error processing request. The login user is not assign to any service centre nor has the right privilege");
+                }
+
+                //validate waybill 
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                if (shipment is null)
+                {
+                    throw new GenericException("Error Grouping waybill. An error occured while trying to group waybill automatically,please manually group waybill.");
+                }
+
+
+                var destServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
+                int departureServiceCenterId = serviceCenters[0];
+                var currentUserId = await _userService.GetCurrentUserId();
+                var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, destServiceCentre.Code);
+
+                //validate the ids are in the system
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+
+
+                //check if the group already exist for centre
+                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery).SingleOrDefault();
+                if (groupwaybillExist == null)
+                {
+                    var newGroupWaybill = new GroupWaybillNumber
+                    {
+                        GroupWaybillCode = groupWaybillNumber,
+                        UserId = currentUserId,
+                        ServiceCentreId = destServiceCentre.ServiceCentreId,
+                        IsActive = true,
+                        DepartureServiceCentreId = departureServiceCenterId,
+                        ExpressDelivery = shipment.ExpressDelivery
+                    };
+                    _uow.GroupWaybillNumber.Add(newGroupWaybill);
+
+                    //check to see if a manifest already exist for this centre
+                    var isGroupWaybillMapped = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.ManifestCode == manifestCode && x.GroupWaybillNumber == groupWaybillNumber);
+
+                }
+                else
+                {
+                   
+                }
+
+
+
+
+
+
+                //Get GroupWaybill Details
+                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
+
+                if (groupwaybillObj == null)
+                {
+                    var newGroupWaybill = new GroupWaybillNumber
+                    {
+                        GroupWaybillCode = groupWaybillNumber,
+                        UserId = currentUserId,
+                        ServiceCentreId = serviceCentre.ServiceCentreId,
+                        IsActive = true,
+                        DepartureServiceCentreId = departureServiceCenterId
+                    };
+                    _uow.GroupWaybillNumber.Add(newGroupWaybill);
+                }
+                else
+                {
+                    //ensure that the Manifest containing the Groupwaybill has not been dispatched
+                    var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.GroupWaybillNumber == groupWaybillNumber);
+                    if (manifestGroupWaybillNumberMapping != null)
+                    {
+                        var manifestObject = _uow.Manifest.SingleOrDefault(x => x.ManifestCode == manifestGroupWaybillNumberMapping.ManifestCode);
+                        if (manifestObject != null && manifestObject.IsDispatched)
+                        {
+                            throw new GenericException($"Error: The Manifest: {manifestObject.ManifestCode} assigned to this waybill has already been dispatched.");
+                        }
+                    }
+                }
+
+                //Get All Waybills that need to be group by the service centre
+                var filterOptionsDto = new FilterOptionsDto
+                {
+                    count = 1000000,
+                    page = 1,
+                    sortorder = "0"
+                };
+
+                var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
+
+                var ungroupedWaybillsList = new HashSet<string>();
+
+                foreach (var item in ungroupedWaybills)
+                {
+                    if (item?.Waybill != null)
+                    {
+                        ungroupedWaybillsList.Add(item.Waybill);
+                    }
+                }
+
+                List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
+
+                //convert the list to HashSet to remove duplicate
+                var newWaybillNumberList = new HashSet<string>(waybillNumberList);
+
+                //check if the waybill that need to be grouped are in ungroupedWaybills above
+                //var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
+                var getWaybillNotAvailableForGrouping = newWaybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x));
+
+                if (getWaybillNotAvailableForGrouping.Any())
+                {
+                    throw new GenericException($"Error: The following waybills [{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
+                        $" can not be added to this group because they are not available to you. Remove them from the list to proceed");
+                }
+                else
+                {
+                    //Get All the shipment at once into memory
+                    var shipmentList = _uow.Shipment.GetAllAsQueryable().Where(x => newWaybillNumberList.Contains(x.Waybill)).ToList();
+
+                    foreach (var waybillNumber in newWaybillNumberList)
+                    {
+                        var shipmentDTO = shipmentList.Where(x => x.Waybill == waybillNumber).FirstOrDefault();
+
+                        //if the groupwaybill service centre is not the same as the waybill destination
+                        if (shipmentDTO.DestinationServiceCentreId != serviceCentre.ServiceCentreId)
+                        {
+                            throw new GenericException($"Waybill {waybillNumber} cannot be added to the group {groupWaybillNumber}. Remove it from the list to proceed");
+                        }
+
+                        //Add new Mapping
+                        var newMapping = new GroupWaybillNumberMapping
+                        {
+                            GroupWaybillNumber = groupWaybillNumber,
+                            WaybillNumber = waybillNumber,
+                            IsActive = true,
+                            DateMapped = DateTime.Now,
+                            DepartureServiceCentreId = departureServiceCenterId,
+                            DestinationServiceCentreId = serviceCenterId,
+                            OriginalDepartureServiceCentreId = departureServiceCenterId,
+                            UserId = currentUserId
+                        };
+
+                        groupWaybillNumberMapping.Add(newMapping);
+                    }
+
+                    //update all shipment as grouped
+                    shipmentList.ForEach(x => x.IsGrouped = true);
+
+                    //update all entry for waybills if any exist in transitwaybill
+                    var updateTransitWaybill = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(s => newWaybillNumberList.Contains(s.WaybillNumber)).ToList();
+                    updateTransitWaybill.ForEach(u => u.IsGrouped = true);
+                }
+
+                _uow.GroupWaybillNumberMapping.AddRange(groupWaybillNumberMapping);
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        #endregion
 
     }
 }
