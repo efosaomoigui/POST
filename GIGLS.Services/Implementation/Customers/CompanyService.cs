@@ -23,6 +23,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -1371,6 +1372,143 @@ namespace GIGLS.Services.Implementation.Customers
             }
             filterCriteria.AssignedCustomerRep = user.Id;
             return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
+        }
+
+        public async Task<ResponseDTO> UpdateUserRankForAlpha(string  merchantEmail)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                var user = new UserDTO();
+
+                if (String.IsNullOrEmpty(merchantEmail))
+                {
+                    result.Succeeded = false;
+                    result.Message = "Invalid email";
+                    return result;
+                }
+
+                user = await _userService.GetUserByEmail(merchantEmail);
+                if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "User does not exist";
+                    return result;
+                }
+
+                var userValidationDTO = new UserValidationDTO
+                {
+                    Rank = Rank.Class,
+                    UserCode = user.UserChannelCode,
+                    UserID = user.Id,
+                    RankType = RankType.Upgrade
+                };
+
+                if (userValidationDTO == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Invalid payload";
+                    return result;
+                }
+
+                if (String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "User not provided";
+                    return result;
+                }
+
+                if (userValidationDTO.Rank == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Rank not provided";
+                    return result;
+                }
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Company information does not exist";
+                    return result;
+                }
+
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //make the BVN compulsory
+                    if (String.IsNullOrEmpty(company.BVN))
+                    {
+                        result.Succeeded = false;
+                        result.Message = "User BVN not provided";
+                        return result;
+                    }
+                    company.isCodNeeded = true;
+                }
+                else
+                {
+                    company.isCodNeeded = false;
+                }
+
+                company.Rank = userValidationDTO.Rank;
+                company.RankModificationDate = DateTime.Now;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = userValidationDTO.RankType
+                });
+                await _uow.CompleteAsync();
+
+                //Call Node to Update User subscription
+                //Code goes here
+
+                //send email for upgrade customers
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+                    //send a copy to chairman
+                    //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
+                    //if (chairmanEmail != null)
+                    //{
+                    //    //seperate email by comma and send message to those email
+                    //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
+                    //    foreach (string email in chairmanEmails)
+                    //    {
+                    //        companyMessagingDTO.Emails.Add(email);
+                    //    }
+                    //}
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //CHeck if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
+                }
+
+                result.Message = "User Rank Update Successful";
+                result.Succeeded = true;
+                result.Entity = companyDTO;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 

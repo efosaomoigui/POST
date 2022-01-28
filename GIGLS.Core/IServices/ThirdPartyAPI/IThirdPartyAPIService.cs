@@ -48,5 +48,6 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<string> GetCellulantKey();
         Task<string> Decrypt(string encrytedKey);
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
+        Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
     }
 }
