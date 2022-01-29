@@ -205,6 +205,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Business\Alpha\AlphaService.cs" />
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\CustomerPortal\PartnerPortalService.cs" />
     <Compile Include="Business\DHL\DHLService.cs" />

@@ -23,6 +23,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Alpha;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -36,10 +37,12 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IAlphaService _alphsService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService,
+            IAlphaService alphsService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -49,6 +52,7 @@ namespace GIGLS.Services.Implementation.Customers
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
             _paystackPaymentService = paystackPaymentService;
+            _alphsService = alphsService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -1098,6 +1102,15 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 await _uow.CompleteAsync();
 
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = 3999,
+                    CustomerCode = companyDTO.CustomerCode,
+                    SubscriptionPlan = companyDTO.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now
+                });
+                
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
