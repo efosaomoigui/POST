@@ -4123,7 +4123,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var gigxUser = await _uow.GIGXUserDetail.GetGIGXUserDetailByCode(user.UserChannelCode);
             if (gigxUser == null)
             {
-                var userPin = await _gigxService.AddGIGXUserDetail(userDetails);
+                var userPin = await _gigxService.AddGIGXUserDetailPin(userDetails);
             }
             else
             {
@@ -4562,6 +4562,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             var result = await _uow.GIGXUserDetail.GetGIGXUserDetailByCodeNew(user.UserChannelCode);
+            return result;
+        }
+
+        public async Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode)
+        {
+            var result = await _uow.GIGXUserDetail.GetGIGXUserDetailByCodeNew(customerCode);
             return result;
         }
     }
