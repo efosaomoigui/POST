@@ -261,5 +261,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<OutstandingPaymentsDTO> GetEquivalentAmountOfActiveCurrency(CurrencyEquivalentDTO currencyEquivalent);
         Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid);
         Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew();
+        Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode);
     }
 }

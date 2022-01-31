@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices
         Task<bool> VerifyUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<bool> ChangeUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
         Task<bool> ResetUserPin(GIGXUserDetailDTO gIGXUserDetailDTO);
+        Task<bool> AddGIGXUserDetailPin(GIGXUserDetailDTO gIGXUserDetailDTO);
     }
 }
