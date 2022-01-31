@@ -493,9 +493,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         //    }
         //}
 
-        public async Task<ResponseDTO> UpdateUserRankForAlpha(string  merchantEmail)
+        public async Task<ResponseDTO> UpdateUserRankForAlpha(string merchantcode)
         {
-            return await _companyService.UpdateUserRankForAlpha(merchantEmail);
+            return await _companyService.UpdateUserRankForAlpha(merchantcode);
         }
     }
 }

@@ -24,6 +24,8 @@ using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
 using System.Net;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -37,10 +39,12 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly INodeService _nodeService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService,
+            INodeService nodeService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -50,6 +54,7 @@ namespace GIGLS.Services.Implementation.Customers
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
             _paystackPaymentService = paystackPaymentService;
+            _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -1374,26 +1379,22 @@ namespace GIGLS.Services.Implementation.Customers
             return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
         }
 
-        public async Task<ResponseDTO> UpdateUserRankForAlpha(string  merchantEmail)
+        public async Task<ResponseDTO> UpdateUserRankForAlpha(string merchantcode)
         {
             try
             {
                 var result = new ResponseDTO();
                 var user = new UserDTO();
 
-                if (String.IsNullOrEmpty(merchantEmail))
+                if (String.IsNullOrEmpty(merchantcode))
                 {
-                    result.Succeeded = false;
-                    result.Message = "Invalid email";
-                    return result;
+                    throw new GenericException("Invalid merchant code.", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
-                user = await _userService.GetUserByEmail(merchantEmail);
+                user = await _userService.GetUserByChannelCode(merchantcode);
                 if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
                 {
-                    result.Succeeded = false;
-                    result.Message = "User does not exist";
-                    return result;
+                    throw new GenericException("User does not exist.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var userValidationDTO = new UserValidationDTO
@@ -1404,33 +1405,20 @@ namespace GIGLS.Services.Implementation.Customers
                     RankType = RankType.Upgrade
                 };
 
-                if (userValidationDTO == null)
-                {
-                    result.Succeeded = false;
-                    result.Message = "Invalid payload";
-                    return result;
-                }
-
                 if (String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
                 {
-                    result.Succeeded = false;
-                    result.Message = "User not provided";
-                    return result;
+                    throw new GenericException("User not provided.", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
                 if (userValidationDTO.Rank == null)
                 {
-                    result.Succeeded = false;
-                    result.Message = "Rank not provided";
-                    return result;
+                    throw new GenericException("Rank not provided.", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
                 var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (company == null)
                 {
-                    result.Succeeded = false;
-                    result.Message = "Company information does not exist";
-                    return result;
+                    throw new GenericException("Company information does not exist.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (userValidationDTO.Rank == Rank.Class)
@@ -1438,9 +1426,7 @@ namespace GIGLS.Services.Implementation.Customers
                     //make the BVN compulsory
                     if (String.IsNullOrEmpty(company.BVN))
                     {
-                        result.Succeeded = false;
-                        result.Message = "User BVN not provided";
-                        return result;
+                        throw new GenericException("User BVN not provided.", $"{(int)HttpStatusCode.BadRequest}");
                     }
                     company.isCodNeeded = true;
                 }
@@ -1461,24 +1447,18 @@ namespace GIGLS.Services.Implementation.Customers
                 await _uow.CompleteAsync();
 
                 //Call Node to Update User subscription
-                //Code goes here
+                await _nodeService.UpdateMerchantSubscription(new UpdateNodeMercantSubscriptionDTO
+                {
+                    UserId = user.Id,
+                    MerchantCode = companyDTO.CustomerCode
+                });
 
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
                     //SEND EMAIL TO CLASS CUSTOMERS
                     var companyMessagingDTO = new CompanyMessagingDTO();
-                    //send a copy to chairman
-                    //var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-                    //if (chairmanEmail != null)
-                    //{
-                    //    //seperate email by comma and send message to those email
-                    //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-                    //    foreach (string email in chairmanEmails)
-                    //    {
-                    //        companyMessagingDTO.Emails.Add(email);
-                    //    }
-                    //}
+                  
                     var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
                     companyMessagingDTO.Name = company.Name;
                     companyMessagingDTO.Email = company.Email;

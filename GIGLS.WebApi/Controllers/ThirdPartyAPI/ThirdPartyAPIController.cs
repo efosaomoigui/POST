@@ -481,12 +481,12 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         [HttpPut]
-        [Route("updatemerchantsubscription/{merchantEmail}")]
-        public async Task<IServiceResponse<ResponseDTO>> UpdateMerchantClassSubscriptionForAlpha(string merchantEmail)
+        [Route("updatemerchantsubscription/{merchantcode}")]
+        public async Task<IServiceResponse<ResponseDTO>> UpdateMerchantClassSubscriptionForAlpha(string merchantcode)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _thirdPartyAPIService.UpdateUserRankForAlpha(merchantEmail);
+                var result = await _thirdPartyAPIService.UpdateUserRankForAlpha(merchantcode);
 
                 return new ServiceResponse<ResponseDTO>
                 {
