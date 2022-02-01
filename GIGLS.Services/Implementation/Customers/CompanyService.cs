@@ -24,6 +24,7 @@ using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Alpha;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -1105,11 +1106,11 @@ namespace GIGLS.Services.Implementation.Customers
                 //Call Alpha Api to Notify them of merchant subscription
                 await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
                 {
-                    Amount = 3999,
+                    Amount = Convert.ToInt32( ConfigurationManager.AppSettings["AlphaSubAmount"]),
                     CustomerCode = companyDTO.CustomerCode,
                     SubscriptionPlan = companyDTO.Rank.ToString().ToLower(),
-                    ExpiryDate = DateTime.Now
-                });
+                    ExpiryDate = DateTime.Now.AddMonths(1)
+                }) ;
                 
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
@@ -1318,6 +1319,16 @@ namespace GIGLS.Services.Implementation.Customers
                         await _uow.CompleteAsync();
                     }
                 }
+
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = companyDTO.CustomerCode,
+                    SubscriptionPlan = companyDTO.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1)
+                });
+
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
