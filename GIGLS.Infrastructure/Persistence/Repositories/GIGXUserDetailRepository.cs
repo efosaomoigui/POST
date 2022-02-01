@@ -140,6 +140,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
         {
             try
             {
+                GIGXUserDetailDTO result = new GIGXUserDetailDTO();
                 var gigxusers = _context.GIGXUserDetail.AsQueryable().Where(x => x.CustomerCode == customerCode);
                 List<GIGXUserDetailDTO> gigxusersDTO = new List<GIGXUserDetailDTO>();
 
@@ -155,8 +156,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.BankSettlement
                 {
                     gigxusersDTO.FirstOrDefault().HasPin = true;
                     gigxusersDTO.FirstOrDefault().CustomerPin = null;
+                    result = gigxusersDTO.FirstOrDefault();
                 }
-                return Task.FromResult(gigxusersDTO.FirstOrDefault());
+                return Task.FromResult(result);
             }
             catch (Exception)
             {
