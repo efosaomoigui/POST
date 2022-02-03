@@ -82,6 +82,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IServiceCentreService _centreService;
         private readonly IDHLService _dhlService;
         private readonly IUPSService _uPSService;
+        private readonly IInsuranceService _insuranceService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -91,7 +92,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
             INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService,
-            IDHLService dHLService, IUPSService uPSService)
+            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -121,6 +122,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _centreService = centreService;
             _dhlService = dHLService;
             _uPSService = uPSService;
+            _insuranceService = insuranceService;
             MapperConfig.Initialize();
         }
 
@@ -5300,7 +5302,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
                                         //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                                        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                                        ShipmentPackagePrice = preshipmentmobile.ShipmentPackagePrice.Value,
                                         ApproximateItemsWeight = 0.00,
                                         ReprintCounterStatus = false,
                                         CustomerType = preshipmentmobile.CustomerType,
@@ -5324,8 +5326,10 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }).ToList()
                                     };
 
+                                    var insuranceValue = await _insuranceService.GetInsuranceValueByCountry();
                                     var factor = Convert.ToDecimal(Math.Pow(10, -2));
                                     MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
+                                    MobileShipment.Insurance = insuranceValue;
                                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
