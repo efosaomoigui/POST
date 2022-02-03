@@ -125,6 +125,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly INodeService _nodeService;
         private readonly IGIGXUserDetailService _gigxService;
         private readonly IPaymentMethodService _paymentMethodService;
+        private readonly ISterlingPaymentService _sterlingPaymentService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -138,7 +139,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -186,6 +187,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _gigxService = gigxService;
             _paymentMethodService = paymentMethodService;
             _cellulantPaymentService = cellulantPaymentService;
+            _sterlingPaymentService = sterlingPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -335,6 +337,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         result = await VerifyAndValidateFlutterWavePayment(referenceCode);
                     }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Sterling)
+                    {
+                        result = await VerifyAndValidateSterlingPayment(referenceCode);
+                    }
                     else
                     {
                         result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -361,6 +367,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
                     {
                         result = await VerifyAndValidateFlutterWavePayment(referenceCode);
+                    }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Sterling)
+                    {
+                        result = await VerifyAndValidateSterlingPayment(referenceCode);
                     }
                     else
                     {
@@ -4569,6 +4579,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = await _uow.GIGXUserDetail.GetGIGXUserDetailByCodeNew(customerCode);
             return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateSterlingPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _sterlingPaymentService.VerifyAndValidateMobilePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
         }
     }
 }
