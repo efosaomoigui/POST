@@ -5281,7 +5281,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }
                                     }
 
-                                    var MobileShipment = new ShipmentDTO
+                                    var mobileShipment = new ShipmentDTO
                                     {
                                         Waybill = preshipmentmobile.Waybill,
                                         ReceiverName = preshipmentmobile.ReceiverName,
@@ -5302,7 +5302,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
                                         //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                                        ShipmentPackagePrice = preshipmentmobile.ShipmentPackagePrice.Value,
+                                        ShipmentPackagePrice = preshipmentmobile.ShipmentPackagePrice == null ? 0.00m : preshipmentmobile.ShipmentPackagePrice.Value,
                                         ApproximateItemsWeight = 0.00,
                                         ReprintCounterStatus = false,
                                         CustomerType = preshipmentmobile.CustomerType,
@@ -5328,9 +5328,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                     var insuranceValue = await _insuranceService.GetInsuranceValueByCountry();
                                     var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                                    MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
-                                    MobileShipment.Insurance = insuranceValue;
-                                    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+                                    mobileShipment.GrandTotal = Math.Round(mobileShipment.GrandTotal * factor) / factor;
+                                    mobileShipment.Insurance = insuranceValue;
+                                    mobileShipment.DeclarationOfValueCheck = mobileShipment.Value;
+                                    mobileShipment.Total = mobileShipment.ShipmentItems.Select(x => x.Price).Sum();
+                                    var status = await _shipmentService.AddShipmentFromMobile(mobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
                                     preshipmentmobile.IsApproved = true;
