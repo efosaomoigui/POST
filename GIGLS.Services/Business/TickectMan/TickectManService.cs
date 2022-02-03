@@ -310,6 +310,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         shipment.Invoice.Shipment.Insurance = Math.Round((decimal)shipment.Insurance * factor) / factor;
                         shipment.Invoice.Shipment.CashOnDeliveryAmount = Math.Round((decimal)shipment.CashOnDeliveryAmount * factor) / factor;
                         shipment.Invoice.Shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
+                        shipment.Invoice.Pos = Math.Round((decimal)shipment.Invoice.Pos * factor) / factor;
+
                     }
                 }
             }
