@@ -6287,7 +6287,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 //check if the group already exist for centre
-                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
+                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
                 if (groupwaybillExist == null)
                 {
                     // generate new manifest code
@@ -6303,7 +6303,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         DepartureServiceCentreId = departureServiceCenterId,
                         ExpressDelivery = shipment.ExpressDelivery,
                         OriginalDepartureServiceCentreId = departureServiceCenterId,
-                        WaybillNumber = shipment.Waybill
+                        WaybillNumber = shipment.Waybill,
+                        DateMapped = DateTime.Now
                     };
                     _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
 
@@ -6316,7 +6317,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         IsActive = true,
                         DepartureServiceCentreId = departureServiceCenterId,
                         ExpressDelivery = shipment.ExpressDelivery,
-                        HasManifest = true
+                        HasManifest = true,
                     };
                     _uow.GroupWaybillNumber.Add(newGroupWaybill);
 
@@ -6337,6 +6338,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DateTime = DateTime.Now,
                         ManifestCode = manifestCode
                     };
+                    _uow.Manifest.Add(newManifest);
                 }
                 else
                 {
