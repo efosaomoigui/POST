@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -403,6 +404,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 if (verifyResult.data != null)
                 {
+                    _uow.BeginTransaction(IsolationLevel.RepeatableRead);
                     //get wallet payment log by reference code
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
 
@@ -524,7 +526,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
-                    await _uow.CompleteAsync();
+                    //await _uow.CompleteAsync();
+                    _uow.Commit();
 
                     if (sendPaymentNotification)
                     {
