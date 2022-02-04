@@ -6393,7 +6393,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         var newManifest = new Manifest
                         {
                             DateTime = DateTime.Now,
-                            ManifestCode = manifestCode
+                            ManifestCode = manifestCode,
+                            ExpressDelivery = shipment.ExpressDelivery
                         };
                         _uow.Manifest.Add(newManifest);
                     }

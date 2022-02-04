@@ -38,6 +38,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string SuperManifestCode { get; set; }
         public MovementStatus MovementStatus { get; set; }
         public CargoStatus CargoStatus { get; set; }
-        
+        public bool ExpressDelivery { get; set; }
+
     }
 }
