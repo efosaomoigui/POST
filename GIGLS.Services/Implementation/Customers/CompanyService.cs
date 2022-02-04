@@ -1106,10 +1106,14 @@ namespace GIGLS.Services.Implementation.Customers
                 //Call Alpha Api to Notify them of merchant subscription
                 await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
                 {
-                    Amount = Convert.ToInt32( ConfigurationManager.AppSettings["AlphaSubAmount"]),
-                    CustomerCode = companyDTO.CustomerCode,
-                    SubscriptionPlan = companyDTO.Rank.ToString().ToLower(),
-                    ExpiryDate = DateTime.Now.AddMonths(1)
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
                 }) ;
                 
                 //send email for upgrade customers
@@ -1324,9 +1328,13 @@ namespace GIGLS.Services.Implementation.Customers
                 await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
                 {
                     Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
-                    CustomerCode = companyDTO.CustomerCode,
-                    SubscriptionPlan = companyDTO.Rank.ToString().ToLower(),
-                    ExpiryDate = DateTime.Now.AddMonths(1)
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "": company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
                 });
 
                 companyDTO = Mapper.Map<CompanyDTO>(company);
