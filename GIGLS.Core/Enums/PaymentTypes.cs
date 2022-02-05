@@ -24,6 +24,7 @@
         TheTeller,
         Flutterwave,
         USSD,
-        Cellulant
+        Cellulant,
+        Sterling
     }
 }

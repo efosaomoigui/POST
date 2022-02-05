@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
-    public class FlutterwavePaymentService : IFlutterwavePaymentService
+    public class SterlingPaymentService : ISterlingPaymentService
     {
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
@@ -37,7 +37,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly INodeService _nodeService;
         private readonly IMessageSenderService _messageSenderService;
 
-        public FlutterwavePaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
+        public SterlingPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
             IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService)
         {
             _userService = userService;
@@ -82,14 +82,14 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             FlutterWebhookDTO result = new FlutterWebhookDTO();
 
-            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            string sterlingSandBox = ConfigurationManager.AppSettings["SterlingSandBox"];
+            string secretKey = ConfigurationManager.AppSettings["SterlingSecretKey"];
             string authorization = "Bearer " + secretKey;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             //int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
             int transactionId = await GetTransactionPaymentIdUsingRefCodeV2(reference);
-            string verifyUrl = flutterSandBox + "transactions/" + transactionId + "/verify";
+            string verifyUrl = sterlingSandBox + "transactions/" + transactionId + "/verify";
 
             using (var client = new HttpClient())
             {
@@ -526,8 +526,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
-                    //await _uow.CompleteAsync();
                     _uow.Commit();
+                   // await _uow.CompleteAsync();
 
                     if (sendPaymentNotification)
                     {
