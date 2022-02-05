@@ -31,11 +31,12 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IPaystackPaymentService _paystackService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly IUssdService _ussdService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
         public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
-            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, IUssdService ussdService,
+            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, ISterlingPaymentService sterlingPaymentService, IUssdService ussdService,
             ICountryRouteZoneMapService countryRouteZoneMapService)
         {
             _uow = uow;
@@ -43,6 +44,7 @@ namespace GIGLS.Services.Implementation.Wallet
             _passwordGenerator = passwordGenerator;
             _paystackService = paystackService;
             _flutterwavePaymentService = flutterwavePaymentService;
+            _sterlingPaymentService = sterlingPaymentService;
             _ussdService = ussdService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             MapperConfig.Initialize();
@@ -91,6 +93,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     //Process Payment for FlutterWave;
                     response = await AddWaybillPaymentLogForFlutterWave(waybillPaymentLog);
+                }
+
+                if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Sterling)
+                {
+                    //Process Payment for FlutterWave;
+                    response = await AddWaybillPaymentLogForSterling(waybillPaymentLog);
                 }
 
                 if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
@@ -412,6 +420,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
                 }
 
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Sterling)
+                {
+                    response = await _sterlingPaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                }
+
                 if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
                 {
                     response = await _ussdService.VerifyAndValidatePayment(paymentLog.Reference);
@@ -450,6 +463,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
                 {
                     var response = await _flutterwavePaymentService.ProcessPaymentForWaybillUsingOTP(paymentLog, pin);
+                    return response;
+                }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Sterling)
+                {
+                    var response = await _sterlingPaymentService.ProcessPaymentForWaybillUsingOTP(paymentLog, pin);
                     return response;
                 }
             }
@@ -509,6 +528,15 @@ namespace GIGLS.Services.Implementation.Wallet
             return paystackResponse;
         }
 
+        private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForSterling(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
+
+            //3. send the request to paystack gateway
+            var paystackResponse = await ProcessMobilePaymentForSterling(waybillPaymentLog);
+            return paystackResponse;
+        }
+
         private async Task<PaystackWebhookDTO> ProcessMobilePaymentForFlutterWave(WaybillPaymentLogDTO waybillPaymentLog)
         {
             try
@@ -519,6 +547,111 @@ namespace GIGLS.Services.Implementation.Wallet
                 string flutterDirectAccountDebit = flutterSandBox + ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
                 string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
                 string SecretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                FlutterWaveDTO mobileMoney = new FlutterWaveDTO
+                {
+                    amount = waybillPaymentLog.Amount,
+                    currency = waybillPaymentLog.Currency,
+                    email = waybillPaymentLog.Email,
+                    txRef = waybillPaymentLog.Reference,
+                    phonenumber = waybillPaymentLog.PhoneNumber,
+                    accountbank = waybillPaymentLog.FlutterWaveData.accountbank,
+                    accountnumber = waybillPaymentLog.FlutterWaveData.accountnumber,
+                    bvn = waybillPaymentLog.FlutterWaveData.bvn,
+                    country = waybillPaymentLog.FlutterWaveData.country,
+                    payment_type = waybillPaymentLog.FlutterWaveData.payment_type,
+                    firstname = waybillPaymentLog.FlutterWaveData.firstname,
+                    lastname = waybillPaymentLog.FlutterWaveData.lastname,
+                    passcode = waybillPaymentLog.FlutterWaveData.passcode,
+                    PBFPubKey = PBFPubKey
+                };
+
+                //encrypt data
+                string mobileMoneySerialize = JsonConvert.SerializeObject(mobileMoney);
+                IPaymentDataEncryption en = new RavePaymentDataEncryption();
+                string key = en.GetEncryptionKey(SecretKey);
+                string cipher = en.EncryptData(key, mobileMoneySerialize);
+
+                var flutterObject = new FlutterWaveObject
+                {
+                    PBFPubKey = PBFPubKey,
+                    client = cipher,
+                    alg = "3DES-24"
+                };
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var json = JsonConvert.SerializeObject(flutterObject);
+                    StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(flutterDirectAccountDebit, data);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    var flutterResponse = JsonConvert.DeserializeObject<FlutterWebhookDTO>(result);
+
+                    //update the response from flutterwave
+                    var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+
+                    responseResult.Message = flutterResponse.Message;
+                    if (flutterResponse.Status == "success")
+                    {
+                        responseResult.Status = true;
+                    }
+
+                    if (flutterResponse.data != null)
+                    {
+                        //use Reference to represent flutter flwRef -- security code for otp confirmation
+                        responseResult.data.Reference = flutterResponse.data.FlwRef;
+                        responseResult.data.Status = flutterResponse.data.Status;
+
+                        if (flutterResponse.data.validateInstructions.Instruction != null)
+                        {
+                            responseResult.data.Message = flutterResponse.data.validateInstructions.Instruction;
+                        }
+                        else if (flutterResponse.data.ChargeMessage != null)
+                        {
+                            responseResult.data.Message = flutterResponse.data.ChargeMessage;
+                        }
+                        else
+                        {
+                            responseResult.data.Message = flutterResponse.data.ChargeResponseMessage;
+                        }
+                    }
+                    else
+                    {
+                        responseResult.data.Message = flutterResponse.Message;
+                        responseResult.data.Status = flutterResponse.Status;
+                    }
+
+                    //update waybill payment log
+                    updateWaybillPaymentLog.TransactionStatus = responseResult.data.Status;
+                    updateWaybillPaymentLog.TransactionResponse = responseResult.data.Message;
+                    updateWaybillPaymentLog.NetworkProvider = responseResult.data.Reference;  //use NetworkProvide to represent flutter flwRef -- security code for otp confirmation
+                    await _uow.CompleteAsync();
+
+                    return responseResult;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<PaystackWebhookDTO> ProcessMobilePaymentForSterling(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            try
+            {
+                var responseResult = new PaystackWebhookDTO();
+
+                string flutterSandBox = ConfigurationManager.AppSettings["SterlingSandBox"];
+                string flutterDirectAccountDebit = flutterSandBox + ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
+                string PBFPubKey = ConfigurationManager.AppSettings["SterlingPubKey"];
+                string SecretKey = ConfigurationManager.AppSettings["SterlingSecretKey"];
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
