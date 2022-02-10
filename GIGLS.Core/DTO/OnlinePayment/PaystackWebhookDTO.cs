@@ -506,10 +506,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Status { get; set; }
 
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("fee")]
-        public string Fee { get; set; }
+        public decimal Fee { get; set; }
 
         [JsonProperty("currency")]
         public string Currency { get; set; }
