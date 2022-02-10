@@ -9,9 +9,9 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface IKorapayPaymentService : IServiceDependencyMarker
     {
-        Task<string> Encrpt(KorapayWebhookDTO payload);
+        Task<string> Encrypt(KorapayWebhookDTO payload);
         Task<string> InitializeCharge(KoarapayInitializeCharge payload);
-        
-
+        Task<bool> VerifyAndValidatePaymentForWebhook(KorapayWebhookDTO webhook);
+        Task<KorapayQueryChargeResponse> QueryCharge(string reference);
     }
 }

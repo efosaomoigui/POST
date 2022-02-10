@@ -23,33 +23,29 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
             _korapayService = korapayService;
         }
 
-        //[HttpPost]
-        //[Route("encryptdata")]
-        //public async Task<IServiceResponse<string>> EncryptData(KorapayWebhookDTO payload)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var result = await  _korapayService.Encrpt(payload);
-
-        //        return new ServiceResponse<string>
-        //        {
-        //            Object = result
-        //        };
-        //    });
-        //}
-
+        [AllowAnonymous]
         [HttpPost]
-        [Route("generatecheckouturl")]
-        public async Task<IServiceResponse<string>> InitializeCharge(KoarapayInitializeCharge payload)
+        [Route("validatepayment")]
+        public async Task<IServiceResponse<bool>> VerifyAndValidatePayment(KorapayWebhookDTO webhookData)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _korapayService.InitializeCharge(payload);
-
-                return new ServiceResponse<string>
+                var response = new ServiceResponse<bool>
                 {
-                    Object = result
+                    Object = true
                 };
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("x-korapay-signature"))
+                {
+                    var key = await _korapayService.Encrypt(webhookData);
+                    string token = headers.GetValues("x-korapay-signature").FirstOrDefault();
+                    if (token == key)
+                    {
+                        await _korapayService.VerifyAndValidatePaymentForWebhook(webhookData);
+                    }
+                }
+                return response;
             });
         }
     }
