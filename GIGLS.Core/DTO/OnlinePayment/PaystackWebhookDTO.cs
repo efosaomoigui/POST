@@ -396,4 +396,85 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ReceiptNumber { get; set; }
     }
 
+    #region Korapay
+    public class KorapayCustomer
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("email")]
+        public string Email { get; set; }
+    }
+
+    public class KoarapayInitializeCharge
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("redirect_url")]
+        public string RedirectUrl { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+
+        [JsonProperty("customer")]
+        public KorapayCustomer Customer { get; set; }
+    }
+
+    public class KorapayInitializeChargeData
+    {
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("checkout_url")]
+        public string CheckoutUrl { get; set; }
+    }
+
+    public class KorapayInitializeChargeResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public KorapayInitializeChargeData Data { get; set; }
+    }
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class KorapayWebhookData
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("fee")]
+        public string Fee { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+    }
+
+    public class KorapayWebhookDTO
+    {
+        [JsonProperty("event")]
+        public string Event { get; set; }
+
+        [JsonProperty("data")]
+        public KorapayWebhookData Data { get; set; }
+    }
+
+    #endregion
 }
