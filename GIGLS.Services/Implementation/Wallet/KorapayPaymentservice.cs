@@ -803,15 +803,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {secretkey}");
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 var json = JsonConvert.SerializeObject(payload);
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, data);
 
-                if (response == null || !response.IsSuccessStatusCode)
-                {
-                    throw new GenericException("Operation could not complete successfully:");
-                }
+                //if (response == null || !response.IsSuccessStatusCode)
+                //{
+                //    throw new GenericException("Operation could not complete successfully:");
+                //}
 
                 string resultJson = await response.Content.ReadAsStringAsync();
                 var jObject = JsonConvert.DeserializeObject<KorapayInitializeChargeResponse>(resultJson);

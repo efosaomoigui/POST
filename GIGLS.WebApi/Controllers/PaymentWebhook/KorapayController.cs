@@ -12,34 +12,34 @@ using System.Web.Mvc;
 namespace GIGLS.WebApi.Controllers.PaymentWebhook
 {
     //[Authorize]
-    [RoutePrefix("api/korapay")]
-    public class KorapayController : BaseWebApiController
+    [RoutePrefix("api/korapayment")]
+    public class KorapaymentController : BaseWebApiController
     {
         // GET: Korapay
         private readonly IKorapayPaymentService _korapayService;
 
-        public KorapayController(IKorapayPaymentService korapayService) : base(nameof(KorapayController))
+        public KorapaymentController(IKorapayPaymentService korapayService) : base(nameof(KorapaymentController))
         {
             _korapayService = korapayService;
         }
 
-        [HttpPost]
-        [Route("encrypt")]
-        public async Task<IServiceResponse<string>> EncryptData(KorapayWebhookDTO payload)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await  _korapayService.Encrpt(payload);
+        //[HttpPost]
+        //[Route("encryptdata")]
+        //public async Task<IServiceResponse<string>> EncryptData(KorapayWebhookDTO payload)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await  _korapayService.Encrpt(payload);
 
-                return new ServiceResponse<string>
-                {
-                    Object = result
-                };
-            });
-        }
+        //        return new ServiceResponse<string>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
 
         [HttpPost]
-        [Route("initializecharge")]
+        [Route("generatecheckouturl")]
         public async Task<IServiceResponse<string>> InitializeCharge(KoarapayInitializeCharge payload)
         {
             return await HandleApiOperationAsync(async () =>
