@@ -2,11 +2,8 @@
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Services.Implementation;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.PaymentWebhook
