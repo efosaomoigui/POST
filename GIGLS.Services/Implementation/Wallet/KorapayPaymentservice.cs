@@ -96,7 +96,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //2. if the payment successful
                     if (verifyResult.Data.TransactionStatus.Equals("success") && !paymentLog.IsWaybillSettled)
                     {
-                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.Data.Amount);
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount,Convert.ToDecimal(verifyResult.Data.Amount));
 
                         if (checkAmount)
                         {
@@ -160,7 +160,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //2. if the payment successful
                     if (verifyResult.Data.TransactionStatus.Equals("success") && !paymentLog.IsWalletCredited)
                     {
-                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.Data.Amount);
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount,Convert.ToDecimal(verifyResult.Data.Amount));
 
                         if (checkAmount)
                         {
@@ -407,7 +407,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<string> InitializeCharge(KoarapayInitializeCharge payload)
         {
 
-            if(payload.Amount == null || payload.Amount < 0)
+            if( string.IsNullOrEmpty(payload?.Amount) || Convert.ToDecimal(payload?.Amount) < 0)
             {
                 throw new GenericException("Amount is invalid", $"{(int)HttpStatusCode.BadRequest}");
             }
