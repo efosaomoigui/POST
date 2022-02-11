@@ -2938,7 +2938,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("generatecheckoutUrl")]
+        [Route("generatecheckouturl")]
         public async Task<IServiceResponse<string>> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
         {
             return await HandleApiOperationAsync(async () =>
