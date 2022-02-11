@@ -27,7 +27,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             try
             {
                 var wallets = _context.Wallets.ToList();
-
                 var walletDto = Mapper.Map<IEnumerable<WalletDTO>>(wallets);
                 return Task.FromResult(walletDto);
             }
