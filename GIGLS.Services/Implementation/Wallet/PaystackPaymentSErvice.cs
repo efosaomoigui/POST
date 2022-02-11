@@ -168,6 +168,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (verifyResult.Status)
             {
+                _uow.BeginTransaction(IsolationLevel.RepeatableRead);
                 //get wallet payment log by reference code
                 var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == webhook.data.Reference);
 
@@ -285,7 +286,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
-                await _uow.CompleteAsync();
+                _uow.Commit();
+               // await _uow.CompleteAsync();
 
                 if (sendPaymentNotification)
                 {
