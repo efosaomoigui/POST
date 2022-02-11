@@ -409,7 +409,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
     public class KoarapayInitializeCharge
     {
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("redirect_url")]
         public string RedirectUrl { get; set; }
@@ -451,13 +451,13 @@ namespace GIGLS.Core.DTO.OnlinePayment
     public class KorapayWebhookData
     {
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("amount_expected")]
-        public string AmountExpected { get; set; }
+        public decimal AmountExpected { get; set; }
 
         [JsonProperty("fee")]
-        public string Fee { get; set; }
+        public decimal Fee { get; set; }
 
         [JsonProperty("currency")]
         public string Currency { get; set; }
@@ -506,10 +506,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Status { get; set; }
 
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("fee")]
-        public string Fee { get; set; }
+        public decimal Fee { get; set; }
 
         [JsonProperty("currency")]
         public string Currency { get; set; }

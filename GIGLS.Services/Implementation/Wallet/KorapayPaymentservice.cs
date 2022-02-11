@@ -407,7 +407,8 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<string> InitializeCharge(KoarapayInitializeCharge payload)
         {
 
-            if( string.IsNullOrEmpty(payload?.Amount) || Convert.ToDecimal(payload?.Amount) < 0)
+            //if( string.IsNullOrEmpty(payload?.Amount) || Convert.ToDecimal(payload?.Amount) < 0)
+            if( payload?.Amount == null|| payload?.Amount < 0)
             {
                 throw new GenericException("Amount is invalid", $"{(int)HttpStatusCode.BadRequest}");
             }
