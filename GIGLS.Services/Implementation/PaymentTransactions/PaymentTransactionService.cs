@@ -1033,7 +1033,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     var newManifest = new Manifest
                     {
                         DateTime = DateTime.Now,
-                        ManifestCode = manifestCode
+                        ManifestCode = manifestCode ,
+                        ExpressDelivery = shipment.ExpressDelivery
                     };
                     _uow.Manifest.Add(newManifest);
                 }
@@ -1176,7 +1177,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                                 ManifestCode = manifest.ManifestCode,
                                 GroupWaybillNumber = isManifestGroupWaybillMapped.GroupWaybillNumber,
                                 IsActive = true,
-                                DateMapped = DateTime.Now
+                                DateMapped = DateTime.Now,
                             };
                             _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
                         }
