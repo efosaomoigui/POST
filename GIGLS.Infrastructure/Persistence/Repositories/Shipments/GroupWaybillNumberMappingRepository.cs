@@ -41,6 +41,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                              DateModified = gw.DateModified,
                                              DepartureServiceCentreId = gw.DepartureServiceCentreId,
                                              DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                             ExpressDelivery = gw.ExpressDelivery,
                                              DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                              {
                                                  ServiceCentreId = gw.DepartureServiceCentreId,
@@ -83,6 +84,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                              DateModified = gw.DateModified,
                                              DepartureServiceCentreId = gw.DepartureServiceCentreId,
                                              DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                             ExpressDelivery = gw.ExpressDelivery,
                                              DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                              {
                                                  ServiceCentreId = gw.DepartureServiceCentreId,
@@ -120,6 +122,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               DateModified = gw.DateModified,
                                               DepartureServiceCentreId = gw.DepartureServiceCentreId,
                                               DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                              ExpressDelivery = gw.ExpressDelivery,
                                               DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                               {
                                                   ServiceCentreId = gw.DepartureServiceCentreId,
