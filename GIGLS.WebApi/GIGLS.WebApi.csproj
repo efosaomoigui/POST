@@ -392,6 +392,7 @@
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\PaymentWebhook\CellulantController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\SterlingController.cs" />
     <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
     <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
     <Compile Include="Controllers\PaymentWebhook\USSDController.cs" />

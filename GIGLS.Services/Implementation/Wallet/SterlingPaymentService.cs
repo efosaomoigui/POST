@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
-    public class FlutterwavePaymentService : IFlutterwavePaymentService
+    public class SterlingPaymentService : ISterlingPaymentService
     {
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
@@ -37,7 +37,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly INodeService _nodeService;
         private readonly IMessageSenderService _messageSenderService;
 
-        public FlutterwavePaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
+        public SterlingPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, 
             IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService)
         {
             _userService = userService;
@@ -82,14 +82,14 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             FlutterWebhookDTO result = new FlutterWebhookDTO();
 
-            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            string sterlingSandBox = ConfigurationManager.AppSettings["SterlingSandBox"];
+            string secretKey = ConfigurationManager.AppSettings["SterlingSecretKey"];
             string authorization = "Bearer " + secretKey;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             //int transactionId = await GetTransactionPaymentIdUsingRefCode(reference);
             int transactionId = await GetTransactionPaymentIdUsingRefCodeV2(reference);
-            string verifyUrl = flutterSandBox + "transactions/" + transactionId + "/verify";
+            string verifyUrl = sterlingSandBox + "transactions/" + transactionId + "/verify";
 
             using (var client = new HttpClient())
             {
@@ -105,45 +105,11 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        private async Task<int> GetTransactionPaymentIdUsingRefCode(string reference)
-        {
-            int id = 0;
-            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
-
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-            string verifyUrl = flutterSandBox + "transactions?tx_ref=" + reference;
-            string authorization = "Bearer " + secretKey;
-
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", authorization);
-
-                var response = await client.GetAsync(verifyUrl);
-                string responseResult = await response.Content.ReadAsStringAsync();
-
-                var result = JsonConvert.DeserializeObject<FlutterTransactionWebhookDTO>(responseResult);
-
-                if (result.Status.Equals("success"))
-                {
-                    if(result.data.Count > 0)
-                    {
-                        id = result.data[0].Id;
-                    }
-                }
-            }
-
-            return id;
-        }
-
         private async Task<int> GetTransactionPaymentIdUsingRefCodeV2(string reference)
         {
             int id = 0;
-            string verifyUrl = ConfigurationManager.AppSettings["FlutterVerifyV2"];
-            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            string verifyUrl = ConfigurationManager.AppSettings["SterlingVerifyV2"];
+            string secretKey = ConfigurationManager.AppSettings["SterlingSecretKey"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             var obj = new
@@ -179,9 +145,9 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             FlutterWebhookDTO result = new FlutterWebhookDTO();
 
-            string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-            string flutterVerify = flutterSandBox + ConfigurationManager.AppSettings["FlutterVerify"];
-            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
+            string flutterSandBox = ConfigurationManager.AppSettings["SterlingSandBox"];
+            string flutterVerify = flutterSandBox + ConfigurationManager.AppSettings["SterlingVerify"];
+            string secretKey = ConfigurationManager.AppSettings["SterlingSecretKey"];
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -526,8 +492,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
                     paymentLog.TransactionResponse = verifyResult.data.Processor_Response;
-                    //await _uow.CompleteAsync();
                     _uow.Commit();
+                   // await _uow.CompleteAsync();
 
                     if (sendPaymentNotification)
                     {
@@ -555,7 +521,7 @@ namespace GIGLS.Services.Implementation.Wallet
         //Generate security for webhook
         public Task<string> GetSecurityKey()
         {
-            var securityKey = ConfigurationManager.AppSettings["FlutterwaveApiSecurityKey"];
+            var securityKey = ConfigurationManager.AppSettings["SterlingApiSecurityKey"];
             return Task.FromResult(Decrypt(securityKey));
         }
 
@@ -685,9 +651,9 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 FlutterWebhookDTO result = new FlutterWebhookDTO();
 
-                string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-                string flutterValidateOtp = flutterSandBox + ConfigurationManager.AppSettings["FlutterValidateOTP"];
-                string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
+                string flutterSandBox = ConfigurationManager.AppSettings["SterlingSandBox"];
+                string flutterValidateOtp = flutterSandBox + ConfigurationManager.AppSettings["SterlingValidateOTP"];
+                string PBFPubKey = ConfigurationManager.AppSettings["SterlingPubKey"];
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
