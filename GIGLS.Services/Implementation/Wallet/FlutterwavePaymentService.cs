@@ -404,7 +404,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 if (verifyResult.data != null)
                 {
-                    _uow.BeginTransaction(IsolationLevel.RepeatableRead);
+                    _uow.BeginTransaction(IsolationLevel.Serializable);
                     //get wallet payment log by reference code
                     var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == reference);
 
