@@ -1086,7 +1086,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
                 //also group and manifest shipment(grouping and manifesting should consider go standard and faster)
-                await MappingWaybillNumberToGroup(newShipment.Waybill);
+               // await MappingWaybillNumberToGroup(newShipment.Waybill);
                 return newShipment;
             }
             catch (Exception ex)
