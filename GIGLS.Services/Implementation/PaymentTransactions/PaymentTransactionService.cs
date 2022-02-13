@@ -1011,6 +1011,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         else
                         {
                             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode);
+                            if (manifest is null)
+                            {
+                                var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+                                //create new manifest
+                                var newManifest = new Manifest
+                                {
+                                    DateTime = DateTime.Now,
+                                    ManifestCode = manifestCode,
+                                    ExpressDelivery = shipment.ExpressDelivery
+                                };
+                                _uow.Manifest.Add(newManifest);
+                            }
                             //get date for the manifest
                             var today = DateTime.Now;
                             int hours = Convert.ToInt32((today - manifest.DateCreated).TotalHours);
