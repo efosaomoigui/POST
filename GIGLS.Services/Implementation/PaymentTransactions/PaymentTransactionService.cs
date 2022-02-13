@@ -1041,7 +1041,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 else
                 {
 
-                    //check if it has a manifest
+                    //check if it has a manifest mapping
                     var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
                     if (isManifestGroupWaybillMapped is null)
                     {
@@ -1054,6 +1054,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                             DateMapped = DateTime.Now
                         };
                         _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+                        //create a new group waybill mapping 
+                        var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+                        {
+                            GroupWaybillNumber = groupwaybillExist.GroupWaybillCode,
+                            UserId = currentUserId,
+                            DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                            IsActive = true,
+                            DepartureServiceCentreId = departureServiceCenterId,
+                            ExpressDelivery = shipment.ExpressDelivery,
+                            OriginalDepartureServiceCentreId = departureServiceCenterId,
+                            WaybillNumber = shipment.Waybill,
+                            DateMapped = DateTime.Now
+                        };
+                        _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+
                         //create new manifest
                         var newManifest = new Manifest
                         {
