@@ -1109,6 +1109,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 ManifestCode = manifestCode,
                 ExpressDelivery = shipment.ExpressDelivery
             };
+            _uow.Manifest.Add(newManifest);
 
             //also  map group waybill to existing manifest
             var newMapping = new ManifestGroupWaybillNumberMapping
