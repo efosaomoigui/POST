@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -20,6 +21,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -29,6 +32,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
 
         public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
         {
@@ -38,12 +42,24 @@ namespace GIGLS.Services.Implementation.Wallet
             MapperConfig.Initialize();
         }
 
-        public Task AddCODWallet(string CustomerCode)
+        public async Task AddCODWallet(CreateStellaAccountDTO createStellaAccountDTO)
         {
-            var user = _uow.Company.GetAsync(x => x.CustomerCode == CustomerCode);
+            var user = _uow.Company.GetAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
             if (user is null)
             {
 
+            }
+
+            var url = ConfigurationManager.AppSettings["StellasUrl"];
+            url = $"{url}account/create-customer";
+            using (var client = new HttpClient())
+            {
+                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string result = await response.Content.ReadAsStringAsync();
+               // var jObject = JsonConvert.DeserializeObject<NodeResponse>(result);
+              //  nodeResponse = jObject;
             }
         }
 

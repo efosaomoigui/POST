@@ -26,5 +26,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string phoneNo { get; set; }
         public string gender { get; set; }
         public string email { get; set; }
+        public string CustomerCode { get; set; }
+
     }
 }
