@@ -1581,11 +1581,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // Special Discount Price
                 var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, preShipment.CountryId);
-                var specialStationIds = discountPercent.Value.Split(',');
+                var specialStationIds = specialStation.Value.Split(',');
 
                 if(specialStationIds.Length > 0 && specialStationIds.Contains(preShipment.SenderStationId.ToString()))
                 {
+                    var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
+                    var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
 
+                    var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
+                    var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
+                    newCalculatedTotal = Math.Round(newCalculatedTotal);
+                    preShipment.DeliveryPrice = (decimal)newCalculatedTotal;
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
