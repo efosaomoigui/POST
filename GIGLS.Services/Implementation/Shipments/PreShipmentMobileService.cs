@@ -1591,7 +1591,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
                     var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
                     newCalculatedTotal = Math.Round(newCalculatedTotal);
-                    preShipment.DeliveryPrice = (decimal)newCalculatedTotal;
+
+                    grandTotal = (decimal)newCalculatedTotal;
+                    discount = (decimal)preShipment.CalculatedTotal + pickupValue - (decimal)newCalculatedTotal;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
