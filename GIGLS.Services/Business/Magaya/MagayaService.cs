@@ -1002,6 +1002,11 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
                 int count = 0;
 
+                if (shipmentDTO.DeliveryType == DeliveryType.GOSTANDARDED)
+                {
+                    throw new Exception("The GO STANDARD service is currently not available, please use the GO FASTER option");
+                }
+
                 if (customer.CustomerType == CustomerType.Company)
                 {
                     shipmentDTO.CustomerId = customer.CompanyId;
