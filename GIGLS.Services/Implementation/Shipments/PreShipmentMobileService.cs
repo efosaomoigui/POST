@@ -1579,6 +1579,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.GrandTotal = grandTotal;
                 }
 
+                // Special Discount Price
+                var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, preShipment.CountryId);
+                var specialStationIds = discountPercent.Value.Split(',');
+
+                if(specialStationIds.Length > 0 && specialStationIds.Contains(preShipment.SenderStationId.ToString()))
+                {
+
+                }
+
                 var countOfItems = preShipment.PreShipmentItems.Count;
                 var individualPrice = grandTotal / countOfItems;
 
