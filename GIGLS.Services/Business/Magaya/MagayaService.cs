@@ -1004,7 +1004,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 if (shipmentDTO.DeliveryType == DeliveryType.GOSTANDARDED && shipmentDTO.RequestProcessingCountryId == 207)
                 {
-                    throw new Exception("The GO STANDARD service is currently not available, please use the GO FASTER option");
+                    throw new GenericException("The GO STANDARD service is currently not available, please use the GO FASTER option");
                 }
 
                 if (customer.CustomerType == CustomerType.Company)
