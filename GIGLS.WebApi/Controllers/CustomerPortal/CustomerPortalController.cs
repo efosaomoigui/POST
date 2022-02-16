@@ -2937,7 +2937,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("allcodshipment")]
         public async Task<IServiceResponse<List<AllCODShipmentDTO>>> GetAllCODShipments(PaginationDTO dto)
         {
