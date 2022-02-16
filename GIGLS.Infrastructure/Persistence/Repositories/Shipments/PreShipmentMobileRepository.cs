@@ -135,6 +135,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    IsBatchPickUp = r.IsBatchPickUp,
                                    IsCancelled = r.IsCancelled,
                                    ZoneMapping = r.ZoneMapping,
+                                   CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                   IsCashOnDelivery = r.IsCashOnDelivery,
                                    PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -167,6 +169,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    CurrencySymbol = co.CurrencySymbol,
                                    CustomerType = r.CustomerType,
                                    CustomerId = r.CustomerId,
+                                   CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                   IsCashOnDelivery = r.IsCashOnDelivery,
                                    PreShipmentItems = _context.ShipmentItem.Where(d => d.ShipmentId == r.ShipmentId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -313,7 +317,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    CurrencySymbol = co.CurrencySymbol,
                                    IsDelivered = r.IsDelivered,
                                    IsBatchPickUp = r.IsBatchPickUp,
-                                   IsCancelled = r.IsCancelled
+                                   IsCancelled = r.IsCancelled,
+                                   CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                   IsCashOnDelivery = r.IsCashOnDelivery,
                                });
 
             return shipmentDto;
@@ -542,6 +548,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                           VehicleType = r.VehicleType,
                                           ZoneMapping = r.ZoneMapping,
                                           SenderLocality = r.SenderLocality,
+                                          CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                          IsCashOnDelivery = r.IsCashOnDelivery,
                                           PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == r.PreShipmentMobileId)
                                                  .Select(y => new PreShipmentItemMobileDTO
                                                  {
