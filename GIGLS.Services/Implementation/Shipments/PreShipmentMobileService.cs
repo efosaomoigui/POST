@@ -1459,6 +1459,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.GrandTotal = grandTotal;
                 }
 
+                // Special Discount Price
+                var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, preShipment.CountryId);
+                var specialStationIds = specialStation.Value.Split(',');
+
+                if (specialStationIds.Length > 0 && specialStationIds.Contains(preShipment.SenderStationId.ToString()))
+                {
+                    var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
+                    var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
+
+                    var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
+                    var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
+                    newCalculatedTotal = Math.Round(newCalculatedTotal);
+
+                    grandTotal = (decimal)newCalculatedTotal;
+                    discount = (decimal)preShipment.CalculatedTotal + PickupValue - (decimal)newCalculatedTotal;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
+                }
+
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
