@@ -4592,5 +4592,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             response.GatewayResponse = result.data.Gateway_Response;
             return response;
         }
+
+        public async Task<List<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
+        {
+            try
+            {
+                return await _shipmentService.GetAllCODShipments(dto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

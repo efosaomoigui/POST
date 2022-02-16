@@ -23,4 +23,10 @@
         Verified
     }
 
+    public enum CODMobileStatus
+    {
+        Initiated,
+        Collected,
+        Paid
+    }
 }
