@@ -23,6 +23,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -36,10 +37,11 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly INodeService _nodeService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService, INodeService nodeService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -49,6 +51,7 @@ namespace GIGLS.Services.Implementation.Customers
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
             _paystackPaymentService = paystackPaymentService;
+            _nodeService = nodeService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -1420,6 +1423,13 @@ namespace GIGLS.Services.Implementation.Customers
                     RankType = RankType.Upgrade
                 });
                 await _uow.CompleteAsync();
+
+                //Call Node to Update User subscription
+                await _nodeService.UpdateMerchantSubscription(new UpdateNodeMercantSubscriptionDTO
+                {
+                    UserId = user.Id,
+                    MerchantCode = companyDTO.CustomerCode
+                });
 
                 //send email for upgrade customers
                 if (company.Rank == Rank.Class)
