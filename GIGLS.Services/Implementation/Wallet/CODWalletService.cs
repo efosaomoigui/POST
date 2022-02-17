@@ -33,94 +33,75 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IStellasService _stellasService;
 
-        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
+        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService, IStellasService stellasService)
         {
             _userService = userService;
             _uow = uow;
             _globalPropertyService = globalPropertyService;
+            _stellasService = stellasService;
             MapperConfig.Initialize();
         }
 
-        private async Task CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
+
+        public async Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
             var user = await _uow.Company.GetAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
             if (user is null)
             {
-
+                throw new GenericException("User does not exist as an Ecommerce user!", $"{(int)HttpStatusCode.NotFound}");
             }
-
-            var url = ConfigurationManager.AppSettings["StellasSandBox"];
-            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string authorization = "Bearer " + secretKey;
-            url = $"{url}account/create-customer";
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            using (var client = new HttpClient())
+            CODWalletDTO res = new CODWalletDTO();
+            var result = await _stellasService.CreateStellasAccount(createStellaAccountDTO);
+            if (result.status)
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", authorization);
-                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync(url,data);
-                string responseResult = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
-
-                if (result.status)
+                //now create this user CODWALLET on agility  
+                CODWalletDTO codWalletDTO = new CODWalletDTO
                 {
-                    //now create this user CODWALLET on agility  
-                    CODWalletDTO codWalletDTO = new CODWalletDTO
-                    {
-                        AccountNo = result.account_details.accountNumber,
-                        AvailableBalance = result.account_details.availableBalance,
-                        CustomerId = result.account_details.customerId,
-                        CustomerCode = user.CustomerCode,
-                        CustomerType = CustomerType.Company,
-                        CompanyType = CompanyType.Ecommerce.ToString(),
-                        AccountType = result.account_details.accountType,
-                        WithdrawableBalance = result.account_details.withdrawableBalance,
-                        CustomerAccountId = result.account_details.customerId
-                    };
-                    await AddCODWallet(codWalletDTO);
-                }
+                    AccountNo = result.account_details.accountNumber,
+                    AvailableBalance = result.account_details.availableBalance,
+                    CustomerId = result.account_details.customerId,
+                    CustomerCode = user.CustomerCode,
+                    CustomerType = CustomerType.Company,
+                    CompanyType = CompanyType.Ecommerce.ToString(),
+                    AccountType = result.account_details.accountType,
+                    WithdrawableBalance = result.account_details.withdrawableBalance,
+                    CustomerAccountId = result.account_details.customerId
+                };
+                await AddCODWallet(codWalletDTO);
+                res = codWalletDTO;
             }
-
+            else
+            {
+                res = null;
+                throw new GenericException(result.message, $"{(int)HttpStatusCode.BadRequest}");
+            }
+            return res;
         }
+
+
 
         public async Task AddCODWallet(CODWalletDTO codWalletDTO)
         {
-            if (codWalletDTO != null)
+            try
             {
                 var codWallet = Mapper.Map<CODWallet>(codWalletDTO);
                 _uow.CODWallet.Add(codWallet);
                 _uow.CompleteAsync();
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
-        public Task<WalletDTO> GetCODWalletById(int walletId)
+        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
         {
-            throw new NotImplementedException();
+            var bal = _stellasService.GetCustomerStellasAccount(customerCode);
+            return bal;
         }
 
-        public Task<Core.Domain.Wallet.Wallet> GetCODWalletById(string walletNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<WalletDTO>> GetCODWallets()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveCODWallet(int walletId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateCODWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

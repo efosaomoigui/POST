@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -64,5 +65,20 @@ namespace GIGLS.Core.DTO.Wallet
         public string availableBalance { get; set; }
         public string withdrawableBalance { get; set; }
         public string customerId { get; set; }
+    }
+
+    public class GetCustomerBalanceDTO
+    {
+
+        public bool status { get; set; }
+        public string message { get; set; }
+        public CustomerAccountDetailDTO data { get; set; }
+    }
+
+    public class CustomerAccountDetailDTO
+    {
+        public string accountNumber { get; set; }
+        public string availableBalance { get; set; }
+        public DateTime financialDate { get; set; }
     }
 }

@@ -2936,5 +2936,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("createstellasaccount")]
+        public async Task<IServiceResponse<CODWalletDTO>> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.AddCODWallet(codWalletDTO);
+                return new ServiceResponse<CODWalletDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
     }
 }

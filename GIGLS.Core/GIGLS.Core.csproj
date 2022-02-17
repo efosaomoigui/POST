@@ -985,6 +985,7 @@
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
     <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
+    <Compile Include="IServices\Wallet\IStellasService.cs" />
     <Compile Include="IServices\Wallet\ISterlingPaymentService.cs" />
     <Compile Include="IServices\Wallet\IFlutterwavePaymentService.cs" />
     <Compile Include="IServices\Wallet\IUssdService.cs" />

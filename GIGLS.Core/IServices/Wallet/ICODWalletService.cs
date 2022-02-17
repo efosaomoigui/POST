@@ -9,12 +9,8 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface ICODWalletService : IServiceDependencyMarker
     {
-        Task<IEnumerable<WalletDTO>> GetCODWallets();
-        Task<WalletDTO> GetCODWalletById(int walletId);
-        Task<Domain.Wallet.Wallet> GetCODWalletById(string walletNumber);
-        Task AddCODWallet(WalletDTO wallet);
-        Task UpdateCODWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true);
-        Task RemoveCODWallet(int walletId);
+        Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO0);
+        Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
     }
 
 }
