@@ -6302,6 +6302,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var obj = new AllCODShipmentDTO();
                         obj.Waybill = item.Waybill;
                         obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
                         var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
                         if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
                         {
@@ -6325,6 +6326,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.Waybill = item.Waybill;
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
                         if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
                         {
                             obj.CODStatus = CODMobileStatus.Collected.ToString();

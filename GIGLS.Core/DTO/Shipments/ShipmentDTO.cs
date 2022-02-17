@@ -595,6 +595,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string Waybill { get; set; }
         public decimal? CODAmount { get; set; }
         public string CODStatus { get; set; }
+        public string ReceiverName { get; set; }
     }
 
 }
