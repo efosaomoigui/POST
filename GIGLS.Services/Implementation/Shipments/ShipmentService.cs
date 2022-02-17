@@ -6249,7 +6249,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return receiverInfo;
         }
 
-        public async Task<List<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
+        public async Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
         {
             try
             {
@@ -6271,7 +6271,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     dto.UserId = currentUser;
                 }
                 var user = await _uow.User.GetUserById(dto.UserId);
-                var allCOD = new List<AllCODShipmentDTO>();
+                var allCOD = new AllCODShipmentDTO();
                 var codMobileShipment = new List<PreShipmentMobile>();
                 var codAgilityShipment = new List<Shipment>();
                 if (dto.PageSize < 1)
@@ -6298,9 +6298,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     var waybills = codAgilityShipment.Select(x => x.Waybill);
                     var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
                     var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
                     foreach (var item in codAgilityShipment)
                     {
-                        var obj = new AllCODShipmentDTO();
+                        var obj = new CODShipmentDetailDTO();
                         obj.Waybill = item.Waybill;
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.ReceiverName = item.ReceiverName;
@@ -6317,16 +6318,17 @@ namespace GIGLS.Services.Implementation.Shipments
                             obj.CODStatus = CODMobileStatus.Initiated.ToString();
                             obj.DateCreated = item.DateCreated;
                         }
-                        allCOD.Add(obj);
+                        allCOD.CODShipmentDetail.Add(obj);
                     }
 
                 }
                 if (codMobileShipment.Any())
                 {
                     var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
                     foreach (var item in codMobileShipment)
                     {
-                        var obj = new AllCODShipmentDTO();
+                        var obj = new CODShipmentDetailDTO();
                         obj.Waybill = item.Waybill;
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.DateCreated = item.DateModified;
@@ -6341,7 +6343,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             obj.CODStatus = CODMobileStatus.Initiated.ToString();
                         }
-                        allCOD.Add(obj);
+                        allCOD.CODShipmentDetail.Add(obj);
                     }
                 }
 

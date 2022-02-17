@@ -103,7 +103,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> AddUnIdentifiedIntlShipments(List<UnidentifiedItemsForInternationalShippingDTO> dtos);
         Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
         Task<ReceiverDetailDTO> GetShipmentReceiverDetails(NewFilterOptionsDto filter);
-        Task<List<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto);
+        Task <AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
