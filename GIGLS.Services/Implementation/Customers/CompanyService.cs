@@ -1404,14 +1404,6 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
-                //make the BVN compulsory
-                if (String.IsNullOrEmpty(company.BVN))
-                {
-                    result.Succeeded = false;
-                    result.Message = "User BVN not provided";
-                    return result;
-                }
-
                 //Get user wallet
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
                 if (wallet == null)
