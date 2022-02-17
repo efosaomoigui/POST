@@ -1469,8 +1469,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     //2. Get special discount price
                     var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, PickupValue);
 
-                    preShipment.DiscountValue = specialStationDiscount.DiscountValue;
-                    preShipment.GrandTotal = specialStationDiscount.GrandTotal.Value;
+                    grandTotal = (decimal)specialStationDiscount.GrandTotal.Value;
+                    discount = (decimal)specialStationDiscount.DiscountValue;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
                 }
 
                 var returnprice = new MobilePriceDTO()
@@ -1603,8 +1605,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     //2. Get special discount price
                     var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, pickupValue);
 
-                    preShipment.DiscountValue = specialStationDiscount.DiscountValue;
-                    preShipment.GrandTotal = specialStationDiscount.GrandTotal.Value;
+                    grandTotal = (decimal)specialStationDiscount.GrandTotal.Value;
+                    discount = (decimal)specialStationDiscount.DiscountValue;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
