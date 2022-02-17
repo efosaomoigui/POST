@@ -7571,24 +7571,19 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<SpecialDiscountPriceDTO> CalculateSpecialDiscount(PreShipmentMobileDTO preShipment, decimal grandTotal, decimal pickupValue)
         {
-            var result = new SpecialDiscountPriceDTO();
+            var result = new SpecialDiscountPriceDTO { DiscountValue = 0.00m, GrandTotal = 0.00m };
             // Special Discount Price
 
-            //Check sender station eligibility
-            var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.CountryId);
+            var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
+            var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
 
-            if (isSenderStationEligible)
-            {
-                var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
-                var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
+            var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
+            var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
+            newCalculatedTotal = Math.Round(newCalculatedTotal);
 
-                var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
-                var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
-                newCalculatedTotal = Math.Round(newCalculatedTotal);
+            result.DiscountValue = (decimal)preShipment.DeliveryPrice + pickupValue - (decimal)newCalculatedTotal;
+            result.GrandTotal = (decimal)newCalculatedTotal;
 
-                result.DiscountValue = (decimal)preShipment.DeliveryPrice + pickupValue - (decimal)newCalculatedTotal;
-                result.GrandTotal = (decimal)newCalculatedTotal;
-            }
             return result;
         }
 
