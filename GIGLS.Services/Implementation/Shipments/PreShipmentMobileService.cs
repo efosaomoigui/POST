@@ -1460,22 +1460,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 // Special Discount Price
-                var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, preShipment.CountryId);
-                var specialStationIds = specialStation.Value.Split(',');
+                //1. Check sender station eligibility
+                var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
 
-                if (specialStationIds.Length > 0 && specialStationIds.Contains(preShipment.SenderStationId.ToString()))
+                if (isSenderStationEligible)
                 {
-                    var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
-                    var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
 
-                    var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
-                    var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
-                    newCalculatedTotal = Math.Round(newCalculatedTotal);
+                    //2. Get special discount price
+                    var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, PickupValue);
 
-                    grandTotal = (decimal)newCalculatedTotal;
-                    discount = (decimal)preShipment.CalculatedTotal + PickupValue - (decimal)newCalculatedTotal;
-                    preShipment.DiscountValue = discount;
-                    preShipment.GrandTotal = grandTotal;
+                    preShipment.DiscountValue = specialStationDiscount.DiscountValue;
+                    preShipment.GrandTotal = specialStationDiscount.GrandTotal.Value;
                 }
 
                 var returnprice = new MobilePriceDTO()
@@ -1599,22 +1594,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 // Special Discount Price
-                var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, preShipment.CountryId);
-                var specialStationIds = specialStation.Value.Split(',');
+                //1. Check sender station eligibility
+                var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
 
-                if(specialStationIds.Length > 0 && specialStationIds.Contains(preShipment.SenderStationId.ToString()))
+                if (isSenderStationEligible)
                 {
-                    var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
-                    var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
 
-                    var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
-                    var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
-                    newCalculatedTotal = Math.Round(newCalculatedTotal);
+                    //2. Get special discount price
+                    var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, pickupValue);
 
-                    grandTotal = (decimal)newCalculatedTotal;
-                    discount = (decimal)preShipment.CalculatedTotal + pickupValue - (decimal)newCalculatedTotal;
-                    preShipment.DiscountValue = discount;
-                    preShipment.GrandTotal = grandTotal;
+                    preShipment.DiscountValue = specialStationDiscount.DiscountValue;
+                    preShipment.GrandTotal = specialStationDiscount.GrandTotal.Value;
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
@@ -7575,10 +7565,52 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
             }
-            var shipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(filter.FilterType);   
+            var shipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(filter.FilterType);
             return shipment;
         }
 
+        private async Task<SpecialDiscountPriceDTO> CalculateSpecialDiscount(PreShipmentMobileDTO preShipment, decimal grandTotal, decimal pickupValue)
+        {
+            var result = new SpecialDiscountPriceDTO();
+            // Special Discount Price
 
+            //Check sender station eligibility
+            var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.CountryId);
+
+            if (isSenderStationEligible)
+            {
+                var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
+                var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
+
+                var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
+                var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
+                newCalculatedTotal = Math.Round(newCalculatedTotal);
+
+                result.DiscountValue = (decimal)preShipment.DeliveryPrice + pickupValue - (decimal)newCalculatedTotal;
+                result.GrandTotal = (decimal)newCalculatedTotal;
+            }
+            return result;
+        }
+
+        private async Task<bool> CheckEligibleStation(int CountryId, int SenderStationId)
+        {
+            bool result = false;
+            if (CountryId == 0 || SenderStationId == 0)
+            {
+                return result;
+            }
+
+            var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, CountryId);
+            var specialStationIds = specialStation.Value.Split(',');
+
+            if (specialStationIds.Length > 0 && specialStationIds.Contains(SenderStationId.ToString()))
+            {
+                result = true;
+            }
+
+            return result;
+        }
     }
 }
+
+

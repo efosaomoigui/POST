@@ -46,6 +46,10 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? ItemCalculatedPrice { get; set; }
         public string ItemRecever { get; set; }
     }
-    
 
+    public class SpecialDiscountPriceDTO
+    {
+        public decimal? GrandTotal { get; set; }
+        public decimal? DiscountValue { get; set; }
+    }
 }
