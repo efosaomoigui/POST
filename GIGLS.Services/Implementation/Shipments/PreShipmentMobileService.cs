@@ -1449,16 +1449,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 // decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
                 decimal grandTotal = (decimal)preShipment.DeliveryPrice + PickupValue;
 
-                //GIG Go Promo Price
-                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
-                if (gigGoPromo.GrandTotal > 0)
-                {
-                    grandTotal = (decimal)gigGoPromo.GrandTotal;
-                    discount = (decimal)gigGoPromo.Discount;
-                    preShipment.DiscountValue = discount;
-                    preShipment.GrandTotal = grandTotal;
-                }
-
                 // Special Discount Price
                 //1. Check sender station eligibility
                 var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
@@ -1474,6 +1464,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.DiscountValue = discount;
                     preShipment.GrandTotal = grandTotal;
                 }
+                else
+                {
+                    //GIG Go Promo Price
+                    var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
+                    if (gigGoPromo.GrandTotal > 0)
+                    {
+                        grandTotal = (decimal)gigGoPromo.GrandTotal;
+                        discount = (decimal)gigGoPromo.Discount;
+                        preShipment.DiscountValue = discount;
+                        preShipment.GrandTotal = grandTotal;
+                    }
+                }
+
 
                 var returnprice = new MobilePriceDTO()
                 {
@@ -1585,23 +1588,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 discount = Math.Round(mainCharge - (decimal)calculatedTotal);
                 decimal grandTotal = (decimal)calculatedTotal + pickupValue;
 
-                //GIG Go Promo Price
-                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
-                if (gigGoPromo.GrandTotal > 0)
-                {
-                    grandTotal = (decimal)gigGoPromo.GrandTotal;
-                    discount = (decimal)gigGoPromo.Discount;
-                    preShipment.DiscountValue = discount;
-                    preShipment.GrandTotal = grandTotal;
-                }
-
                 // Special Discount Price
                 //1. Check sender station eligibility
                 var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
 
                 if (isSenderStationEligible)
                 {
-
                     //2. Get special discount price
                     var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, pickupValue);
 
@@ -1609,6 +1601,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     discount = (decimal)specialStationDiscount.DiscountValue;
                     preShipment.DiscountValue = discount;
                     preShipment.GrandTotal = grandTotal;
+                }
+                else
+                {
+                    //GIG Go Promo Price
+                    var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
+                    if (gigGoPromo.GrandTotal > 0)
+                    {
+                        grandTotal = (decimal)gigGoPromo.GrandTotal;
+                        discount = (decimal)gigGoPromo.Discount;
+                        preShipment.DiscountValue = discount;
+                        preShipment.GrandTotal = grandTotal;
+                    }
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
