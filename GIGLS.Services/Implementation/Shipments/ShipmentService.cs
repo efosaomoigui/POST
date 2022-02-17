@@ -6297,12 +6297,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var waybills = codAgilityShipment.Select(x => x.Waybill);
                     var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
                     foreach (var item in codAgilityShipment)
                     {
                         var obj = new AllCODShipmentDTO();
                         obj.Waybill = item.Waybill;
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.ReceiverName = item.ReceiverName;
+                        obj.TotalCODAmount = Agilitytotal.Value;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
                         var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
                         if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
                         {
@@ -6320,6 +6323,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (codMobileShipment.Any())
                 {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
                     foreach (var item in codMobileShipment)
                     {
                         var obj = new AllCODShipmentDTO();
@@ -6327,6 +6331,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.DateCreated = item.DateModified;
                         obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        obj.TotalCODAmount = Mobiletotal.Value;
                         if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
                         {
                             obj.CODStatus = CODMobileStatus.Collected.ToString();
