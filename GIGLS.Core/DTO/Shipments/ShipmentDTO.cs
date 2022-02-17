@@ -607,7 +607,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODStatus { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverStationName { get; set; }
-        public decimal TotalCODAmount { get; set; }
     }
 
 }
