@@ -262,6 +262,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid);
         Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew();
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode);
-        Task<List<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto);
+        Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
     }
 }

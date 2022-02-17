@@ -4593,7 +4593,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        public async Task<List<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
+        public async Task<AllCODShipmentDTO>GetAllCODShipments(PaginationDTO dto)
         {
             try
             {
