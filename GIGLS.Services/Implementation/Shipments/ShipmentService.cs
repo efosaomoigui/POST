@@ -6285,12 +6285,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (dto.StartDate != null && dto.EndDate != null)
                 {
                     codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.ZoneMapping > 1 && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.ZoneMapping == 1 && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
                 else
                 {
                     codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false && x.ZoneMapping > 1).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false && x.ZoneMapping == 1).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
 
                 if (codAgilityShipment.Any())
@@ -6301,7 +6301,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var obj = new AllCODShipmentDTO();
                         obj.Waybill = item.Waybill;
-                        obj.CODAmount = item.GrandTotal;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
                         var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
                         if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
                         {
@@ -6323,7 +6323,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var obj = new AllCODShipmentDTO();
                         obj.Waybill = item.Waybill;
-                        obj.CODAmount = item.GrandTotal;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.DateCreated = item.DateModified;
                         if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
                         {

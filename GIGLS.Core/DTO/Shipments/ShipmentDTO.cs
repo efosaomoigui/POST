@@ -593,7 +593,7 @@ namespace GIGLS.Core.DTO.Shipments
     public class AllCODShipmentDTO : BaseDomainDTO
     {
         public string Waybill { get; set; }
-        public decimal CODAmount { get; set; }
+        public decimal? CODAmount { get; set; }
         public string CODStatus { get; set; }
     }
 
