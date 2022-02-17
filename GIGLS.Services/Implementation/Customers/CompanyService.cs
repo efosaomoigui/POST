@@ -1473,7 +1473,7 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                result.Message = "User Rank Update Successful";
+                result.Message = "Class Subscription Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
                 return result;
