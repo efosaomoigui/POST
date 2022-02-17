@@ -1372,6 +1372,92 @@ namespace GIGLS.Services.Implementation.Customers
             filterCriteria.AssignedCustomerRep = user.Id;
             return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
         }
+
+        public async Task<ResponseDTO> AddSubscriptionToCustomer(string customercode)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                if (string.IsNullOrEmpty(customercode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "Customer code cannot be empty";
+                    return result;
+                }
+
+                var user = await _userService.GetUserByChannelCode(customercode);
+                if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "User does not exist";
+                    return result;
+                }
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Company information does not exist";
+                    return result;
+                }
+
+                //make the BVN compulsory
+                if (String.IsNullOrEmpty(company.BVN))
+                {
+                    result.Succeeded = false;
+                    result.Message = "User BVN not provided";
+                    return result;
+                }
+
+                company.isCodNeeded = true;
+                company.Rank = Rank.Class;
+                company.RankModificationDate = DateTime.Now;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = RankType.Upgrade
+                });
+                await _uow.CompleteAsync();
+
+                //send email for upgrade customers
+                if (company.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (company.Rank == Rank.Class)
+                {
+                    //Check if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
+                }
+
+                result.Message = "User Rank Update Successful";
+                result.Succeeded = true;
+                result.Entity = companyDTO;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 }
