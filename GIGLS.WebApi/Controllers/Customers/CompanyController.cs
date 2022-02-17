@@ -318,5 +318,22 @@ namespace GIGLS.WebApi.Controllers.Customers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("addsubscription/{customercode}")]
+        public async Task<IServiceResponse<bool>> AddSubscriptionToCustomer(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.AddSubscriptionToCustomer(customercode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+
+            });
+        }
+
     }
 }
