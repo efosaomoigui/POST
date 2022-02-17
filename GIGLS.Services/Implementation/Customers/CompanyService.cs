@@ -1412,6 +1412,29 @@ namespace GIGLS.Services.Implementation.Customers
                     return result;
                 }
 
+                //Get user wallet
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
+                //Charge Wallet for Subscription
+                var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = 3999m,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Customer subscription",
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = referenceNo,
+                    UserId = user.Id,
+                    ServiceCharge = 0m,
+                }, false);
+
                 company.isCodNeeded = true;
                 company.Rank = Rank.Class;
                 company.RankModificationDate = DateTime.Now;
