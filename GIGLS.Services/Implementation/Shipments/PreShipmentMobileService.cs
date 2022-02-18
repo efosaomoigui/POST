@@ -469,11 +469,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment Items cannot be empty");
                 }
-                if (!preShipmentDTO.IsdeclaredVal)
-                {
-                    throw new GenericException("please provide declared value");
-                }
-
+               
                 if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
                 {
                     preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
@@ -637,15 +633,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 // set declared value of the shipment
-                if (preShipmentDTO.IsdeclaredVal)
-                { 
-                    decimal totalDecValue = 0;
-                    foreach (var item in preShipmentDTO.PreShipmentItems)
-                    {
-                        totalDecValue = totalDecValue + Convert.ToDecimal(item.Value); 
-                    }
-                    preShipmentDTO.DeclarationOfValueCheck = totalDecValue;
+                decimal totalDecValue = 0;
+                foreach (var item in preShipmentDTO.PreShipmentItems)
+                {
+                    totalDecValue = totalDecValue + Convert.ToDecimal(item.Value);
                 }
+                preShipmentDTO.DeclarationOfValueCheck = totalDecValue;
+                preShipmentDTO.Value = totalDecValue;
 
                 if (wallet.Balance >= actualAmountToDebit)
                 {
