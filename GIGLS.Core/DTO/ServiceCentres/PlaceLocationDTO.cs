@@ -21,4 +21,16 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsExtraMileDelivery { get; set; }
         public bool IsGIGGO { get; set; }
     }
+
+    public class UpdatePlaceLocationsDTO : BaseDomainDTO
+    {
+        public List<int> PlaceLocations { get; set; }
+        public string BaseStationName { get; set; }
+        public int BaseStationId { get; set; }
+        public bool IsHomeDelivery { get; set; }
+        public bool IsNormalHomeDelivery { get; set; }
+        public bool IsExpressHomeDelivery { get; set; }
+        public bool IsExtraMileDelivery { get; set; }
+        public bool IsGIGGO { get; set; }
+    }
 }

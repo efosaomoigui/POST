@@ -279,5 +279,44 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+        public async Task UpdateLocationList(UpdatePlaceLocationsDTO locationDtos)
+        {
+            try
+            {
+                var createRange = new List<PlaceLocation>();
+                foreach (int locationId in locationDtos.PlaceLocations)
+                {
+                    if (locationId > 0)
+                    {
+                        await UpdateLocationForRange(locationId,locationDtos.BaseStationName,locationDtos.BaseStationId);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateLocationForRange(int locationId, string baseStationName, int baseStationId)
+        {
+            try
+            {
+                var location = await _uow.PlaceLocation.GetAsync(locationId);
+
+                //To check if the update already exists
+                if (location != null)
+                {
+                    location.BaseStation = baseStationName;
+                    location.BaseStationId = baseStationId;
+                }
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

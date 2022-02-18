@@ -21,5 +21,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task UpdateGIGGOLocation(int locationId, bool status);
         Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId);
         Task CreateOrUpdateLocationList(List<PlaceLocationDTO> locationDtos);
+        Task UpdateLocationList(UpdatePlaceLocationsDTO locationDtos);
     }
 }
