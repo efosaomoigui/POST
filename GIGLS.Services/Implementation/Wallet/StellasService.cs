@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -33,6 +34,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private static string _auth = System.Web.HttpContext.Current.Server.MapPath("~");
 
         public StellasService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
         {
@@ -44,11 +46,22 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<CreateStellaAccounResponsetDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
-            var url = ConfigurationManager.AppSettings["StellasSandBox"];
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2OThlOTU4LTUwNTEtNDc0My04MGU1LTljOTFhNDAxNjliMSIsImVtYWlsIjoiaXRAZ2lnbG9naXN0aWNzLmNvbSIsImNsaWVudElkIjoiY2NiYTZmMjUtYjk0NS00Yzc3LTg2YzMtZmY3MDFjMTI5ZTYxIiwiaWF0IjoxNjQ1MDMwODkxLCJleHAiOjE2NDUyMDM2OTF9.TiAvDAwfJieOUu6pisB4J5Mf55SL_UqKay2zcdq26v0";
-            url = $"{url}account/create-customer";
+            string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            string authorization = await GetToken();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = auth.Value;
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -59,9 +72,27 @@ namespace GIGLS.Services.Implementation.Wallet
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var response = await client.PostAsync(url, data);
-                string responseResult = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
-                return result;
+                if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    var auth = await Authenticate();
+                    authorization = await GetToken();
+                  //  client.DefaultRequestHeaders.Remove("Authorization");
+                    //client.DefaultRequestHeaders.Add("Authorization", authorization);
+                    var retrialResponse = await client.PostAsync(url, data);
+                    string retrialResponseResult = await retrialResponse.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retrialResponseResult);
+                    return result;
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    string responseResult = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
+                    return result;
+                }
+                else
+                {
+                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                }
             }
         }
 
@@ -82,6 +113,91 @@ namespace GIGLS.Services.Implementation.Wallet
                 var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
                 return result;
             }
+        }
+
+
+        private static async Task<KeyValuePair<bool, string>> Authenticate()
+        {
+            using (var client = new HttpClient())
+            {
+                var authModel = new AuthModel();
+                var credentials = JToken.FromObject(authModel);
+                var data = JsonConvert.SerializeObject(credentials);
+                KeyValuePair<string, string>[] nameValueCollection = new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("grant_type", "password"), new KeyValuePair<string, string>("email", authModel.email), new KeyValuePair<string, string>("password", authModel.password) };
+                FormUrlEncodedContent content = new FormUrlEncodedContent(nameValueCollection);
+                string authUrl = ConfigurationManager.AppSettings["StellasAuth"];
+
+                var path = _auth + @"\Auth";
+                var response = await client.PostAsync(authUrl, content);
+                try
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var result = JToken.Parse(await response.Content.ReadAsStringAsync());
+                        // save the result in a file
+                        if (!Directory.Exists(path))
+                        {
+                            Directory.CreateDirectory(path);
+                        }
+                        using (StreamWriter sw = new StreamWriter($"{path}\\config.txt"))
+                        {
+                            sw.Write(result);
+                        }
+                        return new KeyValuePair<bool, string>(true, result.ToString());
+                    }
+                }
+                catch (Exception exp)
+                {
+                    return new KeyValuePair<bool, string>(false, exp.Message);
+                }
+                var ex = await response.Content.ReadAsStringAsync();
+                return new KeyValuePair<bool, string>(false, ex); 
+            }
+        }
+
+        private static async Task<string> GetToken()
+        {
+            try
+            {
+                var loc = _auth + @"\Auth";
+                string path = Path.GetPathRoot($"{loc}\\config.txt");
+                if (File.Exists(path))
+                {
+                    using (StreamReader sr = new StreamReader(path))
+                    {
+                        var token = await sr.ReadToEndAsync().ContinueWith(t => JObject.Parse(t.Result).SelectToken("accessToken").ToString());
+                        return token;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return String.Empty;
+            }
+            return String.Empty;
+        }
+
+        private async Task<string> Retry(string url,string data)
+        {
+            var token = String.Empty;
+            var auth = await Authenticate();
+            if (auth.Key)
+            {
+                token = JObject.Parse(auth.Value).SelectToken("accessToken").ToString();
+                if (String.IsNullOrEmpty(token))
+                {
+                    return string.Empty;
+                }
+                return token;
+            }
+            return token;
+        }
+
+        private class AuthModel
+        {
+            public string email { get; set; } = "it@giglogistics.com";
+            public string password { get; set; } = "Password@001";
+
         }
     }
 }
