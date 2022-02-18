@@ -253,5 +253,31 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+        public async Task CreateOrUpdateLocationList(List<PlaceLocationDTO> locationDtos)
+        {
+            try
+            {
+                //var updateRange = new List<PlaceLocationDTO>();
+                var createRange = new List<PlaceLocation>();
+                foreach (PlaceLocationDTO location in locationDtos)
+                {
+                    if(location.PlaceLocationId > 0)
+                    {
+                        await UpdateLocation(location.PlaceLocationId, location);
+                    }
+                    else
+                    {
+                        createRange.Add(Mapper.Map<PlaceLocation>(location));
+                    }
+                }
+                _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -224,5 +224,20 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("")]
+        public async Task<IServiceResponse<object>> AddOrUpdateLocations(List<PlaceLocationDTO> locationDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _locationService.CreateOrUpdateLocationList(locationDto);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }
