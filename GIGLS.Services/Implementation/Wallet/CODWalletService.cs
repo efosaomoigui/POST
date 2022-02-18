@@ -48,6 +48,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
             var user = await _uow.Company.GetAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
+            var Aspuser = await _uow.User.GetUserByChannelCode(createStellaAccountDTO.CustomerCode);
             if (user is null)
             {
                 throw new GenericException("User does not exist as an Ecommerce user!", $"{(int)HttpStatusCode.NotFound}");
@@ -59,15 +60,21 @@ namespace GIGLS.Services.Implementation.Wallet
                 //now create this user CODWALLET on agility  
                 CODWalletDTO codWalletDTO = new CODWalletDTO
                 {
-                    AccountNo = result.account_details.accountNumber,
-                    AvailableBalance = result.account_details.availableBalance,
-                    CustomerId = result.account_details.customerId,
+                    AccountNo = result.data.account_details.accountNumber,
+                    AvailableBalance = result.data.account_details.availableBalance,
+                    CustomerId = result.data.account_details.customerId,
                     CustomerCode = user.CustomerCode,
                     CustomerType = CustomerType.Company,
                     CompanyType = CompanyType.Ecommerce.ToString(),
-                    AccountType = result.account_details.accountType,
-                    WithdrawableBalance = result.account_details.withdrawableBalance,
-                    CustomerAccountId = result.account_details.customerId
+                    AccountType = result.data.account_details.accountType,
+                    WithdrawableBalance = result.data.account_details.withdrawableBalance,
+                    CustomerAccountId = result.data.account_details.customerId,
+                    DateOfBirth = result.data.customerDetails.dateOfBirth,
+                    PlaceOfBirth = result.data.customerDetails.placeOfBirth,
+                    Address = result.data.customerDetails.address,
+                    NationalIdentityNo = result.data.customerDetails.nationalIdentityNo,
+                    UserId = Aspuser.Id
+             
                 };
                 await AddCODWallet(codWalletDTO);
                 res = codWalletDTO;

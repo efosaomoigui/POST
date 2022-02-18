@@ -48,6 +48,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
@@ -55,7 +56,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 var auth = await Authenticate();
                 if (auth.Key)
                 {
-                    authorization = auth.Value;
+                    authorization = await GetToken();
                 }
                 else
                 {
@@ -67,7 +68,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("Authorization", authorization);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
                 var json = JsonConvert.SerializeObject(createStellaAccountDTO);
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -76,8 +78,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var auth = await Authenticate();
                     authorization = await GetToken();
-                  //  client.DefaultRequestHeaders.Remove("Authorization");
-                    //client.DefaultRequestHeaders.Add("Authorization", authorization);
                     var retrialResponse = await client.PostAsync(url, data);
                     string retrialResponseResult = await retrialResponse.Content.ReadAsStringAsync();
                     var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retrialResponseResult);
@@ -160,13 +160,13 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 var loc = _auth + @"\Auth";
-                string path = Path.GetPathRoot($"{loc}\\config.txt");
+                string path = $"{loc}\\config.txt";
                 if (File.Exists(path))
                 {
                     using (StreamReader sr = new StreamReader(path))
                     {
-                        var token = await sr.ReadToEndAsync().ContinueWith(t => JObject.Parse(t.Result).SelectToken("accessToken").ToString());
-                        return token;
+                        var obj = await sr.ReadToEndAsync().ContinueWith(t => JObject.Parse(t.Result));
+                        return (string)obj["data"]["accessToken"];
                     }
                 }
             }
