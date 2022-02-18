@@ -242,7 +242,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("")]
+        [Route("updatemultiplelocations")]
         public async Task<IServiceResponse<object>> UpdateMultipleLocations(UpdatePlaceLocationsDTO locationDto)
         {
             return await HandleApiOperationAsync(async () =>
