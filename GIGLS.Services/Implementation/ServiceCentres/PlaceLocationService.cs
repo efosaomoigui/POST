@@ -270,6 +270,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                         location.IsHomeDelivery = locationDtos.IsHomeDelivery;
                         location.IsGIGGO = locationDtos.IsGIGGO;
                         location.IsNormalHomeDelivery = locationDtos.IsNormalHomeDelivery;
+                        location.StateId = locationDtos.StateId;
+                        location.StateName = locationDtos.StateName;
                         createRange.Add(Mapper.Map<PlaceLocation>(location));
                     }
                     _uow.PlaceLocation.AddRange(createRange.AsEnumerable());

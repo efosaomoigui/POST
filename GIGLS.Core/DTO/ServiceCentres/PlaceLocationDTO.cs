@@ -33,5 +33,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsExpressHomeDelivery { get; set; }
         public bool IsExtraMileDelivery { get; set; }
         public bool IsGIGGO { get; set; }
+        public string StateName { get; set; }
+        public int StateId { get; set; }
     }
 }
