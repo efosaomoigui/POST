@@ -254,15 +254,22 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
         }
 
-        private async Task CreateLocationForRange(List<PlaceLocationDTO> locationDtos)
+        private async Task CreateLocationForRange(UpdatePlaceLocationsDTO locationDtos)
         {
             try
             {
-                if(locationDtos != null)
+                if (locationDtos.LocationItems != null)
                 {
                     var createRange = new List<PlaceLocation>();
-                    foreach (PlaceLocationDTO location in locationDtos)
+                    foreach (PlaceLocationDTO location in locationDtos.LocationItems)
                     {
+                        location.BaseStation = locationDtos.BaseStationName;
+                        location.BaseStationId = locationDtos.BaseStationId;
+                        location.IsExpressHomeDelivery = locationDtos.IsExpressHomeDelivery;
+                        location.IsExtraMileDelivery = locationDtos.IsExtraMileDelivery;
+                        location.IsHomeDelivery = locationDtos.IsHomeDelivery;
+                        location.IsGIGGO = locationDtos.IsGIGGO;
+                        location.IsNormalHomeDelivery = locationDtos.IsNormalHomeDelivery;
                         createRange.Add(Mapper.Map<PlaceLocation>(location));
                     }
                     _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
@@ -294,7 +301,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 if(locationDtos.LocationItems != null)
                 {
                     // Create range of locations
-                    await CreateLocationForRange(locationDtos.LocationItems);
+                    await CreateLocationForRange(locationDtos);
                 }
                 
             }
