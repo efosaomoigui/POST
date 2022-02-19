@@ -20,7 +20,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task UpdateExtraMileDeliveryLocation(int locationId, bool status);
         Task UpdateGIGGOLocation(int locationId, bool status);
         Task<IEnumerable<PlaceLocationDTO>> GetLocationsByStateId(int stateId);
-        Task CreateOrUpdateLocationList(List<PlaceLocationDTO> locationDtos);
-        Task UpdateLocationList(UpdatePlaceLocationsDTO locationDtos);
+        Task CreateOrUpdateLocationList(UpdatePlaceLocationsDTO locationDtos);
     }
 }

@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
     public class UpdatePlaceLocationsDTO : BaseDomainDTO
     {
         public List<int> PlaceLocations { get; set; }
+        public List<PlaceLocationDTO> LocationItems { get; set; }
         public string BaseStationName { get; set; }
         public int BaseStationId { get; set; }
         public bool IsHomeDelivery { get; set; }

@@ -227,27 +227,12 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<object>> AddOrUpdateLocations(List<PlaceLocationDTO> locationDto)
+        [Route("addorupdatelocations")]
+        public async Task<IServiceResponse<object>> AddOrUpdateLocations(UpdatePlaceLocationsDTO locationDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 await _locationService.CreateOrUpdateLocationList(locationDto);
-                return new ServiceResponse<object>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("updatemultiplelocations")]
-        public async Task<IServiceResponse<object>> UpdateMultipleLocations(UpdatePlaceLocationsDTO locationDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _locationService.UpdateLocationList(locationDto);
                 return new ServiceResponse<object>
                 {
                     Object = true

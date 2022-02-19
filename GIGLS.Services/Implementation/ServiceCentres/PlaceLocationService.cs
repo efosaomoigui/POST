@@ -254,25 +254,20 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
         }
 
-        public async Task CreateOrUpdateLocationList(List<PlaceLocationDTO> locationDtos)
+        private async Task CreateLocationForRange(List<PlaceLocationDTO> locationDtos)
         {
             try
             {
-                //var updateRange = new List<PlaceLocationDTO>();
-                var createRange = new List<PlaceLocation>();
-                foreach (PlaceLocationDTO location in locationDtos)
+                if(locationDtos != null)
                 {
-                    if(location.PlaceLocationId > 0)
-                    {
-                        await UpdateLocation(location.PlaceLocationId, location);
-                    }
-                    else
+                    var createRange = new List<PlaceLocation>();
+                    foreach (PlaceLocationDTO location in locationDtos)
                     {
                         createRange.Add(Mapper.Map<PlaceLocation>(location));
                     }
+                    _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
+                    await _uow.CompleteAsync();
                 }
-                _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
-                await _uow.CompleteAsync();
             }
             catch (Exception)
             {
@@ -280,11 +275,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
         }
 
-        public async Task UpdateLocationList(UpdatePlaceLocationsDTO locationDtos)
+        public async Task CreateOrUpdateLocationList(UpdatePlaceLocationsDTO locationDtos)
         {
             try
             {
-                var createRange = new List<PlaceLocation>();
                 foreach (int locationId in locationDtos.PlaceLocations)
                 {
                     if (locationId > 0)
@@ -292,6 +286,9 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                         await UpdateLocationForRange(locationId,locationDtos.BaseStationName,locationDtos.BaseStationId);
                     }
                 }
+
+                // Create range of locations
+                await CreateLocationForRange(locationDtos.LocationItems);
             }
             catch (Exception)
             {
