@@ -263,16 +263,19 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     var createRange = new List<PlaceLocation>();
                     foreach (PlaceLocationDTO location in locationDtos.LocationItems)
                     {
-                        location.BaseStation = locationDtos.BaseStationName;
-                        location.BaseStationId = locationDtos.BaseStationId;
-                        location.IsExpressHomeDelivery = locationDtos.IsExpressHomeDelivery;
-                        location.IsExtraMileDelivery = locationDtos.IsExtraMileDelivery;
-                        location.IsHomeDelivery = locationDtos.IsHomeDelivery;
-                        location.IsGIGGO = locationDtos.IsGIGGO;
-                        location.IsNormalHomeDelivery = locationDtos.IsNormalHomeDelivery;
-                        location.StateId = locationDtos.StateId;
-                        location.StateName = locationDtos.StateName;
-                        createRange.Add(Mapper.Map<PlaceLocation>(location));
+                        if (location != null && !string.IsNullOrEmpty(location.PlaceLocationName))
+                        {
+                            location.BaseStation = locationDtos.BaseStationName;
+                            location.BaseStationId = locationDtos.BaseStationId;
+                            location.IsExpressHomeDelivery = locationDtos.IsExpressHomeDelivery;
+                            location.IsExtraMileDelivery = locationDtos.IsExtraMileDelivery;
+                            location.IsHomeDelivery = locationDtos.IsHomeDelivery;
+                            location.IsGIGGO = locationDtos.IsGIGGO;
+                            location.IsNormalHomeDelivery = locationDtos.IsNormalHomeDelivery;
+                            location.StateId = locationDtos.StateId;
+                            location.StateName = locationDtos.StateName;
+                            createRange.Add(Mapper.Map<PlaceLocation>(location));
+                        }
                     }
                     _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
                     await _uow.CompleteAsync();
