@@ -279,16 +279,24 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             try
             {
-                foreach (int locationId in locationDtos.PlaceLocations)
+                if(locationDtos.PlaceLocations != null)
                 {
-                    if (locationId > 0)
+                    foreach (int locationId in locationDtos.PlaceLocations)
                     {
-                        await UpdateLocationForRange(locationId,locationDtos.BaseStationName,locationDtos.BaseStationId);
+                        if (locationId > 0)
+                        {
+                            // Update range of locations
+                            await UpdateLocationForRange(locationId, locationDtos.BaseStationName, locationDtos.BaseStationId);
+                        }
                     }
                 }
-
-                // Create range of locations
-                await CreateLocationForRange(locationDtos.LocationItems);
+                
+                if(locationDtos.LocationItems != null)
+                {
+                    // Create range of locations
+                    await CreateLocationForRange(locationDtos.LocationItems);
+                }
+                
             }
             catch (Exception)
             {
