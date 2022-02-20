@@ -1,8 +1,10 @@
 ﻿using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -41,6 +43,14 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
                     {
                         await _korapayService.VerifyAndValidatePaymentForWebhook(webhookData);
                     }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
                 }
                 return response;
             });
