@@ -492,3 +492,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerType { get; set; }
     }
 }
+
+public class UpdateNodeMercantSubscriptionDTO
+{
+    public string MerchantCode { get; set; }
+    public string UserId { get; set; }
+}

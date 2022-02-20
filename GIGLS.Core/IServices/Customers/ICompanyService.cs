@@ -42,5 +42,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<JObject> GetNubanProviders();
         Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRepEmail(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams);
+        Task<ResponseDTO> AddSubscriptionToCustomer(string customercode);
     }
 }
