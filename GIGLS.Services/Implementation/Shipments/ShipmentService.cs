@@ -1741,6 +1741,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.Waybill = waybill;
             }
 
+
+               //confirm the weight for special shipment type
+                var specialPackageIDs = shipmentDTO.ShipmentItems.Select(x => x.SpecialPackageId).ToList();
+                if (specialPackageIDs.Any())
+                {
+                   var specialPackages = _uow.SpecialDomesticPackage.GetAllAsQueryable().Where(x => specialPackageIDs.Contains(x.SpecialDomesticPackageId)).ToList();
+                   //confirm the weight for special shipment type
+                    foreach (var item in shipmentDTO.ShipmentItems)
+                    {
+                        if (item.SpecialPackageId != null && item.SpecialPackageId > 0)
+                        {
+                          var specialItem = specialPackages.Where(x => x.SpecialDomesticPackageId == item.SpecialPackageId).FirstOrDefault();
+                            if (specialItem != null)
+                            {
+                                item.Weight = Convert.ToDouble(specialItem.Weight);
+                            }
+                        }
+                    }
+                }
+                
+
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
