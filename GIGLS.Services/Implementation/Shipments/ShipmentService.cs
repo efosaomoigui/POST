@@ -6271,6 +6271,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     dto.UserId = currentUser;
                 }
                 var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
                 var allCOD = new AllCODShipmentDTO();
                 var codMobileShipment = new List<PreShipmentMobile>();
                 var codAgilityShipment = new List<Shipment>();
