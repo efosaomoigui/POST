@@ -50,7 +50,7 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
                 }
                 else
                 {
-                    throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
                 }
                 return response;
             });
