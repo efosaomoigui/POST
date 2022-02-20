@@ -469,7 +469,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment Items cannot be empty");
                 }
-
+               
                 if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
                 {
                     preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
@@ -612,6 +612,34 @@ namespace GIGLS.Services.Implementation.Shipments
                         actualAmountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
                     }
                 }
+
+                //confirm the weight for special shipment type
+                var specialPackageIDs = preShipmentDTO.PreShipmentItems.Select(x => x.SpecialPackageId).ToList();
+                if (specialPackageIDs.Any())
+                {
+                    var specialPackages = _uow.SpecialDomesticPackage.GetAllAsQueryable().Where(x => specialPackageIDs.Contains(x.SpecialDomesticPackageId)).ToList();
+                    //confirm the weight for special shipment type
+                    foreach (var item in preShipmentDTO.PreShipmentItems)
+                    {
+                        if (item.SpecialPackageId != null && item.SpecialPackageId > 0)
+                        {
+                            var specialItem = specialPackages.Where(x => x.SpecialDomesticPackageId == item.SpecialPackageId).FirstOrDefault();
+                            if (specialItem != null)
+                            {
+                                item.Weight = specialItem.Weight;
+                            }
+                        }
+                    }
+                }
+
+                // set declared value of the shipment
+                decimal totalDecValue = 0;
+                foreach (var item in preShipmentDTO.PreShipmentItems)
+                {
+                    totalDecValue = totalDecValue + Convert.ToDecimal(item.Value);
+                }
+                preShipmentDTO.DeclarationOfValueCheck = totalDecValue;
+                preShipmentDTO.Value = totalDecValue;
 
                 if (wallet.Balance >= actualAmountToDebit)
                 {
