@@ -392,6 +392,7 @@
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\PaymentWebhook\CellulantController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\KorapayController.cs" />
     <Compile Include="Controllers\PaymentWebhook\SterlingController.cs" />
     <Compile Include="Controllers\PaymentWebhook\FlutterwaveController.cs" />
     <Compile Include="Controllers\PaymentWebhook\PaystackController.cs" />
@@ -509,6 +510,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
+    <Folder Include="Views\Korapay\" />
     <Folder Include="Views\Location\" />
     <Folder Include="Views\Reminder\" />
     <Folder Include="Views\Test\" />
