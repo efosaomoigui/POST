@@ -22,6 +22,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Infrastructure;
 using System.Net;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.IServices.Customers;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -34,10 +35,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IScanService _scanService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly ICellulantPaymentService _cellulantPaymentService;
+        private readonly ICompanyService _companyService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
                             IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, 
-                            IWaybillPaymentLogService waybillPaymentLogService, ICellulantPaymentService cellulantPaymentService)
+                            IWaybillPaymentLogService waybillPaymentLogService, ICellulantPaymentService cellulantPaymentService, ICompanyService companyService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
@@ -46,6 +48,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _uow = uow;
             _waybillPaymentLogService = waybillPaymentLogService;
             _cellulantPaymentService = cellulantPaymentService;
+            _companyService = companyService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -490,5 +493,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         //    }
         //}
 
+        public async Task<ResponseDTO> UpdateUserRankForAlpha(string merchantcode)
+        {
+            return await _companyService.UpdateUserRankForAlpha(merchantcode);
+        }
     }
 }

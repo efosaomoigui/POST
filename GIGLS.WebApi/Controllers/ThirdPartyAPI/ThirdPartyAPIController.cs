@@ -479,5 +479,20 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 return response;
             });
         }
+
+        [HttpPut]
+        [Route("updatemerchantsubscription/{merchantcode}")]
+        public async Task<IServiceResponse<ResponseDTO>> UpdateMerchantClassSubscriptionForAlpha(string merchantcode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.UpdateUserRankForAlpha(merchantcode);
+
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
