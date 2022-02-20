@@ -6249,5 +6249,119 @@ namespace GIGLS.Services.Implementation.Shipments
             return receiverInfo;
         }
 
+        public async Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
+        {
+            try
+            {
+                //set default values if payload is null
+                if (dto == null)
+                {
+                    dto = new PaginationDTO
+                    {
+                        Page = 1,
+                        PageSize = 25,
+                        StartDate = null,
+                        EndDate = null
+                    };
+                }
+                int totalCount;
+                if (String.IsNullOrEmpty(dto.UserId))
+                {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    dto.UserId = currentUser;
+                }
+                var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
+                var allCOD = new AllCODShipmentDTO();
+                var codMobileShipment = new List<PreShipmentMobile>();
+                var codAgilityShipment = new List<Shipment>();
+                if (dto.PageSize < 1)
+                {
+                    dto.PageSize = 25;
+                }
+                if (dto.Page < 1)
+                {
+                    dto.Page = 1;
+                }
+                if (dto.StartDate != null && dto.EndDate != null)
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.ZoneMapping == 1 && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false && x.ZoneMapping == 1).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+
+                if (codAgilityShipment.Any())
+                {
+                    var waybills = codAgilityShipment.Select(x => x.Waybill);
+                    var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
+                    foreach (var item in codAgilityShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                        if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
+                        {
+                            obj.CODStatus = CODMobileStatus.Collected.ToString();
+                            obj.DateCreated = lastScan.DateCreated;
+                        }
+                        else
+                        {
+                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                            obj.DateCreated = item.DateCreated;
+                        }
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+
+                }
+                if (codMobileShipment.Any())
+                {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
+                    foreach (var item in codMobileShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
+                        {
+                            obj.CODStatus = CODMobileStatus.Collected.ToString();
+                        }
+                        else
+                        {
+                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                        }
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+                }
+
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
 }

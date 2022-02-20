@@ -2456,6 +2456,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               InputtedReceiverAddress = r.InputtedReceiverAddress,
                                                               SenderLocality = r.SenderLocality,
                                                               ZoneMapping = r.ZoneMapping,
+                                                              CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                                              IsCashOnDelivery = r.IsCashOnDelivery,
                                                               ReceiverLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.ReceiverLocation.Longitude,
