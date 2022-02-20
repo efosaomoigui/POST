@@ -173,6 +173,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int HomeDeliveryLocation { get; set; }
         public decimal ExpressCharge { get; set; }
         public decimal? insurancevalue_display { get; set; }
+        public bool IsExpressDropoff { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
