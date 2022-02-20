@@ -85,5 +85,12 @@ namespace GIGLS.Services.Implementation.Account
             var insurance = await _uow.Insurance.GetInsuranceByCountry(countryIds);
             return insurance;
         }
+
+        public async Task<decimal> GetInsuranceValueByCountry()
+        {
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var insurance = await _uow.Insurance.GetInsuranceValueByCountry(countryIds);
+            return insurance;
+        }
     }
 }

@@ -2950,5 +2950,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("generatecheckouturl")]
+        public async Task<IServiceResponse<string>> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GenerateCheckoutUrlForKorapay(payload);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

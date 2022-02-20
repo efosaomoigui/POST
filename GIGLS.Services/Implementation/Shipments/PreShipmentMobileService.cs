@@ -82,6 +82,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IServiceCentreService _centreService;
         private readonly IDHLService _dhlService;
         private readonly IUPSService _uPSService;
+        private readonly IInsuranceService _insuranceService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -91,7 +92,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
             INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService,
-            IDHLService dHLService, IUPSService uPSService)
+            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -121,6 +122,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _centreService = centreService;
             _dhlService = dHLService;
             _uPSService = uPSService;
+            _insuranceService = insuranceService;
             MapperConfig.Initialize();
         }
 
@@ -1477,15 +1479,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 // decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
                 decimal grandTotal = (decimal)preShipment.DeliveryPrice + PickupValue;
 
-                //GIG Go Promo Price
-                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
-                if (gigGoPromo.GrandTotal > 0)
+                // Special Discount Price
+                //1. Check sender station eligibility
+                var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
+
+                if (isSenderStationEligible)
                 {
-                    grandTotal = (decimal)gigGoPromo.GrandTotal;
-                    discount = (decimal)gigGoPromo.Discount;
+
+                    //2. Get special discount price
+                    var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, PickupValue);
+
+                    grandTotal = (decimal)specialStationDiscount.GrandTotal.Value;
+                    discount = (decimal)specialStationDiscount.DiscountValue;
                     preShipment.DiscountValue = discount;
                     preShipment.GrandTotal = grandTotal;
                 }
+                else
+                {
+                    //GIG Go Promo Price
+                    var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
+                    if (gigGoPromo.GrandTotal > 0)
+                    {
+                        grandTotal = (decimal)gigGoPromo.GrandTotal;
+                        discount = (decimal)gigGoPromo.Discount;
+                        preShipment.DiscountValue = discount;
+                        preShipment.GrandTotal = grandTotal;
+                    }
+                }
+
 
                 var returnprice = new MobilePriceDTO()
                 {
@@ -1597,14 +1618,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 discount = Math.Round(mainCharge - (decimal)calculatedTotal);
                 decimal grandTotal = (decimal)calculatedTotal + pickupValue;
 
-                //GIG Go Promo Price
-                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
-                if (gigGoPromo.GrandTotal > 0)
+                // Special Discount Price
+                //1. Check sender station eligibility
+                var isSenderStationEligible = await CheckEligibleStation(preShipment.CountryId, preShipment.SenderStationId);
+
+                if (isSenderStationEligible)
                 {
-                    grandTotal = (decimal)gigGoPromo.GrandTotal;
-                    discount = (decimal)gigGoPromo.Discount;
+                    //2. Get special discount price
+                    var specialStationDiscount = await CalculateSpecialDiscount(preShipment, grandTotal, pickupValue);
+
+                    grandTotal = (decimal)specialStationDiscount.GrandTotal.Value;
+                    discount = (decimal)specialStationDiscount.DiscountValue;
                     preShipment.DiscountValue = discount;
                     preShipment.GrandTotal = grandTotal;
+                }
+                else
+                {
+                    //GIG Go Promo Price
+                    var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
+                    if (gigGoPromo.GrandTotal > 0)
+                    {
+                        grandTotal = (decimal)gigGoPromo.GrandTotal;
+                        discount = (decimal)gigGoPromo.Discount;
+                        preShipment.DiscountValue = discount;
+                        preShipment.GrandTotal = grandTotal;
+                    }
                 }
 
                 var countOfItems = preShipment.PreShipmentItems.Count;
@@ -5309,7 +5347,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }
                                     }
 
-                                    var MobileShipment = new ShipmentDTO
+                                    var mobileShipment = new ShipmentDTO
                                     {
                                         Waybill = preshipmentmobile.Waybill,
                                         ReceiverName = preshipmentmobile.ReceiverName,
@@ -5330,7 +5368,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PickupOptions = preshipmentmobile.IsHomeDelivery == true ? PickupOptions.HOMEDELIVERY : PickupOptions.SERVICECENTER,
                                         //  PickupOptions = PickupOptions.HOMEDELIVERY,
                                         IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                                        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                                        ShipmentPackagePrice = preshipmentmobile.ShipmentPackagePrice == null ? 0.00m : preshipmentmobile.ShipmentPackagePrice.Value,
                                         ApproximateItemsWeight = 0.00,
                                         ReprintCounterStatus = false,
                                         CustomerType = preshipmentmobile.CustomerType,
@@ -5354,9 +5392,13 @@ namespace GIGLS.Services.Implementation.Shipments
                                         }).ToList()
                                     };
 
+                                    var insuranceValue = await _insuranceService.GetInsuranceValueByCountry();
                                     var factor = Convert.ToDecimal(Math.Pow(10, -2));
-                                    MobileShipment.GrandTotal = Math.Round(MobileShipment.GrandTotal * factor) / factor;
-                                    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+                                    mobileShipment.GrandTotal = Math.Round(mobileShipment.GrandTotal * factor) / factor;
+                                    mobileShipment.Insurance = insuranceValue;
+                                    mobileShipment.DeclarationOfValueCheck = mobileShipment.Value;
+                                    mobileShipment.Total = mobileShipment.ShipmentItems.Select(x => x.Price).Sum();
+                                    var status = await _shipmentService.AddShipmentFromMobile(mobileShipment);
 
                                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
                                     preshipmentmobile.IsApproved = true;
@@ -7567,10 +7609,47 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Invalid payload", $"{(int)HttpStatusCode.BadRequest}");
             }
-            var shipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(filter.FilterType);   
+            var shipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(filter.FilterType);
             return shipment;
         }
 
+        private async Task<SpecialDiscountPriceDTO> CalculateSpecialDiscount(PreShipmentMobileDTO preShipment, decimal grandTotal, decimal pickupValue)
+        {
+            var result = new SpecialDiscountPriceDTO { DiscountValue = 0.00m, GrandTotal = 0.00m };
+            // Special Discount Price
 
+            var specialStationDiscount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStationDiscount, preShipment.CountryId);
+            var specialPercentage = Convert.ToDecimal(specialStationDiscount.Value);
+
+            var specialPercentageTobeUsed = ((100M - specialPercentage) / 100M);
+            var newCalculatedTotal = (double)(grandTotal * specialPercentageTobeUsed);
+            newCalculatedTotal = Math.Round(newCalculatedTotal);
+
+            result.DiscountValue = (decimal)preShipment.DeliveryPrice + pickupValue - (decimal)newCalculatedTotal;
+            result.GrandTotal = (decimal)newCalculatedTotal;
+
+            return result;
+        }
+
+        private async Task<bool> CheckEligibleStation(int CountryId, int SenderStationId)
+        {
+            bool result = false;
+            if (CountryId == 0 || SenderStationId == 0)
+            {
+                return result;
+            }
+
+            var specialStation = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SpecialStation, CountryId);
+            var specialStationIds = specialStation.Value.Split(',');
+
+            if (specialStationIds.Length > 0 && specialStationIds.Contains(SenderStationId.ToString()))
+            {
+                result = true;
+            }
+
+            return result;
+        }
     }
 }
+
+

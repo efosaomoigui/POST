@@ -11,6 +11,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.OnlinePayment;
 using Newtonsoft.Json.Linq;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -315,6 +316,23 @@ namespace GIGLS.WebApi.Controllers.Customers
                 {
                     Object = companies
                 };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("addsubscription/{customercode}")]
+        public async Task<IServiceResponse<ResponseDTO>> AddSubscriptionToCustomer(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _service.AddSubscriptionToCustomer(customercode);
+
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = response
+                };
+
             });
         }
 

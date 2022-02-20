@@ -25,6 +25,7 @@
         Flutterwave,
         USSD,
         Cellulant,
-        Sterling
+        Sterling,
+        Korapay
     }
 }
