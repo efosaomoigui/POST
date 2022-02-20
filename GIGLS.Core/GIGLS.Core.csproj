@@ -329,6 +329,7 @@
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
     <Compile Include="DTO\Admin\AdminReportDTO.cs" />
+    <Compile Include="DTO\Alpha\AlphaUserLoginDTO.cs" />
     <Compile Include="DTO\AppMessageDTO.cs" />
     <Compile Include="DTO\ApproveShipmentDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankDTO.cs" />
@@ -848,6 +849,7 @@
     <Compile Include="IServices\Account\IInvoiceService.cs" />
     <Compile Include="IServices\Account\IInvoiceShipmentService.cs" />
     <Compile Include="IServices\Account\IVATService.cs" />
+    <Compile Include="IServices\Alpha\IAlphaService.cs" />
     <Compile Include="IServices\BankSettlement\IBankService.cs" />
     <Compile Include="IServices\BankSettlement\ICODSettlementSheetService.cs" />
     <Compile Include="IServices\Business\IGIGGoPricingService.cs" />

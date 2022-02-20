@@ -27,6 +27,8 @@ using GIGLS.Core.IServices.Node;
 using System.Net;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Alpha;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -41,6 +43,7 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IPasswordGenerator _codegenerator;
         private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly INodeService _nodeService;
+        private readonly IAlphaService _alphsService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
@@ -55,6 +58,7 @@ namespace GIGLS.Services.Implementation.Customers
             _codegenerator = codegenerator;
             _paystackPaymentService = paystackPaymentService;
             _nodeService = nodeService;
+            _alphsService = alphsService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -1104,6 +1108,19 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 await _uow.CompleteAsync();
 
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                }) ;
+                
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
@@ -1311,6 +1328,20 @@ namespace GIGLS.Services.Implementation.Customers
                         await _uow.CompleteAsync();
                     }
                 }
+
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "": company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                });
+
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
