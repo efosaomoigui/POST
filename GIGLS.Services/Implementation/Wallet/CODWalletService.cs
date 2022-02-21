@@ -103,10 +103,19 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
+        public async Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
         {
-            var bal = _stellasService.GetCustomerStellasAccount(customerCode);
-            return bal;
+            if (String.IsNullOrEmpty(customerCode))
+            {
+                throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var custmerAccountInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (custmerAccountInfo != null)
+            {
+                var bal = await _stellasService.GetCustomerStellasAccount(custmerAccountInfo.AccountNo);
+                return bal; 
+            }
+            return new GetCustomerBalanceDTO();
         }
 
        

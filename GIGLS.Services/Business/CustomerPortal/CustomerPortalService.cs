@@ -4608,5 +4608,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return result;
 
         }
+        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
+        {
+            var bal = _codWalletService.GetStellasAccountBal(customerCode);
+            return bal;
+        }
     }
 }

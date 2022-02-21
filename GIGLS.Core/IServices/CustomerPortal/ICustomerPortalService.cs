@@ -263,5 +263,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew();
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode);
         Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO);
+        Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
     }
 }

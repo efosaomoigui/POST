@@ -2951,5 +2951,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("getcustomerstellasaccountbal/{code}")]
+        public async Task<IServiceResponse<GetCustomerBalanceDTO>> GetStellasAccountBal(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasAccountBal(code);
+                return new ServiceResponse<GetCustomerBalanceDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

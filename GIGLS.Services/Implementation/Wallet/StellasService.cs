@@ -72,15 +72,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
                 var json = JsonConvert.SerializeObject(createStellaAccountDTO);
                 StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-
                 var response = await client.PostAsync(url, data);
-                if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.Unauthorized)
+                string message = await response.Content.ReadAsStringAsync();
+                if (message.Contains("Session Expired! Please login again"))
                 {
-                    var auth = await Authenticate();
-                    authorization = await GetToken();
-                    var retrialResponse = await client.PostAsync(url, data);
-                    string retrialResponseResult = await retrialResponse.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retrialResponseResult);
+                    var retry = await Retry(url,"post", data);
+                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry);
                     return result;
                 }
                 else if (response.IsSuccessStatusCode)
@@ -98,20 +95,50 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<GetCustomerBalanceDTO> GetCustomerStellasAccount(string accountNo)
         {
-            var url = ConfigurationManager.AppSettings["StellasSandBox"];
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string authorization = "Bearer " + secretKey;
-            url = $"{url}clients/business/customers/balance/{accountNo}";
+            string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            string authorization = await GetToken();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            url = $"{url}balance/{accountNo}";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", authorization);
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
                 var response = await client.GetAsync(url);
                 string responseResult = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
-                return result;
+                if (responseResult.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "get", null);
+                    var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry);
+                    return result;
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseContent);
+                    return res;
+                }
+                else
+                {
+                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                }
             }
         }
 
@@ -177,20 +204,36 @@ namespace GIGLS.Services.Implementation.Wallet
             return String.Empty;
         }
 
-        private async Task<string> Retry(string url,string data)
+        private async Task<string> Retry(string url, string action, StringContent data)
         {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             var token = String.Empty;
             var auth = await Authenticate();
-            if (auth.Key)
+            var authorization = await GetToken();
+            using (var client = new HttpClient())
             {
-                token = JObject.Parse(auth.Value).SelectToken("accessToken").ToString();
-                if (String.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+
+                if (action == "get")
                 {
-                    return string.Empty;
+                    var response = await client.GetAsync(url);
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    return retrialResponseResult;
                 }
-                return token;
+                else if (action == "post")
+                {
+                    var response = await client.PostAsync(url, data);
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    return retrialResponseResult;
+                }
+                return string.Empty;
             }
-            return token;
         }
 
         private class AuthModel
