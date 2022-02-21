@@ -141,7 +141,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService,IKorapayPaymentService koraPaymentService,ICODWalletService codWalletService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -190,6 +190,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _paymentMethodService = paymentMethodService;
             _cellulantPaymentService = cellulantPaymentService;
             _sterlingPaymentService = sterlingPaymentService;
+            _koraPaymentService = koraPaymentService;
+           _codWalletService = codWalletService;
             MapperConfig.Initialize();
         }
 
@@ -4593,6 +4595,35 @@ namespace GIGLS.Services.Business.CustomerPortal
             response.Message = result.Message;
             response.GatewayResponse = result.data.Gateway_Response;
             return response;
+        }
+
+        public async Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        {
+
+            if (String.IsNullOrEmpty(codWalletDTO.CustomerCode))
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                codWalletDTO.CustomerCode = currentUser.UserChannelCode;
+            }
+            var result = await _codWalletService.CreateStellasAccount(codWalletDTO);
+            return result;
+
+        }
+        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
+        {
+            var bal = _codWalletService.GetStellasAccountBal(customerCode);
+            return bal;
+        }
+
+        public Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
+        {
+            throw new NotImplementedException();
         }
     }
 }
