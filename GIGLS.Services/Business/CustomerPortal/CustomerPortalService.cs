@@ -127,6 +127,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly ICODWalletService _codWalletService;
+        private readonly IKorapayPaymentService _koraPaymentService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -140,7 +141,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService,ICODWalletService codWalletService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -189,7 +190,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _paymentMethodService = paymentMethodService;
             _cellulantPaymentService = cellulantPaymentService;
             _sterlingPaymentService = sterlingPaymentService;
-            _codWalletService = codWalletService;
             MapperConfig.Initialize();
         }
 
@@ -4593,25 +4593,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             response.Message = result.Message;
             response.GatewayResponse = result.data.Gateway_Response;
             return response;
-        }
-
-        public async Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
-        {
-
-            if (String.IsNullOrEmpty(codWalletDTO.CustomerCode))
-            {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
-                codWalletDTO.CustomerCode = currentUser.UserChannelCode;
-            }
-            var result = await _codWalletService.CreateStellasAccount(codWalletDTO);
-            return result;
-
-        }
-        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
-        {
-            var bal = _codWalletService.GetStellasAccountBal(customerCode);
-            return bal;
         }
     }
 }

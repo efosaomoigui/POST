@@ -2965,5 +2965,33 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpPost]
+        [Route("allcodshipment")]
+        public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _portalService.GetAllCODShipments(dto);
+                return new ServiceResponse<AllCODShipmentDTO>
+                {
+                    Object = res,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("generatecheckouturl")]
+        public async Task<IServiceResponse<string>> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GenerateCheckoutUrlForKorapay(payload);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

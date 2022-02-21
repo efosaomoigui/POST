@@ -118,7 +118,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
         public async Task<List<SmsSendLogDTO>> GetSmsSendLog(string phoneNumber)
         {
-            var message = await _uow.SmsSendLog.FindAsync(x => x.To == phoneNumber);
+            var message =  _uow.SmsSendLog.GetAllAsQueryable().Where(x => x.To == phoneNumber);
             return Mapper.Map<List<SmsSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
         }
 

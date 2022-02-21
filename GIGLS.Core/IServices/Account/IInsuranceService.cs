@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices.Account
         Task UpdateInsurance(int insuranceId, InsuranceDTO insurance);
         Task RemoveInsurance(int insuranceId);
         Task<InsuranceDTO> GetInsuranceByCountry();
+        Task<decimal> GetInsuranceValueByCountry();
     }
 }

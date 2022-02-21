@@ -23,6 +23,12 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.DTO.Report;
 using System.Data.Entity;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.IServices.Node;
+using System.Net;
+using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Alpha;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -36,10 +42,12 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly INodeService _nodeService;
+        private readonly IAlphaService _alphsService;
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator,
-            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService)
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService, IPasswordGenerator codegenerator, IPaystackPaymentService paystackPaymentService, INodeService nodeService, IAlphaService alphsService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -49,6 +57,8 @@ namespace GIGLS.Services.Implementation.Customers
             _messageSenderService = messageSenderService;
             _codegenerator = codegenerator;
             _paystackPaymentService = paystackPaymentService;
+            _nodeService = nodeService;
+            _alphsService = alphsService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -1098,6 +1108,19 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 await _uow.CompleteAsync();
 
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                }) ;
+                
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
@@ -1305,6 +1328,20 @@ namespace GIGLS.Services.Implementation.Customers
                         await _uow.CompleteAsync();
                     }
                 }
+
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "": company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                });
+
                 companyDTO = Mapper.Map<CompanyDTO>(company);
             }
             return companyDTO;
@@ -1371,6 +1408,226 @@ namespace GIGLS.Services.Implementation.Customers
             }
             filterCriteria.AssignedCustomerRep = user.Id;
             return await _uow.Company.GetAssignedCustomersByCustomerRep(filterCriteria);
+        }
+
+        public async Task<ResponseDTO> AddSubscriptionToCustomer(string customercode)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                if (string.IsNullOrEmpty(customercode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "Customer code cannot be empty";
+                    return result;
+                }
+
+                var user = await _userService.GetUserByChannelCode(customercode);
+                if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                {
+                    result.Succeeded = false;
+                    result.Message = "User does not exist";
+                    return result;
+                }
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = "Company information does not exist";
+                    return result;
+                }
+
+                //Get user wallet
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                if (wallet == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Wallet does not exist";
+                    return result;
+                }
+
+                //Charge Wallet for Subscription
+                var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = 3999m,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Customer subscription",
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = referenceNo,
+                    UserId = user.Id,
+                    ServiceCharge = 0m,
+                }, false);
+
+                company.isCodNeeded = true;
+                company.Rank = Rank.Class;
+                company.RankModificationDate = DateTime.Now;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = RankType.Upgrade
+                });
+                await _uow.CompleteAsync();
+
+                //Call Node to Update User subscription
+                await _nodeService.UpdateMerchantSubscription(new UpdateNodeMercantSubscriptionDTO
+                {
+                    UserId = user.Id,
+                    MerchantCode = companyDTO.CustomerCode
+                });
+
+                //send email for upgrade customers
+                if (company.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (company.Rank == Rank.Class)
+                {
+                    //Check if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
+                }
+
+                result.Message = "Class Subscription Successful";
+                result.Succeeded = true;
+                result.Entity = companyDTO;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ResponseDTO> UpdateUserRankForAlpha(string merchantcode)
+        {
+            try
+            {
+                var result = new ResponseDTO();
+                var user = new UserDTO();
+
+                if (String.IsNullOrEmpty(merchantcode))
+                {
+                    throw new GenericException("Invalid merchant code.", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                user = await _userService.GetUserByChannelCode(merchantcode);
+                if (user == null || String.IsNullOrEmpty(user.UserChannelCode))
+                {
+                    throw new GenericException("User does not exist.", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                var userValidationDTO = new UserValidationDTO
+                {
+                    Rank = Rank.Class,
+                    UserCode = user.UserChannelCode,
+                    UserID = user.Id,
+                    RankType = RankType.Upgrade
+                };
+
+                if (String.IsNullOrEmpty(userValidationDTO.UserID) && String.IsNullOrEmpty(userValidationDTO.UserCode))
+                {
+                    throw new GenericException("User not provided.", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                if (userValidationDTO.Rank == null)
+                {
+                    throw new GenericException("Rank not provided.", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company == null)
+                {
+                    throw new GenericException("Company information does not exist.", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //make the BVN compulsory
+                    if (String.IsNullOrEmpty(company.BVN))
+                    {
+                        throw new GenericException("User BVN not provided.", $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                    company.isCodNeeded = true;
+                }
+                else
+                {
+                    company.isCodNeeded = false;
+                }
+
+                company.Rank = userValidationDTO.Rank;
+                company.RankModificationDate = DateTime.Now;
+                var companyDTO = Mapper.Map<CompanyDTO>(company);
+                _uow.RankHistory.Add(new RankHistory
+                {
+                    CustomerName = companyDTO.Name,
+                    CustomerCode = companyDTO.CustomerCode,
+                    RankType = userValidationDTO.RankType
+                });
+                await _uow.CompleteAsync();
+
+                //Call Node to Update User subscription
+                await _nodeService.UpdateMerchantSubscription(new UpdateNodeMercantSubscriptionDTO
+                {
+                    UserId = user.Id,
+                    MerchantCode = companyDTO.CustomerCode
+                });
+
+                //send email for upgrade customers
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //SEND EMAIL TO CLASS CUSTOMERS
+                    var companyMessagingDTO = new CompanyMessagingDTO();
+                  
+                    var userchannelType = (UserChannelType)Enum.Parse(typeof(UserChannelType), company.CompanyType.ToString());
+                    companyMessagingDTO.Name = company.Name;
+                    companyMessagingDTO.Email = company.Email;
+                    companyMessagingDTO.PhoneNumber = company.PhoneNumber;
+                    companyMessagingDTO.Rank = company.Rank;
+                    companyMessagingDTO.IsFromMobile = company.IsRegisteredFromMobile;
+                    companyMessagingDTO.UserChannelType = userchannelType;
+                    companyMessagingDTO.IsUpdate = true;
+                    await SendMessageToNewSignUps(companyMessagingDTO);
+                }
+
+                //Send mail to class customers with an assigned customer rep
+                if (userValidationDTO.Rank == Rank.Class)
+                {
+                    //CHeck if already assigned a customer rep
+                    if (string.IsNullOrEmpty(company.AssignedCustomerRep))
+                    {
+                        await SendEmailToAssignEcommerceCustomerRep(company);
+                    }
+                }
+
+                result.Message = "User Rank Update Successful";
+                result.Succeeded = true;
+                result.Entity = companyDTO;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 

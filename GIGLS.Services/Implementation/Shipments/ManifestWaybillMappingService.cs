@@ -473,15 +473,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (manifestwaybill.Shipment.CustomerType == CustomerType.Company.ToString())
                     {
                         customerType = CustomerType.Company;
+                        var companyExist = await _uow.Company.ExistAsync(x => x.CustomerCode == manifestwaybill.Shipment.CustomerCode);
+                        if (companyExist)
+                        {
+                            //Get  customer detail
+                            var currentCustomerObject = await _customerService.GetCustomer(manifestwaybill.Shipment.CustomerId, customerType);
+                            manifestwaybill.Shipment.CustomerDetails = currentCustomerObject;
+                        }
+
                     }
                     else
                     {
                         customerType = CustomerType.IndividualCustomer;
+                        var induvidual = await _uow.IndividualCustomer.ExistAsync(x => x.CustomerCode == manifestwaybill.Shipment.CustomerCode);
+                        if (induvidual)
+                        {
+                            //Get  customer detail
+                            var currentCustomerObject = await _customerService.GetCustomer(manifestwaybill.Shipment.CustomerId, customerType);
+                            manifestwaybill.Shipment.CustomerDetails = currentCustomerObject;
+                        }
                     }
-
-                    //Get  customer detail
-                    var currentCustomerObject = await _customerService.GetCustomer(manifestwaybill.Shipment.CustomerId, customerType);
-                    manifestwaybill.Shipment.CustomerDetails = currentCustomerObject;
 
                     //get from ShipmentCollection
                     var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);

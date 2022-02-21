@@ -2,6 +2,7 @@
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -491,4 +492,16 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal Amount { get; set; }
         public string PartnerType { get; set; }
     }
+
+    public class UpdateNodeMercantSubscriptionDTO
+    {
+        public string MerchantCode { get; set; }
+        public string UserId { get; set; }
+    }
+}
+
+public class UpdateNodeMercantSubscriptionDTO
+{
+    public string MerchantCode { get; set; }
+    public string UserId { get; set; }
 }

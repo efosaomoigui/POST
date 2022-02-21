@@ -1219,6 +1219,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            ExpressDelivery = r.ExpressDelivery,
                                            RequestNumber = r.RequestNumber,
                                            ExpressCharge = r.ExpressCharge,
+                                           IsExpressDropoff = r.IsExpressDropoff,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
