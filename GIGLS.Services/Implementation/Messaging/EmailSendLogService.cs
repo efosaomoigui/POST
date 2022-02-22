@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
         public async Task<List<EmailSendLogDTO>> GetEmailSendLog(string email)
         {
-            var message = await _uow.EmailSendLog.FindAsync(x => x.To == email);
+            var message = _uow.EmailSendLog.GetAllAsQueryable().Where(x => x.To == email);
             return Mapper.Map<List<EmailSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
         }
 

@@ -82,5 +82,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                                 };
             return Task.FromResult(insurancesDto.FirstOrDefault());
         }
+
+        public Task<decimal> GetInsuranceValueByCountry(int countryId)
+        {
+            var insurances = _context.Insurance.Where(x => x.CountryId == countryId);
+
+            var insurancesDto = from i in insurances
+                                join c in _context.Country on i.CountryId equals c.CountryId
+                                select new InsuranceDTO
+                                {
+                                    Value = i.Value
+                                };
+            return Task.FromResult(insurancesDto.FirstOrDefault().Value);
+        }
     }
 }

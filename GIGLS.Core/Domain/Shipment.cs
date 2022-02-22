@@ -167,6 +167,8 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(128)]
         public string RequestNumber { get; set; }
         public decimal ExpressCharge { get; set; }
+        public bool IsExpressDropoff { get; set; }
+        public bool IsBulky { get; set; }
 
     }
 

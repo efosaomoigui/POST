@@ -396,4 +396,142 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ReceiptNumber { get; set; }
     }
 
+    #region Korapay
+    public class KorapayCustomer
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("email")]
+        public string Email { get; set; }
+    }
+
+    public class KoarapayInitializeCharge
+    {
+        [JsonProperty("amount")]
+        public decimal Amount { get; set; }
+
+        [JsonProperty("redirect_url")]
+        public string RedirectUrl { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+
+        [JsonProperty("customer")]
+        public KorapayCustomer Customer { get; set; }
+    }
+
+    public class KorapayInitializeChargeData
+    {
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("checkout_url")]
+        public string CheckoutUrl { get; set; }
+    }
+
+    public class KorapayInitializeChargeResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public KorapayInitializeChargeData Data { get; set; }
+    }
+
+    public class KorapayWebhookData
+    {
+        [JsonProperty("amount")]
+        public decimal Amount { get; set; }
+
+        [JsonProperty("amount_expected")]
+        public decimal AmountExpected { get; set; }
+
+        [JsonProperty("fee")]
+        public decimal Fee { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("payment_reference")]
+        public string PaymentReference { get; set; }
+
+        [JsonProperty("transaction_status")]
+        public string TransactionStatus { get; set; }
+    }
+
+    public class KorapayWebhookDTO
+    {
+        [JsonProperty("event")]
+        public string Event { get; set; }
+
+        [JsonProperty("data")]
+        public KorapayWebhookData Data { get; set; }
+    }
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class KoraPayerBankAccount
+    {
+        [JsonProperty("account_number")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("account_name")]
+        public string AccountName { get; set; }
+
+        [JsonProperty("bank_name")]
+        public string BankName { get; set; }
+    }
+
+    public class KorapayQueryData
+    {
+        [JsonProperty("reference")]
+        public string Reference { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("amount")]
+        public decimal Amount { get; set; }
+
+        [JsonProperty("fee")]
+        public decimal Fee { get; set; }
+
+        [JsonProperty("currency")]
+        public string Currency { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        [JsonProperty("payer_bank_account")]
+        public KoraPayerBankAccount PayerBankAccount { get; set; }
+    }
+
+    public class KorapayQueryChargeResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public KorapayQueryData Data { get; set; }
+    }
+
+    #endregion
 }

@@ -253,5 +253,87 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 throw;
             }
         }
+
+        private async Task CreateLocationForRange(UpdatePlaceLocationsDTO locationDtos)
+        {
+            try
+            {
+                if (locationDtos.LocationItems != null)
+                {
+                    var createRange = new List<PlaceLocation>();
+                    foreach (PlaceLocationDTO location in locationDtos.LocationItems)
+                    {
+                        if (location != null && !string.IsNullOrEmpty(location.PlaceLocationName))
+                        {
+                            location.BaseStation = locationDtos.BaseStationName;
+                            location.BaseStationId = locationDtos.BaseStationId;
+                            location.IsExpressHomeDelivery = locationDtos.IsExpressHomeDelivery;
+                            location.IsExtraMileDelivery = locationDtos.IsExtraMileDelivery;
+                            location.IsHomeDelivery = locationDtos.IsHomeDelivery;
+                            location.IsGIGGO = locationDtos.IsGIGGO;
+                            location.IsNormalHomeDelivery = locationDtos.IsNormalHomeDelivery;
+                            location.StateId = locationDtos.StateId;
+                            location.StateName = locationDtos.StateName;
+                            createRange.Add(Mapper.Map<PlaceLocation>(location));
+                        }
+                    }
+                    _uow.PlaceLocation.AddRange(createRange.AsEnumerable());
+                    await _uow.CompleteAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task CreateOrUpdateLocationList(UpdatePlaceLocationsDTO locationDtos)
+        {
+            try
+            {
+                if(locationDtos.PlaceLocations != null)
+                {
+                    foreach (int locationId in locationDtos.PlaceLocations)
+                    {
+                        if (locationId > 0)
+                        {
+                            // Update range of locations
+                            await UpdateLocationForRange(locationId, locationDtos.BaseStationName, locationDtos.BaseStationId);
+                        }
+                    }
+                }
+                
+                if(locationDtos.LocationItems != null)
+                {
+                    // Create range of locations
+                    await CreateLocationForRange(locationDtos);
+                }
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateLocationForRange(int locationId, string baseStationName, int baseStationId)
+        {
+            try
+            {
+                var location = await _uow.PlaceLocation.GetAsync(locationId);
+
+                //To check if the update already exists
+                if (location != null)
+                {
+                    location.BaseStation = baseStationName;
+                    location.BaseStationId = baseStationId;
+                }
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

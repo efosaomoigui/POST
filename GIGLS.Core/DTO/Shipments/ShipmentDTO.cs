@@ -173,6 +173,8 @@ namespace GIGLS.Core.DTO.Shipments
         public int HomeDeliveryLocation { get; set; }
         public decimal ExpressCharge { get; set; }
         public decimal? insurancevalue_display { get; set; }
+        public bool IsExpressDropoff { get; set; }
+        public bool IsBulky { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -589,4 +591,24 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime DeliveredDate { get; set; }
         public string ActualDeliveryAddress { get; set; }
     }
+
+    public class AllCODShipmentDTO : BaseDomainDTO
+    {
+        public AllCODShipmentDTO()
+        {
+            CODShipmentDetail = new List<CODShipmentDetailDTO>();
+        }
+        public List<CODShipmentDetailDTO> CODShipmentDetail { get; set; }
+        public decimal TotalCODAmount { get; set; }
+    }
+
+    public class CODShipmentDetailDTO : BaseDomainDTO
+    {
+        public string Waybill { get; set; }
+        public decimal? CODAmount { get; set; }
+        public string CODStatus { get; set; }
+        public string ReceiverName { get; set; }
+        public string ReceiverStationName { get; set; }
+    }
+
 }

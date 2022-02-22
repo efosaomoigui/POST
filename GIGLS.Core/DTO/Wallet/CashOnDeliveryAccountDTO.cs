@@ -16,6 +16,7 @@ namespace GIGLS.Core.DTO.Wallet
         public CODStatus CODStatus { get; set; }
         public int CountryId { get; set; }
         public CountryDTO Country { get; set; }
+        public string CODMobileStatus { get; set; }
     }
 
     public class CashOnDeliveryRegisterAccountDTO : BaseDomainDTO  

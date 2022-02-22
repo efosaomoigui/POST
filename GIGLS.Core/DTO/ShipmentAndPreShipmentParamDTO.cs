@@ -18,6 +18,7 @@ namespace GIGLS.Core.DTO
         public int PageSize { get; set; } = 20;
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public string UserId { get; set; }
         public string FilterOption { get; set; }
     }
 

@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Node
         Task<NewNodeResponse> RemoveShipmentFromQueue(string waybill);
         Task<AcceptShipmentResponse> AssignShipmentToPartner(AcceptShipmentPayload nodePayload);
         Task<NewNodeResponse> RemovePendingShipment(PendingNodeShipmentDTO dto);
+        Task<NewNodeResponse> UpdateMerchantSubscription(UpdateNodeMercantSubscriptionDTO dto);
     }
 }

@@ -104,7 +104,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
                 var codAccounts = _context.CashOnDeliveryAccount.AsQueryable();
                 return codAccounts;
         }
-
     }
 
     public class CashOnDeliveryRegisterAccountRepository : Repository<CashOnDeliveryRegisterAccount, GIGLSContext>, ICashOnDeliveryRegisterAccountRepository
