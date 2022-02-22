@@ -770,7 +770,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var group = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
                         if (group != null)
                         {
-                            item.ManifestDetails.DestinationServiceCentre = _uow.ServiceCentre.GetAllAsQueryable().(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
+                            item.ManifestDetails.DestinationServiceCentre = _uow.ServiceCentre.GetAllAsQueryable().Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
                             {
                                 Name = d.Name,
                                 FormattedServiceCentreName = d.FormattedServiceCentreName,
