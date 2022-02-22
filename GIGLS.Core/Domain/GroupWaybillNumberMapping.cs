@@ -31,6 +31,7 @@ namespace GIGL.GIGLS.Core.Domain   //
         [MaxLength(128)]
         public string UserId { get; set; }
         public bool ExpressDelivery { get; set; }
+        public bool IsBulky { get; set; }
     }
 
      

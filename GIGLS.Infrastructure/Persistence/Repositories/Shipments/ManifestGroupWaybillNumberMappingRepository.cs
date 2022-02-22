@@ -141,7 +141,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                          ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                          CargoStatus = p.CargoStatus,
-                                                         ExpressDelivery = p.ExpressDelivery
+                                                         ExpressDelivery = p.ExpressDelivery,
+                                                         IsBulky = p.IsBulky,
                                                      }).FirstOrDefault()
                                                  };
 
@@ -262,7 +263,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       IsReceived = mgw.IsReceived,
                                                       DispatchedBy = Context.Users.Where(d => d.Id == mgw.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                       ReceiverBy = Context.Users.Where(r => r.Id == mgw.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                      ExpressDelivery = mgw.ExpressDelivery
+                                                      ExpressDelivery = mgw.ExpressDelivery,
+                                                      IsBulky = mgw.IsBulky
                                                   };
 
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());

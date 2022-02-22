@@ -984,7 +984,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 
                 //check if the group already exist for centre
-                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
+                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
                 if (groupwaybillExist == null)
                 {
                     await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
@@ -1066,7 +1066,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 ExpressDelivery = shipment.ExpressDelivery,
                 OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
                 WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
 
@@ -1080,6 +1081,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
                 ExpressDelivery = shipment.ExpressDelivery,
                 HasManifest = true,
+                IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumber.Add(newGroupWaybill);
 
@@ -1099,7 +1101,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
-                ExpressDelivery = shipment.ExpressDelivery
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
             };
             _uow.Manifest.Add(newManifest);
         }
@@ -1112,7 +1115,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
-                ExpressDelivery = shipment.ExpressDelivery
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
             };
             _uow.Manifest.Add(newManifest);
 
@@ -1137,7 +1141,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 ExpressDelivery = shipment.ExpressDelivery,
                 OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
                 WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
 
@@ -1168,7 +1173,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 ExpressDelivery = shipment.ExpressDelivery,
                 OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
                 WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
 
@@ -1182,7 +1188,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
-                ExpressDelivery = shipment.ExpressDelivery
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
             };
             _uow.Manifest.Add(newManifest);
 
@@ -1207,7 +1214,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 ExpressDelivery = shipment.ExpressDelivery,
                 OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
                 WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
         }
