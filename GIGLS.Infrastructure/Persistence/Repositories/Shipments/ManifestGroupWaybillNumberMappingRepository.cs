@@ -153,7 +153,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     var group =  _context.GroupWaybillNumber.Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
                     if (group != null)
                     {
-                        item.ManifestDetails.DestinationServiceCentre = Context.ServiceCentre.Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
+                        item.ManifestDetails.DestinationServiceCentre = _context.ServiceCentre.Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
                         {
                             Name = d.Name,
                             FormattedServiceCentreName = d.FormattedServiceCentreName,
