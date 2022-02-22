@@ -146,23 +146,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          IsBulky = p.IsBulky,
                                                      }).FirstOrDefault()
                                                  };
-            if (manifestGroupwaybillMappingDTO.Any())
-            {
-                foreach (var item in manifestGroupwaybillMappingDTO)
-                {
-                    var group =  _context.GroupWaybillNumber.Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
-                    if (group != null)
-                    {
-                        item.ManifestDetails.DestinationServiceCentre = _context.ServiceCentre.Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
-                        {
-                            Name = d.Name,
-                            FormattedServiceCentreName = d.FormattedServiceCentreName,
-                        }).FirstOrDefault();
-                    }
-                }
-            }
-
-
             return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
