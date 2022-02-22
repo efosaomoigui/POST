@@ -150,7 +150,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 foreach (var item in manifestGroupwaybillMappingDTO)
                 {
-                    var group = await _context.GroupWaybillNumber.FindAsync(item.GroupWaybillNumber);
+                    var group =  _context.GroupWaybillNumber.Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
                     if (group != null)
                     {
                         item.ManifestDetails.DestinationServiceCentre = Context.ServiceCentre.Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
