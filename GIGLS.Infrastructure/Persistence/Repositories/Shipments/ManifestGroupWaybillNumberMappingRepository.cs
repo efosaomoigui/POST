@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
@@ -140,6 +141,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          SuperManifestStatus = p.SuperManifestStatus,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                          ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                         DestinationServiceCentre = Context.ServiceCentre.Where(r => r.ServiceCentreId == p.DestinationServiceCentreId).Select(d => new ServiceCentreDTO
+                                                         {
+                                                             Name = d.Name,
+                                                             FormattedServiceCentreName = d.FormattedServiceCentreName,
+                                                         }).FirstOrDefault(),
                                                          CargoStatus = p.CargoStatus,
                                                          ExpressDelivery = p.ExpressDelivery,
                                                          IsBulky = p.IsBulky,
