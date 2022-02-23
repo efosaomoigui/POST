@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
@@ -140,10 +141,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          SuperManifestStatus = p.SuperManifestStatus,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                          ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                         CargoStatus = p.CargoStatus
+                                                         CargoStatus = p.CargoStatus,
+                                                         ExpressDelivery = p.ExpressDelivery,
+                                                         IsBulky = p.IsBulky,
                                                      }).FirstOrDefault()
                                                  };
-
             return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
@@ -260,7 +262,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                       IsDispatched = mgw.IsDispatched,
                                                       IsReceived = mgw.IsReceived,
                                                       DispatchedBy = Context.Users.Where(d => d.Id == mgw.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                      ReceiverBy = Context.Users.Where(r => r.Id == mgw.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                      ReceiverBy = Context.Users.Where(r => r.Id == mgw.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                      ExpressDelivery = mgw.ExpressDelivery,
+                                                      IsBulky = mgw.IsBulky
                                                   };
 
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());

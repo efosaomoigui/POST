@@ -168,6 +168,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string RequestNumber { get; set; }
         public decimal ExpressCharge { get; set; }
         public bool IsExpressDropoff { get; set; }
+        public bool IsBulky { get; set; }
 
     }
 

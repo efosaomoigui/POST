@@ -174,6 +174,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal ExpressCharge { get; set; }
         public decimal? insurancevalue_display { get; set; }
         public bool IsExpressDropoff { get; set; }
+        public bool IsBulky { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

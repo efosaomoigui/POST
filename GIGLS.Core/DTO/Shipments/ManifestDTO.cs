@@ -40,5 +40,7 @@ namespace GIGLS.Core.DTO.Shipments
         public List<string> ManifestCodes { get; set; }
         public MovementStatus MovementStatus { get; set; }
         public CargoStatus CargoStatus { get; set; }
+        public bool ExpressDelivery { get; set; }
+        public bool IsBulky { get; set; }
     }
 }

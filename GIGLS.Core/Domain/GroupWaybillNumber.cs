@@ -23,6 +23,9 @@ namespace GIGLS.Core.Domain
 
         public bool HasManifest { get; set; }
         public int DepartureServiceCentreId { get; set; }
+        public bool ExpressDelivery { get; set; }
+        public bool IsBulky { get; set; }
+
     }
 
     public class MovementManifestNumber : BaseDomain, IAuditable 

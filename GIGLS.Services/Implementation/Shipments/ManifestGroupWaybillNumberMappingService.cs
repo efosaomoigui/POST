@@ -763,6 +763,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     result.Add(resultGrp.FirstOrDefault());
                 }
+                if (result.Any())
+                {
+                    foreach (var item in result)
+                    {
+                        var group = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
+                        if (group != null)
+                        {
+                            item.ManifestDetails.DestinationServiceCentre = _uow.ServiceCentre.GetAllAsQueryable().Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
+                            {
+                                Name = d.Name,
+                                FormattedServiceCentreName = d.FormattedServiceCentreName,
+                            }).FirstOrDefault();
+                        }
+                    }
+                }
+
 
                 return result;
             }

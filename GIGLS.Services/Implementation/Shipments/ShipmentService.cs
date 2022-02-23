@@ -1084,6 +1084,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 //{
                 //await SendEmailToCustomerForShipmentCreation(newShipment);
                 //}
+
+                //also group and manifest shipment(grouping and manifesting should consider go standard and faster)
+               // await MappingWaybillNumberToGroup(newShipment.Waybill);
                 return newShipment;
             }
             catch (Exception ex)
@@ -1870,7 +1873,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (!shipmentDTO.IsInternational && domesticCustomerWeekValue)
                 {
-                    await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
+                   // await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
 
                     newShipment.GrandTotal = shipmentDTO.GrandTotal;
                     newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;

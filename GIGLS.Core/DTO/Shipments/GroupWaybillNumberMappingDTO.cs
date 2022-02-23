@@ -31,6 +31,8 @@ namespace GIGLS.CORE.DTO.Shipments
         //Original Information - used for Transit Manifest Tracking
         public int OriginalDepartureServiceCentreId { get; set; }
         public virtual ServiceCentre OriginalDepartureServiceCentre { get; set; }
+        public bool ExpressDelivery { get; set; }
+        public bool IsBulky { get; set; }
     }
 
     public class MovementManifestNumberMappingDTO : BaseDomain 
