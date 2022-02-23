@@ -118,6 +118,23 @@ namespace GIGLS.Services.Implementation.Wallet
             return new GetCustomerBalanceDTO();
         }
 
-       
+        public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
+        {
+            if (String.IsNullOrEmpty(customerCode))
+            {
+                throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            customerCode = customerCode.Trim();
+            return await _uow.CODWallet.ExistAsync(x => x.CustomerCode == customerCode);
+        }
+
+        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn)
+        {
+            if (String.IsNullOrEmpty(bvn))
+            {
+                throw new GenericException("Invalid BVN", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            return await _stellasService.ValidateBVNNumber(bvn.Trim());
+        }
     }
 }

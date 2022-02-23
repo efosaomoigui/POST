@@ -128,6 +128,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly ICODWalletService _codWalletService;
         private readonly IKorapayPaymentService _koraPaymentService;
+        private readonly IStellasService _stellaService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -4621,9 +4622,24 @@ namespace GIGLS.Services.Business.CustomerPortal
             throw new NotImplementedException();
         }
 
-        public Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
+        public async Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            return await _cellulantPaymentService.GetTransferStatus(craccount);
+        }
+
+        public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
+        {
+            return await _codWalletService.CheckIfUserHasCODWallet(customerCode);
+        }
+
+        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn)
+        {
+            return await _codWalletService.ValidateBVNNumber(bvn);
         }
     }
 }

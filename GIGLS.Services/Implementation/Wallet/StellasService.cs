@@ -242,5 +242,55 @@ namespace GIGLS.Services.Implementation.Wallet
             public string password { get; set; } = "Password@001";
 
         }
+
+        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn)
+        {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string url = ConfigurationManager.AppSettings["StellasSandBox"];
+            string validatebvn = ConfigurationManager.AppSettings["StellasValidateBVN"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            string authorization = await GetToken();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            url = $"{url}{validatebvn}";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+                var response = await client.GetAsync(url);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                if (responseResult.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "get", null);
+                    var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry);
+                    return result;
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseContent);
+                    return res;
+                }
+                else
+                {
+                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                }
+            }
+        }
     }
 }

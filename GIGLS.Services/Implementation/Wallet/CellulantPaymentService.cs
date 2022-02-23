@@ -783,5 +783,75 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
         #endregion
+
+        #region Cellulant Confirm Transfer
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            var sessionId = GetSessionIdFromTransferDetails(craccount).Result;
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                throw new GenericException("SessionId not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            result = ConfirmTransferStatus(sessionId).Result;
+            return result;
+        }
+
+        private async Task<bool> ConfirmTransferStatus(string sessionId)
+        {
+            bool result = false;
+            //string token = await GetToken();
+            using (var client = new HttpClient())
+            {
+                //Get login details
+                var url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+                url = $"{url}?sessionid={sessionId}&type=1";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                //setup client
+                client.BaseAddress = new Uri(url);
+                //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await client.GetAsync(url);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                if (response.IsSuccessStatusCode == true)
+                {
+                    result = true;
+                }
+
+                return result;
+            }
+        }
+
+        private async Task<string> GetSessionIdFromTransferDetails(string craccount)
+        {
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var record = _uow.TransferDetails.GetAsync(x => x.CrAccount == craccount).Result;
+            if(record == null)
+            {
+                throw new GenericException("Transfer details not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return record.SessionId;
+        }
+        #endregion
     }
 }

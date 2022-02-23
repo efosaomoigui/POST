@@ -11,7 +11,7 @@ namespace GIGLS.Core.IServices.Wallet
     {
         Task<CreateStellaAccounResponsetDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO);
         Task<GetCustomerBalanceDTO> GetCustomerStellasAccount(string accountNo);
-
+        Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn);
 
     }
 
