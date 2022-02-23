@@ -2676,7 +2676,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     };
                     //send item received message
                     messageDTO.MessageTemplate = "UnRegisteredItem";
-                    await _messageSenderService.SendEmailForReceivedItem(messageDTO);
+                    _messageSenderService.SendEmailForReceivedItem(messageDTO);
                 }
                 return shipmentDtos;
             }
