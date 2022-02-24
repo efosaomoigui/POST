@@ -783,5 +783,31 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
         #endregion
+
+        #region Cellulant TRANSFER PROCESS
+
+
+
+        private async Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload)
+        {
+            string celullantUrl = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var json = JsonConvert.SerializeObject(payload);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(celullantUrl, data);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<CellulantTransferResponsePayload>(responseResult);
+                return result;
+            }
+        }
+        #endregion
+
+
+
     }
 }
