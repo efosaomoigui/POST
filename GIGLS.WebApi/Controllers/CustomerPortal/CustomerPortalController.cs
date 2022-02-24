@@ -3024,14 +3024,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("validatebvnnumber")]
-        public async Task<IServiceResponse<bool>> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<IServiceResponse<ValidateBVNResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                 await _portalService.ValidateBVNNumber(payload);
-                return new ServiceResponse<bool>
+                 var result = await _portalService.ValidateBVNNumber(payload);
+                return new ServiceResponse<ValidateBVNResponseDTO>
                 {
-                    Object = true
+                    Object = result
                 };
             });
         }

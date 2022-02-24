@@ -128,7 +128,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return await _uow.CODWallet.ExistAsync(x => x.CustomerCode == customerCode);
         }
 
-        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             if (payload == null)
             {

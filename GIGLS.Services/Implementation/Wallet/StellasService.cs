@@ -243,7 +243,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         }
 
-        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasSandBox"];
@@ -279,13 +279,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (responseResult.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry);
+                    var result = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(retry);
                     return result;
                 }
                 else if (response.IsSuccessStatusCode)
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseContent);
+                    var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(responseContent);
                     return res;
                 }
                 else

@@ -4637,7 +4637,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.CheckIfUserHasCODWallet(customerCode);
         }
 
-        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             return await _codWalletService.ValidateBVNNumber(payload);
         }

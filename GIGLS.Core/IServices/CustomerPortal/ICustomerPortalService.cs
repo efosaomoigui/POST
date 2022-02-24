@@ -268,6 +268,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload);
         Task<bool> GetTransferStatus(string craccount);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
-        Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
     }
 }
