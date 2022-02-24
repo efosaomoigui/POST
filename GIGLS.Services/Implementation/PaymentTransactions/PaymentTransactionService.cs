@@ -285,7 +285,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
 
             //grouping and manifesting shipment
-            await MappingWaybillNumberToGroup(shipment.Waybill);
+           // await MappingWaybillNumberToGroup(shipment.Waybill);
 
             result = true;
             return result;
