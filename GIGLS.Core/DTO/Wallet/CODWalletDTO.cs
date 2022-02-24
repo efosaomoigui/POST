@@ -115,5 +115,38 @@ namespace GIGLS.Core.DTO.Wallet
         public string PhoneNo { get; set; }
     }
 
+    public class ValidateBVNData
+    {
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        [JsonProperty("bvn")]
+        public string Bvn { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("lastName")]
+        public string LastName { get; set; }
+
+        [JsonProperty("otherNames")]
+        public string OtherNames { get; set; }
+
+        [JsonProperty("dob")]
+        public string Dob { get; set; }
+    }
+
+    public class ValidateBVNResponseDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public ValidateBVNData Data { get; set; }
+    }
+
 
 }
