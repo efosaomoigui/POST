@@ -12,7 +12,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO0);
         Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
-        Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn);
+        Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
     }
 
 }

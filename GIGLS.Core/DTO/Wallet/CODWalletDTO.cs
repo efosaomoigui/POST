@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using Newtonsoft.Json;
 using System;
 
 namespace GIGLS.Core.DTO.Wallet
@@ -95,4 +96,24 @@ namespace GIGLS.Core.DTO.Wallet
         public string availableBalance { get; set; }
         public DateTime financialDate { get; set; }
     }
+
+    public class ValidateCustomerBVN
+    {
+        [JsonProperty("bvn")]
+        public string Bvn { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("lastName")]
+        public string LastName { get; set; }
+
+        [JsonProperty("dateOfBirth")]
+        public string DateOfBirth { get; set; }
+
+        [JsonProperty("phoneNo")]
+        public string PhoneNo { get; set; }
+    }
+
+
 }

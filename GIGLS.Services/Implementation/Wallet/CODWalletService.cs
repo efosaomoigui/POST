@@ -128,13 +128,33 @@ namespace GIGLS.Services.Implementation.Wallet
             return await _uow.CODWallet.ExistAsync(x => x.CustomerCode == customerCode);
         }
 
-        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(string bvn)
+        public async Task<GetCustomerBalanceDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
-            if (String.IsNullOrEmpty(bvn))
+            if (payload == null)
             {
-                throw new GenericException("Invalid BVN", $"{(int)HttpStatusCode.BadRequest}");
+                throw new GenericException("Invalid Payload", $"{(int)HttpStatusCode.BadRequest}");
             }
-            return await _stellasService.ValidateBVNNumber(bvn.Trim());
+            if (string.IsNullOrEmpty(payload.FirstName))
+            {
+                throw new GenericException("FirstName is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.LastName))
+            {
+                throw new GenericException("LastName is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.Bvn))
+            {
+                throw new GenericException("BVN is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.PhoneNo))
+            {
+                throw new GenericException("Phone number is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.DateOfBirth))
+            {
+                throw new GenericException("Date of birth is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            return await _stellasService.ValidateBVNNumber(payload);
         }
     }
 }
