@@ -807,6 +807,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private async Task<bool> ConfirmTransferStatus(string sessionId)
         {
             bool result = false;
+            string readResponse = string.Empty;
             //string token = await GetToken();
             using (var client = new HttpClient())
             {
@@ -820,15 +821,18 @@ namespace GIGLS.Services.Implementation.Wallet
                 //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var response = await client.GetAsync(url);
-
+                var json = JsonConvert.SerializeObject(sessionId);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url,data);
+                
                 if (response == null || !response.IsSuccessStatusCode)
                 {
                     throw new GenericException("Operation could not complete successfully:");
                 }
 
-                if (response.IsSuccessStatusCode == true)
+                readResponse = await response.Content.ReadAsStringAsync();
+                readResponse = JObject.Parse(readResponse)["status"].ToString();
+                if (response.IsSuccessStatusCode == true && readResponse.Contains("00"))
                 {
                     result = true;
                 }
