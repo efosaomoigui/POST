@@ -2938,6 +2938,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
+        [Route("createstellasaccount")]
+        public async Task<IServiceResponse<CODWalletDTO>> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.AddCODWallet(codWalletDTO);
+                return new ServiceResponse<CODWalletDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcustomerstellasaccountbal/{code}")]
+        public async Task<IServiceResponse<GetCustomerBalanceDTO>> GetStellasAccountBal(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasAccountBal(code);
+                return new ServiceResponse<GetCustomerBalanceDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpPost]
         [Route("allcodshipment")]
         public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
         {

@@ -168,6 +168,7 @@
     <Compile Include="Domain\PaymentMethod.cs" />
     <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
+    <Compile Include="Domain\Wallet\CODWallet.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
     <Compile Include="Domain\DeliveryNumber.cs" />
@@ -568,6 +569,7 @@
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
+    <Compile Include="DTO\Wallet\CODWalletDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
     <Compile Include="DTO\Wallet\TransactionResult.cs" />
@@ -826,6 +828,7 @@
     <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWaybillPaymentLogRepository.cs" />
@@ -984,6 +987,7 @@
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
     <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
+    <Compile Include="IServices\Wallet\IStellasService.cs" />
     <Compile Include="IServices\Wallet\IKorapayPaymentService.cs" />
     <Compile Include="IServices\Wallet\ISterlingPaymentService.cs" />
     <Compile Include="IServices\Wallet\IFlutterwavePaymentService.cs" />
@@ -993,6 +997,7 @@
     <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />
     <Compile Include="IServices\Wallet\IPaystackPaymentService.cs" />
     <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
+    <Compile Include="IServices\Wallet\ICODWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
     <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
