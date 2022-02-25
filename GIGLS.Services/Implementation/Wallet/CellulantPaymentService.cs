@@ -822,7 +822,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 content = await response.Content.ReadAsStringAsync();
                 var status = JObject.Parse(content)["status"].ToString();
 
-                if (string.IsNullOrEmpty(status))
+                if (!string.IsNullOrEmpty(status))
                 {
                     result = status == "00" ? true : result;
                 }
