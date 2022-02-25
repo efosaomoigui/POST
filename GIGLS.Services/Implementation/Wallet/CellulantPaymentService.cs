@@ -794,51 +794,40 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             craccount = craccount.Trim();
 
-            var sessionId = GetSessionIdFromTransferDetails(craccount).Result;
+            var sessionId = await GetSessionIdFromTransferDetails(craccount);
             if (string.IsNullOrEmpty(sessionId))
             {
                 throw new GenericException("SessionId not found", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            result = ConfirmTransferStatus(sessionId).Result;
+            result = await ConfirmTransferStatus(sessionId);
             return result;
         }
 
         private async Task<bool> ConfirmTransferStatus(string sessionId)
         {
             bool result = false;
-            string readResponse = string.Empty;
-            //string token = await GetToken();
-            using (var client = new HttpClient())
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
             {
-                //Get login details
-                var url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
-                url = $"{url}?sessionid={sessionId}&type=1";
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?sessionid={sessionId}&type=1"){};
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
 
-                //setup client
-                client.BaseAddress = new Uri(url);
-                //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var json = JsonConvert.SerializeObject(sessionId);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url,data);
-                
-                if (response == null || !response.IsSuccessStatusCode)
+                if (string.IsNullOrEmpty(status))
                 {
-                    throw new GenericException("Operation could not complete successfully:");
+                    result = status == "00" ? true : result;
                 }
-
-                readResponse = await response.Content.ReadAsStringAsync();
-                readResponse = JObject.Parse(readResponse)["status"].ToString();
-                if (response.IsSuccessStatusCode == true && readResponse.Contains("00"))
-                {
-                    result = true;
-                }
-
-                return result;
             }
+            return result;
         }
 
         private async Task<string> GetSessionIdFromTransferDetails(string craccount)
@@ -848,8 +837,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
             }
 
-            var record = _uow.TransferDetails.GetAsync(x => x.CrAccount == craccount).Result;
-            if(record == null)
+            var record = await _uow.TransferDetails.GetAsync(x => x.CrAccount == craccount);
+            if (record == null)
             {
                 throw new GenericException("Transfer details not found", $"{(int)HttpStatusCode.NotFound}");
             }
