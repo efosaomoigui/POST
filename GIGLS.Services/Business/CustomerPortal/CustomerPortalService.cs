@@ -4655,5 +4655,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await _cellulantPaymentService.Transfer(payload);
             return result;
         }
+
+        public async Task<StellassBankResponse> GetStellasBanks()
+        {
+            return await _codWalletService.GetBanks();
+        }
     }
 }

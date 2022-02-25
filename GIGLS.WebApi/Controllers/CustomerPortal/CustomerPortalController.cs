@@ -3007,5 +3007,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("stellasbanks")]
+        public async Task<IServiceResponse<StellassBankResponse>> GetStellasBank()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasBanks();
+                return new ServiceResponse<StellassBankResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

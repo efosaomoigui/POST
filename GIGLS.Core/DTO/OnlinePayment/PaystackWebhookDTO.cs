@@ -589,6 +589,11 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class Payload
     {
+        public Payload()
+        {
+            Credentials = new Credentials();
+            Packet = new List<Packet>();
+        }
         [JsonProperty("credentials")]
         public Credentials Credentials { get; set; }
 
@@ -598,6 +603,10 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class CellulantTransferPayload
     {
+        public CellulantTransferPayload()
+        {
+            Payload = new Payload();
+        }
         [JsonProperty("countryCode")]
         public string CountryCode { get; set; }
 
