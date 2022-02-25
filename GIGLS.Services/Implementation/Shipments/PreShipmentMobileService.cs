@@ -5381,6 +5381,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         DepartureCountryId = departureCountryId,
                                         PackageOptionIds = detail.PackageOptionIds,
                                         IsClassShipment = isClassShipment,
+                                        IsBulky = detail.IsBulky,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
