@@ -653,15 +653,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             };
             _uow.Manifest.Add(newManifest);
 
-            //also  map group waybill to existing manifest
-            var newMapping = new ManifestGroupWaybillNumberMapping
+            var exist = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+            if (!exist)
             {
-                ManifestCode = manifestCode,
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                IsActive = true,
-                DateMapped = DateTime.Now,
-            };
-            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                //also  map group waybill to existing manifest
+                var newMapping = new ManifestGroupWaybillNumberMapping
+                {
+                    ManifestCode = manifestCode,
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    IsActive = true,
+                    DateMapped = DateTime.Now,
+                };
+                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -683,17 +687,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task MapExistingGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, Manifest manifest, GroupWaybillNumber groupWaybill)
         {
-            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
-
             //also  map group waybill to existing manifest
-            var newMapping = new ManifestGroupWaybillNumberMapping
+            var exist = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+            if (!exist)
             {
-                ManifestCode = manifest.ManifestCode,
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                IsActive = true,
-                DateMapped = DateTime.Now,
-            };
-            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                var newMapping = new ManifestGroupWaybillNumberMapping
+                {
+                    ManifestCode = manifest.ManifestCode,
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    IsActive = true,
+                    DateMapped = DateTime.Now,
+                };
+                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -727,14 +733,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             _uow.Manifest.Add(newManifest);
 
             //also  map group waybill to existing manifest
-            var newMapping = new ManifestGroupWaybillNumberMapping
+            var exist = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+            if (!exist)
             {
-                ManifestCode = manifestCode,
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                IsActive = true,
-                DateMapped = DateTime.Now,
-            };
-            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                var newMapping = new ManifestGroupWaybillNumberMapping
+                {
+                    ManifestCode = manifestCode,
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    IsActive = true,
+                    DateMapped = DateTime.Now,
+                };
+                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -752,6 +762,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
         }
+
         private async Task MapNewGroupWaybillToExistingManifest(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, Manifest manifest)
         {
             var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
@@ -769,15 +780,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumber.Add(newGroupWaybill);
-            //also  map group waybill to existing manifest
-            var newMapping = new ManifestGroupWaybillNumberMapping
+
+            var exist = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
+            if (!exist)
             {
-                ManifestCode = manifest.ManifestCode,
-                GroupWaybillNumber = groupWaybillNumber,
-                IsActive = true,
-                DateMapped = DateTime.Now,
-            };
-            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                //also  map group waybill to existing manifest
+                var newMapping = new ManifestGroupWaybillNumberMapping
+                {
+                    ManifestCode = manifest.ManifestCode,
+                    GroupWaybillNumber = groupWaybillNumber,
+                    IsActive = true,
+                    DateMapped = DateTime.Now,
+                };
+                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
