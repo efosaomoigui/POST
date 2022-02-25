@@ -4658,7 +4658,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<StellassBankResponse> GetStellasBanks()
         {
-            return await _codWalletService.GetBanks();
+            return await _codWalletService.GetStellasBanks();
         }
     }
 }
