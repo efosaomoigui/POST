@@ -32,13 +32,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, 
-            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _messageSenderService = messageSenderService;
             _financialReportService = financialReportService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
+
             MapperConfig.Initialize();
         }
 
