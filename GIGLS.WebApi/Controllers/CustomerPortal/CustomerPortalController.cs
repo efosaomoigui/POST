@@ -2993,5 +2993,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("celullanttransfer")]
+        public async Task<IServiceResponse<CellulantTransferResponsePayload>> CelullantTransfer(CellulantTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CelullantTransfer(payload);
+                return new ServiceResponse<CellulantTransferResponsePayload>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

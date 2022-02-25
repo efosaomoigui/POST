@@ -126,7 +126,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IGIGXUserDetailService _gigxService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ISterlingPaymentService _sterlingPaymentService;
-        private readonly ICODWalletService _codWalletService;
         private readonly IKorapayPaymentService _koraPaymentService;
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -141,7 +140,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService,IKorapayPaymentService koraPaymentService,ICODWalletService codWalletService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService, IKorapayPaymentService koraPaymentService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -191,7 +190,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _cellulantPaymentService = cellulantPaymentService;
             _sterlingPaymentService = sterlingPaymentService;
             _koraPaymentService = koraPaymentService;
-           _codWalletService = codWalletService;
             MapperConfig.Initialize();
         }
 
@@ -4597,51 +4595,65 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        public async Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        public async Task<AllCODShipmentDTO>GetAllCODShipments(PaginationDTO dto)
         {
-
-            if (String.IsNullOrEmpty(codWalletDTO.CustomerCode))
+            try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
-                codWalletDTO.CustomerCode = currentUser.UserChannelCode;
+                return await _shipmentService.GetAllCODShipments(dto);
             }
-            var result = await _codWalletService.CreateStellasAccount(codWalletDTO);
-            return result;
-
-        }
-        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
-        {
-            var bal = _codWalletService.GetStellasAccountBal(customerCode);
-            return bal;
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
+        public async Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
         {
-            throw new NotImplementedException();
+            return await _koraPaymentService.InitializeCharge(payload);
         }
 
-        public Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
+        public async Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<string> CelullantTransfer(string customerCode)
-        {
-            var user = await _companyService.GetCompanyByCode(customerCode);
-            accInfo = await _uow.codw
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var user = await _companyService.GetCompanyByCode(transferDTO.CustomerCode);
+            if (user is null)
+            {
+                throw new GenericException("ecommerce user does not exist");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == transferDTO.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            string username = ConfigurationManager.AppSettings["CellulantUsername"];
+            string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
             var pak = new Packet();
-            pak.ServiceCode = "";
+            pak.ServiceCode = serviceCode;
             pak.MSISDN = user.PhoneNumber;
-            pak.InvoiceNumber = "";
+            pak.InvoiceNumber = transferDTO.RefNo;
+            pak.AccountNumber = accInfo.AccountNo;
+            pak.PayerTransactionID = transferDTO.RefNo;
+            pak.Amount = transferDTO.Amount;
+            pak.HubID = "";
+            pak.Narration = "Transfer to COD wallet";
+            pak.DatePaymentReceived = DateTime.Now.ToString();
+            pak.ExtraData = "";
+            pak.CurrencyCode = "NG";
+            pak.CustomerNames = $"{user.Name}";
+            pak.PaymentMode = "Online Payment";
 
             var payload = new CellulantTransferPayload();
             payload.CountryCode = "NG";
-            payload.Function = "";
-            payload.Payload.Credentials.Password = "";
-            payload.Payload.Credentials.Username = "";
-            payload.Payload.Packet
-
+            payload.Function = "BEEP.postPayment";
+            payload.Payload.Credentials.Password = pwd;
+            payload.Payload.Credentials.Username = username;
+            payload.Payload.Packet.Add(pak);
+            var result = await _cellulantPaymentService.Transfer(payload);
+            return result;
         }
     }
 }

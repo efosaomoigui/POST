@@ -563,7 +563,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string PayerTransactionID { get; set; }
 
         [JsonProperty("amount")]
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("hubID")]
         public string HubID { get; set; }
@@ -647,6 +647,15 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
         [JsonProperty("results")]
         public List<Result> Results { get; set; }
+    }
+
+
+    public class CellulantTransferDTO
+    {
+        public string CustomerCode { get; set; }
+
+        public decimal Amount { get; set; }
+        public string RefNo { get; set; }
     }
 
 
