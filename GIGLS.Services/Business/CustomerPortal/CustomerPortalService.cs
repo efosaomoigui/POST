@@ -4611,5 +4611,23 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _koraPaymentService.InitializeCharge(payload);
         }
+
+        public async Task<string> CelullantTransfer(string customerCode)
+        {
+            var user = await _companyService.GetCompanyByCode(customerCode);
+            accInfo = await _uow.codw
+            var pak = new Packet();
+            pak.ServiceCode = "";
+            pak.MSISDN = user.PhoneNumber;
+            pak.InvoiceNumber = "";
+
+            var payload = new CellulantTransferPayload();
+            payload.CountryCode = "NG";
+            payload.Function = "";
+            payload.Payload.Credentials.Password = "";
+            payload.Payload.Credentials.Username = "";
+            payload.Payload.Packet
+
+        }
     }
 }
