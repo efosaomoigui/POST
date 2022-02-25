@@ -16,6 +16,9 @@ using System.Security.Cryptography;
 using System.Text;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using GIGL.GIGLS.Core.Domain;
+using System.Linq;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -26,6 +29,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IFinancialReportService _financialReportService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, 
             IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
@@ -127,6 +131,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var waybill = paymentPartialTransactionProcessDTO.Waybill;
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == waybill);
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybill);
 
             //get the GrandTotal Amount to be paid
             var grandTotal = invoiceEntity.Amount;
@@ -238,8 +243,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             /////2.  When payment is complete and balance is 0, send sms to customer
             if (balanceAmount == 0)
             {
-                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-
                 if (shipment != null)
                 {
                     //Add to Financial Reports
@@ -277,6 +280,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 }
             }
+            if (result)
+            {
+                //grouping and manifesting shipment
+                if (shipment.IsBulky)
+                {
+                    await MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                }
+                else
+                {
+                    await MappingWaybillNumberToGroup(shipment.Waybill);
+                }
+            }
 
             return result;
         }
@@ -310,5 +325,371 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);
         }
+
+
+        #region IMPLEMENTING GROUPING AND MANIFESTING
+
+        //map waybillNumber to groupWaybillNumber
+        private async Task MappingWaybillNumberToGroup(string waybill)
+        {
+            try
+            {
+                // get the service centres of login user
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 0)
+                {
+                    throw new GenericException("Error Grouping waybill. An error occured while trying to group waybill automatically,please manually group waybill.");
+                }
+
+                //validate waybill 
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                if (shipment is null)
+                {
+                    throw new GenericException("Error Grouping waybill. An error occured while trying to group waybill automatically,please manually group waybill.");
+                }
+
+                int departureServiceCenterId = serviceCenters[0];
+                var currentUserId = await _userService.GetCurrentUserId();
+                var destServiceCentre = await _uow.ServiceCentre.GetAsync(shipment.DestinationServiceCentreId);
+                var deptServiceCentre = await _uow.ServiceCentre.GetAsync(departureServiceCenterId);
+                var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
+
+                //validate the ids are in the system
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+
+
+
+                //check if the group already exist for centre
+                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == false).FirstOrDefault();
+                if (groupwaybillExist == null)
+                {
+                    await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                }
+                else
+                {
+
+                    //check if it has a manifest mapping
+                    var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
+                    if (isManifestGroupWaybillMapped is null)
+                    {
+                        //map new waybill to existing groupwaybill 
+                        await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                    }
+
+                    else
+                    {
+                        //confirm if the manifest has been dispatched
+                        var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
+                        if (manifestDispatched)
+                        {
+                            await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                        }
+                        else
+                        {
+                            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode);
+                            if (manifest is null)
+                            {
+                                await CreateNewManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                            }
+                            else if (manifest != null)
+                            {
+                                //get date for the manifest
+                                var today = DateTime.Now;
+                                int hours = Convert.ToInt32((today - manifest.DateCreated).TotalHours);
+                                if (hours >= 24)
+                                {
+                                    await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                                }
+                                else
+                                {
+                                    //map new waybill to existing groupwaybill 
+                                    await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, manifest, groupwaybillExist);
+                                }
+                            }
+                        }
+                    }
+                }
+                shipment.IsGrouped = true;
+                var updateTransitWaybill = await _uow.TransitWaybillNumber.GetAsync(x => x.WaybillNumber == shipment.Waybill);
+                if (updateTransitWaybill != null)
+                {
+                    updateTransitWaybill.IsGrouped = true;
+                }
+                _uow.Complete();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        private async Task MappingWaybillNumberToGroupForBulk(string waybill)
+        {
+            try
+            {
+                // get the service centres of login user
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 0)
+                {
+                    throw new GenericException("Error Grouping waybill. An error occured while trying to group waybill automatically,please manually group waybill.");
+                }
+
+                //validate waybill 
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                if (shipment is null)
+                {
+                    throw new GenericException("Error Grouping waybill. An error occured while trying to group waybill automatically,please manually group waybill.");
+                }
+
+                int departureServiceCenterId = serviceCenters[0];
+                var currentUserId = await _userService.GetCurrentUserId();
+                var destServiceCentre = await _uow.ServiceCentre.GetAsync(shipment.DestinationServiceCentreId);
+                var deptServiceCentre = await _uow.ServiceCentre.GetAsync(departureServiceCenterId);
+                var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
+
+                //validate the ids are in the system
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+
+
+
+                //check if the group already exist for centre
+                var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
+                if (groupwaybillExist == null)
+                {
+                    await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                }
+                else
+                {
+
+                    //check if it has a manifest mapping
+                    var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
+                    if (isManifestGroupWaybillMapped is null)
+                    {
+                        //map new waybill to existing groupwaybill 
+                        await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                    }
+
+                    else
+                    {
+                        //confirm if the manifest has been dispatched
+                        var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
+                        if (manifestDispatched)
+                        {
+                            await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                        }
+                        else
+                        {
+                            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode);
+                            if (manifest is null)
+                            {
+                                await CreateNewManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                            }
+                            else if (manifest != null)
+                            {
+                                //get date for the manifest
+                                var today = DateTime.Now;
+                                int hours = Convert.ToInt32((today - manifest.DateCreated).TotalHours);
+                                if (hours >= 24)
+                                {
+                                    await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                                }
+                                else
+                                {
+                                    //map new waybill to existing groupwaybill 
+                                    await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, manifest, groupwaybillExist);
+                                }
+                            }
+                        }
+                    }
+                }
+                shipment.IsGrouped = true;
+                var updateTransitWaybill = await _uow.TransitWaybillNumber.GetAsync(x => x.WaybillNumber == shipment.Waybill);
+                if (updateTransitWaybill != null)
+                {
+                    updateTransitWaybill.IsGrouped = true;
+                }
+                _uow.Complete();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
+        private async Task NewGroupWaybillProcess(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)
+        {
+            // generate new manifest code
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
+
+            // create a group waybillnumbermapping
+            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            {
+                GroupWaybillNumber = groupWaybillNumber,
+                UserId = userId,
+                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                WaybillNumber = shipment.Waybill,
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+
+            //create a groupwaybill for centre
+            var newGroupWaybill = new GroupWaybillNumber
+            {
+                GroupWaybillCode = groupWaybillNumber,
+                UserId = userId,
+                ServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                HasManifest = true,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumber.Add(newGroupWaybill);
+
+            //also create a minifest group manifest and add group waybill to it
+            //Add new Mapping
+            var newMapping = new ManifestGroupWaybillNumberMapping
+            {
+                ManifestCode = manifestCode,
+                GroupWaybillNumber = newGroupWaybill.GroupWaybillCode,
+                IsActive = true,
+                DateMapped = DateTime.Now
+            };
+            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+            //create new manifest
+            var newManifest = new Manifest
+            {
+                DateTime = DateTime.Now,
+                ManifestCode = manifestCode,
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.Manifest.Add(newManifest);
+        }
+
+        private async Task CreateNewManifestGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, GroupWaybillNumber groupWaybill)
+        {
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+            //create new manifest
+            var newManifest = new Manifest
+            {
+                DateTime = DateTime.Now,
+                ManifestCode = manifestCode,
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.Manifest.Add(newManifest);
+
+            //also  map group waybill to existing manifest
+            var newMapping = new ManifestGroupWaybillNumberMapping
+            {
+                ManifestCode = manifestCode,
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                IsActive = true,
+                DateMapped = DateTime.Now,
+            };
+            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+            //map new waybill to existing groupwaybill 
+            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            {
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                UserId = userId,
+                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                WaybillNumber = shipment.Waybill,
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+
+        }
+
+        private async Task MapExistingGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, Manifest manifest, GroupWaybillNumber groupWaybill)
+        {
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+
+            //also  map group waybill to existing manifest
+            var newMapping = new ManifestGroupWaybillNumberMapping
+            {
+                ManifestCode = manifest.ManifestCode,
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                IsActive = true,
+                DateMapped = DateTime.Now,
+            };
+            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+            //map new waybill to existing groupwaybill 
+            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            {
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                UserId = userId,
+                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                WaybillNumber = shipment.Waybill,
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+
+        }
+
+        private async Task CreateNewManifest(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, GroupWaybillNumber groupWaybill)
+        {
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+            //create new manifest
+            var newManifest = new Manifest
+            {
+                DateTime = DateTime.Now,
+                ManifestCode = manifestCode,
+                ExpressDelivery = shipment.ExpressDelivery,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.Manifest.Add(newManifest);
+
+            //also  map group waybill to existing manifest
+            var newMapping = new ManifestGroupWaybillNumberMapping
+            {
+                ManifestCode = manifestCode,
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                IsActive = true,
+                DateMapped = DateTime.Now,
+            };
+            _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+            //map new waybill to existing groupwaybill 
+            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            {
+                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                UserId = userId,
+                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                WaybillNumber = shipment.Waybill,
+                DateMapped = DateTime.Now,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+        }
+        #endregion
+
     }
 }
