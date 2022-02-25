@@ -767,14 +767,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     foreach (var item in result)
                     {
-                        var group = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
-                        if (group != null)
+                        if (!item.ManifestDetails.IsBulky)
                         {
-                            item.ManifestDetails.DestinationServiceCentre = _uow.ServiceCentre.GetAllAsQueryable().Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
+                            var group = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.GroupWaybillCode == item.GroupWaybillNumber).FirstOrDefault();
+                            if (group != null)
                             {
-                                Name = d.Name,
-                                FormattedServiceCentreName = d.FormattedServiceCentreName,
-                            }).FirstOrDefault();
+                                item.ManifestDetails.DestinationServiceCentre = _uow.ServiceCentre.GetAllAsQueryable().Where(r => r.ServiceCentreId == group.ServiceCentreId).Select(d => new ServiceCentreDTO
+                                {
+                                    Name = d.Name,
+                                    FormattedServiceCentreName = d.FormattedServiceCentreName,
+                                }).FirstOrDefault();
+                            } 
                         }
                     }
                 }
