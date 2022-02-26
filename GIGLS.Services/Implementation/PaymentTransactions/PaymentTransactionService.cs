@@ -1119,7 +1119,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                             {
                                 await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
                             }
-                            await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist);
+                            else
+                            {
+                                await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist); 
+                            }
                         } 
                     }
                 }
