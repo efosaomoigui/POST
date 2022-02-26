@@ -518,8 +518,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private async Task NewGroupWaybillProcess(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)
         {
             // generate new manifest code
-            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
-            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, destServiceCentre.Code);
+            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, destServiceCentre.Code);
 
             // create a group waybillnumbermapping
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -575,7 +575,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task CreateNewManifestGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, GroupWaybillNumber groupWaybill)
         {
-            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, destServiceCentre.Code);
             //create new manifest
             var newManifest = new Manifest
             {
@@ -664,7 +664,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task CreateNewManifest(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, GroupWaybillNumber groupWaybill)
         {
-            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, deptServiceCentre.Code);
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, destServiceCentre.Code);
             //create new manifest
             var newManifest = new Manifest
             {
@@ -713,7 +713,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         private async Task MapNewGroupWaybillToExistingManifest(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, Manifest manifest)
         {
-            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, deptServiceCentre.Code);
+            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, destServiceCentre.Code);
 
             //create a groupwaybill for centre
             var newGroupWaybill = new GroupWaybillNumber
