@@ -1091,16 +1091,24 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
                 else
                 {
-
-                    var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
-                    if (groupwaybillExist == null)
+                    var today = DateTime.Now;
+                    int hours = Convert.ToInt32((today - bulkManifest.DateCreated).TotalHours);
+                    if (hours >= 24)
                     {
-                        await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
+                        await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
                     }
                     else
                     {
-                        //map new waybill to existing groupwaybill 
-                        await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist);
+                        var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
+                        if (groupwaybillExist == null)
+                        {
+                            await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
+                        }
+                        else
+                        {
+                            //map new waybill to existing groupwaybill 
+                            await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist);
+                        } 
                     }
                 }
                 shipment.IsGrouped = true;
@@ -1203,6 +1211,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping); 
             }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -1236,6 +1249,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     DateMapped = DateTime.Now,
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping); 
+            }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
             }
 
             //map new waybill to existing groupwaybill 
@@ -1281,6 +1299,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     DateMapped = DateTime.Now,
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping); 
+            }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
             }
 
             //map new waybill to existing groupwaybill 
@@ -1331,6 +1354,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping); 
             }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
+                gmw.DateMapped = DateTime.Now;
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -1347,7 +1375,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
-
         }
 
         #endregion
