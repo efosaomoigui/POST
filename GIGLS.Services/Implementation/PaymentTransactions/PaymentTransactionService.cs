@@ -1084,7 +1084,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
 
                 //check if the bulk manifest exist
-                var bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && x.IsDispatched == false && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
+                var bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
                 if (bulkManifest is null)
                 {
                     await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
