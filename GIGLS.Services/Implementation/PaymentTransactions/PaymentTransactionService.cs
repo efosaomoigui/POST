@@ -1107,7 +1107,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         }
                         else
                         {
-                            //map new waybill to existing groupwaybill 
+                            //map new waybill to existing groupwaybill
+                            var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
+                            if (isManifestGroupWaybillMapped is null)
+                            {
+                                //map new waybill to existing groupwaybill 
+                                await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                            }
+                            var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
+                            if (manifestDispatched)
+                            {
+                                await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
+                            }
                             await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist);
                         } 
                     }

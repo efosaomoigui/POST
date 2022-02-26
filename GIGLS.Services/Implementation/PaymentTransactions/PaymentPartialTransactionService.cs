@@ -584,6 +584,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
 
 
+
         private async Task NewGroupWaybillProcess(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)
         {
             // generate new manifest code
