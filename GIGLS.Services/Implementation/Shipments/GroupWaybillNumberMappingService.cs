@@ -538,7 +538,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             DepartureServiceCentreId = departureServiceCenterId,
                             DestinationServiceCentreId = serviceCenterId,
                             OriginalDepartureServiceCentreId = departureServiceCenterId,
-                            UserId = currentUserId
+                            UserId = currentUserId,
+                            IsBulky = shipmentDTO.IsBulky,
+                            ExpressDelivery = shipmentDTO.ExpressDelivery
                         };
 
                         groupWaybillNumberMapping.Add(newMapping);
