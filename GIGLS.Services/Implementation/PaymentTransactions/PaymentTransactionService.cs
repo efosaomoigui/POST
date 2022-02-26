@@ -1102,6 +1102,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
                         if (groupwaybillExist == null)
                         {
+                            bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
                             await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
                         }
                         else
