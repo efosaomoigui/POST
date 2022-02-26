@@ -668,6 +668,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
             }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -701,6 +706,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     DateMapped = DateTime.Now,
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
             }
 
             //map new waybill to existing groupwaybill 
@@ -746,6 +756,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     DateMapped = DateTime.Now,
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+            }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode);
+                gmw.DateMapped = DateTime.Now;
             }
 
             //map new waybill to existing groupwaybill 
@@ -796,6 +811,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 };
                 _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
             }
+            if (exist)
+            {
+                var gmw = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
+                gmw.DateMapped = DateTime.Now;
+            }
 
             //map new waybill to existing groupwaybill 
             var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
@@ -812,7 +832,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
-
         }
 
         #endregion
