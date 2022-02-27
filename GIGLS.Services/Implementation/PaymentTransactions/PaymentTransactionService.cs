@@ -1091,7 +1091,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
 
                 //check if the bulk manifest exist
-                var bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
+                var bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId).FirstOrDefault();
                 if (bulkManifest is null)
                 {
                     await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
@@ -1109,7 +1109,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         var groupwaybillExist = _uow.GroupWaybillNumber.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId && x.ExpressDelivery == shipment.ExpressDelivery && x.IsBulky == shipment.IsBulky).FirstOrDefault();
                         if (groupwaybillExist == null)
                         {
-                            bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery).FirstOrDefault();
+                            bulkManifest = _uow.Manifest.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.IsBulky && !x.IsDispatched && x.ExpressDelivery == shipment.ExpressDelivery && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId).FirstOrDefault();
                             await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
                         }
                         else
@@ -1202,7 +1202,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
                 ExpressDelivery = shipment.ExpressDelivery,
-                IsBulky = shipment.IsBulky
+                IsBulky = shipment.IsBulky,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
             };
             _uow.Manifest.Add(newManifest);
         }
@@ -1216,7 +1217,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
                 ExpressDelivery = shipment.ExpressDelivery,
-                IsBulky = shipment.IsBulky
+                IsBulky = shipment.IsBulky,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
             };
             _uow.Manifest.Add(newManifest);
 
@@ -1305,7 +1307,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 DateTime = DateTime.Now,
                 ManifestCode = manifestCode,
                 ExpressDelivery = shipment.ExpressDelivery,
-                IsBulky = shipment.IsBulky
+                IsBulky = shipment.IsBulky,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
             };
             _uow.Manifest.Add(newManifest);
 
