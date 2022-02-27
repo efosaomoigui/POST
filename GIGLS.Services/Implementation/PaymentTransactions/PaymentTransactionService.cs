@@ -986,7 +986,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //validate the ids are in the system
                 var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
-
+                var groupWaybill = new GroupWaybillNumber();
 
                 
                 //check if the group already exist for centre
@@ -997,13 +997,21 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
                 else
                 {
+                    groupWaybill = groupwaybillExist;
+                    var today = DateTime.Now;
+                    int groupHours = Convert.ToInt32((today - groupwaybillExist.DateCreated).TotalHours);
+                    if (groupHours >= 24)
+                    {
+                       var newGroup = await NewGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                        groupWaybill = newGroup;
+                    }
 
                     //check if it has a manifest mapping
-                    var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
+                    var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode).FirstOrDefault();
                     if (isManifestGroupWaybillMapped is null)
                     {
                         //map new waybill to existing groupwaybill 
-                        await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                        await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
                     }
 
                     else
@@ -1019,21 +1027,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode);
                             if (manifest is null)
                             {
-                                await CreateNewManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                                await CreateNewManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
                             }
                             else if(manifest != null)
                             {
                                 //get date for the manifest
-                                var today = DateTime.Now;
-                                int hours = Convert.ToInt32((today - manifest.DateCreated).TotalHours);
-                                if (hours >= 24)
+                                int manifestHours = Convert.ToInt32((today - manifest.DateCreated).TotalHours);
+                                if (manifestHours >= 24)
                                 {
                                     await NewGroupWaybillProcess(shipment, deptServiceCentre, destServiceCentre, currentUserId);
                                 }
                                 else
                                 {
                                     //map new waybill to existing groupwaybill 
-                                    await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, manifest, groupwaybillExist);
+                                    await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, manifest, groupWaybill);
                                 }
                             }
                         } 
@@ -1390,6 +1397,27 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 IsBulky = shipment.IsBulky
             };
             _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+        }
+
+        private async Task<GroupWaybillNumber> NewGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)
+        {
+            // generate new manifest code
+            var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest, destServiceCentre.Code);
+            var groupWaybillNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, destServiceCentre.Code);
+            //create a groupwaybill for centre
+            var newGroupWaybill = new GroupWaybillNumber
+            {
+                GroupWaybillCode = groupWaybillNumber,
+                UserId = userId,
+                ServiceCentreId = destServiceCentre.ServiceCentreId,
+                IsActive = true,
+                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                ExpressDelivery = shipment.ExpressDelivery,
+                HasManifest = true,
+                IsBulky = shipment.IsBulky
+            };
+            _uow.GroupWaybillNumber.Add(newGroupWaybill);
+            return newGroupWaybill;
         }
 
         #endregion
