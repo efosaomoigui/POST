@@ -163,6 +163,7 @@ namespace GIGLS.Services.Implementation.Utility
 
                 //validate the ids are in the system
                 var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                var groupWaybill = new GroupWaybillNumber();
 
 
 
@@ -190,12 +191,20 @@ namespace GIGLS.Services.Implementation.Utility
                         }
                         else
                         {
+
+                            groupWaybill = groupwaybillExist;
+                            int groupHours = Convert.ToInt32((today - groupwaybillExist.DateCreated).TotalHours);
+                            if (groupHours >= 24)
+                            {
+                                var newGroup = await NewGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId);
+                                groupWaybill = newGroup;
+                            }
                             //map new waybill to existing groupwaybill
-                            var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupwaybillExist.GroupWaybillCode).FirstOrDefault();
+                            var isManifestGroupWaybillMapped = _uow.ManifestGroupWaybillNumberMapping.GetAllAsQueryable().OrderByDescending(x => x.DateCreated).Where(x => x.GroupWaybillNumber == groupWaybill.GroupWaybillCode).FirstOrDefault();
                             if (isManifestGroupWaybillMapped is null)
                             {
                                 //map new waybill to existing groupwaybill 
-                                await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupwaybillExist);
+                                await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
                             }
                             var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
                             if (manifestDispatched)
@@ -204,7 +213,7 @@ namespace GIGLS.Services.Implementation.Utility
                             }
                             else
                             {
-                                await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupwaybillExist);
+                                await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupWaybill);
                             }
                         }
                     }
