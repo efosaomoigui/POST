@@ -977,6 +977,7 @@
     <Compile Include="IServices\UPS\IUPSService.cs" />
     <Compile Include="IServices\User\IRankHistoryService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
+    <Compile Include="IServices\Utility\IAutoManifestAndGroupingService.cs" />
     <Compile Include="IServices\Utility\IQRAndBarcodeService.cs" />
     <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />
     <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />

@@ -74,6 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICountryService _countryService;
         private readonly IInternationalCargoManifestService _intlCargoManifest;
         private readonly IPlaceLocationService _locationService;
+        private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -86,7 +87,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -112,6 +113,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryService = countryService;
             _intlCargoManifest = intlCargoManifest;
             _locationService = locationService;
+            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             MapperConfig.Initialize();
         }
 

@@ -83,6 +83,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IDHLService _dhlService;
         private readonly IUPSService _uPSService;
         private readonly IInsuranceService _insuranceService;
+        private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -92,7 +93,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
             INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService,
-            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService)
+            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -123,6 +124,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _dhlService = dHLService;
             _uPSService = uPSService;
             _insuranceService = insuranceService;
+            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             MapperConfig.Initialize();
         }
 
@@ -5433,6 +5435,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("This shipment is not an interstate delivery, take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
                         }
+                        if (detail.IsBulky)
+                        {
+                            await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(detail.WaybillNumber);
+                        }
+                        else
+                        {
+                            await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(detail.WaybillNumber);
+                        }
                         return true;
                     }
                 }
@@ -7558,6 +7568,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DeclarationOfValueCheck = declarationOfValueCheck;
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
                 shipment.Courier = mobile.CompanyMap.ToString();
+                shipment.IsBulky = detail.IsBulky;
                 shipment.ShipmentItems = mobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                 {
                     Description = s.Description,

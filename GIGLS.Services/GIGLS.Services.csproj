@@ -349,6 +349,7 @@
     <Compile Include="Implementation\Utility\EnumValue.cs" />
     <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\IPaymentDataEncryption.cs" />
     <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\RavePaymentDataEncryption.cs" />
+    <Compile Include="Implementation\Utility\AutoManifestAndGroupingService.cs" />
     <Compile Include="Implementation\Utility\QRAndBarcodeService.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
