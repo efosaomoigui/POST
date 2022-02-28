@@ -206,14 +206,17 @@ namespace GIGLS.Services.Implementation.Utility
                                 //map new waybill to existing groupwaybill 
                                 await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
                             }
-                            var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
-                            if (manifestDispatched)
-                            {
-                                await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
-                            }
                             else
                             {
-                                await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupWaybill);
+                                var manifestDispatched = await _uow.Manifest.ExistAsync(x => x.ManifestCode == isManifestGroupWaybillMapped.ManifestCode && x.IsDispatched);
+                                if (manifestDispatched)
+                                {
+                                    await MapNewGroupWaybillToExistingManifest(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest);
+                                }
+                                else
+                                {
+                                    await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupWaybill);
+                                } 
                             }
                         }
                     }
