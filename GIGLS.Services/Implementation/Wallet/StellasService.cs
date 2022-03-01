@@ -322,15 +322,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(retry);
                     return result;
                 }
-                else if (response.IsSuccessStatusCode)
+                else
                 {
                     string responseResult = await response.Content.ReadAsStringAsync();
                     var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(responseResult);
                     return result;
-                }
-                else
-                {
-                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
                 }
             }
         }
