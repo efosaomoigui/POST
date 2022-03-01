@@ -5272,6 +5272,14 @@ namespace GIGLS.Services.Implementation.Shipments
                             });
 
                             await _uow.CompleteAsync();
+                            if (detail.IsBulky)
+                            {
+                                await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(detail.WaybillNumber);
+                            }
+                            else
+                            {
+                                await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(detail.WaybillNumber);
+                            }
                             return true;
                         }
 
