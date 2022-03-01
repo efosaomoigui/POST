@@ -790,7 +790,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload)
         {
-            string celullantUrl = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            string celullantUrl = ConfigurationManager.AppSettings["CellulantTransferBeepUrl"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             using (var client = new HttpClient())
             {
