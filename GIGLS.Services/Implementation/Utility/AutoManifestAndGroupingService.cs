@@ -193,7 +193,7 @@ namespace GIGLS.Services.Implementation.Utility
                         {
 
                             groupWaybill = groupwaybillExist;
-                            int groupHours = Convert.ToInt32((today - groupwaybillExist.DateCreated).TotalHours);
+                            int groupHours = Convert.ToInt32((today - groupWaybill.DateCreated).TotalHours);
                             if (groupHours >= 24)
                             {
                                 var newGroup = await NewGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId);
@@ -204,7 +204,8 @@ namespace GIGLS.Services.Implementation.Utility
                             if (isManifestGroupWaybillMapped is null)
                             {
                                 //map new waybill to existing groupwaybill 
-                                await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
+                                //await CreateNewManifestGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, groupWaybill);
+                                await MapExistingGroupWaybill(shipment, deptServiceCentre, destServiceCentre, currentUserId, bulkManifest, groupWaybill);
                             }
                             else
                             {
