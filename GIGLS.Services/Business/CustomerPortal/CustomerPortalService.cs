@@ -4667,7 +4667,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("invalid payload");
             }
-            if (stellasWithdrawalDTO.Amount <= 0)
+            bool isNumeric = int.TryParse(stellasWithdrawalDTO.Amount, out int n);
+            if (!isNumeric)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var amount = Convert.ToDecimal(stellasWithdrawalDTO.Amount);
+            var koboValue = amount * 100;
+            stellasWithdrawalDTO.Amount = Convert.ToString(koboValue);
+            if (amount <= 0)
             {
                 throw new GenericException("invalid amount");
             }

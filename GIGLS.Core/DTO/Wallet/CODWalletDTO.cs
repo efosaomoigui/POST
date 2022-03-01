@@ -104,7 +104,7 @@ namespace GIGLS.Core.DTO.Wallet
     public class StellasWithdrawalDTO
     {
         [JsonProperty("amount")]
-        public decimal Amount { get; set; }
+        public string Amount { get; set; }
 
         [JsonProperty("receiverAccountNumber")]
         public string ReceiverAccountNumber { get; set; }
