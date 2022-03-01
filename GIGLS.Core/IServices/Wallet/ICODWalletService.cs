@@ -12,6 +12,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO0);
         Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
         Task<StellassBankResponse> GetStellasBanks();
+        Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO);
     }
 
 }

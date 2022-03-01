@@ -123,6 +123,11 @@ namespace GIGLS.Services.Implementation.Wallet
             return await _stellasService.GetBanks();
         }
 
+        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
+        {
+            return await _stellasService.StellasWithdrawal(stellasWithdrawalDTO);
+        }
+
 
 
 

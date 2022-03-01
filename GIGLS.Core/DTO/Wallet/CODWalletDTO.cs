@@ -104,7 +104,7 @@ namespace GIGLS.Core.DTO.Wallet
     public class StellasWithdrawalDTO
     {
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("receiverAccountNumber")]
         public string ReceiverAccountNumber { get; set; }
@@ -140,4 +140,47 @@ namespace GIGLS.Core.DTO.Wallet
         [JsonProperty("data")]
         public List<Datum> Data { get; set; }
     }
+
+
+
+    public class Data
+    {
+        [JsonProperty("IsSuccessful")]
+        public bool IsSuccessful { get; set; }
+
+        [JsonProperty("ResponseMessage")]
+        public string ResponseMessage { get; set; }
+
+        [JsonProperty("ResponseCode")]
+        public string ResponseCode { get; set; }
+
+        [JsonProperty("Reference")]
+        public object Reference { get; set; }
+    }
+
+    public class ObjMessage
+    {
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public Data Data { get; set; }
+    }
+
+    public class Error
+    {
+        [JsonProperty("message")]
+        public ObjMessage Message { get; set; }
+    }
+
+    public class StellasWithdrawalResponse
+    {
+        [JsonProperty("errors")]
+        public List<Error> Errors { get; set; }
+    }
+
+
 }

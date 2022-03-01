@@ -286,7 +286,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<CreateStellaAccounResponsetDTO> StellasWithdrawal(StellasWithdrawalDTO createStellaAccountDTO)
+        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO createStellaAccountDTO)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasTransfer"];
@@ -319,13 +319,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (message.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry);
+                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(retry);
                     return result;
                 }
                 else if (response.IsSuccessStatusCode)
                 {
                     string responseResult = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
+                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(responseResult);
                     return result;
                 }
                 else

@@ -3022,5 +3022,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("stellaswithdrawal")]
+        public async Task<IServiceResponse<StellasWithdrawalResponse>> StellasWithdrawal(StellasWithdrawalDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasWithdrawal(payload);
+                return new ServiceResponse<StellasWithdrawalResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

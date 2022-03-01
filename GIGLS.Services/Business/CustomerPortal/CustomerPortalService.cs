@@ -4660,5 +4660,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _codWalletService.GetStellasBanks();
         }
+
+        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
+        {
+            if (stellasWithdrawalDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            if (stellasWithdrawalDTO.Amount <= 0)
+            {
+                throw new GenericException("invalid amount");
+            }
+            return await _codWalletService.StellasWithdrawal(stellasWithdrawalDTO);
+        }
     }
 }
