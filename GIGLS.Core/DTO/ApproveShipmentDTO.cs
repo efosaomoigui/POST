@@ -8,6 +8,7 @@ namespace GIGLS.Core.DTO
         public int ReceiverServiceCentreId { get; set; }
         public int SenderServiceCentreId { get; set; }
         public string ReceiverAddress { get; set; }
+        public bool IsBulky { get; set; }
         public List<int> PackageOptionIds { get; set; } = new List<int>();
     }
 }

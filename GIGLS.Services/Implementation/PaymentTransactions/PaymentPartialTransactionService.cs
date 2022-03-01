@@ -16,6 +16,9 @@ using System.Security.Cryptography;
 using System.Text;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using GIGL.GIGLS.Core.Domain;
+using System.Linq;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -26,15 +29,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IFinancialReportService _financialReportService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
 
         public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, 
-            IMessageSenderService messageSenderService, IFinancialReportService financialReportService)
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INumberGeneratorMonitorService numberGeneratorMonitorService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _messageSenderService = messageSenderService;
             _financialReportService = financialReportService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             MapperConfig.Initialize();
         }
 
@@ -127,6 +134,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var waybill = paymentPartialTransactionProcessDTO.Waybill;
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == waybill);
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybill);
 
             //get the GrandTotal Amount to be paid
             var grandTotal = invoiceEntity.Amount;
@@ -238,8 +246,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             /////2.  When payment is complete and balance is 0, send sms to customer
             if (balanceAmount == 0)
             {
-                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-
                 if (shipment != null)
                 {
                     //Add to Financial Reports
@@ -277,6 +283,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     }
                 }
             }
+            if (result)
+            {
+                //grouping and manifesting shipment
+                if (shipment.IsBulky)
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                }
+                else
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                }
+            }
 
             return result;
         }
@@ -310,5 +328,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
             return await Task.FromResult(deliverynumberDTO);
         }
+
     }
 }

@@ -312,7 +312,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         UserId = currentUserId,
                         ServiceCentreId = serviceCentre.ServiceCentreId,
                         IsActive = true,
-                        DepartureServiceCentreId = departureServiceCenterId
+                        DepartureServiceCentreId = departureServiceCenterId,
                     };
                     _uow.GroupWaybillNumber.Add(newGroupWaybill);
                 }
@@ -389,7 +389,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             DepartureServiceCentreId = departureServiceCenterId,
                             DestinationServiceCentreId = serviceCenterId,
                             OriginalDepartureServiceCentreId = departureServiceCenterId,
-                            UserId = currentUserId
+                            UserId = currentUserId,
+                            IsBulky = shipmentDTO.IsBulky,
+                            ExpressDelivery = shipmentDTO.ExpressDelivery
                         };
 
                         groupWaybillNumberMapping.Add(newMapping);
@@ -536,7 +538,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             DepartureServiceCentreId = departureServiceCenterId,
                             DestinationServiceCentreId = serviceCenterId,
                             OriginalDepartureServiceCentreId = departureServiceCenterId,
-                            UserId = currentUserId
+                            UserId = currentUserId,
+                            IsBulky = shipmentDTO.IsBulky,
+                            ExpressDelivery = shipmentDTO.ExpressDelivery
                         };
 
                         groupWaybillNumberMapping.Add(newMapping);
