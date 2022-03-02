@@ -600,6 +600,7 @@ namespace GIGLS.Core.DTO.Shipments
         }
         public List<CODShipmentDetailDTO> CODShipmentDetail { get; set; }
         public decimal TotalCODAmount { get; set; }
+        public string AvailableBalance { get; set; }
     }
 
     public class CODShipmentDetailDTO : BaseDomainDTO

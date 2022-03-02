@@ -74,6 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICountryService _countryService;
         private readonly IInternationalCargoManifestService _intlCargoManifest;
         private readonly IPlaceLocationService _locationService;
+        private readonly ICODWalletService _codWalletService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -86,7 +87,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, ICODWalletService codWalletService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -112,6 +113,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryService = countryService;
             _intlCargoManifest = intlCargoManifest;
             _locationService = locationService;
+            _codWalletService = _codWalletService;
             MapperConfig.Initialize();
         }
 
@@ -6304,9 +6306,20 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("user does not exist");
                     }
                 }
+                var codWalletInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (codWalletInfo is null)
+                {
+                    throw new GenericException("user does not have a COD wallet");
+                }
                 var allCOD = new AllCODShipmentDTO();
                 var codMobileShipment = new List<PreShipmentMobile>();
                 var codAgilityShipment = new List<Shipment>();
+                //get customer available balance from stellass
+                var bal = await _codWalletService.GetStellasAccountBal(codWalletInfo.CustomerCode);
+                if (bal.status)
+                {
+                    allCOD.AvailableBalance = bal.data.availableBalance; 
+                }
                 if (dto.PageSize < 1)
                 {
                     dto.PageSize = 25;
