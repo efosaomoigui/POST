@@ -129,15 +129,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry);
                     return result;
                 }
-                else if (response.IsSuccessStatusCode)
+                else
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
                     var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseContent);
                     return res;
-                }
-                else
-                {
-                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
                 }
             }
         }
