@@ -128,7 +128,14 @@ namespace GIGLS.Services.Implementation.Wallet
             return await _stellasService.StellasWithdrawal(stellasWithdrawalDTO);
         }
 
-
+        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        {
+            if (validateBankNameDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            return await _stellasService.StellasValidateBankName(validateBankNameDTO);
+        }
 
 
     }

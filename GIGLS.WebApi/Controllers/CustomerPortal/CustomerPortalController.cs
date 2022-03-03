@@ -3038,12 +3038,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("stellasvalidatebankname")]
-        public async Task<IServiceResponse<StellassBankResponse>> StellasValidateBankName(ValidateBankNameDTO payload)
+        public async Task<IServiceResponse<ValidateBankNameResponse>> StellasValidateBankName(ValidateBankNameDTO payload)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.StellasValidateBankName(payload);
-                return new ServiceResponse<StellassBankResponse>
+                return new ServiceResponse<ValidateBankNameResponse>
                 {
                     Object = result
                 };

@@ -4682,7 +4682,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.StellasWithdrawal(stellasWithdrawalDTO);
         }
 
-        public async Task<StellassBankResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
         {
             if (validateBankNameDTO is null)
             {

@@ -267,6 +267,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO);
         Task<StellassBankResponse> GetStellasBanks();
         Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO);
-        Task<StellassBankResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO);
+        Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO);
     }
 }
