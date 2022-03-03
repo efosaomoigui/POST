@@ -159,8 +159,8 @@ namespace GIGLS.Core.DTO.Wallet
 
     public class ValidateBankNameDTO
     {
-        [JsonProperty("accountNuber")]
-        public string AccountNuber { get; set; }
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
 
         [JsonProperty("bankCode")]
         public string BankCode { get; set; }
