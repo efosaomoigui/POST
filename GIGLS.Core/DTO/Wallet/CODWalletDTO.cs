@@ -173,10 +173,10 @@ namespace GIGLS.Core.DTO.Wallet
         public string Name { get; set; }
 
         [JsonProperty("bvn")]
-        public object Bvn { get; set; }
+        public string Bvn { get; set; }
 
         [JsonProperty("kyc")]
-        public object Kyc { get; set; }
+        public string Kyc { get; set; }
     }
 
     public class ValidateBankNameResponse
