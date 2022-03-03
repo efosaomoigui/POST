@@ -331,7 +331,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string url = ConfigurationManager.AppSettings["StellasSandBox"];
+            string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             url = $"{url}name-enquiry";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
