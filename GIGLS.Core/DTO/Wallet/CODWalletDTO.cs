@@ -157,4 +157,38 @@ namespace GIGLS.Core.DTO.Wallet
 
 
 
+    public class ValidateBankNameDTO
+    {
+        [JsonProperty("accountNuber")]
+        public string AccountNuber { get; set; }
+
+        [JsonProperty("bankCode")]
+        public string BankCode { get; set; }
+    }
+
+
+    public class ValidateBankNameResponseData
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("bvn")]
+        public object Bvn { get; set; }
+
+        [JsonProperty("kyc")]
+        public object Kyc { get; set; }
+    }
+
+    public class ValidateBankNameResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public ValidateBankNameResponseData Data { get; set; }
+    }
+
 }

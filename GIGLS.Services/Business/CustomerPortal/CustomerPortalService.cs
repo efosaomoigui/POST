@@ -4630,7 +4630,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
-            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
             var pak = new Packet();
             pak.ServiceCode = serviceCode;
             pak.MSISDN = user.PhoneNumber;
@@ -4680,6 +4680,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("invalid amount");
             }
             return await _codWalletService.StellasWithdrawal(stellasWithdrawalDTO);
+        }
+
+        public async Task<StellassBankResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        {
+            if (validateBankNameDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            return await _codWalletService.StellasValidateBankName(validateBankNameDTO);
         }
     }
 }
