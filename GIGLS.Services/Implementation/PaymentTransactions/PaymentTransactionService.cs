@@ -286,15 +286,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //grouping and manifesting shipment
-            if (shipment.IsBulky)
+            var extention =await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == shipment.Waybill && x.IsFromAgility);
+            if (extention is null)
             {
-                await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                if (shipment.IsBulky)
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                }
+                else
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                }
             }
-            else
-            {
-                await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill); 
-            }
-
             result = true;
             return result;
         }
