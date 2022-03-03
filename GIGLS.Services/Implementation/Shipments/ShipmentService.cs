@@ -113,7 +113,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryService = countryService;
             _intlCargoManifest = intlCargoManifest;
             _locationService = locationService;
-            _codWalletService = _codWalletService;
+            _codWalletService = codWalletService;
             MapperConfig.Initialize();
         }
 
