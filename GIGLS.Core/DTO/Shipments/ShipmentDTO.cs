@@ -437,6 +437,7 @@ namespace GIGLS.Core.DTO.Shipments
         public InternationalRequestType RequestType { get; set; }
         public DeliveryType DeliveryType { get; set; }
         public string ReceiverAddress2 { get; set; }
+        public bool IsBulky { get; set; }
 
     }
 
