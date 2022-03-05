@@ -286,8 +286,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //grouping and manifesting shipment
-            var extention =await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == shipment.Waybill && x.IsFromAgility);
-            if (extention is null)
+            
+            if (!shipment.IsGIGGOExtension)
             {
                 if (shipment.IsBulky)
                 {
