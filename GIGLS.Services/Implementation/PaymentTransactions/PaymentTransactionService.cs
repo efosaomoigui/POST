@@ -237,6 +237,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
                 await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
+                if (!shipment.IsGIGGOExtension)
+                {
+                    if (shipment.IsBulky)
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                    }
+                    else
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    }
+                }
                 return true;
             }
 
