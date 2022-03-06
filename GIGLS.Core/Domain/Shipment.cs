@@ -169,6 +169,10 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal ExpressCharge { get; set; }
         public bool IsExpressDropoff { get; set; }
         public bool IsBulky { get; set; }
+        public CODMobileStatus CODStatus { get; set; }
+        public DateTime? CODStatusDate { get; set; }
+        [MaxLength(300)]
+        public string CODDescription { get; set; }
 
     }
 

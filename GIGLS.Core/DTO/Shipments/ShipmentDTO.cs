@@ -610,6 +610,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODStatus { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverStationName { get; set; }
+        public string CODDescription { get; set; }
     }
 
 }

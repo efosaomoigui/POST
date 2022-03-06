@@ -1854,6 +1854,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+
+                newShipment.CODDescription = "COD Shipment Created";
+                newShipment.CODStatus = CODMobileStatus.Initiated;
+                newShipment.CODStatusDate = DateTime.Now;
             }
 
             newShipment.DepartureCountryId = departureCountry.CountryId;
@@ -6352,17 +6356,21 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.ReceiverName = item.ReceiverName;
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
-                        var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-                        if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
-                        {
-                            obj.CODStatus = CODMobileStatus.Collected.ToString();
-                            obj.DateCreated = lastScan.DateCreated;
-                        }
-                        else
-                        {
-                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
-                            obj.DateCreated = item.DateCreated;
-                        }
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
+                        //var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                        //if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Collected.ToString();
+                        //    obj.DateCreated = lastScan.DateCreated;
+                        //}
+                        //else
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                        //    obj.DateCreated = item.DateCreated;
+                        //}
                         allCOD.CODShipmentDetail.Add(obj);
                     }
 
@@ -6379,14 +6387,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.DateCreated = item.DateModified;
                         obj.ReceiverName = item.ReceiverName;
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
-                        if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
-                        {
-                            obj.CODStatus = CODMobileStatus.Collected.ToString();
-                        }
-                        else
-                        {
-                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
-                        }
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
+                        //if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Collected.ToString();
+                        //}
+                        //else
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                        //}
                         allCOD.CODShipmentDetail.Add(obj);
                     }
                 }
