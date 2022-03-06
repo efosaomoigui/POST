@@ -191,4 +191,20 @@ namespace GIGLS.Core.DTO.Wallet
         public ValidateBankNameResponseData Data { get; set; }
     }
 
+
+    public class StellasTransferDTO
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("payerAccountNumber")]
+        public string PayerAccountNumber { get; set; }
+
+        [JsonProperty("retrievalReference")]
+        public string RetrievalReference { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+    }
+
 }
