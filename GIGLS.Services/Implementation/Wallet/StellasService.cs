@@ -411,7 +411,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (retry.ContainsKey(true))
                     {
                         var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
+                        result.data = res;
                         result.message = res.Message;
                         result.status = res.Status;
                         return result;
@@ -431,7 +431,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (response.IsSuccessStatusCode)
                     {
                         var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
-                        result.data = res.Data;
+                        result.data = res;
                         result.message = res.Message;
                         result.status = res.Status;
                         return result;
