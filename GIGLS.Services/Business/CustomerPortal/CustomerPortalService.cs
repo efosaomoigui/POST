@@ -4656,7 +4656,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return result;
         }
 
-        public async Task<StellassBankResponse> GetStellasBanks()
+        public async Task<StellasResponseDTO> GetStellasBanks()
         {
             return await _codWalletService.GetStellasBanks();
         }
@@ -4701,7 +4701,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return withdrawResponse;
         }
 
-        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
         {
             if (validateBankNameDTO is null)
             {

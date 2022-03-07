@@ -3010,12 +3010,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("stellasbanks")]
-        public async Task<IServiceResponse<StellassBankResponse>> GetStellasBank()
+        public async Task<IServiceResponse<StellasResponseDTO>> GetStellasBank()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.GetStellasBanks();
-                return new ServiceResponse<StellassBankResponse>
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };
@@ -3024,12 +3024,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("stellaswithdrawal")]
-        public async Task<IServiceResponse<StellasWithdrawalResponse>> StellasWithdrawal(StellasWithdrawalDTO payload)
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasWithdrawal(StellasTransferDTO payload)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.StellasWithdrawal(payload);
-                return new ServiceResponse<StellasWithdrawalResponse>
+                var result = await _portalService.StellasTransfer(payload);
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };
@@ -3038,12 +3038,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("stellasvalidatebankname")]
-        public async Task<IServiceResponse<ValidateBankNameResponse>> StellasValidateBankName(ValidateBankNameDTO payload)
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasValidateBankName(ValidateBankNameDTO payload)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.StellasValidateBankName(payload);
-                return new ServiceResponse<ValidateBankNameResponse>
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };
