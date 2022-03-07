@@ -6326,11 +6326,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var result = (GetCustomerBalanceDTO)bal.data;
                         allCOD.AvailableBalance = result.data.availableBalance;
-                        if (String.IsNullOrEmpty(allCOD.AvailableBalance))
-                        {
-                            allCOD.AvailableBalance = "0.00";
-                        }
                     } 
+                }
+                if (String.IsNullOrEmpty(allCOD.AvailableBalance))
+                {
+                    allCOD.AvailableBalance = "0.00";
                 }
                 if (dto.PageSize < 1)
                 {
