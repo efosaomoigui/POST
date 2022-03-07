@@ -4661,7 +4661,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.GetStellasBanks();
         }
 
-        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
+        public async Task<object> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
         {
             if (stellasWithdrawalDTO is null)
             {

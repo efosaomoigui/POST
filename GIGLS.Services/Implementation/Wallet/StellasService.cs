@@ -44,12 +44,13 @@ namespace GIGLS.Services.Implementation.Wallet
             MapperConfig.Initialize();
         }
 
-        public async Task<CreateStellaAccounResponsetDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
+        public async Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
             {
@@ -77,18 +78,39 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (message.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url,"post", data);
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry);
-                    return result;
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
                 }
+                string responseResult = await response.Content.ReadAsStringAsync();
                 else if (response.IsSuccessStatusCode)
                 {
-                    string responseResult = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
+                    var res = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
+                    result.data = res.data;
+                    result.message = res.message;
+                    result.status = res.status;
                     return result;
                 }
                 else
                 {
-                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                    var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(responseResult);
+                    result.errors.Add(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
         }
@@ -200,11 +222,12 @@ namespace GIGLS.Services.Implementation.Wallet
             return String.Empty;
         }
 
-        private async Task<string> Retry(string url, string action, StringContent data)
+        private async Task<Dictionary<bool,string>> Retry(string url, string action, StringContent data)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var res = new Dictionary<bool, string>();
             var token = String.Empty;
             var auth = await Authenticate();
             var authorization = await GetToken();
@@ -219,16 +242,37 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (action == "get")
                 {
                     var response = await client.GetAsync(url);
-                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                    return retrialResponseResult;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(true, retrialResponseResult);
+                        return res;
+                    }
+                    else
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(false, retrialResponseResult);
+                        return res;
+                    }
                 }
                 else if (action == "post")
                 {
                     var response = await client.PostAsync(url, data);
-                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                    return retrialResponseResult;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(true, retrialResponseResult);
+                        return res;
+                    }
+                    else
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(false, retrialResponseResult);
+                        return res;
+                    }
                 }
-                return string.Empty;
+                res.Add(false, "error occured");
+                return res;
             }
         }
 
@@ -282,12 +326,13 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<StellasWithdrawalResponse> StellasTransfer(StellasTransferDTO createStellaAccountDTO)
+        public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO createStellaAccountDTO)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasTransfer"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
             {
@@ -315,15 +360,45 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (message.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(retry);
-                    return result;
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+
                 }
                 else
                 {
-                    string responseResult = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(responseResult);
-                    return result;
+                    string resResult = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(resResult);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(resResult);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
                 }
+                return result;
             }
         }
 
@@ -381,6 +456,7 @@ namespace GIGLS.Services.Implementation.Wallet
             string url = ConfigurationManager.AppSettings["StellasWithdraw"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
             {

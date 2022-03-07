@@ -149,7 +149,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Message { get; set; }
     }
 
-    public class StellasWithdrawalResponse
+    public class StellasWithdrawalErrorResponse
     {
         [JsonProperty("errors")]
         public List<Error> Errors { get; set; }
@@ -205,6 +205,16 @@ namespace GIGLS.Core.DTO.Wallet
 
         [JsonProperty("narration")]
         public string Narration { get; set; }
+    }
+
+    public class StellasResponseDTO
+    {
+
+        public bool status { get; set; }
+        public string message { get; set; }
+        public object data { get; set; }
+        public List<object> errors { get; set; }
+
     }
 
 }
