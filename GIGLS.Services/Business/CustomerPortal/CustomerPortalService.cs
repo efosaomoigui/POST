@@ -4630,7 +4630,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
-            string serviceCode = ConfigurationManager.AppSettings["CellulantServiceCode"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
             var pak = new Packet();
             pak.ServiceCode = serviceCode;
             pak.MSISDN = user.PhoneNumber;
@@ -4661,25 +4661,53 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.GetStellasBanks();
         }
 
-        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
+        public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO)
         {
-            if (stellasWithdrawalDTO is null)
+            if (transferDTO is null)
             {
                 throw new GenericException("invalid payload");
             }
-            bool isNumeric = int.TryParse(stellasWithdrawalDTO.Amount, out int n);
+            var userId = await _userService.GetCurrentUserId();
+            var codWallet = await _uow.CODWallet.GetAsync(x => x.UserId == userId);
+            if(codWallet is null)
+            {
+                throw new GenericException("user does not have a COD wallet");
+            }
+            bool isNumeric = int.TryParse(transferDTO.Amount, out int n);
             if (!isNumeric)
             {
                 throw new GenericException("invalid amount");
             }
-            var amount = Convert.ToDecimal(stellasWithdrawalDTO.Amount);
+            var amount = Convert.ToDecimal(transferDTO.Amount);
             var koboValue = amount * 100;
-            stellasWithdrawalDTO.Amount = Convert.ToString(koboValue);
+            transferDTO.Amount = Convert.ToString(koboValue);
             if (amount <= 0)
             {
                 throw new GenericException("invalid amount");
             }
-            return await _codWalletService.StellasWithdrawal(stellasWithdrawalDTO);
+
+            var withrawObj = new StellasWithdrawalDTO()
+            {
+              Amount = transferDTO.Amount,
+              RetrievalReference = transferDTO.RetrievalReference,
+              Narration = transferDTO.Narration,
+              PayerAccountNumber = codWallet.AccountNo
+            };
+            var  withdrawResponse = await _codWalletService.StellasWithdrawal(withrawObj);
+            if (withdrawResponse.status)
+            {
+                return await _codWalletService.StellasTransfer(transferDTO);
+            }
+            return withdrawResponse;
+        }
+
+        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        {
+            if (validateBankNameDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            return await _codWalletService.StellasValidateBankName(validateBankNameDTO);
         }
     }
 }

@@ -101,7 +101,7 @@ namespace GIGLS.Core.DTO.Wallet
 
 
 
-    public class StellasWithdrawalDTO
+    public class StellasTransferDTO
     {
         [JsonProperty("amount")]
         public string Amount { get; set; }
@@ -149,12 +149,99 @@ namespace GIGLS.Core.DTO.Wallet
         public string Message { get; set; }
     }
 
-    public class StellasWithdrawalResponse
+    public class StellasErrorResponse
     {
         [JsonProperty("errors")]
         public List<Error> Errors { get; set; }
     }
 
+
+
+    public class ValidateBankNameDTO
+    {
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("bankCode")]
+        public string BankCode { get; set; }
+    }
+
+
+    public class ValidateBankNameResponseData
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("bvn")]
+        public string Bvn { get; set; }
+
+        [JsonProperty("kyc")]
+        public string Kyc { get; set; }
+    }
+
+    public class ValidateBankNameResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public ValidateBankNameResponseData Data { get; set; }
+    }
+
+
+    public class StellasWithdrawalDTO
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("payerAccountNumber")]
+        public string PayerAccountNumber { get; set; }
+
+        [JsonProperty("retrievalReference")]
+        public string RetrievalReference { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+    }
+
+    public class StellasResponseDTO
+    {
+
+        public bool status { get; set; }
+        public string message { get; set; }
+        public object data { get; set; }
+        public List<object> errors { get; set; }
+
+    }
+
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class WithdrawAndTransferSucessObj
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("transactionCharge")]
+        public string TransactionCharge { get; set; }
+
+        [JsonProperty("totalAmount")]
+        public string TotalAmount { get; set; }
+    }
+
+    public class WithdrawAndTransferSucessDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public WithdrawAndTransferSucessObj Data { get; set; }
+    }
 
 
 }
