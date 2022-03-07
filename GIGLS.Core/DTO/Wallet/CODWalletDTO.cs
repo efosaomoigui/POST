@@ -151,6 +151,10 @@ namespace GIGLS.Core.DTO.Wallet
 
     public class StellasErrorResponse
     {
+        public StellasErrorResponse()
+        {
+            Errors = new List<Error>();
+        }
         [JsonProperty("errors")]
         public List<Error> Errors { get; set; }
     }

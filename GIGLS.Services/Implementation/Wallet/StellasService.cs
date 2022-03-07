@@ -89,7 +89,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 else
                 {
                     var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                    result.errors.Add(res.Errors);
+                    result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
@@ -160,7 +160,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -177,7 +177,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 else
                 {
                     var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
-                    result.errors.Add(res.Errors);
+                    result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
@@ -348,7 +348,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -365,7 +365,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 else
                 {
                     var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
-                    result.errors.Add(res.Errors);
+                    result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
@@ -419,7 +419,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -439,7 +439,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -496,7 +496,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -515,7 +515,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -571,7 +571,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
@@ -590,7 +590,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.Add(res.Errors);
+                        result.errors.AddRange(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
