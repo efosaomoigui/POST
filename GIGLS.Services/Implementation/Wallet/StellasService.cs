@@ -430,7 +430,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(message);
+                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
                         result.data = res.Data;
                         result.message = res.Message;
                         result.status = res.Status;
@@ -562,7 +562,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var retry = await Retry(url, "post", data);
                     if (retry.ContainsKey(true))
                     {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
+                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
                         result.data = res.Data;
                         result.message = res.Message;
                         result.status = res.Status;
