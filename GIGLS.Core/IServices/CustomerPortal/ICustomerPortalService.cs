@@ -266,7 +266,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload);
         Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO);
         Task<StellassBankResponse> GetStellasBanks();
-        Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO);
+        Task<StellasResponseDTO> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO);
         Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO);
     }
 }

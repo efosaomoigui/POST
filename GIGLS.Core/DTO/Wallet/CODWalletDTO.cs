@@ -101,7 +101,7 @@ namespace GIGLS.Core.DTO.Wallet
 
 
 
-    public class StellasWithdrawalDTO
+    public class StellasTransferDTO
     {
         [JsonProperty("amount")]
         public string Amount { get; set; }
@@ -149,7 +149,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Message { get; set; }
     }
 
-    public class StellasWithdrawalErrorResponse
+    public class StellasErrorResponse
     {
         [JsonProperty("errors")]
         public List<Error> Errors { get; set; }
@@ -192,7 +192,7 @@ namespace GIGLS.Core.DTO.Wallet
     }
 
 
-    public class StellasTransferDTO
+    public class StellasWithdrawalDTO
     {
         [JsonProperty("amount")]
         public string Amount { get; set; }
@@ -216,5 +216,32 @@ namespace GIGLS.Core.DTO.Wallet
         public List<object> errors { get; set; }
 
     }
+
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class WithdrawAndTransferSucessObj
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("transactionCharge")]
+        public string TransactionCharge { get; set; }
+
+        [JsonProperty("totalAmount")]
+        public string TotalAmount { get; set; }
+    }
+
+    public class WithdrawAndTransferSucessDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public WithdrawAndTransferSucessObj Data { get; set; }
+    }
+
 
 }

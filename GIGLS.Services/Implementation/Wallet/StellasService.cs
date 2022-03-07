@@ -88,17 +88,16 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else
                     {
-                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(retry.FirstOrDefault().Value);
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
                         result.errors.Add(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
                     }
                 }
-                string responseResult = await response.Content.ReadAsStringAsync();
                 else if (response.IsSuccessStatusCode)
                 {
-                    var res = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(responseResult);
+                    var res = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(message);
                     result.data = res.data;
                     result.message = res.message;
                     result.status = res.status;
@@ -106,21 +105,23 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(responseResult);
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
                     result.errors.Add(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
                 }
             }
+            return result;
         }
 
-        public async Task<GetCustomerBalanceDTO> GetCustomerStellasAccount(string accountNo)
+        public async Task<StellasResponseDTO> GetCustomerStellasAccount(string accountNo)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
             {
@@ -148,16 +149,41 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (responseResult.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "get", null);
-                    var result = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry);
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
+                    result.data = res.data;
+                    result.message = res.message;
+                    result.status = res.status;
                     return result;
                 }
                 else
                 {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseContent);
-                    return res;
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    result.errors.Add(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
+            return result;
         }
 
 
@@ -277,12 +303,13 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        public async Task<StellassBankResponse> GetBanks()
+        public async Task<StellasResponseDTO> GetBanks()
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasSandBox"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
             string authorization = await GetToken();
             if (String.IsNullOrEmpty(authorization))
             {
@@ -310,26 +337,199 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (responseResult.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "get", null);
-                    var result = JsonConvert.DeserializeObject<StellassBankResponse>(retry);
-                    return result;
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
                 }
                 else if (response.IsSuccessStatusCode)
                 {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    var res = JsonConvert.DeserializeObject<StellassBankResponse>(responseContent);
-                    return res;
+                    var res = JsonConvert.DeserializeObject<StellassBankResponse>(responseResult);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
                 }
                 else
                 {
-                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    result.errors.Add(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
+            return result;
         }
 
         public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO createStellaAccountDTO)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasTransfer"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
+            string authorization = await GetToken();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string message = await response.Content.ReadAsStringAsync();
+                if (message.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "post", data);
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+
+                }
+                else
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(message);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+                return result;
+            }
+        }
+
+
+        public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            url = $"{url}name-enquiry";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new StellasResponseDTO();
+            string authorization = await GetToken();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+                var json = JsonConvert.SerializeObject(validateBankNameDTO);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string message = await response.Content.ReadAsStringAsync();
+                if (message.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "post", data);
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+                else
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(message);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+            }
+            return result;
+        }
+
+
+        public async Task<StellasResponseDTO> StellasWithdrawal(StellasWithdrawalDTO createStellaAccountDTO)
+        {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string url = ConfigurationManager.AppSettings["StellasWithdraw"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             var result = new StellasResponseDTO();
@@ -370,20 +570,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else
                     {
-                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(retry.FirstOrDefault().Value);
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
                         result.errors.Add(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
                     }
-
                 }
                 else
                 {
-                    string resResult = await response.Content.ReadAsStringAsync();
                     if (response.IsSuccessStatusCode)
                     {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(resResult);
+                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
                         result.data = res.Data;
                         result.message = res.Message;
                         result.status = res.Status;
@@ -391,109 +589,15 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else
                     {
-                        var res = JsonConvert.DeserializeObject<StellasWithdrawalErrorResponse>(resResult);
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
                         result.errors.Add(res.Errors);
                         result.message = "an error occured";
                         result.status = false;
                         return result;
                     }
                 }
-                return result;
             }
-        }
-
-
-        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
-        {
-            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string url = ConfigurationManager.AppSettings["StellasCreateAccount"];
-            string bizId = ConfigurationManager.AppSettings["BusinessID"];
-            url = $"{url}name-enquiry";
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            string authorization = await GetToken();
-            if (String.IsNullOrEmpty(authorization))
-            {
-                var auth = await Authenticate();
-                if (auth.Key)
-                {
-                    authorization = await GetToken();
-                }
-                else
-                {
-                    throw new GenericException(auth.ToString());
-                }
-            }
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var json = JsonConvert.SerializeObject(validateBankNameDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, data);
-                string message = await response.Content.ReadAsStringAsync();
-                if (message.Contains("Session Expired! Please login again"))
-                {
-                    var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<ValidateBankNameResponse>(retry);
-                    return result;
-                }
-                else
-                {
-                    string responseResult = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<ValidateBankNameResponse>(responseResult);
-                    return result;
-                }
-            }
-        }
-
-
-        public async Task<StellasWithdrawalResponse> StellasWithdraw(StellasWithdrawalDTO createStellaAccountDTO)
-        {
-            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
-            string url = ConfigurationManager.AppSettings["StellasWithdraw"];
-            string bizId = ConfigurationManager.AppSettings["BusinessID"];
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            var result = new StellasResponseDTO();
-            string authorization = await GetToken();
-            if (String.IsNullOrEmpty(authorization))
-            {
-                var auth = await Authenticate();
-                if (auth.Key)
-                {
-                    authorization = await GetToken();
-                }
-                else
-                {
-                    throw new GenericException(auth.ToString());
-                }
-            }
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, data);
-                string message = await response.Content.ReadAsStringAsync();
-                if (message.Contains("Session Expired! Please login again"))
-                {
-                    var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(retry);
-                    return result;
-                }
-                else
-                {
-                    string responseResult = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<StellasWithdrawalResponse>(responseResult);
-                    return result;
-                }
-            }
+            return result;
         }
 
         private class AuthModel
