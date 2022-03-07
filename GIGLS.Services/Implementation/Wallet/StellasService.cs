@@ -151,10 +151,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     var retry = await Retry(url, "get", null);
                     if (retry.ContainsKey(true))
                     {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
+                        var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry.FirstOrDefault().Value);
+                        result.data = res;
+                        result.message = res.message;
+                        result.status = res.status;
                         return result;
                     }
                     else

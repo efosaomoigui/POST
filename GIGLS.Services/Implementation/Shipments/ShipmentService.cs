@@ -6322,7 +6322,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var bal = await _codWalletService.GetStellasAccountBal(codWalletInfo.CustomerCode);
                 if (bal.status)
                 {
-                    allCOD.AvailableBalance = bal.data.availableBalance; 
+                    if (bal.data is GetCustomerBalanceDTO)
+                    {
+                        var result = (GetCustomerBalanceDTO)bal.data;
+                        allCOD.AvailableBalance = result.data.availableBalance; 
+                    } 
                 }
                 if (dto.PageSize < 1)
                 {
