@@ -2939,12 +2939,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createstellasaccount")]
-        public async Task<IServiceResponse<CODWalletDTO>> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        public async Task<IServiceResponse<StellasResponseDTO>> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var response = await _portalService.AddCODWallet(codWalletDTO);
-                return new ServiceResponse<CODWalletDTO>
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = response
                 };
@@ -2953,12 +2953,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getcustomerstellasaccountbal/{code}")]
-        public async Task<IServiceResponse<GetCustomerBalanceDTO>> GetStellasAccountBal(string code)
+        public async Task<IServiceResponse<StellasResponseDTO>> GetStellasAccountBal(string code)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.GetStellasAccountBal(code);
-                return new ServiceResponse<GetCustomerBalanceDTO>
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };
@@ -3024,12 +3024,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("validatebvnnumber")]
-        public async Task<IServiceResponse<ValidateBVNResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<IServiceResponse<StellasResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             return await HandleApiOperationAsync(async () =>
             {
                  var result = await _portalService.ValidateBVNNumber(payload);
-                return new ServiceResponse<ValidateBVNResponseDTO>
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };

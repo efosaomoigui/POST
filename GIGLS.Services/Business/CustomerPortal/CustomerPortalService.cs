@@ -4598,7 +4598,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        public async Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        public async Task<StellasResponseDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
         {
 
             if (String.IsNullOrEmpty(codWalletDTO.CustomerCode))
@@ -4611,7 +4611,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return result;
 
         }
-        public Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
+        public Task<StellasResponseDTO> GetStellasAccountBal(string customerCode)
         {
             var bal = _codWalletService.GetStellasAccountBal(customerCode);
             return bal;

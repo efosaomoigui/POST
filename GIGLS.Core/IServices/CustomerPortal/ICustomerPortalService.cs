@@ -262,12 +262,12 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryid);
         Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew();
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode);
-        Task<CODWalletDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO);
-        Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
+        Task<StellasResponseDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO);
+        Task<StellasResponseDTO> GetStellasAccountBal(string customerCode);
         Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
         Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload);
         Task<bool> GetTransferStatus(string craccount);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
-        Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
     }
 }
