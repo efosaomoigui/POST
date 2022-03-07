@@ -2,6 +2,7 @@
 using GIGLS.CORE.DTO;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -148,5 +149,13 @@ namespace GIGLS.Core.DTO.Wallet
         public ValidateBVNData Data { get; set; }
     }
 
+    public class StellasResponseDTO
+    {
 
+        public bool status { get; set; }
+        public string message { get; set; }
+        public object data { get; set; }
+        public List<object> errors { get; set; }
+
+    }
 }

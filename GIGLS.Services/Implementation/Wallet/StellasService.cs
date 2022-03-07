@@ -268,7 +268,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         }
 
-        public async Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        public async Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string url = ConfigurationManager.AppSettings["StellasSandBox"];
@@ -276,6 +276,7 @@ namespace GIGLS.Services.Implementation.Wallet
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             string authorization = await GetToken();
+            var result = new StellasResponseDTO();
             if (String.IsNullOrEmpty(authorization))
             {
                 var auth = await Authenticate();
@@ -304,18 +305,38 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (responseResult.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url, "post", data);
-                    var result = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(retry);
-                    return result;
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.Add(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
                 }
                 else if (response.IsSuccessStatusCode)
                 {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(responseContent);
-                    return res;
+                    var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(responseResult);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
                 }
                 else
                 {
-                    throw new GenericException(response.Content.ReadAsStringAsync().Result, response.StatusCode.ToString());
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    result.errors.Add(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
         }
