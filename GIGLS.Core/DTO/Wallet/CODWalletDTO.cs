@@ -158,4 +158,17 @@ namespace GIGLS.Core.DTO.Wallet
         public List<object> errors { get; set; }
 
     }
+
+    public class Error
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+    }
+
+    public class StellasErrorResponse
+    {
+        [JsonProperty("errors")]
+        public List<Error> Errors { get; set; }
+    }
+
 }

@@ -9,9 +9,9 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface IStellasService : IServiceDependencyMarker
     {
-        Task<CreateStellaAccounResponsetDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO);
-        Task<GetCustomerBalanceDTO> GetCustomerStellasAccount(string accountNo);
-        Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO);
+        Task<StellasResponseDTO> GetCustomerStellasAccount(string accountNo);
+        Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
 
     }
 
