@@ -263,6 +263,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<GIGXUserDetailDTO> GetGIGXUserWalletDetailsNew();
         Task<GIGXUserDetailDTO> GetGIGXUserDetailByCodeNew(string customerCode);
         Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
+        Task<StellasResponseDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO);
+        Task<StellasResponseDTO> GetStellasAccountBal(string customerCode);
         Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload);
         Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO);
         Task<StellasResponseDTO> GetStellasBanks();
