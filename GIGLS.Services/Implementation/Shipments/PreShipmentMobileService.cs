@@ -680,6 +680,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         message.SenderName = words.FirstOrDefault();
                     }
 
+                    if (newPreShipment.IsCashOnDelivery)
+                    {
+                        newPreShipment.CODDescription = "COD Shipment Created";
+                        newPreShipment.CODStatus = CODMobileStatus.Initiated;
+                        newPreShipment.CODStatusDate = DateTime.Now;
+                    }
+
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
                     newPreShipment.IsDelivered = false;
@@ -869,6 +876,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         string[] words = preShipmentDTO.SenderName.Split(' ');
                         message.SenderName = words.FirstOrDefault();
+                    }
+
+                    if (newPreShipment.IsCashOnDelivery)
+                    {
+                        newPreShipment.CODDescription = "COD Shipment Created";
+                        newPreShipment.CODStatus = CODMobileStatus.Initiated;
+                        newPreShipment.CODStatusDate = DateTime.Now;
                     }
 
                     newPreShipment.UserId = currentUserId;

@@ -612,6 +612,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             await UpdateShipmentCollection(shipmentCollection);
 
+            //update cod values for cod shipment for both agility and mobile
+            var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+            if (mobile != null)
+            {
+               mobile.CODDescription = $"COD Shipment Collected({shipmentCollection.PaymentType.ToString()})";
+               mobile.CODStatus = CODMobileStatus.Collected;
+               mobile.CODStatusDate = DateTime.Now;
+               await _uow.CompleteAsync();
+            }
+
+            var agility = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+            if (agility != null)
+            {
+                agility.CODDescription = $"COD Shipment Collected({shipmentCollection.PaymentType.ToString()})";
+                agility.CODStatus = CODMobileStatus.Collected;
+                agility.CODStatusDate = DateTime.Now;
+                await _uow.CompleteAsync();
+            }
+
             //If it is mobile
             if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
