@@ -77,8 +77,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (message.Contains("Session Expired! Please login again"))
                 {
                     var retry = await Retry(url,"post", data);
-                    var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry);
-                    return result;
+                    if (retry.ContainsKey(true))
+                    {
+                        var result = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry.FirstOrDefault().Value);
+                        return result;
+                    }
                 }
                 else if (response.IsSuccessStatusCode)
                 {
@@ -204,11 +207,12 @@ namespace GIGLS.Services.Implementation.Wallet
             return String.Empty;
         }
 
-        private async Task<string> Retry(string url, string action, StringContent data)
+        private async Task<Dictionary<bool, string>> Retry(string url, string action, StringContent data)
         {
             string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
             string bizId = ConfigurationManager.AppSettings["BusinessID"];
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var res = new Dictionary<bool, string>();
             var token = String.Empty;
             var auth = await Authenticate();
             var authorization = await GetToken();
@@ -223,16 +227,37 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (action == "get")
                 {
                     var response = await client.GetAsync(url);
-                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                    return retrialResponseResult;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(true, retrialResponseResult);
+                        return res;
+                    }
+                    else
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(false, retrialResponseResult);
+                        return res;
+                    }
                 }
                 else if (action == "post")
                 {
                     var response = await client.PostAsync(url, data);
-                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                    return retrialResponseResult;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(true, retrialResponseResult);
+                        return res;
+                    }
+                    else
+                    {
+                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                        res.Add(false, retrialResponseResult);
+                        return res;
+                    }
                 }
-                return string.Empty;
+                res.Add(false, "error occured");
+                return res;
             }
         }
 
