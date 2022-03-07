@@ -9,10 +9,10 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface ICODWalletService : IServiceDependencyMarker
     {
-        Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO0);
-        Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode);
+        Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO);
+        Task<StellasResponseDTO> GetStellasAccountBal(string customerCode);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
-        Task<ValidateBVNResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
     }
 
 }
