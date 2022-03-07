@@ -6325,7 +6325,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (bal.data is GetCustomerBalanceDTO)
                     {
                         var result = (GetCustomerBalanceDTO)bal.data;
-                        allCOD.AvailableBalance = result.data.availableBalance; 
+                        allCOD.AvailableBalance = result.data.availableBalance;
+                        if (String.IsNullOrEmpty(allCOD.AvailableBalance))
+                        {
+                            allCOD.AvailableBalance = "0.00";
+                        }
                     } 
                 }
                 if (dto.PageSize < 1)
@@ -6338,13 +6342,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (dto.StartDate != null && dto.EndDate != null)
                 {
-                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.ZoneMapping == 1 && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
                 else
                 {
-                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false && x.ZoneMapping == 1).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
 
                 if (codAgilityShipment.Any())
@@ -6362,7 +6366,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
                         var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
                         obj.CODStatus = status.ToString();
-                        obj.DateCreated = item.CODStatusDate.Value;
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
                         obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
                         //var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
                         //if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
@@ -6393,7 +6397,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
                         var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
                         obj.CODStatus = status.ToString();
-                        obj.DateCreated = item.CODStatusDate.Value;
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
                         obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
                         //if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
                         //{
