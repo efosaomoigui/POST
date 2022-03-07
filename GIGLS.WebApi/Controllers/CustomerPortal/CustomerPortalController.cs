@@ -2993,5 +2993,48 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("celullanttransfer")]
+        public async Task<IServiceResponse<CellulantTransferResponsePayload>> CelullantTransfer(CellulantTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CelullantTransfer(payload);
+                return new ServiceResponse<CellulantTransferResponsePayload>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("stellasbanks")]
+        public async Task<IServiceResponse<StellassBankResponse>> GetStellasBank()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasBanks();
+                return new ServiceResponse<StellassBankResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("stellaswithdrawal")]
+        public async Task<IServiceResponse<StellasWithdrawalResponse>> StellasWithdrawal(StellasWithdrawalDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasWithdrawal(payload);
+                return new ServiceResponse<StellasWithdrawalResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }

@@ -534,4 +534,142 @@ namespace GIGLS.Core.DTO.OnlinePayment
     }
 
     #endregion
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class Credentials
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+    }
+
+    public class Packet
+    {
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("MSISDN")]
+        public string MSISDN { get; set; }
+
+        [JsonProperty("invoiceNumber")]
+        public string InvoiceNumber { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("amount")]
+        public decimal Amount { get; set; }
+
+        [JsonProperty("hubID")]
+        public string HubID { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+
+        [JsonProperty("datePaymentReceived")]
+        public string DatePaymentReceived { get; set; }
+
+        [JsonProperty("extraData")]
+        public string ExtraData { get; set; }
+
+        [JsonProperty("currencyCode")]
+        public string CurrencyCode { get; set; }
+
+        [JsonProperty("customerNames")]
+        public string CustomerNames { get; set; }
+
+        [JsonProperty("paymentMode")]
+        public string PaymentMode { get; set; }
+    }
+
+    public class Payload
+    {
+        public Payload()
+        {
+            Credentials = new Credentials();
+            Packet = new List<Packet>();
+        }
+        [JsonProperty("credentials")]
+        public Credentials Credentials { get; set; }
+
+        [JsonProperty("packet")]
+        public List<Packet> Packet { get; set; }
+    }
+
+    public class CellulantTransferPayload
+    {
+        public CellulantTransferPayload()
+        {
+            Payload = new Payload();
+        }
+        [JsonProperty("countryCode")]
+        public string CountryCode { get; set; }
+
+        [JsonProperty("function")]
+        public string Function { get; set; }
+
+        [JsonProperty("payload")]
+        public Payload Payload { get; set; }
+    }
+
+
+
+
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class AuthStatus
+    {
+        [JsonProperty("authStatusCode")]
+        public int AuthStatusCode { get; set; }
+
+        [JsonProperty("authStatusDescription")]
+        public string AuthStatusDescription { get; set; }
+    }
+
+    public class Result
+    {
+        [JsonProperty("statusCode")]
+        public int StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("beepTransactionID")]
+        public string BeepTransactionID { get; set; }
+
+        [JsonProperty("invoiceNumber")]
+        public string InvoiceNumber { get; set; }
+    }
+
+    public class CellulantTransferResponsePayload
+    {
+        [JsonProperty("authStatus")]
+        public AuthStatus AuthStatus { get; set; }
+
+        [JsonProperty("results")]
+        public List<Result> Results { get; set; }
+    }
+
+
+    public class CellulantTransferDTO
+    {
+        public string CustomerCode { get; set; }
+
+        public decimal Amount { get; set; }
+        public string RefNo { get; set; }
+    }
+
+
+
+
+
+
 }

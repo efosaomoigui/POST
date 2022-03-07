@@ -1,6 +1,8 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -95,4 +97,64 @@ namespace GIGLS.Core.DTO.Wallet
         public string availableBalance { get; set; }
         public DateTime financialDate { get; set; }
     }
+
+
+
+
+    public class StellasWithdrawalDTO
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("receiverAccountNumber")]
+        public string ReceiverAccountNumber { get; set; }
+
+        [JsonProperty("receiverBankCode")]
+        public string ReceiverBankCode { get; set; }
+
+        [JsonProperty("retrievalReference")]
+        public string RetrievalReference { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+    }
+
+
+    public class Datum
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("code")]
+        public string Code { get; set; }
+    }
+
+    public class StellassBankResponse
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public List<Datum> Data { get; set; }
+    }
+
+
+
+    public class Error
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+    }
+
+    public class StellasWithdrawalResponse
+    {
+        [JsonProperty("errors")]
+        public List<Error> Errors { get; set; }
+    }
+
+
+
 }
