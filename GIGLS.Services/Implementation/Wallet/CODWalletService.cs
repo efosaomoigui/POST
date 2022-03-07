@@ -45,7 +45,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        public async Task<CODWalletDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
+        public async Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
             var user = await _uow.Company.GetAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
             var Aspuser = await _uow.User.GetUserByChannelCode(createStellaAccountDTO.CustomerCode);
@@ -54,37 +54,41 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("User does not exist as an Ecommerce user!", $"{(int)HttpStatusCode.NotFound}");
             }
             CODWalletDTO res = new CODWalletDTO();
-            var result = await _stellasService.CreateStellasAccount(createStellaAccountDTO);
-            if (result.status)
+            var resp = await _stellasService.CreateStellasAccount(createStellaAccountDTO);
+            if (resp.status)
             {
-                //now create this user CODWALLET on agility  
-                CODWalletDTO codWalletDTO = new CODWalletDTO
+                if (resp.data is CreateStellaAccounResponsetDTO)
                 {
-                    AccountNo = result.data.account_details.accountNumber,
-                    AvailableBalance = result.data.account_details.availableBalance,
-                    CustomerId = result.data.account_details.customerId,
-                    CustomerCode = user.CustomerCode,
-                    CustomerType = CustomerType.Company,
-                    CompanyType = CompanyType.Ecommerce.ToString(),
-                    AccountType = result.data.account_details.accountType,
-                    WithdrawableBalance = result.data.account_details.withdrawableBalance,
-                    CustomerAccountId = result.data.account_details.customerId,
-                    DateOfBirth = result.data.customerDetails.dateOfBirth,
-                    PlaceOfBirth = result.data.customerDetails.placeOfBirth,
-                    Address = result.data.customerDetails.address,
-                    NationalIdentityNo = result.data.customerDetails.nationalIdentityNo,
-                    UserId = Aspuser.Id
-             
-                };
-                await AddCODWallet(codWalletDTO);
-                res = codWalletDTO;
+                    var result = (CreateStellaAccounResponsetDTO)resp.data;
+                    //now create this user CODWALLET on agility  
+                    CODWalletDTO codWalletDTO = new CODWalletDTO
+                    {
+                        AccountNo = result.data.account_details.accountNumber,
+                        AvailableBalance = result.data.account_details.availableBalance,
+                        CustomerId = result.data.account_details.customerId,
+                        CustomerCode = user.CustomerCode,
+                        CustomerType = CustomerType.Company,
+                        CompanyType = CompanyType.Ecommerce.ToString(),
+                        AccountType = result.data.account_details.accountType,
+                        WithdrawableBalance = result.data.account_details.withdrawableBalance,
+                        CustomerAccountId = result.data.account_details.customerId,
+                        DateOfBirth = result.data.customerDetails.dateOfBirth,
+                        PlaceOfBirth = result.data.customerDetails.placeOfBirth,
+                        Address = result.data.customerDetails.address,
+                        NationalIdentityNo = result.data.customerDetails.nationalIdentityNo,
+                        UserId = Aspuser.Id
+
+                    };
+                    await AddCODWallet(codWalletDTO);
+                    res = codWalletDTO;
+                    resp.data = res;
+                }
             }
             else
             {
                 res = null;
-                throw new GenericException(result.message, $"{(int)HttpStatusCode.BadRequest}");
             }
-            return res;
+            return resp;
         }
 
 
@@ -103,7 +107,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<GetCustomerBalanceDTO> GetStellasAccountBal(string customerCode)
+        public async Task<StellasResponseDTO> GetStellasAccountBal(string customerCode)
         {
             if (String.IsNullOrEmpty(customerCode))
             {
@@ -115,20 +119,25 @@ namespace GIGLS.Services.Implementation.Wallet
                 var bal = await _stellasService.GetCustomerStellasAccount(custmerAccountInfo.AccountNo);
                 return bal; 
             }
-            return new GetCustomerBalanceDTO();
+            return new StellasResponseDTO();
         }
 
-        public async Task<StellassBankResponse> GetStellasBanks()
+        public async Task<StellasResponseDTO> GetStellasBanks()
         {
             return await _stellasService.GetBanks();
         }
 
-        public async Task<StellasWithdrawalResponse> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
+        public async Task<StellasResponseDTO> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO)
         {
             return await _stellasService.StellasWithdrawal(stellasWithdrawalDTO);
         }
 
-        public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO)
+        {
+            return await _stellasService.StellasTransfer(transferDTO);
+        }
+
+        public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
         {
             if (validateBankNameDTO is null)
             {

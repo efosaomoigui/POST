@@ -80,10 +80,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     var retry = await Retry(url,"post", data);
                     if (retry.ContainsKey(true))
                     {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
+                        var res = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(retry.FirstOrDefault().Value);
+                        result.data = res;
+                        result.message = res.message;
+                        result.status = res.status;
                         return result;
                     }
                     else
@@ -98,7 +98,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 else if (response.IsSuccessStatusCode)
                 {
                     var res = JsonConvert.DeserializeObject<CreateStellaAccounResponsetDTO>(message);
-                    result.data = res.data;
+                    result.data = res;
                     result.message = res.message;
                     result.status = res.status;
                     return result;

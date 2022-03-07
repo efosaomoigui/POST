@@ -4661,7 +4661,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.GetStellasBanks();
         }
 
-        public async Task<StellasResponseDTO> StellasWithdrawal(StellasTransferDTO transferDTO)
+        public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO)
         {
             if (transferDTO is null)
             {
@@ -4698,6 +4698,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 return await _codWalletService.StellasTransfer(transferDTO);
             }
+            return withdrawResponse;
         }
 
         public async Task<ValidateBankNameResponse> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
