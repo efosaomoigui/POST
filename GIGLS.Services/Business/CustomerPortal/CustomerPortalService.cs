@@ -4711,7 +4711,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var withrawObj = new StellasWithdrawalDTO()
             {
               Amount = transferDTO.Amount,
-              RetrievalReference = transferDTO.RetrievalReference,
+              RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
               Narration = transferDTO.Narration,
               PayerAccountNumber = codWallet.AccountNo
             };
@@ -4719,6 +4719,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (withdrawResponse.status)
             {
                 await Task.Delay(15000);
+                transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
                 return await _codWalletService.StellasTransfer(transferDTO);
             }
             return withdrawResponse;
