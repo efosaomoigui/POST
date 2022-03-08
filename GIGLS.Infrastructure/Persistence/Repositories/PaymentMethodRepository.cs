@@ -28,7 +28,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     paymentMethods = paymentMethods.Where(x => x.CountryId.Equals(countryId) && x.IsActive == true);
                 }
 
-                var transferDetailsDto = GetListOfPaymentMethods(paymentMethods);
+                var transferDetailsDto = GetListOfPaymentMethods(paymentMethods.OrderBy(x =>x.DateCreated));
 
                 return transferDetailsDto;
             }
