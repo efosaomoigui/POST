@@ -4718,6 +4718,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var  withdrawResponse = await _codWalletService.StellasWithdrawal(withrawObj);
             if (withdrawResponse.status)
             {
+                await Task.Delay(15000);
                 return await _codWalletService.StellasTransfer(transferDTO);
             }
             return withdrawResponse;
