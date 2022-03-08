@@ -6328,6 +6328,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         allCOD.AvailableBalance = result.data.availableBalance;
                     } 
                 }
+                allCOD.AccountNo = codWalletInfo.AccountNo;
                 if (String.IsNullOrEmpty(allCOD.AvailableBalance))
                 {
                     allCOD.AvailableBalance = "0.00";
