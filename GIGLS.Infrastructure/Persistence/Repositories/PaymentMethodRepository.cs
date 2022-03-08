@@ -28,7 +28,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     paymentMethods = paymentMethods.Where(x => x.CountryId.Equals(countryId) && x.IsActive == true);
                 }
 
-                var transferDetailsDto = GetListOfPaymentMethods(paymentMethods.OrderBy(x =>x.PaymentMethodId));
+                var transferDetailsDto = GetListOfPaymentMethods(paymentMethods);
 
                 return transferDetailsDto;
             }
@@ -48,7 +48,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   PaymentMethodName = p.PaymentMethodName,
                                   IsActive = p.IsActive,
                               };
-            return Task.FromResult(paymentMethodDto.ToList());
+            return Task.FromResult(paymentMethodDto.OrderBy(x => x.PaymentMethodId).ToList());
         }
     }
 }
