@@ -1449,10 +1449,27 @@ namespace GIGLS.Services.Implementation.Customers
 
                 //Charge Wallet for Subscription
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+
+                // Get Ecommerce sub charge
+                var charge = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceSubscriptionCharge, 1);
+                var chargeValue = 0.00M;
+                if (charge == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Charge subscription not found";
+                    return result;
+                }
+                chargeValue = Convert.ToDecimal(charge.Value);
+                if(wallet.Balance < chargeValue)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Insufficient wallet balance";
+                    return result;
+                }
                 await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
-                    Amount = 3999m,
+                    Amount = chargeValue,
                     CreditDebitType = CreditDebitType.Debit,
                     Description = "Customer subscription",
                     PaymentType = PaymentType.Wallet,
