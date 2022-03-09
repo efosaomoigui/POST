@@ -37,4 +37,16 @@ namespace GIGLS.Core.DTO
         public string TransactionStatus { get; set; }
         public string ServiceCenterName { get; set; }
     }
+
+    public class CODCallBackDTO : BaseDomainDTO
+    {
+        [JsonProperty("cod_amount")]
+        public string CODAmount { get; set; }
+        [JsonProperty("waybill")]
+        public string Waybill { get; set; }
+        [JsonProperty("paymentstatus")]
+        public string PaymentStatus { get; set; }
+        [JsonProperty("transactionreference")]
+        public string TransactionReference { get; set; }
+    }
 }
