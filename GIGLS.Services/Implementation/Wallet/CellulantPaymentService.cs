@@ -779,9 +779,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             //call the transfer cellulant API
-            var refNo = Guid.NewGuid().ToString();
-            refNo = refNo.Substring(0, 7);
-            refNo = $"{refNo}-{cod.Waybill}";
+            var refNo = $"TRX-{cod.Waybill}-CLNT";
             var transferDTO = new CellulantTransferDTO()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
@@ -789,11 +787,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 CustomerCode = shipmentInfo.CustomerCode
             };
             var response = await CelullantTransfer(transferDTO);
-            if (response.AuthStatus.AuthStatusCode == 131 && response.Results.FirstOrDefault().StatusCode == 139)
-            {
-                await UpdateCODShipmentOnCallBack();
-            }
-
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
             await _uow.CompleteAsync();
