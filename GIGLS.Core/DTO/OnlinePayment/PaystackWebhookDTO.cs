@@ -669,6 +669,98 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
 
 
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class PacketPushPaymentStatus
+    {
+        [JsonProperty("statusCode")]
+        public string StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("beepTransactionID")]
+        public string BeepTransactionID { get; set; }
+
+        [JsonProperty("receiptNumber")]
+        public string ReceiptNumber { get; set; }
+
+        [JsonProperty("receiverNarration")]
+        public string ReceiverNarration { get; set; }
+
+        [JsonProperty("function")]
+        public string Function { get; set; }
+
+        [JsonProperty("msisdn")]
+        public string Msisdn { get; set; }
+
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("paymentDate")]
+        public string PaymentDate { get; set; }
+
+        [JsonProperty("clientCode")]
+        public string ClientCode { get; set; }
+
+        [JsonProperty("extraData")]
+        public string ExtraData { get; set; }
+    }
+
+    public class PayloadPushPaymentStatus
+    {
+        [JsonProperty("packet")]
+        public PacketPushPaymentStatus Packet { get; set; }
+
+        [JsonProperty("credentials")]
+        public Credentials Credentials { get; set; }
+    }
+
+    public class PushPaymentStatusRequstPayload
+    {
+        [JsonProperty("function")]
+        public string Function { get; set; }
+
+        [JsonProperty("countryCode")]
+        public string CountryCode { get; set; }
+
+        [JsonProperty("payload")]
+        public PayloadPushPaymentStatus Payload { get; set; }
+    }
+
+
+
+    public class PushPaymentStatusResponseResult
+    {
+        [JsonProperty("statusCode")]
+        public int StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("beepTransactionID")]
+        public string BeepTransactionID { get; set; }
+    }
+
+    public class CellulantPushPaymentStatusResponse
+    {
+        [JsonProperty("authStatus")]
+        public AuthStatus AuthStatus { get; set; }
+
+        [JsonProperty("results")]
+        public PushPaymentStatusResponseResult Results { get; set; }
+    }
+
+
+
+
+
+
 
 
 

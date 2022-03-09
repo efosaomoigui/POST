@@ -21,6 +21,8 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
         Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook);
         Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload);
-        Task<bool> CODCallBack(CODCallBackDTO cod);
+        Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod);
+        Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO);
+        Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
     }
 }

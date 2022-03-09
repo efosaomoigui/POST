@@ -728,7 +728,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        public async Task<bool> CODCallBack(CODCallBackDTO cod)
+        public async Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod)
         {
             //0. validate payload
             if (cod == null)
@@ -766,10 +766,38 @@ namespace GIGLS.Services.Implementation.Wallet
                 codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
             }
 
+            shipmentInfo.CODStatusDate = DateTime.Now;
+            shipmentInfo.CODStatus = CODMobileStatus.Collected;
+            shipmentInfo.CODDescription = $"COD Shipment {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
+
+            var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill);
+            if (mobileShipment != null)
+            {
+                mobileShipment.CODStatusDate = DateTime.Now;
+                mobileShipment.CODStatus = CODMobileStatus.Collected;
+                mobileShipment.CODDescription = $"COD Shipment {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
+            }
+
+            //call the transfer cellulant API
+            var refNo = Guid.NewGuid().ToString();
+            refNo = refNo.Substring(0, 7);
+            refNo = $"{refNo}-{cod.Waybill}";
+            var transferDTO = new CellulantTransferDTO()
+            {
+                Amount = Convert.ToDecimal(cod.CODAmount),
+                RefNo = refNo,
+                CustomerCode = shipmentInfo.CustomerCode
+            };
+            var response = await CelullantTransfer(transferDTO);
+            if (response.AuthStatus.AuthStatusCode == 131 && response.Results.FirstOrDefault().StatusCode == 139)
+            {
+                await UpdateCODShipmentOnCallBack();
+            }
+
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
             await _uow.CompleteAsync();
-            return true;
+            return response;
         }
 
         #endregion
@@ -830,8 +858,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
         #region Cellulant TRANSFER PROCESS
 
-
-
         public async Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload)
         {
             string celullantUrl = ConfigurationManager.AppSettings["CellulantTransferBeepUrl"];
@@ -848,6 +874,85 @@ namespace GIGLS.Services.Implementation.Wallet
                 var result = JsonConvert.DeserializeObject<CellulantTransferResponsePayload>(responseResult);
                 return result;
             }
+        }
+
+        public async Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO)
+        {
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var user = await _uow.Company.GetCompanyByCode(transferDTO.CustomerCode);
+            if (user is null)
+            {
+                throw new GenericException("ecommerce user does not exist");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == transferDTO.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            string username = ConfigurationManager.AppSettings["CellulantUsername"];
+            string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
+            var pak = new Packet();
+            pak.ServiceCode = serviceCode;
+            pak.MSISDN = user.PhoneNumber;
+            pak.InvoiceNumber = transferDTO.RefNo;
+            pak.AccountNumber = accInfo.AccountNo;
+            pak.PayerTransactionID = transferDTO.RefNo;
+            pak.Amount = transferDTO.Amount;
+            pak.HubID = "";
+            pak.Narration = "Transfer to COD wallet";
+            pak.DatePaymentReceived = DateTime.Now.ToString();
+            pak.ExtraData = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            pak.CurrencyCode = "NG";
+            pak.CustomerNames = $"{user.Name}";
+            pak.PaymentMode = "Online Payment";
+
+            var payload = new CellulantTransferPayload();
+            payload.CountryCode = "NG";
+            payload.Function = "BEEP.postPayment";
+            payload.Payload.Credentials.Password = pwd;
+            payload.Payload.Credentials.Username = username;
+            payload.Payload.Packet.Add(pak);
+            var result = await Transfer(payload);
+            return result;
+        }
+
+        public async Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        {
+            var response = new CellulantPushPaymentStatusResponse();
+            if (payload != null)
+            {
+                var payerTransacID = payload.Payload.Packet.PayerTransactionID;
+                var getWaybill = payerTransacID.Split('-');
+                var waybill = getWaybill[1];
+                //1. get shipment details
+                var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                if (shipmentInfo != null)
+                {
+                    shipmentInfo.CODStatusDate = DateTime.Now;
+                    shipmentInfo.CODStatus = CODMobileStatus.Paid;
+                    shipmentInfo.CODDescription = $"COD Shipment {CODMobileStatus.Paid.ToString()}";
+                }
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment != null)
+                {
+                    mobileShipment.CODStatusDate = DateTime.Now;
+                    mobileShipment.CODStatus = CODMobileStatus.Collected;
+                    mobileShipment.CODDescription = $"COD Shipment {CODMobileStatus.Paid.ToString()}";
+                }
+                await _uow.CompleteAsync();
+
+                response.AuthStatus.AuthStatusCode = 131;
+                response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
+                response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
+                response.Results.BeepTransactionID = payload.Payload.Packet.PayerTransactionID;
+                response.Results.StatusCode = 188;
+                response.Results.StatusDescription = "Response was received";
+            }
+            return response;
         }
         #endregion
 
