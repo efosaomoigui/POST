@@ -728,6 +728,50 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        public async Task<bool> CODCallBack(CODCallBackDTO cod)
+        {
+            //0. validate payload
+            if (cod == null)
+            {
+                throw new GenericException($"invalid payload", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            var amount = Convert.ToDecimal(cod.CODAmount);
+            if (String.IsNullOrEmpty(cod.Waybill) || amount <= 0)
+            {
+                throw new GenericException($"missing parameter", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            //1. get sender details
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == cod.Waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var senderInfo = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            if (senderInfo == null)
+            {
+                throw new GenericException($"sender information not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var senderWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            //2.update the cod shipment
+            var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == cod.Waybill);
+            if (codAccShipment != null)
+            {
+                codAccShipment.PaymentType = PaymentType.Transfer;
+                codAccShipment.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                codAccShipment.ServiceCenterId = shipmentInfo.DestinationServiceCentreId;
+                codAccShipment.PaymentTypeReference = cod.TransactionReference;
+                codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
+            }
+
+            //3. TODO: deduct charges
+            //4. TODO: send email to merchant
+            await _uow.CompleteAsync();
+            return true;
+        }
+
         #endregion
 
         #region Cellulant Webhook

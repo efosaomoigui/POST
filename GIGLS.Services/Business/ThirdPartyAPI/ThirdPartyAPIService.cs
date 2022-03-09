@@ -497,5 +497,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _companyService.UpdateUserRankForAlpha(merchantcode);
         }
+
+        public async Task<bool> CODCallBack(CODCallBackDTO cod)
+        {
+            return await _cellulantPaymentService.CODCallBack(cod);
+        }
     }
 }
