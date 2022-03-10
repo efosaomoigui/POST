@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
@@ -34,13 +35,15 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IStellasService _stellasService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService, IStellasService stellasService)
+        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService, IStellasService stellasService, IMessageSenderService messageSenderService)
         {
             _userService = userService;
             _uow = uow;
             _globalPropertyService = globalPropertyService;
             _stellasService = stellasService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 

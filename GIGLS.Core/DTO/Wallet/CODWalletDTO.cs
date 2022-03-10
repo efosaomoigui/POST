@@ -171,4 +171,36 @@ namespace GIGLS.Core.DTO.Wallet
         public List<Error> Errors { get; set; }
     }
 
+    public class CreateAccountCoreBankingDTO
+    {
+        [JsonProperty("customerId")]
+        public string CustomerId { get; set; }
+    }
+
+    public class CreateAccountCoreBankingResponseDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public CreateAccountCoreBankingData Data { get; set; }
+    }
+
+    public class LoginDetails
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+    }
+
+    public class CreateAccountCoreBankingData
+    {
+        [JsonProperty("loginDetails")]
+        public LoginDetails LoginDetails { get; set; }
+    }
 }
