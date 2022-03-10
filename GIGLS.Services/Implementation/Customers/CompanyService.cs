@@ -1108,19 +1108,6 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 await _uow.CompleteAsync();
 
-                //Call Alpha Api to Notify them of merchant subscription
-                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
-                {
-                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
-                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
-                    SubscriptionPlan = company.Rank.ToString().ToLower(),
-                    ExpiryDate = DateTime.Now.AddMonths(1),
-                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
-                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
-                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
-                }) ;
-                
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
@@ -1161,6 +1148,19 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
+
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                });
                 return result;
             }
             catch (Exception)
