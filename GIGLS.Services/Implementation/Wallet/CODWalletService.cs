@@ -82,6 +82,35 @@ namespace GIGLS.Services.Implementation.Wallet
                     await AddCODWallet(codWalletDTO);
                     res = codWalletDTO;
                     resp.data = res;
+
+                    //Create User login details on stella core banking
+                    var loginDetails = new CreateAccountCoreBankingResponseDTO();
+                    if (!string.IsNullOrEmpty(result.data.account_details.customerId))
+                    {
+                        var resultResponse = await AddCustomerToStellaCoreBanking(result.data.account_details.customerId);
+                        loginDetails = (CreateAccountCoreBankingResponseDTO)resultResponse.data;
+
+                        //Send stella account login details to customer
+                        if (loginDetails.Data != null)
+                        {
+                            if (loginDetails.Data?.LoginDetails != null)
+                            {
+                                var message = new MessageDTO
+                                {
+                                    ToEmail = user.Email,
+                                    To = user.Email,
+                                    MessageTemplate = "CODWalletAccountCreation",
+                                    StellaLoginDetails = new StellaLoginDetails
+                                    {
+                                        Username = loginDetails.Data.LoginDetails.Username,
+                                        CustomerName = user?.Name,
+                                        AccountNumber = result.data.account_details.accountNumber
+                                    }
+                                };
+                                await _messageSenderService.SendEmailForStellaLoginDetails(message);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -159,6 +188,19 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Date of birth is required", $"{(int)HttpStatusCode.BadRequest}");
             }
             return await _stellasService.ValidateBVNNumber(payload);
+        }
+
+        public async Task<StellasResponseDTO> AddCustomerToStellaCoreBanking(string customerId)
+        {
+            try
+            {
+                var payload = new CreateAccountCoreBankingDTO { CustomerId = customerId };
+                return await _stellasService.CreateAccountOnCoreBanking(payload);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
