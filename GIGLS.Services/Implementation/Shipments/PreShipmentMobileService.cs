@@ -5284,6 +5284,23 @@ namespace GIGLS.Services.Implementation.Shipments
                                 WaybillNumber = detail.WaybillNumber,
                                 ShipmentScanStatus = ShipmentScanStatus.ARO
                             });
+                            if (preshipmentmobile.IsCashOnDelivery == true)
+                            {
+                                //collect the cods and add to CashOnDeliveryRegisterAccount()
+                                var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                                {
+                                    Amount = preshipmentmobile.CashOnDeliveryAmount ?? 0,
+                                    CODStatusHistory = CODStatushistory.Created,
+                                    Description = "Cod From Sales",
+                                    ServiceCenterId = 0,
+                                    Waybill = preshipmentmobile.Waybill,
+                                    UserId = preshipmentmobile.UserId,
+                                    DepartureServiceCenterId = detail.SenderServiceCentreId,
+                                    DestinationCountryId = preshipmentmobile.DestinationCountryId
+                                };
+
+                                _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+                            }
 
                             await _uow.CompleteAsync();
                             if (detail.IsBulky)
@@ -5444,6 +5461,24 @@ namespace GIGLS.Services.Implementation.Shipments
                                         WaybillNumber = detail.WaybillNumber,
                                         ShipmentScanStatus = ShipmentScanStatus.ARO
                                     });
+
+                                    if (preshipmentmobile.IsCashOnDelivery == true)
+                                    {
+                                        //collect the cods and add to CashOnDeliveryRegisterAccount()
+                                        var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                                        {
+                                            Amount = preshipmentmobile.CashOnDeliveryAmount ?? 0,
+                                            CODStatusHistory = CODStatushistory.Created,
+                                            Description = "Cod From Sales",
+                                            ServiceCenterId = 0,
+                                            Waybill = preshipmentmobile.Waybill,
+                                            UserId = preshipmentmobile.UserId,
+                                            DepartureServiceCenterId = detail.SenderServiceCentreId,
+                                            DestinationCountryId = destinationCountryId
+                                        };
+
+                                        _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+                                    }
 
                                     await _uow.CompleteAsync();
                                 }
