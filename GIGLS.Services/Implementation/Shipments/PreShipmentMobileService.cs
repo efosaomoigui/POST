@@ -7595,6 +7595,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
                 shipment.Courier = mobile.CompanyMap.ToString();
                 shipment.IsBulky = detail.IsBulky;
+                shipment.IsCashOnDelivery = mobile.IsCashOnDelivery;
+                shipment.CODStatusDate = mobile.CODStatusDate;
+                shipment.CODDescription = mobile.CODDescription;
+                shipment.CODStatus = mobile.CODStatus;
                 shipment.ShipmentItems = mobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                 {
                     Description = s.Description,
