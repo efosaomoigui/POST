@@ -389,6 +389,7 @@
     <Compile Include="Controllers\Partnership\FleetPartnerController.cs" />
     <Compile Include="Controllers\Partnership\PartnerApplicationController.cs" />
     <Compile Include="Controllers\Partnership\PartnerController.cs" />
+    <Compile Include="Controllers\PaymentMethodController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\PaymentWebhook\CellulantController.cs" />
@@ -512,6 +513,7 @@
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Korapay\" />
     <Folder Include="Views\Location\" />
+    <Folder Include="Views\PaymentMethod\" />
     <Folder Include="Views\Reminder\" />
     <Folder Include="Views\Test\" />
   </ItemGroup>

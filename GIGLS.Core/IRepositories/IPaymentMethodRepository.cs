@@ -12,5 +12,7 @@ namespace GIGLS.Core.IRepositories
     public interface IPaymentMethodRepository : IRepository<PaymentMethod>
     {
         Task<List<PaymentMethodDTO>> GetPaymentMethodByUserActiveCountry(int countryId);
+        Task<List<PaymentMethodNewDTO>> GetPaymentMethods();
+        Task<PaymentMethodNewDTO> GetPaymentMethodById(int paymentMethodId);
     }
 }

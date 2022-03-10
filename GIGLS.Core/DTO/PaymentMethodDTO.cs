@@ -13,4 +13,12 @@ namespace GIGLS.Core.DTO
         public string PaymentMethodName { get; set; }
         public bool IsActive { get; set; }
     }
+
+    public class PaymentMethodNewDTO : BaseDomainDTO
+    {
+        public int PaymentMethodId { get; set; }
+        public string PaymentMethodName { get; set; }
+        public bool IsActive { get; set; }
+        public int CountryId { get; set; }
+    }
 }

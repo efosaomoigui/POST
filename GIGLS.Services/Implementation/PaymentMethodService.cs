@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation
             MapperConfig.Initialize();
         }
 
-        public async Task<bool> AddPaymentMethod(PaymentMethodDTO paymentMethodDTO)
+        public async Task<bool> AddPaymentMethod(PaymentMethodNewDTO paymentMethodDTO)
         {
             try
             {
@@ -93,5 +93,97 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task UpdatePaymentMethodStatus(int paymentMethodId, bool status)
+        {
+            try
+            {
+                var location = await _uow.PaymentMethod.GetAsync(paymentMethodId);
+                if (location == null)
+                {
+                    throw new GenericException("Payment method Information does not exist");
+                }
+                location.IsActive = status;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PaymentMethodNewDTO>> GetPaymentMethods()
+        {
+            try
+            {
+                var result = await _uow.PaymentMethod.GetPaymentMethods();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeletePaymentMethod(int paymentMethodId)
+        {
+            try
+            {
+                var method = await _uow.PaymentMethod.GetAsync(paymentMethodId);
+                if (method == null)
+                {
+                    throw new GenericException("Payment method information does not exist");
+                }
+                _uow.PaymentMethod.Remove(method);
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdatePaymentMethod(int paymentMethodId, PaymentMethodNewDTO paymentMethodDto)
+        {
+            try
+            {
+                var method = await _uow.PaymentMethod.GetAsync(paymentMethodId);
+
+                //To check if the update already exists
+                if (method == null || paymentMethodDto.PaymentMethodId != paymentMethodId)
+                {
+                    throw new GenericException("Payment method Information does not exist");
+                }
+
+                method.CountryId = paymentMethodDto.CountryId;
+                method.IsActive = paymentMethodDto.IsActive;
+                method.PaymentMethodName = paymentMethodDto.PaymentMethodName;
+
+                _uow.Complete();
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PaymentMethodNewDTO> GetPaymentMethodById(int paymentMethodId)
+        {
+            try
+            {
+                var method = await _uow.PaymentMethod.GetPaymentMethodById(paymentMethodId);
+                if (method == null)
+                {
+                    throw new GenericException("Payment method information does not exist");
+                }
+
+                return method;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
