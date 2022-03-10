@@ -175,6 +175,10 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? insurancevalue_display { get; set; }
         public bool IsExpressDropoff { get; set; }
         public bool IsBulky { get; set; }
+        public CODMobileStatus CODStatus { get; set; }
+        public DateTime? CODStatusDate { get; set; }
+        public string CODDescription { get; set; }
+        
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

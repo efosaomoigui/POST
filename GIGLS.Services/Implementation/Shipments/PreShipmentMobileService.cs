@@ -5383,7 +5383,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
                                         Vat = preshipmentmobile.Vat == null ? 0 : preshipmentmobile.Vat,
                                         SenderAddress = preshipmentmobile.SenderAddress,
-                                        IsCashOnDelivery = false,
+                                        IsCashOnDelivery = preshipmentmobile.IsCashOnDelivery,
                                         CustomerCode = preshipmentmobile.CustomerCode,
                                         DestinationServiceCentreId = detail.ReceiverServiceCentreId,
                                         DepartureServiceCentreId = detail.SenderServiceCentreId,
@@ -5406,6 +5406,10 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PackageOptionIds = detail.PackageOptionIds,
                                         IsClassShipment = isClassShipment,
                                         IsBulky = detail.IsBulky,
+                                        CashOnDeliveryAmount = preshipmentmobile.CashOnDeliveryAmount,
+                                        CODDescription = preshipmentmobile.CODDescription,
+                                        CODStatus = preshipmentmobile.CODStatus,
+                                        CODStatusDate = preshipmentmobile.CODStatusDate,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
