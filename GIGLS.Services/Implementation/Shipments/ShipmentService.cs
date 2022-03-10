@@ -1855,7 +1855,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
 
-                newShipment.CODDescription = "COD Shipment Created";
+                newShipment.CODDescription = "COD Initiated";
                 newShipment.CODStatus = CODMobileStatus.Initiated;
                 newShipment.CODStatusDate = DateTime.Now;
             }
@@ -6368,7 +6368,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
                         obj.CODStatus = status.ToString();
                         obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
-                        obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
                         //var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
                         //if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
                         //{
@@ -6399,7 +6399,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
                         obj.CODStatus = status.ToString();
                         obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
-                        obj.CODDescription = (item.CODDescription == null) ? "COD Shipment Created" : item.CODDescription;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
                         //if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
                         //{
                         //    obj.CODStatus = CODMobileStatus.Collected.ToString();

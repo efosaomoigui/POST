@@ -682,7 +682,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
-                        newPreShipment.CODDescription = "COD Shipment Created";
+                        newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
                     }
@@ -880,7 +880,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
-                        newPreShipment.CODDescription = "COD Shipment Created";
+                        newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
                     }
