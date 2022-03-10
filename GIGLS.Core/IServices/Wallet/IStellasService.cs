@@ -13,7 +13,5 @@ namespace GIGLS.Core.IServices.Wallet
         Task<StellasResponseDTO> GetCustomerStellasAccount(string accountNo);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
         Task<StellasResponseDTO> CreateAccountOnCoreBanking(CreateAccountCoreBankingDTO payload);
-
     }
-
 }
