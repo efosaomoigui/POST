@@ -764,6 +764,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 codAccShipment.ServiceCenterId = shipmentInfo.DestinationServiceCentreId;
                 codAccShipment.PaymentTypeReference = cod.TransactionReference;
                 codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
+                codAccShipment.TransferAccount = cod.TransferAccount;
             }
 
             shipmentInfo.CODStatusDate = DateTime.Now;

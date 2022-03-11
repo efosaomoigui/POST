@@ -48,5 +48,7 @@ namespace GIGLS.Core.DTO
         public string PaymentStatus { get; set; }
         [JsonProperty("transactionreference")]
         public string TransactionReference { get; set; }
+        [JsonProperty("transferaccount")]
+        public string TransferAccount { get; set; }
     }
 }
