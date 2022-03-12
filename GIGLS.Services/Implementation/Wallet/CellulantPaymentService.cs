@@ -845,6 +845,45 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return record.SessionId;
         }
+
+        public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            result = await CheckISCODPaymentReceived(craccount);
+            return result;
+        }
+
+        private async Task<bool> CheckISCODPaymentReceived(string craccount)
+        {
+            bool result = false;
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?craccount={craccount}&type=2"){};
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    result = status == "00" ? true : result;
+                }
+            }
+            return result;
+        }
         #endregion
     }
 }

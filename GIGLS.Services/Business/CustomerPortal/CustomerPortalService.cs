@@ -4629,7 +4629,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<bool> GetTransferStatus(string craccount)
         {
-            return await _cellulantPaymentService.GetTransferStatus(craccount);
+            return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }
 
         public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
@@ -4641,5 +4641,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _codWalletService.ValidateBVNNumber(payload);
         }
+
     }
 }
