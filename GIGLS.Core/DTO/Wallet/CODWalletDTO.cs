@@ -248,4 +248,110 @@ namespace GIGLS.Core.DTO.Wallet
     }
 
 
+
+    public class ValidateCustomerBVN
+    {
+        [JsonProperty("bvn")]
+        public string Bvn { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("lastName")]
+        public string LastName { get; set; }
+
+        [JsonProperty("dateOfBirth")]
+        public string DateOfBirth { get; set; }
+
+        [JsonProperty("phoneNo")]
+        public string PhoneNo { get; set; }
+    }
+
+    public class ValidateBVNData
+    {
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        [JsonProperty("bvn")]
+        public string Bvn { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("lastName")]
+        public string LastName { get; set; }
+
+        [JsonProperty("otherNames")]
+        public string OtherNames { get; set; }
+
+        [JsonProperty("dob")]
+        public string Dob { get; set; }
+    }
+
+    public class ValidateBVNResponseDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public ValidateBVNData Data { get; set; }
+    }
+
+    public class StellasResponseDTO
+    {
+
+        public bool status { get; set; }
+        public string message { get; set; }
+        public object data { get; set; }
+        public List<object> errors { get; set; }
+
+    }
+
+    public class Error
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+    }
+
+    public class StellasErrorResponse
+    {
+        [JsonProperty("errors")]
+        public List<Error> Errors { get; set; }
+    }
+
+    public class CreateAccountCoreBankingDTO
+    {
+        [JsonProperty("customerId")]
+        public string CustomerId { get; set; }
+    }
+
+    public class CreateAccountCoreBankingResponseDTO
+    {
+        [JsonProperty("status")]
+        public bool Status { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public CreateAccountCoreBankingData Data { get; set; }
+    }
+
+    public class LoginDetails
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+    }
+
+    public class CreateAccountCoreBankingData
+    {
+        [JsonProperty("loginDetails")]
+        public LoginDetails LoginDetails { get; set; }
+    }
 }
