@@ -110,6 +110,7 @@
         AirtimeMaxDailyTransferLimit,
         PartnerDeliveryPrice,
         SpecialStationDiscount,
-        SpecialStation
+        SpecialStation,
+        EcommerceSubscriptionCharge
     }
 }
