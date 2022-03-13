@@ -886,6 +886,11 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("user does not have a cod wallet");
             }
+            //test
+            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+
+            //live
+            var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
             string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
@@ -899,7 +904,7 @@ namespace GIGLS.Services.Implementation.Wallet
             pak.HubID = "";
             pak.Narration = "Transfer to COD wallet";
             pak.DatePaymentReceived = DateTime.Now.ToString();
-            pak.ExtraData = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            pak.ExtraData = callback;
             pak.CurrencyCode = "NG";
             pak.CustomerNames = $"{user.Name}";
             pak.PaymentMode = "Online Payment";

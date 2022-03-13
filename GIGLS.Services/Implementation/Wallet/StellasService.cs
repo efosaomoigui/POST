@@ -192,6 +192,10 @@ namespace GIGLS.Services.Implementation.Wallet
             using (var client = new HttpClient())
             {
                 var authModel = new AuthModel();
+                string username = ConfigurationManager.AppSettings["StellasUsername"];
+                string pwd = ConfigurationManager.AppSettings["StellasPwd"];
+                authModel.email = username;
+                authModel.password = pwd;
                 var credentials = JToken.FromObject(authModel);
                 var data = JsonConvert.SerializeObject(credentials);
                 KeyValuePair<string, string>[] nameValueCollection = new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("grant_type", "password"), new KeyValuePair<string, string>("email", authModel.email), new KeyValuePair<string, string>("password", authModel.password) };
@@ -602,8 +606,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private class AuthModel
         {
-            public string email { get; set; } = "it@giglogistics.com";
-            public string password { get; set; } = "Password@001";
+            public string email { get; set; } 
+            public string password { get; set; }
 
         }
     }
