@@ -786,6 +786,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         }
                         if (!String.IsNullOrEmpty(user.CustomerCode))
                         {
+                            var regUser = await _uow.User.GetUserByChannelCode(user.CustomerCode);
+                            if (regUser != null)
+                            {
+                                userId = regUser.Id;
+                            }
                             //Pin Generation 
                             var message = new MobileShipmentCreationMessageDTO
                             {
