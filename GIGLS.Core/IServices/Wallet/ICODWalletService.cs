@@ -15,8 +15,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<StellasResponseDTO> StellasWithdrawal(StellasWithdrawalDTO stellasWithdrawalDTO);
         Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO);
         Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO);
-        Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO);
-        Task<StellasResponseDTO> GetStellasAccountBal(string customerCode);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
     }

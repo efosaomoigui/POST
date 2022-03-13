@@ -177,8 +177,6 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return await _stellasService.StellasValidateBankName(validateBankNameDTO);
         }
-            return new StellasResponseDTO();
-        }
 
         public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
         {

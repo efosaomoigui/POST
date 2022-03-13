@@ -300,28 +300,6 @@ namespace GIGLS.Core.DTO.Wallet
         public ValidateBVNData Data { get; set; }
     }
 
-    public class StellasResponseDTO
-    {
-
-        public bool status { get; set; }
-        public string message { get; set; }
-        public object data { get; set; }
-        public List<object> errors { get; set; }
-
-    }
-
-    public class Error
-    {
-        [JsonProperty("message")]
-        public string Message { get; set; }
-    }
-
-    public class StellasErrorResponse
-    {
-        [JsonProperty("errors")]
-        public List<Error> Errors { get; set; }
-    }
-
     public class CreateAccountCoreBankingDTO
     {
         [JsonProperty("customerId")]
