@@ -220,6 +220,7 @@ namespace GIGLS.Core
         IInternationalCargoManifestDetailRepository InternationalCargoManifestDetail { get; set; }
         IUnidentifiedItemsForInternationalShippingRepository UnidentifiedItemsForInternationalShipping { get; set; }
         IBillsPaymentManagementRepository BillsPaymentManagement { get; set; }
+        ICODWalletRepository CODWallet { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

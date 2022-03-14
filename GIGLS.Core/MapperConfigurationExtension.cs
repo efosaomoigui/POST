@@ -539,6 +539,9 @@ namespace GIGLS.Core
                 config.CreateMap<UnidentifiedItemsForInternationalShippingDTO, UnidentifiedItemsForInternationalShipping>();
                 config.CreateMap<UnidentifiedItemsForInternationalShipping, UnidentifiedItemsForInternationalShippingDTO>();
 
+                config.CreateMap<CODWalletDTO, CODWallet>();
+                config.CreateMap<CODWallet, CODWalletDTO>();
+
             });
 
             isInit = true;

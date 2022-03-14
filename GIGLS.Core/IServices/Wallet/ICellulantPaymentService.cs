@@ -20,6 +20,11 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
         Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
         Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook);
-        Task<bool> CODCallBack(CODCallBackDTO cod);
+        Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload);
+        Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod);
+        Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO);
+        Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
+        Task<bool> GetTransferStatus(string craccount);
+        Task<bool> GetCODPaymentReceivedStatus(string craccount);
     }
 }

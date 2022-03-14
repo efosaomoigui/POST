@@ -358,12 +358,14 @@
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
     <Compile Include="Implementation\Wallet\CellulantPaymentService.cs" />
+    <Compile Include="Implementation\Wallet\StellasService.cs" />
     <Compile Include="Implementation\Wallet\KorapayPaymentservice.cs" />
     <Compile Include="Implementation\Wallet\SterlingPaymentService.cs" />
     <Compile Include="Implementation\Wallet\FlutterwavePaymentService.cs" />
     <Compile Include="Implementation\Wallet\PaystackPaymentService.cs" />
     <Compile Include="Implementation\Wallet\UssdService.cs" />
     <Compile Include="Implementation\Wallet\WalletPaymentLogService.cs" />
+    <Compile Include="Implementation\Wallet\CODWalletService.cs" />
     <Compile Include="Implementation\Wallet\WalletService.cs" />
     <Compile Include="Implementation\Wallet\WalletTransactionService.cs" />
     <Compile Include="Implementation\Wallet\WaybillPaymentLogService.cs" />

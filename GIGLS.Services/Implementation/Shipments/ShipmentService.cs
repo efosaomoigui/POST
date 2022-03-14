@@ -75,6 +75,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IInternationalCargoManifestService _intlCargoManifest;
         private readonly IPlaceLocationService _locationService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
+        private readonly ICODWalletService _codWalletService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -87,7 +88,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -113,7 +114,6 @@ namespace GIGLS.Services.Implementation.Shipments
             _countryService = countryService;
             _intlCargoManifest = intlCargoManifest;
             _locationService = locationService;
-            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             MapperConfig.Initialize();
         }
 
@@ -1854,6 +1854,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+
+                newShipment.CODDescription = "COD Initiated";
+                newShipment.CODStatus = CODMobileStatus.Initiated;
+                newShipment.CODStatusDate = DateTime.Now;
             }
 
             newShipment.DepartureCountryId = departureCountry.CountryId;
@@ -6306,9 +6310,29 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("user does not exist");
                     }
                 }
+                var codWalletInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (codWalletInfo is null)
+                {
+                    throw new GenericException("user does not have a COD wallet");
+                }
                 var allCOD = new AllCODShipmentDTO();
                 var codMobileShipment = new List<PreShipmentMobile>();
                 var codAgilityShipment = new List<Shipment>();
+                //get customer available balance from stellass
+                var bal = await _codWalletService.GetStellasAccountBal(codWalletInfo.CustomerCode);
+                if (bal.status)
+                {
+                    if (bal.data is GetCustomerBalanceDTO)
+                    {
+                        var result = (GetCustomerBalanceDTO)bal.data;
+                        allCOD.AvailableBalance = result.data.availableBalance;
+                    } 
+                }
+                allCOD.AccountNo = codWalletInfo.AccountNo;
+                if (String.IsNullOrEmpty(allCOD.AvailableBalance))
+                {
+                    allCOD.AvailableBalance = "0.00";
+                }
                 if (dto.PageSize < 1)
                 {
                     dto.PageSize = 25;
@@ -6319,13 +6343,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (dto.StartDate != null && dto.EndDate != null)
                 {
-                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.ZoneMapping == 1 && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
                 else
                 {
-                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery &&  x.IsCancelled == false && x.ZoneMapping == 1).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false &&  x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
 
                 if (codAgilityShipment.Any())
@@ -6341,17 +6365,21 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODAmount = item.CashOnDeliveryAmount;
                         obj.ReceiverName = item.ReceiverName;
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
-                        var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-                        if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
-                        {
-                            obj.CODStatus = CODMobileStatus.Collected.ToString();
-                            obj.DateCreated = lastScan.DateCreated;
-                        }
-                        else
-                        {
-                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
-                            obj.DateCreated = item.DateCreated;
-                        }
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        //var lastScan = collection.Where(x => x.Waybill == item.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                        //if (lastScan != null && (lastScan.ShipmentScanStatus == ShipmentScanStatus.OKC || lastScan.ShipmentScanStatus == ShipmentScanStatus.OKT))
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Collected.ToString();
+                        //    obj.DateCreated = lastScan.DateCreated;
+                        //}
+                        //else
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                        //    obj.DateCreated = item.DateCreated;
+                        //}
                         allCOD.CODShipmentDetail.Add(obj);
                     }
 
@@ -6368,14 +6396,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.DateCreated = item.DateModified;
                         obj.ReceiverName = item.ReceiverName;
                         obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
-                        if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
-                        {
-                            obj.CODStatus = CODMobileStatus.Collected.ToString();
-                        }
-                        else
-                        {
-                            obj.CODStatus = CODMobileStatus.Initiated.ToString();
-                        }
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        //if (item.shipmentstatus.ToLower() == MobilePickUpRequestStatus.Delivered.ToString().ToLower())
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Collected.ToString();
+                        //}
+                        //else
+                        //{
+                        //    obj.CODStatus = CODMobileStatus.Initiated.ToString();
+                        //}
                         allCOD.CODShipmentDetail.Add(obj);
                     }
                 }

@@ -175,6 +175,10 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? insurancevalue_display { get; set; }
         public bool IsExpressDropoff { get; set; }
         public bool IsBulky { get; set; }
+        public CODMobileStatus CODStatus { get; set; }
+        public DateTime? CODStatusDate { get; set; }
+        public string CODDescription { get; set; }
+        
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -601,6 +605,8 @@ namespace GIGLS.Core.DTO.Shipments
         }
         public List<CODShipmentDetailDTO> CODShipmentDetail { get; set; }
         public decimal TotalCODAmount { get; set; }
+        public string AvailableBalance { get; set; }
+        public string AccountNo { get; set; }
     }
 
     public class CODShipmentDetailDTO : BaseDomainDTO
@@ -610,6 +616,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODStatus { get; set; }
         public string ReceiverName { get; set; }
         public string ReceiverStationName { get; set; }
+        public string CODDescription { get; set; }
     }
 
 }

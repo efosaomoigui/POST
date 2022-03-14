@@ -127,6 +127,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly IKorapayPaymentService _koraPaymentService;
+        private readonly ICODWalletService _codWalletService;
+        private readonly IStellasService _stellaService;
+
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
@@ -140,7 +143,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
             IPaymentTransactionService paymentTransactionService, IFlutterwavePaymentService flutterwavePaymentService, IMagayaService magayaService, IMobilePickUpRequestsService mobilePickUpRequestsService,
             INotificationService notificationService, ICompanyService companyService, IShipmentService shipmentService, IManifestGroupWaybillNumberMappingService movementManifestService,
-            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService, IKorapayPaymentService koraPaymentService)
+            IWaybillPaymentLogService waybillPaymentLogService, INodeService nodeService, IGIGXUserDetailService gigxService, IPaymentMethodService paymentMethodService, ICellulantPaymentService cellulantPaymentService, ISterlingPaymentService sterlingPaymentService, IKorapayPaymentService koraPaymentService, ICODWalletService codWalletService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -190,6 +193,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _cellulantPaymentService = cellulantPaymentService;
             _sterlingPaymentService = sterlingPaymentService;
             _koraPaymentService = koraPaymentService;
+            _codWalletService = codWalletService;
             MapperConfig.Initialize();
         }
 
@@ -4607,9 +4611,144 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<StellasResponseDTO> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        {
+
+            if (String.IsNullOrEmpty(codWalletDTO.CustomerCode))
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                codWalletDTO.CustomerCode = currentUser.UserChannelCode;
+            }
+            var result = await _codWalletService.CreateStellasAccount(codWalletDTO);
+            return result;
+
+        }
+        public Task<StellasResponseDTO> GetStellasAccountBal(string customerCode)
+        {
+            var bal = _codWalletService.GetStellasAccountBal(customerCode);
+            return bal;
+        }
+
         public async Task<string> GenerateCheckoutUrlForKorapay(KoarapayInitializeCharge payload)
         {
             return await _koraPaymentService.InitializeCharge(payload);
         }
+
+        public async Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO)
+        {
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var user = await _companyService.GetCompanyByCode(transferDTO.CustomerCode);
+            if (user is null)
+            {
+                throw new GenericException("ecommerce user does not exist");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == transferDTO.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            string username = ConfigurationManager.AppSettings["CellulantUsername"];
+            string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
+            var pak = new Packet();
+            pak.ServiceCode = serviceCode;
+            pak.MSISDN = user.PhoneNumber;
+            pak.InvoiceNumber = transferDTO.RefNo;
+            pak.AccountNumber = accInfo.AccountNo;
+            pak.PayerTransactionID = transferDTO.RefNo;
+            pak.Amount = transferDTO.Amount;
+            pak.HubID = "";
+            pak.Narration = "Transfer to COD wallet";
+            pak.DatePaymentReceived = DateTime.Now.ToString();
+            pak.ExtraData = "";
+            pak.CurrencyCode = "NG";
+            pak.CustomerNames = $"{user.Name}";
+            pak.PaymentMode = "Online Payment";
+
+            var payload = new CellulantTransferPayload();
+            payload.CountryCode = "NG";
+            payload.Function = "BEEP.postPayment";
+            payload.Payload.Credentials.Password = pwd;
+            payload.Payload.Credentials.Username = username;
+            payload.Payload.Packet.Add(pak);
+            var result = await _cellulantPaymentService.Transfer(payload);
+            return result;
+        }
+
+        public async Task<StellasResponseDTO> GetStellasBanks()
+        {
+            return await _codWalletService.GetStellasBanks();
+        }
+
+        public async Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO)
+        {
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var userId = await _userService.GetCurrentUserId();
+            var codWallet = await _uow.CODWallet.GetAsync(x => x.UserId == userId);
+            if(codWallet is null)
+            {
+                throw new GenericException("user does not have a COD wallet");
+            }
+            bool isNumeric = int.TryParse(transferDTO.Amount, out int n);
+            if (!isNumeric)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var amount = Convert.ToDecimal(transferDTO.Amount);
+            var koboValue = amount * 100;
+            transferDTO.Amount = Convert.ToString(koboValue);
+            if (amount <= 0)
+            {
+                throw new GenericException("invalid amount");
+            }
+
+            var withrawObj = new StellasWithdrawalDTO()
+            {
+              Amount = transferDTO.Amount,
+              RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
+              Narration = transferDTO.Narration,
+              PayerAccountNumber = codWallet.AccountNo
+            };
+            var  withdrawResponse = await _codWalletService.StellasWithdrawal(withrawObj);
+            if (withdrawResponse.status)
+            {
+                await Task.Delay(15000);
+                transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
+                return await _codWalletService.StellasTransfer(transferDTO);
+            }
+            return withdrawResponse;
+        }
+
+        public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
+        {
+            if (validateBankNameDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            return await _codWalletService.StellasValidateBankName(validateBankNameDTO);
+        }
+
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
+        }
+
+        public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
+        {
+            return await _codWalletService.CheckIfUserHasCODWallet(customerCode);
+        }
+
+        public async Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            return await _codWalletService.ValidateBVNNumber(payload);
+        }
+
     }
 }

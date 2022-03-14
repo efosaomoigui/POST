@@ -48,7 +48,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   PaymentMethodName = p.PaymentMethodName,
                                   IsActive = p.IsActive,
                               };
-            return Task.FromResult(paymentMethodDto.ToList());
+            return Task.FromResult(paymentMethodDto.OrderBy(x => x.PaymentMethodId).ToList());
         }
 
         public Task<List<PaymentMethodNewDTO>> GetPaymentMethods()

@@ -23,6 +23,7 @@ using GIGLS.Infrastructure;
 using System.Net;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -498,9 +499,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _companyService.UpdateUserRankForAlpha(merchantcode);
         }
 
-        public async Task<bool> CODCallBack(CODCallBackDTO cod)
+        public async Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod)
         {
             return await _cellulantPaymentService.CODCallBack(cod);
+        }
+
+        public async Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        {
+            return await _cellulantPaymentService.UpdateCODShipmentOnCallBack(payload);
         }
     }
 }
