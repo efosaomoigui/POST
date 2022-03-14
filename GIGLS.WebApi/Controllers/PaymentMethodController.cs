@@ -21,7 +21,7 @@ namespace GIGLS.WebApi.Controllers
         {
             _paymentMethodService = paymentMethodService;
         }
-        // GET: Location
+        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
@@ -69,12 +69,12 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{locationId:int}")]
-        public async Task<IServiceResponse<object>> UpdateLocation(int locationId, PlaceLocationDTO locationDto)
+        [Route("{paymentMethodId:int}")]
+        public async Task<IServiceResponse<object>> UpdatePaymentMethod(int paymentMethodId, PaymentMethodNewDTO paymentMethodDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _locationService.UpdateLocation(locationId, locationDto);
+                await _paymentMethodService.UpdatePaymentMethod(paymentMethodId, paymentMethodDto);
                 return new ServiceResponse<object>
                 {
                     Object = true
@@ -84,12 +84,12 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("{locationId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteLGA(int locationId)
+        [Route("{paymentMethodId:int}")]
+        public async Task<IServiceResponse<bool>> DeletePaymentMethod(int paymentMethodId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _locationService.DeleteLocation(locationId);
+                await _paymentMethodService.DeletePaymentMethod(paymentMethodId);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -99,12 +99,12 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{locationId:int}/homedeliverystatus/{status}")]
-        public async Task<IServiceResponse<object>> UpdateHomeDeliveryStatus(int locationId, bool status)
+        [Route("{paymentMethodId:int}/status/{status}")]
+        public async Task<IServiceResponse<object>> UpdateStatus(int paymentMethodId, bool status)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _locationService.UpdateHomeDeliveryLocation(locationId, status);
+                await _paymentMethodService.UpdatePaymentMethodStatus(paymentMethodId, status);
                 return new ServiceResponse<object>
                 {
                     Object = true

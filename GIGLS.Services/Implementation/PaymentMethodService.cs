@@ -147,6 +147,10 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
+                if(paymentMethodDto == null)
+                {
+                    throw new GenericException("Invalid payload");
+                }
                 var method = await _uow.PaymentMethod.GetAsync(paymentMethodId);
 
                 //To check if the update already exists
