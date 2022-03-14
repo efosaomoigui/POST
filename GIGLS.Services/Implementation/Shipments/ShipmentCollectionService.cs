@@ -671,7 +671,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.State = shipment.ReceiverState;
             shipmentCollection.IsComingFromDispatch = true;
             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
-            shipmentCollection.PaymentType = PaymentType.Cash;
+            shipmentCollection.PaymentType = shipmentCollection.PaymentType;
             shipmentCollection.Description = shipment.Description;
 
             var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipment.CustomerCode);
