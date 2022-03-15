@@ -4715,12 +4715,12 @@ namespace GIGLS.Services.Business.CustomerPortal
               Narration = transferDTO.Narration,
               PayerAccountNumber = codWallet.AccountNo
             };
-            var  withdrawResponse = await _codWalletService.StellasWithdrawal(withrawObj);
+            var  withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
             if (withdrawResponse.status)
             {
                 await Task.Delay(15000);
                 transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                return await _codWalletService.StellasTransfer(transferDTO);
+                return await _codWalletService.StellasWithdrawal(withrawObj);
             }
             return withdrawResponse;
         }
