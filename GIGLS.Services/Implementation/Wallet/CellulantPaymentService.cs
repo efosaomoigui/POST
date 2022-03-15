@@ -905,7 +905,7 @@ namespace GIGLS.Services.Implementation.Wallet
             pak.Narration = "Transfer to COD wallet";
             pak.DatePaymentReceived = DateTime.Now.ToString();
             pak.ExtraData = callback;
-            pak.CurrencyCode = "NG";
+            pak.CurrencyCode = "NGN";
             pak.CustomerNames = $"{user.Name}";
             pak.PaymentMode = "Online Payment";
 
