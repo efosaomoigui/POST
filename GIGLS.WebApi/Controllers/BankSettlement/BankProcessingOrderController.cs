@@ -467,6 +467,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         //    //});
         //}
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("markmultipleasverified")]
+        public async Task<IServiceResponse<object>> MarkMultipleBankProcessingOrderAsVerified(List<BankProcessingOrderCodesDTO> bankrefcodes, string type)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _bankprocessingorder.MarkMultipleBankProcessingOrderAsVerified(bankrefcodes,type);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
 
     }
 }

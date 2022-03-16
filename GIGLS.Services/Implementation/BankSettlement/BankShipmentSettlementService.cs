@@ -1615,5 +1615,37 @@ namespace GIGLS.Services.Implementation.Wallet
             var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type, dateFilterCriteria, serviceCenterIds);
             return await Task.FromResult(result);
         }
+
+
+        public async Task MarkMultipleBankProcessingOrderAsVerified(List<BankProcessingOrderCodesDTO> bankrefcodes, string type)
+        {
+            if (bankrefcodes.Count == 0 || String.IsNullOrEmpty(type))
+            {
+                throw new GenericException("invalid payload!", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            if (type.ToLower() == "demurrage")
+            {
+                foreach (var item in bankrefcodes)
+                {
+                    await MarkAsVerified_demurrage(item);
+                }
+            }
+            else if (type.ToLower() == "cod")
+            {
+                foreach (var item in bankrefcodes)
+                {
+                    await MarkAsVerified_cod(item);
+                }
+            }
+            else if (type.ToLower() == "shipment")
+            {
+                foreach (var item in bankrefcodes)
+                {
+                    await MarkAsVerified(item);
+                }
+            }
+
+        }
     }
 }
