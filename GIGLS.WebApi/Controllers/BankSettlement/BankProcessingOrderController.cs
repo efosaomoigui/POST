@@ -9,6 +9,7 @@ using GIGLS.Services.Scheduler;
 using GIGLS.WebApi.Filters;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -470,11 +471,11 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("markmultipleasverified")]
-        public async Task<IServiceResponse<object>> MarkMultipleBankProcessingOrderAsVerified(List<BankProcessingOrderCodesDTO> bankrefcodes, string type)
+        public async Task<IServiceResponse<object>> MarkMultipleBankProcessingOrderAsVerified(List<BankProcessingOrderCodesDTO> bankrefcodes)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _bankprocessingorder.MarkMultipleBankProcessingOrderAsVerified(bankrefcodes,type);
+                await _bankprocessingorder.MarkMultipleBankProcessingOrderAsVerified(bankrefcodes,bankrefcodes.FirstOrDefault().Type);
                 return new ServiceResponse<object>
                 {
                 };
