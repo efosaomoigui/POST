@@ -551,6 +551,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICODWalletRepository CODWallet { get; set; }
 
+        [Inject]
+        public ICODTransferRegisterRepository CODTransferRegister { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

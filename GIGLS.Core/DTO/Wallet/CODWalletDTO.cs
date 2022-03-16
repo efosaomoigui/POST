@@ -248,4 +248,17 @@ namespace GIGLS.Core.DTO.Wallet
     }
 
 
+
+    public class CODTransferRegisterDTO : BaseDomainDTO
+    {
+        public int CODTransferRegisterId { get; set; }
+        public string Waybill { get; set; }
+        public string AccountNo { get; set; }
+        public decimal Amount { get; set; }
+        public string CustomerCode { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public string ClientRefNo { get; set; }
+        public string RefNo { get; set; }
+    }
+
 }

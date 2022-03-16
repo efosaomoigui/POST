@@ -168,6 +168,7 @@
     <Compile Include="Domain\PaymentMethod.cs" />
     <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
+    <Compile Include="Domain\Wallet\CODTransferRegister.cs" />
     <Compile Include="Domain\Wallet\CODWallet.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
     <Compile Include="Domain\DeliveryLocation.cs" />
@@ -822,13 +823,14 @@
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IDemurrageRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
-    <Compile Include="IRepositories\Wallet\ICODWalletRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODTransferRegisterRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWaybillPaymentLogRepository.cs" />
@@ -988,6 +990,7 @@
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
     <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
+    <Compile Include="IServices\Wallet\ICODTransferRegisterService.cs" />
     <Compile Include="IServices\Wallet\IStellasService.cs" />
     <Compile Include="IServices\Wallet\IKorapayPaymentService.cs" />
     <Compile Include="IServices\Wallet\ISterlingPaymentService.cs" />

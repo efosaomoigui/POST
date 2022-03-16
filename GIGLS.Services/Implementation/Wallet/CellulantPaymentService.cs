@@ -779,8 +779,26 @@ namespace GIGLS.Services.Implementation.Wallet
                 mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
             }
 
-            //call the transfer cellulant API
             var refNo = $"TRX-{cod.Waybill}-CLNT";
+            //log transaction into CODTransferRegister
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(cod.CODAmount),
+                RefNo = cod.TransactionReference,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = shipmentInfo.Waybill,
+                ClientRefNo = cod.TransactionReference
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
+            await _uow.CompleteAsync();
+            //call the transfer cellulant API
             var transferDTO = new CellulantTransferDTO()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
@@ -790,7 +808,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var response = await CelullantTransfer(transferDTO);
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
-            await _uow.CompleteAsync();
             return response;
         }
 
@@ -944,6 +961,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     mobileShipment.CODStatus = CODMobileStatus.Collected;
                     mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
                 }
+
+                //update codtransferlog table to paid
+                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+                if (codtransferlog != null)
+                {
+                    codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                }
+
                 await _uow.CompleteAsync();
 
                 response.AuthStatus.AuthStatusCode = 131;
