@@ -60,6 +60,7 @@ namespace GIGLS.Core.DTO
         public string Charge { get; set; }
         public string ToTal { get; set; }
         public string DamageDescription { get; set; }
+        public StellaLoginDetails StellaLoginDetails { get; set; }
     }
 
     public class NewMessageDTO
@@ -249,4 +250,11 @@ namespace GIGLS.Core.DTO
         public string Amount { get; set; }
     }
 
+    public class StellaLoginDetails
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string CustomerName { get; set; }
+        public string AccountNumber { get; set; }
+    }
 }

@@ -42,5 +42,6 @@ namespace GIGLS.Core.IMessageService
         Task SendShipmentRegisteredWithGigGoMails(IntlShipmentRequestDTO shipmentDto);
         Task SendShipmentRequestConfirmation(IntlShipmentRequestDTO shipmentDto);
         Task SendEmailForService(MessageDTO messageDTO);
+        Task SendEmailForStellaLoginDetails(MessageDTO messageDTO);
     }
 }

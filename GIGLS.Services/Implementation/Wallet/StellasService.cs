@@ -187,6 +187,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
+
         private static async Task<KeyValuePair<bool, string>> Authenticate()
         {
             using (var client = new HttpClient())
@@ -609,6 +610,152 @@ namespace GIGLS.Services.Implementation.Wallet
             public string email { get; set; } 
             public string password { get; set; }
 
+        }
+
+        public async Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string url = ConfigurationManager.AppSettings["StellasSandBox"];
+            string validatebvn = ConfigurationManager.AppSettings["StellasValidateBVN"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            string authorization = await GetToken();
+            var result = new StellasResponseDTO();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            url = $"{url}{validatebvn}";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+                var json = JsonConvert.SerializeObject(payload);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                if (responseResult.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "post", data);
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(retry.FirstOrDefault().Value);
+                        result.data = res.Data;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.AddRange(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<ValidateBVNResponseDTO>(responseResult);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
+                }
+            }
+        }
+
+        public async Task<StellasResponseDTO> CreateAccountOnCoreBanking(CreateAccountCoreBankingDTO payload)
+        {
+            string secretKey = ConfigurationManager.AppSettings["StellasSecretKey"];
+            string url = ConfigurationManager.AppSettings["StellasSandBox"];
+            string coreBanking = ConfigurationManager.AppSettings["StellasCoreBanking"];
+            string bizId = ConfigurationManager.AppSettings["BusinessID"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            string authorization = await GetToken();
+            var result = new StellasResponseDTO();
+            if (String.IsNullOrEmpty(authorization))
+            {
+                var auth = await Authenticate();
+                if (auth.Key)
+                {
+                    authorization = await GetToken();
+                }
+                else
+                {
+                    throw new GenericException(auth.ToString());
+                }
+            }
+            url = $"{url}{coreBanking}";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+                client.DefaultRequestHeaders.Add("businessId", bizId);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+                var json = JsonConvert.SerializeObject(payload);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                if (responseResult.Contains("Session Expired! Please login again"))
+                {
+                    var retry = await Retry(url, "post", data);
+                    if (retry.ContainsKey(true))
+                    {
+                        var res = JsonConvert.DeserializeObject<CreateAccountCoreBankingResponseDTO>(retry.FirstOrDefault().Value);
+                        result.data = res;
+                        result.message = res.Message;
+                        result.status = res.Status;
+                        return result;
+                    }
+                    else
+                    {
+                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                        result.errors.AddRange(res.Errors);
+                        result.message = "an error occured";
+                        result.status = false;
+                        return result;
+                    }
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<CreateAccountCoreBankingResponseDTO>(responseResult);
+                    result.data = res;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
+                }
+            }
         }
     }
 }

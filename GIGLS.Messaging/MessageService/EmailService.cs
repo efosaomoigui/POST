@@ -990,5 +990,57 @@ namespace GIGLS.Messaging.MessageService
             return response.StatusCode.ToString();
         }
 
+        public async Task<string> SendEmailForStellaLoginDetails(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendEmailForStellaLoginDetails(message);
+            }
+            return result;
+        }
+
+        private async Task<string> ConfigSendEmailForStellaLoginDetails(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "COD Wallet Creation";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            if (message.Emails != null && message.Emails.Any())
+            {
+                //set BCCs
+                var bccEmails = new List<EmailAddress>();
+                foreach (var item in message.Emails)
+                {
+                    var bccEmail = new EmailAddress(item, fromName);
+                    bccEmails.Add(bccEmail);
+                    myMessage.AddBccs(bccEmails);
+                    break;
+                }
+            }
+            //set substitutions 
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "S_CustomerName", message.StellaLoginDetails.CustomerName },
+                { "S_AccountNumber", message.StellaLoginDetails.AccountNumber },
+                { "S_StellaUsername", message.StellaLoginDetails.Username },
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
     }
 }

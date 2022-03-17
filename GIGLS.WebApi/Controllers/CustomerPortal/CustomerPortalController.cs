@@ -3050,5 +3050,47 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpGet]
+        [Route("gettransferstatus/{craccount}")]
+        public async Task<IServiceResponse<bool>> GetTransferStatus(string craccount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetTransferStatus(craccount);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("checkifuserhascodwallet/{customercode}")]
+        public async Task<IServiceResponse<bool>> CheckIfUserHasCODWallet(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckIfUserHasCODWallet(customercode);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("validatebvnnumber")]
+        public async Task<IServiceResponse<StellasResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 var result = await _portalService.ValidateBVNNumber(payload);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

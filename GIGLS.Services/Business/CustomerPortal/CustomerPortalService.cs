@@ -128,6 +128,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly IKorapayPaymentService _koraPaymentService;
         private readonly ICODWalletService _codWalletService;
+        private readonly IStellasService _stellaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -4736,5 +4737,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return await _codWalletService.StellasValidateBankName(validateBankNameDTO);
         }
+
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
+        }
+
+        public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
+        {
+            return await _codWalletService.CheckIfUserHasCODWallet(customerCode);
+        }
+
+        public async Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            return await _codWalletService.ValidateBVNNumber(payload);
+        }
+
     }
 }

@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
@@ -34,13 +35,15 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IStellasService _stellasService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService, IStellasService stellasService)
+        public CODWalletService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService, IStellasService stellasService, IMessageSenderService messageSenderService)
         {
             _userService = userService;
             _uow = uow;
             _globalPropertyService = globalPropertyService;
             _stellasService = stellasService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -89,6 +92,39 @@ namespace GIGLS.Services.Implementation.Wallet
                     await AddCODWallet(codWalletDTO);
                     res = codWalletDTO;
                     resp.data = res;
+
+                    //Create User login details on stella core banking
+                    if (!string.IsNullOrEmpty(result.data.account_details.customerId))
+                    {
+                        var resultResponse = await AddCustomerToStellaCoreBanking(result.data.account_details.customerId);
+                        var loginDetails = new CreateAccountCoreBankingResponseDTO();
+
+                        if (resultResponse != null && resultResponse.data != null)
+                        {
+                            loginDetails = (CreateAccountCoreBankingResponseDTO)resultResponse.data;
+                        } 
+
+                        //Send stella account login details to customer
+                        if (loginDetails !=null && loginDetails.Data != null)
+                        {
+                            if (loginDetails.Data?.LoginDetails != null)
+                            {
+                                var message = new MessageDTO
+                                {
+                                    ToEmail = user.Email,
+                                    To = user.Email,
+                                    MessageTemplate = "CODWalletAccountCreation",
+                                    StellaLoginDetails = new StellaLoginDetails
+                                    {
+                                        Username = loginDetails.Data.LoginDetails.Username,
+                                        CustomerName = user?.Name,
+                                        AccountNumber = result.data.account_details.accountNumber
+                                    }
+                                };
+                                await _messageSenderService.SendEmailForStellaLoginDetails(message);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -124,7 +160,7 @@ namespace GIGLS.Services.Implementation.Wallet
             if (custmerAccountInfo != null)
             {
                 var bal = await _stellasService.GetCustomerStellasAccount(custmerAccountInfo.AccountNo);
-                return bal; 
+                return bal;
             }
             return new StellasResponseDTO();
         }
@@ -153,6 +189,56 @@ namespace GIGLS.Services.Implementation.Wallet
             return await _stellasService.StellasValidateBankName(validateBankNameDTO);
         }
 
+        public async Task<bool> CheckIfUserHasCODWallet(string customerCode)
+        {
+            if (String.IsNullOrEmpty(customerCode))
+            {
+                throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            customerCode = customerCode.Trim();
+            return await _uow.CODWallet.ExistAsync(x => x.CustomerCode == customerCode);
+        }
 
+        public async Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            if (payload == null)
+            {
+                throw new GenericException("Invalid Payload", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.FirstName))
+            {
+                throw new GenericException("FirstName is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.LastName))
+            {
+                throw new GenericException("LastName is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.Bvn))
+            {
+                throw new GenericException("BVN is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.PhoneNo))
+            {
+                throw new GenericException("Phone number is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            if (string.IsNullOrEmpty(payload.DateOfBirth))
+            {
+                throw new GenericException("Date of birth is required", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            return await _stellasService.ValidateBVNNumber(payload);
+        }
+
+        public async Task<StellasResponseDTO> AddCustomerToStellaCoreBanking(string customerId)
+        {
+            try
+            {
+                var payload = new CreateAccountCoreBankingDTO { CustomerId = customerId };
+                return await _stellasService.CreateAccountOnCoreBanking(payload);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
