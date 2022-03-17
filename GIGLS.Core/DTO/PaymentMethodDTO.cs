@@ -20,5 +20,6 @@ namespace GIGLS.Core.DTO
         public string PaymentMethodName { get; set; }
         public bool IsActive { get; set; }
         public int CountryId { get; set; }
+        public string CountryName { get; set; }
     }
 }

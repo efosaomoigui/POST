@@ -22,7 +22,7 @@ namespace GIGLS.WebApi.Controllers
             _paymentMethodService = paymentMethodService;
         }
         
-        [GIGLSActivityAuthorize(Activity = "View")]
+        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<PaymentMethodNewDTO>>> GetPaymentMethods()
@@ -37,14 +37,14 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
+        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{paymentMethodId:int}")]
-        public async Task<IServiceResponse<PaymentMethodNewDTO>> GetPaymentMethodById(int paymentMethodId)
+        [Route("{paymentmethodId:int}")]
+        public async Task<IServiceResponse<PaymentMethodNewDTO>> GetPaymentMethod(int paymentmethodId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var method = await _paymentMethodService.GetPaymentMethodById(paymentMethodId);
+                var method = await _paymentMethodService.GetPaymentMethodById(paymentmethodId);
                 return new ServiceResponse<PaymentMethodNewDTO>
                 {
                     Object = method
@@ -52,7 +52,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddPaymentMethod(PaymentMethodNewDTO paymentMethodDto)
@@ -67,7 +67,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Update")]
+        //[GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{paymentMethodId:int}")]
         public async Task<IServiceResponse<object>> UpdatePaymentMethod(int paymentMethodId, PaymentMethodNewDTO paymentMethodDto)
@@ -82,7 +82,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{paymentMethodId:int}")]
         public async Task<IServiceResponse<bool>> DeletePaymentMethod(int paymentMethodId)
@@ -97,14 +97,14 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Update")]
+        //[GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{paymentMethodId:int}/status/{status}")]
-        public async Task<IServiceResponse<object>> UpdateStatus(int paymentMethodId, bool status)
+        [Route("{paymentmethodId:int}/status/{status}")]
+        public async Task<IServiceResponse<object>> UpdatePaymentMethodStatus(int paymentmethodId, bool status)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _paymentMethodService.UpdatePaymentMethodStatus(paymentMethodId, status);
+                await _paymentMethodService.UpdatePaymentMethodStatus(paymentmethodId, status);
                 return new ServiceResponse<object>
                 {
                     Object = true

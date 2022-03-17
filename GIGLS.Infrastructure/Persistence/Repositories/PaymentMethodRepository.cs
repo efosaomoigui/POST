@@ -57,6 +57,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             {
                 var paymentMethods = _context.PaymentMethod;
                 var paymentdto = from p in paymentMethods
+                                 join c in _context.Country on p.CountryId equals c.CountryId
                                 orderby p.DateCreated ascending
                                 select new PaymentMethodNewDTO
                                 {
@@ -66,6 +67,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                     DateCreated = p.DateCreated,
                                     DateModified = p.DateModified,
                                     CountryId = p.CountryId,
+                                    CountryName = c.CountryName
                                 };
 
                 return Task.FromResult(paymentdto.ToList());
