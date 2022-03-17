@@ -789,7 +789,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var codTransferReg = new CODTransferRegister()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
-                RefNo = cod.TransactionReference,
+                RefNo = refNo,
                 CustomerCode = shipmentInfo.CustomerCode,
                 AccountNo = accInfo.AccountNo,
                 PaymentStatus = PaymentStatus.Pending,
