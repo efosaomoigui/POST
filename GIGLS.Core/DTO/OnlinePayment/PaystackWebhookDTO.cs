@@ -751,6 +751,11 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class CellulantPushPaymentStatusResponse
     {
+        public CellulantPushPaymentStatusResponse()
+        {
+            AuthStatus = new AuthStatus();
+            Results = new PushPaymentStatusResponseResult();
+        }
         [JsonProperty("authStatus")]
         public AuthStatus AuthStatus { get; set; }
 
