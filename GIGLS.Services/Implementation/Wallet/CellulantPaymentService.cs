@@ -980,7 +980,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.AuthStatus.AuthStatusCode = 131;
                 response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
                 response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
-                response.Results.BeepTransactionID = payload.Payload.Packet.PayerTransactionID;
+                response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
                 response.Results.StatusCode = 188;
                 response.Results.StatusDescription = "Response was received";
             }
