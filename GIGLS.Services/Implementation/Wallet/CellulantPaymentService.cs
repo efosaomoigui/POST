@@ -917,9 +917,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
             }
             //test
-            var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-            // var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+             var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();
