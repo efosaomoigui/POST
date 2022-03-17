@@ -94,7 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         loginDetails = (CreateAccountCoreBankingResponseDTO)resultResponse.data;
 
                         //Send stella account login details to customer
-                        if (loginDetails.Data != null)
+                        if (loginDetails !=null && loginDetails.Data != null)
                         {
                             if (loginDetails.Data?.LoginDetails != null)
                             {
