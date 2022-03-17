@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿
+
+using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
@@ -889,7 +891,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("user does not have a cod wallet");
             }
-            
+
             //log transaction into CODTransferRegister
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == transferDTO.Waybill);
             if (shipmentInfo == null)
@@ -910,18 +912,19 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
             var phoneNo = user.PhoneNumber;
             var phoneNoIndex = user.PhoneNumber.IndexOf('+');
-            if (phoneNoIndex >= 1)
+            if (phoneNoIndex >= 0)
             {
-                phoneNo = user.PhoneNumber.Remove(phoneNoIndex);
+                phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
             }
             //test
-            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-            var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            // var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+
 
             var extraData = new ExtraData();
-            extraData.CallBackUrl = callback;
-            extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}"; 
+            extraData.callbackUrl = callback;
+            extraData.DestinationAccountName = $"{user.Name}";
             extraData.DestinationBankCode = $"100332";
             extraData.DestinationBank = $"Stellas";
             extraData.DestinationAccountNo = accInfo.AccountNo;
@@ -954,6 +957,8 @@ namespace GIGLS.Services.Implementation.Wallet
             payload.Payload.Credentials.Username = username;
             payload.Payload.Packet.Add(pak);
             var result = await Transfer(payload);
+
+            string t = JsonConvert.SerializeObject(payload);
             return result;
         }
 
@@ -1003,5 +1008,107 @@ namespace GIGLS.Services.Implementation.Wallet
 
 
 
+
+        #region Cellulant Confirm Transfer
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            var sessionId = await GetSessionIdFromTransferDetails(craccount);
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                throw new GenericException("SessionId not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            result = await ConfirmTransferStatus(sessionId);
+            return result;
+        }
+
+        private async Task<bool> ConfirmTransferStatus(string sessionId)
+        {
+            bool result = false;
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?sessionid={sessionId}&type=1") { };
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    result = status == "00" ? true : result;
+                }
+            }
+            return result;
+        }
+
+        private async Task<string> GetSessionIdFromTransferDetails(string craccount)
+        {
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var record = await _uow.TransferDetails.GetAsync(x => x.CrAccount == craccount);
+            if (record == null)
+            {
+                throw new GenericException("Transfer details not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return record.SessionId;
+        }
+
+        public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            result = await CheckISCODPaymentReceived(craccount);
+            return result;
+        }
+
+        private async Task<bool> CheckISCODPaymentReceived(string craccount)
+        {
+            bool result = false;
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?craccount={craccount}&type=2") { };
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    result = status == "00" ? true : result;
+                }
+            }
+            return result;
+        }
+        #endregion
     }
 }

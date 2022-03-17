@@ -164,7 +164,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string Order_Reference { get; set; }
         public string Transaction_Ref { get; set; }
     }
-    
+
     public class BonusAddOn
     {
         public string Description { get; set; }
@@ -251,15 +251,15 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class NubanCustomerDataResponse
     {
-      public string email { get; set; }
-      public int integration { get; set; }
-      public int id { get; set; }
-      public string domain { get; set; }
-      public string customer_code { get; set; }
-      public bool identified { get; set; }
-      public string identifications { get; set; }
-      public string createdAt { get; set; }
-      public string updatedAt { get; set; }
+        public string email { get; set; }
+        public int integration { get; set; }
+        public int id { get; set; }
+        public string domain { get; set; }
+        public string customer_code { get; set; }
+        public bool identified { get; set; }
+        public string identifications { get; set; }
+        public string createdAt { get; set; }
+        public string updatedAt { get; set; }
     }
 
     public class NubanCreateCustomerDTO
@@ -713,35 +713,35 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class ExtraData
     {
-        [JsonProperty("callbackurl")]
-        public string CallBackUrl { get; set; }
+        [JsonProperty("callbackUrl")]
+        public string callbackUrl { get; set; }
 
-        [JsonProperty("destinationbankcode")]
+        [JsonProperty("destinationBankCode")]
         public string DestinationBankCode { get; set; }
 
-        [JsonProperty("destinationaccountname")]
+        [JsonProperty("destinationAccountName")]
         public string DestinationAccountName { get; set; }
-        [JsonProperty("destinationaccountno")]
+        [JsonProperty("destinationAccountNo")]
         public string DestinationAccountNo { get; set; }
-        [JsonProperty("destinationbank")]
+        [JsonProperty("destinationBank")]
         public string DestinationBank { get; set; }
     }
 
     public class ExtraDataCallBack
     {
-        [JsonProperty("callbackurl")]
+        [JsonProperty("callbackUrl")]
         public string CallBackUrl { get; set; }
 
-        [JsonProperty("destinationbankcode")]
+        [JsonProperty("destinationBankCode")]
         public string DestinationBankCode { get; set; }
 
-        [JsonProperty("destinationaccountname")]
+        [JsonProperty("destinationAccountName")]
         public string DestinationAccountName { get; set; }
-        [JsonProperty("destinationaccountno")]
+        [JsonProperty("destinationAccountNo")]
         public string DestinationAccountNo { get; set; }
-        [JsonProperty("destinationbank")]
+        [JsonProperty("destinationBank")]
         public string DestinationBank { get; set; }
-        [JsonProperty("hubid")]
+        [JsonProperty("hubID")]
         public string HubId { get; set; }
     }
 
