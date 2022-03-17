@@ -908,7 +908,12 @@ namespace GIGLS.Services.Implementation.Wallet
             };
             _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
-
+            var phoneNo = user.PhoneNumber;
+            var phoneNoIndex = user.PhoneNumber.IndexOf('+');
+            if (phoneNoIndex >= 1)
+            {
+                phoneNo = user.PhoneNumber.Remove(phoneNoIndex);
+            }
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
 
@@ -921,7 +926,7 @@ namespace GIGLS.Services.Implementation.Wallet
             string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
             var pak = new Packet();
             pak.ServiceCode = serviceCode;
-            pak.MSISDN = user.PhoneNumber;
+            pak.MSISDN = phoneNo;
             pak.InvoiceNumber = transferDTO.RefNo;
             pak.AccountNumber = accInfo.AccountNo;
             pak.PayerTransactionID = transferDTO.RefNo;
