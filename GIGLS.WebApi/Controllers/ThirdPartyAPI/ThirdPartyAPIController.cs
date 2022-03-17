@@ -499,14 +499,14 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [AllowAnonymous]
         [HttpPost]
         [Route("codcallback")]
-        public async Task<IServiceResponse<object>> CODCallBack(CODCallBackDTO cod)
+        public async Task<IServiceResponse<bool>> CODCallBack(CODCallBackDTO cod)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<object>();
+                var response = new ServiceResponse<bool>();
                 var request = Request;
                 var headers = request.Headers;
-                var result = new object();
+                var result = false;
 
                 if (headers.Contains("api_key"))
                 {

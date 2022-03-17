@@ -665,6 +665,8 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
         public decimal Amount { get; set; }
         public string RefNo { get; set; }
+        public string Waybill { get; set; }
+        public string ClientRefNo { get; set; }
     }
 
 

@@ -728,7 +728,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        public async Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod)
+        public async Task<bool> CODCallBack(CODCallBackDTO cod)
         {
             //0. validate payload
             if (cod == null)
@@ -780,35 +780,19 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var refNo = $"TRX-{cod.Waybill}-CLNT";
-            //log transaction into CODTransferRegister
-            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
-            if (accInfo is null)
-            {
-                throw new GenericException("user does not have a cod wallet");
-            }
-            var codTransferReg = new CODTransferRegister()
-            {
-                Amount = Convert.ToDecimal(cod.CODAmount),
-                RefNo = refNo,
-                CustomerCode = shipmentInfo.CustomerCode,
-                AccountNo = accInfo.AccountNo,
-                PaymentStatus = PaymentStatus.Pending,
-                Waybill = shipmentInfo.Waybill,
-                ClientRefNo = cod.TransactionReference
-            };
-            _uow.CODTransferRegister.Add(codTransferReg);
-            await _uow.CompleteAsync();
             //call the transfer cellulant API
             var transferDTO = new CellulantTransferDTO()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
                 RefNo = refNo,
-                CustomerCode = shipmentInfo.CustomerCode
+                CustomerCode = shipmentInfo.CustomerCode,
+                ClientRefNo = cod.TransactionReference,
+                Waybill = cod.Waybill
             };
             var response = await CelullantTransfer(transferDTO);
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
-            return response;
+            return true;
         }
 
         #endregion
@@ -903,6 +887,26 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("user does not have a cod wallet");
             }
+            
+            //log transaction into CODTransferRegister
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == transferDTO.Waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(transferDTO.Amount),
+                RefNo = transferDTO.RefNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = transferDTO.Waybill,
+                ClientRefNo = transferDTO.ClientRefNo
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
+            await _uow.CompleteAsync();
+
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
 
