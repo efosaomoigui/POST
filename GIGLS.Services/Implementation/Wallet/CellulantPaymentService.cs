@@ -730,6 +730,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<bool> CODCallBack(CODCallBackDTO cod)
         {
+            var result = false;
             //0. validate payload
             if (cod == null)
             {
@@ -792,7 +793,8 @@ namespace GIGLS.Services.Implementation.Wallet
             var response = await CelullantTransfer(transferDTO);
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
-            return true;
+            result = true;
+            return result;
         }
 
         #endregion
