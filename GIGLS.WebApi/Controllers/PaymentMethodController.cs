@@ -1,14 +1,9 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
 using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
-using System;
 using System.Collections.Generic;
-using System.EnterpriseServices;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
+using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -17,15 +12,14 @@ namespace GIGLS.WebApi.Controllers
     public class PaymentMethodController : BaseWebApiController
     {
         private IPaymentMethodService _paymentMethodService;
-        public PaymentMethodController(IPaymentMethodService paymentMethodService) : base(nameof(PaymentMethodController))
+        public PaymentMethodController(IPaymentMethodService paymentMethodService) :base(nameof(PaymentMethodController))
         {
             _paymentMethodService = paymentMethodService;
         }
-        
-        //[GIGLSActivityAuthorize(Activity = "View")]
+
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<PaymentMethodNewDTO>>> GetPaymentMethods()
+        public async Task<IServiceResponse<IEnumerable<PaymentMethodNewDTO>>> PaymentMethods()
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -37,10 +31,9 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{paymentmethodId:int}")]
-        public async Task<IServiceResponse<PaymentMethodNewDTO>> GetPaymentMethod(int paymentmethodId)
+        public async Task<IServiceResponse<PaymentMethodNewDTO>> PaymentMethod(int paymentmethodId)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -52,7 +45,6 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddPaymentMethod(PaymentMethodNewDTO paymentMethodDto)
@@ -67,14 +59,13 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{paymentMethodId:int}")]
-        public async Task<IServiceResponse<object>> UpdatePaymentMethod(int paymentMethodId, PaymentMethodNewDTO paymentMethodDto)
+        [Route("{paymentmethodId:int}")]
+        public async Task<IServiceResponse<object>> UpdatePaymentMethod(int paymentmethodId, PaymentMethodNewDTO paymentMethodDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _paymentMethodService.UpdatePaymentMethod(paymentMethodId, paymentMethodDto);
+                await _paymentMethodService.UpdatePaymentMethod(paymentmethodId, paymentMethodDto);
                 return new ServiceResponse<object>
                 {
                     Object = true
@@ -82,14 +73,13 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("{paymentMethodId:int}")]
-        public async Task<IServiceResponse<bool>> DeletePaymentMethod(int paymentMethodId)
+        [Route("{paymentmethodId:int}")]
+        public async Task<IServiceResponse<bool>> DeletePaymentMethod(int paymentmethodId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _paymentMethodService.DeletePaymentMethod(paymentMethodId);
+                await _paymentMethodService.DeletePaymentMethod(paymentmethodId);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -97,7 +87,6 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{paymentmethodId:int}/status/{status}")]
         public async Task<IServiceResponse<object>> UpdatePaymentMethodStatus(int paymentmethodId, bool status)
@@ -111,6 +100,5 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
-
     }
 }

@@ -88,7 +88,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         private Task<PaymentMethodNewDTO> GetPaymentMethod(IQueryable<PaymentMethod> methods)
         {
             var methoddto = from m in methods
-                              select new PaymentMethodNewDTO
+                            join c in _context.Country on m.CountryId equals c.CountryId
+                            select new PaymentMethodNewDTO
                               {
                                   PaymentMethodId = m.PaymentMethodId,
                                   PaymentMethodName = m.PaymentMethodName,
@@ -96,6 +97,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   CountryId = m.CountryId,
                                   DateCreated = m.DateCreated,
                                   DateModified = m.DateModified,
+                                  CountryName = c.CountryName
                               };
             return Task.FromResult(methoddto.FirstOrDefault());
         }
