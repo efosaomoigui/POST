@@ -916,11 +916,19 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
-
             //live
+            var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+
+            var extraData = new ExtraData();
+            extraData.CallBackUrl = callback;
+            extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}"; 
+            extraData.DestinationBankCode = $"100332";
+            extraData.DestinationBank = $"Stellas";
+            extraData.DestinationAccountNo = accInfo.AccountNo;
+
+            string extraDataStringified = JsonConvert.SerializeObject(extraData);
             var today = DateTime.Now;
             string paymentDate = $"{today.Year}-{today.Month}-{today.Day} {today.Hour}:{today.Minute}:{today.Second}";
-            var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
             string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
@@ -932,12 +940,12 @@ namespace GIGLS.Services.Implementation.Wallet
             pak.PayerTransactionID = transferDTO.RefNo;
             pak.Amount = transferDTO.Amount;
             pak.HubID = "";
-            pak.Narration = "Transfer to COD wallet";
+            pak.Narration = "COD bank payout";
             pak.DatePaymentReceived = paymentDate;
-            pak.ExtraData = callback;
+            pak.ExtraData = extraDataStringified;
             pak.CurrencyCode = "NGN";
             pak.CustomerNames = $"{user.Name}";
-            pak.PaymentMode = "Online Payment";
+            pak.PaymentMode = "Bank";
 
             var payload = new CellulantTransferPayload();
             payload.CountryCode = "NG";

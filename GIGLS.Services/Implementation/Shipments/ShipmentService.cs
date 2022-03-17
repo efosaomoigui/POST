@@ -6344,12 +6344,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (dto.StartDate != null && dto.EndDate != null)
                 {
                     codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.IsCancelled == false && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
                 else
                 {
                     codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false &&  x.IsCancelled == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false &&  x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
 
                 if (codAgilityShipment.Any())

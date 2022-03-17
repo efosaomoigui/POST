@@ -708,7 +708,41 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ClientCode { get; set; }
 
         [JsonProperty("extraData")]
-        public string ExtraData { get; set; }
+        public ExtraDataCallBack ExtraData { get; set; }
+    }
+
+    public class ExtraData
+    {
+        [JsonProperty("callbackurl")]
+        public string CallBackUrl { get; set; }
+
+        [JsonProperty("destinationbankcode")]
+        public string DestinationBankCode { get; set; }
+
+        [JsonProperty("destinationaccountname")]
+        public string DestinationAccountName { get; set; }
+        [JsonProperty("destinationaccountno")]
+        public string DestinationAccountNo { get; set; }
+        [JsonProperty("destinationbank")]
+        public string DestinationBank { get; set; }
+    }
+
+    public class ExtraDataCallBack
+    {
+        [JsonProperty("callbackurl")]
+        public string CallBackUrl { get; set; }
+
+        [JsonProperty("destinationbankcode")]
+        public string DestinationBankCode { get; set; }
+
+        [JsonProperty("destinationaccountname")]
+        public string DestinationAccountName { get; set; }
+        [JsonProperty("destinationaccountno")]
+        public string DestinationAccountNo { get; set; }
+        [JsonProperty("destinationbank")]
+        public string DestinationBank { get; set; }
+        [JsonProperty("hubid")]
+        public string HubId { get; set; }
     }
 
     public class PayloadPushPaymentStatus

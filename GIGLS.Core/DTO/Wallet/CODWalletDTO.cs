@@ -23,6 +23,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string PlaceOfBirth { get; set; }
         public string Address { get; set; }
         public string NationalIdentityNo { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
     public class CreateStellaAccountDTO 
