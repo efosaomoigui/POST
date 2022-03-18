@@ -708,7 +708,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ClientCode { get; set; }
 
         [JsonProperty("extraData")]
-        public ExtraDataCallBack ExtraData { get; set; }
+        public string ExtraData { get; set; }
     }
 
     public class PayloadPushPaymentStatus
