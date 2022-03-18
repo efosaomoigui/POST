@@ -535,17 +535,19 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [AllowAnonymous]
         [HttpPost]
         [Route("updateshipmentcallback")]
-        public async Task<IServiceResponse<object>> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        public async Task<object> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
         {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
+            //return await HandleApiOperationAsync(async () =>
+            //{
+            //    var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
 
-                return new ServiceResponse<object>
-                {
-                    Object = result
-                };
-            });
+            //    return new ServiceResponse<object>
+            //    {
+            //        Object = result
+            //    };
+            //});
+            var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
+            return result;
         }
     }
 }
