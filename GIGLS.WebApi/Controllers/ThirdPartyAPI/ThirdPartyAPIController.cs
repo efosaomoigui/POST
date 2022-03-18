@@ -532,7 +532,6 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
 
-
         [AllowAnonymous]
         [HttpPost]
         [Route("updateshipmentcallback")]
@@ -540,33 +539,13 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<object>();
-                var request = Request;
-                var headers = request.Headers;
-                var result = new object();
+                var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
 
-                if (headers.Contains("api_key"))
+                return new ServiceResponse<object>
                 {
-                    var key = await _thirdPartyAPIService.GetCellulantKey();
-                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
-                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
-                    if (token == key)
-                    {
-                        result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
-                        response.Object = result;
-                    }
-                    else
-                    {
-                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
-                    }
-                }
-                else
-                {
-                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
-                }
-                return response;
+                    Object = result
+                };
             });
         }
-
     }
 }
