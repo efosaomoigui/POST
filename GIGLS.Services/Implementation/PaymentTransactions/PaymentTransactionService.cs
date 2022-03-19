@@ -237,6 +237,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
                 await _messageSenderService.SendOverseasPaymentConfirmationMails(shipmentDTO);
+                if (!shipment.IsGIGGOExtension)
+                {
+                    if (shipment.IsBulky)
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                    }
+                    else
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    }
+                }
                 return true;
             }
 
@@ -286,15 +297,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //grouping and manifesting shipment
-            if (shipment.IsBulky)
+            
+            if (!shipment.IsGIGGOExtension)
             {
-                await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                if (shipment.IsBulky)
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                }
+                else
+                {
+                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                }
             }
-            else
-            {
-                await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill); 
-            }
-
             result = true;
             return result;
         }
@@ -772,6 +786,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         }
                         if (!String.IsNullOrEmpty(user.CustomerCode))
                         {
+                            var regUser = await _uow.User.GetUserByChannelCode(user.CustomerCode);
+                            if (regUser != null)
+                            {
+                                userId = regUser.Id;
+                            }
                             //Pin Generation 
                             var message = new MobileShipmentCreationMessageDTO
                             {

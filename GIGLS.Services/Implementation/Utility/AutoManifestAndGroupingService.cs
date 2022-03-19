@@ -330,21 +330,25 @@ namespace GIGLS.Services.Implementation.Utility
                 gmw.DateMapped = DateTime.Now;
             }
 
-            //map new waybill to existing groupwaybill 
-            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            var waybillExist = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.WaybillNumber == shipment.Waybill);
+            if (!waybillExist)
             {
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                UserId = userId,
-                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
-                IsActive = true,
-                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                ExpressDelivery = shipment.ExpressDelivery,
-                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now,
-                IsBulky = shipment.IsBulky
-            };
-            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+                //map new waybill to existing groupwaybill 
+                var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+                {
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    UserId = userId,
+                    DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                    IsActive = true,
+                    DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    ExpressDelivery = shipment.ExpressDelivery,
+                    OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    WaybillNumber = shipment.Waybill,
+                    DateMapped = DateTime.Now,
+                    IsBulky = shipment.IsBulky
+                };
+                _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping); 
+            }
 
         }
 
@@ -369,21 +373,25 @@ namespace GIGLS.Services.Implementation.Utility
                 gmw.DateMapped = DateTime.Now;
             }
 
-            //map new waybill to existing groupwaybill 
-            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            var waybillExist = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.WaybillNumber == shipment.Waybill);
+            if (!waybillExist)
             {
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                UserId = userId,
-                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
-                IsActive = true,
-                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                ExpressDelivery = shipment.ExpressDelivery,
-                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now,
-                IsBulky = shipment.IsBulky
-            };
-            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+                //map new waybill to existing groupwaybill 
+                var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+                {
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    UserId = userId,
+                    DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                    IsActive = true,
+                    DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    ExpressDelivery = shipment.ExpressDelivery,
+                    OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    WaybillNumber = shipment.Waybill,
+                    DateMapped = DateTime.Now,
+                    IsBulky = shipment.IsBulky
+                };
+                _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping); 
+            }
 
         }
 
@@ -421,20 +429,24 @@ namespace GIGLS.Services.Implementation.Utility
             }
 
             //map new waybill to existing groupwaybill 
-            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            var waybillExist = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.WaybillNumber == shipment.Waybill);
+            if (!waybillExist)
             {
-                GroupWaybillNumber = groupWaybill.GroupWaybillCode,
-                UserId = userId,
-                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
-                IsActive = true,
-                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                ExpressDelivery = shipment.ExpressDelivery,
-                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now,
-                IsBulky = shipment.IsBulky
-            };
-            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+                var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+                {
+                    GroupWaybillNumber = groupWaybill.GroupWaybillCode,
+                    UserId = userId,
+                    DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                    IsActive = true,
+                    DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    ExpressDelivery = shipment.ExpressDelivery,
+                    OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    WaybillNumber = shipment.Waybill,
+                    DateMapped = DateTime.Now,
+                    IsBulky = shipment.IsBulky
+                };
+                _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping); 
+            }
         }
 
         private async Task MapNewGroupWaybillToExistingManifest(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId, Manifest manifest)
@@ -474,21 +486,25 @@ namespace GIGLS.Services.Implementation.Utility
                 gmw.DateMapped = DateTime.Now;
             }
 
-            //map new waybill to existing groupwaybill 
-            var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+            var waybillExist = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.WaybillNumber == shipment.Waybill);
+            if (!waybillExist)
             {
-                GroupWaybillNumber = groupWaybillNumber,
-                UserId = userId,
-                DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
-                IsActive = true,
-                DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                ExpressDelivery = shipment.ExpressDelivery,
-                OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
-                WaybillNumber = shipment.Waybill,
-                DateMapped = DateTime.Now,
-                IsBulky = shipment.IsBulky
-            };
-            _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping);
+                //map new waybill to existing groupwaybill 
+                var newGroupWaybillNoMapping = new GroupWaybillNumberMapping
+                {
+                    GroupWaybillNumber = groupWaybillNumber,
+                    UserId = userId,
+                    DestinationServiceCentreId = destServiceCentre.ServiceCentreId,
+                    IsActive = true,
+                    DepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    ExpressDelivery = shipment.ExpressDelivery,
+                    OriginalDepartureServiceCentreId = deptServiceCentre.ServiceCentreId,
+                    WaybillNumber = shipment.Waybill,
+                    DateMapped = DateTime.Now,
+                    IsBulky = shipment.IsBulky
+                };
+                _uow.GroupWaybillNumberMapping.Add(newGroupWaybillNoMapping); 
+            }
         }
 
         private async Task<GroupWaybillNumber> NewGroupWaybill(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)

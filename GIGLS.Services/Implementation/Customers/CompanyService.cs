@@ -1108,19 +1108,6 @@ namespace GIGLS.Services.Implementation.Customers
                 });
                 await _uow.CompleteAsync();
 
-                //Call Alpha Api to Notify them of merchant subscription
-                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
-                {
-                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
-                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
-                    SubscriptionPlan = company.Rank.ToString().ToLower(),
-                    ExpiryDate = DateTime.Now.AddMonths(1),
-                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
-                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
-                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
-                }) ;
-                
                 //send email for upgrade customers
                 if (userValidationDTO.Rank == Rank.Class)
                 {
@@ -1161,6 +1148,19 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Message = "User Rank Update Successful";
                 result.Succeeded = true;
                 result.Entity = companyDTO;
+
+                //Call Alpha Api to Notify them of merchant subscription
+                await _alphsService.UpdateUserSubscription(new Core.DTO.Alpha.AlphaSubscriptionUpdateDTO
+                {
+                    Amount = Convert.ToInt32(ConfigurationManager.AppSettings["AlphaSubAmount"]),
+                    CustomerCode = String.IsNullOrEmpty(company?.CustomerCode) ? "" : company?.CustomerCode,
+                    SubscriptionPlan = company.Rank.ToString().ToLower(),
+                    ExpiryDate = DateTime.Now.AddMonths(1),
+                    FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
+                    LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
+                    Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                });
                 return result;
             }
             catch (Exception)
@@ -1449,10 +1449,27 @@ namespace GIGLS.Services.Implementation.Customers
 
                 //Charge Wallet for Subscription
                 var referenceNo = $"{user.UserChannelCode}{DateTime.Now.ToString("ddMMyyyss")}";
+
+                // Get Ecommerce sub charge
+                var charge = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceSubscriptionCharge, 1);
+                var chargeValue = 0.00M;
+                if (charge == null)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Charge subscription not found";
+                    return result;
+                }
+                chargeValue = Convert.ToDecimal(charge.Value);
+                if(wallet.Balance < chargeValue)
+                {
+                    result.Succeeded = false;
+                    result.Message = $"Insufficient wallet balance";
+                    return result;
+                }
                 await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = wallet.WalletId,
-                    Amount = 3999m,
+                    Amount = chargeValue,
                     CreditDebitType = CreditDebitType.Debit,
                     Description = "Customer subscription",
                     PaymentType = PaymentType.Wallet,

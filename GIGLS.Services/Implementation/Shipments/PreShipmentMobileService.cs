@@ -686,6 +686,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         message.SenderName = words.FirstOrDefault();
                     }
 
+                    if (newPreShipment.IsCashOnDelivery)
+                    {
+                        newPreShipment.CODDescription = "COD Initiated";
+                        newPreShipment.CODStatus = CODMobileStatus.Initiated;
+                        newPreShipment.CODStatusDate = DateTime.Now;
+                    }
+
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
                     newPreShipment.IsDelivered = false;
@@ -876,6 +883,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         string[] words = preShipmentDTO.SenderName.Split(' ');
                         message.SenderName = words.FirstOrDefault();
+                    }
+
+                    if (newPreShipment.IsCashOnDelivery)
+                    {
+                        newPreShipment.CODDescription = "COD Initiated";
+                        newPreShipment.CODStatus = CODMobileStatus.Initiated;
+                        newPreShipment.CODStatusDate = DateTime.Now;
                     }
 
                     newPreShipment.UserId = currentUserId;
@@ -5277,6 +5291,23 @@ namespace GIGLS.Services.Implementation.Shipments
                                 WaybillNumber = detail.WaybillNumber,
                                 ShipmentScanStatus = ShipmentScanStatus.ARO
                             });
+                            if (preshipmentmobile.IsCashOnDelivery == true)
+                            {
+                                //collect the cods and add to CashOnDeliveryRegisterAccount()
+                                var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                                {
+                                    Amount = preshipmentmobile.CashOnDeliveryAmount ?? 0,
+                                    CODStatusHistory = CODStatushistory.Created,
+                                    Description = "Cod From Sales",
+                                    ServiceCenterId = 0,
+                                    Waybill = preshipmentmobile.Waybill,
+                                    UserId = preshipmentmobile.UserId,
+                                    DepartureServiceCenterId = detail.SenderServiceCentreId,
+                                    DestinationCountryId = preshipmentmobile.DestinationCountryId
+                                };
+
+                                _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+                            }
 
                             await _uow.CompleteAsync();
                             if (detail.IsBulky)
@@ -5376,7 +5407,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         Insurance = preshipmentmobile.InsuranceValue == null ? 0 : preshipmentmobile.InsuranceValue,
                                         Vat = preshipmentmobile.Vat == null ? 0 : preshipmentmobile.Vat,
                                         SenderAddress = preshipmentmobile.SenderAddress,
-                                        IsCashOnDelivery = false,
+                                        IsCashOnDelivery = preshipmentmobile.IsCashOnDelivery,
                                         CustomerCode = preshipmentmobile.CustomerCode,
                                         DestinationServiceCentreId = detail.ReceiverServiceCentreId,
                                         DepartureServiceCentreId = detail.SenderServiceCentreId,
@@ -5399,6 +5430,10 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PackageOptionIds = detail.PackageOptionIds,
                                         IsClassShipment = isClassShipment,
                                         IsBulky = detail.IsBulky,
+                                        CashOnDeliveryAmount = preshipmentmobile.CashOnDeliveryAmount,
+                                        CODDescription = preshipmentmobile.CODDescription,
+                                        CODStatus = preshipmentmobile.CODStatus,
+                                        CODStatusDate = preshipmentmobile.CODStatusDate,
                                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                         {
                                             Description = s.Description,
@@ -5433,6 +5468,24 @@ namespace GIGLS.Services.Implementation.Shipments
                                         WaybillNumber = detail.WaybillNumber,
                                         ShipmentScanStatus = ShipmentScanStatus.ARO
                                     });
+
+                                    if (preshipmentmobile.IsCashOnDelivery == true)
+                                    {
+                                        //collect the cods and add to CashOnDeliveryRegisterAccount()
+                                        var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                                        {
+                                            Amount = preshipmentmobile.CashOnDeliveryAmount ?? 0,
+                                            CODStatusHistory = CODStatushistory.Created,
+                                            Description = "Cod From Sales",
+                                            ServiceCenterId = 0,
+                                            Waybill = preshipmentmobile.Waybill,
+                                            UserId = preshipmentmobile.UserId,
+                                            DepartureServiceCenterId = detail.SenderServiceCentreId,
+                                            DestinationCountryId = destinationCountryId
+                                        };
+
+                                        _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+                                    }
 
                                     await _uow.CompleteAsync();
                                 }
@@ -7584,6 +7637,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
                 shipment.Courier = mobile.CompanyMap.ToString();
                 shipment.IsBulky = detail.IsBulky;
+                shipment.IsCashOnDelivery = mobile.IsCashOnDelivery;
+                shipment.CODStatusDate = mobile.CODStatusDate;
+                shipment.CODDescription = mobile.CODDescription;
+                shipment.CODStatus = mobile.CODStatus;
                 shipment.ShipmentItems = mobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                 {
                     Description = s.Description,

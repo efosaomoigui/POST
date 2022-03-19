@@ -1,6 +1,7 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -494,5 +495,78 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("codcallback")]
+        public async Task<IServiceResponse<bool>> CODCallBack(CODCallBackDTO cod)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = false;
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _thirdPartyAPIService.GetCellulantKey();
+                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
+                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
+                    if (token == key)
+                    {
+                        result = await _thirdPartyAPIService.CODCallBack(cod);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("updateshipmentcallback")]
+        public async Task<IServiceResponse<object>> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _thirdPartyAPIService.GetCellulantKey();
+                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
+                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
+                    if (token == key)
+                    {
+                        result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
+            });
+        }
+
     }
 }

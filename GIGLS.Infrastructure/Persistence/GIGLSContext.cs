@@ -320,6 +320,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<InternationalCargoManifestDetail> InternationalCargoManifestDetail { get; set; }
         public DbSet<UnidentifiedItemsForInternationalShipping> UnidentifiedItemsForInternationalShipping { get; set; }
         public DbSet<BillsPaymentManagement> BillsPaymentManagement { get; set; }
+        public DbSet<CODWallet> CODWallet { get; set; }
+        public DbSet<CODTransferRegister> CODTransferRegister { get; set; }
         #endregion
 
 

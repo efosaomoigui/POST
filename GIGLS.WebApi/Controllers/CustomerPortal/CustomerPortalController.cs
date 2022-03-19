@@ -2938,6 +2938,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
+        [Route("createstellasaccount")]
+        public async Task<IServiceResponse<StellasResponseDTO>> AddCODWallet(CreateStellaAccountDTO codWalletDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.AddCODWallet(codWalletDTO);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcustomerstellasaccountbal/{code}")]
+        public async Task<IServiceResponse<StellasResponseDTO>> GetStellasAccountBal(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasAccountBal(code);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpPost]
         [Route("allcodshipment")]
         public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipments(PaginationDTO dto)
         {
@@ -2959,6 +2988,105 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var result = await _portalService.GenerateCheckoutUrlForKorapay(payload);
                 return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("celullanttransfer")]
+        public async Task<IServiceResponse<CellulantTransferResponsePayload>> CelullantTransfer(CellulantTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CelullantTransfer(payload);
+                return new ServiceResponse<CellulantTransferResponsePayload>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("stellasbanks")]
+        public async Task<IServiceResponse<StellasResponseDTO>> GetStellasBank()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasBanks();
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("stellaswithdrawal")]
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasWithdrawal(StellasTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasTransfer(payload);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("stellasvalidatebankname")]
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasValidateBankName(ValidateBankNameDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasValidateBankName(payload);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("gettransferstatus/{craccount}")]
+        public async Task<IServiceResponse<bool>> GetTransferStatus(string craccount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetTransferStatus(craccount);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("checkifuserhascodwallet/{customercode}")]
+        public async Task<IServiceResponse<bool>> CheckIfUserHasCODWallet(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CheckIfUserHasCODWallet(customercode);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("validatebvnnumber")]
+        public async Task<IServiceResponse<StellasResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 var result = await _portalService.ValidateBVNNumber(payload);
+                return new ServiceResponse<StellasResponseDTO>
                 {
                     Object = result
                 };

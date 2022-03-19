@@ -612,6 +612,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             await UpdateShipmentCollection(shipmentCollection);
 
+            //update cod values for cod shipment for both agility and mobile
+            var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+            if (mobile != null)
+            {
+               mobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
+               mobile.CODStatus = CODMobileStatus.Collected;
+               mobile.CODStatusDate = DateTime.Now;
+               await _uow.CompleteAsync();
+            }
+
+            var agility = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+            if (agility != null)
+            {
+                agility.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
+                agility.CODStatus = CODMobileStatus.Collected;
+                agility.CODStatusDate = DateTime.Now;
+                await _uow.CompleteAsync();
+            }
+
             //If it is mobile
             if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
@@ -652,7 +671,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.State = shipment.ReceiverState;
             shipmentCollection.IsComingFromDispatch = true;
             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
-            shipmentCollection.PaymentType = PaymentType.Cash;
+            shipmentCollection.PaymentType = shipmentCollection.PaymentType;
             shipmentCollection.Description = shipment.Description;
 
             var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipment.CustomerCode);

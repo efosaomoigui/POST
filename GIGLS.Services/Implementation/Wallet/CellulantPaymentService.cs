@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿
+
+using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
@@ -728,6 +730,75 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        public async Task<bool> CODCallBack(CODCallBackDTO cod)
+        {
+            var result = false;
+            //0. validate payload
+            if (cod == null)
+            {
+                throw new GenericException($"invalid payload", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            var amount = Convert.ToDecimal(cod.CODAmount);
+            if (String.IsNullOrEmpty(cod.Waybill) || amount <= 0)
+            {
+                throw new GenericException($"missing parameter", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            //1. get sender details
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == cod.Waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var senderInfo = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            if (senderInfo == null)
+            {
+                throw new GenericException($"sender information not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var senderWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            //2.update the cod shipment
+            var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == cod.Waybill);
+            if (codAccShipment != null)
+            {
+                codAccShipment.PaymentType = PaymentType.Transfer;
+                codAccShipment.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                codAccShipment.ServiceCenterId = shipmentInfo.DestinationServiceCentreId;
+                codAccShipment.PaymentTypeReference = cod.TransactionReference;
+                codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
+                codAccShipment.TransferAccount = cod.TransferAccount;
+            }
+
+            shipmentInfo.CODStatusDate = DateTime.Now;
+            shipmentInfo.CODStatus = CODMobileStatus.Collected;
+            shipmentInfo.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
+
+            var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill);
+            if (mobileShipment != null)
+            {
+                mobileShipment.CODStatusDate = DateTime.Now;
+                mobileShipment.CODStatus = CODMobileStatus.Collected;
+                mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
+            }
+
+            var refNo = $"TRX-{cod.Waybill}-CLNT";
+            //call the transfer cellulant API
+            var transferDTO = new CellulantTransferDTO()
+            {
+                Amount = Convert.ToDecimal(cod.CODAmount),
+                RefNo = refNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                ClientRefNo = cod.TransactionReference,
+                Waybill = cod.Waybill
+            };
+            var response = await CelullantTransfer(transferDTO);
+            //3. TODO: deduct charges
+            //4. TODO: send email to merchant
+            result = true;
+            return result;
+        }
+
         #endregion
 
         #region Cellulant Webhook
@@ -780,6 +851,262 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var result = await VerifyAndValidatePayment(webhook);
 
+            return result;
+        }
+        #endregion
+
+        #region Cellulant TRANSFER PROCESS
+
+        public async Task<CellulantTransferResponsePayload> Transfer(CellulantTransferPayload payload)
+        {
+            string celullantUrl = ConfigurationManager.AppSettings["CellulantTransferBeepUrl"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var json = JsonConvert.SerializeObject(payload);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(celullantUrl, data);
+                string responseResult = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<CellulantTransferResponsePayload>(responseResult);
+                return result;
+            }
+        }
+
+        public async Task<CellulantTransferResponsePayload> CelullantTransfer(CellulantTransferDTO transferDTO)
+        {
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var user = await _uow.Company.GetCompanyByCode(transferDTO.CustomerCode);
+            if (user is null)
+            {
+                throw new GenericException("ecommerce user does not exist");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == transferDTO.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+
+            //log transaction into CODTransferRegister
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == transferDTO.Waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(transferDTO.Amount),
+                RefNo = transferDTO.RefNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = transferDTO.Waybill,
+                ClientRefNo = transferDTO.ClientRefNo
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
+            await _uow.CompleteAsync();
+            var phoneNo = user.PhoneNumber;
+            var phoneNoIndex = user.PhoneNumber.IndexOf('+');
+            if (phoneNoIndex >= 0)
+            {
+                phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
+            }
+            //test
+            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            //live
+             var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+
+
+            var extraData = new ExtraData();
+            extraData.callbackUrl = callback;
+            extraData.DestinationAccountName = $"{user.Name}";
+            extraData.DestinationBankCode = $"100332";
+            extraData.DestinationBank = $"Stellas";
+            extraData.DestinationAccountNo = accInfo.AccountNo;
+
+            string extraDataStringified = JsonConvert.SerializeObject(extraData);
+            var today = DateTime.Now;
+            string paymentDate = $"{today.Year}-{today.Month}-{today.Day} {today.Hour}:{today.Minute}:{today.Second}";
+            string username = ConfigurationManager.AppSettings["CellulantUsername"];
+            string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
+            string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
+            var pak = new Packet();
+            pak.ServiceCode = serviceCode;
+            pak.MSISDN = phoneNo;
+            pak.InvoiceNumber = transferDTO.RefNo;
+            pak.AccountNumber = accInfo.AccountNo;
+            pak.PayerTransactionID = transferDTO.RefNo;
+            pak.Amount = transferDTO.Amount;
+            pak.HubID = "";
+            pak.Narration = "COD bank payout";
+            pak.DatePaymentReceived = paymentDate;
+            pak.ExtraData = extraDataStringified;
+            pak.CurrencyCode = "NGN";
+            pak.CustomerNames = $"{user.Name}";
+            pak.PaymentMode = "Bank";
+
+            var payload = new CellulantTransferPayload();
+            payload.CountryCode = "NG";
+            payload.Function = "BEEP.postPayment";
+            payload.Payload.Credentials.Password = pwd;
+            payload.Payload.Credentials.Username = username;
+            payload.Payload.Packet.Add(pak);
+            var result = await Transfer(payload);
+
+            string t = JsonConvert.SerializeObject(payload);
+            return result;
+        }
+
+        public async Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        {
+            var response = new CellulantPushPaymentStatusResponse();
+            if (payload != null)
+            {
+                var payerTransacID = payload.Payload.Packet.PayerTransactionID;
+                var getWaybill = payerTransacID.Split('-');
+                var waybill = getWaybill[1];
+                //1. get shipment details
+                var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                if (shipmentInfo != null)
+                {
+                    shipmentInfo.CODStatusDate = DateTime.Now;
+                    shipmentInfo.CODStatus = CODMobileStatus.Paid;
+                    shipmentInfo.CODDescription = $"COD Collected ({CODMobileStatus.Paid.ToString()})";
+                }
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment != null)
+                {
+                    mobileShipment.CODStatusDate = DateTime.Now;
+                    mobileShipment.CODStatus = CODMobileStatus.Collected;
+                    mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
+                }
+
+                //update codtransferlog table to paid
+                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+                if (codtransferlog != null)
+                {
+                    codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                }
+
+                await _uow.CompleteAsync();
+
+                response.AuthStatus.AuthStatusCode = 131;
+                response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
+                response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
+                response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
+                response.Results.StatusCode = 188;
+                response.Results.StatusDescription = "Response was received";
+            }
+            return response;
+        }
+        #endregion
+
+
+
+
+        #region Cellulant Confirm Transfer
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            var sessionId = await GetSessionIdFromTransferDetails(craccount);
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                throw new GenericException("SessionId not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            result = await ConfirmTransferStatus(sessionId);
+            return result;
+        }
+
+        private async Task<bool> ConfirmTransferStatus(string sessionId)
+        {
+            bool result = false;
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?sessionid={sessionId}&type=1") { };
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    result = status == "00" ? true : result;
+                }
+            }
+            return result;
+        }
+
+        private async Task<string> GetSessionIdFromTransferDetails(string craccount)
+        {
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var record = await _uow.TransferDetails.GetAsync(x => x.CrAccount == craccount);
+            if (record == null)
+            {
+                throw new GenericException("Transfer details not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            return record.SessionId;
+        }
+
+        public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
+        {
+            bool result = false;
+            if (string.IsNullOrEmpty(craccount))
+            {
+                throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            craccount = craccount.Trim();
+
+            result = await CheckISCODPaymentReceived(craccount);
+            return result;
+        }
+
+        private async Task<bool> CheckISCODPaymentReceived(string craccount)
+        {
+            bool result = false;
+            string content = string.Empty;
+            string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri(url);
+                httpClient.Timeout = new TimeSpan(0, 0, 30);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?craccount={craccount}&type=2") { };
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                content = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(content)["status"].ToString();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    result = status == "00" ? true : result;
+                }
+            }
             return result;
         }
         #endregion

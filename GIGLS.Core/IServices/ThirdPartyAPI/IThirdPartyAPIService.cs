@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -49,5 +50,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<string> Decrypt(string encrytedKey);
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
         Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
+        Task<bool> CODCallBack(CODCallBackDTO cod);
+        Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
     }
 }

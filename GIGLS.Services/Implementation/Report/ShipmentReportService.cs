@@ -37,6 +37,7 @@ using Image = iTextSharp.text.Image;
 using System.Configuration;
 using Font = iTextSharp.text.Font;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -47,14 +48,16 @@ namespace GIGLS.Services.Implementation.Report
         private IServiceCentreService _serviceCenterService;
         private INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IWalletService _walletService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPaystackPaymentService paystackPaymentService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPaystackPaymentService paystackPaymentService, IWalletService walletService)
         {
             _uow = uow;
             _userService = userService;
             _serviceCenterService = serviceCenterService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _paystackPaymentService = paystackPaymentService;
+            _walletService = walletService;
             MapperConfig.Initialize();
         }
 
@@ -1039,13 +1042,30 @@ namespace GIGLS.Services.Implementation.Report
                 {
                     var refNos = customerInvoices.Select(c => c.InvoiceRefNo).ToList();
                     var invoices = _uow.CustomerInvoice.GetAllAsQueryable().Where(x => refNos.Contains(x.InvoiceRefNo)).ToList();
+                    var codes = invoices.Select(x => x.CustomerCode).ToList();
                     if (invoices.Any())
                     {
+                        var wallets = _uow.Wallet.GetAllAsQueryable().Where(x => codes.Contains(x.CustomerCode)).ToList();
                         foreach (var item in invoices)
                         {
                             item.PaymentStatus = PaymentStatus.Paid;
                             item.DateModified = DateTime.Now;
                             item.UserID = await _userService.GetCurrentUserId();
+
+                            //now manually update user's wallet too
+                            var wallet = wallets.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+                            if (wallet != null)
+                            {
+                                await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO()
+                                {
+                                    WalletId = wallet.WalletId,
+                                    Amount = item.Total,
+                                    Description = "Payment offset",
+                                    PaymentTypeReference = item.InvoiceRefNo,
+                                    CreditDebitType = CreditDebitType.Credit
+                                });
+
+    }
                         }
                         await _uow.CompleteAsync();
                     }
