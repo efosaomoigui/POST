@@ -1083,5 +1083,32 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw ex;
             }
         }
+
+        public async Task<List<object>> GetDetailForAllTypesOfManifest(string code, string type)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(code) || String.IsNullOrEmpty(type))
+                {
+                    throw new GenericException($"invalid parameters");
+                }
+                if (type.ToLower() == "supermanifest")
+                {
+                   var items =  
+                }
+                else if(type.ToLower() == "manifest")
+                {
+                  var item = _groupWaybillNumberService.
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+
     }
 }
