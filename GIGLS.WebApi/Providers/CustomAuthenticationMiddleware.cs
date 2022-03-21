@@ -32,7 +32,7 @@ namespace GIGLS.WebApi.Providers
             if (context.Response.StatusCode == 415)
             {
                 var contentType = context.Request.Headers.GetValues("Content-Type").First();
-                var log = new LogEntry() { Logger = contentType, MachineName = "CELLULANT", Username = DateTime.Now.ToString() };
+                var log = new LogEntry() { Logger = contentType, MachineName = "CELLULANT", DateTime = DateTime.Now.ToString(), Level = context.Response.StatusCode.ToString()};
                 _context.LogEntry.Add(log);
                 await _context.SaveChangesAsync();
             }

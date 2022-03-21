@@ -4753,5 +4753,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.ValidateBVNNumber(payload);
         }
 
+        public async Task LogContentType(LogEntryDTO log)
+        {
+            var logEntry = Mapper.Map<LogEntry>(log);
+            await _uow.WalletPaymentLog.LogContentType(logEntry);
+        }
     }
 }

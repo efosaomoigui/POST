@@ -273,5 +273,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> GetTransferStatus(string craccount);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task LogContentType(LogEntryDTO log);
     }
 }

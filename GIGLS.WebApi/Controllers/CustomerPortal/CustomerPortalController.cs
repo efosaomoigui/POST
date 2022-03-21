@@ -2878,6 +2878,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("verifypayment")]
         public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
+            var contentType = Request.Content.Headers.GetValues("Content-Type").FirstOrDefault();
+            var entry = new LogEntryDTO
+            {
+                DateTime = DateTime.Now.ToString(),
+                Logger = contentType,
+                Level = $"{(int)HttpStatusCode.OK}",
+                MachineName = "CELLULANT"
+            };
+
+            await _portalService.LogContentType(entry);
             return await _portalService.VerifyAndValidatePayment(webhook);
         }
 
