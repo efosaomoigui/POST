@@ -5,6 +5,7 @@ using GIGLS.Infrastructure.Persistence;
 using Microsoft.Owin;
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace GIGLS.WebApi.Providers
@@ -32,7 +33,13 @@ namespace GIGLS.WebApi.Providers
             if (context.Response.StatusCode == 415)
             {
                 var contentType = context.Request.Headers.GetValues("Content-Type").First();
-                var log = new LogEntry() { Logger = contentType, MachineName = "CELLULANT", DateTime = DateTime.Now.ToString(), Level = context.Response.StatusCode.ToString()};
+                var request = context.Request;
+                var remoteIp = request.RemoteIpAddress;
+                var remotePort = request.RemotePort;
+                var localIp = request.LocalIpAddress;
+                var localPort = request.LocalPort;
+                var ipport = $"Remote IP Address: {remoteIp}, Remote Port: {remotePort}, Local IP Address: {localIp}, Local Port: {localPort}";
+                var log = new LogEntry() { Logger = contentType, MachineName = "CELLULANT", DateTime = DateTime.Now.ToString(), Level = context.Response.StatusCode.ToString(), CallSite = ipport};
                 _context.LogEntry.Add(log);
                 await _context.SaveChangesAsync();
             }

@@ -2879,12 +2879,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
             var contentType = Request.Content.Headers.GetValues("Content-Type").FirstOrDefault();
+            var request = Request.GetOwinContext().Request;
+            var remoteIp = request.RemoteIpAddress;
+            var remotePort = request.RemotePort;
+            var localIp = request.LocalIpAddress;
+            var localPort = request.LocalPort;
+            var ipport = $"Remote IP Address: {remoteIp}, Remote Port: {remotePort}, Local IP Address: {localIp}, Local Port: {localPort}";
             var entry = new LogEntryDTO
             {
                 DateTime = DateTime.Now.ToString(),
                 Logger = contentType,
                 Level = $"{(int)HttpStatusCode.OK}",
-                MachineName = "CELLULANT"
+                MachineName = "CELLULANT",
+                CallSite = ipport
             };
 
             await _portalService.LogContentType(entry);
