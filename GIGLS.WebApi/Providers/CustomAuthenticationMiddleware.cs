@@ -1,4 +1,10 @@
-﻿using Microsoft.Owin;
+﻿using GIGLS.Core;
+using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Infrastructure.Persistence;
+using Microsoft.Owin;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.WebApi.Providers
@@ -7,6 +13,7 @@ namespace GIGLS.WebApi.Providers
     //not just focus on invalid authentication
     public class CustomAuthenticationMiddleware : OwinMiddleware
     {
+        private readonly GIGLSContext _context = new GIGLSContext();
         public CustomAuthenticationMiddleware(OwinMiddleware next)
             : base(next)
         {
@@ -20,6 +27,14 @@ namespace GIGLS.WebApi.Providers
             {
                 context.Response.Headers.Remove("AuthorizationResponse");
                 context.Response.StatusCode = 401;
+            }
+
+            if (context.Response.StatusCode == 415)
+            {
+                var contentType = context.Request.Headers.GetValues("Content-Type").First();
+                var log = new LogEntry() { Logger = contentType, MachineName = "CELLULANT", Username = DateTime.Now.ToString() };
+                _context.LogEntry.Add(log);
+                await _context.SaveChangesAsync();
             }
         }
     }
