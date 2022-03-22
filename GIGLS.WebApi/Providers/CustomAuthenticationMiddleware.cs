@@ -30,10 +30,15 @@ namespace GIGLS.WebApi.Providers
                 context.Response.StatusCode = 401;
             }
 
-            if (context.Response.StatusCode == 415)
+            if (context.Response.StatusCode == 415 || context.Response.StatusCode == 400)
             {
-                var contentType = context.Request.Headers.GetValues("Content-Type").First();
+                string contentType = String.Empty;
                 var request = context.Request;
+                foreach (var key in request.Headers.Keys)
+                {
+                    contentType += key + "=" + request.Headers[key] + "; ";
+                }
+                
                 var remoteIp = request.RemoteIpAddress;
                 var remotePort = request.RemotePort;
                 var localIp = request.LocalIpAddress;

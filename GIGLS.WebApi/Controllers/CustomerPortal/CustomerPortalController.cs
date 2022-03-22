@@ -2878,8 +2878,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("verifypayment")]
         public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
-            var contentType = Request.Content.Headers.GetValues("Content-Type").FirstOrDefault();
-            var request = Request.GetOwinContext().Request;
+            string contentType = String.Empty;
+            var request = Request.GetOwinContext().Request; 
+
+            foreach (var key in request.Headers.Keys)
+            {
+                contentType += key + "=" + request.Headers[key] + "; ";
+            }
+            
             var remoteIp = request.RemoteIpAddress;
             var remotePort = request.RemotePort;
             var localIp = request.LocalIpAddress;
