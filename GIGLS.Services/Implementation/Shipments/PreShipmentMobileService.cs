@@ -702,7 +702,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.CustomerCode = user.UserChannelCode;
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
-                    newPreShipment.InternationalShippingCost = PreshipmentPriceDTO.InternationalShippingCost.Value;
+                    newPreShipment.InternationalShippingCost = PreshipmentPriceDTO.InternationalShippingCost == null ? 0.00M : PreshipmentPriceDTO.InternationalShippingCost.Value;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
 
