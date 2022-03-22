@@ -436,5 +436,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getallmanifestandgroupwaybill")]
+        public async Task<IServiceResponse<List<AllManifestAndGroupWaybillDTO>>> GetGroupWaybillDataInManifest(AllManifestAndGroupWaybillFilterDTO allManifestAndGroupWaybillFilterDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetDetailForAllTypesOfManifest(allManifestAndGroupWaybillFilterDTO.Code, allManifestAndGroupWaybillFilterDTO.Type);
+
+                return new ServiceResponse<List<AllManifestAndGroupWaybillDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

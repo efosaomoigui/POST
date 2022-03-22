@@ -270,5 +270,25 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
         }
 
+        public async Task<ManifestGroupWaybillNumberMappingDTO> GetGroupWaybillNumberMappingsUsingManifestCode(string manifestCode)
+        {
+            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == manifestCode).AsQueryable();
+
+            var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
+                                                 select new ManifestGroupWaybillNumberMappingDTO
+                                                 {
+                                                     ManifestGroupWaybillNumberMappingId = mgw.ManifestGroupWaybillNumberMappingId,
+                                                     ManifestCode = mgw.ManifestCode,
+                                                     GroupWaybillNumber = mgw.GroupWaybillNumber,
+                                                     IsActive = mgw.IsActive,
+                                                     DateMapped = mgw.DateMapped,
+                                                     DateCreated = mgw.DateCreated,
+                                                     DateModified = mgw.DateModified,
+                                                     IsDeleted = mgw.IsDeleted,
+                                                 };
+
+            return await Task.FromResult(manifestGroupwaybillMappingDTO.FirstOrDefault());
+        }
+
     }
 }

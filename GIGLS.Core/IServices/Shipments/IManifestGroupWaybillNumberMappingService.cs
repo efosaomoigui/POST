@@ -34,5 +34,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<MovementManifestNumberMappingDTOTwo>> GetManifestNumbersInMovementManifest(string movementmanifestCode);
         Task<List<GroupWaybillAndWaybillDTO>> GetGroupWaybillDataInManifest(string manifest);
         Task RemoveManifestFromMovementManifest(string manifest, string groupWaybillNumber);
+        Task<List<AllManifestAndGroupWaybillDTO>> GetDetailForAllTypesOfManifest(string code, string type);
     }
 }

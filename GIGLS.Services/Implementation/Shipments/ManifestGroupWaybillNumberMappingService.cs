@@ -32,6 +32,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentTrackingService _trackingService;
         private readonly IMessageSenderService _messageSenderService;
 
+
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
             IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService)
@@ -1084,8 +1085,9 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<object>> GetDetailForAllTypesOfManifest(string code, string type)
+        public async Task<List<AllManifestAndGroupWaybillDTO>> GetDetailForAllTypesOfManifest(string code, string type)
         {
+            var result = new List<AllManifestAndGroupWaybillDTO>();
             try
             {
                 if (String.IsNullOrEmpty(code) || String.IsNullOrEmpty(type))
@@ -1094,16 +1096,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (type.ToLower() == "supermanifest")
                 {
-                   var items =  
+                    result = await _uow.Manifest.GetManifestsInSuperManifests(code);
+                    return result;
                 }
                 else if(type.ToLower() == "manifest")
                 {
-                  var item = _groupWaybillNumberService.
+                    result = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(code);
+                    return result;
                 }
+                else if (type.ToLower() == "groupwaybill")
+                {
+                    result = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(code);
+                    return result;
+                }
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
                 throw;
             }
         }
