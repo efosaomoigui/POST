@@ -56,5 +56,6 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByServiceCenter(DepositType type, BankDepositFilterCriteria dateFilterCriteria);
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrderV2(string refcode, DepositType type);
         Task<List<BankProcessingOrderCodesDTO>> GetRegionalAndECOBankOrderProcessingCodeByDate(DepositType type, BankDepositFilterCriteria dateFilterCriteria);
+        Task MarkMultipleBankProcessingOrderAsVerified(List<BankProcessingOrderCodesDTO> bankrefcodes, string type);
     }
 }
