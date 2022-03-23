@@ -270,12 +270,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return await Task.FromResult(manifestSuperManifestMappingDTO.OrderByDescending(x => x.DateModified).ToList());
         }
 
-        public async Task<ManifestGroupWaybillNumberMappingDTO> GetGroupWaybillNumberMappingsUsingManifestCode(string manifestCode)
+        public Task<List<AllManifestAndGroupWaybillDTO>> GetGroupWaybillNumberMappingsUsingManifestCode(string manifestCode)
         {
-            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == manifestCode).AsQueryable();
+            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.ManifestCode == manifestCode).AsQueryable();
 
-            var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
-                                                 select new ManifestGroupWaybillNumberMappingDTO
+            var manifestGroupwaybillMappingDTO = (from mgw in manifestGroupwaybillMapping
+                                                 select new AllManifestAndGroupWaybillDTO
                                                  {
                                                      ManifestGroupWaybillNumberMappingId = mgw.ManifestGroupWaybillNumberMappingId,
                                                      ManifestCode = mgw.ManifestCode,
@@ -285,9 +285,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DateCreated = mgw.DateCreated,
                                                      DateModified = mgw.DateModified,
                                                      IsDeleted = mgw.IsDeleted,
-                                                 };
+                                                 }).ToList();
 
-            return await Task.FromResult(manifestGroupwaybillMappingDTO.FirstOrDefault());
+            return Task.FromResult(manifestGroupwaybillMappingDTO.ToList());
         }
 
     }

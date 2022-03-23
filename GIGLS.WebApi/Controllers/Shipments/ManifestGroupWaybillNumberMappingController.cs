@@ -438,7 +438,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("getallmanifestandgroupwaybill")]
         public async Task<IServiceResponse<List<AllManifestAndGroupWaybillDTO>>> GetGroupWaybillDataInManifest(AllManifestAndGroupWaybillFilterDTO allManifestAndGroupWaybillFilterDTO)
         {

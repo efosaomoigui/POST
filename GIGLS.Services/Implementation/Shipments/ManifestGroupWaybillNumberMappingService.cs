@@ -1101,7 +1101,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else if(type.ToLower() == "manifest")
                 {
-                    result = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(code);
+                    result = await _uow.ManifestGroupWaybillNumberMapping.GetGroupWaybillNumberMappingsUsingManifestCode(code);
                     return result;
                 }
                 else if (type.ToLower() == "groupwaybill")
