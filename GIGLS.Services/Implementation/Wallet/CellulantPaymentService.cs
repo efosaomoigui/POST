@@ -919,7 +919,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-             var callback = "https://thirdparty.gigl-go.com/api/thirdparty/codcallback";
+             var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();
