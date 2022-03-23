@@ -102,6 +102,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                       DestinationServiceCentreId = r.DestinationServiceCentreId,
                                       ExpressDelivery = r.ExpressDelivery,
                                       IsBulky = r.IsBulky,
+                                      ManifestType = r.ManifestType,
                                       DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                       {
                                           Code = x.Code,
