@@ -924,7 +924,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var extraData = new ExtraData();
             extraData.callbackUrl = callback;
-            extraData.DestinationAccountName = $"{user.Name}";
+            extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}";
             extraData.DestinationBankCode = $"100332";
             extraData.DestinationBank = $"Stellas";
             extraData.DestinationAccountNo = accInfo.AccountNo;
@@ -947,7 +947,7 @@ namespace GIGLS.Services.Implementation.Wallet
             pak.DatePaymentReceived = paymentDate;
             pak.ExtraData = extraDataStringified;
             pak.CurrencyCode = "NGN";
-            pak.CustomerNames = $"{user.Name}";
+            pak.CustomerNames = $"{accInfo.FirstName} {accInfo.LastName}";
             pak.PaymentMode = "Bank";
 
             var payload = new CellulantTransferPayload();
