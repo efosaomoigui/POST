@@ -532,41 +532,22 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
 
-
         [AllowAnonymous]
         [HttpPost]
         [Route("updateshipmentcallback")]
-        public async Task<IServiceResponse<object>> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
+        public async Task<object> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload)
         {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var response = new ServiceResponse<object>();
-                var request = Request;
-                var headers = request.Headers;
-                var result = new object();
+            //return await HandleApiOperationAsync(async () =>
+            //{
+            //    var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
 
-                if (headers.Contains("api_key"))
-                {
-                    var key = await _thirdPartyAPIService.GetCellulantKey();
-                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
-                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
-                    if (token == key)
-                    {
-                        result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
-                        response.Object = result;
-                    }
-                    else
-                    {
-                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
-                    }
-                }
-                else
-                {
-                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
-                }
-                return response;
-            });
+            //    return new ServiceResponse<object>
+            //    {
+            //        Object = result
+            //    };
+            //});
+            var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
+            return result;
         }
-
     }
 }

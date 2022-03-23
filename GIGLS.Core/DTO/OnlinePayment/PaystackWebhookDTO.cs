@@ -708,7 +708,7 @@ namespace GIGLS.Core.DTO.OnlinePayment
         public string ClientCode { get; set; }
 
         [JsonProperty("extraData")]
-        public ExtraDataCallBack ExtraData { get; set; }
+        public string ExtraData { get; set; }
     }
 
     public class PayloadPushPaymentStatus
@@ -751,6 +751,11 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class CellulantPushPaymentStatusResponse
     {
+        public CellulantPushPaymentStatusResponse()
+        {
+            AuthStatus = new AuthStatus();
+            Results = new PushPaymentStatusResponseResult();
+        }
         [JsonProperty("authStatus")]
         public AuthStatus AuthStatus { get; set; }
 
