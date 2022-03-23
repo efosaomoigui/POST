@@ -61,5 +61,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task CreditCaptainForMovementManifestTransaction(CreditPartnerTransactionsDTO creditPartnerTransactionsDTO);
         Task RemoveShipmentFromQueue(string waybill);
         Task<List<MovementDispatchDTO>> getManifestsinmovementmanifestDispatchCompleted(DateFilterCriteria dateFilterCriteria);
+        Task<bool> GetTransferStatus(string craccount);
     }
 }
