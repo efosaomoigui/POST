@@ -2878,6 +2878,29 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("verifypayment")]
         public async Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook)
         {
+            string contentType = String.Empty;
+            var request = Request.GetOwinContext().Request; 
+
+            foreach (var key in request.Headers.Keys)
+            {
+                contentType += key + "=" + request.Headers[key] + "; ";
+            }
+            
+            var remoteIp = request.RemoteIpAddress;
+            var remotePort = request.RemotePort;
+            var localIp = request.LocalIpAddress;
+            var localPort = request.LocalPort;
+            var ipport = $"Remote IP Address: {remoteIp}, Remote Port: {remotePort}, Local IP Address: {localIp}, Local Port: {localPort}";
+            var entry = new LogEntryDTO
+            {
+                DateTime = DateTime.Now.ToString(),
+                Logger = contentType,
+                Level = $"{(int)HttpStatusCode.OK}",
+                MachineName = "CELLULANT",
+                CallSite = ipport
+            };
+
+            await _portalService.LogContentType(entry);
             return await _portalService.VerifyAndValidatePayment(webhook);
         }
 
@@ -3044,21 +3067,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var result = await _portalService.StellasValidateBankName(payload);
                 return new ServiceResponse<StellasResponseDTO>
-                {
-                    Object = result
-                };
-            });
-        }
-
-
-        [HttpGet]
-        [Route("gettransferstatus/{craccount}")]
-        public async Task<IServiceResponse<bool>> GetTransferStatus(string craccount)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _portalService.GetTransferStatus(craccount);
-                return new ServiceResponse<bool>
                 {
                     Object = result
                 };

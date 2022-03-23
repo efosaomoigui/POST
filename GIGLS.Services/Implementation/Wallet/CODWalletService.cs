@@ -50,6 +50,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<StellasResponseDTO> CreateStellasAccount(CreateStellaAccountDTO createStellaAccountDTO)
         {
+            var exist = await _uow.CODWallet.ExistAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
+            if (exist)
+            {
+                throw new GenericException("user already has a COD wallet", $"{(int)HttpStatusCode.NotFound}");
+            }
             var user = await _uow.Company.GetAsync(x => x.CustomerCode == createStellaAccountDTO.CustomerCode);
             var Aspuser = await _uow.User.GetUserByChannelCode(createStellaAccountDTO.CustomerCode);
             if (user is null)
@@ -79,7 +84,9 @@ namespace GIGLS.Services.Implementation.Wallet
                         PlaceOfBirth = result.data.customerDetails.placeOfBirth,
                         Address = result.data.customerDetails.address,
                         NationalIdentityNo = result.data.customerDetails.nationalIdentityNo,
-                        UserId = Aspuser.Id
+                        UserId = Aspuser.Id,
+                        FirstName = createStellaAccountDTO.firstName,
+                        LastName = createStellaAccountDTO.lastName
 
                     };
                     await AddCODWallet(codWalletDTO);
@@ -87,14 +94,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     resp.data = res;
 
                     //Create User login details on stella core banking
-                    var loginDetails = new CreateAccountCoreBankingResponseDTO();
                     if (!string.IsNullOrEmpty(result.data.account_details.customerId))
                     {
                         var resultResponse = await AddCustomerToStellaCoreBanking(result.data.account_details.customerId);
-                        loginDetails = (CreateAccountCoreBankingResponseDTO)resultResponse.data;
+                        var loginDetails = new CreateAccountCoreBankingResponseDTO();
+
+                        if (resultResponse != null && resultResponse.data != null)
+                        {
+                            loginDetails = (CreateAccountCoreBankingResponseDTO)resultResponse.data;
+                        } 
 
                         //Send stella account login details to customer
-                        if (loginDetails.Data != null)
+                        if (loginDetails !=null && loginDetails.Data != null)
                         {
                             if (loginDetails.Data?.LoginDetails != null)
                             {

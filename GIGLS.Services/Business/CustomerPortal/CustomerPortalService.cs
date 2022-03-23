@@ -4651,6 +4651,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("user does not have a cod wallet");
             }
+            var today = DateTime.Now;
+            string paymentDate = $"{today.Year}-{today.Month}-{today.Day} {today.Hour}:{today.Minute}:{today.Second}";
+            var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
             string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
@@ -4663,9 +4666,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             pak.Amount = transferDTO.Amount;
             pak.HubID = "";
             pak.Narration = "Transfer to COD wallet";
-            pak.DatePaymentReceived = DateTime.Now.ToString();
-            pak.ExtraData = "";
-            pak.CurrencyCode = "NG";
+            pak.DatePaymentReceived = paymentDate;
+            pak.ExtraData = callback;
+            pak.CurrencyCode = "NGN";
             pak.CustomerNames = $"{user.Name}";
             pak.PaymentMode = "Online Payment";
 
@@ -4716,12 +4719,12 @@ namespace GIGLS.Services.Business.CustomerPortal
               Narration = transferDTO.Narration,
               PayerAccountNumber = codWallet.AccountNo
             };
-            var  withdrawResponse = await _codWalletService.StellasWithdrawal(withrawObj);
+            var  withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
             if (withdrawResponse.status)
             {
                 await Task.Delay(15000);
                 transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                return await _codWalletService.StellasTransfer(transferDTO);
+                return await _codWalletService.StellasWithdrawal(withrawObj);
             }
             return withdrawResponse;
         }
@@ -4750,5 +4753,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.ValidateBVNNumber(payload);
         }
 
+        public async Task LogContentType(LogEntryDTO log)
+        {
+            var logEntry = Mapper.Map<LogEntry>(log);
+            await _uow.WalletPaymentLog.LogContentType(logEntry);
+        }
     }
 }

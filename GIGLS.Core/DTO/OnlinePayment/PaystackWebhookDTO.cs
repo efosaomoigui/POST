@@ -665,6 +665,8 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
         public decimal Amount { get; set; }
         public string RefNo { get; set; }
+        public string ClientRefNo { get; set; }
+        public string Waybill { get; set; }
     }
 
 
@@ -749,6 +751,11 @@ namespace GIGLS.Core.DTO.OnlinePayment
 
     public class CellulantPushPaymentStatusResponse
     {
+        public CellulantPushPaymentStatusResponse()
+        {
+            AuthStatus = new AuthStatus();
+            Results = new PushPaymentStatusResponseResult();
+        }
         [JsonProperty("authStatus")]
         public AuthStatus AuthStatus { get; set; }
 
@@ -757,7 +764,39 @@ namespace GIGLS.Core.DTO.OnlinePayment
     }
 
 
+    public class ExtraData
+    {
+        [JsonProperty("callbackUrl")]
+        public string callbackUrl { get; set; }
 
+        [JsonProperty("destinationBankCode")]
+        public string DestinationBankCode { get; set; }
+
+        [JsonProperty("destinationAccountName")]
+        public string DestinationAccountName { get; set; }
+        [JsonProperty("destinationAccountNo")]
+        public string DestinationAccountNo { get; set; }
+        [JsonProperty("destinationBank")]
+        public string DestinationBank { get; set; }
+    }
+
+    public class ExtraDataCallBack
+    {
+        [JsonProperty("callbackUrl")]
+        public string CallBackUrl { get; set; }
+
+        [JsonProperty("destinationBankCode")]
+        public string DestinationBankCode { get; set; }
+
+        [JsonProperty("destinationAccountName")]
+        public string DestinationAccountName { get; set; }
+        [JsonProperty("destinationAccountNo")]
+        public string DestinationAccountNo { get; set; }
+        [JsonProperty("destinationBank")]
+        public string DestinationBank { get; set; }
+        [JsonProperty("hubID")]
+        public string HubId { get; set; }
+    }
 
 
 

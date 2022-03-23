@@ -221,6 +221,7 @@ namespace GIGLS.Core
         IUnidentifiedItemsForInternationalShippingRepository UnidentifiedItemsForInternationalShipping { get; set; }
         IBillsPaymentManagementRepository BillsPaymentManagement { get; set; }
         ICODWalletRepository CODWallet { get; set; }
+        ICODTransferRegisterRepository CODTransferRegister { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

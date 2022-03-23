@@ -257,5 +257,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
              await _preShipmentMobileService.RemoveShipmentFromQueue(waybill);
         }
+
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+           return await _portalService.GetTransferStatus(craccount);
+        }
     }
 }

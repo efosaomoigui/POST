@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿
+
+using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
@@ -728,8 +730,9 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
-        public async Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod)
+        public async Task<bool> CODCallBack(CODCallBackDTO cod)
         {
+            var result = false;
             //0. validate payload
             if (cod == null)
             {
@@ -779,19 +782,21 @@ namespace GIGLS.Services.Implementation.Wallet
                 mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
             }
 
-            //call the transfer cellulant API
             var refNo = $"TRX-{cod.Waybill}-CLNT";
+            //call the transfer cellulant API
             var transferDTO = new CellulantTransferDTO()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
                 RefNo = refNo,
-                CustomerCode = shipmentInfo.CustomerCode
+                CustomerCode = shipmentInfo.CustomerCode,
+                ClientRefNo = cod.TransactionReference,
+                Waybill = cod.Waybill
             };
             var response = await CelullantTransfer(transferDTO);
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
-            await _uow.CompleteAsync();
-            return response;
+            result = true;
+            return result;
         }
 
         #endregion
@@ -886,28 +891,64 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("user does not have a cod wallet");
             }
+
+            //log transaction into CODTransferRegister
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == transferDTO.Waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(transferDTO.Amount),
+                RefNo = transferDTO.RefNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = transferDTO.Waybill,
+                ClientRefNo = transferDTO.ClientRefNo
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
+            await _uow.CompleteAsync();
+            var phoneNo = user.PhoneNumber;
+            var phoneNoIndex = user.PhoneNumber.IndexOf('+');
+            if (phoneNoIndex >= 0)
+            {
+                phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
+            }
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
-
             //live
-            var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+             var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+
+
+            var extraData = new ExtraData();
+            extraData.callbackUrl = callback;
+            extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}";
+            extraData.DestinationBankCode = $"100332";
+            extraData.DestinationBank = $"Stellas";
+            extraData.DestinationAccountNo = accInfo.AccountNo;
+
+            string extraDataStringified = JsonConvert.SerializeObject(extraData);
+            var today = DateTime.Now;
+            string paymentDate = $"{today.Year}-{today.Month}-{today.Day} {today.Hour}:{today.Minute}:{today.Second}";
             string username = ConfigurationManager.AppSettings["CellulantUsername"];
             string pwd = ConfigurationManager.AppSettings["CellulantPwd"];
             string serviceCode = ConfigurationManager.AppSettings["CellulantBeepServiceCode"];
             var pak = new Packet();
             pak.ServiceCode = serviceCode;
-            pak.MSISDN = user.PhoneNumber;
+            pak.MSISDN = phoneNo;
             pak.InvoiceNumber = transferDTO.RefNo;
             pak.AccountNumber = accInfo.AccountNo;
             pak.PayerTransactionID = transferDTO.RefNo;
             pak.Amount = transferDTO.Amount;
             pak.HubID = "";
-            pak.Narration = "Transfer to COD wallet";
-            pak.DatePaymentReceived = DateTime.Now.ToString();
-            pak.ExtraData = callback;
-            pak.CurrencyCode = "NG";
-            pak.CustomerNames = $"{user.Name}";
-            pak.PaymentMode = "Online Payment";
+            pak.Narration = "COD bank payout";
+            pak.DatePaymentReceived = paymentDate;
+            pak.ExtraData = extraDataStringified;
+            pak.CurrencyCode = "NGN";
+            pak.CustomerNames = $"{accInfo.FirstName} {accInfo.LastName}";
+            pak.PaymentMode = "Bank";
 
             var payload = new CellulantTransferPayload();
             payload.CountryCode = "NG";
@@ -916,6 +957,8 @@ namespace GIGLS.Services.Implementation.Wallet
             payload.Payload.Credentials.Username = username;
             payload.Payload.Packet.Add(pak);
             var result = await Transfer(payload);
+
+            string t = JsonConvert.SerializeObject(payload);
             return result;
         }
 
@@ -942,12 +985,20 @@ namespace GIGLS.Services.Implementation.Wallet
                     mobileShipment.CODStatus = CODMobileStatus.Collected;
                     mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
                 }
+
+                //update codtransferlog table to paid
+                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+                if (codtransferlog != null)
+                {
+                    codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                }
+
                 await _uow.CompleteAsync();
 
                 response.AuthStatus.AuthStatusCode = 131;
                 response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
                 response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
-                response.Results.BeepTransactionID = payload.Payload.Packet.PayerTransactionID;
+                response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
                 response.Results.StatusCode = 188;
                 response.Results.StatusDescription = "Response was received";
             }
@@ -990,7 +1041,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 httpClient.DefaultRequestHeaders.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?sessionid={sessionId}&type=1"){};
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?sessionid={sessionId}&type=1") { };
                 var response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 content = await response.Content.ReadAsStringAsync();
@@ -1045,7 +1096,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 httpClient.DefaultRequestHeaders.Clear();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?craccount={craccount}&type=2"){};
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/GenericWave/Proxy/Query?craccount={craccount}&type=2") { };
                 var response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 content = await response.Content.ReadAsStringAsync();

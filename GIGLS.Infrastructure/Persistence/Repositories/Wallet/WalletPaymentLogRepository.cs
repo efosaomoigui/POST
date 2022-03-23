@@ -14,6 +14,8 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Report;
 using System.Data.SqlClient;
+using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -246,6 +248,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                param).ToListAsync();
 
             return await Task.FromResult(summary);
+        }
+
+        public async Task LogContentType(LogEntry payload)
+        {
+            if(payload != null)
+            {
+
+                Context.LogEntry.Add(payload);
+                await Context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -50,7 +50,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<string> Decrypt(string encrytedKey);
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
         Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
-        Task<CellulantTransferResponsePayload> CODCallBack(CODCallBackDTO cod);
+        Task<bool> CODCallBack(CODCallBackDTO cod);
         Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
     }
 }

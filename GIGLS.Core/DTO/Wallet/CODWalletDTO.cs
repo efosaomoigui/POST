@@ -23,6 +23,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string PlaceOfBirth { get; set; }
         public string Address { get; set; }
         public string NationalIdentityNo { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
     public class CreateStellaAccountDTO 
@@ -247,6 +249,19 @@ namespace GIGLS.Core.DTO.Wallet
         public WithdrawAndTransferSucessObj Data { get; set; }
     }
 
+
+
+    public class CODTransferRegisterDTO : BaseDomainDTO
+    {
+        public int CODTransferRegisterId { get; set; }
+        public string Waybill { get; set; }
+        public string AccountNo { get; set; }
+        public decimal Amount { get; set; }
+        public string CustomerCode { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public string ClientRefNo { get; set; }
+        public string RefNo { get; set; }
+    }
 
 
     public class ValidateCustomerBVN

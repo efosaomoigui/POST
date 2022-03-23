@@ -1,5 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
@@ -19,5 +21,6 @@ namespace GIGLS.Core.IRepositories.Wallet
         Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogView(DateFilterCriteria filterCriteria);
         Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem);
         Task<List<WalletPaymentLogView>> GetWalletPaymentLogBreakdown(DashboardFilterCriteria dashboardFilter);
+        Task LogContentType(LogEntry payload);
     }
 }

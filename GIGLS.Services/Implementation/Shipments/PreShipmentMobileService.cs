@@ -580,7 +580,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         PreshipmentPriceDTO.Vat = result.VAT;
                         PreshipmentPriceDTO.PreshipmentMobile = preShipmentDTO;
                         PreshipmentPriceDTO.IsWithinProcessingTime = isWithinProcessingTime;
+                        preShipmentDTO.Vat = result.VAT;
+                        preShipmentDTO.vatvalue_display = result.VAT;
+                        preShipmentDTO.DiscountValue = result.Discount;
+                        preShipmentDTO.vatvalue_display = result.Discount;
+                        preShipmentDTO.InternationalShippingCost = result.InternationalShippingCost;
                         PreshipmentPriceDTO.InternationalShippingCost = result.InternationalShippingCost;
+                        PreshipmentPriceDTO.PreshipmentMobile.InternationalShippingCost = result.InternationalShippingCost;
                     }
                     else
                     {
@@ -696,6 +702,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.CustomerCode = user.UserChannelCode;
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
+                    newPreShipment.InternationalShippingCost = PreshipmentPriceDTO.InternationalShippingCost == null ? 0.00M : PreshipmentPriceDTO.InternationalShippingCost.Value;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
 

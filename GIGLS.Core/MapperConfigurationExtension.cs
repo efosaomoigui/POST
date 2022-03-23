@@ -542,6 +542,9 @@ namespace GIGLS.Core
                 config.CreateMap<CODWalletDTO, CODWallet>();
                 config.CreateMap<CODWallet, CODWalletDTO>();
 
+                config.CreateMap<LogEntryDTO, LogEntry>();
+                config.CreateMap<LogEntry, LogEntryDTO>();
+
             });
 
             isInit = true;
