@@ -777,5 +777,19 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
+
+        [HttpGet]
+        [Route("gettransferstatus/{craccount}")]
+        public async Task<IServiceResponse<bool>> GetTransferStatus(string craccount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetTransferStatus(craccount);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
