@@ -967,40 +967,52 @@ namespace GIGLS.Services.Implementation.Wallet
             var response = new CellulantPushPaymentStatusResponse();
             if (payload != null)
             {
-                var payerTransacID = payload.Payload.Packet.PayerTransactionID;
-                var getWaybill = payerTransacID.Split('-');
-                var waybill = getWaybill[1];
-                //1. get shipment details
-                var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-                if (shipmentInfo != null)
+                if (payload.Payload != null && payload.Payload.Packet != null && payload.Payload.Packet.StatusCode == "183")
                 {
-                    shipmentInfo.CODStatusDate = DateTime.Now;
-                    shipmentInfo.CODStatus = CODMobileStatus.Paid;
-                    shipmentInfo.CODDescription = $"COD Collected ({CODMobileStatus.Paid.ToString()})";
-                }
-                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
-                if (mobileShipment != null)
-                {
-                    mobileShipment.CODStatusDate = DateTime.Now;
-                    mobileShipment.CODStatus = CODMobileStatus.Collected;
-                    mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
-                }
+                    var payerTransacID = payload.Payload.Packet.PayerTransactionID;
+                    var getWaybill = payerTransacID.Split('-');
+                    var waybill = getWaybill[1];
+                    //1. get shipment details
+                    var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                    if (shipmentInfo != null)
+                    {
+                        shipmentInfo.CODStatusDate = DateTime.Now;
+                        shipmentInfo.CODStatus = CODMobileStatus.Paid;
+                        shipmentInfo.CODDescription = $"COD Collected ({CODMobileStatus.Paid.ToString()})";
+                    }
+                    var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                    if (mobileShipment != null)
+                    {
+                        mobileShipment.CODStatusDate = DateTime.Now;
+                        mobileShipment.CODStatus = CODMobileStatus.Collected;
+                        mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
+                    }
 
-                //update codtransferlog table to paid
-                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
-                if (codtransferlog != null)
-                {
-                    codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                    //update codtransferlog table to paid
+                    var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+                    if (codtransferlog != null)
+                    {
+                        codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                    }
+
+                    await _uow.CompleteAsync();
+
+                    response.AuthStatus.AuthStatusCode = 131;
+                    response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
+                    response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
+                    response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
+                    response.Results.StatusCode = 188;
+                    response.Results.StatusDescription = "Response was received"; 
                 }
-
-                await _uow.CompleteAsync();
-
+            }
+            else
+            {
                 response.AuthStatus.AuthStatusCode = 131;
                 response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
                 response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
                 response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
-                response.Results.StatusCode = 188;
-                response.Results.StatusDescription = "Response was received";
+                response.Results.StatusCode = Convert.ToInt32(payload.Payload.Packet.StatusCode);
+                response.Results.StatusDescription = payload.Payload.Packet.StatusDescription;
             }
             return response;
         }
