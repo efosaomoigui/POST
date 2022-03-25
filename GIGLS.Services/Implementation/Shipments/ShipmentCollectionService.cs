@@ -3,11 +3,13 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Alpha;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Alpha;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -31,17 +33,19 @@ namespace GIGLS.Services.Implementation.Shipments
         private ICashOnDeliveryAccountService _cashOnDeliveryAccountService;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IAlphaService _alphaService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
             ICashOnDeliveryAccountService cashOnDeliveryAccountService,
             IShipmentTrackingService shipmentTrackingService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService, IAlphaService alphaService)
         {
             _uow = uow;
             _userService = userService;
             _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
+            _alphaService = alphaService;
             MapperConfig.Initialize();
         }
 
@@ -613,8 +617,8 @@ namespace GIGLS.Services.Implementation.Shipments
             await UpdateShipmentCollection(shipmentCollection);
 
             //update cod values for cod shipment for both agility and mobile
-            var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
-            if (mobile != null)
+            var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
+            if (mobile != null && mobile.IsCashOnDelivery == true)
             {
                mobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
                mobile.CODStatus = CODMobileStatus.Collected;
@@ -635,6 +639,11 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
                 await AddRiderToDeliveryTable(shipmentCollection);
+            }
+
+            if(mobile != null && mobile.IsAlpha == true)
+            {
+                await UpdateAlphaOrderStatus(shipmentCollection);
             }
         }
 
@@ -1275,7 +1284,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
+        public async Task UpdateAlphaOrderStatus(ShipmentCollectionDTO shipmentCollection)
+        {
+            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = "delivered", WayBill = shipmentCollection.Waybill };
+            await _alphaService.UpdateOrderStatus(notifyAlphaPayload);
+        }
 
     }
 }

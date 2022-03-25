@@ -161,4 +161,13 @@ namespace GIGLS.Core.DTO.Alpha
         [JsonProperty("results")]
         public ResponseDTO Results { get; set; }
     }
+
+    public class AlphaUpdateOrderStatusDTO
+    {
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("way_bill")]
+        public string WayBill { get; set; }
+    }
 }
