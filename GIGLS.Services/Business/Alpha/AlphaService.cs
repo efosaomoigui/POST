@@ -118,7 +118,7 @@ namespace GIGLS.Services.Business.Alpha
                 var json = JsonConvert.SerializeObject(payload);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync(baseurl, data);
+                var response = await client.PutAsync(baseurl, data);
 
                 if (response == null || !response.IsSuccessStatusCode)
                 {
