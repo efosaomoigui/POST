@@ -511,6 +511,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
                     }
+                    if (preShipmentDTO.IsCashOnDelivery && customer.Rank != Rank.Class)
+                    {
+                        throw new GenericException("Cash On Delivery feature not available for  Basic ecommerce users; please upgrade to Class to have access to Cash On Delivery.");
+                    }
 
                     if (customer.IsEligible != true)
                     {
