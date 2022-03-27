@@ -18,6 +18,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
+using GIGLS.Infrastructure.Persistence;
 using GIGLS.Services.Implementation.Utility.CellulantEncryptionService;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -812,6 +813,20 @@ namespace GIGLS.Services.Implementation.Wallet
             };
 
             //var response = await CelullantTransfer(transferDTO);
+            //log to register table
+
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(transferDTO.Amount),
+                RefNo = transferDTO.RefNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = transferDTO.Waybill,
+                ClientRefNo = transferDTO.ClientRefNo
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
+            await _uow.CompleteAsync();
             var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
             if (stellasWithdraw.status)
             {
@@ -827,10 +842,16 @@ namespace GIGLS.Services.Implementation.Wallet
                 ErrorMessage = stellasWithdraw.message,
                 ErrorMethod = "Stellas Tranfer",
                 ErrorSource = "Stellas API",
+                Username = cod.Waybill,
                 InnerErrorMessage = json,
                 DateTime = DateTime.Now.ToString()
             };
-            await _uow.CompleteAsync();
+            // _uow.LogEntry.Add(codTransferReg);
+            using (GIGLSContext _context = new GIGLSContext())
+            {
+                _context.LogEntry.Add(logEnt);
+                await _context.SaveChangesAsync();
+            }
 
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
@@ -1056,7 +1077,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return response;
         }
 
-        private async Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod)
+        public async Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod)
         {
             bool result = false;
             //1. get shipment details

@@ -26,5 +26,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
         Task<bool> GetTransferStatus(string craccount);
         Task<bool> GetCODPaymentReceivedStatus(string craccount);
+        Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod);
     }
 }
