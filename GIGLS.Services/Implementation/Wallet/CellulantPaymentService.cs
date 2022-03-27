@@ -830,6 +830,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 InnerErrorMessage = json,
                 DateTime = DateTime.Now.ToString()
             };
+            await _uow.CompleteAsync();
 
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
