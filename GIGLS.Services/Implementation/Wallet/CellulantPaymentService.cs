@@ -1120,9 +1120,6 @@ namespace GIGLS.Services.Implementation.Wallet
         }
         #endregion
 
-
-
-
         #region Cellulant Confirm Transfer
         public async Task<bool> GetTransferStatus(string craccount)
         {
