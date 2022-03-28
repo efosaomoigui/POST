@@ -1027,11 +1027,11 @@ namespace GIGLS.Services.Implementation.Wallet
             var response = new CellulantPushPaymentStatusResponse();
             if (payload != null)
             {
+                var payerTransacID = payload.Payload.Packet.PayerTransactionID;
+                var getWaybill = payerTransacID.Split('-');
+                var waybill = getWaybill[1];
                 if (payload.Payload != null && payload.Payload.Packet != null && payload.Payload.Packet.StatusCode == "183")
                 {
-                    var payerTransacID = payload.Payload.Packet.PayerTransactionID;
-                    var getWaybill = payerTransacID.Split('-');
-                    var waybill = getWaybill[1];
                     //1. get shipment details
                     var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
                     if (shipmentInfo != null)
@@ -1053,6 +1053,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (codtransferlog != null)
                     {
                         codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                        codtransferlog.StatusCode = payload.Payload.Packet.StatusCode;
+                        codtransferlog.StatusDescription = payload.Payload.Packet.StatusDescription;
                     }
 
                     await _uow.CompleteAsync();
@@ -1064,15 +1066,25 @@ namespace GIGLS.Services.Implementation.Wallet
                     response.Results.StatusCode = 188;
                     response.Results.StatusDescription = "Response was received"; 
                 }
-            }
-            else
-            {
-                response.AuthStatus.AuthStatusCode = 131;
-                response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
-                response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
-                response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
-                response.Results.StatusCode = Convert.ToInt32(payload.Payload.Packet.StatusCode);
-                response.Results.StatusDescription = payload.Payload.Packet.StatusDescription;
+
+                else
+                {
+                    response.AuthStatus.AuthStatusCode = 131;
+                    response.AuthStatus.AuthStatusDescription = "API call doesn't need authentication";
+                    response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
+                    response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
+                    response.Results.StatusCode = Convert.ToInt32(payload.Payload.Packet.StatusCode);
+                    response.Results.StatusDescription = payload.Payload.Packet.StatusDescription;
+
+                    //update codtransferlog table to paid
+                    var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+                    if (codtransferlog != null)
+                    {
+                        codtransferlog.PaymentStatus = PaymentStatus.Paid;
+                        codtransferlog.StatusCode = payload.Payload.Packet.StatusCode;
+                        codtransferlog.StatusDescription = payload.Payload.Packet.StatusDescription;
+                    }
+                }
             }
             return response;
         }
