@@ -973,7 +973,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var extraData = new ExtraData();
             extraData.callbackUrl = callback;
             extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}";
-            extraData.DestinationBankCode = $"100332";
+            extraData.DestinationBankCode = $"0423";
             extraData.DestinationBank = $"Stellas";
             extraData.DestinationAccountNo = accInfo.AccountNo;
 
