@@ -1080,7 +1080,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
                     if (codtransferlog != null)
                     {
-                        codtransferlog.PaymentStatus = PaymentStatus.Paid;
                         codtransferlog.StatusCode = payload.Payload.Packet.StatusCode;
                         codtransferlog.StatusDescription = payload.Payload.Packet.StatusDescription;
                     }
