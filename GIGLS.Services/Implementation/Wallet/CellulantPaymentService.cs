@@ -790,6 +790,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 mobileShipment.CODStatus = CODMobileStatus.Collected;
                 mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
             }
+            await _uow.CompleteAsync();
 
             var refNo = $"TRX-{cod.Waybill}-CLNT";
             //call the transfer cellulant API
@@ -802,56 +803,43 @@ namespace GIGLS.Services.Implementation.Wallet
                 Waybill = cod.Waybill
             };
 
-            //call the transfer stellas API
-            var transferDTOStellas = new StellasTransferDTO()
-            {
-                Amount = cod.CODAmount,
-                RetrievalReference = refNo,
-                ReceiverAccountNumber = accInfo.AccountNo,
-                Narration= $"COD Bank Transfer Payout for {cod.Waybill}",
-                ReceiverBankCode = "100332",   
-            };
+            var response = await CelullantTransfer(transferDTO);
+            ////call the transfer stellas API
+            //var transferDTOStellas = new StellasTransferDTO()
+            //{
+            //    Amount = cod.CODAmount,
+            //    RetrievalReference = refNo,
+            //    ReceiverAccountNumber = accInfo.AccountNo,
+            //    Narration= $"COD Bank Transfer Payout for {cod.Waybill}",
+            //    ReceiverBankCode = "100332",   
+            //};
 
-            //var response = await CelullantTransfer(transferDTO);
-            //log to register table
+            //await _uow.CompleteAsync();
+            //var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
+            //if (stellasWithdraw.status)
+            //{
+            //   var res = await UpdateCODShipmentOnCallBackStellas(cod);
+            //   result = res;
+            //}
 
-            var codTransferReg = new CODTransferRegister()
-            {
-                Amount = Convert.ToDecimal(transferDTO.Amount),
-                RefNo = transferDTO.RefNo,
-                CustomerCode = shipmentInfo.CustomerCode,
-                AccountNo = accInfo.AccountNo,
-                PaymentStatus = PaymentStatus.Pending,
-                Waybill = transferDTO.Waybill,
-                ClientRefNo = transferDTO.ClientRefNo
-            };
-            _uow.CODTransferRegister.Add(codTransferReg);
-            await _uow.CompleteAsync();
-            var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
-            if (stellasWithdraw.status)
-            {
-               var res = await UpdateCODShipmentOnCallBackStellas(cod);
-               result = res;
-            }
-
-            //log stellas response
-            string json = JsonConvert.SerializeObject(stellasWithdraw);
-            var logEnt = new LogEntry()
-            {
-                CallSite = "",
-                ErrorMessage = stellasWithdraw.message,
-                ErrorMethod = "Stellas Tranfer",
-                ErrorSource = "Stellas API",
-                Username = cod.Waybill,
-                InnerErrorMessage = json,
-                DateTime = DateTime.Now.ToString()
-            };
-            // _uow.LogEntry.Add(codTransferReg);
-            using (GIGLSContext _context = new GIGLSContext())
-            {
-                _context.LogEntry.Add(logEnt);
-                await _context.SaveChangesAsync();
-            }
+            ////log stellas response
+            //string json = JsonConvert.SerializeObject(stellasWithdraw);
+            //var logEnt = new LogEntry()
+            //{
+            //    CallSite = "",
+            //    ErrorMessage = stellasWithdraw.message,
+            //    ErrorMethod = "Stellas Tranfer",
+            //    ErrorSource = "Stellas API",
+            //    Username = cod.Waybill,
+            //    InnerErrorMessage = json,
+            //    DateTime = DateTime.Now.ToString()
+            //};
+            //// _uow.LogEntry.Add(codTransferReg);
+            //using (GIGLSContext _context = new GIGLSContext())
+            //{
+            //    _context.LogEntry.Add(logEnt);
+            //    await _context.SaveChangesAsync();
+            //}
 
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
@@ -1085,6 +1073,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
+            await _uow.CompleteAsync();
             return response;
         }
 

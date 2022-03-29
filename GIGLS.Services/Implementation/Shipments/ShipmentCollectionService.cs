@@ -352,7 +352,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCentreDetail.ServiceCentreId;
                     codRegisterCollectsForASingleWaybill.ServiceCenterCode = getServiceCentreDetail.Code;
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
-                    codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
+                    //codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
                     codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
                     codRegisterCollectsForASingleWaybill.DestinationCountryId = getServiceCentreDetail.CountryId;
                 }
