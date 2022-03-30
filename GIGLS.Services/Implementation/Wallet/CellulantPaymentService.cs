@@ -1043,6 +1043,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         codtransferlog.PaymentStatus = PaymentStatus.Paid;
                         codtransferlog.StatusCode = payload.Payload.Packet.StatusCode;
                         codtransferlog.StatusDescription = payload.Payload.Packet.StatusDescription;
+                        codtransferlog.ReceiverNarration = payload.Payload.Packet.ReceiverNarration;
                     }
 
                     await _uow.CompleteAsync();
@@ -1070,6 +1071,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         codtransferlog.StatusCode = payload.Payload.Packet.StatusCode;
                         codtransferlog.StatusDescription = payload.Payload.Packet.StatusDescription;
+                        codtransferlog.ReceiverNarration = payload.Payload.Packet.ReceiverNarration;
                     }
                 }
             }

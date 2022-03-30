@@ -23,5 +23,6 @@ namespace GIGLS.Core.Domain.Wallet
         public string StatusCode { get; set; }
         [MaxLength(500)]
         public string StatusDescription { get; set; }
+        public string ReceiverNarration { get; set; }
     }
 }
