@@ -174,7 +174,7 @@ namespace GIGL.GIGLS.Core.Domain
         public DateTime? CODStatusDate { get; set; }
         [MaxLength(300)]
         public string CODDescription { get; set; }
-
+        public string blackBookSerialNumber { get; set; }
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable
@@ -288,7 +288,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string ConsolidationId { get; set; }
         public int RequestProcessingCountryId { get; set; }
         public DeliveryType DeliveryType { get; set; }
-
     }
 
 }

@@ -178,7 +178,7 @@ namespace GIGLS.Core.DTO.Shipments
         public CODMobileStatus CODStatus { get; set; }
         public DateTime? CODStatusDate { get; set; }
         public string CODDescription { get; set; }
-        
+        public string blackBookSerialNumber { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
