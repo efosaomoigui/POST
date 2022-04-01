@@ -1210,6 +1210,47 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return result;
         }
+
+
+
+        public async Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload)
+        {
+            string url = ConfigurationManager.AppSettings["CellulantAccGeneration"];
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var result = new GenerateAccountDTO();
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var json = JsonConvert.SerializeObject(payload);
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, data);
+                string message = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<GenerateAccountResponseDTO>(message);
+                    if (res.status == 41)
+                    {
+                        var err = JsonConvert.DeserializeObject<GenerateAccountErrorDTO>(message);
+                        result.Error = err;
+                        result.Succeeded = false;
+                        return result;
+                    }
+                    result.ResponsePayload = res;
+                    result.Succeeded = true;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<GenerateAccountErrorDTO>(message);
+                    result.Error = res;
+                    result.Succeeded = false;
+                    return result;
+                }
+            }
+            return result;
+        }
+
         #endregion
     }
 }
