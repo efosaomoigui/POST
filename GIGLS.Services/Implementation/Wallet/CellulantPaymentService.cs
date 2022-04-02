@@ -793,7 +793,7 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
 
             var refNo = $"TRX-{cod.Waybill}-CLNT";
-            //call the transfer cellulant API
+            ////call the transfer cellulant API
             var transferDTO = new CellulantTransferDTO()
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
@@ -803,44 +803,88 @@ namespace GIGLS.Services.Implementation.Wallet
                 Waybill = cod.Waybill
             };
 
-            var response = await CelullantTransfer(transferDTO);
-            ////call the transfer stellas API
-            //var transferDTOStellas = new StellasTransferDTO()
-            //{
-            //    Amount = cod.CODAmount,
-            //    RetrievalReference = refNo,
-            //    ReceiverAccountNumber = accInfo.AccountNo,
-            //    Narration= $"COD Bank Transfer Payout for {cod.Waybill}",
-            //    ReceiverBankCode = "100332",   
-            //};
+            // var response = await CelullantTransfer(transferDTO);
+            //call the transfer stellas API
 
-            //await _uow.CompleteAsync();
-            //var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
-            //if (stellasWithdraw.status)
-            //{
-            //   var res = await UpdateCODShipmentOnCallBackStellas(cod);
-            //   result = res;
-            //}
+            bool isNumeric = int.TryParse(cod.CODAmount, out int n);
+            if (!isNumeric)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var koboValue = transferDTO.Amount * 100;
+            if (amount <= 0)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var transferDTOStellas = new StellasTransferDTO()
+            {
+                Amount = Convert.ToString(koboValue),
+                RetrievalReference = refNo,
+                ReceiverAccountNumber = accInfo.AccountNo,
+                Narration = $"COD Bank Transfer Payout for {cod.Waybill}",
+                ReceiverBankCode = "200002",
+            };
 
-            ////log stellas response
-            //string json = JsonConvert.SerializeObject(stellasWithdraw);
-            //var logEnt = new LogEntry()
-            //{
-            //    CallSite = "",
-            //    ErrorMessage = stellasWithdraw.message,
-            //    ErrorMethod = "Stellas Tranfer",
-            //    ErrorSource = "Stellas API",
-            //    Username = cod.Waybill,
-            //    InnerErrorMessage = json,
-            //    DateTime = DateTime.Now.ToString()
-            //};
-            //// _uow.LogEntry.Add(codTransferReg);
-            //using (GIGLSContext _context = new GIGLSContext())
-            //{
-            //    _context.LogEntry.Add(logEnt);
-            //    await _context.SaveChangesAsync();
-            //}
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = Convert.ToDecimal(transferDTO.Amount),
+                RefNo = transferDTO.RefNo,
+                CustomerCode = shipmentInfo.CustomerCode,
+                AccountNo = accInfo.AccountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = transferDTO.Waybill,
+                ClientRefNo = transferDTO.ClientRefNo
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
 
+            await _uow.CompleteAsync();
+            var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
+            if (stellasWithdraw.status)
+            {
+                //update codtransferlog table to paid
+               // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
+                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
+                if (codtransferlog != null)
+                {
+                    codtransferlog.StatusCode = stellasWithdraw.status.ToString();
+                    codtransferlog.StatusDescription =stellasWithdraw.message;
+                   // codtransferlog.ReceiverNarration = success;
+                }
+                var res = await UpdateCODShipmentOnCallBackStellas(cod);
+                result = res;
+            }
+            else if (!stellasWithdraw.status)
+            {
+                //update codtransferlog table to paid
+               // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
+                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
+                if (codtransferlog != null)
+                {
+                    codtransferlog.StatusCode = stellasWithdraw.status.ToString();
+                    codtransferlog.StatusDescription = stellasWithdraw.message;
+                   // codtransferlog.ReceiverNarration = err;
+                }
+            }
+
+            //log stellas response
+            string json = JsonConvert.SerializeObject(stellasWithdraw);
+            var logEnt = new LogEntry()
+            {
+                CallSite = "",
+                ErrorMessage = stellasWithdraw.message,
+                ErrorMethod = "Stellas Tranfer",
+                ErrorSource = "Stellas API",
+                Username = cod.Waybill,
+                InnerErrorMessage = json,
+                DateTime = DateTime.Now.ToString()
+            };
+            // _uow.LogEntry.Add(codTransferReg);
+            using (GIGLSContext _context = new GIGLSContext())
+            {
+                _context.LogEntry.Add(logEnt);
+                await _context.SaveChangesAsync();
+            }
+            await _uow.CompleteAsync();
             //3. TODO: deduct charges
             //4. TODO: send email to merchant
             result = true;
@@ -973,7 +1017,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var extraData = new ExtraData();
             extraData.callbackUrl = callback;
             extraData.DestinationAccountName = $"{accInfo.FirstName} {accInfo.LastName}";
-            extraData.DestinationBankCode = $"0423";
+            extraData.DestinationBankCode = $"200002";
             extraData.DestinationBank = $"Stellas";
             extraData.DestinationAccountNo = accInfo.AccountNo;
 
