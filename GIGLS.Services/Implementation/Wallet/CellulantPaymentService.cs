@@ -1070,13 +1070,13 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         shipmentInfo.CODStatusDate = DateTime.Now;
                         shipmentInfo.CODStatus = CODMobileStatus.Paid;
-                        shipmentInfo.CODDescription = $"COD Collected ({CODMobileStatus.Paid.ToString()})";
+                        shipmentInfo.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
                     }
                     var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
                     if (mobileShipment != null)
                     {
                         mobileShipment.CODStatusDate = DateTime.Now;
-                        mobileShipment.CODStatus = CODMobileStatus.Collected;
+                        mobileShipment.CODStatus = CODMobileStatus.Paid;
                         mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
                     }
 
@@ -1132,13 +1132,13 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 shipmentInfo.CODStatusDate = DateTime.Now;
                 shipmentInfo.CODStatus = CODMobileStatus.Paid;
-                shipmentInfo.CODDescription = $"COD Collected ({CODMobileStatus.Paid.ToString()})";
+                shipmentInfo.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
             }
             var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill);
             if (mobileShipment != null)
             {
                 mobileShipment.CODStatusDate = DateTime.Now;
-                mobileShipment.CODStatus = CODMobileStatus.Collected;
+                mobileShipment.CODStatus = CODMobileStatus.Paid;
                 mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
             }
 
