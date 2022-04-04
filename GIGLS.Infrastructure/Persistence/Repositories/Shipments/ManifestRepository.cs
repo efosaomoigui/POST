@@ -82,6 +82,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
-        
+
+
+        public Task<List<AllManifestAndGroupWaybillDTO>> GetManifestsInSuperManifests(string code)
+        {
+            var manifests = _context.Manifest.AsQueryable().Where(s => s.SuperManifestCode == code);
+            try
+            {
+                var manifestDto = from r in manifests
+                                  select new AllManifestAndGroupWaybillDTO()
+                                  {
+                                      ManifestCode = r.ManifestCode,
+                                      DateCreated = r.DateCreated,
+                                      DateModified = r.DateModified,
+                                      SuperManifestCode = r.SuperManifestCode,
+                                      SuperManifestStatus = r.SuperManifestStatus,
+                                      HasSuperManifest = r.HasSuperManifest,
+                                      DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                      ExpressDelivery = r.ExpressDelivery,
+                                      IsBulky = r.IsBulky,
+                                      ManifestType = r.ManifestType,
+                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                      {
+                                          Code = x.Code,
+                                          Name = x.Name
+                                      }).FirstOrDefault(),
+                                      DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                      {
+                                          Code = x.Code,
+                                          Name = x.Name
+                                      }).FirstOrDefault(),
+                                  };
+
+                return Task.FromResult(manifestDto.OrderByDescending(x => x.DateModified).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

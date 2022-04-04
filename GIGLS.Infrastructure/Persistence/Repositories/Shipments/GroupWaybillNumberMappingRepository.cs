@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -23,7 +24,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-            
+
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
@@ -66,7 +67,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var endDate = queryDate.Item2;
 
             var groupwaybillMapping = _context.GroupWaybillNumberMapping.Where(s => s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
-            
+
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
@@ -105,7 +106,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-            
+
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
@@ -174,22 +175,62 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<string>> GetGroupWaybillMappingWaybills(int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-            
+
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId) || serviceCentreIds.Contains(s.OriginalDepartureServiceCentreId));
             }
-            
+
             var groupwaybillMappingDto = groupwaybillMapping.Select(x => x.WaybillNumber).Distinct().ToList();
 
             return Task.FromResult(groupwaybillMappingDto);
         }
+
+        public Task<List<AllManifestAndGroupWaybillDTO>> GetGroupWaybillMappings(string groupCode)
+        {
+            var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
+
+
+            groupwaybillMapping = groupwaybillMapping.Where(s => s.GroupWaybillNumber == groupCode);
+
+            var groupwaybillMappingDto = (from gw in groupwaybillMapping
+                                          select new AllManifestAndGroupWaybillDTO
+                                          {
+                                              GroupWaybillNumber = gw.GroupWaybillNumber,
+                                              WaybillNumber = gw.WaybillNumber,
+                                              IsActive = gw.IsActive,
+                                              DateMapped = gw.DateMapped,
+                                              DateCreated = gw.DateCreated,
+                                              DateModified = gw.DateModified,
+                                              DepartureServiceCentreId = gw.DepartureServiceCentreId,
+                                              DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                              ExpressDelivery = gw.ExpressDelivery,
+                                              IsBulky = gw.IsBulky,
+                                              DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                              {
+                                                  ServiceCentreId = gw.DepartureServiceCentreId,
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault(),
+                                              DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                              {
+                                                  ServiceCentreId = gw.DestinationServiceCentreId,
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault()
+                                          }).ToList();
+
+
+
+            return Task.FromResult(groupwaybillMappingDto.ToList());
+        }
+
     }
 
     public class MovementManifestNumberMappingRepository : Repository<MovementManifestNumberMapping, GIGLSContext>, IMovementManifestNumberMappingRepository
     {
         private GIGLSContext _context;
-        public MovementManifestNumberMappingRepository(GIGLSContext context) 
+        public MovementManifestNumberMappingRepository(GIGLSContext context)
             : base(context)
         {
             _context = context;
@@ -197,34 +238,34 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         public Task<List<MovementManifestNumberMappingDTO>> GetMovmentManifestMappings(int[] serviceCentreIds)
         {
-            var movementmanifestMapping = Context.MovementManifestNumberMapping.AsQueryable(); 
+            var movementmanifestMapping = Context.MovementManifestNumberMapping.AsQueryable();
 
             if (serviceCentreIds.Length > 0)
             {
                 //movementmanifestMapping = movementmanifestMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
-            var movementmanifestMappingDto = from gw in movementmanifestMapping 
-                                         select new MovementManifestNumberMappingDTO
-                                         {
-                                             MovementManifestCode = gw.MovementManifestCode,
-                                             MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                             DateCreated = gw.DateCreated,
-                                             DateModified = gw.DateModified,
-                                             //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                             //{
-                                             //    ServiceCentreId = gw.DepartureServiceCentreId,
-                                             //    Code = x.Code,
-                                             //    Name = x.Name
-                                             //}).FirstOrDefault(),
-                                             //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                             //{
-                                             //    ServiceCentreId = gw.DestinationServiceCentreId,
-                                             //    Code = x.Code,
-                                             //    Name = x.Name
-                                             //}).FirstOrDefault()
-                                         };
-            return Task.FromResult(movementmanifestMappingDto.ToList()); 
+            var movementmanifestMappingDto = from gw in movementmanifestMapping
+                                             select new MovementManifestNumberMappingDTO
+                                             {
+                                                 MovementManifestCode = gw.MovementManifestCode,
+                                                 MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
+                                                 DateCreated = gw.DateCreated,
+                                                 DateModified = gw.DateModified,
+                                                 //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 //{
+                                                 //    ServiceCentreId = gw.DepartureServiceCentreId,
+                                                 //    Code = x.Code,
+                                                 //    Name = x.Name
+                                                 //}).FirstOrDefault(),
+                                                 //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 //{
+                                                 //    ServiceCentreId = gw.DestinationServiceCentreId,
+                                                 //    Code = x.Code,
+                                                 //    Name = x.Name
+                                                 //}).FirstOrDefault()
+                                             };
+            return Task.FromResult(movementmanifestMappingDto.ToList());
         }
 
         public Task<List<MovementManifestNumberMappingDTO>> GetMovmentManifestMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria)
@@ -241,28 +282,28 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //movementmanifestMapping = movementmanifestMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
-            var movementmanifestMappingDto = from gw in movementmanifestMapping 
-                                         select new MovementManifestNumberMappingDTO
-                                         {
-                                             MovementManifestCode = gw.MovementManifestCode,
-                                             MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                             DateCreated = gw.DateCreated,
-                                             DateModified = gw.DateModified,
-                                             //DepartureServiceCentreId = gw.DepartureServiceCentreId,
-                                             //DestinationServiceCentreId = gw.DestinationServiceCentreId,
-                                             //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                             //{
-                                             //    ServiceCentreId = gw.DepartureServiceCentreId,
-                                             //    Code = x.Code,
-                                             //    Name = x.Name
-                                             //}).FirstOrDefault(),
-                                             //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                             //{
-                                             //    ServiceCentreId = gw.DestinationServiceCentreId,
-                                             //    Code = x.Code,
-                                             //    Name = x.Name
-                                             //}).FirstOrDefault()
-                                         };
+            var movementmanifestMappingDto = from gw in movementmanifestMapping
+                                             select new MovementManifestNumberMappingDTO
+                                             {
+                                                 MovementManifestCode = gw.MovementManifestCode,
+                                                 MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
+                                                 DateCreated = gw.DateCreated,
+                                                 DateModified = gw.DateModified,
+                                                 //DepartureServiceCentreId = gw.DepartureServiceCentreId,
+                                                 //DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                                 //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 //{
+                                                 //    ServiceCentreId = gw.DepartureServiceCentreId,
+                                                 //    Code = x.Code,
+                                                 //    Name = x.Name
+                                                 //}).FirstOrDefault(),
+                                                 //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 //{
+                                                 //    ServiceCentreId = gw.DestinationServiceCentreId,
+                                                 //    Code = x.Code,
+                                                 //    Name = x.Name
+                                                 //}).FirstOrDefault()
+                                             };
             return Task.FromResult(movementmanifestMappingDto.OrderByDescending(x => x.DateCreated).ToList());
         }
 
@@ -277,27 +318,27 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
 
             var movementmanifestMappingDto = (from gw in movementmanifestMapping
-                                          select new MovementManifestNumberMappingDTO
-                                          {
-                                              MovementManifestCode = gw.MovementManifestCode,
-                                              MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
-                                              DateCreated = gw.DateCreated,
-                                              DateModified = gw.DateModified,
-                                              //DepartureServiceCentreId = gw.DepartureServiceCentreId,
-                                              //DestinationServiceCentreId = gw.DestinationServiceCentreId,
-                                              //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
-                                              //{
-                                              //    ServiceCentreId = gw.DepartureServiceCentreId,
-                                              //    Code = x.Code,
-                                              //    Name = x.Name
-                                              //}).FirstOrDefault(),
-                                              //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
-                                              //{
-                                              //    ServiceCentreId = gw.DestinationServiceCentreId,
-                                              //    Code = x.Code,
-                                              //    Name = x.Name
-                                              //}).FirstOrDefault()
-                                          }).ToList();
+                                              select new MovementManifestNumberMappingDTO
+                                              {
+                                                  MovementManifestCode = gw.MovementManifestCode,
+                                                  MovementManifestNumberMappingId = gw.MovementManifestNumberMappingId,
+                                                  DateCreated = gw.DateCreated,
+                                                  DateModified = gw.DateModified,
+                                                  //DepartureServiceCentreId = gw.DepartureServiceCentreId,
+                                                  //DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                                  //DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                  //{
+                                                  //    ServiceCentreId = gw.DepartureServiceCentreId,
+                                                  //    Code = x.Code,
+                                                  //    Name = x.Name
+                                                  //}).FirstOrDefault(),
+                                                  //DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                  //{
+                                                  //    ServiceCentreId = gw.DestinationServiceCentreId,
+                                                  //    Code = x.Code,
+                                                  //    Name = x.Name
+                                                  //}).FirstOrDefault()
+                                              }).ToList();
 
 
             //filter
@@ -331,7 +372,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(movementmanifestMappingDto.ToList());
         }
 
-        public Task<List<string>> GetMovmentManifestMappingsManifest(int[] serviceCentreIds)  
+        public Task<List<string>> GetMovmentManifestMappingsManifest(int[] serviceCentreIds)
         {
             var movementmanifestMapping = Context.GroupWaybillNumberMapping.AsQueryable();
 
