@@ -104,6 +104,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
         Task<ReceiverDetailDTO> GetShipmentReceiverDetails(NewFilterOptionsDto filter);
         Task <AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
+        Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

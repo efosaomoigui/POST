@@ -8,6 +8,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.DHL;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -33,6 +34,7 @@ using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -6420,6 +6422,83 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            if (String.IsNullOrEmpty(location.Address))
+            {
+                throw new GenericException("no address provided");
+            }
+            return await GetGoogleAddressDetailsForShipment(location);
+        }
+
+        private async Task<GoogleAddressDTO> GetGoogleAddressDetailsForShipment(GoogleAddressDTO location)
+        {
+            var Response = new GeoCodeAddressResponse();
+            var addressResult = new GoogleAddressDTO();
+            try
+            {
+                var GoogleURL = ConfigurationManager.AppSettings["AddressURL"];
+                var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
+                GoogleApiKey = await Decrypt(GoogleApiKey);
+                var finalURL = $"{GoogleURL}{location.Address}&key={GoogleApiKey}";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    Stream result = httpResponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(result);
+                    string responseFromServer = reader.ReadToEnd();
+                    Response = JsonConvert.DeserializeObject<GeoCodeAddressResponse>(responseFromServer);
+                    addressResult.Address = location.Address;
+                    addressResult.FormattedAddress = Response.results.FirstOrDefault().formatted_address;
+                    addressResult.Latitude = Response.results.FirstOrDefault().geometry.location.lat;
+                    addressResult.Longitude = Response.results.FirstOrDefault().geometry.location.lng;
+
+                    //also get locality
+                    var lga = Response.results.FirstOrDefault().address_components.Where(x => x.types.Contains("administrative_area_level_2")).FirstOrDefault();
+                    if (lga != null)
+                    {
+                        addressResult.Locality = lga.long_name;
+                    }
+
+
+                    //check if request was fufilled
+                    if (Response.status.ToLower() == "request_denied")
+                    {
+                        throw new GenericException($"Geo-Location service unavailable.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            return await Task.FromResult(addressResult);
+        }
+
+        private async Task<string> Decrypt(string cipherText)
+        {
+            string EncryptionKey = "abc123";
+            cipherText = cipherText.Replace(" ", "+");
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Close();
+                    }
+                    cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                }
+            }
+            return cipherText;
         }
 
 
