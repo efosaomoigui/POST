@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -12,6 +13,7 @@ using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.Domain;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
@@ -31,17 +33,20 @@ namespace GIGLS.Services.Implementation.Shipments
         private ICashOnDeliveryAccountService _cashOnDeliveryAccountService;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly ICellulantPaymentService _cellulantPaymentService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
             ICashOnDeliveryAccountService cashOnDeliveryAccountService,
             IShipmentTrackingService shipmentTrackingService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService,
+            ICellulantPaymentService cellulantPaymentService)
         {
             _uow = uow;
             _userService = userService;
             _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
+            _cellulantPaymentService = cellulantPaymentService;
             MapperConfig.Initialize();
         }
 
@@ -1273,6 +1278,29 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        public async Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload)
+        {
+            try
+            {
+                if (payload is null)
+                {
+                    throw new GenericException($"invalid payload");
+                }
+                var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> GetTransferStatus(string craccount)
+        {
+            return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }
 
 

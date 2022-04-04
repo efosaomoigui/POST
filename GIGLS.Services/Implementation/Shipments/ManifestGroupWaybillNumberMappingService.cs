@@ -32,6 +32,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentTrackingService _trackingService;
         private readonly IMessageSenderService _messageSenderService;
 
+
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
             IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService)
@@ -1083,5 +1084,40 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw ex;
             }
         }
+
+        public async Task<List<AllManifestAndGroupWaybillDTO>> GetDetailForAllTypesOfManifest(string code, string type)
+        {
+            var result = new List<AllManifestAndGroupWaybillDTO>();
+            try
+            {
+                if (String.IsNullOrEmpty(code) || String.IsNullOrEmpty(type))
+                {
+                    throw new GenericException($"invalid parameters");
+                }
+                if (type.ToLower() == "supermanifest")
+                {
+                    result = await _uow.Manifest.GetManifestsInSuperManifests(code);
+                    return result;
+                }
+                else if(type.ToLower() == "manifest")
+                {
+                    result = await _uow.ManifestGroupWaybillNumberMapping.GetGroupWaybillNumberMappingsUsingManifestCode(code);
+                    return result;
+                }
+                else if (type.ToLower() == "groupwaybill")
+                {
+                    result = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(code);
+                    return result;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
     }
 }

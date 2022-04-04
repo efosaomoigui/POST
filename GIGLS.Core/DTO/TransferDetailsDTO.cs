@@ -51,4 +51,63 @@ namespace GIGLS.Core.DTO
         [JsonProperty("transferaccount")]
         public string TransferAccount { get; set; }
     }
+
+
+    public class GenerateAccountErrorDTO
+    {
+        [JsonProperty("status_desc")]
+        public string StatusDesc { get; set; }
+
+        [JsonProperty("status")]
+        public int Status { get; set; }
+    }
+
+    public class GenerateAccountResponseDTO
+    {
+        public int status { get; set; }
+        [JsonProperty("accountnumber")]
+        public string Accountnumber { get; set; }
+
+        [JsonProperty("accountname")]
+        public string Accountname { get; set; }
+
+        [JsonProperty("bankname")]
+        public string Bankname { get; set; }
+    }
+
+    public class GenerateAccountDTO
+    {
+        public int status { get; set; }
+        public bool Succeeded { get; set; }
+
+        public GenerateAccountErrorDTO Error { get; set; }
+        public GenerateAccountResponseDTO ResponsePayload { get; set; }
+    }
+
+
+    public class GenerateAccountPayloadDTO
+    {
+        [JsonProperty("clientId")]
+        public string ClientId { get; set; }
+
+        [JsonProperty("uniqueId")]
+        public string UniqueId { get; set; }
+
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("accountReference")]
+        public string AccountReference { get; set; }
+
+        [JsonProperty("merchantId")]
+        public string MerchantId { get; set; }
+
+        [JsonProperty("validity")]
+        public string Validity { get; set; }
+    }
+
+
 }

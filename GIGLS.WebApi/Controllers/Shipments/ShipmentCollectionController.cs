@@ -7,6 +7,7 @@ using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -324,6 +325,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<ShipmentCollectionDTOForArrived>>
                 {
                     Object = shipmentcontacts
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("generateaccountnumbercellulant")]
+        public async Task<IServiceResponse<GenerateAccountDTO>> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GenerateAccountNumberCellulant(payload);
+                return new ServiceResponse<GenerateAccountDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("gettransferstatus")]
+        public async Task<IServiceResponse<bool>> GetTransferStatus([FromUri] string craccount)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetTransferStatus(craccount);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
                 };
             });
         }
