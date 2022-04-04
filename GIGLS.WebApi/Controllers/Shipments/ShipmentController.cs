@@ -1141,5 +1141,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getaddressdetails")]
+        public async Task<IServiceResponse<GoogleAddressDTO>> GetGoogleAddressDetails(GoogleAddressDTO location)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetGoogleAddressDetails(location);
+
+                return new ServiceResponse<GoogleAddressDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
