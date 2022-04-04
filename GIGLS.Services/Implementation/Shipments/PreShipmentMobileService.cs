@@ -511,6 +511,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
                     }
+                    if (preShipmentDTO.IsCashOnDelivery && customer.Rank != Rank.Class)
+                    {
+                        throw new GenericException("Cash On Delivery feature not available for  Basic ecommerce users; please upgrade to Class to have access to Cash On Delivery.");
+                    }
 
                     if (customer.IsEligible != true)
                     {
@@ -799,6 +803,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
 
+                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                if (customer is null)
+                {
+                    throw new GenericException("customer is not an ecommerce user");
+                }
+
+                if (preShipmentDTO.IsCashOnDelivery && customer.Rank != Rank.Class)
+                {
+                    throw new GenericException("Cash On Delivery feature not available for  Basic ecommerce users; please upgrade to Class to have access to Cash On Delivery.");
+                }
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 if (country == null)
                 {
@@ -806,7 +820,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 preShipmentDTO.CountryId = country.CountryId;
 
-                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+  
                 if (customer != null)
                 {
                     if (customer.IsEligible != true)
