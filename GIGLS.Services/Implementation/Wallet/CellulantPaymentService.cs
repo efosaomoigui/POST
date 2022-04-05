@@ -806,11 +806,11 @@ namespace GIGLS.Services.Implementation.Wallet
             // var response = await CelullantTransfer(transferDTO);
             //call the transfer stellas API
 
-            bool isNumeric = int.TryParse(cod.CODAmount, out int n);
-            if (!isNumeric)
-            {
-                throw new GenericException("invalid amount");
-            }
+            //bool isNumeric = int.TryParse(cod.CODAmount, out int n);
+            //if (!isNumeric)
+            //{
+            //    throw new GenericException("invalid amount");
+            //}
             var koboValue = transferDTO.Amount * 100;
             if (amount <= 0)
             {
