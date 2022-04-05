@@ -10,10 +10,12 @@ using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.Enums;
+using GIGLS.Infrastructure;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1732,6 +1734,132 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
             return Task.FromResult(resultDto);
+        }
+
+        public Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
+        {
+            try
+            {
+                int shipmentAge = 48;
+
+                var shipment = _context.Shipment.AsQueryable().Where(x =>
+                                x.DestinationServiceCentreId == serviceCenterId
+                                && x.CompanyType == "Ecommerce"
+                                && x.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
+                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) <= 3);
+
+                var preShipment = _context.PresShipmentMobile.AsQueryable().Where(x =>
+                                x.DestinationServiceCenterId == serviceCenterId
+                                && x.CompanyType == "Ecommerce"
+                                && x.shipmentstatus != "Delivered"
+                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
+                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) >= 3);
+
+                List<DelayedDeliveryDTO> delayedShipmentDto = new List<DelayedDeliveryDTO>();
+
+                if (shipment.Any())
+                {
+                    delayedShipmentDto = shipment.Select(x =>
+                                    new DelayedDeliveryDTO()
+                                    {
+                                        DateCreated = x.DateCreated,
+                                        CODAmount = x.CashOnDeliveryAmount,
+                                        WayBill = x.Waybill,
+                                        CustomerCode = x.CustomerCode,
+                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
+                                    }).ToList();
+                }
+
+                if (preShipment.Any())
+                {
+                    delayedShipmentDto.AddRange(preShipment.Select(x =>
+                                    new DelayedDeliveryDTO()
+                                    {
+                                        DateCreated = x.DateCreated,
+                                        CODAmount = x.CashOnDeliveryAmount,
+                                        WayBill = x.Waybill,
+                                        CustomerCode = x.CustomerCode,
+                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
+                                    }).ToList());
+                }
+                return Task.FromResult(delayedShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to)
+        {
+            try
+            {
+                var shipment = _context.Shipment.AsQueryable();
+
+                List<ShipmentDeliveryReportDTO> recievedShipment = new List<ShipmentDeliveryReportDTO>();
+                List<ShipmentDeliveryReportDTO> deliveredShipment = new List<ShipmentDeliveryReportDTO>();
+                double dif = Math.Abs((from - to).TotalDays) / 30;
+
+                if ((int)dif <= 6)
+                {
+                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId
+                                                    && x.DateModified >= from && x.DateModified <= to);
+
+                    // shipments received
+                    var shipmentRecieved = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+
+                    // shipments delivered
+                    var shipmentDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC);
+
+                    // gathers all shipments received from both Shipment and PreShimentMobile tables
+                    if (shipmentRecieved.Any())
+                    {
+                        recievedShipment = shipmentRecieved.Select(x =>
+                                        new ShipmentDeliveryReportDTO()
+                                        {
+                                            DateCreated = x.DateCreated,
+                                            GrandTotal = x.GrandTotal,
+                                            Status = x.ShipmentScanStatus.ToString(),
+                                            Waybill = x.Waybill
+                                        }).ToList();
+                    }
+
+                    // gathers all shipments delivered from both Shipment and PreShimentMobile tables
+                    if (shipmentDelivered.Any())
+                    {
+                        deliveredShipment = shipmentDelivered.Select(x =>
+                                        new ShipmentDeliveryReportDTO()
+                                        {
+                                            DateCreated = x.DateCreated,
+                                            GrandTotal = x.GrandTotal,
+                                            Status = x.ShipmentScanStatus.ToString(),
+                                            Waybill = x.Waybill
+                                        }).ToList();
+                    }
+
+
+                    int totalReceived = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Count();
+                    int totalDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC).Count();
+
+                    var shipmentReport = new ShipmentDeliveryReportForHubRepsDTO()
+                    {
+                        ShipmentsReceived = recievedShipment,
+                        ShipmentsDelivered = deliveredShipment,
+                        TotalReceived = totalReceived,
+                        TotalDelivered = totalDelivered
+                    };
+
+                    return await Task.FromResult(shipmentReport);
+                }
+                throw new GenericException("Invalid date range, maximum of 6 months date range allowed");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }
