@@ -836,53 +836,58 @@ namespace GIGLS.Services.Implementation.Wallet
                 ClientRefNo = transferDTO.ClientRefNo
             };
             _uow.CODTransferRegister.Add(codTransferReg);
-
             await _uow.CompleteAsync();
-            var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
-            if (stellasWithdraw.status)
-            {
-                //update codtransferlog table to paid
-               // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
-                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
-                if (codtransferlog != null)
-                {
-                    codtransferlog.StatusCode = stellasWithdraw.status.ToString();
-                    codtransferlog.StatusDescription =stellasWithdraw.message;
-                   // codtransferlog.ReceiverNarration = success;
-                }
-                var res = await UpdateCODShipmentOnCallBackStellas(cod);
-                result = res;
-            }
-            else if (!stellasWithdraw.status)
-            {
-                //update codtransferlog table to paid
-               // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
-                var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
-                if (codtransferlog != null)
-                {
-                    codtransferlog.StatusCode = stellasWithdraw.status.ToString();
-                    codtransferlog.StatusDescription = stellasWithdraw.message;
-                   // codtransferlog.ReceiverNarration = err;
-                }
-            }
 
-            //log stellas response
-            string json = JsonConvert.SerializeObject(stellasWithdraw);
-            var logEnt = new LogEntry()
+            //check if payment has been made to this user
+            var codtransferlogs = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == cod.Waybill && x.PaymentStatus == PaymentStatus.Paid).ToList();
+            if (codtransferlogs.Count <= 0)
             {
-                CallSite = "",
-                ErrorMessage = stellasWithdraw.message,
-                ErrorMethod = "Stellas Tranfer",
-                ErrorSource = "Stellas API",
-                Username = cod.Waybill,
-                InnerErrorMessage = json,
-                DateTime = DateTime.Now.ToString()
-            };
-            // _uow.LogEntry.Add(codTransferReg);
-            using (GIGLSContext _context = new GIGLSContext())
-            {
-                _context.LogEntry.Add(logEnt);
-                await _context.SaveChangesAsync();
+                var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
+                if (stellasWithdraw.status)
+                {
+                    //update codtransferlog table to paid
+                    // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
+                    var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
+                    if (codtransferlog != null)
+                    {
+                        codtransferlog.StatusCode = stellasWithdraw.status.ToString();
+                        codtransferlog.StatusDescription = stellasWithdraw.message;
+                        // codtransferlog.ReceiverNarration = success;
+                    }
+                    var res = await UpdateCODShipmentOnCallBackStellas(cod);
+                    result = res;
+                }
+                else if (!stellasWithdraw.status)
+                {
+                    //update codtransferlog table to paid
+                    // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
+                    var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
+                    if (codtransferlog != null)
+                    {
+                        codtransferlog.StatusCode = stellasWithdraw.status.ToString();
+                        codtransferlog.StatusDescription = stellasWithdraw.message;
+                        // codtransferlog.ReceiverNarration = err;
+                    }
+                }
+
+                //log stellas response
+                string json = JsonConvert.SerializeObject(stellasWithdraw);
+                var logEnt = new LogEntry()
+                {
+                    CallSite = "",
+                    ErrorMessage = stellasWithdraw.message,
+                    ErrorMethod = "Stellas Tranfer",
+                    ErrorSource = "Stellas API",
+                    Username = cod.Waybill,
+                    InnerErrorMessage = json,
+                    DateTime = DateTime.Now.ToString()
+                };
+                // _uow.LogEntry.Add(codTransferReg);
+                using (GIGLSContext _context = new GIGLSContext())
+                {
+                    _context.LogEntry.Add(logEnt);
+                    await _context.SaveChangesAsync();
+                } 
             }
             await _uow.CompleteAsync();
             //3. TODO: deduct charges
