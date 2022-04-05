@@ -25,35 +25,56 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
         [AllowAnonymous]
         [HttpPost]
         [Route("validatepayment")]
-        public async Task<IServiceResponse<bool>> VerifyAndValidatePayment(KorapayWebhookDTO webhookData)
+        public async Task<IHttpActionResult> VerifyAndValidatePayment(KorapayWebhookDTO webhookData)
         {
-            return await HandleApiOperationAsync(async () =>
+            var request = Request;
+            var headers = request.Headers;
+            if (headers.Contains("x-korapay-signature"))
             {
-                var response = new ServiceResponse<bool>
+                var key = await _korapayService.Encrypt(webhookData);
+                string token = headers.GetValues("x-korapay-signature").FirstOrDefault();
+                if (token == key)
                 {
-                    Object = true
-                };
-                var request = Request;
-                var headers = request.Headers;
-                if (headers.Contains("x-korapay-signature"))
-                {
-                    var key = await _korapayService.Encrypt(webhookData);
-                    string token = headers.GetValues("x-korapay-signature").FirstOrDefault();
-                    if (token == key)
-                    {
-                        await _korapayService.VerifyAndValidatePaymentForWebhook(webhookData);
-                    }
-                    else
-                    {
-                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
-                    }
+                    await _korapayService.VerifyAndValidatePaymentForWebhook(webhookData);
                 }
                 else
                 {
-                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                    return BadRequest();
                 }
-                return response;
-            });
+            }
+            else
+            {
+                return Unauthorized();
+            }
+            return Ok();
+        }
+
+        //For Test no api key
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("validatepayment2")]
+        public async Task<IHttpActionResult> VerifyAndValidatePayment2(KorapayWebhookDTO webhookData)
+        {
+            var request = Request;
+            var headers = request.Headers;
+            if (headers.Contains("x-korapay-signature"))
+            {
+                var key = await _korapayService.Encrypt(webhookData);
+                string token = headers.GetValues("x-korapay-signature").FirstOrDefault();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await _korapayService.VerifyAndValidatePaymentForWebhook(webhookData);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            else
+            {
+                return Unauthorized();
+            }
+            return Ok();
         }
     }
 }
