@@ -105,6 +105,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ReceiverDetailDTO> GetShipmentReceiverDetails(NewFilterOptionsDto filter);
         Task <AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
         Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
+        Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

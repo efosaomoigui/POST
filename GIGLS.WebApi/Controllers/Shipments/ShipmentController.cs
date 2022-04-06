@@ -1156,5 +1156,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("ecommercereport")]
+        public Task<IServiceResponse<List<EcommerceShipmentSummaryReportDTO>>> GetEcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            return HandleApiOperationAsync(async () =>
+            {
+                var report = await _service.EcommerceShipmentSummaryReport(filter);
+
+                return new ServiceResponse<List<EcommerceShipmentSummaryReportDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
     }
 }

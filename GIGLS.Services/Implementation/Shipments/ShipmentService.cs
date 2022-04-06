@@ -6501,6 +6501,36 @@ namespace GIGLS.Services.Implementation.Shipments
             return cipherText;
         }
 
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            try
+            {
+                var EcommerceReport = new List<EcommerceShipmentSummaryReportDTO>() { };
 
+                var userId = await _userService.GetCurrentUserId();
+
+                var User = await _userService.GetUserById(userId);
+
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
+                if (User.Designation.ToLower() == "ecommerce" || admin)
+                {
+
+                    EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
+
+                    return EcommerceReport;
+
+                }
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
     }
 }
