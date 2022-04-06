@@ -1240,7 +1240,7 @@ namespace GIGLS.Services.Implementation.Wallet
             else
             {
                 result.Status = false;
-                result.Message = "Unable to Confirmed transfer";
+                result.Message = response.StatusDesc;
             }
 
             if (!string.IsNullOrEmpty(codWaybill))
