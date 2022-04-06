@@ -6501,6 +6501,39 @@ namespace GIGLS.Services.Implementation.Shipments
             return cipherText;
         }
 
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
 
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
+
+                var check = await _userService.CheckCurrentUserSystemRole(userId);
+
+                if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
+                {
+
+                    var filterCriteria = new GatewayActivityFilterCriteria { UserId = userId, ServiceCentreId = serviceCenterIds };
+
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(filterCriteria);
+                }
+
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }

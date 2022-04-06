@@ -1734,6 +1734,48 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
+        //Gateway Activity
+        public Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria f_Criteria)
+        {
+
+            //Get all shipment
+            var shipments = _context.Shipment.AsQueryable();
+
+            //filter shipment tracking by scan status nand serviceCentreId
+            var track = _context.ShipmentTracking.Where(x => f_Criteria.ServiceCentreId.Contains(x.ServiceCentreId) && x.Status == "ACC" && x.UserId == f_Criteria.UserId);
+
+            //filter by cancelled shipments
+            shipments = shipments.Where(s => s.IsCancelled == false);
+
+
+            List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+                                                    join tracking in track on shipment.Waybill equals tracking.Waybill
+                                                    select new GatewatActivityDTO()
+                                                    {
+                                                        ManifestNumber = Context.ManifestGroupWaybillNumberMapping.Where(ma => ma.GroupWaybillNumber == (Context.GroupWaybillNumberMapping
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill)).FirstOrDefault().GroupWaybillNumber).FirstOrDefault().ManifestCode,
+                                                        Waybill = shipment.Waybill,
+                                                        DateCreated = shipment.DateCreated,
+                                                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                                                        DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+
+                                                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                                                        DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+                                                        DateTime = tracking.DateTime
+                                                    }).ToList();
+
+
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
     }
 
 }

@@ -1156,5 +1156,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("gatewayactivity")]
+        public async Task<IServiceResponse<List<GatewatActivityDTO>>> GatewayActivity()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GatewayActivity();
+
+                return new ServiceResponse<List<GatewatActivityDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
     }
 }
