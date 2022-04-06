@@ -1223,20 +1223,42 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
         {
-            bool result = false;
+            CODPaymentResponse result = new CODPaymentResponse();
             if (string.IsNullOrEmpty(craccount))
             {
                 throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
             }
             craccount = craccount.Trim();
 
-            result = await CheckISCODPaymentReceived(craccount);
+            var response = await CheckISCODPaymentReceived(craccount);
+            var codWaybill = string.Empty;
+            if (response != null)
+            {
+                var craccountName = response.Transactions.FirstOrDefault().Craccountname;
+                codWaybill = craccountName.Split('_').FirstOrDefault();
+            }
+            if (!string.IsNullOrEmpty(codWaybill))
+            {
+                var codAmount = _uow.Shipment.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
+
+                if (codAmount.HasValue)
+                {
+                    if(codAmount.Value == Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount))
+                    {
+                        result.Status = true;
+                        result.Message = "Transfer Successfully Confirmed";
+                    }else if(codAmount.Value > Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount){
+                        result.Status = false;
+                        result.Message = "Transfer Successfully Confirmed";
+                    }
+                }
+            }
             return result;
         }
 
-        private async Task<bool> CheckISCODPaymentReceived(string craccount)
+        private async Task<CODPaymentStatusResponse> CheckISCODPaymentReceived(string craccount)
         {
-            bool result = false;
+            CODPaymentStatusResponse result = new CODPaymentStatusResponse();
             string content = string.Empty;
             string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
             using (var httpClient = new HttpClient())
@@ -1250,11 +1272,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 var response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 content = await response.Content.ReadAsStringAsync();
-                var status = JObject.Parse(content)["status"].ToString();
+                //var status = JObject.Parse(content)["status"].ToString();
+                var resultResponse = JsonConvert.DeserializeObject<CODPaymentStatusResponse>(content);
 
-                if (!string.IsNullOrEmpty(status))
+                if (!string.IsNullOrEmpty(resultResponse.Status))
                 {
-                    result = status == "00" ? true : result;
+                    result = resultResponse;
                 }
             }
             return result;
