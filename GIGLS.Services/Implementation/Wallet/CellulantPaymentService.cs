@@ -887,7 +887,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     _context.LogEntry.Add(logEnt);
                     await _context.SaveChangesAsync();
-                } 
+                }
             }
             await _uow.CompleteAsync();
             //3. TODO: deduct charges
@@ -895,7 +895,6 @@ namespace GIGLS.Services.Implementation.Wallet
             result = true;
             return result;
         }
-
         #endregion
 
         #region Cellulant Webhook
