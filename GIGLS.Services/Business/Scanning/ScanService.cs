@@ -570,6 +570,10 @@ namespace GIGLS.Services.Business.Scanning
                 //Make movement manifest available to service center
                 if (movementManifest != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
                 {
+
+                    //call this methos to scan the manifest as arrive collation centre
+                    await ScanACCForManifest(scan.WaybillNumber, scan, scanStatus);
+
                     await UpdateMovementManifests(movementManifest.MovementManifestCode);
                     return true;
                 }
@@ -726,7 +730,11 @@ namespace GIGLS.Services.Business.Scanning
         //Scan Arrived Collation Center for Manifest
         private async Task ScanACCForManifest(string manifestCode, ScanDTO scan, string scanStatus)
         {
-            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestCode));
+            var movementCode = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode.Equals(manifestCode));
+
+            var manifestNumber = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode.Equals(movementCode.MovementManifestCode));
+
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestNumber.ManifestNumber));
 
             //foreach (var manifest in listOfManifests)
             //{
@@ -806,6 +814,16 @@ namespace GIGLS.Services.Business.Scanning
                                 }
                             }
 
+
+                            if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+                            {
+                                await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                                {
+                                    DateTime = DateTime.Now,
+                                    Status = scanStatus,
+                                    Waybill = waybill,
+                                }, scan.ShipmentScanStatus);
+                            }
 
                         }
                     }
