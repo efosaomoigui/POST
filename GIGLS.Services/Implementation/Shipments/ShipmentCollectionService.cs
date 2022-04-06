@@ -1298,7 +1298,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> GetTransferStatus(string craccount)
+        public async Task<CODPaymentResponse> GetTransferStatus(string craccount)
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }

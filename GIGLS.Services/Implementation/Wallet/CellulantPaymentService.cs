@@ -887,7 +887,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     _context.LogEntry.Add(logEnt);
                     await _context.SaveChangesAsync();
-                } 
+                }
             }
             await _uow.CompleteAsync();
             //3. TODO: deduct charges
@@ -1016,7 +1016,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-             var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
+            var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();
@@ -1102,7 +1102,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
                     response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
                     response.Results.StatusCode = 188;
-                    response.Results.StatusDescription = "Response was received"; 
+                    response.Results.StatusDescription = "Response was received";
                 }
 
                 else
@@ -1221,7 +1221,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return record.SessionId;
         }
 
-        public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
+        public async Task<CODPaymentResponse> GetCODPaymentReceivedStatus(string craccount)
         {
             CODPaymentResponse result = new CODPaymentResponse();
             if (string.IsNullOrEmpty(craccount))
@@ -1232,24 +1232,33 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var response = await CheckISCODPaymentReceived(craccount);
             var codWaybill = string.Empty;
-            if (response != null)
+            if (response != null && response.Status.Equals("00"))
             {
                 var craccountName = response.Transactions.FirstOrDefault().Craccountname;
                 codWaybill = craccountName.Split('_').FirstOrDefault();
             }
+            else
+            {
+                result.Status = false;
+                result.Message = "Unable to Confirmed transfer";
+            }
+
             if (!string.IsNullOrEmpty(codWaybill))
             {
                 var codAmount = _uow.Shipment.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
 
                 if (codAmount.HasValue)
                 {
-                    if(codAmount.Value == Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount))
+                    var transferedAmount = Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount);
+                    if (transferedAmount == codAmount.Value || transferedAmount > codAmount.Value)
                     {
                         result.Status = true;
                         result.Message = "Transfer Successfully Confirmed";
-                    }else if(codAmount.Value > Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount){
+                    }
+                    else if (transferedAmount < codAmount.Value)
+                    {
                         result.Status = false;
-                        result.Message = "Transfer Successfully Confirmed";
+                        result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmount.Value}. This item can not be released at this time";
                     }
                 }
             }
