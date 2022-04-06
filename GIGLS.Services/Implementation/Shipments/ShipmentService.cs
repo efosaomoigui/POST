@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPlaceLocationService _locationService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
         private readonly ICODWalletService _codWalletService;
+        private readonly IStellasService _stellasService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -90,7 +91,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, 
+            ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, IStellasService stellasService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -118,6 +120,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _locationService = locationService;
             _codWalletService = codWalletService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _stellasService = stellasService;
             MapperConfig.Initialize();
         }
 
@@ -6501,6 +6504,84 @@ namespace GIGLS.Services.Implementation.Shipments
             return cipherText;
         }
 
+
+         public async Task<InternationalCargoManifestDTO> ValidateCODPayment(string waybill)
+        {
+            if (String.IsNullOrEmpty(waybill))
+            {
+                throw new GenericException("invalid request, please provide a waybill number");
+            }
+
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+            if (codtransferlog is null)
+            {
+                throw new GenericException("Payment is being processed; please try again later");
+            }
+
+            var codtransferlogs = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Paid).ToList();
+            if (codtransferlogs.Count > 0)
+            {
+                throw new GenericException($"COD payment has been made for this waybill {waybill}");
+            }
+
+            var latestLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (latestLog != null)
+            {
+                 var refNO = Guid.NewGuid().ToString();
+                var koboValue = shipmentInfo.CashOnDeliveryAmount * 100;
+                var transferDTOStellas = new StellasTransferDTO()
+                {
+                    Amount = Convert.ToString(koboValue),
+                    RetrievalReference = $"{latestLog.RefNo}-{refNO.Take(5)}",
+                    ReceiverAccountNumber = accInfo.AccountNo,
+                    Narration = $"COD Bank Transfer Payout for {shipmentInfo.Waybill}",
+                    ReceiverBankCode = "200002",
+                };
+                var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
+                if (stellasWithdraw.status)
+                {
+                    //update codtransferlog table to paid
+                    // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
+
+                    latestLog.StatusCode = stellasWithdraw.status.ToString();
+                    latestLog.StatusDescription = stellasWithdraw.message;
+                    latestLog.PaymentStatus = PaymentStatus.Paid;
+                    latestLog.ReceiverNarration = transferDTOStellas.RetrievalReference;
+
+                    var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                    if (mobileShipment != null)
+                    {
+                        mobileShipment.CODStatusDate = DateTime.Now;
+                        mobileShipment.CODStatus = CODMobileStatus.Paid;
+                        mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
+                    }
+
+                    shipmentInfo.CODStatusDate = DateTime.Now;
+                    shipmentInfo.CODStatus = CODMobileStatus.Paid;
+                    shipmentInfo.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
+                }
+
+                else if (!stellasWithdraw.status)
+                {
+                    //update codtransferlog table to paid
+                    // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
+                    latestLog.StatusCode = stellasWithdraw.status.ToString();
+                    latestLog.StatusDescription = stellasWithdraw.message;
+                    latestLog.ReceiverNarration = transferDTOStellas.RetrievalReference;
+                }
+            }
+
+        }
 
     }
 }
