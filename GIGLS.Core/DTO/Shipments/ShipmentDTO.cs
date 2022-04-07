@@ -455,6 +455,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ShipmentStatus { get; set; }
         public string ShipmentScanStatus { get; set; }
         public string CompanyName { get; set; }
+        public CODMobileStatus CodStatus { get; set; }
     }
 
     public class NewShipmentDTO
