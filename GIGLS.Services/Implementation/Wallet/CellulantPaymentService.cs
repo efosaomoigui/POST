@@ -1231,7 +1231,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var response = await CheckISCODPaymentReceived(craccount);
             var codWaybill = string.Empty;
-            if (response != null && response.Status.Equals("00"))
+            if (response != null && !string.IsNullOrEmpty( response.Status) && response.Status.Equals("00"))
             {
                 var craccountName = response.Transactions.FirstOrDefault().Craccountname;
                 codWaybill = craccountName.Split('_').FirstOrDefault();
@@ -1240,6 +1240,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 result.Status = false;
                 result.Message = response.StatusDesc;
+                return result;
             }
 
             if (!string.IsNullOrEmpty(codWaybill))
