@@ -78,7 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPlaceLocationService _locationService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
         private readonly ICODWalletService _codWalletService;
-        private readonly IStellasService _stellasService;
+        private readonly ICellulantPaymentService _cellulantService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -92,7 +92,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
             ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, 
-            ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, IStellasService stellasService)
+            ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, ICellulantPaymentService cellulantService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -120,7 +120,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _locationService = locationService;
             _codWalletService = codWalletService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
-            _stellasService = stellasService;
+            _cellulantService = cellulantService;
             MapperConfig.Initialize();
         }
 
@@ -6505,8 +6505,10 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-         public async Task<InternationalCargoManifestDTO> ValidateCODPayment(string waybill)
+         public async Task<string> ValidateCODPayment(string waybill)
         {
+
+            var result = "Payment transaction initiated";
             if (String.IsNullOrEmpty(waybill))
             {
                 throw new GenericException("invalid request, please provide a waybill number");
@@ -6534,53 +6536,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"COD payment has been made for this waybill {waybill}");
             }
 
-            var latestLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-            if (latestLog != null)
+            var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (lastRegisterLog != null)
             {
-                 var refNO = Guid.NewGuid().ToString();
-                var koboValue = shipmentInfo.CashOnDeliveryAmount * 100;
-                var transferDTOStellas = new StellasTransferDTO()
+                var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+                if (codAccShipment != null)
                 {
-                    Amount = Convert.ToString(koboValue),
-                    RetrievalReference = $"{latestLog.RefNo}-{refNO.Take(5)}",
-                    ReceiverAccountNumber = accInfo.AccountNo,
-                    Narration = $"COD Bank Transfer Payout for {shipmentInfo.Waybill}",
-                    ReceiverBankCode = "200002",
-                };
-                var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
-                if (stellasWithdraw.status)
-                {
-                    //update codtransferlog table to paid
-                    // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
+                    var cod = new CODCallBackDTO();
+                    cod.CODAmount = Convert.ToString(shipmentInfo.CashOnDeliveryAmount);
+                    cod.TransactionReference = codAccShipment.PaymentTypeReference;
+                    cod.PaymentStatus = PaymentStatus.Pending.ToString();
+                    cod.Waybill = shipmentInfo.Waybill;
 
-                    latestLog.StatusCode = stellasWithdraw.status.ToString();
-                    latestLog.StatusDescription = stellasWithdraw.message;
-                    latestLog.PaymentStatus = PaymentStatus.Paid;
-                    latestLog.ReceiverNarration = transferDTOStellas.RetrievalReference;
-
-                    var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
-                    if (mobileShipment != null)
-                    {
-                        mobileShipment.CODStatusDate = DateTime.Now;
-                        mobileShipment.CODStatus = CODMobileStatus.Paid;
-                        mobileShipment.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
-                    }
-
-                    shipmentInfo.CODStatusDate = DateTime.Now;
-                    shipmentInfo.CODStatus = CODMobileStatus.Paid;
-                    shipmentInfo.CODDescription = $"COD {CODMobileStatus.Paid.ToString()}";
+                   await _cellulantService.CODCallBack(cod);
                 }
 
-                else if (!stellasWithdraw.status)
-                {
-                    //update codtransferlog table to paid
-                    // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
-                    latestLog.StatusCode = stellasWithdraw.status.ToString();
-                    latestLog.StatusDescription = stellasWithdraw.message;
-                    latestLog.ReceiverNarration = transferDTOStellas.RetrievalReference;
-                }
+                var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                result = recentLog.StatusDescription;
             }
-
+            return result;
         }
 
     }
