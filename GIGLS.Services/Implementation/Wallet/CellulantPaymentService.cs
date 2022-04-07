@@ -1015,7 +1015,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //test
             //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-             var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
+            var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();
@@ -1101,7 +1101,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     response.Results.BeepTransactionID = payload.Payload.Packet.BeepTransactionID;
                     response.Results.PayerTransactionID = payload.Payload.Packet.PayerTransactionID;
                     response.Results.StatusCode = 188;
-                    response.Results.StatusDescription = "Response was received"; 
+                    response.Results.StatusDescription = "Response was received";
                 }
 
                 else
@@ -1220,22 +1220,53 @@ namespace GIGLS.Services.Implementation.Wallet
             return record.SessionId;
         }
 
-        public async Task<bool> GetCODPaymentReceivedStatus(string craccount)
+        public async Task<CODPaymentResponse> GetCODPaymentReceivedStatus(string craccount)
         {
-            bool result = false;
+            CODPaymentResponse result = new CODPaymentResponse();
             if (string.IsNullOrEmpty(craccount))
             {
                 throw new GenericException("CR Account cannot be null or empty", $"{(int)HttpStatusCode.BadRequest}");
             }
             craccount = craccount.Trim();
 
-            result = await CheckISCODPaymentReceived(craccount);
+            var response = await CheckISCODPaymentReceived(craccount);
+            var codWaybill = string.Empty;
+            if (response != null && response.Status.Equals("00"))
+            {
+                var craccountName = response.Transactions.FirstOrDefault().Craccountname;
+                codWaybill = craccountName.Split('_').FirstOrDefault();
+            }
+            else
+            {
+                result.Status = false;
+                result.Message = response.StatusDesc;
+            }
+
+            if (!string.IsNullOrEmpty(codWaybill))
+            {
+                var codAmount = _uow.Shipment.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
+
+                if (codAmount.HasValue)
+                {
+                    var transferedAmount = Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount);
+                    if (transferedAmount == codAmount.Value || transferedAmount > codAmount.Value)
+                    {
+                        result.Status = true;
+                        result.Message = "Transfer Successfully Confirmed";
+                    }
+                    else if (transferedAmount < codAmount.Value)
+                    {
+                        result.Status = false;
+                        result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmount.Value}. This item can not be released at this time";
+                    }
+                }
+            }
             return result;
         }
 
-        private async Task<bool> CheckISCODPaymentReceived(string craccount)
+        private async Task<CODPaymentStatusResponse> CheckISCODPaymentReceived(string craccount)
         {
-            bool result = false;
+            CODPaymentStatusResponse result = new CODPaymentStatusResponse();
             string content = string.Empty;
             string url = ConfigurationManager.AppSettings["CellulantTransferUrl"];
             using (var httpClient = new HttpClient())
@@ -1249,11 +1280,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 var response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 content = await response.Content.ReadAsStringAsync();
-                var status = JObject.Parse(content)["status"].ToString();
+                //var status = JObject.Parse(content)["status"].ToString();
+                var resultResponse = JsonConvert.DeserializeObject<CODPaymentStatusResponse>(content);
 
-                if (!string.IsNullOrEmpty(status))
+                if (!string.IsNullOrEmpty(resultResponse.Status))
                 {
-                    result = status == "00" ? true : result;
+                    result = resultResponse;
                 }
             }
             return result;
