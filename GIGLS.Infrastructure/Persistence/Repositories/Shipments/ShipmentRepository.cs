@@ -16,6 +16,7 @@ using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -1737,6 +1738,176 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
+        public Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
+        {
+            try
+            {
+                int shipmentAge = 48;
+
+                var shipment = _context.Shipment.AsQueryable().Where(x =>
+                                x.DestinationServiceCentreId == serviceCenterId
+                                && x.CompanyType == "Ecommerce"
+                                && x.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
+                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) <= 3);
+
+                var preShipment = _context.PresShipmentMobile.AsQueryable().Where(x =>
+                                x.DestinationServiceCenterId == serviceCenterId
+                                && x.CompanyType == "Ecommerce"
+                                && x.shipmentstatus != "Delivered"
+                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
+                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) >= 3);
+
+                List<DelayedDeliveryDTO> delayedShipmentDto = new List<DelayedDeliveryDTO>();
+
+                if (shipment.Any())
+                {
+                    delayedShipmentDto = shipment.Select(x =>
+                                    new DelayedDeliveryDTO()
+                                    {
+                                        DateCreated = x.DateCreated,
+                                        CODAmount = x.CashOnDeliveryAmount,
+                                        WayBill = x.Waybill,
+                                        CustomerCode = x.CustomerCode,
+                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
+                                    }).ToList();
+                }
+
+                if (preShipment.Any())
+                {
+                    delayedShipmentDto.AddRange(preShipment.Select(x =>
+                                    new DelayedDeliveryDTO()
+                                    {
+                                        DateCreated = x.DateCreated,
+                                        CODAmount = x.CashOnDeliveryAmount,
+                                        WayBill = x.Waybill,
+                                        CustomerCode = x.CustomerCode,
+                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
+                                    }).ToList());
+                }
+                return Task.FromResult(delayedShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to)
+        {
+            try
+            {
+                var shipment = _context.Shipment.AsQueryable();
+
+                List<ShipmentDeliveryReportDTO> recievedShipment = new List<ShipmentDeliveryReportDTO>();
+                List<ShipmentDeliveryReportDTO> deliveredShipment = new List<ShipmentDeliveryReportDTO>();
+                double dif = Math.Abs((from - to).TotalDays) / 30;
+
+                if ((int)dif <= 6)
+                {
+                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId
+                                                    && x.DateModified >= from && x.DateModified <= to);
+
+                    // shipments received
+                    var shipmentRecieved = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+
+                    // shipments delivered
+                    var shipmentDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC);
+
+                    // gathers all shipments received from both Shipment and PreShimentMobile tables
+                    if (shipmentRecieved.Any())
+                    {
+                        recievedShipment = shipmentRecieved.Select(x =>
+                                        new ShipmentDeliveryReportDTO()
+                                        {
+                                            DateCreated = x.DateCreated,
+                                            GrandTotal = x.GrandTotal,
+                                            Status = x.ShipmentScanStatus.ToString(),
+                                            Waybill = x.Waybill
+                                        }).ToList();
+                    }
+
+                    // gathers all shipments delivered from both Shipment and PreShimentMobile tables
+                    if (shipmentDelivered.Any())
+                    {
+                        deliveredShipment = shipmentDelivered.Select(x =>
+                                        new ShipmentDeliveryReportDTO()
+                                        {
+                                            DateCreated = x.DateCreated,
+                                            GrandTotal = x.GrandTotal,
+                                            Status = x.ShipmentScanStatus.ToString(),
+                                            Waybill = x.Waybill
+                                        }).ToList();
+                    }
+
+
+                    int totalReceived = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Count();
+                    int totalDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC).Count();
+
+                    var shipmentReport = new ShipmentDeliveryReportForHubRepsDTO()
+                    {
+                        ShipmentsReceived = recievedShipment,
+                        ShipmentsDelivered = deliveredShipment,
+                        TotalReceived = totalReceived,
+                        TotalDelivered = totalDelivered
+                    };
+
+                    return await Task.FromResult(shipmentReport);
+                }
+                throw new GenericException("Invalid date range, maximum of 6 months date range allowed");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Gateway Activity
+        public Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria f_Criteria)
+        {
+
+            //Get all shipment
+            var shipments = _context.Shipment.AsQueryable();
+
+            //filter shipment tracking by scan status nand serviceCentreId
+            var track = _context.ShipmentTracking.Where(x => f_Criteria.ServiceCentreId.Contains(x.ServiceCentreId) && x.Status == "ACC" && x.UserId == f_Criteria.UserId);
+
+            //filter by cancelled shipments
+            shipments = shipments.Where(s => s.IsCancelled == false);
+
+
+            List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+                                                    join tracking in track on shipment.Waybill equals tracking.Waybill
+                                                    select new GatewatActivityDTO()
+                                                    {
+                                                        ManifestNumber = Context.ManifestGroupWaybillNumberMapping.Where(ma => ma.GroupWaybillNumber == (Context.GroupWaybillNumberMapping
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill)).FirstOrDefault().GroupWaybillNumber).FirstOrDefault().ManifestCode,
+                                                        Waybill = shipment.Waybill,
+                                                        DateCreated = shipment.DateCreated,
+                                                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                                                        DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+
+                                                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                                                        DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+                                                        DateTime = tracking.DateTime
+                                                    }).ToList();
+
+
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+
         public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceSummaryReport(EcommerceShipmentSummaryFilterCriteria filterCriteria)
         {
 
@@ -1828,7 +1999,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         }
     }
-
 }
 
 

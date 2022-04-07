@@ -94,5 +94,6 @@ namespace GIGLS.Core.IServices.User
         Task<ServiceCentreDTO> GetInternationalOutBoundServiceCentre();
         Task<UserDTO> GetEmployeeUserByEmail(string email);
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email);
+        Task<bool> CheckCurrentUserSystemRole(string currentUserId);
     }
 }

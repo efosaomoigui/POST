@@ -6501,6 +6501,83 @@ namespace GIGLS.Services.Implementation.Shipments
             return cipherText;
         }
 
+        public async Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId)
+        {
+            try
+            {
+                var shipment = await _uow.Shipment.GetDelayedDeliveryShipment(serviceCentreId);
+                if (shipment == null)
+                {
+                    throw new GenericException($"Service center id {serviceCentreId} not exist");
+                }
+                return shipment;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(DateTime from, DateTime to)
+        {
+            try
+            {
+                if (from > to)
+                {
+                    throw new GenericException("Start date should not be greater than end date");
+                }
+                var userServiceCentres = await _userService.GetCurrentServiceCenter();
+
+                var userServiceCentre = userServiceCentres.FirstOrDefault();
+                if (userServiceCentre.IsHUB == true)
+                {
+                    var shipment = await _uow.Shipment.GetHubShipmentDeliveryReport(userServiceCentre.ServiceCentreId, from, to);
+                    return shipment;
+                }
+
+                throw new GenericException("You are not a hub representative");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
+
+                var check = await _userService.CheckCurrentUserSystemRole(userId);
+
+                if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
+                {
+
+                    var filterCriteria = new GatewayActivityFilterCriteria { UserId = userId, ServiceCentreId = serviceCenterIds };
+
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(filterCriteria);
+                }
+
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
         {
             try
