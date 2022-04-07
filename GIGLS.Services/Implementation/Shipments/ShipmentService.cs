@@ -6542,5 +6542,72 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
+
+                var check = await _userService.CheckCurrentUserSystemRole(userId);
+
+                if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
+                {
+
+                    var filterCriteria = new GatewayActivityFilterCriteria { UserId = userId, ServiceCentreId = serviceCenterIds };
+
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(filterCriteria);
+                }
+
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            try
+            {
+                var EcommerceReport = new List<EcommerceShipmentSummaryReportDTO>() { };
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var User = await _userService.GetUserById(userId);
+
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
+                if (User.Designation.ToLower() == "ecommerce" || admin)
+                {
+
+                    EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
+
+                    return EcommerceReport;
+
+                }
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
     }
 }

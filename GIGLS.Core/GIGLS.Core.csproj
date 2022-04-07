@@ -390,6 +390,8 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\GatewatActivityDTO.cs" />
+    <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
@@ -480,6 +482,8 @@
     <Compile Include="DTO\Shipments\CreatePreShipmentMobileDTO.cs" />
     <Compile Include="DTO\Shipments\CreateShipmentNodeDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryFilterCriteria.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryReportDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
     <Compile Include="DTO\Shipments\UnidentifiedItemsForInternationalShippingDTO.cs" />

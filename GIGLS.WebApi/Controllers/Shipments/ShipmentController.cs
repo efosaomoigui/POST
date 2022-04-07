@@ -1185,5 +1185,37 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("gatewayactivity")]
+        public async Task<IServiceResponse<List<GatewatActivityDTO>>> GatewayActivity()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GatewayActivity();
+
+                return new ServiceResponse<List<GatewatActivityDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("ecommercereport")]
+        public Task<IServiceResponse<List<EcommerceShipmentSummaryReportDTO>>> GetEcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            return HandleApiOperationAsync(async () =>
+            {
+                var report = await _service.EcommerceShipmentSummaryReport(filter);
+
+                return new ServiceResponse<List<EcommerceShipmentSummaryReportDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
     }
 }

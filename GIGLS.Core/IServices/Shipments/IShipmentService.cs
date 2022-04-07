@@ -107,6 +107,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
         Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(DateTime from, DateTime to);
         Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId);
+        Task<List<GatewatActivityDTO>> GatewayActivity();
+        Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
     }
 
     public interface IMagayaService : IServiceDependencyMarker

@@ -41,6 +41,8 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<InvoiceViewDTO>> GetGoFasterShipmentsByServiceCentre(NewFilterOptionsDto filterOptionsDto);
         Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId);
         Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to);
+        Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria filterCriteria);
+        Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceSummaryReport(EcommerceShipmentSummaryFilterCriteria filterCriteria);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  

@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -18,6 +19,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -1862,8 +1864,141 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-    }
+        //Gateway Activity
+        public Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria f_Criteria)
+        {
 
+            //Get all shipment
+            var shipments = _context.Shipment.AsQueryable();
+
+            //filter shipment tracking by scan status nand serviceCentreId
+            var track = _context.ShipmentTracking.Where(x => f_Criteria.ServiceCentreId.Contains(x.ServiceCentreId) && x.Status == "ACC" && x.UserId == f_Criteria.UserId);
+
+            //filter by cancelled shipments
+            shipments = shipments.Where(s => s.IsCancelled == false);
+
+
+            List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+                                                    join tracking in track on shipment.Waybill equals tracking.Waybill
+                                                    select new GatewatActivityDTO()
+                                                    {
+                                                        ManifestNumber = Context.ManifestGroupWaybillNumberMapping.Where(ma => ma.GroupWaybillNumber == (Context.GroupWaybillNumberMapping
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill)).FirstOrDefault().GroupWaybillNumber).FirstOrDefault().ManifestCode,
+                                                        Waybill = shipment.Waybill,
+                                                        DateCreated = shipment.DateCreated,
+                                                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                                                        DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+
+                                                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                                                        DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Code = x.Code,
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+                                                        DateTime = tracking.DateTime
+                                                    }).ToList();
+
+
+
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceSummaryReport(EcommerceShipmentSummaryFilterCriteria filterCriteria)
+        {
+
+            var queryDate = filterCriteria.getStartDateAndEndDateForEcommerceReport();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            var Mobile = "GIGGO";
+            var Agility = "Agility";
+            filterCriteria.CompanyType = "Ecommerce";
+
+            //to check for months apart
+            //int monthsApart = Math.Abs(12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month);
+
+            //to check for days apart
+            int daysApart = (endDate.Date - startDate.Date).Days;
+
+
+            if (daysApart > 15)
+            {
+                throw new GenericException("Date range error", $"{(int)HttpStatusCode.BadRequest}");
+
+            }
+
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false
+                               && s.CompanyType == filterCriteria.CompanyType && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            var mobiles = _context.PresShipmentMobile.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false
+                              && s.CompanyType == filterCriteria.CompanyType && s.IsFromAgility == false && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            var companys = _context.Company.AsQueryable().Where(s => s.CompanyType == CompanyType.Ecommerce);
+
+            List<EcommerceShipmentSummaryReportDTO> TotalEcommerceShipment = (from Shipment in shipments
+                                                                              join company in companys on Shipment.CustomerCode equals company.CustomerCode
+                                                                              select new EcommerceShipmentSummaryReportDTO()
+                                                                              {
+                                                                                  Waybill = Shipment.Waybill,
+                                                                                  CustomerDetails = new CustomerDTO
+                                                                                  {
+                                                                                      CustomerCode = company.CustomerCode,
+                                                                                      Name = company.Name
+                                                                                  },
+                                                                                  DepartureServiceCentre = Context.ServiceCentre.Where(ser => ser.ServiceCentreId == Shipment.DepartureServiceCentreId).Select(n => new ServiceCentreDTO
+                                                                                  {
+                                                                                      Name = n.Name
+                                                                                  }).FirstOrDefault(),
+                                                                                  DestinationServiceCentre = Context.ServiceCentre.Where(ser => ser.ServiceCentreId == Shipment.DestinationServiceCentreId).Select(n => new ServiceCentreDTO
+                                                                                  {
+                                                                                      Name = n.Name
+                                                                                  }).FirstOrDefault(),
+                                                                                  CreationSource = Shipment.IsFromMobile ? Mobile : Agility,
+                                                                                  CurrentStatus = Context.ScanStatus.Where(sca => sca.Code == (Context.ShipmentTracking
+                                                                                  .Where(st => st.Waybill == Shipment.Waybill).OrderByDescending(st => st.DateCreated).FirstOrDefault().Status)).FirstOrDefault().Reason
+                                                                              }).ToList();
+            TotalEcommerceShipment.AddRange(mobiles.Select(x =>
+                                    new EcommerceShipmentSummaryReportDTO()
+                                    {
+                                        Waybill = x.Waybill,
+                                        CustomerDetails = Context.Company.Where(c => c.CustomerCode == x.CustomerCode).Select(n => new CustomerDTO
+                                        {
+                                            CustomerCode = n.CustomerCode,
+                                            Name = n.Name
+                                        }).FirstOrDefault(),
+                                        DepartureServiceCentre = Context.Station.Where(c => c.StationId == x.SenderStationId).Select(n => new ServiceCentreDTO
+                                        {
+                                            Name = n.StationName
+                                        }).FirstOrDefault(),
+                                        DestinationServiceCentre = Context.Station.Where(c => c.StationId == x.ReceiverStationId).Select(n => new ServiceCentreDTO
+                                        {
+                                            Name = n.StationName
+                                        }).FirstOrDefault(),
+                                        CreationSource = x.IsFromAgility ? Agility : Mobile,
+                                        CurrentStatus = Context.MobileScanStatus.Where(mob => mob.Code == (Context.MobileShipmentTracking
+                                        .Where(mobt => mobt.Waybill == x.Waybill).OrderByDescending(mobt => mobt.DateCreated).FirstOrDefault().Status)).FirstOrDefault().Reason
+                                    }).ToList());
+
+            if (filterCriteria.IsMobile)
+            {
+                TotalEcommerceShipment = TotalEcommerceShipment.Where(x => x.CreationSource == Mobile).ToList();
+            }
+
+            if (filterCriteria.IsAgility)
+            {
+                TotalEcommerceShipment = TotalEcommerceShipment.Where(x => x.CreationSource == Agility).ToList();
+            }
+
+
+            return await Task.FromResult(TotalEcommerceShipment.OrderByDescending(x => x.DateCreated).ToList());
+
+
+        }
+    }
 }
 
 

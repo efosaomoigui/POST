@@ -1542,5 +1542,15 @@ namespace GIGLS.Services.Implementation.User
             email = string.IsNullOrEmpty(email) ? throw new GenericException("Email is empty or Not Valid!") : email.Trim();
             return  _unitOfWork.User.GetPartnerUsersByEmail2(email);
         }
+
+        //Check user role
+        public async Task<bool> CheckCurrentUserSystemRole(string currentUserId)
+        {
+            var currentUser = await GetUserById(currentUserId);
+
+            if (currentUser.SystemUserRole == "Gateway Supervisor")
+                return true;
+            return false;
+        }
     }
 }
