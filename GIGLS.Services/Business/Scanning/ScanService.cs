@@ -730,11 +730,25 @@ namespace GIGLS.Services.Business.Scanning
         //Scan Arrived Collation Center for Manifest
         private async Task ScanACCForManifest(string manifestCode, ScanDTO scan, string scanStatus)
         {
+            string code = string.Empty;
             var movementCode = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode.Equals(manifestCode));
+            if (movementCode is null)
+            {
+                var manifestInfo = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestCode));
+                if (manifestCode != null)
+                {
+                    code = manifestInfo.ManifestCode;
+                }
+            }
+            else
+            {
+                var manifestNumber = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode.Equals(movementCode.MovementManifestCode));
+                code = manifestNumber.ManifestNumber;
+            }
 
-            var manifestNumber = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode.Equals(movementCode.MovementManifestCode));
+           
 
-            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestNumber.ManifestNumber));
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(code));
 
             //foreach (var manifest in listOfManifests)
             //{
