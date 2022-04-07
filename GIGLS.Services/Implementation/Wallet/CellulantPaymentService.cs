@@ -895,7 +895,6 @@ namespace GIGLS.Services.Implementation.Wallet
             result = true;
             return result;
         }
-
         #endregion
 
         #region Cellulant Webhook

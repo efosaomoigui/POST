@@ -619,4 +619,29 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
     }
 
+    public class DelayedDeliveryDTO
+    {
+        public string WayBill { get; set; }
+        public string CustomerCode { get; set; }
+        public string CustomerCompanyName { get; set; }
+        public string AgeOfTheShipment { get; set; }
+        public decimal? CODAmount { get; set; }
+        public DateTime DateCreated { get; set; }
+    }
+
+    public class ShipmentDeliveryReportForHubRepsDTO
+    {
+        public List<ShipmentDeliveryReportDTO> ShipmentsReceived { get; set; }
+        public List<ShipmentDeliveryReportDTO> ShipmentsDelivered { get; set; }
+        public int TotalReceived { get; set; }
+        public int TotalDelivered { get; set; }
+    }
+
+    public class ShipmentDeliveryReportDTO
+    {
+        public string Waybill { get; set; }
+        public string Status { get; set; }
+        public decimal GrandTotal { get; set; }
+        public DateTime DateCreated { get; set; }
+    }
 }

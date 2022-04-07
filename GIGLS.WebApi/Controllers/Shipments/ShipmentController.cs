@@ -1156,5 +1156,34 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getdelayeddelivery/{serviceCentreId}")]
+        public Task<IServiceResponse<List<DelayedDeliveryDTO>>> GetDelayedDelivery(int serviceCentreId)
+        {
+            return HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetEcommerceDelayedDeliveryShipment(serviceCentreId);
+                return new ServiceResponse<List<DelayedDeliveryDTO>>
+                {
+                    Object = await Task.FromResult(result)
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("gethubshipmentdeliveryreport/{from}/{to}")]
+        public async Task<IServiceResponse<ShipmentDeliveryReportForHubRepsDTO>> GetHupShipmentDeliveryReport(DateTime from, DateTime to)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetHubShipmentDeliveryReport(from, to);
+                return new ServiceResponse<ShipmentDeliveryReportForHubRepsDTO>()
+                {
+                    Object = await Task.FromResult(result)
+                };
+            });
+        }
     }
 }
