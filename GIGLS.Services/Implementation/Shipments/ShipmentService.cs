@@ -6504,16 +6504,6 @@ namespace GIGLS.Services.Implementation.Shipments
             return cipherText;
         }
 
-
-         public async Task<string> ValidateCODPayment(string waybill)
-        {
-
-            var result = "Payment transaction initiated";
-            if (String.IsNullOrEmpty(waybill))
-            {
-                throw new GenericException("invalid request, please provide a waybill number");
-            }
-
         public async Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId)
         {
             try
@@ -6556,18 +6546,16 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //Gateway Activity
-        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+
+        public async Task<string> ValidateCODPayment(string waybill)
         {
-            try
+
+            var result = "Payment transaction initiated";
+            if (String.IsNullOrEmpty(waybill))
             {
-                var dashboardDTO = new List<GatewatActivityDTO>() { };
+                throw new GenericException("invalid request, please provide a waybill number");
+            }
 
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-
-                var userId = await _userService.GetCurrentUserId();
-
-                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
             if (shipmentInfo == null)
             {
@@ -6611,7 +6599,18 @@ namespace GIGLS.Services.Implementation.Shipments
             return result;
         }
 
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
 
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
 
                 var check = await _userService.CheckCurrentUserSystemRole(userId);
 

@@ -619,6 +619,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
     }
 
+
     public class DelayedDeliveryDTO
     {
         public string WayBill { get; set; }
@@ -644,4 +645,5 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal GrandTotal { get; set; }
         public DateTime DateCreated { get; set; }
     }
+
 }
