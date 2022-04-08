@@ -1217,5 +1217,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("confirmcodtransferstatus/{waybill}")]
+        public async Task<IServiceResponse<string>> ConfirmCODTransferStatus(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ValidateCODPayment(waybill);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

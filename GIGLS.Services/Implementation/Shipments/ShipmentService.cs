@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPlaceLocationService _locationService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
         private readonly ICODWalletService _codWalletService;
+        private readonly ICellulantPaymentService _cellulantService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -90,7 +91,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, 
+            ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, ICellulantPaymentService cellulantService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -118,6 +120,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _locationService = locationService;
             _codWalletService = codWalletService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _cellulantService = cellulantService;
             MapperConfig.Initialize();
         }
 
@@ -6541,6 +6544,59 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        public async Task<string> ValidateCODPayment(string waybill)
+        {
+
+            var result = "Payment transaction initiated";
+            if (String.IsNullOrEmpty(waybill))
+            {
+                throw new GenericException("invalid request, please provide a waybill number");
+            }
+
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipmentInfo == null)
+            {
+                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+            if (codtransferlog is null)
+            {
+                throw new GenericException("Payment is being processed; please try again later");
+            }
+
+            var codtransferlogs = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Paid).ToList();
+            if (codtransferlogs.Count > 0)
+            {
+                throw new GenericException($"COD payment has been made for this waybill {waybill}");
+            }
+
+            var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (lastRegisterLog != null)
+            {
+                var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+                if (codAccShipment != null)
+                {
+                    var cod = new CODCallBackDTO();
+                    cod.CODAmount = Convert.ToString(shipmentInfo.CashOnDeliveryAmount);
+                    cod.TransactionReference = codAccShipment.PaymentTypeReference;
+                    cod.PaymentStatus = PaymentStatus.Pending.ToString();
+                    cod.Waybill = shipmentInfo.Waybill;
+
+                   await _cellulantService.CODCallBack(cod);
+                }
+
+                var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                result = recentLog.StatusDescription;
+            }
+            return result;
         }
 
         //Gateway Activity

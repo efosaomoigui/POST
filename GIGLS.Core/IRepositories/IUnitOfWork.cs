@@ -222,6 +222,7 @@ namespace GIGLS.Core
         IBillsPaymentManagementRepository BillsPaymentManagement { get; set; }
         ICODWalletRepository CODWallet { get; set; }
         ICODTransferRegisterRepository CODTransferRegister { get; set; }
+        ICODTransferLogRepository CODTransferLog { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

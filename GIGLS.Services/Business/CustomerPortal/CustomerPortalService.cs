@@ -74,6 +74,7 @@ using Newtonsoft.Json;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
 using System.Text;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -4724,8 +4725,26 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 await Task.Delay(15000);
                 transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                return await _codWalletService.StellasWithdrawal(withrawObj);
+                var res = await _codWalletService.StellasWithdrawal(withrawObj);
+
+                //log to transferlog table
+                var transferLog = new CODTransferLog()
+                {
+                    CustomerCode = codWallet.CustomerCode,
+                    Amount = amount,
+                    OriginatingBankAccount = $"{codWallet.FirstName} {codWallet.LastName}",
+                    OriginatingBankName = "Stellas",
+                    DestinationBankAccount = transferDTO.ReceiverAccountNumber,
+                    DestinationBankName = transferDTO.ReceiverBankName,
+                    StatusCode = res.status.ToString(),
+                    StatusDescription = res.message
+                };
+                _uow.CODTransferLog.Add(transferLog);
+                await _uow.CompleteAsync();
+
+                return res;
             }
+
             return withdrawResponse;
         }
 
