@@ -39,7 +39,7 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<List<ShipmentCollectionForContactDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria);
         Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria);
         Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload);
-        Task<bool> GetTransferStatus(string craccount);
+        Task<CODPaymentResponse> GetTransferStatus(string craccount);
 
     }
 }

@@ -6514,6 +6514,60 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("invalid request, please provide a waybill number");
             }
 
+        public async Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId)
+        {
+            try
+            {
+                var shipment = await _uow.Shipment.GetDelayedDeliveryShipment(serviceCentreId);
+                if (shipment == null)
+                {
+                    throw new GenericException($"Service center id {serviceCentreId} not exist");
+                }
+                return shipment;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(DateTime from, DateTime to)
+        {
+            try
+            {
+                if (from > to)
+                {
+                    throw new GenericException("Start date should not be greater than end date");
+                }
+                var userServiceCentres = await _userService.GetCurrentServiceCenter();
+
+                var userServiceCentre = userServiceCentres.FirstOrDefault();
+                if (userServiceCentre.IsHUB == true)
+                {
+                    var shipment = await _uow.Shipment.GetHubShipmentDeliveryReport(userServiceCentre.ServiceCentreId, from, to);
+                    return shipment;
+                }
+
+                throw new GenericException("You are not a hub representative");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
             if (shipmentInfo == null)
             {
@@ -6559,5 +6613,58 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
 
+                var check = await _userService.CheckCurrentUserSystemRole(userId);
+
+                if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
+                {
+
+                    var filterCriteria = new GatewayActivityFilterCriteria { UserId = userId, ServiceCentreId = serviceCenterIds };
+
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(filterCriteria);
+                }
+
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            try
+            {
+                var EcommerceReport = new List<EcommerceShipmentSummaryReportDTO>() { };
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var User = await _userService.GetUserById(userId);
+
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
+                if (User.Designation.ToLower() == "ecommerce" || admin)
+                {
+
+                    EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
+
+                    return EcommerceReport;
+
+                }
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
     }
 }

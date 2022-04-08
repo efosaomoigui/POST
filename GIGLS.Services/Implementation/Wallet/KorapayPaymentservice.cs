@@ -94,9 +94,9 @@ namespace GIGLS.Services.Implementation.Wallet
                         return result;
 
                     //2. if the payment successful
-                    if (verifyResult.Data.TransactionStatus.Equals("success") && !paymentLog.IsWaybillSettled)
+                    if (verifyResult.Data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
                     {
-                        var checkAmount = ValidatePaymentValue(paymentLog.Amount,Convert.ToDecimal(verifyResult.Data.Amount));
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, Convert.ToDecimal(verifyResult.Data.Amount));
 
                         if (checkAmount)
                         {
@@ -121,7 +121,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     paymentLog.TransactionStatus = verifyResult?.Data?.Status;
-                    paymentLog.TransactionResponse = verifyResult?.Data?.TransactionStatus;
+                    paymentLog.TransactionResponse = verifyResult?.Data?.Status;
                     result = true;
                     await _uow.CompleteAsync();
                 }
@@ -146,9 +146,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (paymentLog == null)
                         return result;
 
-                    if (verifyResult.Data.TransactionStatus != null)
+                    if (verifyResult.Data.Status != null)
                     {
-                        verifyResult.Data.TransactionStatus = verifyResult.Data.TransactionStatus.ToLower();
+                        verifyResult.Data.Status = verifyResult.Data.Status.ToLower();
                     }
 
                     bool sendPaymentNotification = false;
@@ -158,9 +158,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     bool checkAmount = false;
 
                     //2. if the payment successful
-                    if (verifyResult.Data.TransactionStatus.Equals("success") && !paymentLog.IsWalletCredited)
+                    if (verifyResult.Data.Status.Equals("success") && !paymentLog.IsWalletCredited)
                     {
-                        checkAmount = ValidatePaymentValue(paymentLog.Amount,Convert.ToDecimal(verifyResult.Data.Amount));
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, Convert.ToDecimal(verifyResult.Data.Amount));
 
                         if (checkAmount)
                         {
@@ -256,7 +256,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     paymentLog.TransactionStatus = verifyResult.Data.Status;
-                    paymentLog.TransactionResponse = verifyResult.Data.TransactionStatus;
+                    paymentLog.TransactionResponse = verifyResult.Data.Status;
                     result = true;
                     _uow.Commit();
 
@@ -407,7 +407,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<string> InitializeCharge(KoarapayInitializeCharge payload)
         {
 
-            if( payload?.Amount == null|| payload?.Amount < 0)
+            if (payload?.Amount == null || payload?.Amount < 0)
             {
                 throw new GenericException("Amount is invalid", $"{(int)HttpStatusCode.BadRequest}");
             }
@@ -456,7 +456,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string resultJson = await response.Content.ReadAsStringAsync();
                 var jObject = JsonConvert.DeserializeObject<KorapayInitializeChargeResponse>(resultJson);
 
-                if(jObject != null && jObject.Data != null && !string.IsNullOrEmpty(jObject.Data.CheckoutUrl))
+                if (jObject != null && jObject.Data != null && !string.IsNullOrEmpty(jObject.Data.CheckoutUrl))
                 {
                     result = jObject?.Data?.CheckoutUrl;
                 }
@@ -464,7 +464,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     throw new GenericException("Checkout url not returned successfully:");
                 }
-                
+
                 return result;
             }
         }
@@ -503,7 +503,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string resultJson = await response.Content.ReadAsStringAsync();
                 var jObject = JsonConvert.DeserializeObject<KorapayQueryChargeResponse>(resultJson);
 
-                if (jObject != null && jObject.Data != null )
+                if (jObject != null && jObject.Data != null)
                 {
                     result = jObject;
                 }
