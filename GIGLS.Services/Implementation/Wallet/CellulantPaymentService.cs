@@ -793,7 +793,8 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
 
             var no = Guid.NewGuid().ToString();
-            var refNo = $"TRX-{cod.Waybill}-CLNT{no.Take(5)})";
+            no = no.Substring(0, 5);
+            var refNo = $"TRX-{cod.Waybill}-CLNT-{no})";
             ////call the transfer cellulant API
             var transferDTO = new CellulantTransferDTO()
             {
