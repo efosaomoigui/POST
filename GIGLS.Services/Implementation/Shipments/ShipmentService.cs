@@ -6550,7 +6550,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<string> ValidateCODPayment(string waybill)
         {
 
-            var result = "Payment transaction initiated";
+            var result = "Payment is being processed; please try again later";
             if (String.IsNullOrEmpty(waybill))
             {
                 throw new GenericException("invalid request, please provide a waybill number");
