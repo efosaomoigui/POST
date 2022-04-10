@@ -3485,6 +3485,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                if (preshipmentmobile.IsCashOnDelivery)
+                {
+                    //update cod values for cod shipment for both agility and mobile
+                    if (preshipmentmobile != null)
+                    {
+                        preshipmentmobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({pickuprequest.PaymentType.ToString()})";
+                        preshipmentmobile.CODStatus = CODMobileStatus.Collected;
+                        preshipmentmobile.CODStatusDate = DateTime.Now;
+                        await _uow.CompleteAsync();
+                    }
+                }
+
                 if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                 {
                     preshipmentmobile.IsDelivered = true;

@@ -1219,8 +1219,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [HttpGet]
-        [Route("confirmcodtransferstatus/{waybill}")]
-        public async Task<IServiceResponse<string>> ConfirmCODTransferStatus(string waybill)
+        [Route("confirmcodtransferstatus")]
+        public async Task<IServiceResponse<string>> ConfirmCODTransferStatus([FromUri] string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {

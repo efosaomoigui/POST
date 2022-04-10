@@ -6293,12 +6293,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 //set default values if payload is null
                 if (dto == null)
                 {
+                    var date = DateTime.UtcNow;
+                    var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
                     dto = new PaginationDTO
                     {
                         Page = 1,
                         PageSize = 25,
-                        StartDate = null,
-                        EndDate = null
+                        StartDate = firstDayOfMonth,
+                        EndDate = lastDayOfMonth
                     };
                 }
                 int totalCount;
@@ -6550,7 +6553,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<string> ValidateCODPayment(string waybill)
         {
 
-            var result = "Payment transaction initiated";
+            var result = "Payment is being processed; please try again later";
             if (String.IsNullOrEmpty(waybill))
             {
                 throw new GenericException("invalid request, please provide a waybill number");
@@ -6594,7 +6597,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-                result = recentLog.StatusDescription;
+                if (!String.IsNullOrEmpty(recentLog.StatusDescription))
+                {
+                    result = recentLog.StatusDescription; 
+                }
             }
             return result;
         }
