@@ -6594,7 +6594,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-                result = recentLog.StatusDescription;
+                if (!String.IsNullOrEmpty(recentLog.StatusDescription))
+                {
+                    result = recentLog.StatusDescription; 
+                }
             }
             return result;
         }

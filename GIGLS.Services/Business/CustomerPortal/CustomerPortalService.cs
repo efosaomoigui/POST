@@ -4732,7 +4732,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     CustomerCode = codWallet.CustomerCode,
                     Amount = amount,
-                    OriginatingBankAccount = $"{codWallet.FirstName} {codWallet.LastName}",
+                    OriginatingBankAccount = codWallet.AccountNo,
                     OriginatingBankName = "Stellas",
                     DestinationBankAccount = transferDTO.ReceiverAccountNumber,
                     DestinationBankName = transferDTO.ReceiverBankName,
