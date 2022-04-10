@@ -6293,12 +6293,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 //set default values if payload is null
                 if (dto == null)
                 {
+                    var date = DateTime.UtcNow;
+                    var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
                     dto = new PaginationDTO
                     {
                         Page = 1,
                         PageSize = 25,
-                        StartDate = null,
-                        EndDate = null
+                        StartDate = firstDayOfMonth,
+                        EndDate = lastDayOfMonth
                     };
                 }
                 int totalCount;
