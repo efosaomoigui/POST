@@ -692,6 +692,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
+
+                        //collect the cods and add to CashOnDeliveryRegisterAccount()
+                        var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                        {
+                            Amount = newPreShipment.CashOnDeliveryAmount ?? 0,
+                            CODStatusHistory = CODStatushistory.Created,
+                            Description = "Cod From Sales",
+                            ServiceCenterId = 0,
+                            Waybill = newPreShipment.Waybill,
+                            UserId = newPreShipment.UserId,
+                            DepartureServiceCenterId = 0,
+                            DestinationCountryId = newPreShipment.CountryId
+                        };
+                        _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+
+
                         newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
@@ -3483,18 +3499,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (country == null)
                 {
                     throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
-                }
-
-                if (preshipmentmobile.IsCashOnDelivery)
-                {
-                    //update cod values for cod shipment for both agility and mobile
-                    if (preshipmentmobile != null)
-                    {
-                        preshipmentmobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({pickuprequest.PaymentType.ToString()})";
-                        preshipmentmobile.CODStatus = CODMobileStatus.Collected;
-                        preshipmentmobile.CODStatusDate = DateTime.Now;
-                        await _uow.CompleteAsync();
-                    }
                 }
 
                 if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
