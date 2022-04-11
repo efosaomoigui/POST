@@ -180,5 +180,34 @@ namespace GIGLS.Services.Implementation
                 throw;
             }
         }
+
+        public async Task DeleteCaptainByIdAsync(int captainId)
+        {
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+
+                if (currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "Administrator")
+                {
+                    var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(captainId);
+                    if (captain == null)
+                    {
+                        throw new GenericException($"Captain with Id {captain.PartnerId} does not exist");
+                    }
+                    _uow.CaptainRepository.Remove(captain);
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    throw new GenericException("You are not authorized to use this feature");
+                }
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

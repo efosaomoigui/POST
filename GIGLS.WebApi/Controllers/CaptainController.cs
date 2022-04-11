@@ -91,5 +91,21 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [HttpDelete]
+        [Route("{captainId}")]
+        public async Task<IServiceResponse<bool>> DeleteCaptainById(int captainId)
+        {
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _captainService.DeleteCaptainByIdAsync(captainId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace GIGLS.Core.IServices
 {
     public interface ICaptainService : IServiceDependencyMarker
     {
+        Task DeleteCaptainByIdAsync(int captainId);
         Task<CaptainDetailsDTO> GetCaptainByIdAsync(int partnerId);
         Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date);
         Task<object> RegisterCaptainAsync(CaptainDTO captainDTO);

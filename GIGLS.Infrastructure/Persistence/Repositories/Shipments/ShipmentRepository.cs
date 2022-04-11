@@ -1746,6 +1746,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                 x.DestinationServiceCentreId == serviceCenterId
                                 && x.CompanyType == "Ecommerce"
                                 && x.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                && x.ShipmentScanStatus != ShipmentScanStatus.OKC
                                 && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
                                 && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) <= 3);
 
