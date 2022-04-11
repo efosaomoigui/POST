@@ -305,7 +305,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        private async Task<bool> CheckUserRoleIsAccount()
+        private async Task<bool> CheckUserRoleIsAccount() 
         {
             try
             {

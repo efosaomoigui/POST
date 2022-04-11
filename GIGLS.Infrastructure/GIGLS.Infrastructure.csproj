@@ -118,6 +118,7 @@
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Persistence\CaptainRepository.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
     <Compile Include="Persistence\GIGLSContextForView.cs" />
     <Compile Include="Persistence\Repositories\Account\WaybillChargeRepository.cs" />

@@ -49,5 +49,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Fleets
                 throw;
             }
         }
+
+        public async Task RegisterFleetsCaptainAsync()
+        {
+
+        }
     }
 }

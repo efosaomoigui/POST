@@ -68,5 +68,17 @@ namespace GIGLS.Core.Domain.Partnership
         public DateTime ActivityDate { get; set; }
 
         public bool Contacted { get; set; }
+
+        // for captain
+        [MaxLength(100)]
+        public string CaptainBankName { get; set; }
+
+        [MaxLength(100)]
+        public string CaptainAccountNumber { get; set; }
+
+        [MaxLength(100)]
+        public string CaptainAccountName { get; set; }
+
+        public int Age { get; set; }
     }
 }

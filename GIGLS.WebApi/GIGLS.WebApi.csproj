@@ -351,6 +351,7 @@
     <Compile Include="Controllers\Business\ScanController.cs" />
     <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
     <Compile Include="Controllers\CaptainBonusByZoneMapingController.cs" />
+    <Compile Include="Controllers\CaptainController.cs" />
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerInvoice\CustomerInvoiceController.cs" />
@@ -510,6 +511,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="ReportTemplate\download\" />
+    <Folder Include="Views\Captain\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Korapay\" />
     <Folder Include="Views\Location\" />
