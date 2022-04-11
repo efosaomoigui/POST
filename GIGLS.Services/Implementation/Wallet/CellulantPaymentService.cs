@@ -1263,6 +1263,29 @@ namespace GIGLS.Services.Implementation.Wallet
                         result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmount.Value}. This item can not be released at this time";
                     }
                 }
+                else
+                {
+                    var codAmountFromMobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
+                    if (codAmountFromMobile.HasValue)
+                    {
+                        var transferedAmount = Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount);
+                        if (transferedAmount == codAmountFromMobile.Value || transferedAmount > codAmountFromMobile.Value)
+                        {
+                            result.Status = true;
+                            result.Message = "Transfer Successfully Confirmed";
+                        }
+                        else if (transferedAmount < codAmountFromMobile.Value)
+                        {
+                            result.Status = false;
+                            result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmountFromMobile.Value}. This item can not be released at this time";
+                        }
+                    }
+                    else if(!codAmountFromMobile.HasValue && !codAmount.HasValue)
+                    {
+                        result.Status = false;
+                        result.Message = $"Shipment with waybill {codWaybill} has no COD Value or cannot be found.";
+                    }
+                }
             }
             return result;
         }
