@@ -702,7 +702,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCenterId = 0,
                             Waybill = newPreShipment.Waybill,
                             UserId = newPreShipment.UserId,
-                            DepartureServiceCenterId = 0,
+                            DepartureServiceCenterId = preShipmentDTO.DepartureServiceCentreId,
                             DestinationCountryId = newPreShipment.CountryId
                         };
                         _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
