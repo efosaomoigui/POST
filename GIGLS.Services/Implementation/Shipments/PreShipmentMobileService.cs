@@ -3501,7 +3501,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || (preshipmentmobile.shipmentstatus.ToLower() == "enroute delivery" || preshipmentmobile.shipmentstatus.ToLower() == "enroutedelivery"))
                 {
                     preshipmentmobile.IsDelivered = true;
                     preshipmentmobile.TimeDelivered = DateTime.Now;
