@@ -6551,6 +6551,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
 
             var result = "Payment transaction initiated";
+            var customerCode = string.Empty;
             if (String.IsNullOrEmpty(waybill))
             {
                 throw new GenericException("invalid request, please provide a waybill number");
@@ -6559,7 +6560,23 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
             if (shipmentInfo == null)
             {
-                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment == null)
+                {
+                    throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else
+                {
+
+                    mobileShipment.CODStatusDate = DateTime.Now;
+                    mobileShipment.CODStatus = CODMobileStatus.Collected;
+                    mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
+                    customerCode = mobileShipment.CustomerCode;
+                }
+            }
+            else if (shipmentInfo != null)
+            {
+                customerCode = shipmentInfo.CustomerCode;
             }
             var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
             if (accInfo is null)

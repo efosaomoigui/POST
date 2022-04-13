@@ -798,9 +798,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
                 codAccShipment.TransferAccount = cod.TransferAccount;
             }
-
-           
             await _uow.CompleteAsync();
+
 
             var no = Guid.NewGuid().ToString();
             no = no.Substring(0, 5);
