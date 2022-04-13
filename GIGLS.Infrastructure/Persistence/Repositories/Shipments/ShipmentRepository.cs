@@ -1738,56 +1738,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
-        public Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
+        public async Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
         {
             try
             {
                 int shipmentAge = 48;
 
-                var shipment = _context.Shipment.AsQueryable().Where(x =>
-                                x.DestinationServiceCentreId == serviceCenterId
-                                && x.CompanyType == "Ecommerce"
-                                && x.ShipmentScanStatus == ShipmentScanStatus.ARF
-                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
-                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) <= 3);
+                var query = await (from shipmnt in _context.Shipment
+                            where shipmnt.DestinationServiceCentreId == serviceCenterId
+                                && shipmnt.CompanyType == "Ecommerce"
+                                && shipmnt.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                && DbFunctions.DiffHours(shipmnt.DateModified, DateTime.Now) >= shipmentAge
+                            join coll in _context.ShipmentCollection                    
+                            on shipmnt.Waybill equals coll.Waybill
+                                where coll.ShipmentScanStatus >= ShipmentScanStatus.ARF
+                                    && coll.ShipmentScanStatus != ShipmentScanStatus.OKC
+                                    && DbFunctions.DiffHours(coll.DateModified, DateTime.Now) >= shipmentAge
+                                    && DbFunctions.DiffMonths(coll.DateModified, DateTime.Now) <= 3
+                            select new DelayedDeliveryDTO
+                            {
+                                DateCreated = shipmnt.DateCreated,
+                                CODAmount = shipmnt.CashOnDeliveryAmount,
+                                WayBill = shipmnt.Waybill,
+                                CustomerCode = shipmnt.CustomerCode,
+                                CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == shipmnt.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                AgeOfTheShipment = DbFunctions.DiffDays(coll.DateModified, DateTime.Now).ToString()
+                            })
+                            .OrderByDescending(x => x.DateCreated)
+                            .ToListAsync();
 
-                var preShipment = _context.PresShipmentMobile.AsQueryable().Where(x =>
-                                x.DestinationServiceCenterId == serviceCenterId
-                                && x.CompanyType == "Ecommerce"
-                                && x.shipmentstatus != "Delivered"
-                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
-                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) >= 3);
-
-                List<DelayedDeliveryDTO> delayedShipmentDto = new List<DelayedDeliveryDTO>();
-
-                if (shipment.Any())
-                {
-                    delayedShipmentDto = shipment.Select(x =>
-                                    new DelayedDeliveryDTO()
-                                    {
-                                        DateCreated = x.DateCreated,
-                                        CODAmount = x.CashOnDeliveryAmount,
-                                        WayBill = x.Waybill,
-                                        CustomerCode = x.CustomerCode,
-                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
-                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
-                                    }).ToList();
-                }
-
-                if (preShipment.Any())
-                {
-                    delayedShipmentDto.AddRange(preShipment.Select(x =>
-                                    new DelayedDeliveryDTO()
-                                    {
-                                        DateCreated = x.DateCreated,
-                                        CODAmount = x.CashOnDeliveryAmount,
-                                        WayBill = x.Waybill,
-                                        CustomerCode = x.CustomerCode,
-                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
-                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
-                                    }).ToList());
-                }
-                return Task.FromResult(delayedShipmentDto);
+                return query;
             }
             catch (Exception)
             {
@@ -1795,7 +1775,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to)
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime startDate, DateTime endDate)
         {
             try
             {
@@ -1803,48 +1783,46 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 List<ShipmentDeliveryReportDTO> recievedShipment = new List<ShipmentDeliveryReportDTO>();
                 List<ShipmentDeliveryReportDTO> deliveredShipment = new List<ShipmentDeliveryReportDTO>();
-                double dif = Math.Abs((from - to).TotalDays) / 30;
+                double dif = Math.Abs((startDate - endDate).TotalDays) / 30;
 
                 if ((int)dif <= 6)
                 {
-                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId
-                                                    && x.DateModified >= from && x.DateModified <= to);
+                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId);
 
-                    // shipments received
-                    var shipmentRecieved = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
-
-                    // shipments delivered
-                    var shipmentDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC);
-
-                    // gathers all shipments received from both Shipment and PreShimentMobile tables
-                    if (shipmentRecieved.Any())
-                    {
-                        recievedShipment = shipmentRecieved.Select(x =>
-                                        new ShipmentDeliveryReportDTO()
+                    recievedShipment = await (from ship in shipment
+                                        where ship.ShipmentScanStatus >= ShipmentScanStatus.ARF
+                                            && ship.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                        join coll in _context.ShipmentCollection
+                                        on ship.Waybill equals coll.Waybill
+                                        where coll.ShipmentScanStatus >= ShipmentScanStatus.ARF
+                                            && coll.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                            && ship.DateModified >= startDate && coll.DateModified <= endDate
+                                            select new ShipmentDeliveryReportDTO()
                                         {
-                                            DateCreated = x.DateCreated,
-                                            GrandTotal = x.GrandTotal,
-                                            Status = x.ShipmentScanStatus.ToString(),
-                                            Waybill = x.Waybill
-                                        }).ToList();
-                    }
+                                            DateCreated = ship.DateCreated,
+                                            GrandTotal = ship.GrandTotal,
+                                            Status = coll.ShipmentScanStatus.ToString(),
+                                            Waybill = ship.Waybill
+                                        })
+                                        .ToListAsync();
 
-                    // gathers all shipments delivered from both Shipment and PreShimentMobile tables
-                    if (shipmentDelivered.Any())
-                    {
-                        deliveredShipment = shipmentDelivered.Select(x =>
-                                        new ShipmentDeliveryReportDTO()
+                    deliveredShipment = await (from ship in shipment
+                                        join coll in _context.ShipmentCollection
+                                        on ship.Waybill equals coll.Waybill
+                                        where
+                                            coll.DateModified >= startDate && coll.DateModified <= endDate
+                                            && coll.ShipmentScanStatus == ShipmentScanStatus.OKC
+                                        select new ShipmentDeliveryReportDTO()
                                         {
-                                            DateCreated = x.DateCreated,
-                                            GrandTotal = x.GrandTotal,
-                                            Status = x.ShipmentScanStatus.ToString(),
-                                            Waybill = x.Waybill
-                                        }).ToList();
-                    }
+                                            DateCreated = ship.DateCreated,
+                                            GrandTotal = ship.GrandTotal,
+                                            Status = coll.ShipmentScanStatus.ToString(),
+                                            Waybill = ship.Waybill
+                                        })
+                                        .ToListAsync();
 
-
-                    int totalReceived = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Count();
-                    int totalDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC).Count();
+                    int totalReceived = recievedShipment.Count();
+                    int totalDelivered = deliveredShipment.Count();
 
                     var shipmentReport = new ShipmentDeliveryReportForHubRepsDTO()
                     {
