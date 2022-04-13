@@ -3679,6 +3679,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentmobile.ActualReceiverLastName = pickuprequest.ProxyEmail;
                     await _uow.CompleteAsync();
                 }
+                if (preshipmentmobile.IsCashOnDelivery)
+                {
+                    preshipmentmobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({pickuprequest.PaymentType.ToString()})";
+                    preshipmentmobile.CODStatus = CODMobileStatus.Collected;
+                    preshipmentmobile.CODStatusDate = DateTime.Now;
+                    await _uow.CompleteAsync();
+                }
             }
             catch (Exception)
             {
