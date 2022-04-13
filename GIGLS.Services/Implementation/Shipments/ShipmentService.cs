@@ -6549,8 +6549,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<string> ValidateCODPayment(string waybill)
         {
-
-            var result = "Payment transaction initiated";
+            var result = "Payment is being processed; please try again later";
             var customerCode = string.Empty;
             if (String.IsNullOrEmpty(waybill))
             {
@@ -6567,10 +6566,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-
-                    mobileShipment.CODStatusDate = DateTime.Now;
-                    mobileShipment.CODStatus = CODMobileStatus.Collected;
-                    mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
                     customerCode = mobileShipment.CustomerCode;
                 }
             }
@@ -6584,7 +6579,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("user does not have a cod wallet");
             }
             var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
-            if (codtransferlog is null)
+            var codregister = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codtransferlog is null && String.IsNullOrEmpty(codregister.PaymentTypeReference))
             {
                 throw new GenericException("Payment is being processed; please try again later");
             }
@@ -6595,24 +6591,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"COD payment has been made for this waybill {waybill}");
             }
 
-            var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-            if (lastRegisterLog != null)
+            //var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            //if (lastRegisterLog != null)
+            //{
+
+            //}
+            var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codAccShipment != null)
             {
-                var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
-                if (codAccShipment != null)
-                {
-                    var cod = new CODCallBackDTO();
-                    cod.CODAmount = Convert.ToString(shipmentInfo.CashOnDeliveryAmount);
-                    cod.TransactionReference = codAccShipment.PaymentTypeReference;
-                    cod.PaymentStatus = PaymentStatus.Pending.ToString();
-                    cod.Waybill = shipmentInfo.Waybill;
+                var cod = new CODCallBackDTO();
+                cod.CODAmount = Convert.ToString(codAccShipment.Amount);
+                cod.TransactionReference = codAccShipment.PaymentTypeReference;
+                cod.PaymentStatus = PaymentStatus.Pending.ToString();
+                cod.Waybill = shipmentInfo.Waybill;
 
-                   await _cellulantService.CODCallBack(cod);
-                }
-
-                var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-                result = recentLog.StatusDescription;
+                await _cellulantService.CODCallBack(cod);
             }
+
+            var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            result = recentLog.StatusDescription;
             return result;
         }
 
