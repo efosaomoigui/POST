@@ -809,7 +809,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 Amount = Convert.ToDecimal(cod.CODAmount),
                 RefNo = refNo,
-                CustomerCode = shipmentInfo.CustomerCode,
+                CustomerCode = customerCode,
                 ClientRefNo = cod.TransactionReference,
                 Waybill = cod.Waybill
             };
