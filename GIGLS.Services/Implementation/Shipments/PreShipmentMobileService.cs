@@ -3681,10 +3681,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (preshipmentmobile.IsCashOnDelivery)
                 {
-                    preshipmentmobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({pickuprequest.PaymentType.ToString()})";
-                    preshipmentmobile.CODStatus = CODMobileStatus.Collected;
-                    preshipmentmobile.CODStatusDate = DateTime.Now;
-                    await _uow.CompleteAsync();
+                    var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.PaymentStatus == PaymentStatus.Paid);
+                    if (codtransferlog is null)
+                    {
+                        preshipmentmobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({pickuprequest.PaymentType.ToString()})";
+                        preshipmentmobile.CODStatus = CODMobileStatus.Collected;
+                        preshipmentmobile.CODStatusDate = DateTime.Now;
+                        await _uow.CompleteAsync(); 
+                    }
                 }
             }
             catch (Exception)
