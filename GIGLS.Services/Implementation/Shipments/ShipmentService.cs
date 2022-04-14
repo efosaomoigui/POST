@@ -6290,17 +6290,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //set default values if payload is null
-                if (dto == null)
+                var date = DateTime.UtcNow;
+                var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                dto = new PaginationDTO
                 {
-                    dto = new PaginationDTO
-                    {
-                        Page = 1,
-                        PageSize = 100,
-                        StartDate = null,
-                        EndDate = null
-                    };
-                }
+                    Page = 1,
+                    PageSize = 100,
+                    StartDate = firstDayOfMonth,
+                    EndDate = lastDayOfMonth
+                };
+
                 int totalCount;
                 if (String.IsNullOrEmpty(dto.UserId))
                 {
@@ -6549,8 +6549,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<string> ValidateCODPayment(string waybill)
         {
-
-            var result = "Payment transaction initiated";
+            var result = "Payment is being processed; please try again later";
+            var customerCode = string.Empty;
             if (String.IsNullOrEmpty(waybill))
             {
                 throw new GenericException("invalid request, please provide a waybill number");
@@ -6559,15 +6559,28 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
             if (shipmentInfo == null)
             {
-                throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment == null)
+                {
+                    throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else
+                {
+                    customerCode = mobileShipment.CustomerCode;
+                }
             }
-            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == shipmentInfo.CustomerCode);
+            else if (shipmentInfo != null)
+            {
+                customerCode = shipmentInfo.CustomerCode;
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
             if (accInfo is null)
             {
                 throw new GenericException("user does not have a cod wallet");
             }
             var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
-            if (codtransferlog is null)
+            var codregister = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codtransferlog == null && String.IsNullOrEmpty(codregister.PaymentTypeReference))
             {
                 throw new GenericException("Payment is being processed; please try again later");
             }
@@ -6578,24 +6591,29 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"COD payment has been made for this waybill {waybill}");
             }
 
-            var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-            if (lastRegisterLog != null)
+            //var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            //if (lastRegisterLog != null)
+            //{
+
+            //}
+            var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codAccShipment != null)
             {
-                var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
-                if (codAccShipment != null)
-                {
-                    var cod = new CODCallBackDTO();
-                    cod.CODAmount = Convert.ToString(shipmentInfo.CashOnDeliveryAmount);
-                    cod.TransactionReference = codAccShipment.PaymentTypeReference;
-                    cod.PaymentStatus = PaymentStatus.Pending.ToString();
-                    cod.Waybill = shipmentInfo.Waybill;
+                var cod = new CODCallBackDTO();
+                cod.CODAmount = Convert.ToString(codAccShipment.Amount);
+                cod.TransactionReference = codAccShipment.PaymentTypeReference;
+                cod.PaymentStatus = PaymentStatus.Pending.ToString();
+                cod.Waybill = waybill;
 
-                   await _cellulantService.CODCallBack(cod);
-                }
+                await _cellulantService.CODCallBack(cod);
+            }
 
-                var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (recentLog != null && !String.IsNullOrEmpty(recentLog.StatusDescription))
+            {
                 result = recentLog.StatusDescription;
             }
+           
             return result;
         }
 
