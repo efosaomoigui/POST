@@ -1998,6 +1998,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
 
         }
+
+        public async Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybillNumber)
+        {
+            try
+            {
+                //declare parameters for the stored procedure
+                SqlParameter waybill = new SqlParameter("@Waybill", waybillNumber);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    waybill
+                };
+
+                var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipment " +
+                   "@Waybill",
+                   param).ToList();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
 
@@ -3715,4 +3739,8 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
             throw;
         }
     }
+
+    
+
 }
+
