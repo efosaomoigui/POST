@@ -1747,12 +1747,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var query = await (from shipmnt in _context.Shipment
                             where shipmnt.DestinationServiceCentreId == serviceCenterId
                                 && shipmnt.CompanyType == "Ecommerce"
-                                && shipmnt.ShipmentScanStatus == ShipmentScanStatus.ARF
-                                && DbFunctions.DiffHours(shipmnt.DateModified, DateTime.Now) >= shipmentAge
+                                //&& shipmnt.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                //&& DbFunctions.DiffHours(shipmnt.DateModified, DateTime.Now) >= shipmentAge
                             join coll in _context.ShipmentCollection                    
                             on shipmnt.Waybill equals coll.Waybill
-                                where coll.ShipmentScanStatus >= ShipmentScanStatus.ARF
-                                    && coll.ShipmentScanStatus != ShipmentScanStatus.OKC
+                                where coll.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                    //&& coll.ShipmentScanStatus != ShipmentScanStatus.OKC
                                     && DbFunctions.DiffHours(coll.DateModified, DateTime.Now) >= shipmentAge
                                     && DbFunctions.DiffMonths(coll.DateModified, DateTime.Now) <= 3
                             select new DelayedDeliveryDTO
