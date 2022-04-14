@@ -6539,6 +6539,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 throw new GenericException("You are not a hub representative");
+
             }
             catch (Exception)
             {
