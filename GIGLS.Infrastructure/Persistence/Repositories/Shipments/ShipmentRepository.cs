@@ -1779,6 +1779,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             try
             {
+                //Get start date and end date for database query
+                var filterCriteria = new DashboardFilterCriteria { EndDate = endDate, StartDate = startDate };
+                var filter = filterCriteria.getStartDateAndEndDate();
+                startDate = filter.Item1;
+                endDate = filter.Item2;
+
                 var shipment = _context.Shipment.AsQueryable();
 
                 List<ShipmentDeliveryReportDTO> recievedShipment = new List<ShipmentDeliveryReportDTO>();
@@ -1790,12 +1796,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId);
 
                     recievedShipment = await (from ship in shipment
-                                        where ship.ShipmentScanStatus >= ShipmentScanStatus.ARF
-                                            && ship.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                        //where ship.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                            //&& ship.ShipmentScanStatus < ShipmentScanStatus.OKC
                                         join coll in _context.ShipmentCollection
                                         on ship.Waybill equals coll.Waybill
-                                        where coll.ShipmentScanStatus >= ShipmentScanStatus.ARF
-                                            && coll.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                        where coll.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                            //&& coll.ShipmentScanStatus < ShipmentScanStatus.OKC
                                             && ship.DateModified >= startDate && coll.DateModified <= endDate
                                             select new ShipmentDeliveryReportDTO()
                                         {
@@ -1804,6 +1810,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                             Status = coll.ShipmentScanStatus.ToString(),
                                             Waybill = ship.Waybill
                                         })
+                                        .OrderByDescending(x =>x.DateCreated)
                                         .ToListAsync();
 
                     deliveredShipment = await (from ship in shipment
@@ -1819,6 +1826,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                             Status = coll.ShipmentScanStatus.ToString(),
                                             Waybill = ship.Waybill
                                         })
+                                        .OrderByDescending(x => x.DateCreated)
                                         .ToListAsync();
 
                     int totalReceived = recievedShipment.Count();
