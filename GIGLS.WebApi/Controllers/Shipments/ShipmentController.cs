@@ -1187,13 +1187,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("gatewayactivity")]
-        public async Task<IServiceResponse<List<GatewatActivityDTO>>> GatewayActivity()
+        public async Task<IServiceResponse<List<GatewatActivityDTO>>> GatewayActivity(BaseFilterCriteria FilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipments = await _service.GatewayActivity();
+                var shipments = await _service.GatewayActivity(FilterCriteria);
 
                 return new ServiceResponse<List<GatewatActivityDTO>>
                 {

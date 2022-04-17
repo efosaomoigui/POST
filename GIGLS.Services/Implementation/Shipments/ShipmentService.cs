@@ -6618,7 +6618,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Gateway Activity
-        public async Task<List<GatewatActivityDTO>> GatewayActivity()
+        public async Task<List<GatewatActivityDTO>> GatewayActivity(BaseFilterCriteria FilterCriteria)
         {
             try
             {
@@ -6635,9 +6635,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
                 {
 
-                    var filterCriteria = new GatewayActivityFilterCriteria { UserId = userId, ServiceCentreId = serviceCenterIds };
+                    FilterCriteria.StartDate = FilterCriteria.StartDate.Value.AddDays(1);
 
-                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(filterCriteria);
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
                 }
 
                 else

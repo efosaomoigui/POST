@@ -1865,17 +1865,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         }
 
         //Gateway Activity
-        public Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria f_Criteria)
+        public Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
         {
+            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
 
             //Get all shipment
-            var shipments = _context.Shipment.AsQueryable();
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
 
             //filter shipment tracking by scan status nand serviceCentreId
-            var track = _context.ShipmentTracking.Where(x => f_Criteria.ServiceCentreId.Contains(x.ServiceCentreId) && x.Status == "ACC" && x.UserId == f_Criteria.UserId);
-
-            //filter by cancelled shipments
-            shipments = shipments.Where(s => s.IsCancelled == false);
+            var track = _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.Status != "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate);
 
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
