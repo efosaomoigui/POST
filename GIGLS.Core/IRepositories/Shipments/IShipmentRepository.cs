@@ -43,6 +43,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to);
         Task<List<GatewatActivityDTO>> GetGatewayShipment(GatewayActivityFilterCriteria filterCriteria);
         Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceSummaryReport(EcommerceShipmentSummaryFilterCriteria filterCriteria);
+        Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybillNumber);
     }
 
     public interface IIntlShipmentRequestRepository : IRepository<IntlShipmentRequest>  
