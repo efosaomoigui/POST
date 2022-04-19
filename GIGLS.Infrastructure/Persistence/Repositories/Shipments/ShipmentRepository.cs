@@ -1865,25 +1865,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         }
 
         //Gateway Activity
-        public Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
+        public async Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
         {
             var queryDate = f_Criteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
+            var temp = new List<ShipmentTracking>();
 
             //Get all shipment
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
+            var shipments = await _context.Shipment.Where(s => s.IsCancelled == false && s.DestinationServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
 
             //filter shipment tracking by scan status nand serviceCentreId
-            var track = _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.Status != "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate);
+            var track = await _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
 
+            var track2 = await _context.ShipmentTracking.Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
+
+            foreach (var item in track)
+            {
+                if (track2.Any(x => x.Waybill == item.Waybill))
+                {
+                    continue;
+                }
+
+                temp.Add(item);
+            }
+
+            //var t = temp.AsQueryable();
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
-                                                    join tracking in track on shipment.Waybill equals tracking.Waybill
+                                                    join tracking in temp on shipment.Waybill equals tracking.Waybill
                                                     select new GatewatActivityDTO()
                                                     {
-                                                        ManifestNumber = Context.ManifestGroupWaybillNumberMapping.Where(ma => ma.GroupWaybillNumber == (Context.GroupWaybillNumberMapping
-                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill)).FirstOrDefault().GroupWaybillNumber).FirstOrDefault().ManifestCode,
+                                                        ManifestNumber = Context.GroupWaybillNumberMapping
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault()?.GroupWaybillNumber,
+
                                                         Waybill = shipment.Waybill,
                                                         DateCreated = shipment.DateCreated,
                                                         DepartureServiceCentreId = shipment.DepartureServiceCentreId,
@@ -1903,8 +1918,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     }).ToList();
 
 
-
-            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+            return await Task.FromResult(shipmentDto.OrderBy(x => x.DateCreated).ToList());
         }
 
 
