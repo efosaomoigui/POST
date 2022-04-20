@@ -1004,16 +1004,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
                 SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
                 SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
+                SqlParameter allServiceCentre = new SqlParameter("@AllServiceCentre", baseFilterCriteria.AllServiceCentre);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     serviceCentreId,
                     startDate,
-                    endDate
+                    endDate,
+                    allServiceCentre
                 };
 
                 var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments " +
-                   "@ServiceCentreId,@StartDate, @EndDate",
+                   "@ServiceCentreId,@StartDate, @EndDate, @AllServiceCentre",
                    param).ToList();
 
 
