@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace GIGLS.Core.DTO.Captains
 {
@@ -58,5 +59,21 @@ namespace GIGLS.Core.DTO.Captains
         public string AssignedVehicleNumber { get; set; }
         public string Status { get; set; }
         public DateTime EmploymentDate { get; set; }
+    }
+
+    public class UpdateCaptainDTO
+    {
+        public int PartnerId { get; set; }
+        public string PictureUrl { get; set; }
+        public string CaptainCode { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string CaptainPhoneNumber { get; set; }
+        public int CaptainAge { get; set; }
+        public string Status { get; set; }
+        public string EmploymentDate { get; set; }
+        public string AssignedVehicleType {get; set; }
+        public string AssignedVehicleNumber {get; set; }
     }
 }

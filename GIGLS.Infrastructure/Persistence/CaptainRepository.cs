@@ -30,7 +30,7 @@ namespace GIGLS.Infrastructure.Persistence
                 var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
                 var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-                var captains = _context.Partners.Where(x => x.PartnerType == PartnerType.Captain).AsQueryable();
+                var captains = _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false).AsQueryable();
                 var allCaptains = new List<ViewCaptainsDTO>();
 
                 if(date == null)
@@ -66,7 +66,7 @@ namespace GIGLS.Infrastructure.Persistence
         {
             try
             {
-                var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId);
+                var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId && x.IsDeleted == false);
                 return await Task.FromResult(captain);
             }
             catch (Exception)
@@ -74,5 +74,6 @@ namespace GIGLS.Infrastructure.Persistence
                 throw;
             }
         }
+
     }
 }

@@ -6,6 +6,9 @@ using GIGLS.WebApi.Filters;
 using System.Web.Http;
 using GIGLS.Core.DTO.Captains;
 using System;
+using System.Web;
+using System.Text;
+using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -21,17 +24,18 @@ namespace GIGLS.WebApi.Controllers
             _captainService = captainService;
         }
 
-        // GET: Captain
-        //public ActionResult Index()
-        //{
-        //    return View();
-        //}
-
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<object>> RegisterCaptain(CaptainDTO captainDTO)
         {
+            byte[] bytes = Convert.FromBase64String(captainDTO.PictureUrl);
+            
+            //Save to AzureBlobStorage
+            var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainDTO.FirstName}-{captainDTO.LastName}.png");
+            captainDTO.PictureUrl = picUrl;
+            
+
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.RegisterCaptainAsync(captainDTO);
@@ -100,6 +104,27 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 await _captainService.DeleteCaptainByIdAsync(captainId);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("")]
+        public async Task<IServiceResponse<bool>> EditCaptain(UpdateCaptainDTO captainInfo)
+        {
+            byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
+
+            //Save to AzureBlobStorage
+            var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
+            captainInfo.PictureUrl = picUrl;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _captainService.EditCaptainAsync(captainInfo);
 
                 return new ServiceResponse<bool>
                 {
