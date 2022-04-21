@@ -6539,6 +6539,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 throw new GenericException("You are not a hub representative");
+
             }
             catch (Exception)
             {
@@ -6664,7 +6665,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var admin = await _userService.IsUserHasAdminRole(userId);
 
-                if (admin || User.SystemUserRole.ToLower() == "Ecommerce Coordinator" || User.SystemUserRole.ToLower() == "Ecommerce Relations")
+                if(admin || User.SystemUserRole.ToLower().Contains("ecommerce"))
                 {
 
                     EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
@@ -6681,6 +6682,33 @@ namespace GIGLS.Services.Implementation.Shipments
             {
 
                 throw ex;
+            }
+        }
+
+        public async Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(waybill))
+                {
+                    waybill = waybill.Trim();
+                }
+
+                var codShipments = await _uow.Shipment.GetCODShipmentByWaybill(waybill);
+                if (codShipments.Any())
+                {
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
+                    var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
+                    foreach (var item in codShipments)
+                    {
+                        item.ShipmentStatus = scanST.Where(x => x.Code == item.ShipmentScanStatus.ToString()).FirstOrDefault().Reason;
+                    }
+                }
+                return codShipments;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

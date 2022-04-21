@@ -1231,5 +1231,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getcodshipmentbywaybill/{waybill}")]
+        public async Task<IServiceResponse<List<CODShipmentDTO>>> GetCODShipmentByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCODShipmentByWaybill(waybill);
+                return new ServiceResponse<List<CODShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
     }
 }

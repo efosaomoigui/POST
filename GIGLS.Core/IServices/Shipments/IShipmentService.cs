@@ -110,6 +110,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId);
         Task<List<GatewatActivityDTO>> GatewayActivity(BaseFilterCriteria FilterCriteria);
         Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
+        Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
