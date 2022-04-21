@@ -108,7 +108,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> ValidateCODPayment(string waybill);
         Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(DateTime from, DateTime to);
         Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId);
-        Task<List<GatewatActivityDTO>> GatewayActivity();
+        Task<List<GatewatActivityDTO>> GatewayActivity(BaseFilterCriteria FilterCriteria);
         Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
         Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill);
     }
