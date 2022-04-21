@@ -6665,7 +6665,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var admin = await _userService.IsUserHasAdminRole(userId);
 
-                if (admin || User.SystemUserRole.ToLower() == "Ecommerce Coordinator" || User.SystemUserRole.ToLower() == "Ecommerce Relations")
+                if(admin || User.SystemUserRole.ToLower().Contains("ecommerce"))
                 {
 
                     EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
