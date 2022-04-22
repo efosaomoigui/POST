@@ -780,11 +780,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException($"sender information not found", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
-            if (accInfo is null)
-            {
-                throw new GenericException("user does not have a cod wallet");
-            }
             var senderWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
             var currentUserId = await _userService.GetCurrentUserId();
 
@@ -801,20 +796,34 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
 
 
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (accInfo is null)
+            {
+                // throw new GenericException("user does not have a cod wallet");
+                var err = new LogEntry()
+                {
+                    CallSite = "",
+                    ErrorMessage = "user does not have a cod wallet",
+                    ErrorMethod = "Stellas Tranfer",
+                    ErrorSource = "Stellas API",
+                    Username = cod.Waybill,
+                    InnerErrorMessage = "user does not have a cod wallet",
+                    DateTime = DateTime.Now.ToString()
+                };
+                using (GIGLSContext _context = new GIGLSContext())
+                {
+                    _context.LogEntry.Add(err);
+                    await _context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+
             var no = Guid.NewGuid().ToString();
             no = no.Substring(0, 5);
             var refNo = $"TRX-{cod.Waybill}-CLNT-{no}";
-            ////call the transfer cellulant API
-            var transferDTO = new CellulantTransferDTO()
-            {
-                Amount = Convert.ToDecimal(cod.CODAmount),
-                RefNo = refNo,
-                CustomerCode = customerCode,
-                ClientRefNo = cod.TransactionReference,
-                Waybill = cod.Waybill
-            };
 
-            var koboValue = transferDTO.Amount * 100;
+            var koboValue = amount * 100;
             if (amount <= 0)
             {
                 throw new GenericException("invalid amount");
@@ -836,13 +845,13 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var codTransferReg = new CODTransferRegister()
             {
-                Amount = Convert.ToDecimal(transferDTO.Amount),
+                Amount = amount,
                 RefNo = refNo,
                 CustomerCode = customerCode,
                 AccountNo = accInfo.AccountNo,
                 PaymentStatus = PaymentStatus.Pending,
-                Waybill = transferDTO.Waybill,
-                ClientRefNo = transferDTO.ClientRefNo
+                Waybill = cod.Waybill,
+                ClientRefNo = cod.TransactionReference
             };
             _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
@@ -851,13 +860,11 @@ namespace GIGLS.Services.Implementation.Wallet
             if (stellasWithdraw.status)
             {
                 //update codtransferlog table to paid
-                // string success = JsonConvert.SerializeObject(stellasWithdraw.data);
                 var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
                 if (codtransferlog != null)
                 {
                     codtransferlog.StatusCode = stellasWithdraw.status.ToString();
                     codtransferlog.StatusDescription = stellasWithdraw.message;
-                    // codtransferlog.ReceiverNarration = success;
                 }
                 var res = await UpdateCODShipmentOnCallBackStellas(cod);
                 result = res;
@@ -865,13 +872,11 @@ namespace GIGLS.Services.Implementation.Wallet
             else if (!stellasWithdraw.status)
             {
                 //update codtransferlog table to paid
-                // string err = JsonConvert.SerializeObject(stellasWithdraw.errors.FirstOrDefault());
                 var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == cod.Waybill);
                 if (codtransferlog != null)
                 {
                     codtransferlog.StatusCode = stellasWithdraw.status.ToString();
                     codtransferlog.StatusDescription = stellasWithdraw.message;
-                    // codtransferlog.ReceiverNarration = err;
                 }
             }
 
@@ -887,7 +892,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 InnerErrorMessage = json,
                 DateTime = DateTime.Now.ToString()
             };
-            // _uow.LogEntry.Add(codTransferReg);
             using (GIGLSContext _context = new GIGLSContext())
             {
                 _context.LogEntry.Add(logEnt);

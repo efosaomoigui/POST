@@ -6592,11 +6592,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"COD payment has been made for this waybill {waybill}");
             }
 
-            //var lastRegisterLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Pending).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-            //if (lastRegisterLog != null)
-            //{
-
-            //}
+            
             var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
             if (codAccShipment != null)
             {
