@@ -3192,7 +3192,27 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
-            return await _companyService.UnboardUser(company);
+            var result = await _companyService.UnboardUser(company);
+            //if (result.Succeeded)
+            //{
+            //    //create codwallet for customer(if failure,it should be silent)
+            //    var codWal = new CreateStellaAccountDTO()
+            //    {
+            //        firstName = company.FirstName,
+            //        lastName = company.LastName,
+            //        otherNames = string.Empty,
+            //        bvn = company.BVN,
+            //        phoneNo = company.PhoneNumber,
+            //        gender = "M",
+            //        email = company.Email,
+            //        dateOfBirth = string.Empty,
+            //        placeOfBirth = string.Empty,
+            //        address = company.Address,
+            //        nationalIdentityNo = company.IdentificationNumber,
+            //    };
+            //    var codWallet = _codWalletService.CreateStellasAccount(codWal);
+            //}
+            return result;
         }
 
         public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
