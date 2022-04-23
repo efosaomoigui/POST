@@ -358,7 +358,5 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
-
     }
 }

@@ -323,6 +323,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CODWallet> CODWallet { get; set; }
         public DbSet<CODTransferRegister> CODTransferRegister { get; set; }
         public DbSet<CODTransferLog> CODTransferLog { get; set; }
+        public DbSet<CODGeneratedAccountNo> CODGeneratedAccountNo { get; set; }
         #endregion
 
 

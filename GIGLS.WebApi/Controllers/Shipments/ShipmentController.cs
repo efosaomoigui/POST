@@ -1245,5 +1245,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("checktransferstatusforeca")]
+        public async Task<IServiceResponse<string>> CheckTransferStatusForECA([FromUri] string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.CheckTransferStatusForECA(waybill);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -40,6 +40,5 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria);
         Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload);
         Task<CODPaymentResponse> GetTransferStatus(string craccount);
-
     }
 }

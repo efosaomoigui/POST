@@ -6604,8 +6604,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 await _cellulantService.CODCallBack(cod);
             }
-
-            var recentLog = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            await Task.Delay(10000);
+            var recentLog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Paid);
             if (recentLog != null && !String.IsNullOrEmpty(recentLog.StatusDescription))
             {
                 result = recentLog.StatusDescription;
@@ -6706,6 +6706,21 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task<string> CheckTransferStatusForECA(string waybill)
+        {
+            var result = "Transfer has not been received from customer’s Bank";
+            var accNo = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == waybill);
+            if (accNo != null)
+            {
+                var item = await _cellulantService.GetCODPaymentReceivedStatus(accNo.AccountNo);
+                if (item.Status)
+                {
+                    result = "Transfer Confirmed. Transfer has been received from customer’s Bank";
+                }
+            }
+            return result;
         }
     }
 }

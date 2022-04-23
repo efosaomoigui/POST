@@ -1293,8 +1293,44 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"invalid payload");
                 }
-                var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
-                return result;
+                var res = new GenerateAccountDTO();
+                //first check if an account has been generated for this waybill before 
+                //if so fetch and return to caller else call 3rd party and save to table and then return to caller
+                var alreadyGenerated = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == payload.UniqueId);
+                if (alreadyGenerated != null)
+                {
+                    var resPayload = new GenerateAccountResponseDTO();
+                    resPayload.Accountname = alreadyGenerated.AccountName;
+                    resPayload.Accountnumber = alreadyGenerated.AccountNo;
+                    resPayload.Bankname = alreadyGenerated.BankName;
+                    resPayload.status = 1;
+
+                    
+                    res.status = 1;
+                    res.Succeeded = true;
+                    res.Error = null;
+                    res.ResponsePayload = resPayload;
+                    
+                }
+                else
+                {
+                    var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
+                    if (result.Succeeded && result.ResponsePayload != null)
+                    {
+                        var accNo = new CODGeneratedAccountNo()
+                        {
+                            AccountName = result.ResponsePayload.Accountname,
+                            AccountNo = result.ResponsePayload.Accountnumber,
+                            Amount = payload.Amount,
+                            Waybill = payload.UniqueId,
+                            BankName = result.ResponsePayload.Bankname
+                        };
+                        _uow.CODGeneratedAccountNo.Add(accNo);
+                        await _uow.CompleteAsync();
+                    }
+                    res = result;
+                }
+                return res;
             }
             catch (Exception)
             {
@@ -1306,8 +1342,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }
-
-
 
     }
 }

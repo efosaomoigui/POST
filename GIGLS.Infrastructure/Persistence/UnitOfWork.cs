@@ -557,6 +557,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICODTransferLogRepository CODTransferLog { get; set; }
 
+        [Inject]
+        public ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

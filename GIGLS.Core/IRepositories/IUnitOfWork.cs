@@ -223,6 +223,7 @@ namespace GIGLS.Core
         ICODWalletRepository CODWallet { get; set; }
         ICODTransferRegisterRepository CODTransferRegister { get; set; }
         ICODTransferLogRepository CODTransferLog { get; set; }
+        ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

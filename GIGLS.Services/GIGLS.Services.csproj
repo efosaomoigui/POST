@@ -358,6 +358,7 @@
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
     <Compile Include="Implementation\Wallet\CellulantPaymentService.cs" />
+    <Compile Include="Implementation\Wallet\CODGeneratedAccountNoService.cs" />
     <Compile Include="Implementation\Wallet\CODTransferLogService.cs" />
     <Compile Include="Implementation\Wallet\CODTransferRegisterService.cs" />
     <Compile Include="Implementation\Wallet\StellasService.cs" />
