@@ -138,51 +138,49 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             url = $"{url}balance/{accountNo}";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            using (var client = new HttpClient())
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var response = await client.GetAsync(url);
+            string responseResult = await response.Content.ReadAsStringAsync();
+            if (responseResult.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var response = await client.GetAsync(url);
-                string responseResult = await response.Content.ReadAsStringAsync();
-                if (responseResult.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "get", null);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "get", null);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry.FirstOrDefault().Value);
-                        result.data = res;
-                        result.message = res.message;
-                        result.status = res.status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
-                }
-                else if (response.IsSuccessStatusCode)
-                {
-                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
-                    result.data = res.data;
+                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry.FirstOrDefault().Value);
+                    result.data = res;
                     result.message = res.message;
                     result.status = res.status;
                     return result;
                 }
                 else
                 {
-                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
                     result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
                 }
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
+                result.data = res.data;
+                result.message = res.message;
+                result.status = res.status;
+                return result;
+            }
+            else
+            {
+                var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                result.errors.AddRange(res.Errors);
+                result.message = "an error occured";
+                result.status = false;
+                return result;
             }
             return result;
         }
