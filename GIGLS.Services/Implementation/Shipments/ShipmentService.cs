@@ -6711,6 +6711,16 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<string> CheckTransferStatusForECA(string waybill)
         {
             var result = "Transfer has not been received from customer’s Bank";
+
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipmentInfo is null)
+            {
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment == null)
+                {
+                    throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+            }
             var accNo = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == waybill);
             if (accNo != null)
             {
@@ -6719,6 +6729,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     result = "Transfer Confirmed. Transfer has been received from customer’s Bank";
                 }
+            }
+            else if (accNo is null)
+            {
+                result = "Transfer can not be validated at this time. Transfer details are not available";
             }
             return result;
         }
