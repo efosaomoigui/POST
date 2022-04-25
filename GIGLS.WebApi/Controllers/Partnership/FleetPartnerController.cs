@@ -183,10 +183,11 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        //Old Flow
         [AllowAnonymous]
         [HttpPost]
-        [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        [Route("forgotpasswordv2")]
+        public async Task<IServiceResponse<bool>> ForgotPasswordV2(UserDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -236,6 +237,24 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        //New Flow
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ForgotPasswordV2(user);
+
+                return new ServiceResponse<bool>
+                {
+                    Code = $"{(int)HttpStatusCode.OK}",
+                    Object = result
                 };
             });
         }
