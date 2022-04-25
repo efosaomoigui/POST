@@ -1861,31 +1861,35 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var temp = new List<ShipmentTracking>();
 
             //Get all shipment
-            var shipments = await _context.Shipment.Where(s => s.IsCancelled == false && s.DestinationServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
+            var shipments = _context.Shipment.AsQueryable();
 
             //filter shipment tracking by scan status nand serviceCentreId
-            var track = await _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
+            //var track = _context.ShipmentTracking.AsQueryable().Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate);
 
-            var track2 = await _context.ShipmentTracking.Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
+            //var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate);
 
-            foreach (var item in track)
-            {
-                if (track2.Any(x => x.Waybill == item.Waybill))
-                {
-                    continue;
-                }
+            //foreach (var item in track)
+            //{
+            //    if (track2.Any(x => x.Waybill == item.Waybill))
+            //    {
+            //        continue;
+            //    }
 
-                temp.Add(item);
-            }
+            //    temp.Add(item);
+            //}
 
             //var t = temp.AsQueryable();
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
-                                                    join tracking in temp on shipment.Waybill equals tracking.Waybill
+                                                    join tracking in _context.ShipmentTracking on shipment.Waybill equals tracking.Waybill
+                                                    join  trac in _context.ShipmentTracking on shipment.Waybill equals trac.Waybill
+                                                    where shipment.IsCancelled == false && shipment.DestinationServiceCentreId == f_Criteria.ServiceCentreId &&
+                                                    tracking.Status == "ACC" && trac.Status != "DCC" && tracking.DateCreated >= startDate && tracking.DateCreated
+                                                    <= endDate && trac.DateCreated >= startDate && trac.DateCreated <= endDate
                                                     select new GatewatActivityDTO()
                                                     {
                                                         ManifestNumber = Context.GroupWaybillNumberMapping
-                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault()?.GroupWaybillNumber,
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault().GroupWaybillNumber,
 
                                                         Waybill = shipment.Waybill,
                                                         DateCreated = shipment.DateCreated,

@@ -6631,7 +6631,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var check = await _userService.CheckCurrentUserSystemRole(userId);
 
-                if (check || admin || serviceCenter.IsGateway)
+                if (check || admin && serviceCenter.IsGateway)
                 {
 
                     FilterCriteria.StartDate = FilterCriteria.StartDate.Value.AddDays(1);
