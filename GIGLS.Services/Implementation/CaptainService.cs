@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Partnership;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.Core.DTO;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation
 {
@@ -38,12 +39,18 @@ namespace GIGLS.Services.Implementation
 
         public async Task<object> RegisterCaptainAsync(CaptainDTO captainDTO)
         {
-            var currentUserId = await _userService.GetCurrentUserId();
-            var currentUser = await _userService.GetUserById(currentUserId);
+            var currentUserRole = await GetCurrentUserRoleAsync();
 
-            if(currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+            if (currentUserRole == "Administrator" || currentUserRole == "CaptainManagement")
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
+                var confirmCaptain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
+
+                // confirm if captain does not exist in partner table
+                if (confirmCaptain != null)
+                {
+                    throw new GenericException($"Captain with email {captainDTO.Email} already exist");
+                }
 
                 string password = await _passwordGenerator.Generate();
                 var user = new GIGL.GIGLS.Core.Domain.User
@@ -93,6 +100,7 @@ namespace GIGLS.Services.Implementation
                     PartnerName = captainDTO.FirstName + " " + captainDTO.LastName,
                 };
 
+                // confirm if user does not exist in user table
                 if (confirmUser == null)
                 {
                     var result = await _uow.User.RegisterUser(user, password);
@@ -125,12 +133,12 @@ namespace GIGLS.Services.Implementation
 
         public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date)
         {
+            DateFilterCriteria dateFilterCriteria = new DateFilterCriteria();
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
+                var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
                 {
                     var captains = await _uow.CaptainRepository.GetAllCaptainsByDateAsync(date);
                     return captains;
@@ -148,10 +156,9 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
+                var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(partnerId);
                     var user = await _userService.GetUserById(captain.UserId);
@@ -193,18 +200,18 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
+                var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(captainId);
                     if (captain == null)
                     {
-                        throw new GenericException($"Captain with Id {captain.PartnerId} does not exist");
+                        throw new GenericException($"Captain with Id {captain.PartnerId} and name {captain.FirstName} {captain.LastName} does not exist");
                     }
-                    captain.IsDeleted = true;
-                    //_uow.CaptainRepository.Remove(captain);
+
+                    _uow.CaptainRepository.Remove(captain);
+                    captain.IsActivated = false;
                     await _uow.CompleteAsync();
                 }
                 else
@@ -223,10 +230,9 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
+                var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(partner.PartnerId);
                     if (captain == null)
@@ -273,6 +279,15 @@ namespace GIGLS.Services.Implementation
             {
                 throw;
             }
+        }
+
+
+        private async Task<string> GetCurrentUserRoleAsync()
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return currentUser.SystemUserRole;
         }
     }
 }

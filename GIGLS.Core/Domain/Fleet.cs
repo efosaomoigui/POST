@@ -26,5 +26,6 @@ namespace GIGL.GIGLS.Core.Domain
         public int PartnerId { get; set; }
         public virtual Partner Partner { get; set; }
 
+        public string VehicleName { get; set; }
     }
 }
