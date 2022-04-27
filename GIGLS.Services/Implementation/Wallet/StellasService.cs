@@ -68,6 +68,7 @@ namespace GIGLS.Services.Implementation.Wallet
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
                 client.DefaultRequestHeaders.Add("businessId", bizId);
@@ -140,6 +141,7 @@ namespace GIGLS.Services.Implementation.Wallet
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
@@ -264,10 +266,10 @@ namespace GIGLS.Services.Implementation.Wallet
             
             
             client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
-            client.DefaultRequestHeaders.Remove("Authorization");
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
 
             if (action == "get")
@@ -331,6 +333,7 @@ namespace GIGLS.Services.Implementation.Wallet
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             
             client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
@@ -475,6 +478,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             
             client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
@@ -548,6 +552,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             
             client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
