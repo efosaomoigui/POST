@@ -267,6 +267,7 @@ namespace GIGLS.Services.Implementation.Wallet
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
             client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Remove("Authorization");
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
 
             if (action == "get")
