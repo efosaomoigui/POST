@@ -179,6 +179,7 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? CODStatusDate { get; set; }
         public string CODDescription { get; set; }
         public string blackBookSerialNumber { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

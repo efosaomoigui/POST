@@ -2781,6 +2781,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.DestinationStationId = preShipmentDTO.DestinationStationId;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
                 existingPreShipment.DestinationServiceCenterId = preShipmentDTO.DestinationServiceCenterId;
+                existingPreShipment.DeliveryType = preShipmentDTO.DeliveryType;
 
                 if (existingPreShipment.IsAgent)
                 {

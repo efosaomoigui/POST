@@ -570,7 +570,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
                     ReceiverStationId = shipment.DestinationStationId,
                     SenderStationId = shipment.DepartureStationId,
-                    LGA = shipment.LGA
+                    LGA = shipment.LGA,
+                    DeliveryType = shipment.DeliveryType,
+                    ExpressDelivery = shipment.DeliveryType == DeliveryType.GOFASTER ? true : false
 
                 };
 
