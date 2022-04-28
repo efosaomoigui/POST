@@ -1908,12 +1908,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     var faster = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GoFaster.ToString());
                     if (faster != null)
                     {
-                        var fasterValue = Convert.ToInt32(faster.Value);
+                        var fasterValue = Convert.ToDecimal(faster.Value);
                         var num = fasterValue / 100M;
-                        returnprice.GrandTotal = returnprice.GrandTotal * num;
+                        var numAmount = returnprice.GrandTotal * num;
+                        returnprice.GrandTotal = returnprice.GrandTotal + numAmount;
                     }
                 }
-               
+
                 return returnprice;
             }
             catch (Exception)
