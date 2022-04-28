@@ -382,8 +382,12 @@ namespace GIGLS.Services.Implementation.Fleets
             }
             else
             {
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
+
+                ShipmentScanStatus scanStatus = serviceCenter.IsGateway ? ShipmentScanStatus.DCC : ShipmentScanStatus.DPC;
+
                 //Scan all waybills attached to this movement manifest Number
-                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, ShipmentScanStatus.DPC);
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, scanStatus);
             }
             return 0;
         }
