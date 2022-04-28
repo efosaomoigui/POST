@@ -1865,13 +1865,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             //filter shipment tracking by scan status nand serviceCentreId
 
-            var track = await _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate && x.ServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
+            var track = await _context.ShipmentTracking.Where(x => x.ServiceCentreId == f_Criteria.ServiceCentreId && x.DateCreated >= startDate && x.DateCreated < endDate && x.Status == "ACC").ToListAsync();
 
-            var track2 = await _context.ShipmentTracking.Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate && x.ServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
+            var track2 = await _context.ShipmentTracking.Where(x => x.ServiceCentreId == f_Criteria.ServiceCentreId && x.DateCreated >= startDate && x.DateCreated < endDate && x.Status == "DCC").ToListAsync();
 
             foreach (var item in track)
             {
-                if (track2.Any(x => x.Waybill == item.Waybill))
+                if (track2.Exists(x => x.Waybill == item.Waybill))
                 {
                     continue;
                 }
