@@ -75,5 +75,17 @@ namespace GIGLS.Infrastructure.Persistence
             }
         }
 
+        //public async Task<Partner> GetCaptainNameAsync(string partnerName)
+        //{
+        //    try
+        //    {
+        //        var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId && x.IsDeleted == false);
+        //        return await Task.FromResult(captain);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
     }
 }

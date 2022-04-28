@@ -14,5 +14,6 @@ namespace GIGLS.Core.IServices
         Task<object> RegisterCaptainAsync(CaptainDTO captainDTO);
         Task<object> GetCaptainByIdAsync(int partnerId);
         Task EditCaptainAsync(UpdateCaptainDTO partner);
+        Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO);
     }
 }

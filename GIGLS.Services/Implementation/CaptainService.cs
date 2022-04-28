@@ -14,6 +14,8 @@ using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.Core.DTO;
 using GIGLS.CORE.DTO.Report;
+using System.Linq;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation
 {
@@ -44,7 +46,8 @@ namespace GIGLS.Services.Implementation
             if (currentUserRole == "Administrator" || currentUserRole == "CaptainManagement")
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
-                var confirmCaptain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
+                var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
+                var confirmCaptain = captain.FirstOrDefault();
 
                 // confirm if captain does not exist in partner table
                 if (confirmCaptain != null)
@@ -279,6 +282,47 @@ namespace GIGLS.Services.Implementation
             {
                 throw;
             }
+        }
+
+        public async Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            {
+                if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
+                {
+                    throw new GenericException($"Fleet with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
+                }
+
+                var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicleDTO.VehicleType);
+                var partner = await _uow.Partner.GetPartnerByEmail(vehicleDTO.PartnerEmail);
+
+                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType);
+
+                Fleet newFleet = new Fleet()
+                {
+                    RegistrationNumber = vehicleDTO.RegistrationNumber,
+                    Capacity = vehicleDTO.VehicleCapacity,
+                    DateCreated = vehicleDTO.DateOfCommission,
+                    DateModified = DateTime.Now,
+                    IsDeleted = false,
+                    Status = vehicleDTO.Status == "Active" ? true : false,
+                    Partner = partner[0],
+                    PartnerId = partner[0].PartnerId,
+                    FleetType = fleetType,
+                    VehicleName = vehicleDTO.VehicleName,
+                    ModelId = fleetModel.FirstOrDefault().MakeId,
+                    FleetModel = fleetModel.FirstOrDefault(),
+                };
+
+                _uow.Fleet.Add(newFleet);
+
+                partner[0].VehicleType = newFleet.FleetType.ToString();
+                partner[0].VehicleLicenseNumber = newFleet.RegistrationNumber;
+
+                await _uow.CompleteAsync();
+            }
+            return default;
         }
 
 
