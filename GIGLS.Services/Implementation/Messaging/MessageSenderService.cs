@@ -151,8 +151,100 @@ namespace GIGLS.Services.Implementation.Messaging
         {
             if (obj is ShipmentTrackingDTO)
             {
-                var strArray = new string[]
+                var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
+                if (shipmentTrackingDTO.MessageSender)
                 {
+                    var strArray = new string[]
+                    {
+                    "Customer Name",
+                    "Waybill",
+                    "Service Centre",
+                    "QR Code"
+                    };
+
+                    var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
+                    if (invoice != null)
+                    {
+                        //Add Delivery Code to ArrivedFinalDestination message
+                        if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
+                        {
+                            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
+                            if (deliveryNumber != null)
+                            {
+                                strArray[3] = deliveryNumber.ReceiverCode;
+                            }
+                        }
+
+                        //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
+                        if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                        {
+                            MessageDTO homeDeliveryMessageDTO = null;
+                            if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.ARFFSHD);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
+                            if (homeDeliveryMessageDTO != null)
+                            {
+                                messageDTO.Body = homeDeliveryMessageDTO.Body;
+                                messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            }
+                        }
+                        if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.SERVICECENTER)
+                        {
+                            MessageDTO homeDeliveryMessageDTO = null;
+                            if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.ARFFSTP);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
+                            if (homeDeliveryMessageDTO != null)
+                            {
+                                messageDTO.Body = homeDeliveryMessageDTO.Body;
+                                messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            }
+                        }
+
+                        //get CustomerDetails
+                        if (invoice.CustomerType.Contains("Individual"))
+                        {
+                            invoice.CustomerType = CustomerType.IndividualCustomer.ToString();
+                        }
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
+                        var customerObj = await GetCustomer(invoice.CustomerId, customerType);
+
+                        strArray[0] = customerObj.CustomerName;
+                        strArray[1] = invoice.Waybill;
+                        strArray[2] = invoice.DestinationServiceCentreName;         
+
+                        //B. decode url parameter
+                        messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                        //C. populate the message subject
+                        messageDTO.Subject =
+                            string.Format(messageDTO.Subject, strArray);
+
+                        //populate the message template
+                        messageDTO.FinalBody =
+                            string.Format(messageDTO.Body, strArray);
+
+                        //populate the waybill
+                        messageDTO.Waybill = invoice.Waybill;
+                        messageDTO.To = customerObj.PhoneNumber;
+                        messageDTO.ToEmail = customerObj.Email;
+                        messageDTO.CustomerName = customerObj.CustomerName;
+                      
+                        var country = new Country();
+                        //Get Country Currency Symbol
+                         country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DepartureCountryId);
+                        //prepare message format base on country code
+                        messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, country.PhoneNumberCode);
+                    }
+                }
+                else
+                {
+                    var strArray = new string[]
+                           {
                     "Customer Name",
                     "Waybill",
                     "Service Centre",
@@ -173,197 +265,196 @@ namespace GIGLS.Services.Implementation.Messaging
                     "QR Code"
                 };
 
-                var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
+                    var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
 
-                var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
-
-                if (invoice != null)
-                {
-                    var country = new Country();
-
-                    //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
+                    if (invoice != null)
                     {
-                        //use the destination country details 
-                        country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DestinationCountryId);
-                    }
-                    else
-                    {
-                        //Get Country Currency Symbol
-                        country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DepartureCountryId);
-                    }
+                        var country = new Country();
 
-                    //get CustomerDetails
-                    if (invoice.CustomerType.Contains("Individual"))
-                    {
-                        invoice.CustomerType = CustomerType.IndividualCustomer.ToString();
-                    }
-                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
-                    var customerObj = await GetCustomer(invoice.CustomerId, customerType);
-
-                    var currentUserId = await _userService.GetCurrentUserId();
-                    var currentUser = await _userService.GetUserById(currentUserId);
-                    var userActiveCountryId = currentUser.UserActiveCountryId;
-
-                    //Get DemurrageDayCount from GlobalProperty
-                    var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
-                    var demurrageDayCount = demurrageDayCountObj.Value;
-
-                    //Get DemurragePrice from GlobalProperty
-                    var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
-                    var demurragePrice = demurragePriceObj.Value;
-
-                    var customerName = customerObj.FirstName;
-                    var demurrageAmount = demurragePrice;
-
-                    // Reduce receiver name logic
-                    var receiverName = string.Empty;
-                    var tempRecName = string.Empty;
-                    var splittitle = "mrs,mr,doc,doctor,master,engineer,eng,chief,prof,professor,miss,bar,barrister,cap,captain".Split(',');
-                    var splittedName = invoice.ReceiverName.Split(' ');
-                    var word = splittedName[0].ToLower(); // FOR DEBUG
-                    foreach (var item in splittitle)
-                    {
-                        if (item.Trim() == word.Trim())
+                        //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
+                        if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
                         {
-                            tempRecName = splittedName.Length > 1 ? splittedName[0] + " " + splittedName[1] : invoice.ReceiverName;
-                            break;
-                        }
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(tempRecName))
-                    {
-                        receiverName = tempRecName;
-                    }
-                    else
-                    {
-                        receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
-                    }
-
-                    //map the array
-                    strArray[0] = customerName;
-                    strArray[1] = invoice.Waybill;
-                    strArray[2] = invoice.DepartureServiceCentreName;
-                    strArray[3] = invoice.DestinationServiceCentreName;
-                    strArray[4] = invoice.ReceiverAddress;
-                    strArray[5] = demurrageDayCount;
-                    strArray[6] = demurragePrice;
-                    strArray[7] = receiverName;
-                    strArray[8] = invoice.Description;
-                    strArray[9] = invoice.GrandTotal.ToString();
-                    strArray[10] = invoice.DateCreated.ToLongDateString();
-                    strArray[11] = invoice.DateCreated.ToShortTimeString();
-                    strArray[12] = invoice.GrandTotal.ToString();
-                    strArray[13] = country.CurrencySymbol;
-                    strArray[14] = country.ContactEmail;
-                    strArray[15] = country.ContactNumber;
-                    strArray[16] = country.CurrencyCode;
-                    strArray[17] = shipmentTrackingDTO.QRCode;
-
-                    //Add Delivery Code to ArrivedFinalDestination message
-                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
-                    {
-                        var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
-                        if (deliveryNumber != null)
-                        {
-                            strArray[17] = deliveryNumber.SenderCode;
-                        }
-                    }
-
-                    //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
-                    {
-                        MessageDTO homeDeliveryMessageDTO = null;
-                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
-                        {
-                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.AHD);
-                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            //use the destination country details 
+                            country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DestinationCountryId);
                         }
                         else
                         {
-                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.AHD);
-                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            //Get Country Currency Symbol
+                            country = await _uow.Country.GetAsync(s => s.CountryId == invoice.DepartureCountryId);
                         }
 
-                        if (homeDeliveryMessageDTO != null)
+                        //get CustomerDetails
+                        if (invoice.CustomerType.Contains("Individual"))
                         {
-                            messageDTO.Body = homeDeliveryMessageDTO.Body;
-                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            invoice.CustomerType = CustomerType.IndividualCustomer.ToString();
                         }
-                    }
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
+                        var customerObj = await GetCustomer(invoice.CustomerId, customerType);
 
-                    //B. added for HomeDelivery email, when scan is created at Service Centre
-                    if (messageDTO.MessageType == MessageType.CRT && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
-                    {
-                        MessageDTO homeDeliveryMessageDTO = null;
-                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                        var currentUserId = await _userService.GetCurrentUserId();
+                        var currentUser = await _userService.GetUserById(currentUserId);
+                        var userActiveCountryId = currentUser.UserActiveCountryId;
+
+                        //Get DemurrageDayCount from GlobalProperty
+                        var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
+                        var demurrageDayCount = demurrageDayCountObj.Value;
+
+                        //Get DemurragePrice from GlobalProperty
+                        var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
+                        var demurragePrice = demurragePriceObj.Value;
+
+                        var customerName = customerObj.FirstName;
+                        var demurrageAmount = demurragePrice;
+
+                        // Reduce receiver name logic
+                        var receiverName = string.Empty;
+                        var tempRecName = string.Empty;
+                        var splittitle = "mrs,mr,doc,doctor,master,engineer,eng,chief,prof,professor,miss,bar,barrister,cap,captain".Split(',');
+                        var splittedName = invoice.ReceiverName.Split(' ');
+                        var word = splittedName[0].ToLower(); // FOR DEBUG
+                        foreach (var item in splittitle)
                         {
-                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.CRH);
-                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            if (item.Trim() == word.Trim())
+                            {
+                                tempRecName = splittedName.Length > 1 ? splittedName[0] + " " + splittedName[1] : invoice.ReceiverName;
+                                break;
+                            }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(tempRecName))
+                        {
+                            receiverName = tempRecName;
                         }
                         else
                         {
-                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.CRH);
-                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            receiverName = splittedName.Length > 1 ? splittedName[0] : invoice.ReceiverName;
                         }
 
-                        if (homeDeliveryMessageDTO != null)
+                        //map the array
+                        strArray[0] = customerName;
+                        strArray[1] = invoice.Waybill;
+                        strArray[2] = invoice.DepartureServiceCentreName;
+                        strArray[3] = invoice.DestinationServiceCentreName;
+                        strArray[4] = invoice.ReceiverAddress;
+                        strArray[5] = demurrageDayCount;
+                        strArray[6] = demurragePrice;
+                        strArray[7] = receiverName;
+                        strArray[8] = invoice.Description;
+                        strArray[9] = invoice.GrandTotal.ToString();
+                        strArray[10] = invoice.DateCreated.ToLongDateString();
+                        strArray[11] = invoice.DateCreated.ToShortTimeString();
+                        strArray[12] = invoice.GrandTotal.ToString();
+                        strArray[13] = country.CurrencySymbol;
+                        strArray[14] = country.ContactEmail;
+                        strArray[15] = country.ContactNumber;
+                        strArray[16] = country.CurrencyCode;
+                        strArray[17] = shipmentTrackingDTO.QRCode;
+
+                        //Add Delivery Code to ArrivedFinalDestination message
+                        if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
                         {
-                            messageDTO.Body = homeDeliveryMessageDTO.Body;
-                            messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
+                            if (deliveryNumber != null)
+                            {
+                                strArray[17] = deliveryNumber.SenderCode;
+                            }
                         }
-                    }
 
-                    //C. added for Email sent for Store Keeper Shipment when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF && invoice.isInternalShipment)
-                    {
-                        MessageDTO storeMessageDTO = null;
-                        var emailMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.ARFS);
-                        storeMessageDTO = Mapper.Map<MessageDTO>(emailMessages);
-
-                        if (storeMessageDTO != null)
+                        //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
+                        if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
                         {
-                            var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
-                            messageDTO.Body = storeMessageDTO.Body;
-                            messageDTO.To = storeMessageDTO.To;
-                            messageDTO.SMSSenderPlatform = storeMessageDTO.SMSSenderPlatform;
+                            MessageDTO homeDeliveryMessageDTO = null;
+                            if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.AHD);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
+                            else
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.AHD);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
+
+                            if (homeDeliveryMessageDTO != null)
+                            {
+                                messageDTO.Body = homeDeliveryMessageDTO.Body;
+                                messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            }
                         }
-                    }
 
-                    //B. decode url parameter
-                    messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                        //B. added for HomeDelivery email, when scan is created at Service Centre
+                        if (messageDTO.MessageType == MessageType.CRT && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                        {
+                            MessageDTO homeDeliveryMessageDTO = null;
+                            if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.CRH);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
+                            else
+                            {
+                                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.CRH);
+                                homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                            }
 
-                    //C. populate the message subject
-                    messageDTO.Subject =
-                        string.Format(messageDTO.Subject, strArray);
+                            if (homeDeliveryMessageDTO != null)
+                            {
+                                messageDTO.Body = homeDeliveryMessageDTO.Body;
+                                messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
+                            }
+                        }
 
-                    //populate the message template
-                    messageDTO.FinalBody =
-                        string.Format(messageDTO.Body, strArray);
+                        //C. added for Email sent for Store Keeper Shipment when scan is ArrivedFinalDestination
+                        if (messageDTO.MessageType == MessageType.ARF && invoice.isInternalShipment)
+                        {
+                            MessageDTO storeMessageDTO = null;
+                            var emailMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.ARFS);
+                            storeMessageDTO = Mapper.Map<MessageDTO>(emailMessages);
 
-                    //populate the waybill
-                    messageDTO.Waybill = invoice.Waybill;
+                            if (storeMessageDTO != null)
+                            {
+                                var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
+                                messageDTO.Body = storeMessageDTO.Body;
+                                messageDTO.To = storeMessageDTO.To;
+                                messageDTO.SMSSenderPlatform = storeMessageDTO.SMSSenderPlatform;
+                            }
+                        }
 
-                    if ("CUSTOMER" == messageDTO.To.Trim())
-                    {
-                        messageDTO.To = customerObj.PhoneNumber;
-                        messageDTO.ToEmail = customerObj.Email;
-                        messageDTO.CustomerName = customerObj.CustomerName;
-                    }
-                    else if ("RECEIVER" == messageDTO.To.Trim())
-                    {
-                        messageDTO.To = invoice.ReceiverPhoneNumber;
-                        messageDTO.ToEmail = invoice.ReceiverEmail;
-                        messageDTO.ReceiverName = invoice.ReceiverName;
-                    }
-                    else
-                    {
-                        messageDTO.To = invoice.ReceiverPhoneNumber;
-                        messageDTO.ToEmail = invoice.ReceiverEmail;
-                    }
+                        //B. decode url parameter
+                        messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
-                    //prepare message format base on country code
-                    messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, country.PhoneNumberCode);
+                        //C. populate the message subject
+                        messageDTO.Subject =
+                            string.Format(messageDTO.Subject, strArray);
+
+                        //populate the message template
+                        messageDTO.FinalBody =
+                            string.Format(messageDTO.Body, strArray);
+
+                        //populate the waybill
+                        messageDTO.Waybill = invoice.Waybill;
+
+                        if ("CUSTOMER" == messageDTO.To.Trim())
+                        {
+                            messageDTO.To = customerObj.PhoneNumber;
+                            messageDTO.ToEmail = customerObj.Email;
+                            messageDTO.CustomerName = customerObj.CustomerName;
+                        }
+                        else if ("RECEIVER" == messageDTO.To.Trim())
+                        {
+                            messageDTO.To = invoice.ReceiverPhoneNumber;
+                            messageDTO.ToEmail = invoice.ReceiverEmail;
+                            messageDTO.ReceiverName = invoice.ReceiverName;
+                        }
+                        else
+                        {
+                            messageDTO.To = invoice.ReceiverPhoneNumber;
+                            messageDTO.ToEmail = invoice.ReceiverEmail;
+                        }
+
+                        //prepare message format base on country code
+                        messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, country.PhoneNumberCode);
+                    } 
                 }
             }
 
