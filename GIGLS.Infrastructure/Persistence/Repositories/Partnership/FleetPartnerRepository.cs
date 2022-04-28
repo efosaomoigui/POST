@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.IRepositories.Partnership;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -85,6 +86,44 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                              };
 
             return Task.FromResult(partnerDto.ToList());
+        }
+
+        //Get List of Fleet 
+        public Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
+        {
+            var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+
+            var assetDto = from partner in partners
+                             join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
+                             select new AssetDTO
+                             {
+                                 Id = fleet.FleetId,
+                                 Name = fleet.FleetName,
+                                 RegistrationNumber = fleet.RegistrationNumber,
+                                 NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                             };
+
+            return Task.FromResult(assetDto.ToList());
+        }
+
+        //Get List of Fleet 
+        public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerByI(int fleetId)
+        {
+            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+
+            var assetDto = from fleet in fleets
+                           join fleetTrips in _context.FleetTrip on fleet.FleetId equals fleetTrips.FleetId
+                           select new AssetDetailsDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               Status = fleet.Status ? "Active": "Idle",
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                               Captain = _context.Users.Where(x => x.Id == fleetTrips.CaptainId)
+                           };
+
+            return Task.FromResult(assetDto.FirstOrDefault());
         }
     }
 }

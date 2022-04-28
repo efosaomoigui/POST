@@ -186,8 +186,8 @@ namespace GIGLS.WebApi.Controllers.Partnership
         //Old Flow
         [AllowAnonymous]
         [HttpPost]
-        [Route("forgotpasswordv2")]
-        public async Task<IServiceResponse<bool>> ForgotPasswordV2(UserDTO user)
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -242,19 +242,33 @@ namespace GIGLS.WebApi.Controllers.Partnership
         }
 
         //New Flow
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
+        //[AllowAnonymous]
+        //[HttpPost]
+        //[Route("forgotpassword")]
+        //public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await _portalService.ForgotPasswordV2(user);
+
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Code = $"{(int)HttpStatusCode.OK}",
+        //            Object = result
+        //        };
+        //    });
+        //}
+
+        [HttpGet]
+        [Route("getenterprisepartnersasset")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetEnterprisePartnerAsset()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.ForgotPasswordV2(user);
-
-                return new ServiceResponse<bool>
+                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner();
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
                 {
-                    Code = $"{(int)HttpStatusCode.OK}",
-                    Object = result
+                    Object = partners
                 };
             });
         }

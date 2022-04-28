@@ -381,6 +381,8 @@
     <Compile Include="DTO\DHL\TotalNetResult.cs" />
     <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
+    <Compile Include="DTO\Fleets\AssetDetails.cs" />
+    <Compile Include="DTO\Fleets\AssetDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
