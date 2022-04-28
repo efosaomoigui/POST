@@ -1861,12 +1861,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var temp = new List<ShipmentTracking>();
 
             //Get all shipment
-            var shipments = await _context.Shipment.Where(s => s.IsCancelled == false && s.DestinationServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
+            var shipments = await _context.Shipment.Where(x => x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
 
             //filter shipment tracking by scan status nand serviceCentreId
-            var track = await _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
 
-            var track2 = await _context.ShipmentTracking.Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate).ToListAsync();
+            var track = await _context.ShipmentTracking.Where(x => x.Status == "ACC" && x.DateCreated >= startDate && x.DateCreated <= endDate && x.ServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
+
+            var track2 = await _context.ShipmentTracking.Where(x => x.Status == "DCC" && x.DateCreated >= startDate && x.DateCreated <= endDate && x.ServiceCentreId == f_Criteria.ServiceCentreId).ToListAsync();
 
             foreach (var item in track)
             {
@@ -1882,10 +1883,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
                                                     join tracking in temp on shipment.Waybill equals tracking.Waybill
+                            
                                                     select new GatewatActivityDTO()
                                                     {
-                                                        ManifestNumber = Context.GroupWaybillNumberMapping
-                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault()?.GroupWaybillNumber,
+                                                        ManifestNumber = _context.ManifestGroupWaybillNumberMapping.Where(mani => mani.GroupWaybillNumber == (Context.GroupWaybillNumberMapping
+                                                        .Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault().GroupWaybillNumber)).FirstOrDefault()?.ManifestCode,
 
                                                         Waybill = shipment.Waybill,
                                                         DateCreated = shipment.DateCreated,

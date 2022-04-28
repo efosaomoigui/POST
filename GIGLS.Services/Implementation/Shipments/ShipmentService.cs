@@ -6625,14 +6625,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var userId = await _userService.GetCurrentUserId();
 
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
                 var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
 
                 var check = await _userService.CheckCurrentUserSystemRole(userId);
 
-                if (check || serviceCenter.Name.ToLower().EndsWith("gtway"))
+                if (check || admin && serviceCenter.IsGateway)
                 {
 
                     FilterCriteria.StartDate = FilterCriteria.StartDate.Value.AddDays(1);
+                    FilterCriteria.EndDate = FilterCriteria.EndDate.Value.AddDays(1);
 
                     return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
                 }

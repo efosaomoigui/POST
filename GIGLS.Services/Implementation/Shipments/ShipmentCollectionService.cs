@@ -1299,6 +1299,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 var alreadyGenerated = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == payload.UniqueId);
                 if (alreadyGenerated != null)
                 {
+                    if (String.IsNullOrEmpty(alreadyGenerated.AccountNo))
+                    {
+                        var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
+                        if (result.Succeeded && result.ResponsePayload != null && !String.IsNullOrEmpty(result.ResponsePayload.Accountnumber))
+                        {
+                            alreadyGenerated.AccountNo = result.ResponsePayload.Accountnumber;
+                            alreadyGenerated.AccountName = result.ResponsePayload.Accountname;
+                            alreadyGenerated.BankName = result.ResponsePayload.Bankname;
+                            await _uow.CompleteAsync();
+                        }
+                    }
+
                     var resPayload = new GenerateAccountResponseDTO();
                     resPayload.Accountname = alreadyGenerated.AccountName;
                     resPayload.Accountnumber = alreadyGenerated.AccountNo;

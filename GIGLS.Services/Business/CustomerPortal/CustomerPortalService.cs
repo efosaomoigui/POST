@@ -249,7 +249,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             //for now block flutter wave untill they sort there issues
             if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
             {
-                throw new GenericException("Payment method currently not available, try paystack.");
+                throw new GenericException("You are using an old version of the GIGGO App. Please update your App to the latest App Version.");
             }
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
@@ -257,6 +257,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto)
         {
+            if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+            {
+                throw new GenericException("You are using an old version of the GIGGO App. Please update your App to the latest App Version.");
+            }
             var walletPaymentLog = await _waybillPaymentLogService.AddWaybillPaymentLogFromApp(walletPaymentLogDto);
             var factor = Convert.ToDecimal(Math.Pow(10, 0));
             walletPaymentLog.Amount = Math.Round(walletPaymentLog.Amount * factor) / factor;
