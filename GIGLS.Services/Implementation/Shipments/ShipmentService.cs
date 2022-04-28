@@ -6634,9 +6634,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (check || admin && serviceCenter.IsGateway)
                 {
 
-                    FilterCriteria.StartDate = FilterCriteria.StartDate.Value.AddDays(1);
-                    FilterCriteria.EndDate = FilterCriteria.EndDate.Value.AddDays(1);
-
                     return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
                 }
 
