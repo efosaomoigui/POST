@@ -1902,6 +1902,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     CurrencyCode = country.CurrencyCode,
                     Discount = discount
                 };
+
+                if (preShipment.DeliveryType == DeliveryType.GOFASTER)
+                {
+                    var faster = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GoFaster.ToString());
+                    if (faster != null)
+                    {
+                        var fasterValue = Convert.ToDecimal(faster.Value);
+                        var num = fasterValue / 100M;
+                        var numAmount = returnprice.GrandTotal * num;
+                        returnprice.GrandTotal = returnprice.GrandTotal + numAmount;
+                    }
+                }
+
                 return returnprice;
             }
             catch (Exception)
