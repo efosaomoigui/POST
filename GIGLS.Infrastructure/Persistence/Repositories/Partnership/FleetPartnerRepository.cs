@@ -51,7 +51,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  IsVerified = vehicle.IsVerified,
                                  PartnerName = partner.FirstName + " " + partner.LastName,
                                  PartnerPhoneNumber = partner.PhoneNumber,
-                                 PartnerFirstName =  partner.FirstName,
+                                 PartnerFirstName = partner.FirstName,
                                  PartnerLastName = partner.LastName,
                                  EnterprisePartner = _context.FleetPartner.Where(c => c.FleetPartnerCode == fleetPartnerCode).Select(x => new FleetPartnerDTO
                                  {
@@ -71,7 +71,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return await Task.FromResult(fleetCount);
         }
 
-       
+
         public Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner()
         {
             var partners = _context.Partners.AsQueryable().Where(s => s.FleetPartnerCode == null && s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
@@ -79,10 +79,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var partnerDto = from partner in partners
                              select new PartnerDTO
                              {
-                                PartnerName = partner.PartnerName,
-                                FirstName = partner.FirstName,
-                                LastName = partner.LastName,
-                                PartnerCode = partner.PartnerCode
+                                 PartnerName = partner.PartnerName,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 PartnerCode = partner.PartnerCode
                              };
 
             return Task.FromResult(partnerDto.ToList());
@@ -94,20 +94,20 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
 
             var assetDto = from partner in partners
-                             join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
-                             select new AssetDTO
-                             {
-                                 Id = fleet.FleetId,
-                                 Name = fleet.FleetName,
-                                 RegistrationNumber = fleet.RegistrationNumber,
-                                 NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-                             };
+                           join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
+                           select new AssetDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                           };
 
             return Task.FromResult(assetDto.ToList());
         }
 
-        //Get List of Fleet 
-        public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerByI(int fleetId)
+        //To be completed
+        public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
         {
             var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
 
@@ -118,12 +118,37 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                Id = fleet.FleetId,
                                Name = fleet.FleetName,
                                RegistrationNumber = fleet.RegistrationNumber,
-                               Status = fleet.Status ? "Active": "Idle",
+                               Status = fleet.Status ? "Active" : "Idle",
                                NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-                               Captain = _context.Users.Where(x => x.Id == fleetTrips.CaptainId)
+                               Captain = _context.Users.Where(x => x.Id == fleet.PartnerId.ToString()).Select(x => new CaptainDTO
+                               {
+                                   Code = x.UserChannelCode,
+                                   Name = $"{x.FirstName} {x.LastName}"
+                               }).FirstOrDefault()
+                               //Current location of the vehicle
+                               //Captain
+                               //Fleet Manager assigned to the vehicle
                            };
 
             return Task.FromResult(assetDto.FirstOrDefault());
+        }
+
+        //Get fleet trips by fleet id
+        public Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        {
+            var fleetTrips = _context.FleetTrip.Where(x => x.FleetId == fleetId);
+
+            var assetTripsDto = from fleetTrip in fleetTrips
+                                select new FleetTripDTO
+                                {
+                                    DepartureDestination = fleetTrip.DepartureDestination,
+                                    ActualDestination = fleetTrip.ActualDestination,
+                                    DateCreated = fleetTrip.DateCreated,
+                                    //Get Total amount of trip
+                                    //Get trip status
+                                };
+
+            return Task.FromResult(assetTripsDto.ToList());
         }
     }
 }

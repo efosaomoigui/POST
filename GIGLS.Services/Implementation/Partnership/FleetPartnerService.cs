@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -285,7 +286,22 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
+        public async Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
+        {
+            var assets = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartner(fleetPartnerCode);
+            return assets;
+        }
 
+        public async Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
+        {
+            var asset = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartnerById(fleetId);
+            return asset;
+        }
 
+        public async Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        {
+            var fleetTrips = await _uow.FleetPartner.GetFleetTrips(fleetId);
+            return fleetTrips;
+        }
     }
 }

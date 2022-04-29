@@ -1,5 +1,6 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -187,7 +188,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
         [AllowAnonymous]
         [HttpPost]
         [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -241,34 +242,44 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        //New Flow
-        //[AllowAnonymous]
-        //[HttpPost]
-        //[Route("forgotpassword")]
-        //public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var result = await _portalService.ForgotPasswordV2(user);
-
-        //        return new ServiceResponse<bool>
-        //        {
-        //            Code = $"{(int)HttpStatusCode.OK}",
-        //            Object = result
-        //        };
-        //    });
-        //}
-
         [HttpGet]
-        [Route("getenterprisepartnersasset")]
-        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetEnterprisePartnerAsset()
+        [Route("getenterprisepartnersasset{fleetpartnercode}")]
+        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetFleetAttachedToEnterprisePartner(string fleetpartnercode)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner();
-                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner(fleetpartnercode);
+                return new ServiceResponse<IEnumerable<AssetDTO>>
                 {
-                    Object = partners
+                    Object = assets
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerfleetbyid{fleetid:int}")]
+        public async Task<IServiceResponse<AssetDetailsDTO>> GetFleetAttachedToEnterprisePartnerById(int fleetid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var assetDetails = await _fleetPartnerService.GetFleetAttachedToEnterprisePartnerById(fleetid);
+                return new ServiceResponse<AssetDetailsDTO>
+                {
+                    Object = assetDetails
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerfleettrips{fleetid:int}")]
+        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetFleetTrips(int fleetid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var fleetTrips = await _fleetPartnerService.GetFleetTrips(fleetid);
+                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                {
+                    Object = fleetTrips
                 };
             });
         }

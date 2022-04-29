@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using System;
@@ -25,5 +26,8 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner();
         Task RemovePartnerFromFleetPartner(string partnerCode);
         Task<List<VehicleTypeDTO>> GetVerifiedPartners();
+        Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode);
+        Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId);
+        Task<List<FleetTripDTO>> GetFleetTrips(int fleetId);
     }
 }
