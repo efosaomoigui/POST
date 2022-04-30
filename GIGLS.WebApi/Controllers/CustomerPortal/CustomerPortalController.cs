@@ -3087,6 +3087,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("validatebvnnumber")]
         public async Task<IServiceResponse<StellasResponseDTO>> ValidateBVNNumber(ValidateCustomerBVN payload)
