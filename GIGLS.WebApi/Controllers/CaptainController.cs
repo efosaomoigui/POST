@@ -27,7 +27,7 @@ namespace GIGLS.WebApi.Controllers
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("register")]
-        public async Task<IServiceResponse<object>> RegisterCaptain(CaptainDTO captainDTO)
+        public async Task<IServiceResponse<object>> RegisterCaptain(RegCaptainDTO captainDTO)
         {
             byte[] bytes = Convert.FromBase64String(captainDTO.PictureUrl);
             

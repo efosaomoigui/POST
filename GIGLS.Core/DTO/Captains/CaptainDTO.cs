@@ -8,7 +8,7 @@ using System.Web;
 
 namespace GIGLS.Core.DTO.Captains
 {
-    public class CaptainDTO
+    public class RegCaptainDTO
     {
         public string LoggedInUserId { get; set; }
 

@@ -12,7 +12,7 @@ namespace GIGLS.Core.IServices
     {
         Task DeleteCaptainByIdAsync(int captainId);
         Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date);
-        Task<object> RegisterCaptainAsync(CaptainDTO captainDTO);
+        Task<object> RegisterCaptainAsync(RegCaptainDTO captainDTO);
         Task<object> GetCaptainByIdAsync(int partnerId);
         Task EditCaptainAsync(UpdateCaptainDTO partner);
         Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO);

@@ -39,7 +39,7 @@ namespace GIGLS.Services.Implementation
         }
 
 
-        public async Task<object> RegisterCaptainAsync(CaptainDTO captainDTO)
+        public async Task<object> RegisterCaptainAsync(RegCaptainDTO captainDTO)
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
 
@@ -47,9 +47,8 @@ namespace GIGLS.Services.Implementation
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
                 var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
-                //var confirmCaptain = captain.FirstOrDefault();
 
-                // confirm if captain does not exist in partner table
+                // confirm if captain exist in partner table
                 if (captain.Any())
                 {
                     throw new GenericException($"Captain with email {captainDTO.Email} already exist");
