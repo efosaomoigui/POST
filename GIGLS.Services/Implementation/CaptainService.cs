@@ -47,10 +47,10 @@ namespace GIGLS.Services.Implementation
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
                 var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
-                var confirmCaptain = captain.FirstOrDefault();
+                //var confirmCaptain = captain.FirstOrDefault();
 
                 // confirm if captain does not exist in partner table
-                if (confirmCaptain != null)
+                if (captain.Any())
                 {
                     throw new GenericException($"Captain with email {captainDTO.Email} already exist");
                 }
