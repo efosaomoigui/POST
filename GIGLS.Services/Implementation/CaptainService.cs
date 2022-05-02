@@ -291,7 +291,7 @@ namespace GIGLS.Services.Implementation
             {
                 if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
                 {
-                    throw new GenericException($"Fleet with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
+                    throw new GenericException($"Fleet/Vehicle with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
                 }
 
                 var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicleDTO.VehicleType);
@@ -310,7 +310,7 @@ namespace GIGLS.Services.Implementation
                     Partner = partner[0],
                     PartnerId = partner[0].PartnerId,
                     FleetType = fleetType,
-                    VehicleName = vehicleDTO.VehicleName,
+                    FleetName = vehicleDTO.VehicleName,
                     ModelId = fleetModel.FirstOrDefault().MakeId,
                     FleetModel = fleetModel.FirstOrDefault(),
                 };
@@ -321,8 +321,41 @@ namespace GIGLS.Services.Implementation
                 partner[0].VehicleLicenseNumber = newFleet.RegistrationNumber;
 
                 await _uow.CompleteAsync();
+                return true;
             }
-            return default;
+            else
+            {
+                throw new GenericException("You are not authorized to use this feature");
+            }
+        }
+
+        public async Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync()
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            {
+                var captains = await _uow.CaptainRepository.GetAllCaptainsAsync();
+                //var captainUserInfo = await _userService.GetUserByEmail(ca)
+                var captainsDto = captains.Select(x => new CaptainDetailsDTO
+                {
+                    Status = "Active",
+                    CaptainAge = x.Age,
+                    CaptainCode = x.PartnerCode,
+                    CaptainName = x.LastName + " " + x.LastName,
+                    CaptainPhoneNumber = x.PhoneNumber,
+                    AssignedVehicleName = null,
+                    AssignedVehicleNumber = x.VehicleLicenseNumber,
+                    Email = x.Email,
+                    EmploymentDate = x.DateCreated,
+                    PartnerId = x.PartnerId,
+                    PictureUrl = x.PictureUrl
+                }).ToList();
+                return captainsDto;
+            }
+            else
+            {
+                throw new GenericException("You are not authorized to use this feature");
+            }
         }
 
 

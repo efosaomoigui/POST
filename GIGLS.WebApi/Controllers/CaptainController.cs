@@ -137,9 +137,25 @@ namespace GIGLS.WebApi.Controllers
         [Route("register/vehicle")]
         public async Task<IServiceResponse<object>> RegisterVehicle(RegisterVehicleDTO vehicleDTO)
         {
+            vehicleDTO.PartnerEmail = vehicleDTO.AssignedCaptain;
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.RegisterVehicleAsync(vehicleDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("allcaptains")]
+        public async Task<IServiceResponse<object>> GetAllCaptains()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllCaptainsAsync();
 
                 return new ServiceResponse<object>
                 {

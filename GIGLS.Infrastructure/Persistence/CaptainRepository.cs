@@ -75,17 +75,19 @@ namespace GIGLS.Infrastructure.Persistence
             }
         }
 
-        //public async Task<Partner> GetCaptainNameAsync(string partnerName)
-        //{
-        //    try
-        //    {
-        //        var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId && x.IsDeleted == false);
-        //        return await Task.FromResult(captain);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+        public async Task<IReadOnlyList<Partner>> GetAllCaptainsAsync()
+        {
+            try
+            {
+                var captain = await _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false)
+                    .OrderByDescending(x => x.DateCreated)
+                    .ToListAsync();
+                return await Task.FromResult(captain);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

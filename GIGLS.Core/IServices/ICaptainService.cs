@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Captains;
+﻿using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO.Captains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,6 @@ namespace GIGLS.Core.IServices
         Task<object> GetCaptainByIdAsync(int partnerId);
         Task EditCaptainAsync(UpdateCaptainDTO partner);
         Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO);
+        Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync();
     }
 }

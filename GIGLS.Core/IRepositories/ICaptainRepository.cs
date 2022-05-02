@@ -11,6 +11,7 @@ namespace GIGLS.Core.IRepositories
 {
     public interface ICaptainRepository : IRepository<Partner>
     {
+        Task<IReadOnlyList<Partner>> GetAllCaptainsAsync();
         Task<IReadOnlyList<ViewCaptainsDTO>> GetAllCaptainsByDateAsync(DateTime? date);
         Task<Partner> GetCaptainByIdAsync(int partnerId);
     }

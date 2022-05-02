@@ -88,14 +88,5 @@ namespace GIGLS.Core.DTO.Captains
         public string VehicleName { get; set; }
         public int VehicleCapacity { get; set; }
         public string PartnerEmail { get; set; }
-
-        /*1. Registration Number
-        2. Date of commission 
-        3. Status (Active or Inactive)
-        4. Vehicle Owner (User Code)
-        5. Assigned Captain (Drop Down to select from list of captain)
-        6. Vehicle Type (Truck or Van or Mini truck)
-        7. Vehicle Name (E.g Ford, Dana, Jet Mover)
-        8. Vehicle capacity (5 Tones, 10 Tones, 15 Tones, etc)*/
     }
 }
