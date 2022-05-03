@@ -154,6 +154,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
                 if (shipmentTrackingDTO.MessageSender)
                 {
+                    var code = string.Empty;
                     var strArray = new string[]
                     {
                     "Customer Name",
@@ -171,7 +172,11 @@ namespace GIGLS.Services.Implementation.Messaging
                             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                             if (deliveryNumber != null)
                             {
-                                strArray[3] = deliveryNumber.ReceiverCode ?? deliveryNumber.SenderCode;
+                                code = deliveryNumber.ReceiverCode;
+                                if (String.IsNullOrEmpty(code))
+                                {
+                                    code = deliveryNumber.SenderCode;
+                                }
                             }
                         }
 
@@ -215,10 +220,11 @@ namespace GIGLS.Services.Implementation.Messaging
 
                         strArray[0] = customerObj.CustomerName;
                         strArray[1] = invoice.Waybill;
-                        strArray[2] = invoice.DestinationServiceCentreName;         
+                        strArray[2] = invoice.DestinationServiceCentreName;
+                        strArray[3] = code;
 
-                        //B. decode url parameter
-                        messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                       //B. decode url parameter
+                       messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                         //C. populate the message subject
                         messageDTO.Subject =
