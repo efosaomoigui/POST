@@ -570,7 +570,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
                     ReceiverStationId = shipment.DestinationStationId,
                     SenderStationId = shipment.DepartureStationId,
-                    LGA = shipment.LGA
+                    LGA = shipment.LGA,
+                    DeliveryType = shipment.DeliveryType,
+                    ExpressDelivery = shipment.DeliveryType == DeliveryType.GOFASTER ? true : false
 
                 };
 
@@ -6633,9 +6635,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (check || admin && serviceCenter.IsGateway)
                 {
-
-                    FilterCriteria.StartDate = FilterCriteria.StartDate.Value.AddDays(1);
-                    FilterCriteria.EndDate = FilterCriteria.EndDate.Value.AddDays(1);
 
                     return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
                 }

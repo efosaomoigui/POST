@@ -190,6 +190,7 @@ namespace GIGLS.Core.DTO.Shipments
         public double? SenderLng { get; set; }
         public bool IsCoupon { get; set; }
         public string CouponCode { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
