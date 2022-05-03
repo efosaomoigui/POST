@@ -167,21 +167,17 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (invoice != null)
                     {
                         //Add Delivery Code to ArrivedFinalDestination message
-                        if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.ARFGH || messageDTO.MessageType == MessageType.ARFGFR || messageDTO.MessageType == MessageType.ARFGFS || messageDTO.MessageType == MessageType.AD)
+                        if (messageDTO.MessageType == MessageType.ARF ||  messageDTO.MessageType == MessageType.ARFFSHD || messageDTO.MessageType == MessageType.ARFFSTP)
                         {
                             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                             if (deliveryNumber != null)
                             {
-                                code = deliveryNumber.ReceiverCode;
-                                if (String.IsNullOrEmpty(code))
-                                {
-                                    code = deliveryNumber.SenderCode;
-                                }
+                                code = deliveryNumber.ReceiverCode ?? deliveryNumber.SenderCode;
                             }
                         }
 
                         //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                        if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                        if (messageDTO.MessageType == MessageType.ARFFSHD && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                         {
                             MessageDTO homeDeliveryMessageDTO = null;
                             if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -195,7 +191,7 @@ namespace GIGLS.Services.Implementation.Messaging
                                 messageDTO.SMSSenderPlatform = homeDeliveryMessageDTO.SMSSenderPlatform;
                             }
                         }
-                        if (messageDTO.MessageType == MessageType.ARF && invoice.PickupOptions == PickupOptions.SERVICECENTER)
+                        if (messageDTO.MessageType == MessageType.ARFFSTP && invoice.PickupOptions == PickupOptions.SERVICECENTER)
                         {
                             MessageDTO homeDeliveryMessageDTO = null;
                             if (messageDTO.EmailSmsType == EmailSmsType.SMS)
