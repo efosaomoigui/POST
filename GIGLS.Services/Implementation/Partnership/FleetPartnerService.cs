@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Customers;
@@ -303,5 +304,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var fleetTrips = await _uow.FleetPartner.GetFleetTrips(fleetId);
             return fleetTrips;
         }
+
+        
     }
 }

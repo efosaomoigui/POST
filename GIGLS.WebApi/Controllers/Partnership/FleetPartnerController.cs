@@ -95,6 +95,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 //    user.Username = user.Username.Trim();
                 //}
 
+                var user = await _portalService.CheckDetailsForCustomerPortal(userLoginModel.username);
+
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
+
                 if (userLoginModel.Password != null)
                 {
                     userLoginModel.Password = userLoginModel.Password.Trim();
@@ -130,6 +137,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
 
+                    //Get country detail
+                    var country = await _portalService.GetUserCountryCode(user);
+                    var countryJson = JObject.FromObject(country);
+
+                    //jObject.Add(countryJson);
+                    jObject.Add(new JProperty("Country", countryJson));
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
@@ -192,32 +205,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
         {
             return await HandleApiOperationAsync(async () =>
             {
-                if (string.IsNullOrWhiteSpace(user.Email))
-                {
-                    throw new GenericException("Email Field is Null", $"{(int)HttpStatusCode.BadRequest}");
-                }
-                string password = await _portalService.Generate(6);
-                var User = await _portalService.ForgotPassword(user.Email, password);
-
-                if (User.Succeeded)
-                {
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = password,
-                        UserEmail = user.Email
-                    };
-
-                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                }
-                else
-                {
-                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
-                }
+                var result = await _portalService.ForgotPasswordV3(user);
 
                 return new ServiceResponse<bool>
                 {
                     Code = $"{(int)HttpStatusCode.OK}",
-                    Object = true
+                    Object = result
                 };
             });
         }
