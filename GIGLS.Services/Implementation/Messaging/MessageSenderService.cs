@@ -171,7 +171,7 @@ namespace GIGLS.Services.Implementation.Messaging
                             var deliveryNumber = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == invoice.Waybill);
                             if (deliveryNumber != null)
                             {
-                                strArray[3] = deliveryNumber.ReceiverCode;
+                                strArray[3] = deliveryNumber.ReceiverCode == null ? deliveryNumber.SenderCode : deliveryNumber.ReceiverCode;
                             }
                         }
 
