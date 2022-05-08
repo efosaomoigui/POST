@@ -61,6 +61,7 @@ namespace GIGLS.Core.DTO
         public string ToTal { get; set; }
         public string DamageDescription { get; set; }
         public StellaLoginDetails StellaLoginDetails { get; set; }
+
     }
 
     public class NewMessageDTO

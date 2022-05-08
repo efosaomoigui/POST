@@ -6295,13 +6295,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var date = DateTime.UtcNow;
                 var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
                 var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-                dto = new PaginationDTO
+                if (dto.StartDate == null && dto.EndDate == null)
                 {
-                    Page = 1,
-                    PageSize = 100,
-                    StartDate = firstDayOfMonth,
-                    EndDate = lastDayOfMonth
-                };
+                    dto = new PaginationDTO
+                    {
+                        Page = 1,
+                        PageSize = 100,
+                        StartDate = firstDayOfMonth,
+                        EndDate = lastDayOfMonth
+                    }; 
+                }
 
                 int totalCount;
                 if (String.IsNullOrEmpty(dto.UserId))
