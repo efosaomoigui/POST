@@ -91,64 +91,195 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         //Get List of Fleet 
         public Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
         {
-            var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+            //var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
 
-            var assetDto = from partner in partners
-                           join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
-                           select new AssetDTO
-                           {
-                               Id = fleet.FleetId,
-                               Name = fleet.FleetName,
-                               RegistrationNumber = fleet.RegistrationNumber,
-                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-                           };
-
-            return Task.FromResult(assetDto.ToList());
+            //var assetDto = from partner in partners
+            //               join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
+            //               select new AssetDTO
+            //               {
+            //                   Id = fleet.FleetId,
+            //                   Name = fleet.FleetName,
+            //                   RegistrationNumber = fleet.RegistrationNumber,
+            //                   NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+            //               };
+            var assetDemoDto = new List<AssetDTO>
+            {
+                new AssetDTO
+                {
+                               Id = 1,
+                               Name = "Ford",
+                               RegistrationNumber = "XYZ-001-ABC",
+                               NumberOfTrips = 10,
+                },
+                new AssetDTO
+                {
+                               Id = 2,
+                               Name = "Truck",
+                               RegistrationNumber = "XCB-101-APQ",
+                               NumberOfTrips = 20,
+                },
+                new AssetDTO
+                {
+                               Id = 3,
+                               Name = "Toyota",
+                               RegistrationNumber = "NAV-221-GHA",
+                               NumberOfTrips = 30,
+                },
+                new AssetDTO
+                {
+                               Id = 4,
+                               Name = "Nissan",
+                               RegistrationNumber = "MAB-333-OPC",
+                               NumberOfTrips = 40,
+                },
+            };
+            return Task.FromResult(assetDemoDto.ToList());
         }
 
         //To be completed
         public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
         {
-            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+            //var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
 
-            var assetDto = from fleet in fleets
-                           join fleetTrips in _context.FleetTrip on fleet.FleetId equals fleetTrips.FleetId
-                           select new AssetDetailsDTO
-                           {
-                               Id = fleet.FleetId,
-                               Name = fleet.FleetName,
-                               RegistrationNumber = fleet.RegistrationNumber,
-                               Status = fleet.Status ? "Active" : "Idle",
-                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-                               Captain = _context.Users.Where(x => x.Id == fleet.PartnerId.ToString()).Select(x => new CaptainDTO
+            //var assetDto = from fleet in fleets
+            //               join fleetTrips in _context.FleetTrip on fleet.FleetId equals fleetTrips.FleetId
+            //               select new AssetDetailsDTO
+            //               {
+            //                   Id = fleet.FleetId,
+            //                   Name = fleet.FleetName,
+            //                   RegistrationNumber = fleet.RegistrationNumber,
+            //                   Status = fleet.Status ? "Active" : "Idle",
+            //                   NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+            //                   Captain = _context.Users.Where(x => x.Id == fleet.PartnerId.ToString()).Select(x => new CaptainDTO
+            //                   {
+            //                       Code = x.UserChannelCode,
+            //                       Name = $"{x.FirstName} {x.LastName}"
+            //                   }).FirstOrDefault()
+            //                   //Current location of the vehicle
+            //                   //Captain
+            //                   //Fleet Manager assigned to the vehicle
+            //               };
+            var listAssetDetailsDemo = new List<AssetDetailsDTO>
+            {
+                new AssetDetailsDTO
+                {
+                               Id = 1,
+                               Name = "Ford",
+                               RegistrationNumber = "XYZ-001-ABC",
+                               NumberOfTrips =10,
+                               Status = "Active",
+                               Captain =  new CaptainDTO
                                {
-                                   Code = x.UserChannelCode,
-                                   Name = $"{x.FirstName} {x.LastName}"
-                               }).FirstOrDefault()
-                               //Current location of the vehicle
-                               //Captain
-                               //Fleet Manager assigned to the vehicle
-                           };
-
-            return Task.FromResult(assetDto.FirstOrDefault());
+                                   Code = "EP0005",
+                                   Name = "Isaac Gbade"
+                               },
+                               Location = "Lagos",
+                               FleetManager = "Dele Dada",
+                               TotalRevenue = 200000m
+                },
+                new AssetDetailsDTO
+                {
+                               Id = 2,
+                               Name = "Truck",
+                               RegistrationNumber = "XCB-101-APQ",
+                               NumberOfTrips = 20,
+                               Status = "Idle",
+                               Captain =  new CaptainDTO
+                               {
+                                   Code = "EP0004",
+                                   Name = "Gabriel Lamba"
+                               },
+                               Location = "Oyo",
+                               FleetManager = "Tunde Oshomo",
+                               TotalRevenue = 100000m
+                },
+                new AssetDetailsDTO
+                {
+                               Id = 3,
+                               Name = "Toyota",
+                               RegistrationNumber = "NAV-221-GHA",
+                               NumberOfTrips = 30,
+                               Status = "Active",
+                               Captain =  new CaptainDTO
+                               {
+                                   Code = "EP0003",
+                                   Name = "Daniel Akpata"
+                               },
+                               Location = "Edo",
+                               FleetManager = "Tunde Oshomo",
+                               TotalRevenue = 50000m
+                },
+                new AssetDetailsDTO
+                {
+                               Id = 4,
+                               Name = "Nissan",
+                               RegistrationNumber = "MAB-333-OPC",
+                               NumberOfTrips = 40,
+                               Status = "Idle",
+                               Captain =  new CaptainDTO
+                               {
+                                   Code = "EP0003",
+                                   Name = "Olaide Jamiu"
+                               },
+                               Location = "Ogun",
+                               FleetManager = "Tunde Oshomo",
+                               TotalRevenue = 20000m
+                },
+            };
+            var assetDemoDto = listAssetDetailsDemo.Where(x => x.Id == fleetId).FirstOrDefault();
+            return Task.FromResult(assetDemoDto);
+            //return Task.FromResult(assetDto.FirstOrDefault());
         }
 
         //Get fleet trips by fleet id
         public Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
         {
-            var fleetTrips = _context.FleetTrip.Where(x => x.FleetId == fleetId);
+            //To be completed
+            //var fleetTrips = _context.FleetTrip.Where(x => x.FleetId == fleetId);
 
-            var assetTripsDto = from fleetTrip in fleetTrips
-                                select new FleetTripDTO
-                                {
-                                    DepartureDestination = fleetTrip.DepartureDestination,
-                                    ActualDestination = fleetTrip.ActualDestination,
-                                    DateCreated = fleetTrip.DateCreated,
-                                    //Get Total amount of trip
-                                    //Get trip status
-                                };
+            //var assetTripsDto = from fleetTrip in fleetTrips
+            //                    select new FleetTripDTO
+            //                    {
+            //                        DepartureDestination = fleetTrip.DepartureDestination,
+            //                        ActualDestination = fleetTrip.ActualDestination,
+            //                        DateCreated = fleetTrip.DateCreated,
+            //                        //Get Total amount of trip
+            //                        //Get trip status
+            //                    };
 
-            return Task.FromResult(assetTripsDto.ToList());
+            var listAssetTripssDemo = new List<FleetTripDTO>
+            {
+                new FleetTripDTO
+                {
+                               DepartureDestination = "LOSHUB",
+                                    ActualDestination = "Victoria Islandd",
+                                    DateCreated = System.DateTime.Now,
+                                    
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Iyana Ipaja",
+                                    ActualDestination = "Surulere",
+                                    DateCreated = System.DateTime.Now.AddDays(-1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Wuse",
+                                    ActualDestination = "Gwaripa",
+                                    DateCreated = System.DateTime.Now.AddDays(1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Ado Ekiti",
+                                    ActualDestination = "Ikole Ekiti",
+                                    DateCreated = System.DateTime.Now.AddDays(2),
+
+                },
+            };
+            return Task.FromResult(listAssetTripssDemo.ToList());
+            //return Task.FromResult(assetTripsDto.ToList());
         }
     }
 }
