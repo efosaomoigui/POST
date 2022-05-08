@@ -6633,6 +6633,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (check || admin && serviceCenter.IsGateway)
                 {
+                    FilterCriteria.UserServiceCentreId = serviceCenterIds[0];
 
                     return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
                 }

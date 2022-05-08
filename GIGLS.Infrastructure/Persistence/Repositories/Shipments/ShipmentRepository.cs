@@ -1859,16 +1859,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
             var temp = new List<ShipmentTracking>();
-          
+
 
             //Get all shipment
             //var shipments =  _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
 
             //filter shipment tracking by scan status nand serviceCentreId
 
-            var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.ServiceCentreId && x.Status == "ACC");
+            var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "ACC");
 
-            var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate &&x.ServiceCentreId == f_Criteria.ServiceCentreId && x.Status == "DCC");
+            var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "DCC");
 
             HashSet<ShipmentTracking> shipmentTrackings = new HashSet<ShipmentTracking>(track, new ShipmentEqualityComparer());
             shipmentTrackings.ExceptWith(track2);
@@ -1877,7 +1877,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             var waybil = shipmentTrackings.Select(x => x.Waybill).ToList();
 
-            var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId).ToList();
+            var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DepartureServiceCentreId == f_Criteria.ServiceCentreId).ToList();
 
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
