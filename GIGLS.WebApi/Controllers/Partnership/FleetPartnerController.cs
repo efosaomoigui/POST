@@ -236,7 +236,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
         }
 
         [HttpGet]
-        [Route("getenterprisepartnersasset{fleetpartnercode}")]
+        [Route("getenterprisepartnersasset/{fleetpartnercode}")]
         public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetFleetAttachedToEnterprisePartner(string fleetpartnercode)
         {
             return await HandleApiOperationAsync(async () =>
@@ -250,7 +250,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
         }
 
         [HttpGet]
-        [Route("getpartnerfleetbyid{fleetid:int}")]
+        [Route("getpartnerfleetbyid/{fleetid:int}")]
         public async Task<IServiceResponse<AssetDetailsDTO>> GetFleetAttachedToEnterprisePartnerById(int fleetid)
         {
             return await HandleApiOperationAsync(async () =>
@@ -264,7 +264,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
         }
 
         [HttpGet]
-        [Route("getpartnerfleettrips{fleetid:int}")]
+        [Route("getpartnerfleettrips/{fleetid:int}")]
         public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetFleetTrips(int fleetid)
         {
             return await HandleApiOperationAsync(async () =>
