@@ -112,6 +112,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
         Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill);
         Task<string> CheckTransferStatusForECA(string waybill);
+        Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
