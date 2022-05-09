@@ -7,6 +7,7 @@ namespace GIGLS.CORE.DTO.Report
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int ServiceCentreId { get; set; }
+        public int UserServiceCentreId { get; set; }
         public int StationId { get; set; }
         public int StateId { get; set; }
         public bool fromGigGoDashboard { get; set; }
