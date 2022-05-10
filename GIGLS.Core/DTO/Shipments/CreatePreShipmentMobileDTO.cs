@@ -50,5 +50,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string WaybillImage { get; set; }
         public string WaybillImageFormat { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+
     }
 }
