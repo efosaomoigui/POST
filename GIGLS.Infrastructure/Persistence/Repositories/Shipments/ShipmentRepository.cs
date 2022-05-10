@@ -1852,6 +1852,66 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
+        ////Gateway Activity
+        //public async Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
+        //{
+        //    var queryDate = f_Criteria.getStartDateAndEndDate();
+        //    var startDate = queryDate.Item1;
+        //    var endDate = queryDate.Item2;
+        //    var temp = new List<ShipmentTracking>();
+
+
+        //    //Get all shipment
+        //    //var shipments =  _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
+
+        //    //filter shipment tracking by scan status nand serviceCentreId
+
+        //    var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "ACC");
+
+        //    var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "DCC");
+
+        //    HashSet<ShipmentTracking> shipmentTrackings = new HashSet<ShipmentTracking>(track, new ShipmentEqualityComparer());
+        //    shipmentTrackings.ExceptWith(track2);
+
+        //    shipmentTrackings.ToList();
+
+        //    var waybil = shipmentTrackings.Select(x => x.Waybill).ToList();
+
+        //    var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DepartureServiceCentreId == f_Criteria.ServiceCentreId).ToList();
+
+
+        //    List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+        //                                            join tracking in shipmentTrackings on shipment.Waybill equals tracking.Waybill
+        //                                            select new GatewatActivityDTO()
+        //                                            {
+        //                                                ManifestNumber = _context.ManifestGroupWaybillNumberMapping.Where(x => x.GroupWaybillNumber ==
+        //                                                (_context.GroupWaybillNumberMapping.Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault().GroupWaybillNumber))
+        //                                                .FirstOrDefault()?.ManifestCode,
+        //                                                Waybill = shipment.Waybill,
+        //                                                DateCreated = shipment.DateCreated,
+        //                                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+        //                                                DepartureServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+        //                                                {
+        //                                                    Code = x.Code,
+        //                                                    Name = x.Name
+        //                                                }).FirstOrDefault(),
+
+        //                                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+        //                                                DestinationServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+        //                                                {
+        //                                                    Code = x.Code,
+        //                                                    Name = x.Name
+        //                                                }).FirstOrDefault(),
+        //                                                DateTime = tracking.DateTime
+        //                                            }).ToList();
+
+
+        //    return await Task.FromResult(shipmentDto.OrderBy(x => x.DateCreated).ToList());
+        //}
+
+
+
+
         //Gateway Activity
         public async Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
         {
@@ -1860,46 +1920,49 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var endDate = queryDate.Item2;
             var temp = new List<ShipmentTracking>();
 
-
-            //Get all shipment
-            //var shipments =  _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
-
-            //filter shipment tracking by scan status nand serviceCentreId
-
+            //get shipment with ACC scan
             var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "ACC");
 
+            //get shipment with DCC scan
             var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "DCC");
 
+            //filter those with ACC scan and no DCC scan using HashSet
             HashSet<ShipmentTracking> shipmentTrackings = new HashSet<ShipmentTracking>(track, new ShipmentEqualityComparer());
             shipmentTrackings.ExceptWith(track2);
-
             shipmentTrackings.ToList();
 
+            //Extract the waybill number from the filtering
             var waybil = shipmentTrackings.Select(x => x.Waybill).ToList();
 
+            //get the shipments with the waybill number extracted from the filtering from the shipment table
             var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DepartureServiceCentreId == f_Criteria.ServiceCentreId).ToList();
+
+            //get the waybill number from shipments
+            var shipWaybil = shipments.Select(x => x.Waybill).ToList();
+
+            var groups = _context.GroupWaybillNumberMapping.AsQueryable().Where(x => shipWaybil.Contains(x.WaybillNumber)).ToList();
+
+            var num = groups.Select(x => x.GroupWaybillNumber).ToList();
+
+            var mani = _context.ManifestGroupWaybillNumberMapping.AsQueryable().Where(x => num.Contains(x.GroupWaybillNumber)).ToList();
 
 
             List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
                                                     join tracking in shipmentTrackings on shipment.Waybill equals tracking.Waybill
+                                                    join grou in groups on shipment.Waybill equals grou.WaybillNumber
+                                                    join code in mani on grou.GroupWaybillNumber equals code.GroupWaybillNumber
                                                     select new GatewatActivityDTO()
                                                     {
-                                                        ManifestNumber = _context.ManifestGroupWaybillNumberMapping.Where(x => x.GroupWaybillNumber ==
-                                                        (_context.GroupWaybillNumberMapping.Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault().GroupWaybillNumber))
-                                                        .FirstOrDefault()?.ManifestCode,
+                                                        ManifestNumber = code.ManifestCode,
                                                         Waybill = shipment.Waybill,
                                                         DateCreated = shipment.DateCreated,
-                                                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
                                                         DepartureServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                         {
-                                                            Code = x.Code,
                                                             Name = x.Name
                                                         }).FirstOrDefault(),
 
-                                                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
                                                         DestinationServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                         {
-                                                            Code = x.Code,
                                                             Name = x.Name
                                                         }).FirstOrDefault(),
                                                         DateTime = tracking.DateTime
