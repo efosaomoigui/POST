@@ -16,6 +16,8 @@ using GIGLS.Core.DTO;
 using GIGLS.CORE.DTO.Report;
 using System.Linq;
 using AutoMapper;
+using GIGLS.Core.IRepositories.Fleets;
+using GIGLS.Core.IRepositories.Partnership;
 
 namespace GIGLS.Services.Implementation
 {
@@ -27,6 +29,7 @@ namespace GIGLS.Services.Implementation
         private readonly MessageSenderService _messageSenderService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPartnerService _partnerService;
+        private readonly IFleetPartnerRepository _fleetPartnerRepository;
 
         public CaptainService(IUserService userService, IUnitOfWork uow, IPasswordGenerator passwordGenerator, MessageSenderService messageSenderService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPartnerService partnerService)
         {
@@ -312,6 +315,7 @@ namespace GIGLS.Services.Implementation
                     FleetName = vehicleDTO.VehicleName,
                     ModelId = fleetModel.FirstOrDefault().MakeId,
                     FleetModel = fleetModel.FirstOrDefault(),
+                    FleetOwner = vehicleDTO.VehicleOwner,
                 };
 
                 _uow.Fleet.Add(newFleet);
@@ -340,7 +344,9 @@ namespace GIGLS.Services.Implementation
                     Status = "Active",
                     CaptainAge = x.Age,
                     CaptainCode = x.PartnerCode,
-                    CaptainName = x.LastName + " " + x.LastName,
+                    CaptainName = $"{x.FirstName} {x.LastName}",
+                    CaptainLastName = x.LastName,
+                    CaptainFirstName = x.FirstName,
                     CaptainPhoneNumber = x.PhoneNumber,
                     AssignedVehicleName = null,
                     AssignedVehicleNumber = x.VehicleLicenseNumber,
@@ -354,6 +360,189 @@ namespace GIGLS.Services.Implementation
             else
             {
                 throw new GenericException("You are not authorized to use this feature");
+            }
+        }
+
+        public async Task<IReadOnlyList<VehicleDTO>> GetVehiclesByDateAsync(DateTime? date)
+        {
+            DateFilterCriteria dateFilterCriteria = new DateFilterCriteria();
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                {
+                    var vehicles = await _uow.CaptainRepository.GetAllVehiclesByDateAsync(date);
+                    return vehicles;
+                }
+
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> GetVehicleByIdAsync(int fleetId)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                {
+                    var vehicle = await _uow.Fleet.GetAsync(fleetId);
+                    var owner = await _userService.GetUserById(vehicle.FleetOwner);
+                    var partner = await _uow.Partner.GetAsync(vehicle.PartnerId);
+
+                    var vehicleDetails = new VehicleDetailsDTO
+                    {
+                        FleetId = vehicle.FleetId,
+                        Status = vehicle.Status == true ? "Active" : "Inactive",
+                        FleetName = vehicle.FleetName,
+                        AssignedCaptain = $"{partner.FirstName} {partner.LastName}",
+                        RegistrationNumber = vehicle.RegistrationNumber,
+                        VehicleAge = (int)(DateTime.Now - vehicle.DateCreated).TotalDays,
+                        VehicleOwner = $"{owner.FirstName} {owner.LastName}",
+                        VehicleType = vehicle.FleetType.ToString(),
+                        Capacity = vehicle.Capacity,
+                        PartnerId = vehicle.PartnerId,
+                        VehicleOwnerId = owner.Id,
+                    };
+                    return vehicleDetails;
+                }
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteVehicleByIdAsync(int fleetId)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                {
+                    var fleet = await _uow.Fleet.GetAsync(fleetId);
+                    if (fleet == null)
+                    {
+                        throw new GenericException($"Vehicle with Id {fleetId} does not exist");
+                    }
+
+                    _uow.Fleet.Remove(fleet);
+                    fleet.Status = false;
+                    await _uow.CompleteAsync();
+
+                    return true;
+                }
+                else
+                {
+                    throw new GenericException("You are not authorized to use this feature");
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> EditVehicleAsync(VehicleDetailsDTO vehicle)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                {
+                    var fleet = await _uow.Fleet.GetAsync(vehicle.FleetId);
+                    if (fleet == null)
+                    {
+                        throw new GenericException($"Vehicle with Id {vehicle.FleetId} does not exist");
+                    }
+
+                    FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicle.VehicleType);
+                    var partner = await _uow.Partner.GetAsync(vehicle.PartnerId);
+                    var today = DateTime.Now;
+
+                    // update vehicle
+                    fleet.Status = vehicle.Status == "Active" ? true : false; 
+                    fleet.Capacity = vehicle.Capacity;
+                    fleet.FleetName = vehicle.FleetName;
+                    fleet.RegistrationNumber = vehicle.RegistrationNumber;
+                    fleet.DateModified = DateTime.Now;
+                    fleet.DateCreated = today.AddDays(-1 * vehicle.VehicleAge);
+                    fleet.Partner = partner;
+                    fleet.PartnerId = partner.PartnerId;
+                    fleet.FleetOwner = vehicle.VehicleOwnerId;
+                    fleet.FleetType = fleetType;
+
+                    await _uow.CompleteAsync();
+                    return true;
+                }
+                else
+                {
+                    throw new GenericException("You are not authorized to use this feature");
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync()
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            {
+                var vehicles = _uow.Fleet.GetAll("Partner");
+                var vehicledetails = vehicles.ToList();
+
+                var vehiclesDto = vehicles.Select(x => new VehicleDetailsDTO
+                {
+                    Status = "Active",
+                    VehicleAge = (int)(DateTime.Now - x.DateCreated).TotalDays,
+                    FleetId = x.FleetId,
+                    FleetName = x.FleetName,
+                    PartnerId = x.PartnerId,
+                    AssignedCaptain = x.Partner.PartnerName,
+                    RegistrationNumber = x.RegistrationNumber,
+                    VehicleType = x.FleetType.ToString(),
+                    VehicleOwnerId = x.FleetOwner,
+                    //VehicleOwner = await _userService.GetUserById(x.FleetOwner).Result.FirstName + " " + _userService.GetUserById(x.FleetOwner).Result.LastName,
+                    Capacity = x.Capacity,
+                }).ToList();
+                return vehiclesDto;
+            }
+            else
+            {
+                throw new GenericException("You are not authorized to use this feature");
+            }
+        }
+
+        public async Task<object> GetVehicleByRegistrationNumberAsync(string regNum)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                {
+                    var vehicle = await _uow.CaptainRepository.GetVehicleByRegistrationNumberAsync(regNum);
+                    return vehicle;
+                }
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

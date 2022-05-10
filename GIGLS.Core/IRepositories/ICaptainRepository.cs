@@ -13,6 +13,8 @@ namespace GIGLS.Core.IRepositories
     {
         Task<IReadOnlyList<Partner>> GetAllCaptainsAsync();
         Task<IReadOnlyList<ViewCaptainsDTO>> GetAllCaptainsByDateAsync(DateTime? date);
+        Task<IReadOnlyList<VehicleDTO>> GetAllVehiclesByDateAsync(DateTime? date);
         Task<Partner> GetCaptainByIdAsync(int partnerId);
+        Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
     }
 }

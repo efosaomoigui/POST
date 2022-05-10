@@ -50,6 +50,8 @@ namespace GIGLS.Core.DTO.Captains
     {
         public int PartnerId { get; set; }
         public string CaptainName { get; set; }
+        public string CaptainLastName { get; set; }
+        public string CaptainFirstName { get; set; }
         public string CaptainPhoneNumber { get; set; }
         public string PictureUrl { get; set; }
         public int CaptainAge { get; set; }
@@ -88,5 +90,39 @@ namespace GIGLS.Core.DTO.Captains
         public string VehicleName { get; set; }
         public int VehicleCapacity { get; set; }
         public string PartnerEmail { get; set; }
+        public int PartnerId { get; set; }
+    }
+
+    public class CurrentMonthDetailsDTO
+    {
+        public DateTime FirstDay { get; set; }
+        public DateTime LastDay { get; set; }
+    }
+
+    public class VehicleDTO
+    {
+        public int FleetId { get; set; }
+        public string RegistrationNumber { get; set; }
+        public string FleetName { get; set; }
+        public string VehicleOwner { get; set; }
+        public string AssignedCaptain { get; set; }
+        public string Status { get; set; }
+        public int VehicleAge { get; set; }
+        public string VehicleOwnerId { get; set; }
+    }
+    
+    public class VehicleDetailsDTO
+    {
+        public int FleetId { get; set; }
+        public string FleetName { get; set; }
+        public string RegistrationNumber { get; set; }
+        public string AssignedCaptain { get; set; }
+        public int VehicleAge { get; set; }
+        public string Status { get; set; }
+        public string VehicleOwner { get; set; }
+        public string VehicleType { get; set; }
+        public int Capacity { get; set; }
+        public int PartnerId { get; set; }
+        public string VehicleOwnerId { get; set; }
     }
 }

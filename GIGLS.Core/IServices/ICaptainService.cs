@@ -17,5 +17,11 @@ namespace GIGLS.Core.IServices
         Task EditCaptainAsync(UpdateCaptainDTO partner);
         Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO);
         Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync();
+        Task<IReadOnlyList<VehicleDTO>> GetVehiclesByDateAsync(DateTime? date);
+        Task<object> GetVehicleByIdAsync(int fleetId);
+        Task<bool> DeleteVehicleByIdAsync(int fleetId);
+        Task<bool> EditVehicleAsync(VehicleDetailsDTO vehicle);
+        Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync();
+        Task<object> GetVehicleByRegistrationNumberAsync(string regNum);
     }
 }

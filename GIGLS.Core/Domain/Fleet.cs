@@ -27,5 +27,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Partner Partner { get; set; }
 
         public string FleetName { get; set; }
+        public string FleetOwner { get; set; }
     }
 }

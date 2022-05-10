@@ -116,11 +116,15 @@ namespace GIGLS.WebApi.Controllers
         [Route("")]
         public async Task<IServiceResponse<bool>> EditCaptain(UpdateCaptainDTO captainInfo)
         {
-            byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
+            var picsCheck = captainInfo.PictureUrl.Split(':')[0];
+            if (picsCheck.ToLower().Trim() != "https")
+            {
+                byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
 
-            //Save to AzureBlobStorage
-            var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
-            captainInfo.PictureUrl = picUrl;
+                //Save to AzureBlobStorage
+                var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
+                captainInfo.PictureUrl = picUrl;
+            }
 
             return await HandleApiOperationAsync(async () =>
             {
@@ -156,6 +160,112 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.GetAllCaptainsAsync();
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicles/bydate")]
+        public async Task<IServiceResponse<object>> GetAllVehiclesByDate()
+        {
+            DateTime? date = null;
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehiclesByDateAsync(date);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicles/bydate/{date}")]
+        public async Task<IServiceResponse<object>> GetAllVehiclesByDate(DateTime? date = null)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehiclesByDateAsync(date);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpGet]
+        [Route("vehicles/{fleetId}")]
+        public async Task<IServiceResponse<object>> GetVehicleById(int fleetId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehicleByIdAsync(fleetId);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("vehicles")]
+        public async Task<IServiceResponse<object>> EditVehicleById(VehicleDetailsDTO vehicle)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.EditVehicleAsync(vehicle);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpDelete]
+        [Route("vehicles/{fleetId}")]
+        public async Task<IServiceResponse<object>> DeleteVehicleById(int fleetId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.DeleteVehicleByIdAsync(fleetId);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicles")]
+        public async Task<IServiceResponse<object>> GetAllVehicle()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllVehiclesAsync();
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vehicles/byregnum/{regnum}")]
+        public async Task<IServiceResponse<object>> GetVehicleByRegistrationNumber(string regnum)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehicleByRegistrationNumberAsync(regnum);
 
                 return new ServiceResponse<object>
                 {
