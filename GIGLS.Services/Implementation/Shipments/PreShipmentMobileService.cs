@@ -49,6 +49,8 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.UPS;
+using GIGLS.Core.DTO.Alpha;
+using GIGLS.Core.IServices.Alpha;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -84,6 +86,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUPSService _uPSService;
         private readonly IInsuranceService _insuranceService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
+        private readonly IAlphaService _alphaService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -93,7 +96,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
             INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService,
-            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService, IAutoManifestAndGroupingService autoManifestAndGroupingService, IAlphaService alphaService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -125,6 +128,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uPSService = uPSService;
             _insuranceService = insuranceService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _alphaService = alphaService;
             MapperConfig.Initialize();
         }
 
@@ -2882,6 +2886,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (request == null)
                         {
                             await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+
+                            //Update alpha
+                            if (preshipmentmobile.IsAlpha)
+                            {
+                                await UpdateAlphaOrderStatus(preshipmentmobile.Waybill, AlphaOrderStatus.processing.ToString());
+                            }
                         }
                         else
                         {
@@ -3702,6 +3712,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.CODStatusDate = DateTime.Now;
                         await _uow.CompleteAsync(); 
                     }
+                }
+                if (preshipmentmobile.IsAlpha)
+                {
+                    await UpdateAlphaOrderStatus(preshipmentmobile.Waybill, AlphaOrderStatus.delivered.ToString());
                 }
             }
             catch (Exception)
@@ -4825,6 +4839,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Send SMS To Receiver with Delivery Code
                     await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
+
+                    //Update alpha
+                    if (mobileShipment.IsAlpha)
+                    {
+                        await UpdateAlphaOrderStatus(mobileShipment.Waybill, AlphaOrderStatus.shipped.ToString());
+                    }
                 }
                 else if (mobileShipment.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() && mobileShipment.ZoneMapping == 1)
                 {
@@ -7786,6 +7806,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return result;
+        }
+
+        private async Task UpdateAlphaOrderStatus(string waybill, string status)
+        {
+            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = status, WayBill = waybill };
+            await _alphaService.UpdateOrderStatus(notifyAlphaPayload);
         }
     }
 }

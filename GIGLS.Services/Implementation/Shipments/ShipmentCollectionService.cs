@@ -42,7 +42,8 @@ namespace GIGLS.Services.Implementation.Shipments
             ICashOnDeliveryAccountService cashOnDeliveryAccountService,
             IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService,
-            ICellulantPaymentService cellulantPaymentService)
+            ICellulantPaymentService cellulantPaymentService,
+            IAlphaService alphaService)
         {
             _uow = uow;
             _userService = userService;
@@ -650,9 +651,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 await AddRiderToDeliveryTable(shipmentCollection);
             }
 
-            if(mobile != null && mobile.IsAlpha == true)
+            var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsAlpha);
+            if (mobileShipment != null)
             {
-                await UpdateAlphaOrderStatus(shipmentCollection);
+                await UpdateAlphaOrderStatus(shipmentCollection.Waybill, AlphaOrderStatus.delivered.ToString());
             }
         }
 
@@ -1363,9 +1365,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }
-        public async Task UpdateAlphaOrderStatus(ShipmentCollectionDTO shipmentCollection)
+        private async Task UpdateAlphaOrderStatus(string waybill, string status)
         {
-            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = "delivered", WayBill = shipmentCollection.Waybill };
+            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = status, WayBill = waybill };
             await _alphaService.UpdateOrderStatus(notifyAlphaPayload);
         }
 
