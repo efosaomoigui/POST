@@ -1053,6 +1053,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+            if (preShipmentDTO.DestinationServiceCenterId > 0)
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCenterId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                }
+            }
+
             return newPreShipment;
 
         }
