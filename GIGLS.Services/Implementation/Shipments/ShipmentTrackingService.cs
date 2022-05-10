@@ -294,6 +294,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     await SendEmailShipmentARFTerminalPickup(shipmentDTO);
                 }
+                if (scanStatus == ShipmentScanStatus.ARF && shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    //send message to sender also
+                    tracking.MessageSender = true;
+                    await _messageSenderService.SendMessage(MessageType.ARFFSHD, EmailSmsType.SMS, tracking);
+                }
+                if (scanStatus == ShipmentScanStatus.ARF && shipment.PickupOptions == PickupOptions.SERVICECENTER)
+                {
+                    tracking.MessageSender = true;
+                    //send message to sender also
+                    await _messageSenderService.SendMessage(MessageType.ARFFSTP, EmailSmsType.SMS, tracking);
+                }
             }
 
             return true;

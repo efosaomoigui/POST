@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -18,6 +19,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -1002,16 +1004,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 SqlParameter startDate = new SqlParameter("@StartDate", startDate1);
                 SqlParameter endDate = new SqlParameter("@EndDate", endDate1);
                 SqlParameter serviceCentreId = new SqlParameter("@ServiceCentreId", baseFilterCriteria.ServiceCentreId);
+                SqlParameter allServiceCentre = new SqlParameter("@AllServiceCentre", baseFilterCriteria.AllServiceCentre);
 
                 SqlParameter[] param = new SqlParameter[]
                 {
                     serviceCentreId,
                     startDate,
-                    endDate
+                    endDate,
+                    allServiceCentre
                 };
 
                 var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipments " +
-                   "@ServiceCentreId,@StartDate, @EndDate",
+                   "@ServiceCentreId,@StartDate, @EndDate, @AllServiceCentre",
                    param).ToList();
 
 
@@ -1736,57 +1740,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(resultDto);
         }
 
-        public Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
+        public async Task<List<DelayedDeliveryDTO>> GetDelayedDeliveryShipment(int serviceCenterId)
         {
             try
             {
                 int shipmentAge = 48;
 
-                var shipment = _context.Shipment.AsQueryable().Where(x =>
-                                x.DestinationServiceCentreId == serviceCenterId
-                                && x.CompanyType == "Ecommerce"
-                                && x.ShipmentScanStatus == ShipmentScanStatus.ARF
-                                && x.ShipmentScanStatus != ShipmentScanStatus.OKC
-                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
-                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) <= 3);
+                var query = await (from shipmnt in _context.Shipment
+                            where shipmnt.DestinationServiceCentreId == serviceCenterId
+                                && shipmnt.CompanyType == "Ecommerce"
+                                //&& shipmnt.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                //&& DbFunctions.DiffHours(shipmnt.DateModified, DateTime.Now) >= shipmentAge
+                            join coll in _context.ShipmentCollection                    
+                            on shipmnt.Waybill equals coll.Waybill
+                                where coll.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                    //&& coll.ShipmentScanStatus != ShipmentScanStatus.OKC
+                                    && DbFunctions.DiffHours(coll.DateModified, DateTime.Now) >= shipmentAge
+                                    && DbFunctions.DiffMonths(coll.DateModified, DateTime.Now) <= 3
+                            select new DelayedDeliveryDTO
+                            {
+                                DateCreated = shipmnt.DateCreated,
+                                CODAmount = shipmnt.CashOnDeliveryAmount,
+                                WayBill = shipmnt.Waybill,
+                                CustomerCode = shipmnt.CustomerCode,
+                                CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == shipmnt.CustomerCode).Select(n => n.Name).FirstOrDefault(),
+                                AgeOfTheShipment = DbFunctions.DiffDays(coll.DateModified, DateTime.Now).ToString()
+                            })
+                            .OrderByDescending(x => x.DateCreated)
+                            .ToListAsync();
 
-                var preShipment = _context.PresShipmentMobile.AsQueryable().Where(x =>
-                                x.DestinationServiceCenterId == serviceCenterId
-                                && x.CompanyType == "Ecommerce"
-                                && x.shipmentstatus != "Delivered"
-                                && DbFunctions.DiffHours(x.DateModified, DateTime.Now) >= shipmentAge
-                                && DbFunctions.DiffMonths(x.DateModified, DateTime.Now) >= 3);
-
-                List<DelayedDeliveryDTO> delayedShipmentDto = new List<DelayedDeliveryDTO>();
-
-                if (shipment.Any())
-                {
-                    delayedShipmentDto = shipment.Select(x =>
-                                    new DelayedDeliveryDTO()
-                                    {
-                                        DateCreated = x.DateCreated,
-                                        CODAmount = x.CashOnDeliveryAmount,
-                                        WayBill = x.Waybill,
-                                        CustomerCode = x.CustomerCode,
-                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
-                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
-                                    }).ToList();
-                }
-
-                if (preShipment.Any())
-                {
-                    delayedShipmentDto.AddRange(preShipment.Select(x =>
-                                    new DelayedDeliveryDTO()
-                                    {
-                                        DateCreated = x.DateCreated,
-                                        CODAmount = x.CashOnDeliveryAmount,
-                                        WayBill = x.Waybill,
-                                        CustomerCode = x.CustomerCode,
-                                        CustomerCompanyName = _context.Company.Where(n => n.CustomerCode == x.CustomerCode).Select(n => n.Name).FirstOrDefault(),
-                                        AgeOfTheShipment = DbFunctions.DiffDays(x.DateModified, DateTime.Now).ToString()
-                                    }).ToList());
-                }
-                return Task.FromResult(delayedShipmentDto);
+                return query;
             }
             catch (Exception)
             {
@@ -1794,56 +1777,62 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime from, DateTime to)
+        public async Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(int hubRepServiceCentreId, DateTime startDate, DateTime endDate)
         {
             try
             {
+                //Get start date and end date for database query
+                var filterCriteria = new DashboardFilterCriteria { EndDate = endDate, StartDate = startDate };
+                var filter = filterCriteria.getStartDateAndEndDate();
+                startDate = filter.Item1;
+                endDate = filter.Item2;
+
                 var shipment = _context.Shipment.AsQueryable();
 
                 List<ShipmentDeliveryReportDTO> recievedShipment = new List<ShipmentDeliveryReportDTO>();
                 List<ShipmentDeliveryReportDTO> deliveredShipment = new List<ShipmentDeliveryReportDTO>();
-                double dif = Math.Abs((from - to).TotalDays) / 30;
+                double dif = Math.Abs((startDate - endDate).TotalDays) / 30;
 
                 if ((int)dif <= 6)
                 {
-                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId
-                                                    && x.DateModified >= from && x.DateModified <= to);
+                    shipment = shipment.Where(x => x.DestinationServiceCentreId == hubRepServiceCentreId);
 
-                    // shipments received
-                    var shipmentRecieved = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
-
-                    // shipments delivered
-                    var shipmentDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC);
-
-                    // gathers all shipments received from both Shipment and PreShimentMobile tables
-                    if (shipmentRecieved.Any())
-                    {
-                        recievedShipment = shipmentRecieved.Select(x =>
-                                        new ShipmentDeliveryReportDTO()
+                    recievedShipment = await (from ship in shipment
+                                        //where ship.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                            //&& ship.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                        join coll in _context.ShipmentCollection
+                                        on ship.Waybill equals coll.Waybill
+                                        where coll.ShipmentScanStatus == ShipmentScanStatus.ARF
+                                            //&& coll.ShipmentScanStatus < ShipmentScanStatus.OKC
+                                            && ship.DateModified >= startDate && coll.DateModified <= endDate
+                                            select new ShipmentDeliveryReportDTO()
                                         {
-                                            DateCreated = x.DateCreated,
-                                            GrandTotal = x.GrandTotal,
-                                            Status = x.ShipmentScanStatus.ToString(),
-                                            Waybill = x.Waybill
-                                        }).ToList();
-                    }
+                                            DateCreated = ship.DateCreated,
+                                            GrandTotal = ship.GrandTotal,
+                                            Status = coll.ShipmentScanStatus.ToString(),
+                                            Waybill = ship.Waybill
+                                        })
+                                        .OrderByDescending(x =>x.DateCreated)
+                                        .ToListAsync();
 
-                    // gathers all shipments delivered from both Shipment and PreShimentMobile tables
-                    if (shipmentDelivered.Any())
-                    {
-                        deliveredShipment = shipmentDelivered.Select(x =>
-                                        new ShipmentDeliveryReportDTO()
+                    deliveredShipment = await (from ship in shipment
+                                        join coll in _context.ShipmentCollection
+                                        on ship.Waybill equals coll.Waybill
+                                        where
+                                            coll.DateModified >= startDate && coll.DateModified <= endDate
+                                            && coll.ShipmentScanStatus == ShipmentScanStatus.OKC
+                                        select new ShipmentDeliveryReportDTO()
                                         {
-                                            DateCreated = x.DateCreated,
-                                            GrandTotal = x.GrandTotal,
-                                            Status = x.ShipmentScanStatus.ToString(),
-                                            Waybill = x.Waybill
-                                        }).ToList();
-                    }
+                                            DateCreated = ship.DateCreated,
+                                            GrandTotal = ship.GrandTotal,
+                                            Status = coll.ShipmentScanStatus.ToString(),
+                                            Waybill = ship.Waybill
+                                        })
+                                        .OrderByDescending(x => x.DateCreated)
+                                        .ToListAsync();
 
-
-                    int totalReceived = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Count();
-                    int totalDelivered = shipment.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKC).Count();
+                    int totalReceived = recievedShipment.Count();
+                    int totalDelivered = deliveredShipment.Count();
 
                     var shipmentReport = new ShipmentDeliveryReportForHubRepsDTO()
                     {
@@ -1863,8 +1852,255 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-    }
+        ////Gateway Activity
+        //public async Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
+        //{
+        //    var queryDate = f_Criteria.getStartDateAndEndDate();
+        //    var startDate = queryDate.Item1;
+        //    var endDate = queryDate.Item2;
+        //    var temp = new List<ShipmentTracking>();
 
+
+        //    //Get all shipment
+        //    //var shipments =  _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false && x.DestinationServiceCentreId == f_Criteria.ServiceCentreId);
+
+        //    //filter shipment tracking by scan status nand serviceCentreId
+
+        //    var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "ACC");
+
+        //    var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "DCC");
+
+        //    HashSet<ShipmentTracking> shipmentTrackings = new HashSet<ShipmentTracking>(track, new ShipmentEqualityComparer());
+        //    shipmentTrackings.ExceptWith(track2);
+
+        //    shipmentTrackings.ToList();
+
+        //    var waybil = shipmentTrackings.Select(x => x.Waybill).ToList();
+
+        //    var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DepartureServiceCentreId == f_Criteria.ServiceCentreId).ToList();
+
+
+        //    List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+        //                                            join tracking in shipmentTrackings on shipment.Waybill equals tracking.Waybill
+        //                                            select new GatewatActivityDTO()
+        //                                            {
+        //                                                ManifestNumber = _context.ManifestGroupWaybillNumberMapping.Where(x => x.GroupWaybillNumber ==
+        //                                                (_context.GroupWaybillNumberMapping.Where(gr => gr.WaybillNumber == shipment.Waybill).FirstOrDefault().GroupWaybillNumber))
+        //                                                .FirstOrDefault()?.ManifestCode,
+        //                                                Waybill = shipment.Waybill,
+        //                                                DateCreated = shipment.DateCreated,
+        //                                                DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+        //                                                DepartureServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+        //                                                {
+        //                                                    Code = x.Code,
+        //                                                    Name = x.Name
+        //                                                }).FirstOrDefault(),
+
+        //                                                DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+        //                                                DestinationServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+        //                                                {
+        //                                                    Code = x.Code,
+        //                                                    Name = x.Name
+        //                                                }).FirstOrDefault(),
+        //                                                DateTime = tracking.DateTime
+        //                                            }).ToList();
+
+
+        //    return await Task.FromResult(shipmentDto.OrderBy(x => x.DateCreated).ToList());
+        //}
+
+
+
+
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GetGatewayShipment(BaseFilterCriteria f_Criteria)
+        {
+            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            var temp = new List<ShipmentTracking>();
+
+            //get shipment with ACC scan
+            var track = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "ACC");
+
+            //get shipment with DCC scan
+            var track2 = _context.ShipmentTracking.AsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.ServiceCentreId == f_Criteria.UserServiceCentreId && x.Status == "DCC");
+
+            //filter those with ACC scan and no DCC scan using HashSet
+            HashSet<ShipmentTracking> shipmentTrackings = new HashSet<ShipmentTracking>(track, new ShipmentEqualityComparer());
+            shipmentTrackings.ExceptWith(track2);
+            shipmentTrackings.ToList();
+
+            //Extract the waybill number from the filtering
+            var waybil = shipmentTrackings.Select(x => x.Waybill).ToList();
+
+            //get the shipments with the waybill number extracted from the filtering from the shipment table
+            var shipments = _context.Shipment.AsQueryable().Where(x => waybil.Contains(x.Waybill) && x.IsCancelled == false && x.DepartureServiceCentreId == f_Criteria.ServiceCentreId).ToList();
+
+            //get the waybill number from shipments
+            var shipWaybil = shipments.Select(x => x.Waybill).ToList();
+
+            var groups = _context.GroupWaybillNumberMapping.AsQueryable().Where(x => shipWaybil.Contains(x.WaybillNumber)).ToList();
+
+            var num = groups.Select(x => x.GroupWaybillNumber).ToList();
+
+            var mani = _context.ManifestGroupWaybillNumberMapping.AsQueryable().Where(x => num.Contains(x.GroupWaybillNumber)).ToList();
+
+
+            List<GatewatActivityDTO> shipmentDto = (from shipment in shipments
+                                                    join tracking in shipmentTrackings on shipment.Waybill equals tracking.Waybill
+                                                    join grou in groups on shipment.Waybill equals grou.WaybillNumber
+                                                    join code in mani on grou.GroupWaybillNumber equals code.GroupWaybillNumber
+                                                    select new GatewatActivityDTO()
+                                                    {
+                                                        ManifestNumber = code.ManifestCode,
+                                                        Waybill = shipment.Waybill,
+                                                        DateCreated = shipment.DateCreated,
+                                                        DepartureServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+
+                                                        DestinationServiceCentre = _context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                        {
+                                                            Name = x.Name
+                                                        }).FirstOrDefault(),
+                                                        DateTime = tracking.DateTime
+                                                    }).ToList();
+
+
+            return await Task.FromResult(shipmentDto.OrderBy(x => x.DateCreated).ToList());
+        }
+
+
+
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceSummaryReport(EcommerceShipmentSummaryFilterCriteria filterCriteria)
+        {
+
+            var queryDate = filterCriteria.getStartDateAndEndDateForEcommerceReport();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            var Mobile = "GIGGO";
+            var Agility = "Agility";
+            filterCriteria.CompanyType = "Ecommerce";
+
+            //to check for months apart
+            //int monthsApart = Math.Abs(12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month);
+
+            //to check for days apart
+            int daysApart = (endDate.Date - startDate.Date).Days;
+
+
+            if (daysApart > 15)
+            {
+                throw new GenericException("Date range error", $"{(int)HttpStatusCode.BadRequest}");
+
+            }
+
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false
+                               && s.CompanyType == filterCriteria.CompanyType && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            var mobiles = _context.PresShipmentMobile.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false
+                              && s.CompanyType == filterCriteria.CompanyType && s.IsFromAgility == false && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            var companys = _context.Company.AsQueryable().Where(s => s.CompanyType == CompanyType.Ecommerce);
+
+            List<EcommerceShipmentSummaryReportDTO> TotalEcommerceShipment = (from Shipment in shipments
+                                                                              join company in companys on Shipment.CustomerCode equals company.CustomerCode
+                                                                              select new EcommerceShipmentSummaryReportDTO()
+                                                                              {
+                                                                                  Waybill = Shipment.Waybill,
+                                                                                  CustomerDetails = new CustomerDTO
+                                                                                  {
+                                                                                      CustomerCode = company.CustomerCode,
+                                                                                      Name = company.Name
+                                                                                  },
+                                                                                  DepartureServiceCentre = Context.ServiceCentre.Where(ser => ser.ServiceCentreId == Shipment.DepartureServiceCentreId).Select(n => new ServiceCentreDTO
+                                                                                  {
+                                                                                      Name = n.Name
+                                                                                  }).FirstOrDefault(),
+                                                                                  DestinationServiceCentre = Context.ServiceCentre.Where(ser => ser.ServiceCentreId == Shipment.DestinationServiceCentreId).Select(n => new ServiceCentreDTO
+                                                                                  {
+                                                                                      Name = n.Name
+                                                                                  }).FirstOrDefault(),
+                                                                                  CreationSource = Shipment.IsFromMobile ? Mobile : Agility,
+                                                                                  CurrentStatus = Context.ScanStatus.Where(sca => sca.Code == (Context.ShipmentTracking
+                                                                                  .Where(st => st.Waybill == Shipment.Waybill).OrderByDescending(st => st.DateCreated).FirstOrDefault().Status)).FirstOrDefault().Reason
+                                                                              }).ToList();
+            TotalEcommerceShipment.AddRange(mobiles.Select(x =>
+                                    new EcommerceShipmentSummaryReportDTO()
+                                    {
+                                        Waybill = x.Waybill,
+                                        CustomerDetails = Context.Company.Where(c => c.CustomerCode == x.CustomerCode).Select(n => new CustomerDTO
+                                        {
+                                            CustomerCode = n.CustomerCode,
+                                            Name = n.Name
+                                        }).FirstOrDefault(),
+                                        DepartureServiceCentre = Context.Station.Where(c => c.StationId == x.SenderStationId).Select(n => new ServiceCentreDTO
+                                        {
+                                            Name = n.StationName
+                                        }).FirstOrDefault(),
+                                        DestinationServiceCentre = Context.Station.Where(c => c.StationId == x.ReceiverStationId).Select(n => new ServiceCentreDTO
+                                        {
+                                            Name = n.StationName
+                                        }).FirstOrDefault(),
+                                        CreationSource = x.IsFromAgility ? Agility : Mobile,
+                                        CurrentStatus = Context.MobileScanStatus.Where(mob => mob.Code == (Context.MobileShipmentTracking
+                                        .Where(mobt => mobt.Waybill == x.Waybill).OrderByDescending(mobt => mobt.DateCreated).FirstOrDefault().Status)).FirstOrDefault().Reason
+                                    }).ToList());
+
+            if (filterCriteria.IsMobile)
+            {
+                TotalEcommerceShipment = TotalEcommerceShipment.Where(x => x.CreationSource == Mobile).ToList();
+            }
+
+            if (filterCriteria.IsAgility)
+            {
+                TotalEcommerceShipment = TotalEcommerceShipment.Where(x => x.CreationSource == Agility).ToList();
+            }
+
+
+            return await Task.FromResult(TotalEcommerceShipment.OrderByDescending(x => x.DateCreated).ToList());
+
+
+        }
+
+        public async Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybillNumber)
+        {
+            try
+            {
+                //declare parameters for the stored procedure
+                SqlParameter waybill = new SqlParameter("@Waybill", waybillNumber);
+
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    waybill
+                };
+
+                var result = _context.Database.SqlQuery<CODShipmentDTO>("CODShipment " +
+                   "@Waybill",
+                   param).ToList();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        private class ShipmentEqualityComparer : IEqualityComparer<ShipmentTracking>
+        {
+            public bool Equals(ShipmentTracking x, ShipmentTracking y)
+            {
+                return x.Waybill == y.Waybill;
+            }
+
+            public int GetHashCode(ShipmentTracking obj)
+            {
+                return base.GetHashCode();
+            }
+        }
+    }
 }
 
 
@@ -2764,7 +3000,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
         }
     }
 
-        public Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
+    public Task<List<UnidentifiedItemsForInternationalShippingDTO>> GetUnIdentifiedIntlShipments(NewFilterOptionsDto filter)
     {
 
         var requests = _context.UnidentifiedItemsForInternationalShipping.AsQueryable();
@@ -2779,34 +3015,34 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
         requests = requests.Where(x => x.DateCreated >= filter.StartDate && x.DateCreated <= filter.EndDate).OrderByDescending(s => s.DateCreated);
 
         List<UnidentifiedItemsForInternationalShippingDTO> requestsDTO = (from r in requests
-                                                                        
-                                                    select new UnidentifiedItemsForInternationalShippingDTO()
-                                                    {
-                                                        UnidentifiedItemsForInternationalShippingId = r.UnidentifiedItemsForInternationalShippingId,
-                                                        TrackingNo = r.TrackingNo,
-                                                        CustomerName = r.CustomerName,
-                                                        CustomerEmail = r.CustomerEmail,
-                                                        CustomerPhoneNo = r.CustomerPhoneNo,
-                                                        DateCreated = r.DateCreated,
-                                                        DateModified = r.DateModified,
-                                                        IsProcessed = r.IsProcessed,
-                                                        Quantity = r.Quantity,
-                                                        Length = r.Length,
-                                                        Width = r.Width,
-                                                        Height = r.Height,
-                                                        Weight = r.Weight,
-                                                        UserId = r.UserId,
-                                                        ItemName = r.ItemName,
-                                                        NoOfPackageReceived = r.NoOfPackageReceived,
-                                                        StoreName = r.StoreName,
-                                                        CourierService = r.CourierService,
-                                                        ItemDescription = r.ItemDescription,
-                                                        ItemUniqueNo = r.ItemUniqueNo
-                                                    }).ToList();
+
+                                                                          select new UnidentifiedItemsForInternationalShippingDTO()
+                                                                          {
+                                                                              UnidentifiedItemsForInternationalShippingId = r.UnidentifiedItemsForInternationalShippingId,
+                                                                              TrackingNo = r.TrackingNo,
+                                                                              CustomerName = r.CustomerName,
+                                                                              CustomerEmail = r.CustomerEmail,
+                                                                              CustomerPhoneNo = r.CustomerPhoneNo,
+                                                                              DateCreated = r.DateCreated,
+                                                                              DateModified = r.DateModified,
+                                                                              IsProcessed = r.IsProcessed,
+                                                                              Quantity = r.Quantity,
+                                                                              Length = r.Length,
+                                                                              Width = r.Width,
+                                                                              Height = r.Height,
+                                                                              Weight = r.Weight,
+                                                                              UserId = r.UserId,
+                                                                              ItemName = r.ItemName,
+                                                                              NoOfPackageReceived = r.NoOfPackageReceived,
+                                                                              StoreName = r.StoreName,
+                                                                              CourierService = r.CourierService,
+                                                                              ItemDescription = r.ItemDescription,
+                                                                              ItemUniqueNo = r.ItemUniqueNo
+                                                                          }).ToList();
 
         return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).ToList());
     }
-        public Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
+    public Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID)
     {
 
         var requests = _context.UnidentifiedItemsForInternationalShipping.AsQueryable();
@@ -2840,7 +3076,7 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
         return Task.FromResult(requestsDTO.OrderByDescending(x => x.DateCreated).FirstOrDefault());
     }
 
-        public Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filterOptionsDto)
+    public Task<List<InvoiceViewDTO>> GetProcessedIntlShipment(NewFilterOptionsDto filterOptionsDto)
     {
         // filter by cancelled shipments
         var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsInternational);
@@ -3582,3 +3818,4 @@ public class IntlShipmentRequestRepository : Repository<IntlShipmentRequest, GIG
         }
     }
 }
+

@@ -347,18 +347,16 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [HttpGet]
         [Route("gettransferstatus")]
-        public async Task<IServiceResponse<bool>> GetTransferStatus([FromUri] string craccount)
+        public async Task<IServiceResponse<CODPaymentResponse>> GetTransferStatus([FromUri] string craccount)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _service.GetTransferStatus(craccount);
-                return new ServiceResponse<bool>
+                return new ServiceResponse<CODPaymentResponse>
                 {
                     Object = result
                 };
             });
         }
-
-
     }
 }

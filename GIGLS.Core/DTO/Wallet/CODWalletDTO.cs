@@ -113,6 +113,9 @@ namespace GIGLS.Core.DTO.Wallet
 
         [JsonProperty("receiverBankCode")]
         public string ReceiverBankCode { get; set; }
+        
+        [JsonProperty("receiverBankName")]
+        public string ReceiverBankName { get; set; }
 
         [JsonProperty("retrievalReference")]
         public string RetrievalReference { get; set; }

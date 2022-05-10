@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPlaceLocationService _locationService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
         private readonly ICODWalletService _codWalletService;
+        private readonly ICellulantPaymentService _cellulantService;
 
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
@@ -90,7 +91,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, 
+            ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, ICellulantPaymentService cellulantService)
         {
             _uow = uow;
             _deliveryService = deliveryService;
@@ -118,6 +120,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _locationService = locationService;
             _codWalletService = codWalletService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _cellulantService = cellulantService;
             MapperConfig.Initialize();
         }
 
@@ -567,7 +570,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationServiceCentreId = shipment.DestinationServiceCenterId,
                     ReceiverStationId = shipment.DestinationStationId,
                     SenderStationId = shipment.DepartureStationId,
-                    LGA = shipment.LGA
+                    LGA = shipment.LGA,
+                    DeliveryType = shipment.DeliveryType,
+                    ExpressDelivery = shipment.DeliveryType == DeliveryType.GOFASTER ? true : false
 
                 };
 
@@ -6287,17 +6292,20 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //set default values if payload is null
-                if (dto == null)
+                var date = DateTime.UtcNow;
+                var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                if (dto.StartDate == null && dto.EndDate == null)
                 {
                     dto = new PaginationDTO
                     {
                         Page = 1,
-                        PageSize = 25,
-                        StartDate = null,
-                        EndDate = null
-                    };
+                        PageSize = 100,
+                        StartDate = firstDayOfMonth,
+                        EndDate = lastDayOfMonth
+                    }; 
                 }
+
                 int totalCount;
                 if (String.IsNullOrEmpty(dto.UserId))
                 {
@@ -6339,7 +6347,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (dto.PageSize < 1)
                 {
-                    dto.PageSize = 25;
+                    dto.PageSize = 100;
                 }
                 if (dto.Page < 1)
                 {
@@ -6536,11 +6544,203 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 throw new GenericException("You are not a hub representative");
+
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+
+        public async Task<string> ValidateCODPayment(string waybill)
+        {
+            var result = "Payment is being processed; please try again later";
+            var customerCode = string.Empty;
+            if (String.IsNullOrEmpty(waybill))
+            {
+                throw new GenericException("invalid request, please provide a waybill number");
+            }
+
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipmentInfo == null)
+            {
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment == null)
+                {
+                    throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else
+                {
+                    customerCode = mobileShipment.CustomerCode;
+                }
+            }
+            else if (shipmentInfo != null)
+            {
+                customerCode = shipmentInfo.CustomerCode;
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (accInfo is null)
+            {
+                throw new GenericException("user does not have a cod wallet");
+            }
+            var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill);
+            var codregister = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codtransferlog == null && String.IsNullOrEmpty(codregister.PaymentTypeReference))
+            {
+                throw new GenericException("Payment is being processed; please try again later");
+            }
+
+            var codtransferlogs = _uow.CODTransferRegister.GetAllAsQueryable().Where(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Paid).ToList();
+            if (codtransferlogs.Count > 0)
+            {
+                throw new GenericException($"COD payment has been made for this waybill {waybill}");
+            }
+
+            
+            var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
+            if (codAccShipment != null)
+            {
+                var cod = new CODCallBackDTO();
+                cod.CODAmount = Convert.ToString(codAccShipment.Amount);
+                cod.TransactionReference = codAccShipment.PaymentTypeReference;
+                cod.PaymentStatus = PaymentStatus.Pending.ToString();
+                cod.Waybill = waybill;
+
+                await _cellulantService.CODCallBack(cod);
+            }
+            await Task.Delay(10000);
+            var recentLog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == waybill && x.PaymentStatus == PaymentStatus.Paid);
+            if (recentLog != null && !String.IsNullOrEmpty(recentLog.StatusDescription))
+            {
+                result = recentLog.StatusDescription;
+            }
+           
+            return result;
+        }
+
+        //Gateway Activity
+        public async Task<List<GatewatActivityDTO>> GatewayActivity(BaseFilterCriteria FilterCriteria)
+        {
+            try
+            {
+                var dashboardDTO = new List<GatewatActivityDTO>() { };
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
+                var serviceCenter = await _centreService.GetServiceCentreById(serviceCenterIds[0]);
+
+                var check = await _userService.CheckCurrentUserSystemRole(userId);
+
+                if (check || admin && serviceCenter.IsGateway)
+                {
+                    FilterCriteria.UserServiceCentreId = serviceCenterIds[0];
+
+                    return dashboardDTO = await _uow.Shipment.GetGatewayShipment(FilterCriteria);
+                }
+
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            try
+            {
+                var EcommerceReport = new List<EcommerceShipmentSummaryReportDTO>() { };
+
+                var userId = await _userService.GetCurrentUserId();
+
+                var User = await _userService.GetUserById(userId);
+
+                var admin = await _userService.IsUserHasAdminRole(userId);
+
+                if(admin || User.SystemUserRole.ToLower().Contains("ecommerce"))
+                {
+
+                    EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
+
+                    return EcommerceReport;
+
+                }
+                else
+                {
+                    throw new GenericException("Not Authorized", $"{(int)HttpStatusCode.BadRequest}");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public async Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(waybill))
+                {
+                    waybill = waybill.Trim();
+                }
+
+                var codShipments = await _uow.Shipment.GetCODShipmentByWaybill(waybill);
+                if (codShipments.Any())
+                {
+                    var statuses = codShipments.Select(x => x.ShipmentScanStatus).ToList();
+                    var scanST = _uow.ScanStatus.GetAll().Where(x => statuses.Contains(x.Code));
+                    foreach (var item in codShipments)
+                    {
+                        item.ShipmentStatus = scanST.Where(x => x.Code == item.ShipmentScanStatus.ToString()).FirstOrDefault().Reason;
+                    }
+                }
+                return codShipments;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> CheckTransferStatusForECA(string waybill)
+        {
+            var result = "Transfer has not been received from customer’s Bank";
+
+            var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+            if (shipmentInfo is null)
+            {
+                var mobileShipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (mobileShipment == null)
+                {
+                    throw new GenericException($"waybill not found", $"{(int)HttpStatusCode.NotFound}");
+                }
+            }
+            var accNo = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == waybill);
+            if (accNo != null)
+            {
+                var item = await _cellulantService.GetCODPaymentReceivedStatus(accNo.AccountNo);
+                if (item.Status)
+                {
+                    result = "Transfer Confirmed. Transfer has been received from customer’s Bank";
+                }
+            }
+            else if (accNo is null)
+            {
+                result = "Transfer can not be validated at this time. Transfer details are not available";
+            }
+            return result;
         }
     }
 }

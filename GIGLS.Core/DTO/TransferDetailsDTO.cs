@@ -109,5 +109,68 @@ namespace GIGLS.Core.DTO
         public string Validity { get; set; }
     }
 
+    public class CODPaymentStatusTransaction
+    {
+        [JsonProperty("originatoraccountnumber")]
+        public string Originatoraccountnumber { get; set; }
 
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("originatorname")]
+        public string Originatorname { get; set; }
+
+        [JsonProperty("narration")]
+        public string Narration { get; set; }
+
+        [JsonProperty("craccountname")]
+        public string Craccountname { get; set; }
+
+        [JsonProperty("paymentreference")]
+        public string Paymentreference { get; set; }
+
+        [JsonProperty("bankname")]
+        public string Bankname { get; set; }
+
+        [JsonProperty("sessionid")]
+        public string Sessionid { get; set; }
+
+        [JsonProperty("craccount")]
+        public string Craccount { get; set; }
+
+        [JsonProperty("bankcode")]
+        public string Bankcode { get; set; }
+
+        [JsonProperty("requestdate")]
+        public string Requestdate { get; set; }
+
+        [JsonProperty("nibssresponse")]
+        public string Nibssresponse { get; set; }
+
+        [JsonProperty("sendstatus")]
+        public string Sendstatus { get; set; }
+
+        [JsonProperty("sendresponse")]
+        public string Sendresponse { get; set; }
+    }
+
+    public class CODPaymentStatusResponse
+    {
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("status_desc")]
+        public string StatusDesc { get; set; }
+
+        [JsonProperty("transactions")]
+        public List<CODPaymentStatusTransaction> Transactions { get; set; }
+    }
+
+    public class CODPaymentResponse
+    {
+        public bool Status { get; set; }
+
+        public string Message { get; set; }
+
+    }
 }

@@ -179,6 +179,7 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? CODStatusDate { get; set; }
         public string CODDescription { get; set; }
         public string blackBookSerialNumber { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
@@ -455,6 +456,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ShipmentStatus { get; set; }
         public string ShipmentScanStatus { get; set; }
         public string CompanyName { get; set; }
+        public CODMobileStatus CodStatus { get; set; }
+        public string CodStatusDescription { get; set; }
     }
 
     public class NewShipmentDTO
@@ -619,6 +622,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
     }
 
+
     public class DelayedDeliveryDTO
     {
         public string WayBill { get; set; }
@@ -644,4 +648,5 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal GrandTotal { get; set; }
         public DateTime DateCreated { get; set; }
     }
+
 }

@@ -1185,5 +1185,79 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("gatewayactivity")]
+        public async Task<IServiceResponse<List<GatewatActivityDTO>>> GatewayActivity(BaseFilterCriteria FilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GatewayActivity(FilterCriteria);
+
+                return new ServiceResponse<List<GatewatActivityDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("ecommercereport")]
+        public Task<IServiceResponse<List<EcommerceShipmentSummaryReportDTO>>> GetEcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter)
+        {
+            return HandleApiOperationAsync(async () =>
+            {
+                var report = await _service.EcommerceShipmentSummaryReport(filter);
+
+                return new ServiceResponse<List<EcommerceShipmentSummaryReportDTO>>
+                {
+                    Object = report
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("confirmcodtransferstatus")]
+        public async Task<IServiceResponse<string>> ConfirmCODTransferStatus([FromUri] string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.ValidateCODPayment(waybill);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcodshipmentbywaybill/{waybill}")]
+        public async Task<IServiceResponse<List<CODShipmentDTO>>> GetCODShipmentByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var codShipments = await _service.GetCODShipmentByWaybill(waybill);
+                return new ServiceResponse<List<CODShipmentDTO>>
+                {
+                    Object = codShipments
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("checktransferstatusforeca")]
+        public async Task<IServiceResponse<string>> CheckTransferStatusForECA([FromUri] string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.CheckTransferStatusForECA(waybill);
+                return new ServiceResponse<string>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

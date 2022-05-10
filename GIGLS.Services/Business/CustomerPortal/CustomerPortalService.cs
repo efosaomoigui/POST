@@ -74,6 +74,7 @@ using Newtonsoft.Json;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
 using System.Text;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -248,7 +249,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             //for now block flutter wave untill they sort there issues
             if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
             {
-                throw new GenericException("Payment method currently not available, try paystack.");
+                throw new GenericException("You are using an old version of the GIGGO App. Please update your App to the latest App Version.");
             }
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
@@ -256,6 +257,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> AddWaybillPaymentLogFromApp(WaybillPaymentLogDTO walletPaymentLogDto)
         {
+            if (walletPaymentLogDto.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+            {
+                throw new GenericException("You are using an old version of the GIGGO App. Please update your App to the latest App Version.");
+            }
             var walletPaymentLog = await _waybillPaymentLogService.AddWaybillPaymentLogFromApp(walletPaymentLogDto);
             var factor = Convert.ToDecimal(Math.Pow(10, 0));
             walletPaymentLog.Amount = Math.Round(walletPaymentLog.Amount * factor) / factor;
@@ -2780,6 +2785,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.DestinationStationId = preShipmentDTO.DestinationStationId;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
                 existingPreShipment.DestinationServiceCenterId = preShipmentDTO.DestinationServiceCenterId;
+                existingPreShipment.DeliveryType = preShipmentDTO.DeliveryType;
 
                 if (existingPreShipment.IsAgent)
                 {
@@ -3191,7 +3197,27 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<ResponseDTO> UnboardUser(NewCompanyDTO company)
         {
-            return await _companyService.UnboardUser(company);
+            var result = await _companyService.UnboardUser(company);
+            //if (result.Succeeded)
+            //{
+            //    //create codwallet for customer(if failure,it should be silent)
+            //    var codWal = new CreateStellaAccountDTO()
+            //    {
+            //        firstName = company.FirstName,
+            //        lastName = company.LastName,
+            //        otherNames = string.Empty,
+            //        bvn = company.BVN,
+            //        phoneNo = company.PhoneNumber,
+            //        gender = "M",
+            //        email = company.Email,
+            //        dateOfBirth = string.Empty,
+            //        placeOfBirth = string.Empty,
+            //        address = company.Address,
+            //        nationalIdentityNo = company.IdentificationNumber,
+            //    };
+            //    var codWallet = _codWalletService.CreateStellasAccount(codWal);
+            //}
+            return result;
         }
 
         public async Task<ResponseDTO> ValidateUser(UserValidationNewDTO userDetail)
@@ -4724,8 +4750,26 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 await Task.Delay(15000);
                 transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                return await _codWalletService.StellasWithdrawal(withrawObj);
+                var res = await _codWalletService.StellasWithdrawal(withrawObj);
+
+                //log to transferlog table
+                var transferLog = new CODTransferLog()
+                {
+                    CustomerCode = codWallet.CustomerCode,
+                    Amount = amount,
+                    OriginatingBankAccount = codWallet.AccountNo,
+                    OriginatingBankName = "Stellas",
+                    DestinationBankAccount = transferDTO.ReceiverAccountNumber,
+                    DestinationBankName = transferDTO.ReceiverBankName,
+                    StatusCode = res.status.ToString(),
+                    StatusDescription = res.message
+                };
+                _uow.CODTransferLog.Add(transferLog);
+                await _uow.CompleteAsync();
+
+                return res;
             }
+
             return withdrawResponse;
         }
 
@@ -4738,7 +4782,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _codWalletService.StellasValidateBankName(validateBankNameDTO);
         }
 
-        public async Task<bool> GetTransferStatus(string craccount)
+        public async Task<CODPaymentResponse> GetTransferStatus(string craccount)
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }

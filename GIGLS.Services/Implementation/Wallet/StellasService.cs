@@ -35,6 +35,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
         private static string _auth = System.Web.HttpContext.Current.Server.MapPath("~");
+        private static readonly HttpClient client = new HttpClient();
 
         public StellasService(IUserService userService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
         {
@@ -67,6 +68,7 @@ namespace GIGLS.Services.Implementation.Wallet
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
                 client.DefaultRequestHeaders.Add("businessId", bizId);
@@ -137,51 +139,50 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             url = $"{url}balance/{accountNo}";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            using (var client = new HttpClient())
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var response = await client.GetAsync(url);
+            string responseResult = await response.Content.ReadAsStringAsync();
+            if (responseResult.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var response = await client.GetAsync(url);
-                string responseResult = await response.Content.ReadAsStringAsync();
-                if (responseResult.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "get", null);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "get", null);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry.FirstOrDefault().Value);
-                        result.data = res;
-                        result.message = res.message;
-                        result.status = res.status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
-                }
-                else if (response.IsSuccessStatusCode)
-                {
-                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
-                    result.data = res.data;
+                    var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(retry.FirstOrDefault().Value);
+                    result.data = res;
                     result.message = res.message;
                     result.status = res.status;
                     return result;
                 }
                 else
                 {
-                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
                     result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
                 }
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                var res = JsonConvert.DeserializeObject<GetCustomerBalanceDTO>(responseResult);
+                result.data = res.data;
+                result.message = res.message;
+                result.status = res.status;
+                return result;
+            }
+            else
+            {
+                var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                result.errors.AddRange(res.Errors);
+                result.message = "an error occured";
+                result.status = false;
+                return result;
             }
             return result;
         }
@@ -262,49 +263,49 @@ namespace GIGLS.Services.Implementation.Wallet
             var token = String.Empty;
             var auth = await Authenticate();
             var authorization = await GetToken();
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            
+            
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
 
-                if (action == "get")
+            if (action == "get")
+            {
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                        res.Add(true, retrialResponseResult);
-                        return res;
-                    }
-                    else
-                    {
-                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                        res.Add(false, retrialResponseResult);
-                        return res;
-                    }
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    res.Add(true, retrialResponseResult);
+                    return res;
                 }
-                else if (action == "post")
+                else
                 {
-                    var response = await client.PostAsync(url, data);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                        res.Add(true, retrialResponseResult);
-                        return res;
-                    }
-                    else
-                    {
-                        string retrialResponseResult = await response.Content.ReadAsStringAsync();
-                        res.Add(false, retrialResponseResult);
-                        return res;
-                    }
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    res.Add(false, retrialResponseResult);
+                    return res;
                 }
-                res.Add(false, "error occured");
-                return res;
             }
+            else if (action == "post")
+            {
+                var response = await client.PostAsync(url, data);
+                if (response.IsSuccessStatusCode)
+                {
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    res.Add(true, retrialResponseResult);
+                    return res;
+                }
+                else
+                {
+                    string retrialResponseResult = await response.Content.ReadAsStringAsync();
+                    res.Add(false, retrialResponseResult);
+                    return res;
+                }
+            }
+            res.Add(false, "error occured");
+            return res;
         }
 
 
@@ -330,38 +331,21 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             url = $"{url}banks";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            using (var client = new HttpClient())
+            
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var response = await client.GetAsync(url);
+            string responseResult = await response.Content.ReadAsStringAsync();
+            if (responseResult.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var response = await client.GetAsync(url);
-                string responseResult = await response.Content.ReadAsStringAsync();
-                if (responseResult.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "get", null);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "get", null);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
-                }
-                else if (response.IsSuccessStatusCode)
-                {
-                    var res = JsonConvert.DeserializeObject<StellassBankResponse>(responseResult);
+                    var res = JsonConvert.DeserializeObject<StellassBankResponse>(retry.FirstOrDefault().Value);
                     result.data = res.Data;
                     result.message = res.Message;
                     result.status = res.Status;
@@ -369,13 +353,30 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
                     result.errors.AddRange(res.Errors);
                     result.message = "an error occured";
                     result.status = false;
                     return result;
                 }
             }
+            else if (response.IsSuccessStatusCode)
+            {
+                var res = JsonConvert.DeserializeObject<StellassBankResponse>(responseResult);
+                result.data = res.Data;
+                result.message = res.Message;
+                result.status = res.Status;
+                return result;
+            }
+            else
+            {
+                var res = JsonConvert.DeserializeObject<StellasErrorResponse>(responseResult);
+                result.errors.AddRange(res.Errors);
+                result.message = "an error occured";
+                result.status = false;
+                return result;
+            }
+           
             return result;
         }
 
@@ -399,59 +400,58 @@ namespace GIGLS.Services.Implementation.Wallet
                     throw new GenericException(auth.ToString());
                 }
             }
-            using (var client = new HttpClient())
+            
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var json = JsonConvert.SerializeObject(createStellaAccountDTO);
+            StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, data);
+            string message = await response.Content.ReadAsStringAsync();
+            if (message.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, data);
-                string message = await response.Content.ReadAsStringAsync();
-                if (message.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "post", data);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "post", data);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
-                        result.data = res;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
-
+                    var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
+                    result.data = res;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
                 }
                 else
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
-                        result.data = res;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
-                return result;
+
             }
+            else
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
+                    result.data = res;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
+                }
+            }
+            return result;
         }
 
 
@@ -476,55 +476,55 @@ namespace GIGLS.Services.Implementation.Wallet
                     throw new GenericException(auth.ToString());
                 }
             }
-            using (var client = new HttpClient())
+
+            
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var json = JsonConvert.SerializeObject(validateBankNameDTO);
+            StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, data);
+            string message = await response.Content.ReadAsStringAsync();
+            if (message.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var json = JsonConvert.SerializeObject(validateBankNameDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, data);
-                string message = await response.Content.ReadAsStringAsync();
-                if (message.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "post", data);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "post", data);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
+                    var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(retry.FirstOrDefault().Value);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
                 }
                 else
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(message);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
+                }
+            }
+            else
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<ValidateBankNameResponse>(message);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
             return result;
@@ -551,55 +551,54 @@ namespace GIGLS.Services.Implementation.Wallet
                     throw new GenericException(auth.ToString());
                 }
             }
-            using (var client = new HttpClient())
+            
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
+            client.DefaultRequestHeaders.Add("businessId", bizId);
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
+            var json = JsonConvert.SerializeObject(createStellaAccountDTO);
+            StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, data);
+            string message = await response.Content.ReadAsStringAsync();
+            if (message.Contains("Session Expired! Please login again"))
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("SECRET_KEY", secretKey);
-                client.DefaultRequestHeaders.Add("businessId", bizId);
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authorization}");
-                var json = JsonConvert.SerializeObject(createStellaAccountDTO);
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, data);
-                string message = await response.Content.ReadAsStringAsync();
-                if (message.Contains("Session Expired! Please login again"))
+                var retry = await Retry(url, "post", data);
+                if (retry.ContainsKey(true))
                 {
-                    var retry = await Retry(url, "post", data);
-                    if (retry.ContainsKey(true))
-                    {
-                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
+                    var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(retry.FirstOrDefault().Value);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
                 }
                 else
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
-                        result.data = res.Data;
-                        result.message = res.Message;
-                        result.status = res.Status;
-                        return result;
-                    }
-                    else
-                    {
-                        var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
-                        result.errors.AddRange(res.Errors);
-                        result.message = "an error occured";
-                        result.status = false;
-                        return result;
-                    }
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(retry.FirstOrDefault().Value);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
+                }
+            }
+            else
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = JsonConvert.DeserializeObject<WithdrawAndTransferSucessDTO>(message);
+                    result.data = res.Data;
+                    result.message = res.Message;
+                    result.status = res.Status;
+                    return result;
+                }
+                else
+                {
+                    var res = JsonConvert.DeserializeObject<StellasErrorResponse>(message);
+                    result.errors.AddRange(res.Errors);
+                    result.message = "an error occured";
+                    result.status = false;
+                    return result;
                 }
             }
             return result;

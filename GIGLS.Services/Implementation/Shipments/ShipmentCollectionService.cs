@@ -618,22 +618,26 @@ namespace GIGLS.Services.Implementation.Shipments
             await UpdateShipmentCollection(shipmentCollection);
 
             //update cod values for cod shipment for both agility and mobile
-            var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
-            if (mobile != null)
+            var codtransferlog = await _uow.CODTransferRegister.GetAsync(x => x.Waybill == shipmentCollection.Waybill && x.PaymentStatus == PaymentStatus.Paid);
+            if (codtransferlog is null)
             {
-               mobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
-               mobile.CODStatus = CODMobileStatus.Collected;
-               mobile.CODStatusDate = DateTime.Now;
-               await _uow.CompleteAsync();
-            }
+                var mobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+                if (mobile != null)
+                {
+                    mobile.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
+                    mobile.CODStatus = CODMobileStatus.Collected;
+                    mobile.CODStatusDate = DateTime.Now;
+                    await _uow.CompleteAsync();
+                }
 
-            var agility = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
-            if (agility != null)
-            {
-                agility.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
-                agility.CODStatus = CODMobileStatus.Collected;
-                agility.CODStatusDate = DateTime.Now;
-                await _uow.CompleteAsync();
+                var agility = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsCashOnDelivery);
+                if (agility != null)
+                {
+                    agility.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({shipmentCollection.PaymentType.ToString()})";
+                    agility.CODStatus = CODMobileStatus.Collected;
+                    agility.CODStatusDate = DateTime.Now;
+                    await _uow.CompleteAsync();
+                } 
             }
 
             //If it is mobile
@@ -1289,8 +1293,56 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"invalid payload");
                 }
-                var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
-                return result;
+                var res = new GenerateAccountDTO();
+                //first check if an account has been generated for this waybill before 
+                //if so fetch and return to caller else call 3rd party and save to table and then return to caller
+                var alreadyGenerated = await _uow.CODGeneratedAccountNo.GetAsync(x => x.Waybill == payload.UniqueId);
+                if (alreadyGenerated != null)
+                {
+                    if (String.IsNullOrEmpty(alreadyGenerated.AccountNo))
+                    {
+                        var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
+                        if (result.Succeeded && result.ResponsePayload != null && !String.IsNullOrEmpty(result.ResponsePayload.Accountnumber))
+                        {
+                            alreadyGenerated.AccountNo = result.ResponsePayload.Accountnumber;
+                            alreadyGenerated.AccountName = result.ResponsePayload.Accountname;
+                            alreadyGenerated.BankName = result.ResponsePayload.Bankname;
+                            await _uow.CompleteAsync();
+                        }
+                    }
+
+                    var resPayload = new GenerateAccountResponseDTO();
+                    resPayload.Accountname = alreadyGenerated.AccountName;
+                    resPayload.Accountnumber = alreadyGenerated.AccountNo;
+                    resPayload.Bankname = alreadyGenerated.BankName;
+                    resPayload.status = 1;
+
+                    
+                    res.status = 1;
+                    res.Succeeded = true;
+                    res.Error = null;
+                    res.ResponsePayload = resPayload;
+                    
+                }
+                else
+                {
+                    var result = await _cellulantPaymentService.GenerateAccountNumberCellulant(payload);
+                    if (result.Succeeded && result.ResponsePayload != null)
+                    {
+                        var accNo = new CODGeneratedAccountNo()
+                        {
+                            AccountName = result.ResponsePayload.Accountname,
+                            AccountNo = result.ResponsePayload.Accountnumber,
+                            Amount = payload.Amount,
+                            Waybill = payload.UniqueId,
+                            BankName = result.ResponsePayload.Bankname
+                        };
+                        _uow.CODGeneratedAccountNo.Add(accNo);
+                        await _uow.CompleteAsync();
+                    }
+                    res = result;
+                }
+                return res;
             }
             catch (Exception)
             {
@@ -1298,12 +1350,10 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> GetTransferStatus(string craccount)
+        public async Task<CODPaymentResponse> GetTransferStatus(string craccount)
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
         }
-
-
 
     }
 }

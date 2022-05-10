@@ -270,7 +270,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<StellasResponseDTO> GetStellasBanks();
         Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO);
         Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO);
-        Task<bool> GetTransferStatus(string craccount);
+        Task<CODPaymentResponse> GetTransferStatus(string craccount);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
         Task LogContentType(LogEntryDTO log);
