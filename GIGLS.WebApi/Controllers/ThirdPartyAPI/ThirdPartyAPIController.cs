@@ -549,5 +549,18 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBack(payload);
             return result;
         }
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("updateshipmentcallbackstellas")]
+        public async Task<IServiceResponse<bool>> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod)
+        {
+            var result = await _thirdPartyAPIService.UpdateCODShipmentOnCallBackStellas(cod);
+            return new ServiceResponse<bool>
+            {
+                Object = result
+            };
+        }
     }
 }

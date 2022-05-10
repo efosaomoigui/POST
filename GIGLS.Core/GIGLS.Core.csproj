@@ -168,6 +168,8 @@
     <Compile Include="Domain\PaymentMethod.cs" />
     <Compile Include="Domain\PlaceLocation.cs" />
     <Compile Include="Domain\TransferDetails.cs" />
+    <Compile Include="Domain\Wallet\CODTransferLog.cs" />
+    <Compile Include="Domain\Wallet\CODGeneratedAccountNo.cs" />
     <Compile Include="Domain\Wallet\CODTransferRegister.cs" />
     <Compile Include="Domain\Wallet\CODWallet.cs" />
     <Compile Include="Domain\WaybillCharge.cs" />
@@ -390,9 +392,12 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\GatewatActivityDTO.cs" />
+    <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
+    <Compile Include="DTO\MessagingLog\ResponseData.cs" />
     <Compile Include="DTO\ShipmentExportDTO.cs" />
     <Compile Include="DTO\GIGXUserDetailsDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
@@ -480,6 +485,8 @@
     <Compile Include="DTO\Shipments\CreatePreShipmentMobileDTO.cs" />
     <Compile Include="DTO\Shipments\CreateShipmentNodeDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryFilterCriteria.cs" />
+    <Compile Include="DTO\Shipments\EcommerceShipmentSummaryReportDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
     <Compile Include="DTO\Shipments\UnidentifiedItemsForInternationalShippingDTO.cs" />
@@ -572,6 +579,7 @@
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
     <Compile Include="DTO\Wallet\CODWalletDTO.cs" />
+    <Compile Include="DTO\Wallet\CODTransferLogDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
     <Compile Include="DTO\Wallet\TransactionResult.cs" />
@@ -824,6 +832,8 @@
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODTransferLogRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICODGeneratedAccountNoRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICODWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IDemurrageRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryRegisterAccountRepository.cs" />
@@ -991,6 +1001,8 @@
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
     <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
+    <Compile Include="IServices\Wallet\ICODGeneratedAccountNoService.cs" />
+    <Compile Include="IServices\Wallet\ICODTransferLogService.cs" />
     <Compile Include="IServices\Wallet\ICODTransferRegisterService.cs" />
     <Compile Include="IServices\Wallet\IStellasService.cs" />
     <Compile Include="IServices\Wallet\IKorapayPaymentService.cs" />

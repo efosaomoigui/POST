@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace GIGLS.Core.DTO
         public string ProxyName { get; set; }
         public string ProxyPhoneNumber { get; set; }
         public string ProxyEmail { get; set; }
+        public PaymentType PaymentType { get; set; }
 
 
     }

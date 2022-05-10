@@ -981,18 +981,7 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Succeeded = true;
                 result.Entity = entity;
                 var companyMessagingDTO = new CompanyMessagingDTO();
-                //SEND EMAIL TO NEW SIGNEE
-                //send a copy to chairman
-                // var chairmanEmail = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ChairmanEmail.ToString() && s.CountryId == 1);
-                //if (chairmanEmail != null)
-                //{
-                //    //seperate email by comma and send message to those email
-                //    string[] chairmanEmails = chairmanEmail.Value.Split(',').ToArray();
-                //    foreach (string email in chairmanEmails)
-                //    {
-                //        companyMessagingDTO.Emails.Add(email);
-                //    }
-                //}
+                
                 companyMessagingDTO.Name = company.Name;
                 companyMessagingDTO.Email = company.Email;
                 companyMessagingDTO.PhoneNumber = company.PhoneNumber;

@@ -508,5 +508,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _cellulantPaymentService.UpdateCODShipmentOnCallBack(payload);
         }
+
+        public async Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod)
+        {
+            return await _cellulantPaymentService.UpdateCODShipmentOnCallBackStellas(cod);
+        }
     }
 }

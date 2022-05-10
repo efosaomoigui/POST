@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Report;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -37,6 +38,7 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<ShipmentCollectionForContactDTO>> GetShipmentsCollectionForContact(ShipmentContactFilterCriteria baseFilterCriteria);
         Task<List<ShipmentCollectionDTOForArrived>> GetArrivedShipmentCollection(ShipmentContactFilterCriteria baseFilterCriteria);
-
+        Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload);
+        Task<CODPaymentResponse> GetTransferStatus(string craccount);
     }
 }

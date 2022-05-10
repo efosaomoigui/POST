@@ -75,7 +75,7 @@
         EUCA, //ECOMMERCE UPDATE UP CLASS APP
         EUCW, //ECOMMERCE UPDATE UP CLASS WEBSITE
         ISTC62, //International Shipments Terms and Condition shown on the App for UK
-        ISTC207, //International Shipments Terms and Condition shown on the App for UK
+        ISTC207, //International Shipments Terms and Condition shown on the App for US
         REQSCAUK, //International Message for Service centre UK
         INTPEUK,  //INTERNATIONAL SHIPMENT PROCESS EMAIL FOR UK
         APFS,  //Message for Attempted Pickup From Sender
@@ -85,5 +85,9 @@
         CRTGF, //1ST SCAN FOR EVERY GO FASTER SHIPMENT 
         ARFGFR, //WHEN GO FASTER SHIPMENT ARRIVED FINAL DESTINATION FOR RECEIVER
         ARFGFS, //WHEN GO FASTER SHIPMENT ARRIVED FINAL DESTINATION FOR SENDER
+        ISTC43, //International Shipments Terms and Condition shown on the App for CHINA
+        ARFFSTP, //WHEN SHIPMENT IS ARRIVED FINAL DESTINATION FOR SENDER TERMINAL PICKUP
+        ARFFSHD, //WHEN SHIPMENT IS ARRIVED FINAL DESTINATION FOR SENDER HOME DELIVERY
+
     }
 }

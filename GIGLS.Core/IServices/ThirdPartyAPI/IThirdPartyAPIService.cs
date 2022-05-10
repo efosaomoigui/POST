@@ -52,5 +52,6 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
         Task<bool> CODCallBack(CODCallBackDTO cod);
         Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
+        Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod);
     }
 }

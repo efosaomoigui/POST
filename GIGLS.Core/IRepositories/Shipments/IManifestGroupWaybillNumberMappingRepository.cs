@@ -15,6 +15,7 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
         Task<List<ManifestDTO>> GetManifestSuperManifestMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
         Task<List<MovementManifestNumberDTO>> GetManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
-        Task<List<MovementManifestNumberDTO>> GetExpectedManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria); 
+        Task<List<MovementManifestNumberDTO>> GetExpectedManifestMovementNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
+        Task<List<AllManifestAndGroupWaybillDTO>> GetGroupWaybillNumberMappingsUsingManifestCode(string manifestCode);
     }
 }

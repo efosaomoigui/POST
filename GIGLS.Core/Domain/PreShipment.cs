@@ -70,5 +70,6 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsProcessed { get; set; }
         public bool IsAgent { get; set; }
         public bool IsActive { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 }

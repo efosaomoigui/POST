@@ -104,6 +104,14 @@ namespace GIGLS.Core.IServices.Shipments
         Task<UnidentifiedItemsForInternationalShippingDTO> GetUnIdentifiedIntlShipmentByID(int itemID);
         Task<ReceiverDetailDTO> GetShipmentReceiverDetails(NewFilterOptionsDto filter);
         Task <AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto);
+        Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location);
+        Task<string> ValidateCODPayment(string waybill);
+        Task<ShipmentDeliveryReportForHubRepsDTO> GetHubShipmentDeliveryReport(DateTime from, DateTime to);
+        Task<List<DelayedDeliveryDTO>> GetEcommerceDelayedDeliveryShipment(int serviceCentreId);
+        Task<List<GatewatActivityDTO>> GatewayActivity(BaseFilterCriteria FilterCriteria);
+        Task<List<EcommerceShipmentSummaryReportDTO>> EcommerceShipmentSummaryReport(EcommerceShipmentSummaryFilterCriteria filter);
+        Task<List<CODShipmentDTO>> GetCODShipmentByWaybill(string waybill);
+        Task<string> CheckTransferStatusForECA(string waybill);
     }
 
     public interface IMagayaService : IServiceDependencyMarker
