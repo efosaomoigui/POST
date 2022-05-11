@@ -1041,6 +1041,33 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.CustomerType = "Individual";
                 newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
             }
+            if (preShipmentDTO.DestinationServiceCentreId > 0)
+            {
+                 var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCentreId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
+            }
+
+            if (preShipmentDTO.DestinationServiceCenterId > 0)
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCenterId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
+            }
 
             return newPreShipment;
 
@@ -5446,6 +5473,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             var stationData = await _uow.Station.GetAsync(x => x.StationId == destinationSC.StationId);
                                             detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                        }
+                                    }
+
+                                    if (!preshipmentmobile.IsHomeDelivery && preshipmentmobile.DestinationServiceCenterId > 0)
+                                    {
+                                        var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preshipmentmobile.DestinationServiceCenterId);
+                                        if (centre != null)
+                                        {
+                                            detail.ReceiverServiceCentreId = centre.ServiceCentreId;
                                         }
                                     }
 
