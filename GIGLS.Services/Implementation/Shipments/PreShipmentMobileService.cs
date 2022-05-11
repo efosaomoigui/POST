@@ -1050,6 +1050,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
                     newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
                     newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
                 }
             }
 
@@ -1062,6 +1064,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
                     newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
                     newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
                 }
             }
 
