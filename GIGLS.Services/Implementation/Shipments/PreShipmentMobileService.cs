@@ -5311,7 +5311,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             {
                                 shipmentItems[i].Price = Convert.ToInt32(preshipmentmobile.PreShipmentItems[i].Value);
                                 // Quick fixes
-                                if (shipmentItems[i].Weight == 0)
+                                if (shipmentItems[i].Weight == 0 || shipmentItems[i].Length == 0 || shipmentItems[i].Height == 0 || shipmentItems[i].Width == 0)
                                 {
                                     shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.Document;
                                 }

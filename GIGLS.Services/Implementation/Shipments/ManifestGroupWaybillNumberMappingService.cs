@@ -426,7 +426,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateMappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId) 
+        public async Task UpdateMappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId, bool isScanner) 
         {
             try
             {
@@ -440,10 +440,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
 
                 //remove the manifest mapping as it was there before
-                var movementmanifestmappings = _uow.MovementManifestNumberMapping.GetAll().Where(s => s.MovementManifestCode == movementmanifestCode).ToList();
-                _uow.MovementManifestNumberMapping.RemoveRange(movementmanifestmappings);
-                await _uow.CompleteAsync();
+                if (!isScanner)
+                {
+                    var movementmanifestmappings = _uow.MovementManifestNumberMapping.GetAll().Where(s => s.MovementManifestCode == movementmanifestCode).ToList();
+                    _uow.MovementManifestNumberMapping.RemoveRange(movementmanifestmappings);
+                    await _uow.CompleteAsync();
 
+                }
                 //convert the list to HashSet to remove duplicate
                 var newManifestList = new HashSet<string>(manifestList);
                 var today = DateTime.Now;
@@ -459,7 +462,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Update The Manifest 
                     manifest.MovementStatus = MovementStatus.InProgress;
-
+                    var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(s => s.MovementManifestCode == movementmanifestCode && s.ManifestNumber == manifestCode);
+                    if (manifestExist != null)
+                    {
+                        continue;
+                    }
                     //insert into movement manifest mapping table
                     var resultMap = new MovementManifestNumberMapping()
                     {
