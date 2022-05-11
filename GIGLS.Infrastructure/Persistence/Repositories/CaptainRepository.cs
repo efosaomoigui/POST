@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Infrastructure.Persistence
+namespace GIGLS.Infrastructure.Persistence.Repositories
 {
     public class CaptainRepository : Repository<Partner, GIGLSContext>, ICaptainRepository
     {
