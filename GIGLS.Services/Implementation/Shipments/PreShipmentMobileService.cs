@@ -2354,7 +2354,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               SenderLocality = r.SenderLocality,
                                                               CashOnDeliveryAmount = r.CashOnDeliveryAmount,
                                                               IsApproved = r.IsApproved,
-                                                              IsBatchPickUp = r.IsBatchPickUp
+                                                              IsBatchPickUp = r.IsBatchPickUp,
+                                                              IsCashOnDelivery = r.IsCashOnDelivery
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
