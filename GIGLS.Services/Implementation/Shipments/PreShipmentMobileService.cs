@@ -2353,7 +2353,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               ScheduledDate = r.ScheduledDate,
                                                               SenderLocality = r.SenderLocality,
                                                               CashOnDeliveryAmount = r.CashOnDeliveryAmount,
-                                                              IsApproved = r.IsApproved
+                                                              IsApproved = r.IsApproved,
+                                                              IsBatchPickUp = r.IsBatchPickUp
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
