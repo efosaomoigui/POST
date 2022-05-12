@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GIGLS.Core.Domain;
 
 namespace GIGL.GIGLS.Core.Domain
@@ -27,6 +28,8 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Partner Partner { get; set; }
 
         public string FleetName { get; set; }
-        public string FleetOwner { get; set; }
+        public string EnterprisePartnerId { get; set; }
+        [ForeignKey("EnterprisePartnerId")]
+        public virtual User EnterprisePartner { get; set; }
     }
 }

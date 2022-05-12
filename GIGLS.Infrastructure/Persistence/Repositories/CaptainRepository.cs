@@ -114,8 +114,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                      //x.PartnerId.ToString(),
                     FleetName = x.FleetName,
                     RegistrationNumber = x.RegistrationNumber,
-                    VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.FleetOwner).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.FleetOwner).LastName.ToString() ,
-                    VehicleOwnerId = x.FleetOwner,
+                    VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString() ,
+                    VehicleOwnerId = x.EnterprisePartnerId,
                     VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
                 }).ToList();
 
@@ -135,7 +135,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var currentMonth = GetStartAndEndDayOfMonth();
 
                 var vehicle = await _context.Fleet.Where(x => x.IsDeleted == false && x.RegistrationNumber == regNum).FirstOrDefaultAsync();
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == vehicle.FleetOwner);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == vehicle.EnterprisePartnerId);
                 var partner = await _context.Partners.FirstOrDefaultAsync(p => p.PartnerId == vehicle.PartnerId);
 
                 var vehicleDto = new VehicleDetailsDTO()
@@ -146,7 +146,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     FleetName = vehicle.FleetName,
                     RegistrationNumber = vehicle.RegistrationNumber,
                     VehicleOwner = $"{user.FirstName} {user.LastName}",
-                    VehicleOwnerId = vehicle.FleetOwner,
+                    VehicleOwnerId = vehicle.EnterprisePartnerId,
                     VehicleAge = (int)( DateTime.Now - vehicle.DateCreated ).TotalDays,
                     Capacity = vehicle.Capacity,
                     VehicleType = vehicle.FleetType.ToString(),

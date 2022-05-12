@@ -315,7 +315,7 @@ namespace GIGLS.Services.Implementation
                     FleetName = vehicleDTO.VehicleName,
                     ModelId = fleetModel.FirstOrDefault().MakeId,
                     FleetModel = fleetModel.FirstOrDefault(),
-                    FleetOwner = vehicleDTO.VehicleOwner,
+                    EnterprisePartnerId = vehicleDTO.VehicleOwner,
                 };
 
                 _uow.Fleet.Add(newFleet);
@@ -393,7 +393,7 @@ namespace GIGLS.Services.Implementation
                 if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
                 {
                     var vehicle = await _uow.Fleet.GetAsync(fleetId);
-                    var owner = await _userService.GetUserById(vehicle.FleetOwner);
+                    var owner = await _userService.GetUserById(vehicle.EnterprisePartnerId);
                     var partner = await _uow.Partner.GetAsync(vehicle.PartnerId);
 
                     var vehicleDetails = new VehicleDetailsDTO
@@ -479,7 +479,7 @@ namespace GIGLS.Services.Implementation
                     fleet.DateCreated = today.AddDays(-1 * vehicle.VehicleAge);
                     fleet.Partner = partner;
                     fleet.PartnerId = partner.PartnerId;
-                    fleet.FleetOwner = vehicle.VehicleOwnerId;
+                    fleet.EnterprisePartnerId = vehicle.VehicleOwnerId;
                     fleet.FleetType = fleetType;
 
                     await _uow.CompleteAsync();
@@ -515,7 +515,7 @@ namespace GIGLS.Services.Implementation
                     AssignedCaptain = x.Partner.PartnerName,
                     RegistrationNumber = x.RegistrationNumber,
                     VehicleType = x.FleetType.ToString(),
-                    VehicleOwnerId = x.FleetOwner,
+                    VehicleOwnerId = x.EnterprisePartnerId,
                     //VehicleOwner = await _userService.GetUserById(x.FleetOwner).Result.FirstName + " " + _userService.GetUserById(x.FleetOwner).Result.LastName,
                     Capacity = x.Capacity,
                 }).ToList();
