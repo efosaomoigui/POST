@@ -902,18 +902,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     var message = new MobileShipmentCreationMessageDTO
                     {
                         SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber,
-                        WaybillNumber = newPreShipment.Waybill
+                        WaybillNumber = newPreShipment.Waybill,
+                        SenderName = newPreShipment.SenderName
                     };
-
-                    if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
-                    {
-                        message.SenderName = customer.Name;
-                    }
-                    else
-                    {
-                        string[] words = preShipmentDTO.SenderName.Split(' ');
-                        message.SenderName = words.FirstOrDefault();
-                    }
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
@@ -988,6 +979,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.PaymentUrl = response.data.Authorization_url;
                     }
 
+                    //Pin Generation 
+                    var number = await GenerateDeliveryCode();
+                    var deliveryNumber = new DeliveryNumber
+                    {
+                        SenderCode = number,
+                        IsUsed = false,
+                        Waybill = newPreShipment.Waybill
+                    };
+                    _uow.DeliveryNumber.Add(deliveryNumber);
+
+                    message.QRCode = deliveryNumber.SenderCode;
+
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -1003,7 +1006,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //We will send SMS & Email
-                    //await SendSMSForMobileShipmentCreation(message);
+                    await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
                     return preShipmentDTO;
                 }
             }
