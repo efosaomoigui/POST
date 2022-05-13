@@ -1,5 +1,7 @@
-﻿using GIGLS.Core.DTO.Customers;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using Newtonsoft.Json;
@@ -191,6 +193,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCoupon { get; set; }
         public string CouponCode { get; set; }
         public DeliveryType DeliveryType { get; set; }
+        public PaymentType PaymentType { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
@@ -506,3 +509,69 @@ public class UpdateNodeMercantSubscriptionDTO
     public string MerchantCode { get; set; }
     public string UserId { get; set; }
 }
+
+public class PreShipmentMobileMultiMerchantDTO : BaseDomainDTO
+{
+    public PreShipmentMobileMultiMerchantDTO()
+    {
+        ReceiverLocation = new LocationDTO();
+        Merchants = new List<MultiMerchantDTO>();
+    }
+    //Receivers Information
+    public string ReceiverName { get; set; }
+    public string ReceiverPhoneNumber { get; set; }
+    public string ReceiverEmail { get; set; }
+    public string ReceiverCode { get; set; }
+    public string ReceiverAddress { get; set; }
+    public string ReceiverCity { get; set; }
+    public string ReceiverState { get; set; }
+    public string ReceiverCountry { get; set; }
+    public int ReceiverStationId { get; set; }
+    public string ReceiverStationName { get; set; }
+    public string ReceiverCompanyName { get; set; }
+    public decimal DeclarationOfValueCheck { get; set; }
+    public int DepartureCountryId { get; set; }
+    public int DestinationCountryId { get; set; }
+    public string InputtedReceiverAddress { get; set; }
+    public LocationDTO ReceiverLocation { get; set; }
+    public List<MultiMerchantDTO> Merchants { get; set; }
+    //PickUp Options
+    public PickupOptions PickupOptions { get; set; }
+    public decimal Value { get; set; }
+    public DateTime? DeliveryTime { get; set; }
+    public bool IsHomeDelivery { get; set; } = true;
+    public string UserId { get; set; }
+    public string VehicleType { get; set; }
+    public int? ZoneMapping { get; set; }
+    public PaymentType PaymentType { get; set; }
+    public bool IsConsolidated { get; set; }
+    public bool IsCashOnDelivery { get; set; }
+    public decimal? CashOnDeliveryAmount { get; set; }
+}
+
+
+public class MultiMerchantDTO
+{
+    public MultiMerchantDTO()
+    {
+
+        PreShipmentItems = new List<PreShipmentItemMobileMultiMerchantDTO>();
+        SenderLocation = new LocationDTO();
+    }
+    public string CustomerType { get; set; }
+    public string CompanyType { get; set; }
+    public string CustomerCode { get; set; }
+    public string SenderAddress { get; set; }
+    public string SenderName { get; set; }
+    public string SenderStationName { get; set; }
+    public string SenderPhoneNumber { get; set; }
+    public int SenderStationId { get; set; }
+    public string InputtedSenderAddress { get; set; }
+    public string SenderLocality { get; set; }
+    public LocationDTO SenderLocation { get; set; }
+    public int? ZoneMapping { get; set; }
+    public PaymentType PaymentType { get; set; }
+    public List<PreShipmentItemMobileMultiMerchantDTO> PreShipmentItems { get; set; }
+
+}
+
