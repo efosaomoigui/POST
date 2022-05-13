@@ -91,17 +91,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         //Get List of Fleet 
         public Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
         {
-            //var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+            var partners = _context.Users.Where(s => s.UserChannelCode == fleetPartnerCode);
 
-            //var assetDto = from partner in partners
-            //               join fleet in _context.Fleet on partner.PartnerId equals fleet.PartnerId
-            //               select new AssetDTO
-            //               {
-            //                   Id = fleet.FleetId,
-            //                   Name = fleet.FleetName,
-            //                   RegistrationNumber = fleet.RegistrationNumber,
-            //                   NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-            //               };
+            var assetDto = from partner in partners
+                           join fleet in _context.Fleet on partner.Id equals fleet.EnterprisePartnerId
+                           select new AssetDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                           };
             var assetDemoDto = new List<AssetDTO>
             {
                 new AssetDTO
@@ -133,32 +133,32 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                NumberOfTrips = 40,
                 },
             };
-            return Task.FromResult(assetDemoDto.ToList());
+            return Task.FromResult(assetDto.ToList());
         }
 
         //To be completed
         public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
         {
-            //var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
 
-            //var assetDto = from fleet in fleets
-            //               join fleetTrips in _context.FleetTrip on fleet.FleetId equals fleetTrips.FleetId
-            //               select new AssetDetailsDTO
-            //               {
-            //                   Id = fleet.FleetId,
-            //                   Name = fleet.FleetName,
-            //                   RegistrationNumber = fleet.RegistrationNumber,
-            //                   Status = fleet.Status ? "Active" : "Idle",
-            //                   NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
-            //                   Captain = _context.Users.Where(x => x.Id == fleet.PartnerId.ToString()).Select(x => new CaptainDTO
-            //                   {
-            //                       Code = x.UserChannelCode,
-            //                       Name = $"{x.FirstName} {x.LastName}"
-            //                   }).FirstOrDefault()
-            //                   //Current location of the vehicle
-            //                   //Captain
-            //                   //Fleet Manager assigned to the vehicle
-            //               };
+            var assetDto = from fleet in fleets
+                           join fleetTrips in _context.FleetTrip on fleet.FleetId equals fleetTrips.FleetId
+                           select new AssetDetailsDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               Status = fleet.Status ? "Active" : "Idle",
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                               Captain = _context.Users.Where(x => x.Id == fleet.PartnerId.ToString()).Select(x => new CaptainDTO
+                               {
+                                   Code = x.UserChannelCode,
+                                   Name = $"{x.FirstName} {x.LastName}"
+                               }).FirstOrDefault()
+                               //Current location of the vehicle
+                               //Captain
+                               //Fleet Manager assigned to the vehicle
+                           };
             var listAssetDetailsDemo = new List<AssetDetailsDTO>
             {
                 new AssetDetailsDTO
@@ -227,8 +227,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                 },
             };
             var assetDemoDto = listAssetDetailsDemo.Where(x => x.Id == fleetId).FirstOrDefault();
-            return Task.FromResult(assetDemoDto);
-            //return Task.FromResult(assetDto.FirstOrDefault());
+            //return Task.FromResult(assetDemoDto);
+            return Task.FromResult(assetDto.FirstOrDefault());
         }
 
         //Get fleet trips by fleet id
