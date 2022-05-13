@@ -906,18 +906,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     var message = new MobileShipmentCreationMessageDTO
                     {
                         SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber,
-                        WaybillNumber = newPreShipment.Waybill
+                        WaybillNumber = newPreShipment.Waybill,
+                        SenderName = newPreShipment.SenderName
                     };
-
-                    if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
-                    {
-                        message.SenderName = customer.Name;
-                    }
-                    else
-                    {
-                        string[] words = preShipmentDTO.SenderName.Split(' ');
-                        message.SenderName = words.FirstOrDefault();
-                    }
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
@@ -992,6 +983,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.PaymentUrl = response.data.Authorization_url;
                     }
 
+                    //Pin Generation 
+                    var number = await GenerateDeliveryCode();
+                    var deliveryNumber = new DeliveryNumber
+                    {
+                        SenderCode = number,
+                        IsUsed = false,
+                        Waybill = newPreShipment.Waybill
+                    };
+                    _uow.DeliveryNumber.Add(deliveryNumber);
+
+                    message.QRCode = deliveryNumber.SenderCode;
+
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -1007,7 +1010,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //We will send SMS & Email
-                    //await SendSMSForMobileShipmentCreation(message);
+                    await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
                     return preShipmentDTO;
                 }
             }
@@ -1044,6 +1047,33 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 newPreShipment.CustomerType = "Individual";
                 newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+            }
+            if (preShipmentDTO.DestinationServiceCentreId > 0)
+            {
+                 var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCentreId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
+            }
+
+            if (preShipmentDTO.DestinationServiceCenterId > 0)
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCenterId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
             }
 
             return newPreShipment;
@@ -2357,7 +2387,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               ScheduledDate = r.ScheduledDate,
                                                               SenderLocality = r.SenderLocality,
                                                               CashOnDeliveryAmount = r.CashOnDeliveryAmount,
-                                                              IsApproved = r.IsApproved
+                                                              IsApproved = r.IsApproved,
+                                                              IsBatchPickUp = r.IsBatchPickUp,
+                                                              IsCashOnDelivery = r.IsCashOnDelivery
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -5304,7 +5336,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             {
                                 shipmentItems[i].Price = Convert.ToInt32(preshipmentmobile.PreShipmentItems[i].Value);
                                 // Quick fixes
-                                if (shipmentItems[i].Weight == 0)
+                                if (shipmentItems[i].Weight == 0 || shipmentItems[i].Length == 0 || shipmentItems[i].Height == 0 || shipmentItems[i].Width == 0)
                                 {
                                     shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.Document;
                                 }
@@ -5466,6 +5498,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             var stationData = await _uow.Station.GetAsync(x => x.StationId == destinationSC.StationId);
                                             detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                        }
+                                    }
+
+                                    if (!preshipmentmobile.IsHomeDelivery && preshipmentmobile.DestinationServiceCenterId > 0)
+                                    {
+                                        var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preshipmentmobile.DestinationServiceCenterId);
+                                        if (centre != null)
+                                        {
+                                            detail.ReceiverServiceCentreId = centre.ServiceCentreId;
                                         }
                                     }
 

@@ -141,7 +141,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId);
+                await _service.UpdateMappingMovementManifestToManifest(data.MovementManifestCode, data.ManifestNumbers, data.DestinationServiceCentreId,true);
                 return new ServiceResponse<bool>
                 {
                     Object = true
