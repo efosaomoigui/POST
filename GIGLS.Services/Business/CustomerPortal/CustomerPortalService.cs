@@ -4802,5 +4802,120 @@ namespace GIGLS.Services.Business.CustomerPortal
             var logEntry = Mapper.Map<LogEntry>(log);
             await _uow.WalletPaymentLog.LogContentType(logEntry);
         }
+
+        public async Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment)
+        {
+            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
+
+            if (disableShipmentCreation)
+            {
+                string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
+                throw new GenericException(message, $"{(int)HttpStatusCode.ServiceUnavailable}");
+            }
+            return await _preShipmentMobileService.AddMultiplePreShipmentMobile(preShipment);
+        }
+
+
+        public async Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipments)
+        {
+            if (!preShipments.Merchants.Any())
+            {
+                throw new GenericException($"invalid payload", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
+            var allMerchantPrice = new MultiMerchantMobilePriceDTO();
+            foreach (var preShipment in preShipments.Merchants)
+            {
+                var merchantPrice = new MerchantMobilePriceDTO();
+                var merchant = await _uow.User.GetUserByChannelCode(preShipment.CustomerCode);
+                var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipments.ReceiverStationId);
+                preShipment.ZoneMapping = zoneid.ZoneId;
+                preShipments.ZoneMapping = zoneid.ZoneId;
+                var mobileShipment = JObject.FromObject(preShipment).ToObject<PreShipmentMobileDTO>();
+                mobileShipment.VehicleType = preShipments.VehicleType;
+                mobileShipment.PaymentType = preShipments.PaymentType;
+                mobileShipment.ZoneMapping = preShipment.ZoneMapping;
+                mobileShipment.ReceiverLocation = preShipments.ReceiverLocation;
+                mobileShipment.ReceiverAddress = preShipments.ReceiverAddress;
+                mobileShipment.ReceiverPhoneNumber = preShipments.ReceiverPhoneNumber;
+                mobileShipment.ReceiverStationId = preShipments.ReceiverStationId;
+                mobileShipment.ReceiverLocation = preShipments.ReceiverLocation;
+                mobileShipment.ReceiverName = preShipments.ReceiverName;
+                mobileShipment.ReceiverEmail = preShipments.ReceiverEmail;
+                mobileShipment.ZoneMapping = zoneid.ZoneId;
+                if (merchant == null)
+                {
+                    throw new GenericException($"merchant does not exist", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //set all merchant info
+                if (merchant != null)
+                {
+                    mobileShipment.UserId = merchant.Id;
+                    mobileShipment.ZoneMapping = preShipment.ZoneMapping;
+                    mobileShipment.CustomerCode = merchant.UserChannelCode;
+                    mobileShipment.SenderLocation = preShipment.SenderLocation;
+                }
+                //set some price values 
+                merchantPrice.CustomerCode = mobileShipment.CustomerCode;
+                merchantPrice.CustomerName = $"{merchant.FirstName} {merchant.LastName}";
+                if (string.IsNullOrEmpty(mobileShipment.VehicleType))
+                {
+                    var price = await _preShipmentMobileService.GetPrice(mobileShipment);
+                    price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                    merchantPrice.DeliveryPrice = price.DeliveryPrice;
+                    merchantPrice.InsuranceValue = price.InsuranceValue;
+                    merchantPrice.Vat = price.Vat;
+                    merchantPrice.GrandTotal = price.GrandTotal;
+                    merchantPrice.Discount = price.Discount;
+                    merchantPrice.MainCharge = price.MainCharge;
+                    merchantPrice.PickUpCharge = price.PickUpCharge;
+                    merchantPrice.IsWithinProcessingTime = price.IsWithinProcessingTime;
+                }
+
+                if (mobileShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
+                    && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null
+                    && preShipments.ReceiverLocation.Latitude != null && preShipments.ReceiverLocation.Longitude != null)
+                {
+                    var price = await _preShipmentMobileService.GetPriceForBike(mobileShipment);
+                    merchantPrice.DeliveryPrice = price.DeliveryPrice;
+                    merchantPrice.InsuranceValue = price.InsuranceValue;
+                    merchantPrice.Vat = price.Vat;
+                    merchantPrice.GrandTotal = price.GrandTotal;
+                    merchantPrice.Discount = price.Discount;
+                    merchantPrice.MainCharge = price.MainCharge;
+                    merchantPrice.PickUpCharge = price.PickUpCharge;
+                    merchantPrice.IsWithinProcessingTime = price.IsWithinProcessingTime;
+                }
+                else
+                {
+                    var price = await _preShipmentMobileService.GetPrice(mobileShipment);
+                    price.GrandTotal = await _pricing.GetCoporateDiscountedAmount(preShipment.CustomerCode, price.GrandTotal.Value);
+                    merchantPrice.DeliveryPrice = price.DeliveryPrice;
+                    merchantPrice.InsuranceValue = price.InsuranceValue;
+                    merchantPrice.Vat = price.Vat;
+                    merchantPrice.GrandTotal = price.GrandTotal;
+                    merchantPrice.Discount = price.Discount;
+                    merchantPrice.MainCharge = price.MainCharge;
+                    merchantPrice.PickUpCharge = price.PickUpCharge;
+                    merchantPrice.IsWithinProcessingTime = price.IsWithinProcessingTime;
+                }
+
+                allMerchantPrice.Merchants.Add(merchantPrice);
+            }
+            allMerchantPrice.IsWithinProcessingTime = allMerchantPrice.Merchants.Last().IsWithinProcessingTime;
+            allMerchantPrice.GrandTotal = allMerchantPrice.Merchants.Sum(x => x.GrandTotal);
+            return allMerchantPrice;
+        }
+
+
     }
 }

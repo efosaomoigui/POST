@@ -103,5 +103,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(DateFilterCriteria dateFilterCriteria);
         Task<IEnumerable<CancelledShipmentDTO>> GetCanceledShipment(string waybill);
         Task<PreShipmentMobileDTO> GetPreShipmentMobileReceiverAndItemDetails(NewFilterOptionsDto filter);
+        Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
     }
 }
