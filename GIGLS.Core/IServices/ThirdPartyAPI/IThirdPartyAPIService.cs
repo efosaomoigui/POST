@@ -53,5 +53,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<bool> CODCallBack(CODCallBackDTO cod);
         Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
         Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod);
+        Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
+        Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment);
     }
 }

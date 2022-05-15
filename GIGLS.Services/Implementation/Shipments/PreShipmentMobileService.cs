@@ -8032,6 +8032,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         //drop shipment on node
                         NodeApiCreateShipment(item);
+
+                        //also send sms
                     }
                 }
 
