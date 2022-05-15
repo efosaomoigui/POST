@@ -8026,6 +8026,31 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = item.Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MCRT
                         });
+
+                        var messageDto = new MobileShipmentCreationMessageDTO
+                        {
+                            SenderPhoneNumber = item.SenderPhoneNumber,
+                            WaybillNumber = item.Waybill,
+                            SenderName = item.SenderName
+                        };
+
+
+                        //Pin Generation 
+                        var number = await GenerateDeliveryCode();
+                        var deliveryNumber = new DeliveryNumber
+                        {
+                            SenderCode = number,
+                            IsUsed = false,
+                            Waybill = item.Waybill
+                        };
+                        _uow.DeliveryNumber.Add(deliveryNumber);
+
+                        messageDto.QRCode = deliveryNumber.SenderCode;
+
+                        await _uow.CompleteAsync();
+                        
+                        //We will send SMS & Email
+                        await SendSMSForMobileShipmentCreation(messageDto, MessageType.MCS);
                     }
 
                     foreach (var item in shipments)
