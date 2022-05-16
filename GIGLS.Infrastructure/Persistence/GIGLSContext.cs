@@ -132,6 +132,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<MovementDispatch> MovementDispatch { get; set; }
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
         public DbSet<CaptainBonusByZoneMaping> CaptainBonusByZoneMaping { get; set; }
+        public DbSet<FleetJobCard> FleetJobCard { get; set; }
 
         //Partner
         public DbSet<Partner> Partners { get; set; }

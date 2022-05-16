@@ -148,6 +148,7 @@
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
     <Compile Include="Domain\BillsPaymentManagement.cs" />
+    <Compile Include="Domain\FleetJobCard.cs" />
     <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
     <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
     <Compile Include="Domain\InternationalCargoManifest.cs" />
@@ -384,6 +385,7 @@
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetJobCardDTO.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
     <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />
     <Compile Include="DTO\Fleets\FleetModelDTO.cs" />
@@ -607,6 +609,7 @@
     <Compile Include="Enums\AlphaOrderStatus.cs" />
     <Compile Include="Enums\CardType.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
+    <Compile Include="Enums\FleetJobCardStatus.cs" />
     <Compile Include="Enums\ItemState.cs" />
     <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
@@ -713,6 +716,7 @@
     <Compile Include="IRepositories\Expenses\IExpenseTypeRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchActivityRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IFleetJobCardRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetMakeRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetModelRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetPartInventoryHistoryRepository.cs" />
@@ -720,6 +724,7 @@
     <Compile Include="IRepositories\Fleets\IFleetPartRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
+    <Compile Include="IRepositories\Fleets\IMovementDispatchRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
