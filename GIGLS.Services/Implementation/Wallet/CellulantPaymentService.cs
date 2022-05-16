@@ -759,7 +759,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                   
+
                     mobileShipment.CODStatusDate = DateTime.Now;
                     mobileShipment.CODStatus = CODMobileStatus.Collected;
                     mobileShipment.CODDescription = $"COD {CODMobileStatus.Collected.ToString()}({PaymentType.Transfer.ToString()})";
@@ -855,7 +855,7 @@ namespace GIGLS.Services.Implementation.Wallet
             };
             _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
-           
+
             var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
             if (stellasWithdraw.status)
             {
@@ -1239,7 +1239,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var response = await CheckISCODPaymentReceived(craccount);
             var codWaybill = string.Empty;
-            if (response != null && !string.IsNullOrEmpty( response.Status) && response.Status.Equals("00"))
+            if (response != null && !string.IsNullOrEmpty(response.Status) && response.Status.Equals("00"))
             {
                 var craccountName = response.Transactions.FirstOrDefault().Craccountname;
                 codWaybill = craccountName.Split('_').FirstOrDefault();
@@ -1286,7 +1286,7 @@ namespace GIGLS.Services.Implementation.Wallet
                             result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmountFromMobile.Value}. This item can not be released at this time";
                         }
                     }
-                    else if(!codAmountFromMobile.HasValue && !codAmount.HasValue)
+                    else if (!codAmountFromMobile.HasValue && !codAmount.HasValue)
                     {
                         result.Status = false;
                         result.Message = $"Shipment with waybill {codWaybill} has no COD Value or cannot be found.";
@@ -1363,6 +1363,457 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        #endregion
+
+        #region Cellulant Validate Payment
+        public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
+        {
+            FlutterWebhookDTO webhook = new FlutterWebhookDTO();
+
+            var paymentStatus = await QueryCellulantPaymentStatus(new CellulantPaymentQueryStatusDto
+            {
+                MerchantTransactionID = reference
+            });
+
+            if(paymentStatus.Status == null)
+            {
+                webhook.Message = paymentStatus.Message;
+                webhook.Status = paymentStatus.Message;
+                webhook.data.Processor_Response = paymentStatus.Message;
+                webhook.data.Status = paymentStatus.StatusCode.ToString();
+            }
+
+            if(!paymentStatus.Status.StatusCode.Equals(200))
+            {
+                webhook.Message = paymentStatus.Status.StatusDescription;
+                webhook.Status = paymentStatus.Status.StatusCode.ToString();
+                webhook.data.Processor_Response = paymentStatus.Status.StatusDescription;
+                webhook.data.Status = paymentStatus.Status.StatusCode.ToString();
+            }
+
+            if(paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request"))
+            {
+                WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+                if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+                {
+                    webhook = await ProcessValidatePaymentForWaybill(reference);
+                }
+                else
+                {
+                    webhook = await ProcessValidatePaymentForWallet(reference);
+                }
+
+                webhook.Status = "success";
+            }
+
+            //Acknowledge Payment with cellulant
+
+            if(paymentStatus.Results != null)
+            {
+                await AcknowledgeCellulantPayment(new CellulantPaymentAcknowledgeDto
+                {
+                    CheckoutRequestID = paymentStatus.Results.CheckoutRequestID,
+                    MerchantTransactionID = paymentStatus.Results.MerchantTransactionID,
+                    ReceiptNumber = paymentStatus.Results.MerchantTransactionID,
+                });
+            }
+
+            return ManageReturnResponse(webhook);
+        }
+
+        private async Task<CellulantPaymentResponse> ProcessValidatePaymentForWaybill(CellulantWebhookDTO payload)
+        {
+            //1. verify the payment 
+            var verifyResult = payload;
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
+            };
+
+            if (verifyResult.RequestStatusCode.Equals(178))
+            {
+                if (verifyResult.Payments != null)
+                {
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
+
+                    if (paymentLog == null)
+                        return result;
+
+                    //2. if the payment successful
+                    if (verifyResult.RequestStatusDescription.Equals("Request fully paid") && !paymentLog.IsWaybillSettled)
+                    {
+                        var checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
+
+                        if (checkAmount)
+                        {
+                            //3. Process payment for the waybill if successful
+                            PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                            {
+                                Waybill = paymentLog.Waybill,
+                                PaymentType = PaymentType.Online,
+                                TransactionCode = paymentLog.Reference,
+                                UserId = paymentLog.UserId
+                            };
+
+                            var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                            if (processWaybillPayment)
+                            {
+                                //2. Update waybill Payment log
+                                paymentLog.IsPaymentSuccessful = true;
+                                paymentLog.IsWaybillSettled = true;
+                            }
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
+                    await _uow.CompleteAsync();
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<CellulantPaymentResponse> ProcessValidatePaymentForWallet(CellulantWebhookDTO payload)
+        {
+            //1. verify the payment 
+            var verifyResult = payload;
+            var result = new CellulantPaymentResponse
+            {
+                StatusCode = "183",
+                StatusDescription = "Payment processed successfully",
+                CheckoutRequestID = payload.CheckoutRequestID,
+                MerchantTransactionID = payload.MerchantTransactionID
+            };
+            if (verifyResult.RequestStatusCode.Equals(178))
+            {
+                if (verifyResult.Payments != null)
+                {
+                    _uow.BeginTransaction(IsolationLevel.Serializable);
+                    //get wallet payment log by reference code
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == verifyResult.MerchantTransactionID);
+
+                    if (paymentLog == null)
+                        return result;
+
+                    if (verifyResult.RequestStatusDescription != null)
+                    {
+                        verifyResult.RequestStatusDescription = verifyResult.RequestStatusDescription.ToLower();
+                    }
+
+                    bool sendPaymentNotification = false;
+                    var walletDto = new WalletDTO();
+                    var userPayload = new UserPayload();
+                    var bonusAddon = new BonusAddOn();
+                    bool checkAmount = false;
+
+                    //2. if the payment successful
+                    if (verifyResult.RequestStatusDescription.Equals("request fully paid") && !paymentLog.IsWalletCredited)
+                    {
+                        checkAmount = ValidatePaymentValue(paymentLog.Amount, verifyResult.AmountPaid);
+
+                        if (checkAmount)
+                        {
+                            //a. update the wallet for the customer
+                            string customerId = null;  //set customer id to null
+
+                            //get wallet detail to get customer code
+                            walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                            if (walletDto != null)
+                            {
+                                //use customer code to get customer id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                                if (user != null)
+                                {
+                                    customerId = user.Id;
+                                    userPayload.Email = user.Email;
+                                    userPayload.UserId = user.Id;
+                                }
+                            }
+
+                            //if pay was done using Master VIsa card, give some discount
+                            //bonusAddon = await ProcessBonusAddOnForCardType(verifyResult, paymentLog.PaymentCountryId);
+
+                            //Convert amount base on country rate if isConverted 
+                            //1. CHeck if is converted equals true
+                            if (paymentLog.isConverted)
+                            {
+                                //2. Get user country id
+                                var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+                                if (user == null)
+                                {
+                                    return result;
+                                }
+
+                                if (user.UserActiveCountryId <= 0)
+                                {
+                                    return result;
+                                }
+
+                                var userdestCountry = new CountryRouteZoneMap();
+
+                                // Get conversion rate base of card type use
+                                if (paymentLog.CardType == CardType.Naira)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 1 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if (paymentLog.CardType == CardType.Pound)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 62 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else if (paymentLog.CardType == CardType.Dollar)
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 207 && c.CompanyMap == CompanyMap.GIG);
+                                }
+                                else
+                                {
+                                    userdestCountry = await _uow.CountryRouteZoneMap.GetAsync(c => c.DepartureId == user.UserActiveCountryId && c.DestinationId == 76 && c.CompanyMap == CompanyMap.GIG);
+                                }
+
+                                if (userdestCountry == null)
+                                {
+                                    return result;
+                                }
+
+                                if (userdestCountry.Rate <= 0)
+                                {
+                                    return result;
+                                }
+                                //3. Convert base on country rate
+                                var convertedAmount = Math.Round((userdestCountry.Rate * (double)paymentLog.Amount), 2);
+                                paymentLog.Amount = (decimal)convertedAmount;
+                            }
+
+                            //update the wallet
+                            await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                            {
+                                WalletId = paymentLog.WalletId,
+                                Amount = paymentLog.Amount,
+                                CreditDebitType = CreditDebitType.Credit,
+                                // Description = verifyResult.RequestStatusDescription,
+                                Description = "Funding made through debit card",
+                                PaymentType = PaymentType.Online,
+                                PaymentTypeReference = paymentLog.Reference,
+                                UserId = customerId
+                            }, false);
+
+                            sendPaymentNotification = true;
+
+                            //3. update the wallet payment log
+                            paymentLog.IsWalletCredited = true;
+                        }
+                    }
+
+                    paymentLog.TransactionStatus = ProcessStatusCode(verifyResult.RequestStatusCode);
+                    paymentLog.TransactionResponse = verifyResult.RequestStatusDescription;
+                    _uow.Commit();
+                    //await _uow.CompleteAsync();
+
+                    if (sendPaymentNotification)
+                    {
+                        await SendPaymentNotificationAsync(walletDto, paymentLog);
+                    }
+
+                    //Call Node API for subscription process
+                    if (paymentLog.TransactionType == WalletTransactionType.ClassSubscription && checkAmount)
+                    {
+                        if (userPayload != null)
+                        {
+                            await _nodeService.WalletNotification(userPayload);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        private PaystackWebhookDTO ManageReturnResponse(FlutterWebhookDTO flutterResponse)
+        {
+            var response = new PaystackWebhookDTO
+            {
+                Message = flutterResponse.Message
+            };
+
+            if (flutterResponse.Status.Equals("success"))
+            {
+                response.Status = true;
+            }
+
+            if (flutterResponse.data != null)
+            {
+                response.data.Status = flutterResponse.data.Status;
+                response.data.Message = flutterResponse.data.Processor_Response;
+                response.data.Gateway_Response = flutterResponse.data.Processor_Response;
+
+                //if (flutterResponse.data.validateInstructions.Instruction != null)
+                //{
+                //    response.data.Message = flutterResponse.data.validateInstructions.Instruction;
+                //    response.data.Gateway_Response = flutterResponse.data.validateInstructions.Instruction;
+                //}
+                //else if (flutterResponse.data.ChargeMessage != null)
+                //{
+                //    response.data.Message = flutterResponse.data.ChargeMessage;
+                //    response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
+                //    response.Message = flutterResponse.data.ChargeMessage;
+                //    if (!flutterResponse.data.Status.Equals("successful"))
+                //    {
+                //        response.Status = false;
+                //    }
+                //}
+                //else
+                //{
+                //    response.data.Message = flutterResponse.data.ChargeResponseMessage;
+                //    response.data.Gateway_Response = flutterResponse.data.ChargeResponseMessage;
+                //}
+
+                //if(flutterResponse.data.ChargeCode != null)
+                //{
+                //    if (flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
+                //    {
+                //        response.data.Message = flutterResponse.data.ChargeMessage;
+                //        response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
+                //        response.Message = flutterResponse.data.ChargeMessage;
+                //        response.Status = true;
+                //    }
+                //}
+            }
+            else
+            {
+                response.data.Message = flutterResponse.Message;
+                response.data.Gateway_Response = flutterResponse.Message;
+                response.data.Status = flutterResponse.Status;
+            }
+
+            return response;
+        }
+
+        public async Task<string> GetTokenToValidatePayment()
+        {
+            using (var client = new HttpClient())
+            {
+                var result = "";
+                //Get login details
+                var baseurl = ConfigurationManager.AppSettings["CellulantPaymentBaseUrl"];
+                var login = ConfigurationManager.AppSettings["CellulantPaymentAuth"];
+                baseurl = $"{baseurl}{login}";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                //setup client
+                client.BaseAddress = new Uri(baseurl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var payload = new CellulantPaymentLoginDto
+                {
+                    GrantType = string.IsNullOrEmpty(ConfigurationManager.AppSettings["CellulantPaymentGrantType"]) ? " " : ConfigurationManager.AppSettings["CellulantPaymentGrantType"],
+                    ClientId = string.IsNullOrEmpty(ConfigurationManager.AppSettings["CellulantPaymentClientID"]) ? " " : ConfigurationManager.AppSettings["CellulantPaymentClientID"],
+                    ClientSecret = string.IsNullOrEmpty(ConfigurationManager.AppSettings["CellulantPaymentClientSecret"]) ? " " : ConfigurationManager.AppSettings["CellulantPaymentClientSecret"],
+                };
+
+                //Convert payload to string content / serialize
+                var json = JsonConvert.SerializeObject(payload);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(baseurl, data);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                string resultJson = await response.Content.ReadAsStringAsync();
+                var jObject = JsonConvert.DeserializeObject<CellulantPaymentLoginResponseDto>(resultJson);
+                result = jObject.AccessToken;
+
+                return result;
+            }
+        }
+
+        private async Task<CellulantPaymentQueryStatusResponseDto> QueryCellulantPaymentStatus(CellulantPaymentQueryStatusDto payload)
+        {
+            CellulantPaymentQueryStatusResponseDto result = new CellulantPaymentQueryStatusResponseDto();
+            string token = await GetTokenToValidatePayment();
+            using (var client = new HttpClient())
+            {
+                //Get login details
+                var baseurl = ConfigurationManager.AppSettings["CellulantPaymentBaseUrl"];
+                var queryStatus = ConfigurationManager.AppSettings["CellulantPaymentQueryStatus"];
+                baseurl = $"{ baseurl}{queryStatus}";
+                payload.ServiceCode = ConfigurationManager.AppSettings["CellulantPaymentServiceCode"];
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                //setup client
+                client.BaseAddress = new Uri(baseurl);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //Convert payload to string content / serialize
+                var json = JsonConvert.SerializeObject(payload);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(baseurl, data);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                string resultJson = await response.Content.ReadAsStringAsync();
+                result = JsonConvert.DeserializeObject<CellulantPaymentQueryStatusResponseDto>(resultJson);
+
+                return result;
+            }
+        }
+
+        private async Task<CellulantPaymentAcknowledgeResponseDto> AcknowledgeCellulantPayment(CellulantPaymentAcknowledgeDto payload)
+        {
+            CellulantPaymentAcknowledgeResponseDto result = new CellulantPaymentAcknowledgeResponseDto();
+            string token = await GetTokenToValidatePayment();
+            using (var client = new HttpClient())
+            {
+                //Get login details
+                var baseurl = ConfigurationManager.AppSettings["CellulantPaymentBaseUrl"];
+                var acknowledge = ConfigurationManager.AppSettings["CellulantPaymentAcknowledge"];
+                baseurl = $"{baseurl}{acknowledge}";
+
+                //Set default property values
+                payload.StatusCode = Convert.ToInt32(ConfigurationManager.AppSettings["CellulantPaymentStatusCode"]);
+                payload.StatusDescription = ConfigurationManager.AppSettings["CellulantPaymentStatusDescription"];
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                //setup client
+                client.BaseAddress = new Uri(baseurl);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //Convert payload to string content / serialize
+                var json = JsonConvert.SerializeObject(payload);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(baseurl, data);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                string resultJson = await response.Content.ReadAsStringAsync();
+                result = JsonConvert.DeserializeObject<CellulantPaymentAcknowledgeResponseDto>(resultJson);
+
+                return result;
+            }
+        }
         #endregion
     }
 }
