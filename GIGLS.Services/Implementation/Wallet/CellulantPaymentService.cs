@@ -1667,38 +1667,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.data.Status = flutterResponse.data.Status;
                 response.data.Message = flutterResponse.data.Processor_Response;
                 response.data.Gateway_Response = flutterResponse.data.Processor_Response;
-
-                //if (flutterResponse.data.validateInstructions.Instruction != null)
-                //{
-                //    response.data.Message = flutterResponse.data.validateInstructions.Instruction;
-                //    response.data.Gateway_Response = flutterResponse.data.validateInstructions.Instruction;
-                //}
-                //else if (flutterResponse.data.ChargeMessage != null)
-                //{
-                //    response.data.Message = flutterResponse.data.ChargeMessage;
-                //    response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
-                //    response.Message = flutterResponse.data.ChargeMessage;
-                //    if (!flutterResponse.data.Status.Equals("successful"))
-                //    {
-                //        response.Status = false;
-                //    }
-                //}
-                //else
-                //{
-                //    response.data.Message = flutterResponse.data.ChargeResponseMessage;
-                //    response.data.Gateway_Response = flutterResponse.data.ChargeResponseMessage;
-                //}
-
-                //if(flutterResponse.data.ChargeCode != null)
-                //{
-                //    if (flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
-                //    {
-                //        response.data.Message = flutterResponse.data.ChargeMessage;
-                //        response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
-                //        response.Message = flutterResponse.data.ChargeMessage;
-                //        response.Status = true;
-                //    }
-                //}
             }
             else
             {
