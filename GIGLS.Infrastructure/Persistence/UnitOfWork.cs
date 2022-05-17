@@ -560,6 +560,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
 
+        [Inject]
+        public IFleetJobCardRepository FleetJobCard { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

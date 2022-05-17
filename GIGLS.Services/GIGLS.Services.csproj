@@ -230,6 +230,7 @@
     <Compile Include="Implementation\Account\InvoiceShipmentService.cs" />
     <Compile Include="Implementation\Account\VATService.cs" />
     <Compile Include="Implementation\ActivationCampaignEmailService.cs" />
+    <Compile Include="Implementation\Fleets\FleetJobCardService.cs" />
     <Compile Include="Implementation\GIGXUserDetailService.cs" />
     <Compile Include="Implementation\BankSettlement\BankService.cs" />
     <Compile Include="Implementation\BankSettlement\BankShipmentSettlementService.cs" />

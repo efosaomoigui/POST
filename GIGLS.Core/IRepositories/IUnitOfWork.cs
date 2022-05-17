@@ -225,6 +225,8 @@ namespace GIGLS.Core
         ICODTransferLogRepository CODTransferLog { get; set; }
         ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
 
+        IFleetJobCardRepository FleetJobCard { get; set; } 
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
         void BeginTransaction();

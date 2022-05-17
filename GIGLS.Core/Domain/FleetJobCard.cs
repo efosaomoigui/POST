@@ -26,7 +26,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int FleetManagerId { get; set; }
         [ForeignKey("FleetManagerId")]
-        public virtual Partner Partner { get; set; }
-
+        public virtual Partner FleetManager { get; set; }
     }
 }

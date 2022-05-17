@@ -25,7 +25,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
         {
             try
             {
-                var fleets = _context.FleetJobCard.Include("Partner");
+                var fleets = _context.FleetJobCard.Include("FleetManager");
 
                 var fleetDto = from x in fleets where x.Status == FleetJobCardStatus.Open.ToString()
                     select new FleetJobCardDTO()
