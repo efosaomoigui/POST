@@ -1383,28 +1383,43 @@ namespace GIGLS.Services.Implementation.Wallet
                 webhook.data.Status = paymentStatus.StatusCode.ToString();
             }
 
-            if(!paymentStatus.Status.StatusCode.Equals(200))
+            if(paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request"))
+            {
+                WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+                var transaction = new CellulantWebhookDTO
+                {
+                    RequestStatusDescription = "request fully paid",
+                    MerchantTransactionID = paymentStatus.Results.MerchantTransactionID,
+                    CheckoutRequestID = paymentStatus.Results.CheckoutRequestID,
+                    AmountPaid = paymentStatus.Results.AmountPaid,
+                    RequestStatusCode = 178,
+                    Payments = new List<Payment>()
+                };
+
+                if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+                { 
+                   var result = await ProcessValidatePaymentForWaybill(transaction);
+                    webhook.Status = "success";
+                    webhook.Message = result.StatusDescription;
+                    webhook.data.Processor_Response = result.StatusDescription;
+                    webhook.data.Status = result.StatusCode.ToString();
+                }
+                else
+                {
+                    var result = await ProcessValidatePaymentForWallet(transaction);
+                    webhook.Status = "success";
+                    webhook.Message = result.StatusDescription;
+                    webhook.data.Processor_Response = result.StatusDescription;
+                    webhook.data.Status = result.StatusCode.ToString();
+                }
+            }
+            else
             {
                 webhook.Message = paymentStatus.Status.StatusDescription;
                 webhook.Status = paymentStatus.Status.StatusCode.ToString();
                 webhook.data.Processor_Response = paymentStatus.Status.StatusDescription;
                 webhook.data.Status = paymentStatus.Status.StatusCode.ToString();
-            }
-
-            if(paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request"))
-            {
-                WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
-
-                if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
-                {
-                    webhook = await ProcessValidatePaymentForWaybill(reference);
-                }
-                else
-                {
-                    webhook = await ProcessValidatePaymentForWallet(reference);
-                }
-
-                webhook.Status = "success";
             }
 
             //Acknowledge Payment with cellulant
@@ -1695,7 +1710,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return response;
         }
 
-        public async Task<string> GetTokenToValidatePayment()
+        private async Task<string> GetTokenToValidatePayment()
         {
             using (var client = new HttpClient())
             {
