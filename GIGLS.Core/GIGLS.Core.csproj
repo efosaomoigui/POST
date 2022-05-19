@@ -345,6 +345,7 @@
     <Compile Include="DTO\BillsPaymentManagementDTO.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
     <Compile Include="DTO\CaptainBonusByZoneMapingDTO.cs" />
+    <Compile Include="DTO\Captains\CaptainDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
@@ -731,6 +732,7 @@
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
+    <Compile Include="IRepositories\ICaptainRepository.cs" />
     <Compile Include="IRepositories\IShipmentExportRepository.cs" />
     <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />
     <Compile Include="IRepositories\ICaptainBonusByZoneMapingRepository.cs" />
@@ -907,6 +909,7 @@
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IActivationCampaignEmailService.cs" />
+    <Compile Include="IServices\ICaptainService.cs" />
     <Compile Include="IServices\IGIGXUserDetailService.cs" />
     <Compile Include="IServices\ICaptainBonusByZoneMapingService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />

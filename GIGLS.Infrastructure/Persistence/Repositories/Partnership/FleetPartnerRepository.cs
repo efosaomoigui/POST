@@ -30,6 +30,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  PhoneNumber = partner.PhoneNumber,
                                  FirstName = partner.FirstName,
                                  LastName = partner.LastName,
+                                 UserId = partner.UserId,
                              };
 
             return Task.FromResult(partnerDto.ToList());
