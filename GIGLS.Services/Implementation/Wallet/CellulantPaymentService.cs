@@ -1375,7 +1375,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 MerchantTransactionID = reference
             });
 
-            if(paymentStatus.Status == null)
+            if (paymentStatus.Status == null)
             {
                 webhook.Message = paymentStatus.Message;
                 webhook.Status = paymentStatus.Message;
@@ -1383,7 +1383,18 @@ namespace GIGLS.Services.Implementation.Wallet
                 webhook.data.Status = paymentStatus.StatusCode.ToString();
             }
 
-            if(paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request"))
+            if (paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request") && !paymentStatus.Results.RequestStatusCode.Equals(178))
+            {
+                webhook.Message = "No data was found";
+                webhook.Status = webhook.Message;
+                webhook.data.Processor_Response = webhook.Message;
+                webhook.data.Status = paymentStatus.Status.StatusCode.ToString();
+            }
+
+            if (paymentStatus.Status.StatusCode.Equals(200)
+            && paymentStatus.Status.StatusDescription.Equals("Successfully processed request")
+            && paymentStatus.Results != null
+            && paymentStatus.Results.RequestStatusCode.Equals(178))
             {
                 WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
 
@@ -1398,8 +1409,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 };
 
                 if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
-                { 
-                   var result = await ProcessValidatePaymentForWaybill(transaction);
+                {
+                    var result = await ProcessValidatePaymentForWaybill(transaction);
                     webhook.Status = "success";
                     webhook.Message = result.StatusDescription;
                     webhook.data.Processor_Response = result.StatusDescription;
@@ -1424,7 +1435,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //Acknowledge Payment with cellulant
 
-            if(paymentStatus.Results != null)
+            if (paymentStatus.Results != null)
             {
                 await AcknowledgeCellulantPayment(new CellulantPaymentAcknowledgeDto
                 {
