@@ -276,5 +276,19 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getpartnerwalletbalance/{fleetpartnercode}")]
+        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetPartnerWalletBalance(string fleetpartnercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner(fleetpartnercode);
+                return new ServiceResponse<IEnumerable<AssetDTO>>
+                {
+                    Object = assets
+                };
+            });
+        }
     }
 }
