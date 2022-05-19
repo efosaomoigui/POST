@@ -7,7 +7,7 @@ using GIGLS.Core.Enums;
 
 namespace GIGL.GIGLS.Core.Domain
 {
-    public class FleetJobCard 
+    public class FleetJobCard : BaseDomain
     {
         [Key]
         public int FleetJobCardId { get; set; }
@@ -17,15 +17,17 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Amount { get; set; }
         public string VehiclePartToFix { get; set; }
         public string Status { get; set; }
-        public DateTime DateCreated { get; set; }
-        public DateTime DateModified { get; set; }
 
         //public int FleetId { get; set; }
         //[ForeignKey("FleetId")]
         //public virtual Fleet Fleet { get; set; }
 
-        public int FleetManagerId { get; set; }
+        public string FleetManagerId { get; set; }
         [ForeignKey("FleetManagerId")]
         public virtual Partner FleetManager { get; set; }
+
+        public string EnterprisePartnerId { get; set; }
+        [ForeignKey("EnterprisePartnerId")]
+        public virtual FleetPartner EnterprisePartner { get; set; }
     }
 }

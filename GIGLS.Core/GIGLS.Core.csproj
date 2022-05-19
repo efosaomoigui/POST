@@ -385,7 +385,7 @@
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
-    <Compile Include="DTO\Fleets\FleetJobCardDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetJobCardDto.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
     <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />
     <Compile Include="DTO\Fleets\FleetModelDTO.cs" />

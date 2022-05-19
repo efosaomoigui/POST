@@ -9,6 +9,7 @@ namespace GIGLS.Core.IServices.Fleets
 {
     public interface IFleetJobCardService : IServiceDependencyMarker
     {
-        Task<IEnumerable<FleetJobCardDTO>> GetFleetJobCardsAsync();
+        Task<IEnumerable<FleetJobCardDto>> GetFleetJobCardsAsync();
+        Task<bool> OpenFleetJobCardsAsync(OpenFleetJobCardDto fleetJob);
     }
 }

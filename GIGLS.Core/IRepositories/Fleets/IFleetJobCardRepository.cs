@@ -8,6 +8,6 @@ namespace GIGLS.Core.IRepositories.Fleets
 {
     public interface IFleetJobCardRepository : IRepository<FleetJobCard>
     {
-        Task<List<FleetJobCardDTO>> GetFleetJobCardsAsync();
+        Task<List<FleetJobCardDto>> GetFleetJobCardsAsync();
     }
 }

@@ -545,6 +545,10 @@ namespace GIGLS.Core
                 config.CreateMap<LogEntryDTO, LogEntry>();
                 config.CreateMap<LogEntry, LogEntryDTO>();
 
+                // Fleet Job Card
+                config.CreateMap<FleetJobCardDto, FleetJobCard>();
+                config.CreateMap<FleetJobCard, FleetJobCardDto>();
+
             });
 
             isInit = true;

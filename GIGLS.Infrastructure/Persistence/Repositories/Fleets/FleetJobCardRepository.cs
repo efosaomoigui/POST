@@ -21,14 +21,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             _context = context;
         }
 
-        public async Task<List<FleetJobCardDTO>> GetFleetJobCardsAsync()
+        public async Task<List<FleetJobCardDto>> GetFleetJobCardsAsync()
         {
             try
             {
-                var fleets = _context.FleetJobCard.Include("FleetManager");
+                var fleets = _context.FleetJobCard.Include("FleetManager").Include("EnterprisePartner");
 
                 var fleetDto = from x in fleets where x.Status == FleetJobCardStatus.Open.ToString()
-                    select new FleetJobCardDTO()
+                    select new FleetJobCardDto()
                     {
                         FleetJobCardId = x.FleetJobCardId,
                         DateCreated = x.DateCreated,
