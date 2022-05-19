@@ -274,6 +274,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
         Task LogContentType(LogEntryDTO log);
+        Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
+        Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipments);
         Task<bool> ForgotPasswordV3(ForgotPasswordDTO user);
     }
 }

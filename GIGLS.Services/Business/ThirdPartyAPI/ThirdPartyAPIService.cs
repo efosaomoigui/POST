@@ -513,5 +513,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _cellulantPaymentService.UpdateCODShipmentOnCallBackStellas(cod);
         }
+        public async Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment)
+        {
+            return await _portalService.AddMultiplePreShipmentMobile(preShipment);
+        }
+
+        public async Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment)
+        {
+            return await _portalService.GetPriceMultipleMobileShipment(preShipment);
+        }
+
     }
 }

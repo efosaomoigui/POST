@@ -216,5 +216,17 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateMultipleShipment(PreShipmentMobileMultiMerchantDTO)">
+            <summary>
+            This api is used to create multiple shipments by one receiver 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO)">
+            <summary>
+            This api is used to get price for multiple shipment creation
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

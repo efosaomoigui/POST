@@ -606,6 +606,7 @@
     <Compile Include="DTO\Zone\ZoneDTO.cs" />
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\ActivityStatus.cs" />
+    <Compile Include="Enums\AlphaOrderStatus.cs" />
     <Compile Include="Enums\CardType.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
     <Compile Include="Enums\ItemState.cs" />

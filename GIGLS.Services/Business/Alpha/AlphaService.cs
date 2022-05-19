@@ -95,5 +95,43 @@ namespace GIGLS.Services.Business.Alpha
                 return result;
             }
         }
+
+        public async Task<bool> UpdateOrderStatus(AlphaUpdateOrderStatusDTO payload)
+        {
+            bool result = false;
+            string token = await GetToken();
+            using (var client = new HttpClient())
+            {
+                //Get login details
+                var baseurl = ConfigurationManager.AppSettings["AlphaOrderUrl"];
+                var subscriptionUpdate = ConfigurationManager.AppSettings["AlphaOrderUpdateStatus"];
+                baseurl = $"{ baseurl}{subscriptionUpdate}";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                //setup client
+                client.BaseAddress = new Uri(baseurl);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //Convert payload to string content / serialize
+                var json = JsonConvert.SerializeObject(payload);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PutAsync(baseurl, data);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    throw new GenericException("Operation could not complete successfully:");
+                }
+
+                if (response.IsSuccessStatusCode == true)
+                {
+                    result = true;
+                }
+
+                return result;
+            }
+        }
     }
 }

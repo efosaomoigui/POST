@@ -191,6 +191,7 @@ namespace GIGLS.Core.Domain
         public bool IsCoupon { get; set; }
         [MaxLength(50)]
         public string CouponCode { get; set; }
+        public bool IsAlpha { get; set; }
         public CODMobileStatus CODStatus { get; set; }
         public DateTime? CODStatusDate { get; set; }
         [MaxLength(300)]

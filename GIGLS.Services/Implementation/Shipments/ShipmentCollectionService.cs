@@ -4,11 +4,13 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Alpha;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Alpha;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -34,12 +36,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICellulantPaymentService _cellulantPaymentService;
+        private readonly IAlphaService _alphaService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
             ICashOnDeliveryAccountService cashOnDeliveryAccountService,
             IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService,
-            ICellulantPaymentService cellulantPaymentService)
+            ICellulantPaymentService cellulantPaymentService,
+            IAlphaService alphaService)
         {
             _uow = uow;
             _userService = userService;
@@ -47,6 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
             _cellulantPaymentService = cellulantPaymentService;
+            _alphaService = alphaService;
             MapperConfig.Initialize();
         }
 
@@ -644,6 +649,12 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
                 await AddRiderToDeliveryTable(shipmentCollection);
+            }
+
+            var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == shipmentCollection.Waybill && s.IsAlpha);
+            if (mobileShipment != null)
+            {
+                await UpdateAlphaOrderStatus(shipmentCollection.Waybill, AlphaOrderStatus.delivered.ToString());
             }
         }
 
@@ -1353,6 +1364,11 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<CODPaymentResponse> GetTransferStatus(string craccount)
         {
             return await _cellulantPaymentService.GetCODPaymentReceivedStatus(craccount);
+        }
+        private async Task UpdateAlphaOrderStatus(string waybill, string status)
+        {
+            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = status, WayBill = waybill };
+            await _alphaService.UpdateOrderStatus(notifyAlphaPayload);
         }
 
     }

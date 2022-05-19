@@ -52,4 +52,34 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? GrandTotal { get; set; }
         public decimal? DiscountValue { get; set; }
     }
+
+    public class MerchantMobilePriceDTO
+    {
+        public string CustomerCode { get; set; }
+        public string CustomerName { get; set; }
+        public decimal? DeliveryPrice { get; set; }
+        public decimal? InsuranceValue { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? GrandTotal { get; set; }
+        public decimal? Discount { get; set; }
+        public decimal? MainCharge { get; set; }
+        public decimal? PickUpCharge { get; set; }
+        public bool? IsWithinProcessingTime { get; set; }
+    }
+
+    public class MultiMerchantMobilePriceDTO
+    {
+        public MultiMerchantMobilePriceDTO()
+        {
+
+            Merchants = new List<MerchantMobilePriceDTO>();
+        }
+        public decimal? GrandTotal { get; set; }
+        public List<MerchantMobilePriceDTO> Merchants { get; set; }
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
+        public bool? IsWithinProcessingTime { get; set; }
+    }
+
+
 }
