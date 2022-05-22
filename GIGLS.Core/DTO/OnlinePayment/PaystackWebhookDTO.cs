@@ -799,8 +799,307 @@ namespace GIGLS.Core.DTO.OnlinePayment
     }
 
 
+    public class CellulantPaymentLoginDto
+    {
+        [JsonProperty("grant_type")]
+        public string GrantType { get; set; }
 
+        [JsonProperty("client_id")]
+        public string ClientId { get; set; }
 
+        [JsonProperty("client_secret")]
+        public string ClientSecret { get; set; }
+    }
 
+    public class CellulantPaymentLoginResponseDto : CellulantPaymentBaseResponseDto
+    {
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
 
+        [JsonProperty("expires_in")]
+        public int ExpiresIn { get; set; }
+
+        [JsonProperty("access_token")]
+        public string AccessToken { get; set; }
+    }
+
+    public class CellulantPaymentQueryStatusDto
+    {
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+    }
+
+    public class CellulantPaymentQueryPayment
+    {
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("MSISDN")]
+        public long MSISDN { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("customerName")]
+        public string CustomerName { get; set; }
+
+        [JsonProperty("amountPaid")]
+        public int AmountPaid { get; set; }
+
+        [JsonProperty("payerClientCode")]
+        public string PayerClientCode { get; set; }
+
+        [JsonProperty("cpgTransactionID")]
+        public string CpgTransactionID { get; set; }
+
+        [JsonProperty("paymentDate")]
+        public string PaymentDate { get; set; }
+
+        [JsonProperty("clientName")]
+        public string ClientName { get; set; }
+
+        [JsonProperty("clientDisplayName")]
+        public string ClientDisplayName { get; set; }
+
+        [JsonProperty("currencyCode")]
+        public string CurrencyCode { get; set; }
+
+        [JsonProperty("currencyID")]
+        public int CurrencyID { get; set; }
+
+        [JsonProperty("paymentID")]
+        public int PaymentID { get; set; }
+
+        [JsonProperty("hubOverallStatus")]
+        public int HubOverallStatus { get; set; }
+
+        [JsonProperty("clientCategoryID")]
+        public int ClientCategoryID { get; set; }
+
+        [JsonProperty("clientCategoryName")]
+        public string ClientCategoryName { get; set; }
+
+        [JsonProperty("payerNarration")]
+        public string PayerNarration { get; set; }
+    }
+
+    public class CellulantPaymentQueryResults
+    {
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("MSISDN")]
+        public long MSISDN { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("requestDate")]
+        public string RequestDate { get; set; }
+
+        [JsonProperty("requestStatusCode")]
+        public int RequestStatusCode { get; set; }
+
+        [JsonProperty("serviceName")]
+        public string ServiceName { get; set; }
+
+        [JsonProperty("serviceCode")]
+        public string ServiceCode { get; set; }
+
+        [JsonProperty("requestCurrencyCode")]
+        public string RequestCurrencyCode { get; set; }
+
+        [JsonProperty("requestAmount")]
+        public int RequestAmount { get; set; }
+
+        [JsonProperty("paymentCurrencyCode")]
+        public string PaymentCurrencyCode { get; set; }
+
+        [JsonProperty("amountPaid")]
+        public int AmountPaid { get; set; }
+
+        [JsonProperty("shortUrl")]
+        public string ShortUrl { get; set; }
+
+        [JsonProperty("redirectTrigger")]
+        public string RedirectTrigger { get; set; }
+
+        [JsonProperty("payments")]
+        public List<CellulantPaymentQueryPayment> Payments { get; set; }
+
+        [JsonProperty("failedPayments")]
+        public List<object> FailedPayments { get; set; }
+    }
+
+    public class CellulantPaymentQueryStatusResponseDto : CellulantPaymentBaseResponseDto
+    {
+        [JsonProperty("status")]
+        public CellulantPaymentQueryStatus Status { get; set; }
+
+        [JsonProperty("results")]
+        public CellulantPaymentQueryResults Results { get; set; }
+    }
+
+    public class CellulantPaymentQueryStatus
+    {
+        [JsonProperty("statusCode")]
+        public int StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+    }
+
+    public class CellulantPaymentAcknowledgeDto
+    {
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("receiptNumber")]
+        public string ReceiptNumber { get; set; }
+
+        [JsonProperty("statusCode")]
+        public int StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+    }
+
+    public class CellulantPaymentAcknowledgePayment
+    {
+        [JsonProperty("paymentID")]
+        public int PaymentID { get; set; }
+
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("cpgTransactionID")]
+        public string CpgTransactionID { get; set; }
+
+        [JsonProperty("payerTransactionID")]
+        public string PayerTransactionID { get; set; }
+
+        [JsonProperty("MSISDN")]
+        public long MSISDN { get; set; }
+
+        [JsonProperty("accountNumber")]
+        public string AccountNumber { get; set; }
+
+        [JsonProperty("customerName")]
+        public string CustomerName { get; set; }
+
+        [JsonProperty("amountPaid")]
+        public int AmountPaid { get; set; }
+
+        [JsonProperty("merchantReceipt")]
+        public string MerchantReceipt { get; set; }
+
+        [JsonProperty("payerNarration")]
+        public string PayerNarration { get; set; }
+
+        [JsonProperty("receiverNarration")]
+        public string ReceiverNarration { get; set; }
+
+        [JsonProperty("hubOverallStatus")]
+        public int HubOverallStatus { get; set; }
+
+        [JsonProperty("statusCodeDesc")]
+        public string StatusCodeDesc { get; set; }
+
+        [JsonProperty("currencyID")]
+        public int CurrencyID { get; set; }
+
+        [JsonProperty("payerClientCode")]
+        public string PayerClientCode { get; set; }
+
+        [JsonProperty("payerClientName")]
+        public string PayerClientName { get; set; }
+
+        [JsonProperty("payerClientDisplayName")]
+        public string PayerClientDisplayName { get; set; }
+
+        [JsonProperty("ownerClientCode")]
+        public string OwnerClientCode { get; set; }
+
+        [JsonProperty("ownerClientName")]
+        public string OwnerClientName { get; set; }
+
+        [JsonProperty("ownerClientDisplayName")]
+        public string OwnerClientDisplayName { get; set; }
+
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("convertedAmount")]
+        public int ConvertedAmount { get; set; }
+
+        [JsonProperty("totalPayableAmount")]
+        public int TotalPayableAmount { get; set; }
+
+        [JsonProperty("datePaymentReceived")]
+        public string DatePaymentReceived { get; set; }
+
+        [JsonProperty("datePaymentAcknowledged")]
+        public object DatePaymentAcknowledged { get; set; }
+
+        [JsonProperty("dateCreated")]
+        public string DateCreated { get; set; }
+
+        [JsonProperty("currencyCode")]
+        public string CurrencyCode { get; set; }
+
+        [JsonProperty("countryCode")]
+        public string CountryCode { get; set; }
+    }
+
+    public class CellulantPaymentAcknowledgeResults
+    {
+        [JsonProperty("checkoutRequestID")]
+        public int CheckoutRequestID { get; set; }
+
+        [JsonProperty("merchantTransactionID")]
+        public string MerchantTransactionID { get; set; }
+
+        [JsonProperty("requestStatusCode")]
+        public int RequestStatusCode { get; set; }
+
+        [JsonProperty("payments")]
+        public List<CellulantPaymentAcknowledgePayment> Payments { get; set; }
+    }
+
+    public class CellulantPaymentAcknowledgeResponseDto : CellulantPaymentBaseResponseDto
+    {
+        [JsonProperty("status")]
+        public CellulantPaymentAcknowledgeStatus Status { get; set; }
+
+        [JsonProperty("results")]
+        public CellulantPaymentAcknowledgeResults Results { get; set; }
+    }
+
+    public class CellulantPaymentAcknowledgeStatus
+    {
+        [JsonProperty("statusCode")]
+        public int StatusCode { get; set; }
+
+        [JsonProperty("statusDescription")]
+        public string StatusDescription { get; set; }
+    }
+
+    public class CellulantPaymentBaseResponseDto
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("status_code")]
+        public int StatusCode { get; set; }
+    }
+         
 }
