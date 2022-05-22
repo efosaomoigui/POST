@@ -394,5 +394,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var lastUser = user.LastOrDefault();
             return Task.FromResult(lastUser);
         }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetUsersListByCode(List<string> codes)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && codes.Contains(x.UserChannelCode)).ToList();
+            return Task.FromResult(user);
+        }
     }
 }
