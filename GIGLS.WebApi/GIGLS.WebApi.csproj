@@ -532,10 +532,13 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm-ThirdPartyStaging - Web Deploy5.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - FTP2.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - ReadOnly - FTP2.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemproductionapi-staging - Web Deploy2.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - Web Deploy.pubxml" />
