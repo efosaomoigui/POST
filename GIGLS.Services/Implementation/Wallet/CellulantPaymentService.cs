@@ -1385,7 +1385,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (paymentStatus.Status.StatusCode.Equals(200) && paymentStatus.Status.StatusDescription.Equals("Successfully processed request") && !paymentStatus.Results.RequestStatusCode.Equals(178))
             {
-                webhook.Message = "No data was found";
+                webhook.Message = "No transaction was found";
                 webhook.Status = webhook.Message;
                 webhook.data.Processor_Response = webhook.Message;
                 webhook.data.Status = paymentStatus.Status.StatusCode.ToString();
