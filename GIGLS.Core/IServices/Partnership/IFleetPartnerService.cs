@@ -29,5 +29,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode);
         Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId);
         Task<List<FleetTripDTO>> GetFleetTrips(int fleetId);
+        Task<FleetPartnerWalletDTO> GetPartnerWalletBalance();
     }
 }

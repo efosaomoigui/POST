@@ -289,6 +289,10 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
         {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
             var assets = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartner(fleetPartnerCode);
             return assets;
         }
@@ -305,6 +309,20 @@ namespace GIGLS.Services.Implementation.Partnership
             return fleetTrips;
         }
 
-        
+        public async Task<FleetPartnerWalletDTO> GetPartnerWalletBalance()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var result = new FleetPartnerWalletDTO
+            {
+                AvailableBalance = 20000.00m,
+                LedgerBalance = 40000.00m,
+                CurrentDayIncome = 12000m
+            };
+
+            return result;
+        }
     }
 }
