@@ -352,6 +352,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         result = await VerifyAndValidateSterlingPayment(referenceCode);
                     }
+                    else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                    {
+                        result = await VerifyAndValidateCellulantPayment(referenceCode);
+                    }
                     else
                     {
                         result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -4916,7 +4920,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return allMerchantPrice;
         }
 
+        private async Task<PaymentResponse> VerifyAndValidateCellulantPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _cellulantPaymentService.VerifyAndValidateMobilePayment(referenceCode);
 
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = string.Empty;
+            return response;
+        }
 
         public async Task<bool> ForgotPasswordV3(ForgotPasswordDTO user)
         {
