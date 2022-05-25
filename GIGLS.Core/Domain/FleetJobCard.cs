@@ -18,16 +18,14 @@ namespace GIGL.GIGLS.Core.Domain
         public string VehiclePartToFix { get; set; }
         public string Status { get; set; }
 
-        //public int FleetId { get; set; }
-        //[ForeignKey("FleetId")]
-        //public virtual Fleet Fleet { get; set; }
+        public int FleetId { get; set; }
+        [ForeignKey("FleetId")]
+        public virtual Fleet Fleet { get; set; }
 
         public string FleetManagerId { get; set; }
-        [ForeignKey("FleetManagerId")]
-        public virtual Partner FleetManager { get; set; }
 
-        public string EnterprisePartnerId { get; set; }
-        [ForeignKey("EnterprisePartnerId")]
-        public virtual FleetPartner EnterprisePartner { get; set; }
+        public string FleetOwnerId { get; set; }
+        [ForeignKey("FleetOwnerId")]
+        public virtual User FleetOwner { get; set; }
     }
 }

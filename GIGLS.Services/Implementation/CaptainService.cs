@@ -527,7 +527,7 @@ namespace GIGLS.Services.Implementation
             }
         }
 
-        public async Task<object> GetVehicleByRegistrationNumberAsync(string regNum)
+        public async Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum)
         {
             try
             {

@@ -22,6 +22,6 @@ namespace GIGLS.Core.IServices
         Task<bool> DeleteVehicleByIdAsync(int fleetId);
         Task<bool> EditVehicleAsync(VehicleDetailsDTO vehicle);
         Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync();
-        Task<object> GetVehicleByRegistrationNumberAsync(string regNum);
+        Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
     }
 }
