@@ -279,14 +279,14 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [HttpGet]
         [Route("getpartnerwalletbalance")]
-        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetPartnerWalletBalance()
+        public async Task<IServiceResponse<FleetPartnerWalletDTO>> GetPartnerWalletBalance()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner();
-                return new ServiceResponse<IEnumerable<AssetDTO>>
+                var result = await _fleetPartnerService.GetPartnerWalletBalance();
+                return new ServiceResponse<FleetPartnerWalletDTO>
                 {
-                    Object = assets
+                    Object = result
                 };
             });
         }
