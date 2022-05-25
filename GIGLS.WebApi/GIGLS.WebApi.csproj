@@ -544,10 +544,13 @@
     <None Include="Properties\PublishProfiles\agilitysystemsapibackup-staging - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - FTP2.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - ReadOnly - FTP2.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\giggomobileappapi-staging - Web Deploy2.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
