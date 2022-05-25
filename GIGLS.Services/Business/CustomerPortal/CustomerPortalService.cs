@@ -4742,6 +4742,19 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("invalid amount");
             }
 
+            //check how many miniutes ago the transaction was done, if less than a minuete bounce out
+            var log = _uow.CODTransferLog.GetAllAsQueryable().Where(c => c.CustomerCode == codWallet.CustomerCode).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (log != null)
+            {
+                var today = DateTime.Now;
+                TimeSpan ts = today - log.DateCreated;
+                var secs = ts.TotalSeconds;
+                if (secs < 90)
+                {
+                    throw new GenericException("You have just performed a withdrawal request. Please wait for another 2 minutes before you initialise another transaction");
+                }
+            }
+
             var withrawObj = new StellasWithdrawalDTO()
             {
               Amount = transferDTO.Amount,
