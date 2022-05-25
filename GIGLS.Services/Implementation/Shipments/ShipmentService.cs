@@ -6742,5 +6742,88 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return result;
         }
+
+        public async Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto)
+        {
+            try
+            {
+                var date = DateTime.UtcNow;
+                //var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                //var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                if (dto.StartDate == null && dto.EndDate == null)
+                {
+                    dto = new PaginationDTO
+                    {
+                        StartDate = date,
+                        EndDate = date
+                    };
+                }
+
+              
+                var allCOD = new AllCODShipmentDTO();
+                var codes = new List<string>();
+               var codAgilityShipment = _uow.Shipment.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
+                var codMobileShipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
+
+                codes.AddRange(codAgilityShipment.Select(x => x.CustomerCode));
+                if (!String.IsNullOrEmpty(dto.FilterOption))
+                {
+                    CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
+                    codAgilityShipment = codAgilityShipment.Where(x => x.CODStatus == status);
+                    codMobileShipment = codMobileShipment.Where(x => x.CODStatus == status);
+                }
+
+                var customers = await _uow.User.GetUsersListByCode(codes);
+                if (codAgilityShipment.Any())
+                {
+                    var waybills = codAgilityShipment.Select(x => x.Waybill);
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
+                    foreach (var item in codAgilityShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.SenderName = customers.FirstOrDefault(x => x.UserChannelCode == item.CustomerCode).FirstName + " " + customers.FirstOrDefault(x => x.UserChannelCode == item.CustomerCode).LastName;
+                        obj.CustomerCode = item.CustomerCode;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+
+                }
+                if (codMobileShipment.Any())
+                {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
+                    foreach (var item in codMobileShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.SenderName = item.SenderName;
+                        obj.CustomerCode = item.CustomerCode;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+                }
+
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
