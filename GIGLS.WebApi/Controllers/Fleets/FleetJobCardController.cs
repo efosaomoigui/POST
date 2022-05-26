@@ -38,7 +38,8 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
         // POST: FleetJobCard
         [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<bool>> OpenFleetJobCards(OpenFleetJobCardDto fleetJobCard)
+        //public async Task<IServiceResponse<bool>> OpenFleetJobCards(OpenFleetJobCardDto fleetJobCard)
+        public async Task<IServiceResponse<bool>> OpenFleetJobCards(NewJobCard fleetJobCard)
         {
             return await HandleApiOperationAsync(async () => {
                 var jobCards = await _fleetJobCardService.OpenFleetJobCardsAsync(fleetJobCard);

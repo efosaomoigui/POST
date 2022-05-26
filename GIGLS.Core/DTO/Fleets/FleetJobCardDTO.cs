@@ -44,4 +44,9 @@ namespace GIGLS.Core.DTO.Fleets
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
+
+    public class NewJobCard
+    {
+        public List<OpenFleetJobCardDto> JobCardItems { get; set; }
+    }
 }

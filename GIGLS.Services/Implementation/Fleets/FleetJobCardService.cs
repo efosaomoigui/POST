@@ -61,41 +61,44 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
-        public async Task<bool> OpenFleetJobCardsAsync(OpenFleetJobCardDto fleetJob)
+        public async Task<bool> OpenFleetJobCardsAsync(NewJobCard jobDto)
         {
             try
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
-                    VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(fleetJob.VehicleNumber);
-                    var enterprisePartner = await _userService.GetUserById(fleet.VehicleOwnerId);
-
-                    var newFleetJob = new FleetJobCard()
+                    foreach (var fleetJob in jobDto.JobCardItems)
                     {
-                        Status = FleetJobCardStatus.Open.ToString(),
-                        DateCreated = DateTime.Now,
-                        DateModified = DateTime.Now,
-                        FleetManagerId = currentUser.Id,
-                        FleetOwnerId = fleetJob.EnterprisePartnerId,
-                        VehiclePartToFix = fleetJob.VehiclePartToFix,
-                        FleetId = fleet.FleetId,
-                        Amount = fleetJob.Amount,
-                        VehicleNumber = fleetJob.VehicleNumber
-                    };
+                        //
+                        VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(fleetJob.VehicleNumber);
+                        var enterprisePartner = await _userService.GetUserById(fleet.VehicleOwnerId);
 
-                    _uow.FleetJobCard.Add(newFleetJob);
+                        var newFleetJob = new FleetJobCard()
+                        {
+                            Status = FleetJobCardStatus.Open.ToString(),
+                            DateCreated = DateTime.Now,
+                            DateModified = DateTime.Now,
+                            FleetManagerId = currentUser.Id,
+                            FleetOwnerId = fleetJob.EnterprisePartnerId,
+                            VehiclePartToFix = fleetJob.VehiclePartToFix,
+                            FleetId = fleet.FleetId,
+                            Amount = fleetJob.Amount,
+                            VehicleNumber = fleetJob.VehicleNumber
+                        };
+
+                        _uow.FleetJobCard.Add(newFleetJob);
+
+                        var passwordMessage = new PasswordMessageDTO()
+                        {
+                            Password = $"Maintenance Card has been opened for this vehicle {fleetJob.VehicleNumber}",
+                            UserEmail = enterprisePartner.Email,
+                            CustomerCode = $"Part to be fixed: {fleetJob.VehiclePartToFix}. \nAmount required: {fleetJob.Amount}"
+                        };
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
+                    }
                     await _uow.CompleteAsync();
-
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = $"Maintenance Card has been opened for this vehicle {fleetJob.VehicleNumber}",
-                        UserEmail = enterprisePartner.Email,
-                        CustomerCode = $"Part to be fixed: {fleetJob.VehiclePartToFix}. \nAmount required: {fleetJob.Amount}"
-                    };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
-
                     return true;
                 }
                 throw new GenericException("You are not authorized to perform this operation");
@@ -112,7 +115,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
                     dto.FleetManagerId = currentUser.Id;
                     var fleetJobCards = await _uow.FleetJobCard.GetFleetJobCardByDateRangeAsync(dto);
@@ -134,7 +137,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
                     return await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerAsync(currentUser.Id);
                 }
@@ -152,7 +155,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
                     var jobCardDto = new FleetJobCardDto()
@@ -183,7 +186,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
 
@@ -218,7 +221,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCards = await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerInCurrentMonthAsync(new GetFleetJobCardByDateRangeDto(){FleetManagerId = currentUser.Id, });
 

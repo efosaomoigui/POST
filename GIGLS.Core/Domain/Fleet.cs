@@ -31,5 +31,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string EnterprisePartnerId { get; set; }
         [ForeignKey("EnterprisePartnerId")]
         public virtual User EnterprisePartner { get; set; }
+
+
     }
 }
