@@ -620,6 +620,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverName { get; set; }
         public string ReceiverStationName { get; set; }
         public string CODDescription { get; set; }
+        public string SenderName { get; set; }
+        public string CustomerCode { get; set; }
     }
 
 

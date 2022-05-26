@@ -1729,8 +1729,7 @@ namespace GIGLS.Services.Implementation.Messaging
         //Handle Request Items Mail for Overseas Shipment
         public async Task SendOverseasRequestMails(IntlShipmentRequestDTO shipmentDto, UserDTO user, string storeName)
         {
-            string country = shipmentDto.RequestProcessingCountryId == 207 ? "USA" : "UK";
-
+            var country = await _uow.Country.GetAsync(x => x.CountryId == shipmentDto.RequestProcessingCountryId);
             //Get Customer details
             //get CustomerDetails 
             if (shipmentDto.CustomerType.Contains("Individual"))
@@ -1741,13 +1740,29 @@ namespace GIGLS.Services.Implementation.Messaging
 
             var customerObj = await GetCustomer(shipmentDto.CustomerId, customerType);
 
+            string centreName = string.Empty;
+            var dept = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId);
+            if (dept == null)
+            {
+                if (country != null)
+                {
+                    centreName = $"{country.CountryName.ToUpper()} Delivery Hub";
+                }
+            }
+
+            if (dept != null)
+            {
+                centreName = $"{dept.Name.ToUpper()} Delivery Hub";
+
+            }
+
             var messageDTO = new MessageDTO()
             {
                 CustomerName = customerObj.FirstName,
                 IntlMessage = new IntlMessageDTO()
                 {
                     Description = shipmentDto.ItemDetails,
-                    DepartureCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DepartureServiceCentreId).Name,
+                    DepartureCenter = centreName,
                     DestinationCenter = _uow.ServiceCentre.SingleOrDefault(x => x.ServiceCentreId == shipmentDto.DestinationServiceCentreId).Name,
                     DeliveryOption = shipmentDto.PickupOptions == PickupOptions.SERVICECENTER ? "Pick Up At GIGL Center" : "Home Delivery",
                     RequestCode = shipmentDto.RequestNumber,
@@ -1755,7 +1770,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 },
                 To = user.Email,
                 ToEmail = user.Email,
-                Subject = $"Overseas Shipment Request Acknowledgement ({country}) ",
+                Subject = $"Overseas Shipment Request Acknowledgement ({country.CountryName.ToUpper()}) ",
                 MessageTemplate = "OverseasShippingRequest"
             };
             if (shipmentDto.Consolidated)

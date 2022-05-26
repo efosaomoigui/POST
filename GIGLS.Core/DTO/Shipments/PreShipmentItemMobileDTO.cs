@@ -42,5 +42,19 @@ namespace GIGLS.Core.DTO.Shipments
         public string WeightRange { get; set; }
     }
 
-    
+    public class PreShipmentItemMobileMultiMerchantDTO
+    {
+        public string Description { get; set; }
+        public decimal Weight { get; set; }
+        public string ItemType { get; set; }
+        public ShipmentType ShipmentType { get; set; }
+        public string ItemName { get; set; }
+        public string Value { get; set; }
+        public int Quantity { get; set; }
+        public int? SpecialPackageId { get; set; }
+        public string WeightRange { get; set; }
+    }
+
+
+
 }

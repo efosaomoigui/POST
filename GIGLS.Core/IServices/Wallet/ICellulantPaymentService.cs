@@ -28,5 +28,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<CODPaymentResponse> GetCODPaymentReceivedStatus(string craccount);
         Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod);
         Task<GenerateAccountDTO> GenerateAccountNumberCellulant(GenerateAccountPayloadDTO payload);
+        Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
     }
 }

@@ -49,6 +49,9 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.DHL;
 using GIGLS.Core.IServices.UPS;
+using GIGLS.Core.DTO.Alpha;
+using GIGLS.Core.IServices.Alpha;
+using Newtonsoft.Json.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -84,6 +87,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUPSService _uPSService;
         private readonly IInsuranceService _insuranceService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
+        private readonly IAlphaService _alphaService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -93,7 +97,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
             IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IFinancialReportService financialReportService,
             INodeService nodeService, IPaymentService paymentService, IWaybillPaymentLogService waybillPaymentLogService, IServiceCentreService centreService,
-            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            IDHLService dHLService, IUPSService uPSService, IInsuranceService insuranceService, IAutoManifestAndGroupingService autoManifestAndGroupingService, IAlphaService alphaService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -125,6 +129,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uPSService = uPSService;
             _insuranceService = insuranceService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _alphaService = alphaService;
             MapperConfig.Initialize();
         }
 
@@ -902,18 +907,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     var message = new MobileShipmentCreationMessageDTO
                     {
                         SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber,
-                        WaybillNumber = newPreShipment.Waybill
+                        WaybillNumber = newPreShipment.Waybill,
+                        SenderName = newPreShipment.SenderName
                     };
-
-                    if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
-                    {
-                        message.SenderName = customer.Name;
-                    }
-                    else
-                    {
-                        string[] words = preShipmentDTO.SenderName.Split(' ');
-                        message.SenderName = words.FirstOrDefault();
-                    }
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
@@ -988,6 +984,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.PaymentUrl = response.data.Authorization_url;
                     }
 
+                    //Pin Generation 
+                    var number = await GenerateDeliveryCode();
+                    var deliveryNumber = new DeliveryNumber
+                    {
+                        SenderCode = number,
+                        IsUsed = false,
+                        Waybill = newPreShipment.Waybill
+                    };
+                    _uow.DeliveryNumber.Add(deliveryNumber);
+
+                    message.QRCode = deliveryNumber.SenderCode;
+
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -1003,7 +1011,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //We will send SMS & Email
-                    //await SendSMSForMobileShipmentCreation(message);
+                    await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
                     return preShipmentDTO;
                 }
             }
@@ -1040,6 +1048,33 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 newPreShipment.CustomerType = "Individual";
                 newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+            }
+            if (preShipmentDTO.DestinationServiceCentreId > 0)
+            {
+                 var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCentreId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
+            }
+
+            if (preShipmentDTO.DestinationServiceCenterId > 0)
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preShipmentDTO.DestinationServiceCenterId);
+                if (centre != null)
+                {
+                    newPreShipment.DestinationServiceCenterId = centre.ServiceCentreId;
+                    newPreShipment.InputtedReceiverAddress = preShipmentDTO.ReceiverAddress;
+                    newPreShipment.ReceiverAddress = centre.FormattedServiceCentreName;
+                    newPreShipment.IsHomeDelivery = false;
+                    newPreShipment.ReceiverLocation.Latitude = centre.Latitude;
+                    newPreShipment.ReceiverLocation.Longitude = centre.Longitude;
+                }
             }
 
             return newPreShipment;
@@ -2353,7 +2388,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               ScheduledDate = r.ScheduledDate,
                                                               SenderLocality = r.SenderLocality,
                                                               CashOnDeliveryAmount = r.CashOnDeliveryAmount,
-                                                              IsApproved = r.IsApproved
+                                                              IsApproved = r.IsApproved,
+                                                              IsBatchPickUp = r.IsBatchPickUp,
+                                                              IsCashOnDelivery = r.IsCashOnDelivery
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -2882,6 +2919,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (request == null)
                         {
                             await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+
+                            //Update alpha
+                            if (preshipmentmobile.IsAlpha)
+                            {
+                                await UpdateAlphaOrderStatus(preshipmentmobile.Waybill, AlphaOrderStatus.processing.ToString());
+                            }
                         }
                         else
                         {
@@ -3702,6 +3745,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.CODStatusDate = DateTime.Now;
                         await _uow.CompleteAsync(); 
                     }
+                }
+                if (preshipmentmobile.IsAlpha)
+                {
+                    await UpdateAlphaOrderStatus(preshipmentmobile.Waybill, AlphaOrderStatus.delivered.ToString());
                 }
             }
             catch (Exception)
@@ -4825,6 +4872,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Send SMS To Receiver with Delivery Code
                     await SendReceiverDeliveryCodeBySMS(mobileShipment, deliveryNumber.ReceiverCode);
+
+                    //Update alpha
+                    if (mobileShipment.IsAlpha)
+                    {
+                        await UpdateAlphaOrderStatus(mobileShipment.Waybill, AlphaOrderStatus.shipped.ToString());
+                    }
                 }
                 else if (mobileShipment.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() && mobileShipment.ZoneMapping == 1)
                 {
@@ -5284,7 +5337,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             {
                                 shipmentItems[i].Price = Convert.ToInt32(preshipmentmobile.PreShipmentItems[i].Value);
                                 // Quick fixes
-                                if (shipmentItems[i].Weight == 0)
+                                if (shipmentItems[i].Weight == 0 || shipmentItems[i].Length == 0 || shipmentItems[i].Height == 0 || shipmentItems[i].Width == 0)
                                 {
                                     shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.Document;
                                 }
@@ -5446,6 +5499,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                         {
                                             var stationData = await _uow.Station.GetAsync(x => x.StationId == destinationSC.StationId);
                                             detail.ReceiverServiceCentreId = stationData.SuperServiceCentreId;
+                                        }
+                                    }
+
+                                    if (!preshipmentmobile.IsHomeDelivery && preshipmentmobile.DestinationServiceCenterId > 0)
+                                    {
+                                        var centre = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == preshipmentmobile.DestinationServiceCenterId);
+                                        if (centre != null)
+                                        {
+                                            detail.ReceiverServiceCentreId = centre.ServiceCentreId;
                                         }
                                     }
 
@@ -7787,6 +7849,435 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return result;
         }
+
+        private async Task UpdateAlphaOrderStatus(string waybill, string status)
+        {
+            var notifyAlphaPayload = new AlphaUpdateOrderStatusDTO { Status = status, WayBill = waybill };
+            await _alphaService.UpdateOrderStatus(notifyAlphaPayload);
+        }
+
+
+        public async Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipments)
+        {
+            try
+            {
+                var shipments = new List<PreShipmentMobile>();
+                var waybills = new List<Dictionary<string, string>>();
+                bool IsBalanceSufficient = true;
+                bool IsEligible = true;
+                decimal grandTotal = 0;
+                string message = "shipment created successfully";
+                preShipments.DateCreated = DateTime.Now;
+                if (!preShipments.Merchants.Any())
+                {
+                    message = "invalid payload; merchant not provided";
+                    IsBalanceSufficient = false;
+                    throw new GenericException(message, $"{(int)HttpStatusCode.BadRequest}");
+                }
+                var receiverExist = await _uow.User.GetUserByPhoneNumber(preShipments.ReceiverPhoneNumber);
+                if (receiverExist == null && preShipments.PaymentType == PaymentType.Wallet)
+                {
+                    message = "customer does not exist";
+                    IsBalanceSufficient = false;
+                    throw new GenericException(message, $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (company is null)
+                {
+                    message = "user is not an ecommerce user";
+                    IsBalanceSufficient = false;
+                    throw new GenericException(message, $"{(int)HttpStatusCode.BadRequest}");
+                }
+
+                if (company.CompanyType != CompanyType.Corporate || (company.CompanyType != CompanyType.Ecommerce && company.Rank != Rank.Class))
+                {
+                    if (preShipments.IsCashOnDelivery)
+                    {
+                        message = "this feature is not available for Basic ecommerce customers";
+                        IsBalanceSufficient = false;
+                        throw new GenericException(message, $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                }
+                foreach (var preShipment in preShipments.Merchants)
+                {
+                    if (String.IsNullOrEmpty(preShipment.CustomerCode))
+                    {
+                        message = "merchant does not exist";
+                        IsBalanceSufficient = false;
+                        throw new GenericException(message, $"{(int)HttpStatusCode.BadRequest}");
+                    }
+                    var merchant = await _uow.User.GetUserByChannelCode(preShipment.CustomerCode);
+                    var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipments.ReceiverStationId);
+                    preShipment.ZoneMapping = zoneid.ZoneId;
+                    preShipments.ZoneMapping = zoneid.ZoneId;
+                    var mobileShipment = JObject.FromObject(preShipment).ToObject<PreShipmentMobileDTO>();
+                    mobileShipment.VehicleType = preShipments.VehicleType;
+                    mobileShipment.PaymentType = preShipments.PaymentType;
+                    mobileShipment.ZoneMapping = preShipment.ZoneMapping;
+
+                    //set all merchant info
+                    if (merchant != null)
+                    {
+                        mobileShipment.UserId = merchant.Id;
+                        mobileShipment.ZoneMapping = preShipment.ZoneMapping;
+                        mobileShipment.CustomerCode = merchant.UserChannelCode;
+                        mobileShipment.SenderLocation = preShipment.SenderLocation;
+                    }
+
+                    //set receiver info
+                    mobileShipment.ReceiverAddress = preShipments.ReceiverAddress;
+                    mobileShipment.ReceiverPhoneNumber = preShipments.ReceiverPhoneNumber;
+                    mobileShipment.ReceiverStationId = preShipments.ReceiverStationId;
+                    mobileShipment.ReceiverLocation = preShipments.ReceiverLocation;
+                    mobileShipment.ReceiverName = preShipments.ReceiverName;
+                    mobileShipment.ReceiverEmail = preShipments.ReceiverEmail;
+                    mobileShipment.ZoneMapping = zoneid.ZoneId;
+                    mobileShipment.IsCashOnDelivery = preShipments.IsCashOnDelivery;
+                    mobileShipment.CashOnDeliveryAmount = preShipments.CashOnDeliveryAmount;
+                    if (receiverExist == null)
+                    {
+                        var receiver = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Contains(preShipments.ReceiverPhoneNumber));
+                        if (receiver == null)
+                        {
+                            //create this user first
+                            var newCustomer = new CustomerDTO()
+                            {
+                                PhoneNumber = preShipments.ReceiverPhoneNumber,
+                                FirstName = preShipments.ReceiverName,
+                                LastName = preShipments.ReceiverName,
+                                UserActiveCountryId = 1,
+                                City = preShipment.SenderLocality,
+                                CustomerType = CustomerType.IndividualCustomer,
+                                Address = preShipments.ReceiverAddress,
+                                ReturnAddress = preShipments.ReceiverAddress,
+                                Gender = Gender.Male,
+                                CustomerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual)
+                            };
+                            var newIndCustomer = Mapper.Map<IndividualCustomer>(newCustomer);
+                            _uow.IndividualCustomer.Add(newIndCustomer);
+                            await _uow.CompleteAsync();
+                        }
+                        else if (receiver != null)
+                        {
+                            mobileShipment.ReceiverCode = receiver.CustomerCode;
+                            mobileShipment.ReceiverEmail = receiver.Email;
+                        }
+                    }
+                    else
+                    {
+                        mobileShipment.ReceiverCode = receiverExist.UserChannelCode;
+                        mobileShipment.ReceiverEmail = receiverExist.Email;
+                    }
+
+                    var newPreShipmentDTO = await CreateMultiplePreShipmentMobile(mobileShipment);
+                    IsBalanceSufficient = newPreShipmentDTO.IsBalanceSufficient.Value;
+                    IsEligible = false;
+                    if (!newPreShipmentDTO.IsBalanceSufficient.Value)
+                    {
+                        message = "Insufficient Wallet Balance";
+                        IsBalanceSufficient = false;
+                        throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                    if (merchant.UserChannelType == UserChannelType.Ecommerce || merchant.UserChannelType == UserChannelType.Corporate)
+                    {
+                        IsEligible = newPreShipmentDTO.IsEligible.Value;
+                        if (!newPreShipmentDTO.IsEligible.Value)
+                        {
+                            var carPickUprice = new GlobalPropertyDTO();
+                            if (newPreShipmentDTO.IsCodNeeded == false)
+                            {
+                                carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNoCodAmount, newPreShipmentDTO.CountryId);
+                            }
+                            else
+                            {
+                                carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCodAmount, newPreShipmentDTO.CountryId);
+                            }
+                            var remainingamount = (Convert.ToDecimal(carPickUprice.Value) - newPreShipmentDTO.CurrentWalletAmount);
+                            message = $"You are not yet eligible to create shipment on the Platform. You need a minimum balance of {newPreShipmentDTO.CurrencySymbol}{carPickUprice.Value}, please fund your wallet with additional {newPreShipmentDTO.CurrencySymbol}{remainingamount} to complete the process. Thank you";
+                            newPreShipmentDTO.Waybill = "";
+
+                            throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
+                        }
+                    }
+                    if (newPreShipmentDTO.IsBalanceSufficient.Value)
+                    {
+                        var newPreShipment = Mapper.Map<PreShipmentMobile>(newPreShipmentDTO);
+                        var waybill = new Dictionary<string, string>();
+                        waybill.Add(newPreShipment.Waybill, newPreShipment.CustomerCode);
+                        waybills.Add(waybill);
+                        newPreShipment.IsAlpha = true;
+                        shipments.Add(newPreShipment);
+                    }
+                }
+
+                if (shipments.Any())
+                {
+                    grandTotal = shipments.Sum(x => x.GrandTotal);
+                    _uow.PreShipmentMobile.AddRange(shipments);
+                    await _uow.CompleteAsync();
+
+                    foreach (var item in shipments)
+                    {
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = item.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MCRT
+                        });
+
+                        var messageDto = new MobileShipmentCreationMessageDTO
+                        {
+                            SenderPhoneNumber = item.SenderPhoneNumber,
+                            WaybillNumber = item.Waybill,
+                            SenderName = item.SenderName
+                        };
+
+
+                        //Pin Generation 
+                        var number = await GenerateDeliveryCode();
+                        var deliveryNumber = new DeliveryNumber
+                        {
+                            SenderCode = number,
+                            IsUsed = false,
+                            Waybill = item.Waybill
+                        };
+                        _uow.DeliveryNumber.Add(deliveryNumber);
+
+                        messageDto.QRCode = deliveryNumber.SenderCode;
+
+                        await _uow.CompleteAsync();
+                        
+                        //We will send SMS & Email
+                        await SendSMSForMobileShipmentCreation(messageDto, MessageType.MCS);
+                    }
+
+                    foreach (var item in shipments)
+                    {
+                        //drop shipment on node
+                        NodeApiCreateShipment(item);
+
+                        //also send sms
+                    }
+                }
+
+                return new { waybill = waybills, message = message, IsBalanceSufficient, Zone = preShipments.ZoneMapping, GrandTotal = grandTotal };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<PreShipmentMobileDTO> CreateMultiplePreShipmentMobile(PreShipmentMobileDTO preShipmentDTO)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(preShipmentDTO.VehicleType))
+                {
+                    throw new GenericException("Please select a vehicle type");
+                }
+
+                if (!preShipmentDTO.PreShipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Items cannot be empty");
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.ReceiverPhoneNumber))
+                {
+                    preShipmentDTO.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber.Trim();
+                }
+
+                if (!String.IsNullOrEmpty(preShipmentDTO.SenderPhoneNumber))
+                {
+                    preShipmentDTO.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber.Trim();
+                }
+
+                var PreshipmentPriceDTO = new MobilePriceDTO();
+                bool IsBalanceSufficient = true;
+
+                var sender = await _userService.GetUserById(preShipmentDTO.UserId);
+                preShipmentDTO.CustomerCode = sender.UserChannelCode;
+
+                var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                preShipmentDTO.CountryId = country.CountryId;
+
+                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == sender.UserChannelCode);
+                if (customer != null)
+                {
+                    preShipmentDTO.IsEligible = customer.IsEligible;
+                    //If the account is not active, block the customer from creating shipment
+                    if (customer.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"Your account has been {customer.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
+                    if (customer.IsEligible != true)
+                    {
+                        preShipmentDTO.IsEligible = false;
+                        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
+                        preShipmentDTO.CurrencySymbol = country.CurrencySymbol;
+                        preShipmentDTO.CurrentWalletAmount = customer.WalletAmount != null ? (decimal)customer.WalletAmount : 0;
+                        return preShipmentDTO;
+                    }
+                }
+
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                {
+                    PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
+                    {
+                        Haulageid = (int)preShipmentDTO.Haulageid,
+                        DepartureStationId = preShipmentDTO.SenderStationId,
+                        DestinationStationId = preShipmentDTO.ReceiverStationId
+                    });
+                    preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                    if (preShipmentDTO.PreShipmentItems.Any())
+                    {
+                        foreach (var shipment in preShipmentDTO.PreShipmentItems)
+                        {
+                            shipment.CalculatedPrice = PreshipmentPriceDTO.GrandTotal;
+                        }
+                    }
+                }
+                else if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipmentDTO.ZoneMapping == 1)
+                {
+                    PreshipmentPriceDTO = await GetPriceForBike(preShipmentDTO);
+                }
+                else
+                {
+                    if (sender.UserChannelType == UserChannelType.Ecommerce || customer != null)
+                    {
+                        preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
+                    }
+                    preShipmentDTO.IsFromShipment = true;
+                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                }
+
+                // update and apply coupon 
+                if (preShipmentDTO.IsCoupon)
+                {
+                    PreshipmentPriceDTO.GrandTotal = await ComputeCouponAmount(preShipmentDTO.CouponCode, PreshipmentPriceDTO.GrandTotal.Value);
+                    var coupon = _uow.CouponManagement.SingleOrDefault(x => x.CouponCode == preShipmentDTO.CouponCode);
+                    coupon.IsCouponCodeUsed = true;
+                }
+
+                decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                decimal actualAmountToDebit = shipmentGrandTotal;
+                //get departure country
+                if (country != null)
+                {
+                    if (sender.UserActiveCountryId != country.CountryId)
+                    {
+                        //get actual amount to debit
+                        var countryRateConversion = await _uow.CountryRouteZoneMap.GetAsync(r =>
+                        r.DepartureId == country.CountryId &&
+                        r.DestinationId == sender.UserActiveCountryId, "Zone,Destination,Departure");
+                        if (countryRateConversion == null)
+                            throw new GenericException("The Mapping of Route to Zone does not exist");
+
+                        double amountToDebitDouble = countryRateConversion.Rate * (double)shipmentGrandTotal;
+                        actualAmountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+                    }
+                }
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+
+                //generate waybill
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
+                preShipmentDTO.Waybill = waybill;
+
+                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+
+                if (sender.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    newPreShipment.CustomerType = CustomerType.Company.ToString();
+                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                }
+
+                else
+                {
+                    newPreShipment.CustomerType = "Individual";
+                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                }
+
+                newPreShipment.UserId = preShipmentDTO.UserId;
+                newPreShipment.IsConfirmed = false;
+                newPreShipment.IsDelivered = false;
+                newPreShipment.shipmentstatus = "Shipment created";
+                newPreShipment.DateCreated = DateTime.Now;
+                newPreShipment.GrandTotal = shipmentGrandTotal;
+                newPreShipment.CustomerCode = sender.UserChannelCode;
+                preShipmentDTO.IsBalanceSufficient = true;
+                preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
+                newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
+                var newPreShipmentDTO = Mapper.Map<PreShipmentMobileDTO>(newPreShipment);
+                newPreShipmentDTO.IsBalanceSufficient = preShipmentDTO.IsBalanceSufficient;
+                newPreShipmentDTO.IsEligible = preShipmentDTO.IsEligible;
+                //process payment
+                if (preShipmentDTO.PaymentType == PaymentType.Wallet)
+                {
+                    var currentUserId = await _userService.GetCurrentUserId();
+                    var user = await _userService.GetUserById(currentUserId);
+                    var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                    if (wallet.Balance >= actualAmountToDebit)
+                    {
+                        var transaction = new WalletTransactionDTO
+                        {
+                            WalletId = wallet.WalletId,
+                            CreditDebitType = CreditDebitType.Debit,
+                            Amount = newPreShipment.GrandTotal,
+                            ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
+                            Waybill = waybill,
+                            Description = "Payment for Shipment",
+                            PaymentType = PaymentType.Wallet,
+                            UserId = user.Id,
+                            TransactionCountryId = user.UserActiveCountryId
+                        };
+                        if (transaction.CreditDebitType == CreditDebitType.Credit)
+                        {
+                            transaction.BalanceAfterTransaction = wallet.Balance + actualAmountToDebit;
+                        }
+                        else
+                        {
+                            transaction.BalanceAfterTransaction = wallet.Balance - actualAmountToDebit;
+                        }
+
+                        //update wallet
+                        var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+                        //double check in case something is wrong with the server before complete the transaction
+                        if (updatedwallet.Balance < actualAmountToDebit)
+                        {
+                            preShipmentDTO.IsBalanceSufficient = false;
+                            IsBalanceSufficient = false;
+                            newPreShipmentDTO.IsBalanceSufficient = IsBalanceSufficient;
+                            return newPreShipmentDTO;
+                        }
+                        decimal price = updatedwallet.Balance - actualAmountToDebit;
+                        updatedwallet.Balance = price;
+                        var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    }
+                    else
+                    {
+                        preShipmentDTO.IsBalanceSufficient = false;
+                        IsBalanceSufficient = false;
+                        return preShipmentDTO;
+                    }
+                }
+                newPreShipmentDTO = Mapper.Map<PreShipmentMobileDTO>(newPreShipment);
+                newPreShipmentDTO.IsBalanceSufficient = IsBalanceSufficient;
+                newPreShipmentDTO.IsEligible = preShipmentDTO.IsEligible;
+                return newPreShipmentDTO;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
     }
 }
 

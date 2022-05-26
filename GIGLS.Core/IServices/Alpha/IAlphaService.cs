@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Alpha
     {
         Task<string> GetToken();
         Task<bool> UpdateUserSubscription(AlphaSubscriptionUpdateDTO payload);
+        Task<bool> UpdateOrderStatus(AlphaUpdateOrderStatusDTO payload);
     }
 }

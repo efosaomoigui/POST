@@ -562,5 +562,47 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 Object = result
             };
         }
+
+
+
+        /// <summary>
+        /// This api is used to create multiple shipments by one receiver 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("createmultipleshipment")]
+        public async Task<IServiceResponse<object>> CreateMultipleShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _thirdPartyAPIService.AddMultiplePreShipmentMobile(preshipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get price for multiple shipment creation
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("getpriceformultiplemerchantshipment")]
+        public async Task<IServiceResponse<MultiMerchantMobilePriceDTO>> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _thirdPartyAPIService.GetPriceMultipleMobileShipment(preshipmentMobile);
+
+                return new ServiceResponse<MultiMerchantMobilePriceDTO>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+
     }
 }

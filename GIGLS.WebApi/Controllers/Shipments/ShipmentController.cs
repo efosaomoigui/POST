@@ -1259,5 +1259,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("allcodshipment")]
+        public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipmentsAgilityReport(PaginationDTO dto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.GetAllCODShipmentsAgilityReport(dto);
+                return new ServiceResponse<AllCODShipmentDTO>
+                {
+                    Object = res,
+                };
+            });
+        }
     }
 }

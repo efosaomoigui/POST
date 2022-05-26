@@ -49,5 +49,8 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsBatchPickUp { get; set; }
         public string WaybillImage { get; set; }
         public string WaybillImageFormat { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+
     }
 }

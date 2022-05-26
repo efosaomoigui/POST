@@ -28,14 +28,16 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
         private readonly ISterlingPaymentService _sterlingPaymentService;
         private readonly IUssdService _ussdService;
+        private readonly ICellulantPaymentService _cellulantPaymentService;
 
-        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IFlutterwavePaymentService flutterwavePaymentService, ISterlingPaymentService sterlingPaymentService)
+        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IFlutterwavePaymentService flutterwavePaymentService, ISterlingPaymentService sterlingPaymentService, ICellulantPaymentService cellulantPaymentService)
         {
             _userService = userService;
             _paystackPaymentService = paystackPaymentService;
             _ussdService = ussdService;
             _flutterwavePaymentService = flutterwavePaymentService;
             _sterlingPaymentService = sterlingPaymentService;
+            _cellulantPaymentService = cellulantPaymentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -347,6 +349,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     result = await VerifyAndValidateSterlingPayment(paymentLog.Reference);
                 }
+                else if (paymentLog.OnlinePaymentType == OnlinePaymentType.Cellulant)
+                {
+                    result = await VerifyAndValidateCellulantPayment(paymentLog.Reference);
+                }
                 else
                 {
                     result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
@@ -396,6 +402,18 @@ namespace GIGLS.Services.Implementation.Wallet
             response.Status = result.data.Status;
             response.Message = result.Message;
             response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateCellulantPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+            var result = await _cellulantPaymentService.VerifyAndValidateMobilePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = string.Empty;
             return response;
         }
     }
