@@ -91,6 +91,7 @@ namespace GIGLS.Core.DTO.Captains
         public int VehicleCapacity { get; set; }
         public string PartnerEmail { get; set; }
         public int PartnerId { get; set; }
+        public string IsFixed { get; set; }
     }
 
     public class CurrentMonthDetailsDTO
@@ -109,6 +110,7 @@ namespace GIGLS.Core.DTO.Captains
         public string Status { get; set; }
         public int VehicleAge { get; set; }
         public string VehicleOwnerId { get; set; }
+        public string IsFixed { get; set; }
     }
     
     public class VehicleDetailsDTO
@@ -124,5 +126,6 @@ namespace GIGLS.Core.DTO.Captains
         public int Capacity { get; set; }
         public int PartnerId { get; set; }
         public string VehicleOwnerId { get; set; }
+        public string IsFixed { get; set; }
     }
 }

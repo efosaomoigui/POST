@@ -16,6 +16,7 @@ using GIGLS.Core.DTO;
 using GIGLS.CORE.DTO.Report;
 using System.Linq;
 using AutoMapper;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.IRepositories.Partnership;
 
@@ -122,13 +123,23 @@ namespace GIGLS.Services.Implementation
                 _uow.Partner.Add(partner);
                 await _uow.CompleteAsync();
 
-                var newMsg = new NewMessageDTO();
-                newMsg.Subject = "Captain Registration Successful";
-                newMsg.EmailSmsType = EmailSmsType.Email;
-                newMsg.ReceiverDetail = captainDTO.Email;
-                newMsg.Body = $"Captain registration successful on Agility. Login details below. \nRegistered email: {captainDTO.Email} \nPassword: {password}";
+                // send mail
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = $"Captain Registration Successful on Agility \n <br>Password: <b>{password}</b>",
+                    UserEmail = captainDTO.Email, 
+                };
 
-                await _messageSenderService.SendGenericEmailMessage(MessageType.CAPEMAIL, newMsg);
+                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                //await _messageSenderService.SendGenericEmailMessage(MessageType.CAPEMAIL, passwordMessage);
+
+                //var newMsg = new NewMessageDTO();
+                //newMsg.Subject = "Captain Registration Successful";
+                //newMsg.EmailSmsType = EmailSmsType.Email;
+                //newMsg.ReceiverDetail = captainDTO.Email;
+                //newMsg.Body = $"Captain registration successful. Login details below. \nRegistered email: {captainDTO.Email} \nPassword: {password}";
+
+                //await _messageSenderService.SendGenericEmailMessage(MessageType.CAPEMAIL, newMsg);
 
                 return new { id = user.Id, password = password, email = user.Email };
             } 
@@ -300,6 +311,7 @@ namespace GIGLS.Services.Implementation
                 var partner = await _uow.Partner.GetPartnerByEmail(vehicleDTO.PartnerEmail);
 
                 FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType);
+                VehicleFixedStatus isFixed = (VehicleFixedStatus)Enum.Parse(typeof(VehicleFixedStatus), vehicleDTO.IsFixed);
 
                 Fleet newFleet = new Fleet()
                 {
@@ -316,6 +328,7 @@ namespace GIGLS.Services.Implementation
                     ModelId = fleetModel.FirstOrDefault().MakeId,
                     FleetModel = fleetModel.FirstOrDefault(),
                     EnterprisePartnerId = vehicleDTO.VehicleOwner,
+                    IsFixed = isFixed,
                 };
 
                 _uow.Fleet.Add(newFleet);
@@ -409,6 +422,7 @@ namespace GIGLS.Services.Implementation
                         Capacity = vehicle.Capacity,
                         PartnerId = vehicle.PartnerId,
                         VehicleOwnerId = owner.Id,
+                        IsFixed = vehicle.IsFixed.ToString(),
                     };
                     return vehicleDetails;
                 }
@@ -467,6 +481,8 @@ namespace GIGLS.Services.Implementation
                     }
 
                     FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicle.VehicleType);
+                    VehicleFixedStatus isFixed = (VehicleFixedStatus)Enum.Parse(typeof(VehicleFixedStatus), vehicle.IsFixed);
+
                     var partner = await _uow.Partner.GetAsync(vehicle.PartnerId);
                     var today = DateTime.Now;
 
@@ -481,6 +497,7 @@ namespace GIGLS.Services.Implementation
                     fleet.PartnerId = partner.PartnerId;
                     fleet.EnterprisePartnerId = vehicle.VehicleOwnerId;
                     fleet.FleetType = fleetType;
+                    fleet.IsFixed = isFixed;
 
                     await _uow.CompleteAsync();
                     return true;
@@ -518,6 +535,7 @@ namespace GIGLS.Services.Implementation
                     VehicleOwnerId = x.EnterprisePartnerId,
                     //VehicleOwner = await _userService.GetUserById(x.FleetOwner).Result.FirstName + " " + _userService.GetUserById(x.FleetOwner).Result.LastName,
                     Capacity = x.Capacity,
+                    IsFixed = x.IsFixed.ToString()
                 }).ToList();
                 return vehiclesDto;
             }

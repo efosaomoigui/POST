@@ -117,6 +117,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString() ,
                     VehicleOwnerId = x.EnterprisePartnerId,
                     VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
+                    IsFixed = x.IsFixed.ToString()
                 }).ToList();
 
                 return await Task.FromResult(allVehicles);
@@ -151,6 +152,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     Capacity = vehicle.Capacity,
                     VehicleType = vehicle.FleetType.ToString(),
                     PartnerId = vehicle.PartnerId,
+                    IsFixed = vehicle.IsFixed.ToString(),
                 };
 
                 return vehicleDto;

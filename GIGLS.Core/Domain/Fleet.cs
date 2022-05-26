@@ -32,6 +32,6 @@ namespace GIGL.GIGLS.Core.Domain
         [ForeignKey("EnterprisePartnerId")]
         public virtual User EnterprisePartner { get; set; }
 
-
+        public VehicleFixedStatus IsFixed { get; set; }
     }
 }
