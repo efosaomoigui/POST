@@ -605,38 +605,20 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         /// <summary>
-        /// This api is used to charge wallet
+        /// This api is used to charge a customer's wallet
         /// </summary>
         /// <returns></returns>
-        [AllowAnonymous]
         [HttpPut]
         [Route("chargewallet")]
-        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = new ServiceResponse<ResponseDTO>();
-                var request = Request;
-                var headers = request.Headers;
-                if (headers.Contains("api_key"))
+                var result = await _thirdPartyAPIService.ChargeWallet(responseDTO);
+                return new ServiceResponse<ResponseDTO>
                 {
-                    var key = await _thirdPartyAPIService.Decrypt();
-                    string token = headers.GetValues("api_key").FirstOrDefault();
-                    if (token == key)
-                    {
-                        var result = await _thirdPartyAPIService.ChargeWallet(chargeWalletDTO);
-                        response.Object = result;
-                    }
-                    else
-                    {
-                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
-                    }
-                }
-                else
-                {
-                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
-                }
-                return response;
+                    Object = result,
+                };
             });
         }
 
