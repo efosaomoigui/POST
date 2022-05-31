@@ -132,6 +132,7 @@
     <Compile Include="Persistence\Repositories\Archived\InvoiceArchiveRepository.cs" />
     <Compile Include="Persistence\Repositories\Archived\ShipmentArchiveRepository.cs" />
     <Compile Include="Persistence\Repositories\BillsPaymentManagementRepository.cs" />
+    <Compile Include="Persistence\Repositories\ShipmentCategory.cs" />
     <Compile Include="Persistence\Repositories\ShipmentExportRepository.cs" />
     <Compile Include="Persistence\Repositories\GIGXUserDetailRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankRepository.cs" />

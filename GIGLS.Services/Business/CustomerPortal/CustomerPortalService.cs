@@ -75,6 +75,7 @@ using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO.Node;
 using System.Text;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IRepositories;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -4943,6 +4944,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             response.Message = result.Message;
             response.GatewayResponse = string.Empty;
             return response;
+        }
+
+        public async Task<IEnumerable<InboundCategoryDTO>> GetInboundCategory()
+        {
+            return await Task.FromResult(Mapper.Map<IEnumerable<InboundCategory>, IEnumerable<InboundCategoryDTO>>(_uow.ShipmentCategory.GetAll()));
         }
     }
 }

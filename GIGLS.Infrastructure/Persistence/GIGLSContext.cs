@@ -324,6 +324,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CODTransferRegister> CODTransferRegister { get; set; }
         public DbSet<CODTransferLog> CODTransferLog { get; set; }
         public DbSet<CODGeneratedAccountNo> CODGeneratedAccountNo { get; set; }
+
+        public DbSet<InboundCategory> InboundCategory { get; set; }
         #endregion
 
 
