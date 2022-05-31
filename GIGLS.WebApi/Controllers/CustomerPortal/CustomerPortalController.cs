@@ -3102,7 +3102,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [AllowAnonymous]
+
         [HttpGet]
         [Route("inbundcategory")]
         public async Task<IServiceResponse<IEnumerable<InboundCategoryDTO>>> GetInboundCategory()
