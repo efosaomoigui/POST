@@ -122,7 +122,7 @@ namespace GIGLS.Services.Implementation
                 }
 
                 // add user to role
-                await _userService.AddToRoleAsync(user.Id, "Captain");
+                //await _userService.AddToRoleAsync(user.Id, "Captain");
 
                 _uow.Partner.Add(partner);
                 await _uow.CompleteAsync();
