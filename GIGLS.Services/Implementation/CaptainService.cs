@@ -120,6 +120,10 @@ namespace GIGLS.Services.Implementation
                         throw new GenericException($"{errors}");
                     }
                 }
+
+                // add user to role
+                await _userService.AddToRoleAsync(user.Id, "Captain");
+
                 _uow.Partner.Add(partner);
                 await _uow.CompleteAsync();
 
@@ -131,15 +135,7 @@ namespace GIGLS.Services.Implementation
                 };
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
-                //await _messageSenderService.SendGenericEmailMessage(MessageType.CAPEMAIL, passwordMessage);
-
-                //var newMsg = new NewMessageDTO();
-                //newMsg.Subject = "Captain Registration Successful";
-                //newMsg.EmailSmsType = EmailSmsType.Email;
-                //newMsg.ReceiverDetail = captainDTO.Email;
-                //newMsg.Body = $"Captain registration successful. Login details below. \nRegistered email: {captainDTO.Email} \nPassword: {password}";
-
-                //await _messageSenderService.SendGenericEmailMessage(MessageType.CAPEMAIL, newMsg);
+                await _messageSenderService.SendGenericEmailMessage(MessageType.PSU, passwordMessage);
 
                 return new { id = user.Id, password = password, email = user.Email };
             } 

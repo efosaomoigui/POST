@@ -67,7 +67,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     foreach (var fleetJob in jobDto.JobCardItems)
                     {
@@ -115,7 +115,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     dto.FleetManagerId = currentUser.Id;
                     var fleetJobCards = await _uow.FleetJobCard.GetFleetJobCardByDateRangeAsync(dto);
@@ -137,7 +137,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     return await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerAsync(currentUser.Id);
                 }
@@ -155,7 +155,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
                     var jobCardDto = new FleetJobCardDto()
@@ -186,7 +186,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
 
@@ -221,12 +221,10 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
                     var jobCards = await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerInCurrentMonthAsync(new GetFleetJobCardByDateRangeDto(){FleetManagerId = currentUser.Id, });
-
                     
-
                     return await Task.FromResult(jobCards);
                 }
 
