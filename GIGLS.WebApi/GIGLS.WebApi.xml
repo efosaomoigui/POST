@@ -228,5 +228,17 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ChargeWallet(GIGLS.Core.DTO.Wallet.ChargeWalletDTO)">
+            <summary>
+            This api is used to charge a customer's wallet
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CancelShipment(System.String)">
+            <summary>
+            This api is used to cancel shipment
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

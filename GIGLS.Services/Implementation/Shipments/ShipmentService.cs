@@ -6768,9 +6768,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 codes.AddRange(codAgilityShipment.Select(x => x.CustomerCode));
                 if (!String.IsNullOrEmpty(dto.FilterOption))
                 {
-                    CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
-                    codAgilityShipment = codAgilityShipment.Where(x => x.CODStatus == status);
-                    codMobileShipment = codMobileShipment.Where(x => x.CODStatus == status);
+                    //CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
+                    codAgilityShipment = codAgilityShipment.Where(x => x.CODDescription == dto.FilterOption);
+                    codMobileShipment = codMobileShipment.Where(x => x.CODDescription == dto.FilterOption);
                 }
 
                 var customers = await _uow.User.GetUsersListByCode(codes);
