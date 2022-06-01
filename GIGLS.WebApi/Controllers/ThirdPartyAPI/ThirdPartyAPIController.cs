@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ThirdPartyAPI;
 using GIGLS.CORE.DTO.Report;
@@ -603,6 +604,46 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to charge a customer's wallet
+        /// </summary>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("chargewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.ChargeWallet(responseDTO);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result,
+                };
+            });
+        }
 
+        /// <summary>
+        /// This api is used to cancel shipment
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("cancelshipment/{waybillNumber}")]
+        public async Task<object> CancelShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cancel = new CancelShipmentDTO
+                {
+                    Waybill = waybillNumber,
+                    CancelReason = "None",
+                };
+                var flag = await _thirdPartyAPIService.CancelShipment(cancel.Waybill);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
     }
 }
