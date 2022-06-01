@@ -255,7 +255,7 @@ namespace GIGLS.Services.Implementation
                     var user = await _userService.GetUserById(captain.UserId);
                     if (user == null) 
                     { 
-                        throw new GenericException($"Captain's user info not exist"); 
+                        throw new GenericException($"Captain's user information not exist"); 
                     }
                     // update user
                     user.LastName = partner.LastName;

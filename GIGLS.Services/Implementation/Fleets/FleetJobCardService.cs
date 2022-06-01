@@ -65,10 +65,19 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
+                foreach (var veh in jobDto.JobCardItems)
+                {
+                    if (!(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == veh.VehicleNumber.Trim().ToLower())))
+                    {
+                        throw new GenericException($"Fleet/Vehicle with Registration Number: {veh.VehicleNumber} does not exist!");
+                    }
+                }
+
                 var currentUser = await GetCurrentUserRoleAsync();
 
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
+
                     foreach (var fleetJob in jobDto.JobCardItems)
                     {
                         //
