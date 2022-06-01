@@ -127,6 +127,9 @@ namespace GIGLS.Core.DTO.Alpha
 
         [JsonProperty("expiry_date")]
         public DateTime ExpiryDate { get; set; }
+
+        [JsonProperty("user_id")]
+        public string UserId { get; set; }
     }
 
     public class ResponseDTO
