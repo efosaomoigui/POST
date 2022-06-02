@@ -226,7 +226,8 @@ namespace GIGLS.Core
         ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
         ICaptainRepository CaptainRepository { get; set; }
 
-        IFleetJobCardRepository FleetJobCard { get; set; } 
+        IFleetJobCardRepository FleetJobCard { get; set; }
+        IFleetDisputeMessageRepository FleetDisputeMessage { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

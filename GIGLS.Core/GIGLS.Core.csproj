@@ -900,6 +900,7 @@
     <Compile Include="IServices\Expenses\IExpenseTypeService.cs" />
     <Compile Include="IServices\Fleets\IDispatchActivityService.cs" />
     <Compile Include="IServices\Fleets\IDispatchService.cs" />
+    <Compile Include="IServices\Fleets\IFleetDisputeMessageService.cs" />
     <Compile Include="IServices\Fleets\IFleetJobCardService.cs" />
     <Compile Include="IServices\Fleets\IFleetMakeService.cs" />
     <Compile Include="IServices\Fleets\IFleetManagementService.cs" />
