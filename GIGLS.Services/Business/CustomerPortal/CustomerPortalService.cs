@@ -4950,5 +4950,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await Task.FromResult(Mapper.Map<IEnumerable<InboundCategory>, IEnumerable<InboundCategoryDTO>>(_uow.ShipmentCategory.GetAll()));
         }
+
+        public async Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload)
+        {
+            var codTransfer = Mapper.Map<GIGGOCODTransfer>(payload);
+
+             _uow.GIGGOCODTransferRepository.Add(codTransfer);
+            await _uow.CompleteAsync();
+            var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
+            return result;
+        }
     }
 }

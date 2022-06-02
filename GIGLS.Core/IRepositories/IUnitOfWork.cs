@@ -225,6 +225,7 @@ namespace GIGLS.Core
         ICODTransferLogRepository CODTransferLog { get; set; }
         ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
         IShipmentCategory ShipmentCategory { get; set; }
+        IGIGGOCODTransferRepository GIGGOCODTransferRepository { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

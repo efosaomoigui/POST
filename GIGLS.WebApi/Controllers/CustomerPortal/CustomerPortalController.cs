@@ -3116,5 +3116,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("codtransfer")]
+        public async Task<IServiceResponse<GIGGOCODTransferResponseDTO>> CODTransfer(GIGGOCODTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CODTransfer(payload);
+                return new ServiceResponse<GIGGOCODTransferResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -544,8 +544,15 @@ namespace GIGLS.Core
 
                 config.CreateMap<LogEntryDTO, LogEntry>();
                 config.CreateMap<LogEntry, LogEntryDTO>();
+
                 config.CreateMap<InboundCategory, InboundCategoryDTO>();
                 config.CreateMap<InboundCategoryDTO, InboundCategory>();
+
+                config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferDTO>();
+                config.CreateMap<GIGGOCODTransferDTO, GIGGOCODTransfer>();
+
+                //config.CreateMap<GIGGOCODTransferResponseDTO, GIGGOCODTransfer>();
+                //config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferResponseDTO>();
 
             });
 

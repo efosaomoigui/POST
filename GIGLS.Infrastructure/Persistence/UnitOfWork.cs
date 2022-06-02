@@ -562,6 +562,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IShipmentCategory ShipmentCategory { get; set; }
+        [Inject]
+        public IGIGGOCODTransferRepository GIGGOCODTransferRepository { get; set; }
 
         public int Complete()
         {

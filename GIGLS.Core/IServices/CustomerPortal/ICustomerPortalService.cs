@@ -277,5 +277,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
         Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipments);
         Task<IEnumerable<InboundCategoryDTO>> GetInboundCategory();
+        Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload);
     }
 }
