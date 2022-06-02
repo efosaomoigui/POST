@@ -369,6 +369,7 @@
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
     <Compile Include="Controllers\Fleets\DispatchController.cs" />
     <Compile Include="Controllers\Fleets\FleetController.cs" />
+    <Compile Include="Controllers\Fleets\FleetDisputeMessageController.cs" />
     <Compile Include="Controllers\Fleets\FleetJobCardController.cs" />
     <Compile Include="Controllers\Fleets\FleetMakeController.cs" />
     <Compile Include="Controllers\Fleets\FleetManagementController.cs" />
