@@ -5765,6 +5765,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 currentUser.PictureUrl = user.PictureUrl;
                 if (!String.IsNullOrEmpty(user.Email))
                 {
+                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if(company != null)
+                    {
+                        // Update node merchant details
+                        await UpdateNodeMerchantDetails(company, user);
+                    }
                     currentUser.Email = user.Email;
                 }
                 if (!String.IsNullOrEmpty(user.PhoneNumber))
@@ -6066,6 +6072,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
         }
+
+        private async Task UpdateNodeMerchantDetails(Company company, UserDTO user)
+        {
+            if (!company.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                //Update Node 
+                var payload = new UpdateNodeMercantDetailsDTO
+                {
+                    MerchantCode = company.CustomerCode,
+                    Email = user.Email
+                };
+                await _nodeService.UpdateMerchantDetails(payload);
+            }
+        }
+
         private async Task<int> GetCountryByServiceCentreId(int ServicecentreId)
         {
             int CountryId = 0;

@@ -242,5 +242,35 @@ namespace GIGLS.Services.Business.Node
                 throw;
             }
         }
+
+        public async Task<NewNodeResponse> UpdateMerchantDetails(UpdateNodeMercantDetailsDTO dto)
+        {
+            try
+            {
+                var nodeResponse = new NewNodeResponse();
+                var nodeURL = ConfigurationManager.AppSettings["NodeMerchartSubBaseUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodeMerchantUpdate"];
+                nodeURL = $"{nodeURL}{nodePostShipment}";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    var json = JsonConvert.SerializeObject(dto, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(nodeURL, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    nodeResponse = JsonConvert.DeserializeObject<NewNodeResponse>(result);
+                }
+                return nodeResponse;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
