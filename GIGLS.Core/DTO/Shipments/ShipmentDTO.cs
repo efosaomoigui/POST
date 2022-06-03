@@ -622,6 +622,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
         public string SenderName { get; set; }
         public string CustomerCode { get; set; }
+        public string DepartureServiceCentreName { get; set; }
+        public string DestinationServiceCentreName { get; set; }
+        public string Reference { get; set; }
     }
 
 

@@ -6816,5 +6816,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+        public async Task<AllCODShipmentDTO> CellulantShipmentCollectionReport(PaginationDTO dto)
+        {
+            try
+            {
+                var date = DateTime.UtcNow;
+                if (dto.StartDate == null && dto.EndDate == null)
+                {
+                    dto = new PaginationDTO
+                    {
+                        StartDate = date,
+                        EndDate = date
+                    };
+                }
+                var allCOD = await _uow.Shipment.CellulantShipmentCollectionReport(dto);
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

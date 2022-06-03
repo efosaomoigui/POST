@@ -2100,6 +2100,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 return base.GetHashCode();
             }
         }
+
+
+        public Task<AllCODShipmentDTO> CellulantShipmentCollectionReport(PaginationDTO dto)
+        {
+            // filter by cancelled shipments
+            var allCOD = new AllCODShipmentDTO();
+            var shipments = _context.CODTransferRegister.AsQueryable().Where(x => x.DateModified >= dto.StartDate && x.DateModified <= dto.EndDate);
+            List<CODShipmentDetailDTO> result = (from s in shipments
+                                           join i in Context.Shipment on s.Waybill equals i.Waybill
+                                           join c in Context.CashOnDeliveryRegisterAccount on i.Waybill equals c.Waybill
+                                           join dept in Context.ServiceCentre on i.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on i.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           where i.CODStatus == CODMobileStatus.Collected && s.PaymentStatus == PaymentStatus.Paid && c.PaymentTypeReference != null && c.PaymentType == PaymentType.Transfer
+                                           select new CODShipmentDetailDTO
+                                           {
+                                             Waybill  = s.Waybill,
+                                             CODAmount = s.Amount,
+                                             DepartureServiceCentreName = dept.Name,
+                                             DestinationServiceCentreName = dest.Name,
+                                             Reference = c.PaymentTypeReference,
+                                             DateCreated = i.CODStatusDate.Value,
+                                             CODDescription = i.CODDescription
+                                           }).ToList();
+            if (result.Any())
+            {
+                result = result.OrderByDescending(x => x.DateCreated).ThenBy(x => x.SenderName).ToList();
+                allCOD.TotalCODAmount = result.Sum(x => x.CODAmount.Value);
+                allCOD.CODShipmentDetail = result;
+            }
+            return Task.FromResult(allCOD);
+        }
+
+
+
     }
 }
 
