@@ -17,8 +17,10 @@ using GIGLS.CORE.DTO.Report;
 using System.Linq;
 using AutoMapper;
 using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessage;
 using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.IRepositories.Partnership;
+using GIGLS.Core.IServices.MessagingLog;
 
 namespace GIGLS.Services.Implementation
 {
@@ -31,6 +33,8 @@ namespace GIGLS.Services.Implementation
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPartnerService _partnerService;
         private readonly IFleetPartnerRepository _fleetPartnerRepository;
+        private readonly IEmailService _emailService;
+        private readonly IEmailSendLogService _iEmailSendLogService;
 
         public CaptainService(IUserService userService, IUnitOfWork uow, IPasswordGenerator passwordGenerator, MessageSenderService messageSenderService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPartnerService partnerService)
         {
@@ -136,6 +140,21 @@ namespace GIGLS.Services.Implementation
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
                 await _messageSenderService.SendGenericEmailMessage(MessageType.PSU, passwordMessage);
+
+                // new mail service test
+                MessageDTO message = new MessageDTO()
+                {
+                    ToEmail = user.Email,
+                    Subject = $"Signup Successful",
+                    FinalBody = $"Dear {user.FirstName} {user.LastName}. Your account creation on GIG Logistics Agility platform is successful." +
+                                $"<br>Username: {user.Email}<br>Password: {password}" +
+                                $"<br>Regards, GIGL",
+                    CustomerName = $"{user.FirstName} {user.LastName}",
+                    ReceiverName = $"{user.FirstName} {user.LastName}"
+                };
+
+                var mailResult = await _emailService.SendAsync(message);
+                await LogEmailMessage(message, mailResult);
 
                 return new { id = user.Id, password = password, email = user.Email };
             } 
@@ -567,6 +586,30 @@ namespace GIGLS.Services.Implementation
             var currentUser = await _userService.GetUserById(currentUserId);
 
             return currentUser.SystemUserRole;
+        }
+
+        private async Task<bool> LogEmailMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        {
+            try
+            {
+                await _iEmailSendLogService.AddEmailSendLog(new EmailSendLogDTO()
+                {
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    From = messageDTO.From,
+                    To = messageDTO.ToEmail,
+                    Message = messageDTO.FinalBody,
+                    Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
+                    ResultStatus = result,
+                    ResultDescription = exceptiomMessage
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+            return true;
         }
     }
 }
