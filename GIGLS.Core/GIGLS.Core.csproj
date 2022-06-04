@@ -150,6 +150,8 @@
     <Compile Include="Domain\BillsPaymentManagement.cs" />
     <Compile Include="Domain\GIGGOCODTransfer.cs" />
     <Compile Include="Domain\InboundCategory.cs" />
+    <Compile Include="Domain\InboundShipmentCategory.cs" />
+    <Compile Include="Domain\ShipmentCategory.cs" />
     <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
     <Compile Include="Domain\InternationalCargoManifestDetail.cs" />
     <Compile Include="Domain\InternationalCargoManifest.cs" />
@@ -401,6 +403,7 @@
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\InboundCategoryDTO.cs" />
+    <Compile Include="DTO\InboundShipmentCategoryDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
     <Compile Include="DTO\MessagingLog\ResponseData.cs" />
     <Compile Include="DTO\ShipmentExportDTO.cs" />
@@ -732,6 +735,7 @@
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
     <Compile Include="IRepositories\IGIGGOCODTransferRepository.cs" />
+    <Compile Include="IRepositories\IGIGGOTransferRespository.cs" />
     <Compile Include="IRepositories\IShipmentCategory.cs" />
     <Compile Include="IRepositories\IShipmentExportRepository.cs" />
     <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />

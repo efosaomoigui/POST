@@ -44,6 +44,7 @@ using GIGLS.Core.Domain.DHL;
 using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.Domain.Archived;
 using GIGLS.Core.DTO.Stores;
+using Country = GIGLS.Core.Domain.Country;
 
 namespace GIGLS.Core
 {
@@ -551,8 +552,12 @@ namespace GIGLS.Core
                 config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferDTO>();
                 config.CreateMap<GIGGOCODTransferDTO, GIGGOCODTransfer>();
 
-                //config.CreateMap<GIGGOCODTransferResponseDTO, GIGGOCODTransfer>();
-                //config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferResponseDTO>();
+                config.CreateMap<InboundShipmentCategoryDTO, InboundShipmentCategory>();
+                config.CreateMap<InboundShipmentCategory, InboundShipmentCategoryDTO>();
+                config.CreateMap<ShipmentCategory, InboundShipmentCategoryDTO>();
+                config.CreateMap<InboundShipmentCategoryDTO, ShipmentCategory>();
+                config.CreateMap<InboundShipmentCategoryDTO, Country>();
+                config.CreateMap<Country, InboundShipmentCategoryDTO>();
 
             });
 

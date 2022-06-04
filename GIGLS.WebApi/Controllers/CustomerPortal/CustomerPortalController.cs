@@ -3102,15 +3102,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("inbundcategory")]
-        public async Task<IServiceResponse<IEnumerable<InboundCategoryDTO>>> GetInboundCategory()
+        public async Task<IServiceResponse<IEnumerable<InboundShipmentCategoryDTO>>> GetInboundCategory(int countryId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.GetInboundCategory();
-                return new ServiceResponse<IEnumerable<InboundCategoryDTO>>
+                var result = await _portalService.GetInboundCategory(countryId);
+                return new ServiceResponse<IEnumerable<InboundShipmentCategoryDTO>>
                 {
                     Object = result
                 };
