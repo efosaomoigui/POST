@@ -6827,10 +6827,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     dto = new PaginationDTO
                     {
-                        StartDate = date.Date,
-                        EndDate = date.Date
+                        StartDate = date,
+                        EndDate = date
                     };
                 }
+                else
+                {
+                    dto.StartDate = dto.StartDate.Value.ToUniversalTime();
+                    dto.EndDate = dto.EndDate.Value.ToUniversalTime();
+                    dto.StartDate = dto.StartDate.Value.AddHours(12).AddMinutes(00);
+                    dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
+               
+                dto.StartDate = dto.StartDate.Value.Date;
+                dto.EndDate = dto.EndDate.Value.Date;
                 dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
                 var allCOD = await _uow.Shipment.CellulantShipmentCollectionReport(dto);
                 return allCOD;

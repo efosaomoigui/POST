@@ -2112,7 +2112,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            join c in Context.CashOnDeliveryRegisterAccount on i.Waybill equals c.Waybill
                                            join dept in Context.ServiceCentre on i.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on i.DestinationServiceCentreId equals dest.ServiceCentreId
-                                           where i.CODStatus == CODMobileStatus.Collected && s.PaymentStatus == PaymentStatus.Paid && c.PaymentTypeReference != null && c.PaymentType == PaymentType.Transfer
+                                           where s.PaymentStatus == PaymentStatus.Paid && c.PaymentTypeReference != null && c.PaymentType == PaymentType.Transfer
                                            select new CODShipmentDetailDTO
                                            {
                                              Waybill  = s.Waybill,
