@@ -2106,17 +2106,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             // filter by cancelled shipments
             var allCOD = new AllCODShipmentDTO();
-            var shipments = _context.CODTransferRegister.AsQueryable().Where(x => x.DateModified >= dto.StartDate && x.DateModified <= dto.EndDate);
+            var shipments = _context.CODTransferRegister.AsQueryable().Where(x => x.DateModified >= dto.StartDate && x.DateModified <= dto.EndDate).GroupBy(x=> x.Waybill);
             List<CODShipmentDetailDTO> result = (from s in shipments
-                                           join i in Context.Shipment on s.Waybill equals i.Waybill
+                                           join i in Context.Shipment on s.Key equals i.Waybill
                                            join c in Context.CashOnDeliveryRegisterAccount on i.Waybill equals c.Waybill
                                            join dept in Context.ServiceCentre on i.DepartureServiceCentreId equals dept.ServiceCentreId
                                            join dest in Context.ServiceCentre on i.DestinationServiceCentreId equals dest.ServiceCentreId
                                            where c.PaymentTypeReference != null && c.PaymentType == PaymentType.Transfer
                                            select new CODShipmentDetailDTO
                                            {
-                                             Waybill  = s.Waybill,
-                                             CODAmount = s.Amount,
+                                             Waybill  = s.FirstOrDefault().Waybill,
+                                             CODAmount = s.FirstOrDefault().Amount,
                                              DepartureServiceCentreName = dept.Name,
                                              DestinationServiceCentreName = dest.Name,
                                              Reference = c.PaymentTypeReference,
