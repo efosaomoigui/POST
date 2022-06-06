@@ -523,5 +523,19 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.GetPriceMultipleMobileShipment(preShipment);
         }
 
+        public async Task<string> Decrypt()
+        {
+            return await _portalService.Decrypt();
+        }
+
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await _portalService.ChargeWallet(chargeWalletDTO);
+        }
+
+        public async Task<object> CancelShipment(string Waybill)
+        {
+            return await _portalService.CancelShipment(Waybill);
+        }
     }
 }

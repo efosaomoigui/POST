@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices.Node
         Task<AcceptShipmentResponse> AssignShipmentToPartner(AcceptShipmentPayload nodePayload);
         Task<NewNodeResponse> RemovePendingShipment(PendingNodeShipmentDTO dto);
         Task<NewNodeResponse> UpdateMerchantSubscription(UpdateNodeMercantSubscriptionDTO dto);
+        Task<NewNodeResponse> UpdateMerchantDetails(UpdateNodeMercantDetailsDTO dto);
     }
 }
