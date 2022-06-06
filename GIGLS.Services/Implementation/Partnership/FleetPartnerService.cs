@@ -324,5 +324,13 @@ namespace GIGLS.Services.Implementation.Partnership
 
             return result;
         }
+
+        private async Task CalculateFleetPricing(FleetDTO fleet)
+        {
+            if(fleet == null)
+                throw new GenericException("Invalid fleet details");
+
+           // if(fleet. = FleetType.)
+        }
     }
 }
