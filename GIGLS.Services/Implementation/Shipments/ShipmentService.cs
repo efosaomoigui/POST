@@ -6759,17 +6759,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                 }
 
-                var brac = dto.FilterOption.Split(new char[] { '(', ')' })[1];
-              
+                var brac = "";
+                if (dto.FilterOption.Contains("("))
+                {
+                    brac = dto.FilterOption.Split(new char[] { '(', ')' })[1];
+                }
+                else
+                {
+                    brac = dto.FilterOption;
+                }
+
                 var allCOD = new AllCODShipmentDTO();
                 var codes = new List<string>();
-               var codAgilityShipment = _uow.Shipment.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
+                var codAgilityShipment = _uow.Shipment.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
                 var codMobileShipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
 
                 codes.AddRange(codAgilityShipment.Select(x => x.CustomerCode));
                 if (!String.IsNullOrEmpty(dto.FilterOption))
                 {
                     //CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
+
                     codAgilityShipment = codAgilityShipment.Where(x => x.CODDescription.Contains(brac));
                     codMobileShipment = codMobileShipment.Where(x => x.CODDescription.Contains(brac));
                 }
