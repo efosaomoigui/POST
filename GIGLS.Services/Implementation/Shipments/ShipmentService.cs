@@ -6759,6 +6759,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                 }
 
+                var brac = dto.FilterOption.Split(new char[] { '(', ')' })[1];
               
                 var allCOD = new AllCODShipmentDTO();
                 var codes = new List<string>();
@@ -6769,8 +6770,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!String.IsNullOrEmpty(dto.FilterOption))
                 {
                     //CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
-                    codAgilityShipment = codAgilityShipment.Where(x => x.CODDescription == dto.FilterOption);
-                    codMobileShipment = codMobileShipment.Where(x => x.CODDescription == dto.FilterOption);
+                    codAgilityShipment = codAgilityShipment.Where(x => x.CODDescription.Contains(brac));
+                    codMobileShipment = codMobileShipment.Where(x => x.CODDescription.Contains(brac));
                 }
 
                 var customers = await _uow.User.GetUsersListByCode(codes);
