@@ -295,6 +295,21 @@ namespace GIGLS.Services.Implementation.Fleets
                 //Scan movement manifest waybill
                 await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
 
+                //Write to Fleet trip table
+                var fleetTrip = new FleetTrip
+                {
+                    MovementManifestId = dispatchId,
+                    DispatchAmount = newDispatch.Amount,
+                    DestinationStationId = newDispatch.DestinationId,
+                    DepartureStationId = newDispatch.DepartureId,
+                    FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                    CaptainId = newDispatch.DriverDetail,
+                    DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
+                    DestinationServiceCenterId = newDispatch.DestinationServiceCenterId
+                };
+
+                _uow.FleetTrip.Add(fleetTrip);
+
                 // commit transaction
                 await _uow.CompleteAsync();
                 return new { Id = dispatchId };
