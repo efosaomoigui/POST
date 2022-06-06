@@ -17,6 +17,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Partnership
@@ -29,10 +30,11 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly ICompanyService _companyService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         public FleetPartnerService(IUnitOfWork uow, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator,
-            IMessageSenderService messageSenderService)
+            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -40,6 +42,7 @@ namespace GIGLS.Services.Implementation.Partnership
             _companyService = companyService;
             _passwordGenerator = passwordGenerator;
             _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -325,12 +328,46 @@ namespace GIGLS.Services.Implementation.Partnership
             return result;
         }
 
-        private async Task CalculateFleetPricing(FleetDTO fleet)
+        private async Task<decimal> CalculateFleetPricing(FleetDTO fleet)
         {
             if(fleet == null)
                 throw new GenericException("Invalid fleet details");
 
-           // if(fleet. = FleetType.)
+            decimal price = 0.00m;
+
+            if (fleet.IsFixed == VehicleFixedStatus.Fixed)
+            {
+                //Get pricing for fixed fleet
+                var fixPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetFixPrice, 1);
+                decimal fixPriceValue = Convert.ToDecimal( fixPrice?.Value);
+
+                //Get minimum trip for fixed fleet
+                var minimumTrip = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetMinimumTrip, 1);
+                int minimumTripValue = Convert.ToInt32(minimumTrip?.Value);
+
+                //Set start date and end date
+                var startDate = DateTime.Now;
+                var endDate = DateTime.Now;
+                startDate = new DateTime(startDate.Year, startDate.Month, 1);
+                endDate = endDate.AddDays(1);
+
+                //Get total count of fleet trips for the current month
+                var fleetTripCount = _uow.FleetTrip.GetAllAsQueryable().Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber 
+                                                                                && x.DateCreated >= startDate && x.DateCreated <= endDate).Count();
+
+                if(fleetTripCount >= minimumTripValue)
+                {
+                    price = fixPriceValue;
+                }
+            }
+            else
+            {
+                //Get pricing for Variable fleet
+
+
+            }
+
+            return price;
         }
     }
 }

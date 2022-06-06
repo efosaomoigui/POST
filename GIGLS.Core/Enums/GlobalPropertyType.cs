@@ -111,6 +111,8 @@
         PartnerDeliveryPrice,
         SpecialStationDiscount,
         SpecialStation,
-        EcommerceSubscriptionCharge
+        EcommerceSubscriptionCharge,
+        EnterpriseFleetFixPrice,
+        EnterpriseFleetMinimumTrip
     }
 }
