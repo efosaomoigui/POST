@@ -4823,15 +4823,6 @@ namespace GIGLS.Services.Implementation.Shipments
             total.Insurance = Math.Round(total.Insurance, 2);
             total.GrandTotal = Math.Round(total.GrandTotal, 2);
             total.InternationalShippingCost = Math.Round(total.InternationalShippingCost, 2);
-
-
-            //Get Insurance
-            //if (shipmentDTO.DeclarationOfValueCheck != null && shipmentDTO.DeclarationOfValueCheck > 0)
-            //{
-            //    decimal insurance = (decimal)shipmentDTO.DeclarationOfValueCheck * 0.01M;
-            //    total.GrandTotal = total.GrandTotal + insurance;
-            //    total.Insurance = insurance;
-            //}
             return total;
         }
 
@@ -6827,6 +6818,40 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<AllCODShipmentDTO> CellulantShipmentCollectionReport(PaginationDTO dto)
+        {
+            try
+            {
+                var date = DateTime.UtcNow;
+                if (dto.StartDate == null && dto.EndDate == null)
+                {
+                    dto = new PaginationDTO
+                    {
+                        StartDate = date,
+                        EndDate = date
+                    };
+                }
+                else
+                {
+                    dto.StartDate = dto.StartDate.Value.ToUniversalTime();
+                    dto.EndDate = dto.EndDate.Value.ToUniversalTime();
+                    dto.StartDate = dto.StartDate.Value.AddHours(12).AddMinutes(00);
+                    dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
+                }
+               
+                dto.StartDate = dto.StartDate.Value.Date;
+                dto.EndDate = dto.EndDate.Value.Date;
+                dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
+                var allCOD = await _uow.Shipment.CellulantShipmentCollectionReport(dto);
                 return allCOD;
             }
             catch (Exception)

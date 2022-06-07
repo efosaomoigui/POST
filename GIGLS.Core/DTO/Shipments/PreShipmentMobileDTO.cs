@@ -508,6 +508,7 @@ public class UpdateNodeMercantSubscriptionDTO
 {
     public string MerchantCode { get; set; }
     public string UserId { get; set; }
+    public string Email { get; set; }
 }
 
 public class PreShipmentMobileMultiMerchantDTO : BaseDomainDTO
@@ -575,3 +576,8 @@ public class MultiMerchantDTO
 
 }
 
+public class UpdateNodeMercantDetailsDTO
+{
+    public string MerchantCode { get; set; }
+    public string Email { get; set; }
+}
