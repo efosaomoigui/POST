@@ -99,15 +99,15 @@ namespace GIGLS.Services.Implementation.Fleets
 
                         _uow.FleetJobCard.Add(newFleetJob);
 
-                        var passwordMessage = new PasswordMessageDTO()
+                        // send mail
+                        var jobCardEmailDto = new FleetJobCardMailDto()
                         {
-                            Password = $"Maintenance Card has been opened for this vehicle {fleetJob.VehicleNumber}, details below. <br>" +
-                            $"Part to be fixed: {fleetJob.VehiclePartToFix}. <br>Amount required: {fleetJob.Amount} <br>" +
-                            $"Created by Fleet manager: {currentUser.FirstName} {currentUser.LastName}",
-                            UserEmail = enterprisePartner.Email,
-                            CustomerCode = $"Part to be fixed: {fleetJob.VehiclePartToFix}. \nAmount required: {fleetJob.Amount}"
+                            EnterpriseEmail = enterprisePartner.Email,
+                            Amount = fleetJob.Amount,
+                            FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
+                            VehicleNumber = fleetJob.VehicleNumber
                         };
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.OPENJOBEMAIL, jobCardEmailDto);
                     }
                     await _uow.CompleteAsync();
                     return true;

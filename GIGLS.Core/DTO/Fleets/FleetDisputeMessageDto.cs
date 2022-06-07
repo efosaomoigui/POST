@@ -12,4 +12,13 @@ namespace GIGLS.Core.DTO.Fleets
         public string DisputeMessage { get; set; }
         public string FleetOwnerId { get; set; }
     }
+    
+    public class FleetDisputeMessageMailDto
+    {
+        public string VehicleNumber { get; set; }
+        public string DisputeMessage { get; set; }
+        public string FleetManager { get; set; }
+        public string FleetOwnerId { get; set; }
+        public string FleetOwnerEmail { get; set; }
+    }
 }

@@ -63,14 +63,16 @@ namespace GIGLS.Services.Implementation.Fleets
                     await _uow.CompleteAsync();
 
                     var owner = await _userService.GetUserById(vehicleOwner.VehicleOwnerId);
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = $"Dispute {dto.DisputeMessage} has been registered by the fleet partner {currentUser.FirstName} {currentUser.LastName}",
-                        UserEmail = owner.Email
-                    };
 
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                    // send mail
+                    var disputeMailDto = new FleetDisputeMessageMailDto()
+                    {
+                        FleetOwnerEmail = owner.Email,
+                        DisputeMessage = dto.DisputeMessage,
+                        FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
+                        VehicleNumber = dto.VehicleNumber
+                    };
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.DISPUTEMSGEMAIL, disputeMailDto);
 
                     return true;
                 }

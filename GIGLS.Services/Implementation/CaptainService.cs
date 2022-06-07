@@ -21,6 +21,7 @@ using GIGLS.Core.IMessage;
 using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.IRepositories.Partnership;
 using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Implementation
 {
@@ -51,7 +52,7 @@ namespace GIGLS.Services.Implementation
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
 
-            if (currentUserRole == "Administrator" || currentUserRole == "CaptainManagement")
+            if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement")
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
                 var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
@@ -132,29 +133,13 @@ namespace GIGLS.Services.Implementation
                 await _uow.CompleteAsync();
 
                 // send mail
-                var passwordMessage = new PasswordMessageDTO()
+                var partnerDto = new PartnerDTO()
                 {
-                    Password = $"Captain Registration Successful on Agility \n <br>Password: <b>{password}</b>",
-                    UserEmail = captainDTO.Email, 
+                    Email = user.Email,
+                    Password = password,
+                    PartnerCode = partnerCode,
                 };
-
-                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
-                await _messageSenderService.SendGenericEmailMessage(MessageType.PSU, passwordMessage);
-
-                // new mail service test
-                MessageDTO message = new MessageDTO()
-                {
-                    ToEmail = user.Email,
-                    Subject = $"Signup Successful",
-                    FinalBody = $"Dear {user.FirstName} {user.LastName}. Your account creation on GIG Logistics Agility platform is successful." +
-                                $"<br>Username: {user.Email}<br>Password: {password}" +
-                                $"<br>Regards, GIGL",
-                    CustomerName = $"{user.FirstName} {user.LastName}",
-                    ReceiverName = $"{user.FirstName} {user.LastName}"
-                };
-
-                var mailResult = await _emailService.SendAsync(message);
-                await LogEmailMessage(message, mailResult);
+                await _messageSenderService.SendGenericEmailMessage(MessageType.CAPTEMAIL, partnerDto);
 
                 return new { id = user.Id, password = password, email = user.Email };
             } 
@@ -602,30 +587,6 @@ namespace GIGLS.Services.Implementation
             var currentUser = await _userService.GetUserById(currentUserId);
 
             return currentUser.SystemUserRole;
-        }
-
-        private async Task<bool> LogEmailMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
-        {
-            try
-            {
-                await _iEmailSendLogService.AddEmailSendLog(new EmailSendLogDTO()
-                {
-                    DateCreated = DateTime.Now,
-                    DateModified = DateTime.Now,
-                    From = messageDTO.From,
-                    To = messageDTO.ToEmail,
-                    Message = messageDTO.FinalBody,
-                    Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
-                    ResultStatus = result,
-                    ResultDescription = exceptiomMessage
-                });
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-            return true;
         }
     }
 }

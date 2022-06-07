@@ -90,5 +90,9 @@
         ARFFSHD, //WHEN SHIPMENT IS ARRIVED FINAL DESTINATION FOR SENDER HOME DELIVERY
 
         CAPEMAIL, // Message type for captain creation and login success
+
+        CAPTEMAIL, // Message type for captain creation
+        OPENJOBEMAIL, // Message type for Open Job Card
+        DISPUTEMSGEMAIL, // Message type for Fleet Dispute Message
     }
 }
