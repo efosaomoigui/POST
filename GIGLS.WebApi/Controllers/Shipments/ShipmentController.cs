@@ -1273,5 +1273,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [Authorize(Roles = "Account,Shipment, ViewAdmin")]
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("codsettlement")]
+        public async Task<IServiceResponse<AllCODShipmentDTO>> CellulantShipmentCollectionReport(PaginationDTO dto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var res = await _service.CellulantShipmentCollectionReport(dto);
+                return new ServiceResponse<AllCODShipmentDTO>
+                {
+                    Object = res,
+                };
+            });
+        }
     }
 }
