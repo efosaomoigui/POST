@@ -113,6 +113,7 @@
         SpecialStation,
         EcommerceSubscriptionCharge,
         EnterpriseFleetFixPrice,
-        EnterpriseFleetMinimumTrip
+        EnterpriseFleetMinimumTrip,
+        EnterpriseFleetVariablePerxcentage
     }
 }

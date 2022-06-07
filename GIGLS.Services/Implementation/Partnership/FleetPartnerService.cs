@@ -5,10 +5,13 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
@@ -31,10 +34,13 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IHaulageService _haulageService;
+        private readonly IPricingService _pricing;
 
         public FleetPartnerService(IUnitOfWork uow, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator,
-            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
+            IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService,
+            IHaulageService haulageService, IPricingService pricing)
         {
             _uow = uow;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -43,6 +49,8 @@ namespace GIGLS.Services.Implementation.Partnership
             _passwordGenerator = passwordGenerator;
             _messageSenderService = messageSenderService;
             _globalPropertyService = globalPropertyService;
+            _haulageService = haulageService;
+            _pricing = pricing;
             MapperConfig.Initialize();
         }
 
@@ -86,7 +94,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
             var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
             fleetPartner.FleetPartnerCode = fleetPartnerCode;
-            
+
             string password = await _passwordGenerator.Generate();
 
             var user = new GIGL.GIGLS.Core.Domain.User
@@ -104,11 +112,11 @@ namespace GIGLS.Services.Implementation.Partnership
                 IsActive = true,
                 DateCreated = DateTime.Now.Date,
                 DateModified = DateTime.Now.Date,
-                PasswordExpireDate = DateTime.Now                
+                PasswordExpireDate = DateTime.Now
             };
 
             user.Id = Guid.NewGuid().ToString();
-            
+
             var u = await _uow.User.RegisterUser(user, password);
 
             if (u.Succeeded)
@@ -118,7 +126,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 await AssignPartnersToFleetPartner(fleetPartnerCode, fleetPartnerDTO.PartnerCodes);
                 await _uow.CompleteAsync();
             }
-            
+
             var passwordMessage = new PasswordMessageDTO()
             {
                 Password = password,
@@ -253,7 +261,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
-        private async Task AssignPartnersToFleetPartner(string fleetCode,List<string> partnerCodes)
+        private async Task AssignPartnersToFleetPartner(string fleetCode, List<string> partnerCodes)
         {
             foreach (var partnerCode in partnerCodes)
             {
@@ -264,17 +272,17 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
             }
             await _uow.CompleteAsync();
-            
+
         }
 
         public async Task RemovePartnerFromFleetPartner(string partnerCode)
         {
-                var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
-                if (partner != null)
-                {
-                    partner.FleetPartnerCode = null;
-                }
-            
+            var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
+            if (partner != null)
+            {
+                partner.FleetPartnerCode = null;
+            }
+
             await _uow.CompleteAsync();
 
         }
@@ -330,32 +338,32 @@ namespace GIGLS.Services.Implementation.Partnership
 
         private async Task<decimal> CalculateFleetPricing(FleetDTO fleet)
         {
-            if(fleet == null)
+            if (fleet == null)
                 throw new GenericException("Invalid fleet details");
 
             decimal price = 0.00m;
+
+            //Set start date and end date
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+            startDate = new DateTime(startDate.Year, startDate.Month, 1);
+            endDate = endDate.AddDays(1);
 
             if (fleet.IsFixed == VehicleFixedStatus.Fixed)
             {
                 //Get pricing for fixed fleet
                 var fixPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetFixPrice, 1);
-                decimal fixPriceValue = Convert.ToDecimal( fixPrice?.Value);
+                decimal fixPriceValue = Convert.ToDecimal(fixPrice?.Value);
 
                 //Get minimum trip for fixed fleet
                 var minimumTrip = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetMinimumTrip, 1);
                 int minimumTripValue = Convert.ToInt32(minimumTrip?.Value);
 
-                //Set start date and end date
-                var startDate = DateTime.Now;
-                var endDate = DateTime.Now;
-                startDate = new DateTime(startDate.Year, startDate.Month, 1);
-                endDate = endDate.AddDays(1);
-
                 //Get total count of fleet trips for the current month
-                var fleetTripCount = _uow.FleetTrip.GetAllAsQueryable().Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber 
+                var fleetTripCount = _uow.FleetTrip.GetAllAsQueryable().Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber
                                                                                 && x.DateCreated >= startDate && x.DateCreated <= endDate).Count();
 
-                if(fleetTripCount >= minimumTripValue)
+                if (fleetTripCount >= minimumTripValue)
                 {
                     price = fixPriceValue;
                 }
@@ -363,6 +371,57 @@ namespace GIGLS.Services.Implementation.Partnership
             else
             {
                 //Get pricing for Variable fleet
+
+                var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.FleetId == fleet.FleetId).FirstOrDefault();
+
+
+                if (fleetDto == null)
+                    throw new GenericException("Fleet not found");
+
+                //Get Fleet haulage details
+                var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleetDto.Capacity).FirstOrDefault();
+
+                if (haulage == null)
+                    throw new GenericException("Fleet haulage details not found");
+
+                var userCountryId = await _pricing.GetUserCountryId();
+
+                //Get total count of fleet trips for the current month
+                var fleetTrips = _uow.FleetTrip.GetAllAsQueryable().Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber
+                                                                                && x.DateCreated >= startDate && x.DateCreated <= endDate).ToList();
+
+                var totalHaulagePrice = 0.00m;
+                foreach (var trip in fleetTrips)
+                {
+                    var haulagePricingDTO = new HaulagePricingDTO
+                    {
+                        CustomerCode = string.Empty,
+                        DepartureServiceCentreId = trip.DepartureServiceCenterId,
+                        DestinationServiceCentreId = trip.DestinationServiceCenterId,
+                        Haulageid = haulage.HaulageId,
+                        CountryId = userCountryId
+                    };
+                    var haulagePrice = await _pricing.GetHaulagePrice(haulagePricingDTO);
+
+                    //Remove dispatch fee from pricing
+                    haulagePrice -= trip.DispatchAmount;
+
+                    totalHaulagePrice += haulagePrice;
+                }
+
+
+                //Calculate 40% of the pricing
+                //Get minimum trip for fixed fleet
+                var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePerxcentage, 1);
+                decimal percentageValue = (Convert.ToDecimal(precentage?.Value) / 100M);
+
+                var percentageAmount = totalHaulagePrice * percentageValue;
+
+
+                //Get all maintenance fee
+
+                var maintenanceFee = 
+                //deduct maintenance fee
 
 
             }
