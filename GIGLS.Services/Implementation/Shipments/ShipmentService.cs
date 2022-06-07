@@ -6759,16 +6759,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                 }
 
-                var brac = "";
-                if (dto.FilterOption.Contains("("))
-                {
-                    brac = dto.FilterOption.Split(new char[] { '(', ')' })[1];
-                }
-                else
-                {
-                    brac = dto.FilterOption;
-                }
-
                 var allCOD = new AllCODShipmentDTO();
                 var codes = new List<string>();
                 var codAgilityShipment = _uow.Shipment.GetAllAsQueryable().Where(x => x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatusDate >= dto.StartDate && x.CODStatusDate <= dto.EndDate);
@@ -6778,6 +6768,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!String.IsNullOrEmpty(dto.FilterOption))
                 {
                     //CODMobileStatus status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), dto.FilterOption);
+                    var brac = "";
+                    if (dto.FilterOption.Contains("("))
+                    {
+                        brac = dto.FilterOption.Split(new char[] { '(', ')' })[1];
+                    }
+                    else
+                    {
+                        brac = dto.FilterOption;
+                    }
 
                     codAgilityShipment = codAgilityShipment.Where(x => x.CODDescription.Contains(brac));
                     codMobileShipment = codMobileShipment.Where(x => x.CODDescription.Contains(brac));
