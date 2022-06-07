@@ -1148,7 +1148,8 @@ namespace GIGLS.Services.Implementation.Customers
                     FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
                     LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
                     Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber,
+                    UserId = String.IsNullOrEmpty(user?.Id) ? "" : user?.Id
                 });
                 return result;
             }
@@ -1328,7 +1329,8 @@ namespace GIGLS.Services.Implementation.Customers
                     FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
                     LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
                     Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber,
+                    UserId = String.IsNullOrEmpty(user?.Id) ? "" : user?.Id
                 });
 
                 companyDTO = Mapper.Map<CompanyDTO>(company);
