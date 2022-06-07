@@ -652,13 +652,13 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("getcompanydetails/{email}")]
-        public async Task<IServiceResponse<CompanyDTO>> GetCompanyDetailsByEmail(string email)
+        [HttpPost]
+        [Route("getcompanydetails")]
+        public async Task<IServiceResponse<CompanyDTO>> GetCompanyDetailsByEmail(CompanySearchDTO searchDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var company = await _thirdPartyAPIService.GetCompanyDetailsByEmail(email);
+                var company = await _thirdPartyAPIService.GetCompanyDetailsByEmail(searchDTO.email);
 
                 return new ServiceResponse<CompanyDTO>
                 {
