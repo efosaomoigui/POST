@@ -1635,6 +1635,23 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task<CompanyDTO> GetCompanyDetailsByEmail(string email)
+        {
+            try
+            {
+                var company = await _uow.Company.GetCompanyDetailsByEmail(email);
+
+                if (company == null)
+                    throw new GenericException("Company information does not exist");
+
+                return company;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 }

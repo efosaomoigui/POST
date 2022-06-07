@@ -44,5 +44,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams);
         Task<ResponseDTO> AddSubscriptionToCustomer(string customercode);
         Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
+        Task<CompanyDTO> GetCompanyDetailsByEmail(string email);
     }
 }
