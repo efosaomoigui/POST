@@ -101,7 +101,9 @@ namespace GIGLS.Services.Implementation.Fleets
 
                         var passwordMessage = new PasswordMessageDTO()
                         {
-                            Password = $"Maintenance Card has been opened for this vehicle {fleetJob.VehicleNumber}",
+                            Password = $"Maintenance Card has been opened for this vehicle {fleetJob.VehicleNumber}, details below. <br>" +
+                            $"Part to be fixed: {fleetJob.VehiclePartToFix}. <br>Amount required: {fleetJob.Amount} <br>" +
+                            $"Created by Fleet manager: {currentUser.FirstName} {currentUser.LastName}",
                             UserEmail = enterprisePartner.Email,
                             CustomerCode = $"Part to be fixed: {fleetJob.VehiclePartToFix}. \nAmount required: {fleetJob.Amount}"
                         };

@@ -33,6 +33,8 @@ namespace GIGLS.Core.DTO.Fleets
         public int FleetJobCardId { get; set; }
         public string VehicleNumber { get; set; }
         public string Status { get; set; }
+        public decimal Amount { get; set; }
+        public string VehiclePartToFix { get; set; }
         public DateTime DateCreated { get; set; }
     }
     

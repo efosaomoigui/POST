@@ -72,7 +72,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                               DateCreated = x.DateCreated,
                               Status = x.Status,
                               FleetJobCardId = x.FleetJobCardId,
-                              VehicleNumber = x.VehicleNumber
+                              VehicleNumber = x.VehicleNumber,
+                              Amount = x.Amount,
+                              VehiclePartToFix = x.VehiclePartToFix,
                           }).OrderByDescending(x => x.DateCreated).ToListAsync();
 
                 return fleetJobCards;
@@ -145,7 +147,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                         DateCreated = x.DateCreated,
                         Status = x.Status,
                         FleetJobCardId = x.FleetJobCardId,
-                        VehicleNumber = x.VehicleNumber
+                        VehicleNumber = x.VehicleNumber,
+                        Amount = x.Amount,
+                        VehiclePartToFix = x.VehiclePartToFix,
                     }).OrderByDescending(x => x.DateCreated).ToListAsync();
 
                 return fleetJobCards;
