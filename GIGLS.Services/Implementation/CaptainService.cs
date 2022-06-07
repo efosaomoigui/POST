@@ -322,10 +322,26 @@ namespace GIGLS.Services.Implementation
                     throw new GenericException($"Fleet/Vehicle with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
                 }
 
-                var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicleDTO.VehicleType);
+                var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicleDTO.VehicleType.ToUpper() || x.ModelName == vehicleDTO.VehicleName.ToUpper());
+                if(!fleetModel.Any())
+                {
+                    throw new GenericException($"The chosen Vehicle Model for Vehicle type: {vehicleDTO.VehicleType} does not exist!");
+                }
+
                 var partner = await _uow.Partner.GetPartnerByEmail(vehicleDTO.PartnerEmail);
 
-                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType);
+                FleetType outType;
+                if(!(Enum.TryParse(vehicleDTO.VehicleType.Replace(" ",""), out outType)))
+                {
+                    throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} not yet available!");
+                }
+                
+                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType.Replace(" ",""));
+                if(fleetType == null)
+                {
+                    throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} does not exist!");
+                }
+
                 VehicleFixedStatus isFixed = (VehicleFixedStatus)Enum.Parse(typeof(VehicleFixedStatus), vehicleDTO.IsFixed);
 
                 Fleet newFleet = new Fleet()
