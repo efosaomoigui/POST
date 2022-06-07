@@ -560,6 +560,11 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
 
+        [Inject]
+        public IShipmentCategory ShipmentCategory { get; set; }
+        [Inject]
+        public IGIGGOCODTransferRepository GIGGOCODTransferRepository { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

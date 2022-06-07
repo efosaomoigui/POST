@@ -3101,5 +3101,34 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("inbundcategory/{countryId}")]
+        public async Task<IServiceResponse<IEnumerable<InboundShipmentCategoryDTO>>> GetInboundCategory(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetInboundCategory(countryId);
+                return new ServiceResponse<IEnumerable<InboundShipmentCategoryDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("codtransfer")]
+        public async Task<IServiceResponse<GIGGOCODTransferResponseDTO>> CODTransfer(GIGGOCODTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.CODTransfer(payload);
+                return new ServiceResponse<GIGGOCODTransferResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
