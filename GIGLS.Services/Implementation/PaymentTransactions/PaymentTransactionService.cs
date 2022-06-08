@@ -336,6 +336,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
+            //check if user has sufficient balance for only individual customers
+            if (shipment != null && shipment.CustomerType.Contains("Individual"))
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Insufficient wallet balance ");
+                }
+            }
+
             //for other customers
             //deduct the price for the wallet and update wallet transaction table
             //--Update April 25, 2019: Corporate customers should be debited from wallet
