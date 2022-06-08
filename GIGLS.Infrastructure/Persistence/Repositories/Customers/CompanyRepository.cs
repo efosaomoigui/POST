@@ -766,7 +766,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                    State = c.State,
                                    Address = c.Address,
                                    isCodNeeded = c.isCodNeeded,
-                                   PhoneNumber = c.PhoneNumber,
+                                   PhoneNumber = A.PhoneNumber,
                                    Industry = c.Industry,
                                    CompanyType = c.CompanyType,
                                    CompanyStatus = c.CompanyStatus,
