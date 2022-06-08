@@ -105,7 +105,8 @@ namespace GIGLS.Services.Implementation.Fleets
                             EnterpriseEmail = enterprisePartner.Email,
                             Amount = fleetJob.Amount,
                             FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
-                            VehicleNumber = fleetJob.VehicleNumber
+                            VehicleNumber = fleetJob.VehicleNumber,
+                            FleetJobCardId = newFleetJob.FleetId,
                         };
                         await _messageSenderService.SendGenericEmailMessage(MessageType.OPENJOBEMAIL, jobCardEmailDto);
                     }

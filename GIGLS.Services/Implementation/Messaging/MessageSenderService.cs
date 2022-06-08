@@ -1599,7 +1599,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "VehicleNumber",
                     "VehiclePartToFix",
                     "Amount",
-                    "FleetManager"
+                    "FleetManager",
+                    "JobCardId"
                 };
 
                 var jobCardDto = (FleetJobCardMailDto)obj;
@@ -1608,6 +1609,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = jobCardDto.VehiclePartToFix;
                 strArray[2] = jobCardDto.Amount.ToString();
                 strArray[3] = jobCardDto.FleetManager;
+                strArray[4] = jobCardDto.FleetJobCardId.ToString();
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject);
