@@ -755,6 +755,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             var companiesDto = from c in companies
                                    //join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
                                join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                               join A in _context.Users on c.CustomerCode equals A.UserChannelCode
                                select new CompanyDTO
                                {
                                    CompanyId = c.CompanyId,
@@ -793,7 +794,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                    },
                                    UserActiveCountryName = co.CountryName,
                                    Rank = c.Rank,
-                                   RankModificationDate = c.RankModificationDate
+                                   RankModificationDate = c.RankModificationDate,
+                                   UserId = A.Id,
+                                   FirstName = A.FirstName,
+                                   LastName = A.LastName
                                };
             return Task.FromResult(companiesDto.FirstOrDefault());
         }
