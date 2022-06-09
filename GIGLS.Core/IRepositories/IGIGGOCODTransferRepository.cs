@@ -11,6 +11,6 @@ namespace GIGLS.Core.IRepositories
 {
     public interface IGIGGOCODTransferRepository : IRepository<GIGGOCODTransfer>
     {
-        //Task<object> AddCODTransfer(GIGGOCODTransferDTO payload);
+        Task<GIGGOCODTransferResponseDTO> GetCODTransfer(string waybill);
     }
 }

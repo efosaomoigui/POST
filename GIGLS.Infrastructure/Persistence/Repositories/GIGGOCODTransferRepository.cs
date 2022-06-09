@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Domain;
+﻿using AutoMapper;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IRepositories;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -12,12 +13,19 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 {
     public class GIGGOCODTransferRepository : Repository<GIGGOCODTransfer, GIGLSContext>, IGIGGOCODTransferRepository
     {
-        private GIGLSContext _context;
+        private readonly GIGLSContext _context;
         public GIGGOCODTransferRepository(GIGLSContext context) : base(context)
         {
             _context = context;
         }
 
-       
+        public Task<GIGGOCODTransferResponseDTO> GetCODTransfer(string waybill)
+        {
+            var codTransfer =  _context.GIGGOCODTransfer.Where(x => x.Waybill == waybill);
+
+            var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
+
+            return Task.FromResult(result);
+        }
     }
 }

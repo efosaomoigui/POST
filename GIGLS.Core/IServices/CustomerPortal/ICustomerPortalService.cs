@@ -278,5 +278,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipments);
         Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId);
         Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload);
+        Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill);
     }
 }
