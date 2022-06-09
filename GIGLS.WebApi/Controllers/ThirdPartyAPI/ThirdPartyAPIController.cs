@@ -666,5 +666,25 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        /// <summary>
+        /// This api is used to cancel shipment (v2)
+        /// </summary>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("cancelshipment")]
+        public async Task<IServiceResponse<object>> CancelShipmentV2(CancelShipmentDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _thirdPartyAPIService.CancelShipment(payload.Waybill);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
     }
 }
