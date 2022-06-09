@@ -21,7 +21,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
         public Task<GIGGOCODTransferResponseDTO> GetCODTransfer(string waybill)
         {
-            var codTransfer =  _context.GIGGOCODTransfer.Where(x => x.Waybill == waybill);
+            var codTransfer =  _context.GIGGOCODTransfer.Where(x => x.Waybill == waybill).FirstOrDefault();
 
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
 

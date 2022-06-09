@@ -3133,7 +3133,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpGet]
-        [Route("getcodtransfer")]
+        [Route("getcodtransfer/{waybill}")]
         public async Task<IServiceResponse<GIGGOCODTransferResponseDTO>> GetCODTransfer(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
