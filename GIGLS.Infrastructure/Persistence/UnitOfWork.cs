@@ -563,6 +563,11 @@ namespace GIGLS.Infrastructure.Persistence
         public ICODGeneratedAccountNoRepository CODGeneratedAccountNo { get; set; }
 
         [Inject]
+        public IShipmentCategory ShipmentCategory { get; set; }
+        [Inject]
+        public IGIGGOCODTransferRepository GIGGOCODTransferRepository { get; set; }
+
+        [Inject]
         public IFleetJobCardRepository FleetJobCard { get; set; }
 
         [Inject]

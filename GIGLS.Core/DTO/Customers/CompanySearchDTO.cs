@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Customers
 {
-        public class CompanySearchDTO : BaseDomainDTO
-        {
-            public string searchItem { get; set; }
-            public Rank? rank { get; set; } = null;
-        }
+    public class CompanySearchDTO : BaseDomainDTO
+    {
+        public string searchItem { get; set; }
+        public Rank? rank { get; set; } = null;
+        public string email { get; set; }
+    }
 }

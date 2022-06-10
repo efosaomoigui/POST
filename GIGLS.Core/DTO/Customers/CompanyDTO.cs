@@ -69,6 +69,7 @@ namespace GIGLS.Core.DTO.Customers
         public DateTime RankModificationDate { get; set; }
         public string PrefferedNubanBank { get; set; }
         public string NUBANAccountNo { get; set; }
+        public string UserId { get; set; }
     }
 
     public class NewCompanyDTO 

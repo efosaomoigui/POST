@@ -148,6 +148,10 @@
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
     <Compile Include="Domain\BillsPaymentManagement.cs" />
+    <Compile Include="Domain\GIGGOCODTransfer.cs" />
+    <Compile Include="Domain\InboundCategory.cs" />
+    <Compile Include="Domain\InboundShipmentCategory.cs" />
+    <Compile Include="Domain\ShipmentCategory.cs" />
     <Compile Include="Domain\FleetDisputeMessage.cs" />
     <Compile Include="Domain\FleetJobCard.cs" />
     <Compile Include="Domain\UnidentifiedItemsForInternationalShipping.cs" />
@@ -399,8 +403,12 @@
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
     <Compile Include="DTO\GatewatActivityDTO.cs" />
     <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
+    <Compile Include="DTO\GIGGOCODTransferDTO.cs" />
+    <Compile Include="DTO\GIGGOCODTransferResponseDTO.cs" />
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
+    <Compile Include="DTO\InboundCategoryDTO.cs" />
+    <Compile Include="DTO\InboundShipmentCategoryDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
     <Compile Include="DTO\MessagingLog\ResponseData.cs" />
     <Compile Include="DTO\ShipmentExportDTO.cs" />
@@ -736,6 +744,9 @@
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
+    <Compile Include="IRepositories\IGIGGOCODTransferRepository.cs" />
+    <Compile Include="IRepositories\IGIGGOTransferRespository.cs" />
+    <Compile Include="IRepositories\IShipmentCategory.cs" />
     <Compile Include="IRepositories\ICaptainRepository.cs" />
     <Compile Include="IRepositories\IShipmentExportRepository.cs" />
     <Compile Include="IRepositories\IGIGXUserDetailRepository.cs" />

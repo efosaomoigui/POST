@@ -24,6 +24,7 @@ using System.Net;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -536,6 +537,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> CancelShipment(string Waybill)
         {
             return await _portalService.CancelShipment(Waybill);
+        }
+
+        public async Task<CompanyDTO> GetCompanyDetailsByEmail(string email)
+        {
+            return await _companyService.GetCompanyDetailsByEmail(email);
         }
     }
 }
