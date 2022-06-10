@@ -12,6 +12,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.IServices.Node;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
@@ -26,6 +27,7 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly IFleetPartnerService _fleetPartnerService;
         private readonly IFleetService _fleetService;
         private readonly ICaptainService _captainService;
+        private readonly INodeService _nodeService;
 
         public FleetDisputeMessageService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService, IPartnerService partnerService, IFleetPartnerService fleetPartnerService, IFleetService fleetService, ICaptainService captainService)
         {
@@ -72,7 +74,15 @@ namespace GIGLS.Services.Implementation.Fleets
                         FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
                         VehicleNumber = dto.VehicleNumber
                     };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.DISPUTEMSGEMAIL, disputeMailDto);
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.DMSGEMAIL, disputeMailDto);
+
+                    // push notification
+                    var pushNotification = await _nodeService.PushNotificationsToEnterpriseAPI(new PushNotificationMessageDTO()
+                    {
+                        CustomerId = owner.Id,
+                        Title = "New Dispute Message",
+                        Message = $"Vehicle Number: {dto.VehicleNumber},\n Message: {dto.DisputeMessage},\n Created By: {currentUser.FirstName} {currentUser.LastName}"
+                    });
 
                     return true;
                 }

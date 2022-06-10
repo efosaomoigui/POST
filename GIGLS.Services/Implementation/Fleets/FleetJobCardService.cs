@@ -18,6 +18,7 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Node;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -30,8 +31,9 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly IFleetService _fleetService;
         private readonly IFleetPartnerService _fleetPartnerService;
         private readonly IPartnerService _partnerService;
+        private readonly INodeService _nodeService;
 
-        public FleetJobCardService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService, ICaptainService captainService, IFleetService fleetService, IFleetPartnerService fleetPartnerService, IPartnerService partnerService)
+        public FleetJobCardService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService, ICaptainService captainService, IFleetService fleetService, IFleetPartnerService fleetPartnerService, IPartnerService partnerService, INodeService nodeService)
         {
             _uow = uow;
             _userService = userService;
@@ -41,6 +43,7 @@ namespace GIGLS.Services.Implementation.Fleets
             _fleetPartnerService = fleetPartnerService;
             _partnerService = partnerService;
             MapperConfig.Initialize();
+            _nodeService = nodeService;
         }
 
         public async Task<IEnumerable<FleetJobCardDto>> GetFleetJobCardsAsync()
@@ -108,7 +111,16 @@ namespace GIGLS.Services.Implementation.Fleets
                             VehicleNumber = fleetJob.VehicleNumber,
                             FleetJobCardId = newFleetJob.FleetId,
                         };
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.OPENJOBEMAIL, jobCardEmailDto);
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.JCDEMAIL, jobCardEmailDto);
+
+                        // push notification
+                        await PushNewNotification(enterprisePartner.Id, "New JobCard open", $"Vehicle Number: {fleetJob.VehicleNumber}, Part to fix: {fleetJob.VehiclePartToFix}, Amount: {fleetJob.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}");
+                        //await _nodeService.PushNotificationsToEnterpriseAPI(new PushNotificationMessageDTO()
+                        //{
+                        //    CustomerId = enterprisePartner.Id,
+                        //    Title = "New JobCard open",
+                        //    Message = $"Vehicle Number: {fleetJob.VehicleNumber}, Part to fix: {fleetJob.VehiclePartToFix}, Amount: {fleetJob.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}"
+                        //});
                     }
                     await _uow.CompleteAsync();
                     return true;
@@ -254,6 +266,21 @@ namespace GIGLS.Services.Implementation.Fleets
             var currentUser = await _userService.GetUserById(currentUserId);
 
             return currentUser;
+        }
+
+        private async Task PushNewNotification(string customerId, string title, string message)
+        {
+            if (!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(message))
+            {
+                //push notification 
+                var payload = new PushNotificationMessageDTO
+                {
+                    CustomerId = customerId,
+                    Title = title,
+                    Message = message
+                };
+                var notification = await _nodeService.PushNotificationsToEnterpriseAPI(payload);
+            }
         }
     }
 }

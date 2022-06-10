@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Node
         Task<NewNodeResponse> RemovePendingShipment(PendingNodeShipmentDTO dto);
         Task<NewNodeResponse> UpdateMerchantSubscription(UpdateNodeMercantSubscriptionDTO dto);
         Task<NewNodeResponse> UpdateMerchantDetails(UpdateNodeMercantDetailsDTO dto);
+        Task<NewNodeResponse> PushNotificationsToEnterpriseAPI(PushNotificationMessageDTO dto);
     }
 }

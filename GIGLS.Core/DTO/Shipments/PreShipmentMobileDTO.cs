@@ -581,3 +581,10 @@ public class UpdateNodeMercantDetailsDTO
     public string MerchantCode { get; set; }
     public string Email { get; set; }
 }
+
+public class PushNotificationMessageDTO
+{
+    public string CustomerId { get; set; }
+    public string Title { get; set; }
+    public string Message { get; set; }
+}

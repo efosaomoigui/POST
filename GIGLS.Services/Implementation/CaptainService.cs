@@ -63,7 +63,16 @@ namespace GIGLS.Services.Implementation
                     throw new GenericException($"Captain with email {captainDTO.Email} already exist");
                 }
 
+                var systemUsers = await _userService.GetSystemUsers();
+                var systemUser = systemUsers.FirstOrDefault(x => x.FirstName.Trim() == "Captain");
+                
+                if (systemUser == null)
+                {
+                    throw new GenericException("Unable to add to role at the moment, pls contact the admin");
+                }
+
                 string password = await _passwordGenerator.Generate();
+                
                 var user = new GIGL.GIGLS.Core.Domain.User
                 {
                     Organisation = captainDTO.Organisation,
@@ -81,10 +90,11 @@ namespace GIGLS.Services.Implementation
                     UserType = captainDTO.UserType,
                     IsActive = true,
                     PictureUrl = captainDTO.PictureUrl,
-                    SystemUserRole = "Captain",
+                    SystemUserRole = systemUser.FirstName,
+                    SystemUserId = systemUser.Id,
                     PasswordExpireDate = DateTime.Now
                 };
-                user.Id = Guid.NewGuid().ToString();
+                user.Id = Guid.NewGuid().ToString();                
 
                 // partner
                 var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
@@ -125,9 +135,6 @@ namespace GIGLS.Services.Implementation
                         throw new GenericException($"{errors}");
                     }
                 }
-
-                // add user to role
-                //await _userService.AddToRoleAsync(user.Id, "Captain");
 
                 _uow.Partner.Add(partner);
                 await _uow.CompleteAsync();
