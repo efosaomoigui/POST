@@ -228,7 +228,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             };
             var assetDemoDto = listAssetDetailsDemo.Where(x => x.Id == fleetId).FirstOrDefault();
             //return Task.FromResult(assetDemoDto);
-            return Task.FromResult(assetDto.FirstOrDefault());
+            return Task.FromResult(assetDemoDto);
         }
 
         //Get fleet trips by fleet id
@@ -310,6 +310,34 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                 new FleetTripDTO
                 {
                                DepartureDestination = "Iyana Ipaja",
+                                    ActualDestination = "Surulere",
+                                    DateCreated = System.DateTime.Now.AddDays(-1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Wuse",
+                                    ActualDestination = "Gwaripa",
+                                    DateCreated = System.DateTime.Now.AddDays(1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Ado Ekiti",
+                                    ActualDestination = "Ikole Ekiti",
+                                    DateCreated = System.DateTime.Now.AddDays(2),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Abuja",
+                                    ActualDestination = "Victoria Islandd",
+                                    DateCreated = System.DateTime.Now,
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Lokoja",
                                     ActualDestination = "Surulere",
                                     DateCreated = System.DateTime.Now.AddDays(-1),
 
