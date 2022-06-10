@@ -281,5 +281,56 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return Task.FromResult(listAssetTripssDemo.ToList());
             //return Task.FromResult(assetTripsDto.ToList());
         }
+
+        //Get fleet trips by fleet id
+        public Task<List<FleetTripDTO>> GetFleetTripsByPartner(string partnercode)
+        {
+            //To be completed
+            //var fleetTrips = _context.FleetTrip.Where(x => x.FleetId == fleetId);
+
+            //var assetTripsDto = from fleetTrip in fleetTrips
+            //                    select new FleetTripDTO
+            //                    {
+            //                        DepartureDestination = fleetTrip.DepartureDestination,
+            //                        ActualDestination = fleetTrip.ActualDestination,
+            //                        DateCreated = fleetTrip.DateCreated,
+            //                        //Get Total amount of trip
+            //                        //Get trip status
+            //                    };
+
+            var listAssetTripssDemo = new List<FleetTripDTO>
+            {
+                new FleetTripDTO
+                {
+                               DepartureDestination = "LOSHUB",
+                                    ActualDestination = "Victoria Islandd",
+                                    DateCreated = System.DateTime.Now,
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Iyana Ipaja",
+                                    ActualDestination = "Surulere",
+                                    DateCreated = System.DateTime.Now.AddDays(-1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Wuse",
+                                    ActualDestination = "Gwaripa",
+                                    DateCreated = System.DateTime.Now.AddDays(1),
+
+                },
+                new FleetTripDTO
+                {
+                               DepartureDestination = "Ado Ekiti",
+                                    ActualDestination = "Ikole Ekiti",
+                                    DateCreated = System.DateTime.Now.AddDays(2),
+
+                },
+            };
+            return Task.FromResult(listAssetTripssDemo.ToList());
+            //return Task.FromResult(assetTripsDto.ToList());
+        }
     }
 }

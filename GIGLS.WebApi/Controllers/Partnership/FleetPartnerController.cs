@@ -290,5 +290,19 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getpartnerfleettrips")]
+        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetPartnersFleetTrips()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var fleetTrips = await _fleetPartnerService.GetFleetTripsByPartner();
+                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                {
+                    Object = fleetTrips
+                };
+            });
+        }
     }
 }

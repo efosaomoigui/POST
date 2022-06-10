@@ -21,7 +21,7 @@ namespace GIGLS.Core.DTO.Fleets
         public decimal FuelUsed { get; set; }
         public string FleetRegistrationNumber { get; set; }
         public string CaptainName { get; set; }
-        public int CaptainId { get; set; }
+        public string CaptainId { get; set; }
         public int FleetId { get; set; }
         public List<FleetDTO> FleetDetail { get; set; }
     }

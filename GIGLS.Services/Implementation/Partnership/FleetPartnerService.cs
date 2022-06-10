@@ -420,13 +420,23 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 //Get all maintenance fee
 
-                var maintenanceFee = 
+               // var maintenanceFee = 
                 //deduct maintenance fee
 
 
             }
 
             return price;
+        }
+
+        public async Task<List<FleetTripDTO>> GetFleetTripsByPartner()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var fleetTrips = await _uow.FleetPartner.GetFleetTripsByPartner(currentUser.UserChannelCode);
+            return fleetTrips;
         }
     }
 }
