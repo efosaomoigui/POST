@@ -351,6 +351,7 @@
     <Compile Include="Controllers\Business\ScanController.cs" />
     <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
     <Compile Include="Controllers\CaptainBonusByZoneMapingController.cs" />
+    <Compile Include="Controllers\CaptainController.cs" />
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerInvoice\CustomerInvoiceController.cs" />
@@ -368,6 +369,8 @@
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
     <Compile Include="Controllers\Fleets\DispatchController.cs" />
     <Compile Include="Controllers\Fleets\FleetController.cs" />
+    <Compile Include="Controllers\Fleets\FleetDisputeMessageController.cs" />
+    <Compile Include="Controllers\Fleets\FleetJobCardController.cs" />
     <Compile Include="Controllers\Fleets\FleetMakeController.cs" />
     <Compile Include="Controllers\Fleets\FleetManagementController.cs" />
     <Compile Include="Controllers\Fleets\FleetModelController.cs" />
@@ -561,6 +564,8 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="ReportTemplate\download\" />
+    <Folder Include="Views\Captain\" />
+    <Folder Include="Views\FleetJobCard\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Korapay\" />
     <Folder Include="Views\Location\" />

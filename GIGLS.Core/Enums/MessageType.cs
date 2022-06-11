@@ -89,5 +89,10 @@
         ARFFSTP, //WHEN SHIPMENT IS ARRIVED FINAL DESTINATION FOR SENDER TERMINAL PICKUP
         ARFFSHD, //WHEN SHIPMENT IS ARRIVED FINAL DESTINATION FOR SENDER HOME DELIVERY
 
+        CAPEMAIL, // Message type for captain creation and login success
+
+        CAPTEMAIL, // Message type for captain creation
+        JCDEMAIL, // Message type for Open Job Card
+        DMSGEMAIL, // Message type for Fleet Dispute Message
     }
 }

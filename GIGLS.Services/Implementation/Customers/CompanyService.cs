@@ -1148,7 +1148,8 @@ namespace GIGLS.Services.Implementation.Customers
                     FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
                     LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
                     Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber,
+                    UserId = String.IsNullOrEmpty(user?.Id) ? "" : user?.Id
                 });
                 return result;
             }
@@ -1328,7 +1329,8 @@ namespace GIGLS.Services.Implementation.Customers
                     FirstName = String.IsNullOrEmpty(company?.FirstName) ? "" : company?.FirstName,
                     LastName = String.IsNullOrEmpty(company?.LastName) ? "" : company?.LastName,
                     Email = String.IsNullOrEmpty(company?.Email) ? "" : company?.Email,
-                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber
+                    Phone = String.IsNullOrEmpty(company?.PhoneNumber) ? "" : company?.PhoneNumber,
+                    UserId = String.IsNullOrEmpty(user?.Id) ? "" : user?.Id
                 });
 
                 companyDTO = Mapper.Map<CompanyDTO>(company);
@@ -1629,6 +1631,23 @@ namespace GIGLS.Services.Implementation.Customers
                 result.Succeeded = true;
                 result.Entity = companyDTO;
                 return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CompanyDTO> GetCompanyDetailsByEmail(string email)
+        {
+            try
+            {
+                var company = await _uow.Company.GetCompanyDetailsByEmail(email);
+
+                if (company == null)
+                    throw new GenericException("Company information does not exist");
+
+                return company;
             }
             catch (Exception)
             {

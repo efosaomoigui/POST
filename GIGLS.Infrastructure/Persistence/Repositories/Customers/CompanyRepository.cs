@@ -727,5 +727,79 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
+
+        public Task<CompanyDTO> GetCompanyDetailsByEmail(string email)
+        {
+            try
+            {
+                if (email != null)
+                    email = email.ToLower();
+
+                email = email.Trim();
+
+                var companies = _context.Company.Where(x => x.Email.ToLower() == email);
+
+                
+                var companiesDto = GetSingleCompany(companies);
+                        
+                return companiesDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private Task<CompanyDTO> GetSingleCompany(IQueryable<Company> companies)
+        {
+            var companiesDto = from c in companies
+                                   //join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                               join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                               join A in _context.Users on c.CustomerCode equals A.UserChannelCode
+                               select new CompanyDTO
+                               {
+                                   CompanyId = c.CompanyId,
+                                   Name = c.Name,
+                                   RcNumber = c.RcNumber,
+                                   Email = c.Email,
+                                   City = c.City,
+                                   State = c.State,
+                                   Address = c.Address,
+                                   isCodNeeded = c.isCodNeeded,
+                                   PhoneNumber = A.PhoneNumber,
+                                   Industry = c.Industry,
+                                   CompanyType = c.CompanyType,
+                                   CompanyStatus = c.CompanyStatus,
+                                   Discount = c.Discount,
+                                   SettlementPeriod = c.SettlementPeriod,
+                                   CustomerCode = c.CustomerCode,
+                                   CustomerCategory = c.CustomerCategory,
+                                   ReturnOption = c.ReturnOption,
+                                   ReturnServiceCentre = c.ReturnServiceCentre,
+                                   ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
+                                   ReturnAddress = c.ReturnAddress,
+                                   DateCreated = c.DateCreated,
+                                   DateModified = c.DateModified,
+                                   // WalletBalance = w.Balance,
+                                   UserActiveCountryId = c.UserActiveCountryId,
+                                   PrefferedNubanBank = c.PrefferedNubanBank,
+                                   NUBANAccountNo = c.NUBANAccountNo,
+                                   Country = new CountryDTO
+                                   {
+                                       CountryId = co.CountryId,
+                                       CountryName = co.CountryName,
+                                       CurrencySymbol = co.CurrencySymbol,
+                                       CurrencyCode = co.CurrencyCode,
+                                       PhoneNumberCode = co.PhoneNumberCode
+                                   },
+                                   UserActiveCountryName = co.CountryName,
+                                   Rank = c.Rank,
+                                   RankModificationDate = c.RankModificationDate,
+                                   UserId = A.Id,
+                                   FirstName = A.FirstName,
+                                   LastName = A.LastName
+                               };
+            return Task.FromResult(companiesDto.FirstOrDefault());
+        }
     }
 }

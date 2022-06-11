@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GIGLS.Core.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 

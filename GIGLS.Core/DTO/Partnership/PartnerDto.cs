@@ -44,5 +44,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string FleetPartnerCode { get; set; }
         public ActivityStatus ActivityStatus { get; set; }
         public DateTime ActivityDate { get; set; }
+        public string Password { get; set; }
     }
 }

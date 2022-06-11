@@ -4,7 +4,10 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.JobCards;
 using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
@@ -1559,6 +1562,81 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
                 messageDTO.ToEmail = msgDTO.ToEmail;
+            }
+
+
+
+            // 10. obj is PartnerDTO
+            if (obj is PartnerDTO)
+            {
+                var strArray = new string[]
+                {
+                    "UserEmail",
+                    "Password",
+                    "PartnerCode"
+                };
+
+                var partnerDTO = (PartnerDTO)obj;
+
+                strArray[0] = partnerDTO.Email;
+                strArray[1] = partnerDTO.Password;
+                strArray[2] = partnerDTO.PartnerCode;
+
+                // decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = partnerDTO.Email;
+            }
+
+            // 11. obj is JobCardDto
+            if (obj is FleetJobCardMailDto)
+            {
+                var strArray = new string[]
+                {
+                    "VehicleNumber",
+                    "VehiclePartToFix",
+                    "Amount",
+                    "FleetManager",
+                    "JobCardId"
+                };
+
+                var jobCardDto = (FleetJobCardMailDto)obj;
+
+                strArray[0] = jobCardDto.VehicleNumber;
+                strArray[1] = jobCardDto.VehiclePartToFix;
+                strArray[2] = jobCardDto.Amount.ToString();
+                strArray[3] = jobCardDto.FleetManager;
+                strArray[4] = jobCardDto.FleetJobCardId.ToString();
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = jobCardDto.EnterpriseEmail;
+            }
+
+            // 12. obj is Dispute Message
+            if (obj is FleetDisputeMessageMailDto)
+            {
+                var strArray = new string[]
+                {
+                    "VehicleNumber",
+                    "FleetManager",
+                    "DisputeMessage"
+                };
+
+                var disputeMsgDto = (FleetDisputeMessageMailDto)obj;
+
+                strArray[0] = disputeMsgDto.VehicleNumber;
+                strArray[1] = disputeMsgDto.FleetManager;
+                strArray[2] = disputeMsgDto.DisputeMessage;
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = disputeMsgDto.FleetOwnerEmail;
             }
 
             return await Task.FromResult(verifySendEmail);

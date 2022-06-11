@@ -1,6 +1,7 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -642,6 +643,26 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 return new ServiceResponse<object>
                 {
                     Object = flag
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get company details
+        /// </summary>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getcompanydetails")]
+        public async Task<IServiceResponse<CompanyDTO>> GetCompanyDetailsByEmail(CompanySearchDTO searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _thirdPartyAPIService.GetCompanyDetailsByEmail(searchDTO.email);
+
+                return new ServiceResponse<CompanyDTO>
+                {
+                    Object = company
                 };
             });
         }
