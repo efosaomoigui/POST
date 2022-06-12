@@ -146,7 +146,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     AssignedCaptain = partner.PartnerName,
                     FleetName = vehicle.FleetName,
                     RegistrationNumber = vehicle.RegistrationNumber,
-                    VehicleOwner = $"{user.FirstName} {user.LastName}",
+                    VehicleOwner = user != null ? $"{user.FirstName} {user.LastName}" : "Null",
                     VehicleOwnerId = vehicle.EnterprisePartnerId,
                     VehicleAge = (int)( DateTime.Now - vehicle.DateCreated ).TotalDays,
                     Capacity = vehicle.Capacity,
