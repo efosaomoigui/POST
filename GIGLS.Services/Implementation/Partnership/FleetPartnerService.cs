@@ -420,10 +420,15 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 //Get all maintenance fee
 
-               // var maintenanceFee = 
+                // var maintenanceFee = 
                 //deduct maintenance fee
 
+                var sumMaintenanceAmount = _uow.FleetJobCard.GetAllAsQueryable().Where(x => x.VehicleNumber == fleet.RegistrationNumber
+                                                                          && x.DateCreated >= startDate && x.DateCreated <= endDate)
+                                                                          .Select(x => x.Amount).Sum();
 
+                //Deduct all maintenance amount from 40% of vehicle pricing
+                price = percentageAmount - sumMaintenanceAmount;
             }
 
             return price;
