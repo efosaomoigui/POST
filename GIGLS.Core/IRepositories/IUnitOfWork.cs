@@ -230,6 +230,7 @@ namespace GIGLS.Core
 
         IFleetJobCardRepository FleetJobCard { get; set; }
         IFleetDisputeMessageRepository FleetDisputeMessage { get; set; }
+        IFleetPartnerTransactionRepository FleetPartnerTransaction { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

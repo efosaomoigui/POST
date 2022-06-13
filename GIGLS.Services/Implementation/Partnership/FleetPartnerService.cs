@@ -409,14 +409,12 @@ namespace GIGLS.Services.Implementation.Partnership
                     totalHaulagePrice += haulagePrice;
                 }
 
-
                 //Calculate 40% of the pricing
                 //Get minimum trip for fixed fleet
                 var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePerxcentage, 1);
                 decimal percentageValue = (Convert.ToDecimal(precentage?.Value) / 100M);
 
                 var percentageAmount = totalHaulagePrice * percentageValue;
-
 
                 //Get all maintenance fee
 

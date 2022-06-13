@@ -148,6 +148,7 @@
     <Compile Include="Domain\Archived\TransitWaybillNumber_Archive.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
     <Compile Include="Domain\BillsPaymentManagement.cs" />
+    <Compile Include="Domain\FleetPartnerTransaction.cs" />
     <Compile Include="Domain\GIGGOCODTransfer.cs" />
     <Compile Include="Domain\InboundCategory.cs" />
     <Compile Include="Domain\InboundShipmentCategory.cs" />
@@ -747,6 +748,7 @@
     <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IBillsPaymentManagementRepository.cs" />
+    <Compile Include="IRepositories\IFleetPartnerTransactionRepository.cs" />
     <Compile Include="IRepositories\IGIGGOCODTransferRepository.cs" />
     <Compile Include="IRepositories\IGIGGOTransferRespository.cs" />
     <Compile Include="IRepositories\IShipmentCategory.cs" />

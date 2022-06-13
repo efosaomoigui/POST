@@ -331,6 +331,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<GIGGOCODTransfer> GIGGOCODTransfer { get; set; }
         public DbSet<InboundShipmentCategory> InboundShipmentCategory { get; set; }
         public DbSet<ShipmentCategory> ShipmentCategory { get; set; }
+        public DbSet<FleetPartnerTransaction> FleetPartnerTransaction { get; set; }
         #endregion
 
 
