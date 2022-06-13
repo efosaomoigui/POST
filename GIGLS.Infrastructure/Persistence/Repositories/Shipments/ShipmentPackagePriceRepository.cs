@@ -34,6 +34,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                      CountryId = p.CountryId,
                                      MinimunRequired = p.MinimunRequired,
                                      InventoryOnHand = p.InventoryOnHand,
+                                     Length = p.Length,
+                                     Height = p.Height,
+                                     Width = p.Width,
+                                     Weight = p.Weight,
                                      Country = new CountryDTO
                                      {
                                          CountryId = c.CountryId,
@@ -67,6 +71,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                     Description = p.Description,
                                     InventoryOnHand = p.InventoryOnHand,
                                     MinimunRequired = p.MinimunRequired,
+                                    Length = p.Length,
+                                    Height = p.Height,
+                                    Width = p.Width,
+                                    Weight = p.Weight,
                                     CountryId = p.CountryId,
                                     Country = new CountryDTO
                                     {
@@ -99,6 +107,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                      ShipmentPackagePriceId = p.ShipmentPackagePriceId,
                                      Price = p.Price,
                                      Description = p.Description,
+                                     Length = p.Length,
+                                     Height = p.Height,
+                                     Width = p.Width,
+                                     Weight = p.Weight,
                                      CountryId = p.CountryId,
                                      Country = new CountryDTO
                                      {
