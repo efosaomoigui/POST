@@ -19,6 +19,7 @@ using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Node;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -44,6 +45,7 @@ namespace GIGLS.Services.Implementation.Fleets
             _partnerService = partnerService;
             MapperConfig.Initialize();
             _nodeService = nodeService;
+            MapperConfig.Initialize();
         }
 
         public async Task<IEnumerable<FleetJobCardDto>> GetFleetJobCardsAsync()
@@ -80,17 +82,16 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement")
                 {
-
                     foreach (var fleetJob in jobDto.JobCardItems)
                     {
-                        //
-                        VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(fleetJob.VehicleNumber);
-                        if (fleet.VehicleOwnerId == null)
+                        //VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(fleetJob.VehicleNumber);
+                        var fleet = _uow.Fleet.SingleOrDefault(x => x.RegistrationNumber.ToLower().Trim() == fleetJob.VehicleNumber.ToLower().Trim());
+                        if (fleet.EnterprisePartnerId == null)
                         {
                             throw new GenericException($"The Fleet/Vehicle with Registration Number: {fleetJob.VehicleNumber} does not have associated Enterprise partner or Vehicle owner to complete this operation.");
                         }
 
-                        var enterprisePartner = await _userService.GetUserById(fleet.VehicleOwnerId);                        
+                        var enterprisePartner = await _userService.GetUserById(fleet.EnterprisePartnerId);
 
                         var newFleetJob = new FleetJobCard()
                         {
@@ -98,7 +99,7 @@ namespace GIGLS.Services.Implementation.Fleets
                             DateCreated = DateTime.Now,
                             DateModified = DateTime.Now,
                             FleetManagerId = currentUser.Id,
-                            FleetOwnerId = fleetJob.EnterprisePartnerId,
+                            FleetOwnerId = enterprisePartner.Id,
                             VehiclePartToFix = fleetJob.VehiclePartToFix,
                             FleetId = fleet.FleetId,
                             Amount = fleetJob.Amount,
@@ -107,16 +108,21 @@ namespace GIGLS.Services.Implementation.Fleets
 
                         _uow.FleetJobCard.Add(newFleetJob);
 
-                        // send mail
-                        var jobCardEmailDto = new FleetJobCardMailDto()
+                        //send message for new open job card
+                        var messageDTO = new MessageDTO
                         {
-                            EnterpriseEmail = enterprisePartner.Email,
-                            Amount = fleetJob.Amount,
-                            FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
+                            CustomerName = $"{enterprisePartner.FirstName} {enterprisePartner.LastName}",
+                            ToEmail = enterprisePartner.Email,
+                            To = enterprisePartner.Email,
+                            FleetEnterprisePartnerName = $"{enterprisePartner.FirstName} {enterprisePartner.LastName}",
+                            VehicleName = fleet.FleetName,
                             VehicleNumber = fleetJob.VehicleNumber,
-                            FleetJobCardId = newFleetJob.FleetId,
+                            VehiclePartToFix = fleetJob.VehiclePartToFix,
+                            Amount = fleetJob.Amount.ToString(),
+                            FleetOfficer = $"{currentUser.FirstName} {currentUser.LastName}",
+                            
                         };
-                        await _messageSenderService.SendGenericEmailMessage(MessageType.JCDEMAIL, jobCardEmailDto);
+                        await _messageSenderService.SendEmailOpenJobCardAsync(messageDTO);
 
                         // push notification
                         await PushNewNotification(enterprisePartner.Id, "New JobCard open", $"Vehicle Number: {fleetJob.VehicleNumber}, Part to fix: {fleetJob.VehiclePartToFix}, Amount: {fleetJob.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}");
