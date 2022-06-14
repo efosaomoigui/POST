@@ -20,6 +20,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Node;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Node;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -70,6 +71,9 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
+                NewNodeResponse response = new NewNodeResponse();
+                var messageDtos = new List<MessageDTO>();
+
                 foreach (var veh in jobDto.JobCardItems)
                 {
                     if (!(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == veh.VehicleNumber.Trim().ToLower())))
@@ -82,53 +86,57 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement")
                 {
-                    foreach (var fleetJob in jobDto.JobCardItems)
+                    var fleetJobs = new List<FleetJobCard>();
+                    foreach (var job in jobDto.JobCardItems)
                     {
-                        //VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(fleetJob.VehicleNumber);
-                        var fleet = _uow.Fleet.SingleOrDefault(x => x.RegistrationNumber.ToLower().Trim() == fleetJob.VehicleNumber.ToLower().Trim());
+                        var fleet = _uow.Fleet.SingleOrDefault(x => x.RegistrationNumber.ToLower().Trim() == job.VehicleNumber.ToLower().Trim());
                         if (fleet.EnterprisePartnerId == null)
                         {
-                            throw new GenericException($"The Fleet/Vehicle with Registration Number: {fleetJob.VehicleNumber} does not have associated Enterprise partner or Vehicle owner to complete this operation.");
+                            throw new GenericException($"The Fleet/Vehicle with Registration Number: {job.VehicleNumber} does not have associated Enterprise partner or Vehicle owner to complete this operation.");
                         }
 
                         var enterprisePartner = await _userService.GetUserById(fleet.EnterprisePartnerId);
-
-                        var newFleetJob = new FleetJobCard()
+                        fleetJobs.Add(new FleetJobCard
                         {
                             Status = FleetJobCardStatus.Open.ToString(),
                             DateCreated = DateTime.Now,
                             DateModified = DateTime.Now,
                             FleetManagerId = currentUser.Id,
                             FleetOwnerId = enterprisePartner.Id,
-                            VehiclePartToFix = fleetJob.VehiclePartToFix,
+                            VehiclePartToFix = job.VehiclePartToFix,
                             FleetId = fleet.FleetId,
-                            Amount = fleetJob.Amount,
-                            VehicleNumber = fleetJob.VehicleNumber
-                        };
+                            Amount = job.Amount,
+                            VehicleNumber = job.VehicleNumber
+                        });
 
-                        _uow.FleetJobCard.Add(newFleetJob);
-
-                        //send message for new open job card
-                        var messageDTO = new MessageDTO
+                        //prepare message for new open job card
+                        messageDtos.Add(new MessageDTO
                         {
                             CustomerName = $"{enterprisePartner.FirstName} {enterprisePartner.LastName}",
                             ToEmail = enterprisePartner.Email,
                             To = enterprisePartner.Email,
                             FleetEnterprisePartnerName = $"{enterprisePartner.FirstName} {enterprisePartner.LastName}",
                             VehicleName = fleet.FleetName,
-                            VehicleNumber = fleetJob.VehicleNumber,
-                            VehiclePartToFix = fleetJob.VehiclePartToFix,
-                            Amount = fleetJob.Amount.ToString(),
+                            VehicleNumber = job.VehicleNumber,
+                            VehiclePartToFix = job.VehiclePartToFix,
+                            Amount = job.Amount.ToString(),
                             FleetOfficer = $"{currentUser.FirstName} {currentUser.LastName}",
-                            
-                        };
-                        await _messageSenderService.SendEmailOpenJobCardAsync(messageDTO);
+
+                        });
 
                         // push notification
-                        await PushNewNotification(enterprisePartner.Id, "New JobCard open", $"Vehicle Number: {fleetJob.VehicleNumber}, Part to fix: {fleetJob.VehiclePartToFix}, Amount: {fleetJob.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}");
-                        
+                        response = await PushNewNotification(enterprisePartner.Id, "New JobCard open", $"Vehicle Number: {job.VehicleNumber}, Part to fix: {job.VehiclePartToFix}, Amount: {job.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}");
+
                     }
+                    _uow.FleetJobCard.AddRange(fleetJobs);
                     await _uow.CompleteAsync();
+
+                    //send messages for new open job card
+                    foreach (var msg in messageDtos)
+                    {
+                        await _messageSenderService.SendEmailOpenJobCardAsync(msg);
+                    }
+
                     return true;
                 }
                 throw new GenericException("You are not authorized to perform this operation");
@@ -274,8 +282,9 @@ namespace GIGLS.Services.Implementation.Fleets
             return currentUser;
         }
 
-        private async Task PushNewNotification(string customerId, string title, string message)
+        private async Task<NewNodeResponse> PushNewNotification(string customerId, string title, string message)
         {
+            NewNodeResponse response = new NewNodeResponse();
             if (!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(message))
             {
                 //push notification 
@@ -285,8 +294,9 @@ namespace GIGLS.Services.Implementation.Fleets
                     Title = title,
                     Message = message
                 };
-                var notification = await _nodeService.PushNotificationsToEnterpriseAPI(payload);
+                response = await _nodeService.PushNotificationsToEnterpriseAPI(payload);
             }
+            return response;
         }
     }
 }
