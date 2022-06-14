@@ -19,6 +19,7 @@ using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Node;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -147,7 +148,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     return fleetJobCards;
                 }
                 throw new GenericException("You are not authorized to perform this operation");
-                
+
             }
             catch (Exception)
             {
@@ -215,6 +216,12 @@ namespace GIGLS.Services.Implementation.Fleets
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
 
                     jobCard.Status = FleetJobCardStatus.Closed.ToString();
+
+                    var jobcarddto = Mapper.Map<FleetJobCardDto> (jobCard);
+
+                    //Add maintenance fee
+                    await AddMaintenanceAmountToFleetTransaction(jobcarddto);
+
                     await _uow.CompleteAsync();
 
                     VehicleDetailsDTO fleet = await _captainService.GetVehicleByRegistrationNumberAsync(jobCard.VehicleNumber);
@@ -247,8 +254,8 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
                 {
-                    var jobCards = await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerInCurrentMonthAsync(new GetFleetJobCardByDateRangeDto(){FleetManagerId = currentUser.Id, });
-                    
+                    var jobCards = await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerInCurrentMonthAsync(new GetFleetJobCardByDateRangeDto() { FleetManagerId = currentUser.Id, });
+
                     return await Task.FromResult(jobCards);
                 }
 
@@ -280,6 +287,34 @@ namespace GIGLS.Services.Implementation.Fleets
                     Message = message
                 };
                 var notification = await _nodeService.PushNotificationsToEnterpriseAPI(payload);
+            }
+        }
+
+        private async Task AddMaintenanceAmountToFleetTransaction(FleetJobCardDto jobCard)
+        {
+            try
+            {
+                var maintenanceTransaction = new FleetPartnerTransaction
+                {
+                    MovementManifestNumber = string.Empty,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Amount = jobCard.Amount,
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = $"Maintenance-{jobCard.VehicleNumber}-{DateTime.Now.ToString()}",
+                    Description = $"Maintenance amount for {jobCard.VehicleNumber} on {DateTime.Now.ToString()}",
+                    FleetRegistrationNumber = jobCard.VehicleNumber,
+                    DateOfEntry = DateTime.Now,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    IsSettled = false
+                };
+
+                //Add maintenance amount to transaction table
+                _uow.FleetPartnerTransaction.Add(maintenanceTransaction);
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

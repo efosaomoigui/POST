@@ -41,5 +41,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Station DestinationStation { get; set; }
         public int DepartureServiceCenterId { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public decimal TripAmount { get; set; }
     }
 }

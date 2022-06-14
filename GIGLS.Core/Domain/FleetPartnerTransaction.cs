@@ -38,5 +38,6 @@ namespace GIGLS.Core.Domain
         
         [MaxLength(100)]
         public int TransactionCountryId { get; set; }
+        public bool IsSettled { get; set; }
     }
 }

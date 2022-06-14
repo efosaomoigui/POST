@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.DTO;
@@ -440,6 +441,119 @@ namespace GIGLS.Services.Implementation.Partnership
 
             var fleetTrips = await _uow.FleetPartner.GetFleetTripsByPartner(currentUser.UserChannelCode);
             return fleetTrips;
+        }
+        public async Task<decimal> GetVariableFleetTripAmount(FleetTripDTO fleetTrip)
+        {
+            return await CalculateVariableFleetTripAmount(fleetTrip);
+        }
+
+        public async Task<decimal> GetFixFleetTripAmount(string registrationNumber)
+        {
+            return await CalculateFixFleetTripAmount(registrationNumber);
+        }
+        private async Task<decimal> CalculateVariableFleetTripAmount(FleetTripDTO fleetTrip)
+        {
+            try
+            {
+                if (fleetTrip == null)
+                    throw new GenericException("Invalid fleet trip details");
+
+                if (string.IsNullOrEmpty(fleetTrip.FleetRegistrationNumber))
+                    throw new GenericException("Invalid registration number");
+
+                decimal price = 0.00m;
+
+                var fleet = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == fleetTrip.FleetRegistrationNumber.ToLower()).FirstOrDefault();
+
+                if (fleet == null)
+                    throw new GenericException("Fleet not found");
+
+                if (fleet.IsFixed == VehicleFixedStatus.Variable)
+                {
+                    //Get pricing for Variable fleet
+
+                    //Get Fleet haulage details
+                    var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleet.Capacity).FirstOrDefault();
+
+                    if (haulage == null)
+                        throw new GenericException("Fleet haulage details not found");
+
+                    // Get active country Id
+                    var userCountryId = await _pricing.GetUserCountryId();
+
+                    var haulagePricingDTO = new HaulagePricingDTO
+                    {
+                        CustomerCode = string.Empty,
+                        DepartureServiceCentreId = fleetTrip.DepartureServiceCenterId,
+                        DestinationServiceCentreId = fleetTrip.DestinationServiceCenterId,
+                        Haulageid = haulage.HaulageId,
+                        CountryId = userCountryId
+                    };
+
+                    //Get haulage price for fleet base
+                    var haulagePrice = await _pricing.GetHaulagePrice(haulagePricingDTO);
+
+                    //Calculate variable fleet percentage of the pricing
+                    var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePerxcentage, 1);
+                    decimal percentageValue = (Convert.ToDecimal(precentage?.Value) / 100M);
+
+                    var percentageAmount = haulagePrice * percentageValue;
+
+                    price = percentageAmount;
+                }
+                return price;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+        }
+
+        private async Task<decimal> CalculateFixFleetTripAmount(string registrationNumber)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(registrationNumber))
+                    throw new GenericException("Invalid registration number");
+
+                decimal price = 0.00m;
+
+                //Set start date and end date
+                var startDate = DateTime.Now;
+                var endDate = DateTime.Now;
+                startDate = new DateTime(startDate.Year, startDate.Month, 1);
+                endDate = endDate.AddDays(1);
+
+                var fleet = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == registrationNumber.ToLower()).FirstOrDefault();
+                if (fleet.IsFixed == VehicleFixedStatus.Fixed)
+                {
+                    //Get pricing for fixed fleet
+                    var fixPrice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetFixPrice, 1);
+                    decimal fixPriceValue = Convert.ToDecimal(fixPrice?.Value);
+
+                    //Get minimum trip for fixed fleet
+                    var minimumTrip = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetMinimumTrip, 1);
+                    int minimumTripValue = Convert.ToInt32(minimumTrip?.Value);
+
+                    //Get total count of fleet trips for the current month
+                    var fleetTripCount = _uow.FleetTrip.GetAllAsQueryable().Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber
+                                                                                    && x.DateCreated >= startDate && x.DateCreated <= endDate).Count();
+
+                    if (fleetTripCount >= minimumTripValue)
+                    {
+                        price = fixPriceValue;
+                    }
+                }
+                return price;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+           
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -31,5 +32,8 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<FleetTripDTO>> GetFleetTrips(int fleetId);
         Task<FleetPartnerWalletDTO> GetPartnerWalletBalance();
         Task<List<FleetTripDTO>> GetFleetTripsByPartner();
+
+        Task<decimal> GetVariableFleetTripAmount(FleetTripDTO fleetTrip);
+        Task<decimal> GetFixFleetTripAmount(string registrationNumber);
     }
 }

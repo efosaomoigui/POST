@@ -24,5 +24,15 @@ namespace GIGLS.Core.DTO.Fleets
         public string CaptainId { get; set; }
         public int FleetId { get; set; }
         public List<FleetDTO> FleetDetail { get; set; }
+        public int MovementManifestId { get; set; }
+        public decimal DispatchAmount { get; set; }
+
+        public int? DepartureStationId { get; set; }
+
+        public int? DestinationStationId { get; set; }
+
+        public int DepartureServiceCenterId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+        public decimal TripAmount { get; set; }
     }
 }

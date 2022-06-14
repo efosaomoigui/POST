@@ -18,6 +18,7 @@ using GIGLS.Core.Domain.Expenses;
 using System.Net;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Partnership;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -27,13 +28,15 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IPreShipmentMobileService _preshipmentMobileService;
+        private readonly IFleetPartnerService _fleetPartnerService;
 
-        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPreShipmentMobileService preshipmentMobileService)
+        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPreShipmentMobileService preshipmentMobileService, IFleetPartnerService fleetPartnerService)
         {
             _walletService = walletService;
             _userService = userService;
             _uow = uow;
             _preshipmentMobileService = preshipmentMobileService;
+            _fleetPartnerService = fleetPartnerService;
             MapperConfig.Initialize();
         }
 
@@ -305,9 +308,65 @@ namespace GIGLS.Services.Implementation.Fleets
                     FleetRegistrationNumber = newDispatch.RegistrationNumber,
                     CaptainId = newDispatch.DriverDetail,
                     DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
-                    DestinationServiceCenterId = newDispatch.DestinationServiceCenterId
+                    DestinationServiceCenterId = newDispatch.DestinationServiceCenterId,
+                    TripAmount = 0.00M
                 };
 
+                
+
+                //Write to FleetTransaction table
+                //Check if fleet type (fix or variable)
+                var fleetType = await _uow.Fleet.ExistAsync(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower() && x.IsFixed == VehicleFixedStatus.Variable);
+
+                if (fleetType)
+                {
+                    var fleetTripDto = Mapper.Map<FleetTripDTO>(fleetTrip);
+
+                    //Get fleet trip amount
+                    var tripAmount = await _fleetPartnerService.GetVariableFleetTripAmount(fleetTripDto);
+
+                    //Set Fleet trip amount generated
+                    fleetTrip.TripAmount = tripAmount;
+
+                    //Add fleet trip amount to transaction table
+                    var tripTransaction = new FleetPartnerTransaction
+                    {
+                        MovementManifestNumber = newDispatch.MovementManifestNumber,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = tripAmount,
+                        PaymentType = PaymentType.Wallet,
+                        PaymentTypeReference = $"Trip-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
+                        Description = $"Trip amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
+                        FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                        DateOfEntry = DateTime.Now,
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        IsSettled = false
+                    };
+
+                    //Add fleet trip amount to transaction table
+                    _uow.FleetPartnerTransaction.Add(tripTransaction);
+                    
+                    var dispatchTransaction = new FleetPartnerTransaction
+                    {
+                        MovementManifestNumber = newDispatch.MovementManifestNumber,
+                        CreditDebitType = CreditDebitType.Debit,
+                        Amount = newDispatch.Amount,
+                        PaymentType = PaymentType.Wallet,
+                        PaymentTypeReference = $"Dispatch-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
+                        Description = $"Dispatch amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
+                        FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                        DateOfEntry = DateTime.Now,
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        IsSettled = false
+                    };
+
+                    //Add dispatch amount to fleet transaction 
+                    _uow.FleetPartnerTransaction.Add(dispatchTransaction);
+                }
+
+                //Add fleet trip
                 _uow.FleetTrip.Add(fleetTrip);
 
                 // commit transaction
