@@ -7944,7 +7944,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         mobileShipment.UserId = merchant.Id;
                         mobileShipment.ZoneMapping = preShipment.ZoneMapping;
-                        mobileShipment.CustomerCode = merchant.UserChannelCode;
+                        mobileShipment.CustomerCode = user.UserChannelCode;
                         mobileShipment.SenderLocation = preShipment.SenderLocation;
                     }
 
