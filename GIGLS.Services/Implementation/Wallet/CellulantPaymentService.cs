@@ -748,7 +748,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException($"missing parameter", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            //1. get sender details
+            //1. get sender and shipment info details
             var shipmentInfo = await _uow.Shipment.GetAsync(x => x.Waybill == cod.Waybill);
             if (shipmentInfo == null)
             {
@@ -783,7 +783,21 @@ namespace GIGLS.Services.Implementation.Wallet
             var senderWallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
             var currentUserId = await _userService.GetCurrentUserId();
 
-            //2.update the cod shipment
+
+            //generate ref no for transaction
+            var no = Guid.NewGuid().ToString();
+            no = no.Substring(0, 5);
+            var refNo = $"TRX-{cod.Waybill}-CLNT-{no}";
+            var accountNo = string.Empty;
+
+            //get user codwallet info
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (accInfo != null)
+            {
+                accountNo = accInfo.AccountNo;
+            }
+
+            //2.update the cod shipment and log into codtransferegister
             var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == cod.Waybill);
             if (codAccShipment != null)
             {
@@ -793,10 +807,22 @@ namespace GIGLS.Services.Implementation.Wallet
                 codAccShipment.DestinationCountryId = senderInfo.UserActiveCountryId;
                 codAccShipment.TransferAccount = cod.TransferAccount;
             }
+
+            var codTransferReg = new CODTransferRegister()
+            {
+                Amount = amount,
+                RefNo = refNo,
+                CustomerCode = customerCode,
+                AccountNo = accountNo,
+                PaymentStatus = PaymentStatus.Pending,
+                Waybill = cod.Waybill,
+                ClientRefNo = cod.TransactionReference,
+                TransferDate = DateTime.Now
+            };
+            _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
 
 
-            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
             if (accInfo is null)
             {
                 // throw new GenericException("user does not have a cod wallet");
@@ -819,10 +845,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 return true;
             }
 
-            var no = Guid.NewGuid().ToString();
-            no = no.Substring(0, 5);
-            var refNo = $"TRX-{cod.Waybill}-CLNT-{no}";
-
+        
+            //convert naira to kobo and then call stellas
             var koboValue = amount * 100;
             if (amount <= 0)
             {
@@ -843,19 +867,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 return true;
             }
 
-            var codTransferReg = new CODTransferRegister()
-            {
-                Amount = amount,
-                RefNo = refNo,
-                CustomerCode = customerCode,
-                AccountNo = accInfo.AccountNo,
-                PaymentStatus = PaymentStatus.Pending,
-                Waybill = cod.Waybill,
-                ClientRefNo = cod.TransactionReference
-            };
-            _uow.CODTransferRegister.Add(codTransferReg);
+           
             await _uow.CompleteAsync();
-
             var stellasWithdraw = await _stellasService.StellasTransfer(transferDTOStellas);
             if (stellasWithdraw.status)
             {

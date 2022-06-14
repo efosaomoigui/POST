@@ -24,5 +24,6 @@ namespace GIGLS.Core.Domain.Wallet
         [MaxLength(500)]
         public string StatusDescription { get; set; }
         public string ReceiverNarration { get; set; }
+        public DateTime? TransferDate { get; set; }
     }
 }
