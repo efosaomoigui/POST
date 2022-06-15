@@ -555,7 +555,7 @@ namespace GIGLS.Services.Implementation.Utility
                         {
                             string manifestCode = item.FirstOrDefault().ManifestCode;
                             int destID = item.Key;
-                            var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == movemanifestNo && x.ManifestNumber == manifestCode);
+                            var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == movemanifestNo && x.ManifestNumber == manifestCode && x.IsAutomated);
                             if (manifestExist != null)
                             {
                                 continue;
@@ -605,7 +605,8 @@ namespace GIGLS.Services.Implementation.Utility
                 DepartureServiceCentreId = manifest.DepartureServiceCentreId,
                 DestinationServiceCentreId = manifest.DestinationServiceCentreId,
                 DriverCode = driverCode,
-                DestinationServiceCentreCode = destServiceCentreCode
+                DestinationServiceCentreCode = destServiceCentreCode,
+                IsAutomated = true
             };
             _uow.MovementManifestNumber.Add(movemanifest);
         }
@@ -621,7 +622,8 @@ namespace GIGLS.Services.Implementation.Utility
             {
                 MovementManifestCode = moveManifest.MovementManifestCode,
                 ManifestNumber = manifest.ManifestCode,
-                UserId = userId
+                UserId = userId,
+                IsAutomated = true
             };
             _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
         }
