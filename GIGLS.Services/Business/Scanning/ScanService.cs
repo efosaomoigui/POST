@@ -59,6 +59,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             _uow = uow;
             MapperConfig.Initialize();
         }

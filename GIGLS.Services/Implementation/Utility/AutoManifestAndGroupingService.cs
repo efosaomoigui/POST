@@ -538,7 +538,7 @@ namespace GIGLS.Services.Implementation.Utility
         {
             //get all the manifest in movemanifest if movemanifest exist and group by destination centreid
             var userId = await _userService.GetCurrentUserId();
-            var movemanifest = _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movemanifestNo);
+            var movemanifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movemanifestNo);
             if (movemanifest != null)
             {
                 var manifestNoList = _uow.MovementManifestNumberMapping.GetAllAsQueryable().Where(x => x.MovementManifestCode == movemanifestNo).Select(x => x.ManifestNumber).ToList();
