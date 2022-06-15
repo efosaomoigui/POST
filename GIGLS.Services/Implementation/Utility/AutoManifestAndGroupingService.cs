@@ -593,7 +593,8 @@ namespace GIGLS.Services.Implementation.Utility
             {
                 MovementManifestCode = moveManifestCode,
                 ManifestNumber = manifest.ManifestCode,
-                UserId = userId
+                UserId = userId,
+                IsAutomated = true
             };
             _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
 
