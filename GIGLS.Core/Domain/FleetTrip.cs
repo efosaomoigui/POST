@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -18,7 +19,9 @@ namespace GIGL.GIGLS.Core.Domain
         public int FleetId { get; set; }
         public virtual Fleet Fleet { get; set; }
         
-        public int CaptainId { get; set; }
+        public string CaptainId { get; set; }
+
+        [ForeignKey("CaptainId")]
         public virtual User Captain { get; set; }
     }
 }
