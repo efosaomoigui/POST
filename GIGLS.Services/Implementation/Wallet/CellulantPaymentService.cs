@@ -829,7 +829,6 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 customerCode = alpha.CustomerCode;
             }
-            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
             if (accInfo is null)
             {
                 // throw new GenericException("user does not have a cod wallet");
