@@ -240,5 +240,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetCompanyDetailsByEmail(GIGLS.Core.DTO.Customers.CompanySearchDTO)">
+            <summary>
+            This api is used to get company details
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>
