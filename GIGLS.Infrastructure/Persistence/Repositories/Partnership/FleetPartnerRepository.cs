@@ -101,7 +101,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                Id = fleet.FleetId,
                                Name = fleet.FleetName,
                                RegistrationNumber = fleet.RegistrationNumber,
-                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetId == fleet.FleetId).Count(),
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber.ToLower() == fleet.RegistrationNumber.ToLower()).Count(),
                            };
             var assetDemoDto = new List<AssetDTO>
             {
@@ -240,13 +240,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
             var assetTripsDto = from fleet in fleets
                                 join fleetTrip in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrip.FleetRegistrationNumber.ToLower()
+                                join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
+                                join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
                                 select new FleetTripDTO
                                 {
                                     DepartureDestination = fleetTrip.DepartureDestination,
                                     ActualDestination = fleetTrip.ActualDestination,
                                     DateCreated = fleetTrip.DateCreated,
                                     TripAmount = fleetTrip.TripAmount,
-                                    
+                                    Status = fleetTrip.Status,
+                                    DepartureCity = departStation.StationName,
+                                    DestinationCity = destStation.StationName
                                 };
 
             var listAssetTripssDemo = new List<FleetTripDTO>

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -42,5 +43,6 @@ namespace GIGL.GIGLS.Core.Domain
         public int DepartureServiceCenterId { get; set; }
         public int DestinationServiceCenterId { get; set; }
         public decimal TripAmount { get; set; }
+        public FleetTripStatus Status { get; set; }
     }
 }

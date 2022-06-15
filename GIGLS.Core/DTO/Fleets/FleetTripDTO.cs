@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 
@@ -34,5 +35,8 @@ namespace GIGLS.Core.DTO.Fleets
         public int DepartureServiceCenterId { get; set; }
         public int DestinationServiceCenterId { get; set; }
         public decimal TripAmount { get; set; }
+        public FleetTripStatus Status { get; set; }
+        public string DepartureCity { get; set; }
+        public string DestinationCity { get; set; }
     }
 }

@@ -625,6 +625,7 @@
     <Compile Include="Enums\CardType.cs" />
     <Compile Include="Enums\CompanyMap.cs" />
     <Compile Include="Enums\FleetJobCardStatus.cs" />
+    <Compile Include="Enums\FleetTripStatus.cs" />
     <Compile Include="Enums\ItemState.cs" />
     <Compile Include="Enums\CouponDiscountType.cs" />
     <Compile Include="Enums\DepositType.cs" />
