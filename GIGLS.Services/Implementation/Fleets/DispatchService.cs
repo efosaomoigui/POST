@@ -309,7 +309,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     CaptainId = newDispatch.DriverDetail,
                     DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
                     DestinationServiceCenterId = newDispatch.DestinationServiceCenterId,
-                    TripAmount = 0.00M
+                    TripAmount = 0.00M,
+                    
                 };
 
                 

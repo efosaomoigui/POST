@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
@@ -299,13 +300,13 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
-        public async Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
+        public async Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner()
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var assets = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartner(fleetPartnerCode);
+            var assets = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartner(currentUser.UserChannelCode);
             return assets;
         }
 
@@ -335,6 +336,32 @@ namespace GIGLS.Services.Implementation.Partnership
             };
 
             return result;
+        }
+
+        public async Task<List<FleetPartnerTransaction>> GetPartnerTransactionHistory()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var list = new List<FleetPartnerTransaction>
+            {
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            },
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            }
+
+            };
+            
+            return list;
         }
 
         private async Task<decimal> CalculateFleetPricing(FleetDTO fleet)
@@ -508,7 +535,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 throw;
             }
-            
+
         }
 
         private async Task<decimal> CalculateFixFleetTripAmount(string registrationNumber)
@@ -553,7 +580,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 throw;
             }
-           
+
         }
     }
 }

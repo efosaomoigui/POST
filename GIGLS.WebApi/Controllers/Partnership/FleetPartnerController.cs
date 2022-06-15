@@ -1,4 +1,5 @@
 ﻿using EfeAuthen.Models;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
@@ -236,12 +237,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
         }
 
         [HttpGet]
-        [Route("getenterprisepartnersasset/{fleetpartnercode}")]
-        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetFleetAttachedToEnterprisePartner(string fleetpartnercode)
+        [Route("getenterprisepartnersasset")]
+        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetFleetAttachedToEnterprisePartner()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner(fleetpartnercode);
+                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner();
                 return new ServiceResponse<IEnumerable<AssetDTO>>
                 {
                     Object = assets
@@ -301,6 +302,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<FleetTripDTO>>
                 {
                     Object = fleetTrips
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnertransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransaction>>> GetPartnersTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetPartnerTransactionHistory();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransaction>>
+                {
+                    Object = transactions
                 };
             });
         }
