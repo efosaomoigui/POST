@@ -823,6 +823,13 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
 
 
+            //check if this is an alpha shipment
+            var alpha = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill && x.IsAlpha);
+            if (alpha != null)
+            {
+                customerCode = alpha.CustomerCode;
+            }
+            var accInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
             if (accInfo is null)
             {
                 // throw new GenericException("user does not have a cod wallet");
