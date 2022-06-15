@@ -553,7 +553,9 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         foreach (var item in manifests)
                         {
-                            var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == movemanifestNo && x.ManifestNumber == item.FirstOrDefault().ManifestCode);
+                            string manifestCode = item.FirstOrDefault().ManifestCode;
+                            int destID = item.Key;
+                            var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == movemanifestNo && x.ManifestNumber == manifestCode);
                             if (manifestExist != null)
                             {
                                 continue;
@@ -561,9 +563,9 @@ namespace GIGLS.Services.Implementation.Utility
 
                             //check if an automated movemanifest has already created if so
                             //add current manifest to already create; else create a new one
-                            var existingManifest = alreadyExistingMoveManifests.Where(x => x.DestinationServiceCentreId == item.Key).FirstOrDefault();
-                            var centre = destinationCentres.Where(x => x.ServiceCentreId == item.Key).FirstOrDefault();
-                            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == item.FirstOrDefault().ManifestCode);
+                            var existingManifest = alreadyExistingMoveManifests.Where(x => x.DestinationServiceCentreId == destID).FirstOrDefault();
+                            var centre = destinationCentres.Where(x => x.ServiceCentreId == destID).FirstOrDefault();
+                            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
                             if (existingManifest is null)
                             {
                                 await NewMovementManifest(manifest, centre,userId);
@@ -574,9 +576,8 @@ namespace GIGLS.Services.Implementation.Utility
                             }
                         }
                     }
-                    await _uow.CompleteAsync();
                 }
-
+                await _uow.CompleteAsync();
             }
         }
 
