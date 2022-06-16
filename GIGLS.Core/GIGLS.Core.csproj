@@ -401,6 +401,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\Fleets\VehicleAnalyticsDto.cs" />
     <Compile Include="DTO\GatewatActivityDTO.cs" />
     <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
     <Compile Include="DTO\GIGGOCODTransferDTO.cs" />

@@ -48,7 +48,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     if (!(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == dto.VehicleNumber.Trim().ToLower())))
                     {
@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     var disputeMassages = _uow.FleetDisputeMessage.GetAll("FleetOwner").Select(x => new FleetDisputeMessageDto()
                     {

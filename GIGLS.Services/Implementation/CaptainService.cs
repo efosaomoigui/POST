@@ -22,6 +22,9 @@ using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.IRepositories.Partnership;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Fleets;
+using System.Data.Entity;
+using GIGLS.Core.IServices.Fleets;
 
 namespace GIGLS.Services.Implementation
 {
@@ -36,8 +39,9 @@ namespace GIGLS.Services.Implementation
         private readonly IFleetPartnerRepository _fleetPartnerRepository;
         private readonly IEmailService _emailService;
         private readonly IEmailSendLogService _iEmailSendLogService;
+        private readonly IFleetTripService _fleetTripService;
 
-        public CaptainService(IUserService userService, IUnitOfWork uow, IPasswordGenerator passwordGenerator, MessageSenderService messageSenderService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPartnerService partnerService)
+        public CaptainService(IUserService userService, IUnitOfWork uow, IPasswordGenerator passwordGenerator, MessageSenderService messageSenderService, INumberGeneratorMonitorService numberGeneratorMonitorService, IPartnerService partnerService, IFleetTripService fleetTripService)
         {
             _userService = userService;
             _uow = uow;
@@ -45,6 +49,7 @@ namespace GIGLS.Services.Implementation
             _messageSenderService = messageSenderService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _partnerService = partnerService;
+            _fleetTripService = fleetTripService;
         }
 
 
@@ -52,7 +57,7 @@ namespace GIGLS.Services.Implementation
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
 
-            if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement")
+            if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement" || currentUserRole == "FleetCoordinator")
             {
                 var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
                 var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
@@ -161,7 +166,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var captains = await _uow.CaptainRepository.GetAllCaptainsByDateAsync(date);
                     return captains;
@@ -181,7 +186,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(partnerId);
                     var user = await _userService.GetUserById(captain.UserId);
@@ -225,7 +230,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(captainId);
                     if (captain == null)
@@ -255,7 +260,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var captain = await _uow.CaptainRepository.GetCaptainByIdAsync(partner.PartnerId);
                     if (captain == null)
@@ -307,7 +312,7 @@ namespace GIGLS.Services.Implementation
         public async Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO)
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
-            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
                 if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
                 {
@@ -371,7 +376,7 @@ namespace GIGLS.Services.Implementation
         public async Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync()
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
-            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
                 var captains = await _uow.CaptainRepository.GetAllCaptainsAsync();
                 //var captainUserInfo = await _userService.GetUserByEmail(ca)
@@ -406,7 +411,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var vehicles = await _uow.CaptainRepository.GetAllVehiclesByDateAsync(date);
                     return vehicles;
@@ -426,7 +431,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var vehicle = await _uow.Fleet.GetAsync(fleetId);
                     var owner = await _userService.GetUserById(vehicle.EnterprisePartnerId);
@@ -463,7 +468,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var fleet = await _uow.Fleet.GetAsync(fleetId);
                     if (fleet == null)
@@ -495,7 +500,7 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var fleet = await _uow.Fleet.GetAsync(vehicle.FleetId);
                     if (fleet == null)
@@ -540,7 +545,7 @@ namespace GIGLS.Services.Implementation
         public async Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync()
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
-            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
                 var vehicles = _uow.Fleet.GetAll("Partner");
                 var vehicledetails = vehicles.ToList();
@@ -574,10 +579,44 @@ namespace GIGLS.Services.Implementation
             {
                 var currentUserRole = await GetCurrentUserRoleAsync();
 
-                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator")
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var vehicle = await _uow.CaptainRepository.GetVehicleByRegistrationNumberAsync(regNum);
                     return vehicle;
+                }
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<VehicleAnalyticsDto> GetVehicleAnalyticsAsync(string vehicleNumber)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+                {
+                    var vehicle = await _uow.CaptainRepository.GetVehicleByRegistrationNumberAsync(vehicleNumber);
+                    var fleetTrip = await _uow.FleetTrip.FindAsync(x => x.FleetId == vehicle.FleetId);
+
+                    if (vehicle != null)
+                    {
+                        return new VehicleAnalyticsDto
+                        {
+                            VehicleAge = vehicle.VehicleAge,
+                            TotalExpenses = 0,
+                            VehicleAssignedCaptain = vehicle.AssignedCaptain,
+                            VehicleCurrentLocation = "",
+                            TotalNumberOfTrip = fleetTrip.Count(),
+                            TotalRevenueGenerated = 0,
+                        };
+                    }
+                    throw new GenericException("You are not authorized to use this feature");
+                    
                 }
                 throw new GenericException("You are not authorized to use this feature");
             }
