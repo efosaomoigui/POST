@@ -294,6 +294,12 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
+                //Get fleet Id
+                var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == jobCard.VehicleNumber.ToLower()).FirstOrDefault();
+
+                if (fleetDto == null)
+                    throw new GenericException("Fleet details not found");
+
                 var maintenanceTransaction = new FleetPartnerTransaction
                 {
                     MovementManifestNumber = string.Empty,
@@ -306,7 +312,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     DateOfEntry = DateTime.Now,
                     DateCreated = DateTime.Now,
                     DateModified = DateTime.Now,
-                    IsSettled = false
+                    IsSettled = false,
+                    FleetId = fleetDto.FleetId
                 };
 
                 //Add maintenance amount to transaction table
