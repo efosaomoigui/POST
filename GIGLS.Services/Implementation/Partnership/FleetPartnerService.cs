@@ -338,7 +338,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return result;
         }
 
-        public async Task<List<FleetPartnerTransaction>> GetPartnerTransactionHistory()
+        public async Task<List<FleetPartnerTransactionDTO>> GetPartnerTransactionHistory()
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();

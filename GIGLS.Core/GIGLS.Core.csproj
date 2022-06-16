@@ -402,6 +402,7 @@
     <Compile Include="DTO\Fleets\FleetPartDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartInventoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetPartnerTransactionDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartnerWalletDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
