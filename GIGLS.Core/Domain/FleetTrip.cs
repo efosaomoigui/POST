@@ -20,8 +20,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Fleet Fleet { get; set; }
         
         public string CaptainId { get; set; }
-
-        [ForeignKey("CaptainId")]
         public virtual User Captain { get; set; }
     }
 }
