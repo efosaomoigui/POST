@@ -298,10 +298,22 @@ namespace GIGLS.Services.Implementation.Fleets
                 //Scan movement manifest waybill
                 await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
 
+                //Get fleet Id
+                var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower()).FirstOrDefault();
+
+                if (fleetDto == null)
+                    throw new GenericException("Fleet details not found");
+
+                //Get movement manifest Id
+                var movementManifestNumber = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => x.MovementManifestCode == newDispatch.MovementManifestNumber).FirstOrDefault();
+
+                if (movementManifestNumber == null)
+                    throw new GenericException("Movement manifest details not found");
+
                 //Write to Fleet trip table
                 var fleetTrip = new FleetTrip
                 {
-                    MovementManifestId = dispatchId,
+                    MovementManifestId = movementManifestNumber.MovementManifestNumberId,
                     DispatchAmount = newDispatch.Amount,
                     DestinationStationId = newDispatch.DestinationId,
                     DepartureStationId = newDispatch.DepartureId,
@@ -310,7 +322,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
                     DestinationServiceCenterId = newDispatch.DestinationServiceCenterId,
                     TripAmount = 0.00M,
-                    
+                    FleetId = fleetDto.FleetId,
+                    DepartureTime = DateTime.Now,
+                    ArrivalTime = DateTime.Now,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
                 };
 
                 
@@ -329,6 +345,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     //Set Fleet trip amount generated
                     fleetTrip.TripAmount = tripAmount;
 
+
                     //Add fleet trip amount to transaction table
                     var tripTransaction = new FleetPartnerTransaction
                     {
@@ -339,15 +356,18 @@ namespace GIGLS.Services.Implementation.Fleets
                         PaymentTypeReference = $"Trip-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
                         Description = $"Trip amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
                         FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        DateOfEntry = DateTime.Now,
+                        //DateOfEntry = DateTime.UtcNow,
+                        IsSettled = false,
+                        FleetId = fleetDto.FleetId,
                         DateCreated = DateTime.Now,
                         DateModified = DateTime.Now,
-                        IsSettled = false
+                        DateOfEntry = DateTime.Now
                     };
 
                     //Add fleet trip amount to transaction table
                     _uow.FleetPartnerTransaction.Add(tripTransaction);
-                    
+                   // await _uow.CompleteAsync();
+
                     var dispatchTransaction = new FleetPartnerTransaction
                     {
                         MovementManifestNumber = newDispatch.MovementManifestNumber,
@@ -357,19 +377,22 @@ namespace GIGLS.Services.Implementation.Fleets
                         PaymentTypeReference = $"Dispatch-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
                         Description = $"Dispatch amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
                         FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        DateOfEntry = DateTime.Now,
+                        //DateOfEntry = DateTime.UtcNow,
+                        IsSettled = false,
+                        FleetId = fleetDto.FleetId,
                         DateCreated = DateTime.Now,
                         DateModified = DateTime.Now,
-                        IsSettled = false
+                        DateOfEntry = DateTime.Now
                     };
 
                     //Add dispatch amount to fleet transaction 
                     _uow.FleetPartnerTransaction.Add(dispatchTransaction);
+                   // await _uow.CompleteAsync();
                 }
 
                 //Add fleet trip
                 _uow.FleetTrip.Add(fleetTrip);
-
+                //await _uow.CompleteAsync();
                 // commit transaction
                 await _uow.CompleteAsync();
                 return new { Id = dispatchId };

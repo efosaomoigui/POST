@@ -114,6 +114,6 @@
         EcommerceSubscriptionCharge,
         EnterpriseFleetFixPrice,
         EnterpriseFleetMinimumTrip,
-        EnterpriseFleetVariablePerxcentage
+        EnterpriseFleetVariablePercentage
     }
 }

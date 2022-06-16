@@ -103,37 +103,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                RegistrationNumber = fleet.RegistrationNumber,
                                NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber.ToLower() == fleet.RegistrationNumber.ToLower()).Count(),
                            };
-            var assetDemoDto = new List<AssetDTO>
-            {
-                new AssetDTO
-                {
-                               Id = 1,
-                               Name = "Ford",
-                               RegistrationNumber = "XYZ-001-ABC",
-                               NumberOfTrips = 10,
-                },
-                new AssetDTO
-                {
-                               Id = 2,
-                               Name = "Truck",
-                               RegistrationNumber = "XCB-101-APQ",
-                               NumberOfTrips = 20,
-                },
-                new AssetDTO
-                {
-                               Id = 3,
-                               Name = "Toyota",
-                               RegistrationNumber = "NAV-221-GHA",
-                               NumberOfTrips = 30,
-                },
-                new AssetDTO
-                {
-                               Id = 4,
-                               Name = "Nissan",
-                               RegistrationNumber = "MAB-333-OPC",
-                               NumberOfTrips = 40,
-                },
-            };
             return Task.FromResult(assetDto.ToList());
         }
 
@@ -143,92 +112,24 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
 
             var assetDto = from fleet in fleets
-                           join fleetTrips in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrips.FleetRegistrationNumber.ToLower()
+                           join fleetTrips in _context.FleetTrip on fleet.RegistrationNumber equals fleetTrips.FleetRegistrationNumber
                            select new AssetDetailsDTO
                            {
                                Id = fleet.FleetId,
                                Name = fleet.FleetName,
                                RegistrationNumber = fleet.RegistrationNumber,
                                Status = fleet.Status ? "Active" : "Idle",
-                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber.ToLower() == fleet.RegistrationNumber.ToLower()).Count(),
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber).Count(),
                                Captain = _context.Partners.Where(x => x.PartnerId == fleet.PartnerId).Select(x => new CaptainDTO
                                {
                                    Code = x.PartnerCode,
-                                   Name = $"{x.FirstName} {x.LastName}"
+                                   FirstName = x.FirstName,
+                                   LastName = x.LastName
                                }).FirstOrDefault()
                                //Current location of the vehicle
                                //Captain
                                //Fleet Manager assigned to the vehicle
                            };
-            var listAssetDetailsDemo = new List<AssetDetailsDTO>
-            {
-                new AssetDetailsDTO
-                {
-                               Id = 1,
-                               Name = "Ford",
-                               RegistrationNumber = "XYZ-001-ABC",
-                               NumberOfTrips =10,
-                               Status = "Active",
-                               Captain =  new CaptainDTO
-                               {
-                                   Code = "EP0005",
-                                   Name = "Isaac Gbade"
-                               },
-                               Location = "Lagos",
-                               FleetManager = "Dele Dada",
-                               TotalRevenue = 200000m
-                },
-                new AssetDetailsDTO
-                {
-                               Id = 2,
-                               Name = "Truck",
-                               RegistrationNumber = "XCB-101-APQ",
-                               NumberOfTrips = 20,
-                               Status = "Idle",
-                               Captain =  new CaptainDTO
-                               {
-                                   Code = "EP0004",
-                                   Name = "Gabriel Lamba"
-                               },
-                               Location = "Oyo",
-                               FleetManager = "Tunde Oshomo",
-                               TotalRevenue = 100000m
-                },
-                new AssetDetailsDTO
-                {
-                               Id = 3,
-                               Name = "Toyota",
-                               RegistrationNumber = "NAV-221-GHA",
-                               NumberOfTrips = 30,
-                               Status = "Active",
-                               Captain =  new CaptainDTO
-                               {
-                                   Code = "EP0003",
-                                   Name = "Daniel Akpata"
-                               },
-                               Location = "Edo",
-                               FleetManager = "Tunde Oshomo",
-                               TotalRevenue = 50000m
-                },
-                new AssetDetailsDTO
-                {
-                               Id = 4,
-                               Name = "Nissan",
-                               RegistrationNumber = "MAB-333-OPC",
-                               NumberOfTrips = 40,
-                               Status = "Idle",
-                               Captain =  new CaptainDTO
-                               {
-                                   Code = "EP0003",
-                                   Name = "Olaide Jamiu"
-                               },
-                               Location = "Ogun",
-                               FleetManager = "Tunde Oshomo",
-                               TotalRevenue = 20000m
-                },
-            };
-            var assetDemoDto = listAssetDetailsDemo.Where(x => x.Id == fleetId).FirstOrDefault();
-            //return Task.FromResult(assetDemoDto);
             return Task.FromResult(assetDto.FirstOrDefault());
         }
 
@@ -251,38 +152,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                     DestinationCity = destStation.StationName
                                 };
 
-            var listAssetTripssDemo = new List<FleetTripDTO>
-            {
-                new FleetTripDTO
-                {
-                               DepartureDestination = "LOSHUB",
-                                    ActualDestination = "Victoria Islandd",
-                                    DateCreated = System.DateTime.Now,
-                                    
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Iyana Ipaja",
-                                    ActualDestination = "Surulere",
-                                    DateCreated = System.DateTime.Now.AddDays(-1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Wuse",
-                                    ActualDestination = "Gwaripa",
-                                    DateCreated = System.DateTime.Now.AddDays(1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Ado Ekiti",
-                                    ActualDestination = "Ikole Ekiti",
-                                    DateCreated = System.DateTime.Now.AddDays(2),
-
-                },
-            };
-            //return Task.FromResult(listAssetTripssDemo.ToList());
             return Task.FromResult(assetTripsDto.ToList());
         }
 
@@ -306,66 +175,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                     DestinationCity = destStation.StationName
                                 };
 
-            var listAssetTripssDemo = new List<FleetTripDTO>
-            {
-                new FleetTripDTO
-                {
-                               DepartureDestination = "LOSHUB",
-                                    ActualDestination = "Victoria Islandd",
-                                    DateCreated = System.DateTime.Now,
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Iyana Ipaja",
-                                    ActualDestination = "Surulere",
-                                    DateCreated = System.DateTime.Now.AddDays(-1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Wuse",
-                                    ActualDestination = "Gwaripa",
-                                    DateCreated = System.DateTime.Now.AddDays(1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Ado Ekiti",
-                                    ActualDestination = "Ikole Ekiti",
-                                    DateCreated = System.DateTime.Now.AddDays(2),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Abuja",
-                                    ActualDestination = "Victoria Islandd",
-                                    DateCreated = System.DateTime.Now,
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Lokoja",
-                                    ActualDestination = "Surulere",
-                                    DateCreated = System.DateTime.Now.AddDays(-1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Wuse",
-                                    ActualDestination = "Gwaripa",
-                                    DateCreated = System.DateTime.Now.AddDays(1),
-
-                },
-                new FleetTripDTO
-                {
-                               DepartureDestination = "Ado Ekiti",
-                                    ActualDestination = "Ikole Ekiti",
-                                    DateCreated = System.DateTime.Now.AddDays(2),
-
-                },
-            };
-            //return Task.FromResult(listAssetTripssDemo.ToList());
             return Task.FromResult(assetTripsDto.ToList());
         }
     }

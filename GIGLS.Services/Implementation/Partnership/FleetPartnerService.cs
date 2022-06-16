@@ -439,7 +439,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 //Calculate 40% of the pricing
                 //Get minimum trip for fixed fleet
-                var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePerxcentage, 1);
+                var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePercentage, 1);
                 decimal percentageValue = (Convert.ToDecimal(precentage?.Value) / 100M);
 
                 var percentageAmount = totalHaulagePrice * percentageValue;
@@ -521,7 +521,7 @@ namespace GIGLS.Services.Implementation.Partnership
                     var haulagePrice = await _pricing.GetHaulagePrice(haulagePricingDTO);
 
                     //Calculate variable fleet percentage of the pricing
-                    var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePerxcentage, 1);
+                    var precentage = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EnterpriseFleetVariablePercentage, 1);
                     decimal percentageValue = (Convert.ToDecimal(precentage?.Value) / 100M);
 
                     var percentageAmount = haulagePrice * percentageValue;
@@ -607,7 +607,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            return await _uow.FleetPartnerTransaction.GetFleetPartnerCreditTransaction(currentUser.UserChannelCode);
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerDebitTransaction(currentUser.UserChannelCode);
         }
     }
 }

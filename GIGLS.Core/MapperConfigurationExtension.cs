@@ -563,6 +563,11 @@ namespace GIGLS.Core
                 config.CreateMap<FleetJobCardDto, FleetJobCard>();
                 config.CreateMap<FleetJobCard, FleetJobCardDto>();
 
+                config.CreateMap<FleetTripDTO, FleetTrip>();
+                config.CreateMap<FleetTrip, FleetTripDTO>();
+                config.CreateMap<FleetPartnerTransactionDTO, FleetPartnerTransaction>();
+                config.CreateMap<FleetPartnerTransaction, FleetPartnerTransactionDTO>();
+
             });
 
             isInit = true;
