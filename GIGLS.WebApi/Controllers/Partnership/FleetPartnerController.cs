@@ -308,12 +308,40 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [HttpGet]
         [Route("getpartnertransactionhistory")]
-        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransaction>>> GetPartnersTransactionHistory()
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersTransactionHistory()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var transactions = await _fleetPartnerService.GetPartnerTransactionHistory();
-                return new ServiceResponse<IEnumerable<FleetPartnerTransaction>>
+                var transactions = await _fleetPartnerService.GetFleetPartnerTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnercredittransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersCreditTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetFleetPartnerCreditTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerdebittransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersDebitTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetFleetPartnerDebitTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
                 {
                     Object = transactions
                 };

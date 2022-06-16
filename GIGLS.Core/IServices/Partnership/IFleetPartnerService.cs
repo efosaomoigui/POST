@@ -36,6 +36,9 @@ namespace GIGLS.Core.IServices.Partnership
 
         Task<decimal> GetVariableFleetTripAmount(FleetTripDTO fleetTrip);
         Task<decimal> GetFixFleetTripAmount(string registrationNumber);
-        Task<List<FleetPartnerTransaction>> GetPartnerTransactionHistory();
+        Task<List<FleetPartnerTransactionDTO>> GetPartnerTransactionHistory();
+        Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransaction();
+        Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction();
+        Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerDebitTransaction();
     }
 }

@@ -344,15 +344,15 @@ namespace GIGLS.Services.Implementation.Partnership
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var list = new List<FleetPartnerTransaction>
+            var list = new List<FleetPartnerTransactionDTO>
             {
-                new FleetPartnerTransaction
+                new FleetPartnerTransactionDTO
             {
                 CreditDebitType = CreditDebitType.Credit,
                 Amount = 2000.00M,
                 Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
             },
-                new FleetPartnerTransaction
+                new FleetPartnerTransactionDTO
             {
                 CreditDebitType = CreditDebitType.Credit,
                 Amount = 2000.00M,
@@ -581,6 +581,33 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw;
             }
 
+        }
+
+        public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransaction()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerTransaction(currentUser.UserChannelCode);
+        }
+
+        public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerCreditTransaction(currentUser.UserChannelCode);
+        }
+
+        public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerDebitTransaction()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerCreditTransaction(currentUser.UserChannelCode);
         }
     }
 }
