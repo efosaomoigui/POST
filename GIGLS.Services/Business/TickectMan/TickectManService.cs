@@ -312,6 +312,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                         shipment.Invoice.Shipment.DeclarationOfValueCheck = Math.Round((decimal)shipment.DeclarationOfValueCheck * factor) / factor;
                         shipment.Invoice.Pos = Math.Round((decimal)shipment.Invoice.Pos * factor) / factor;
 
+
+                        foreach (var item in shipment.Invoice.Shipment.ShipmentItems)
+                        {
+                            item.Price = Math.Round(item.Price * factor) / factor;
+                        }
                     }
                 }
             }
