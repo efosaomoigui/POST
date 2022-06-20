@@ -568,7 +568,7 @@ namespace GIGLS.Services.Implementation.Utility
                             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
                             if (existingManifest is null)
                             {
-                                await NewMovementManifest(manifest, centre,userId);
+                                await NewMovementManifest(manifest, centre,userId, movemanifestNo);
                             }
                             else
                             {
@@ -582,7 +582,7 @@ namespace GIGLS.Services.Implementation.Utility
         }
 
 
-        private async Task NewMovementManifest(Manifest manifest, ServiceCentre destServiceCentre, string userId)
+        private async Task NewMovementManifest(Manifest manifest, ServiceCentre destServiceCentre, string userId,string originalMovemanifestNo)
         {
             var moveManifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MovementManifestNumber, destServiceCentre.Code);
             var driverCode = await GenerateDeliveryCode();
@@ -607,7 +607,8 @@ namespace GIGLS.Services.Implementation.Utility
                 DestinationServiceCentreId = manifest.DestinationServiceCentreId,
                 DriverCode = driverCode,
                 DestinationServiceCentreCode = destServiceCentreCode,
-                IsAutomated = true
+                IsAutomated = true,
+                DestinationServiceCentreUserId = originalMovemanifestNo
             };
             _uow.MovementManifestNumber.Add(movemanifest);
         }
