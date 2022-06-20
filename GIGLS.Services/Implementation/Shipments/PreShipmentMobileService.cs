@@ -576,6 +576,20 @@ namespace GIGLS.Services.Implementation.Shipments
                                 shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.NonDocument;
                             }
                         }
+                        if (shipment.CustomerDetails is null )
+                        {
+                            if (customer != null)
+                            {
+                                var custmerDetail = Mapper.Map<CustomerDTO>(customer);
+                                shipment.CustomerDetails = custmerDetail; 
+                            }
+                            else
+                            {
+                                var individualCust = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                                var custmerDetail = Mapper.Map<CustomerDTO>(individualCust);
+                                shipment.CustomerDetails = custmerDetail;
+                            }
+                        }
                         shipment.ShipmentItems = shipmentItems;
                         shipment.DeclarationOfValueCheck = shipment.ShipmentItems.Sum(x => x.Price);
                         shipment.ItemDetails = shipment.ShipmentItems[0].Description;
