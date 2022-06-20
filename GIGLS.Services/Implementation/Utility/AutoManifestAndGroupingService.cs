@@ -619,15 +619,19 @@ namespace GIGLS.Services.Implementation.Utility
             var driverCode = await GenerateDeliveryCode();
             var destServiceCentreCode = await GenerateDeliveryCode();
 
-
-            var movemanifestmapping = new MovementManifestNumberMapping()
+            var manifestAlreadyCreated = await _uow.MovementManifestNumberMapping.GetAsync(x => x.ManifestNumber == manifest.ManifestCode);
+            if (manifestAlreadyCreated is null)
             {
-                MovementManifestCode = moveManifest.MovementManifestCode,
-                ManifestNumber = manifest.ManifestCode,
-                UserId = userId,
-                IsAutomated = true
-            };
-            _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
+                var movemanifestmapping = new MovementManifestNumberMapping()
+                {
+                    MovementManifestCode = moveManifest.MovementManifestCode,
+                    ManifestNumber = manifest.ManifestCode,
+                    UserId = userId,
+                    IsAutomated = true
+                };
+                _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
+            }
+           
         }
 
         private async Task<string> GenerateDeliveryCode()
