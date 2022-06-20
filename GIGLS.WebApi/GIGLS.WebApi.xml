@@ -246,5 +246,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CancelShipmentV2(GIGLS.Core.DTO.CancelShipmentDTO)">
+            <summary>
+            This api is used to cancel shipment (v2)
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

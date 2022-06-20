@@ -258,7 +258,7 @@ namespace GIGLS.Services.Implementation.Fleets
                         FleetOfficer = $"{currentUser.FirstName} {currentUser.LastName}",
                         Subject = $"Job/Maintenance Card for Vehicle: {jobCard.VehicleNumber} closed"
                     };
-                    await _messageSenderService.SendEmailOpenJobCardAsync(msg);
+                    await _messageSenderService.SendEmailCloseJobCardAsync(msg);
 
                     // push notification
                     var response = await PushNewNotification(enterprisePartner.Id, $"Job/Maintenance Card for Vehicle: {jobCard.VehicleNumber} closed", $"Vehicle Number: {jobCard.VehicleNumber}, Part fixed: {jobCard.VehiclePartToFix}, Amount: {jobCard.Amount}, Created By: {currentUser.FirstName} {currentUser.LastName}");

@@ -45,5 +45,6 @@ namespace GIGLS.Core.IMessageService
         Task SendEmailForStellaLoginDetails(MessageDTO messageDTO);
         Task SendEmailFleetDisputeMessageAsync(MessageDTO messageDTO);
         Task SendEmailOpenJobCardAsync(MessageDTO messageDTO);
+        Task SendEmailCloseJobCardAsync(MessageDTO messageDTO);
     }
 }
