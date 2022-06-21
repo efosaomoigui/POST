@@ -596,26 +596,26 @@ namespace GIGLS.Services.Implementation
         {
             try
             {
-                var currentUserRole = await GetCurrentUserRoleAsync();
+                var currentUserRole = await GetCurrentUserRoleAsync();                
 
                 if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
                 {
                     var vehicle = await _uow.CaptainRepository.GetVehicleByRegistrationNumberAsync(vehicleNumber);
-                    var fleetTrip = await _uow.FleetTrip.FindAsync(x => x.FleetId == vehicle.FleetId);
+                    var fleetTrip = await _uow.FleetTrip.FindAsync(x => x.FleetRegistrationNumber == vehicleNumber);
 
                     if (vehicle != null)
                     {
                         return new VehicleAnalyticsDto
                         {
                             VehicleAge = vehicle.VehicleAge,
-                            TotalExpenses = 0,
+                            TotalExpenses = fleetTrip.Sum(x => x.FuelCosts + x.DispatchAmount),
                             VehicleAssignedCaptain = vehicle.AssignedCaptain,
                             VehicleCurrentLocation = "",
                             TotalNumberOfTrip = fleetTrip.Count(),
-                            TotalRevenueGenerated = 0,
+                            TotalRevenueGenerated = fleetTrip.Sum(x => x.TripAmount),
                         };
                     }
-                    throw new GenericException("You are not authorized to use this feature");
+                    throw new GenericException($"Vehicle with registration number: {vehicleNumber} does not exist");
                     
                 }
                 throw new GenericException("You are not authorized to use this feature");
