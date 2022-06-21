@@ -1,5 +1,7 @@
 ﻿using EfeAuthen.Models;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -94,6 +96,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 //    user.Username = user.Username.Trim();
                 //}
 
+                var user = await _portalService.CheckDetailsForCustomerPortal(userLoginModel.username);
+
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
+
                 if (userLoginModel.Password != null)
                 {
                     userLoginModel.Password = userLoginModel.Password.Trim();
@@ -129,6 +138,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
 
+                    //Get country detail
+                    var country = await _portalService.GetUserCountryCode(user);
+                    var countryJson = JObject.FromObject(country);
+
+                    //jObject.Add(countryJson);
+                    jObject.Add(new JProperty("Country", countryJson));
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
@@ -183,39 +198,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        //Old Flow
         [AllowAnonymous]
         [HttpPost]
         [Route("forgotpassword")]
-        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        public async Task<IServiceResponse<bool>> ForgotPassword(ForgotPasswordDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                if (string.IsNullOrWhiteSpace(user.Email))
-                {
-                    throw new GenericException("Email Field is Null", $"{(int)HttpStatusCode.BadRequest}");
-                }
-                string password = await _portalService.Generate(6);
-                var User = await _portalService.ForgotPassword(user.Email, password);
-
-                if (User.Succeeded)
-                {
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = password,
-                        UserEmail = user.Email
-                    };
-
-                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                }
-                else
-                {
-                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
-                }
+                var result = await _portalService.ForgotPasswordV3(user);
 
                 return new ServiceResponse<bool>
                 {
                     Code = $"{(int)HttpStatusCode.OK}",
-                    Object = true
+                    Object = result
                 };
             });
         }
@@ -236,6 +232,118 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getenterprisepartnersasset")]
+        public async Task<IServiceResponse<IEnumerable<AssetDTO>>> GetFleetAttachedToEnterprisePartner()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var assets = await _fleetPartnerService.GetFleetAttachedToEnterprisePartner();
+                return new ServiceResponse<IEnumerable<AssetDTO>>
+                {
+                    Object = assets
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerfleetbyid/{fleetid:int}")]
+        public async Task<IServiceResponse<AssetDetailsDTO>> GetFleetAttachedToEnterprisePartnerById(int fleetid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var assetDetails = await _fleetPartnerService.GetFleetAttachedToEnterprisePartnerById(fleetid);
+                return new ServiceResponse<AssetDetailsDTO>
+                {
+                    Object = assetDetails
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerfleettrips/{fleetid:int}")]
+        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetFleetTrips(int fleetid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var fleetTrips = await _fleetPartnerService.GetFleetTrips(fleetid);
+                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                {
+                    Object = fleetTrips
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerwalletbalance")]
+        public async Task<IServiceResponse<FleetPartnerWalletDTO>> GetPartnerWalletBalance()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _fleetPartnerService.GetPartnerWalletBalance();
+                return new ServiceResponse<FleetPartnerWalletDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerfleettrips")]
+        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetPartnersFleetTrips()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var fleetTrips = await _fleetPartnerService.GetFleetTripsByPartner();
+                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                {
+                    Object = fleetTrips
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnertransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetFleetPartnerTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnercredittransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersCreditTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetFleetPartnerCreditTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpartnerdebittransactionhistory")]
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersDebitTransactionHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _fleetPartnerService.GetFleetPartnerDebitTransaction();
+                return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
+                {
+                    Object = transactions
                 };
             });
         }

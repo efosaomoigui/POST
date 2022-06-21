@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.IRepositories.Partnership;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -51,7 +52,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  IsVerified = vehicle.IsVerified,
                                  PartnerName = partner.FirstName + " " + partner.LastName,
                                  PartnerPhoneNumber = partner.PhoneNumber,
-                                 PartnerFirstName =  partner.FirstName,
+                                 PartnerFirstName = partner.FirstName,
                                  PartnerLastName = partner.LastName,
                                  EnterprisePartner = _context.FleetPartner.Where(c => c.FleetPartnerCode == fleetPartnerCode).Select(x => new FleetPartnerDTO
                                  {
@@ -71,7 +72,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return await Task.FromResult(fleetCount);
         }
 
-       
+
         public Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner()
         {
             var partners = _context.Partners.AsQueryable().Where(s => s.FleetPartnerCode == null && s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
@@ -79,13 +80,102 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var partnerDto = from partner in partners
                              select new PartnerDTO
                              {
-                                PartnerName = partner.PartnerName,
-                                FirstName = partner.FirstName,
-                                LastName = partner.LastName,
-                                PartnerCode = partner.PartnerCode
+                                 PartnerName = partner.PartnerName,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 PartnerCode = partner.PartnerCode
                              };
 
             return Task.FromResult(partnerDto.ToList());
+        }
+
+        //Get List of Fleet 
+        public Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode)
+        {
+            var partners = _context.Users.Where(s => s.UserChannelCode == fleetPartnerCode);
+
+            var assetDto = from partner in partners
+                           join fleet in _context.Fleet on partner.Id equals fleet.EnterprisePartnerId
+                           select new AssetDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber.ToLower() == fleet.RegistrationNumber.ToLower()).Count(),
+                           };
+            return Task.FromResult(assetDto.ToList());
+        }
+
+        //To be completed
+        public Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int  fleetId)
+        {
+            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+
+            var assetDto = from fleet in fleets
+                           join fleetTrips in _context.FleetTrip on fleet.RegistrationNumber equals fleetTrips.FleetRegistrationNumber
+                           select new AssetDetailsDTO
+                           {
+                               Id = fleet.FleetId,
+                               Name = fleet.FleetName,
+                               RegistrationNumber = fleet.RegistrationNumber,
+                               Status = fleet.Status ? "Active" : "Idle",
+                               NumberOfTrips = _context.FleetTrip.Where(x => x.FleetRegistrationNumber == fleet.RegistrationNumber).Count(),
+                               Captain = _context.Partners.Where(x => x.PartnerId == fleet.PartnerId).Select(x => new CaptainDTO
+                               {
+                                   Code = x.PartnerCode,
+                                   FirstName = x.FirstName,
+                                   LastName = x.LastName
+                               }).FirstOrDefault()
+                               //Current location of the vehicle
+                               //Captain
+                               //Fleet Manager assigned to the vehicle
+                           };
+            return Task.FromResult(assetDto.FirstOrDefault());
+        }
+
+        //Get fleet trips by fleet id
+        public Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        {
+            //To be completed
+            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+
+            var assetTripsDto = from fleet in fleets
+                                join fleetTrip in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrip.FleetRegistrationNumber.ToLower()
+                                join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
+                                join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
+                                select new FleetTripDTO
+                                {
+                                    DateCreated = fleetTrip.DateCreated,
+                                    TripAmount = fleetTrip.TripAmount,
+                                    Status = fleetTrip.Status,
+                                    DepartureCity = departStation.StationName,
+                                    DestinationCity = destStation.StationName
+                                };
+
+            return Task.FromResult(assetTripsDto.ToList());
+        }
+
+        //Get fleet trips by fleet id
+        public Task<List<FleetTripDTO>> GetFleetTripsByPartner(string partnercode)
+        {
+            //To be completed
+            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
+
+            var assetTripsDto = from user in users
+                                join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
+                                join fleetTrip in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrip.FleetRegistrationNumber.ToLower()
+                                join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
+                                join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
+                                select new FleetTripDTO
+                                {
+                                    DateCreated = fleetTrip.DateCreated,
+                                    TripAmount = fleetTrip.TripAmount,
+                                    Status = fleetTrip.Status,
+                                    DepartureCity = departStation.StationName,
+                                    DestinationCity = destStation.StationName
+                                };
+
+            return Task.FromResult(assetTripsDto.ToList());
         }
     }
 }

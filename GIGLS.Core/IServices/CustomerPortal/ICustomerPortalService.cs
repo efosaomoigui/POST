@@ -276,6 +276,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task LogContentType(LogEntryDTO log);
         Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
         Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipments);
+        Task<bool> ForgotPasswordV3(ForgotPasswordDTO user);
         Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId);
         Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload);
     }

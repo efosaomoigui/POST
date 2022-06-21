@@ -1,0 +1,129 @@
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IRepositories;
+using GIGLS.Infrastructure.Persistence.Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GIGLS.Infrastructure.Persistence.Repositories
+{
+    public class FleetPartnerTransactionRepository : Repository<FleetPartnerTransaction, GIGLSContext>, IFleetPartnerTransactionRepository
+    {
+        private GIGLSContext _context;
+        public FleetPartnerTransactionRepository(GIGLSContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransaction(string partnercode)
+        {
+            //To be completed
+            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
+
+            var transactionsDto = from user in users
+                                join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
+                                join trans in _context.FleetPartnerTransaction on fleet.RegistrationNumber.ToLower() equals trans.FleetRegistrationNumber.ToLower()
+                                select new FleetPartnerTransactionDTO
+                                {
+                                    CreditDebitType = trans.CreditDebitType,
+                                    Amount = trans.Amount,
+                                    Description = trans.Description
+                                };
+
+            var list = new List<FleetPartnerTransaction>
+            {
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            },
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            }
+
+            };
+            //return Task.FromResult(listAssetTripssDemo.ToList());
+            return Task.FromResult(transactionsDto.ToList());
+        }
+
+        public Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction(string partnercode)
+        {
+            //To be completed
+            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
+
+            var transactionsDto = from user in users
+                                  join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
+                                  join trans in _context.FleetPartnerTransaction on fleet.RegistrationNumber.ToLower() equals trans.FleetRegistrationNumber.ToLower()
+                                  where trans.CreditDebitType == CreditDebitType.Credit
+                                  select new FleetPartnerTransactionDTO
+                                  {
+                                      CreditDebitType = trans.CreditDebitType,
+                                      Amount = trans.Amount,
+                                      Description = trans.Description
+                                  };
+
+            var list = new List<FleetPartnerTransaction>
+            {
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            },
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            }
+
+            };
+            //return Task.FromResult(listAssetTripssDemo.ToList());
+            return Task.FromResult(transactionsDto.ToList());
+        }
+
+        public Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerDebitTransaction(string partnercode)
+        {
+            //To be completed
+            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
+
+            var transactionsDto = from user in users
+                                  join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
+                                  join trans in _context.FleetPartnerTransaction on fleet.RegistrationNumber.ToLower() equals trans.FleetRegistrationNumber.ToLower()
+                                  where trans.CreditDebitType == CreditDebitType.Debit
+                                  select new FleetPartnerTransactionDTO
+                                  {
+                                      CreditDebitType = trans.CreditDebitType,
+                                      Amount = trans.Amount,
+                                      Description = trans.Description
+                                  };
+
+            var list = new List<FleetPartnerTransaction>
+            {
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            },
+                new FleetPartnerTransaction
+            {
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = 2000.00M,
+                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
+            }
+
+            };
+            //return Task.FromResult(listAssetTripssDemo.ToList());
+            return Task.FromResult(transactionsDto.ToList());
+        }
+    }
+}

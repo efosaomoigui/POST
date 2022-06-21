@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.Enums
 {
-    public enum VehicleFixedStatus
+    public enum FleetTripStatus
     {
-        Fixed,
-        Variable
+        Pending,
+        Completed
     }
 }
