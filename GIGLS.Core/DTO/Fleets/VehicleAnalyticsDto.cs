@@ -11,8 +11,8 @@ namespace GIGLS.Core.DTO.Fleets
         public string VehicleCurrentLocation { get; set; }
         public string VehicleAssignedCaptain { get; set; }
         public int TotalNumberOfTrip { get; set; }
-        public decimal TotalRevenueGenerated { get; set; }
-        public decimal TotalExpenses { get; set; }
+        public string TotalRevenueGenerated { get; set; }
+        public string TotalExpenses { get; set; }
         public int VehicleAge { get; set; }
     }
 }

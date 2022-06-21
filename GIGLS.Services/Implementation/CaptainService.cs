@@ -605,14 +605,17 @@ namespace GIGLS.Services.Implementation
 
                     if (vehicle != null)
                     {
+                        var formatter = new System.Globalization.CultureInfo("HA-LATN-NG");
+                        formatter.NumberFormat.CurrencySymbol = "₦";
+
                         return new VehicleAnalyticsDto
                         {
                             VehicleAge = vehicle.VehicleAge,
-                            TotalExpenses = fleetTrip.Sum(x => x.FuelCosts + x.DispatchAmount),
+                            TotalExpenses = fleetTrip.Sum(x => x.FuelCosts + x.DispatchAmount).ToString("c", formatter),
                             VehicleAssignedCaptain = vehicle.AssignedCaptain,
                             VehicleCurrentLocation = "",
                             TotalNumberOfTrip = fleetTrip.Count(),
-                            TotalRevenueGenerated = fleetTrip.Sum(x => x.TripAmount),
+                            TotalRevenueGenerated = fleetTrip.Sum(x => x.TripAmount).ToString("c", formatter),
                         };
                     }
                     throw new GenericException($"Vehicle with registration number: {vehicleNumber} does not exist");
