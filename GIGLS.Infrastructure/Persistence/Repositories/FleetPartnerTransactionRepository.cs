@@ -31,26 +31,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                 {
                                     CreditDebitType = trans.CreditDebitType,
                                     Amount = trans.Amount,
-                                    Description = trans.Description
+                                    Description = trans.Description,
+                                    DateOfEntry = trans.DateOfEntry
                                 };
 
-            var list = new List<FleetPartnerTransaction>
-            {
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            },
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            }
-
-            };
-            //return Task.FromResult(listAssetTripssDemo.ToList());
             return Task.FromResult(transactionsDto.ToList());
         }
 
@@ -67,26 +51,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   {
                                       CreditDebitType = trans.CreditDebitType,
                                       Amount = trans.Amount,
-                                      Description = trans.Description
+                                      Description = trans.Description,
+                                      DateOfEntry = trans.DateOfEntry
                                   };
 
-            var list = new List<FleetPartnerTransaction>
-            {
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            },
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            }
-
-            };
-            //return Task.FromResult(listAssetTripssDemo.ToList());
             return Task.FromResult(transactionsDto.ToList());
         }
 
@@ -103,26 +71,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                   {
                                       CreditDebitType = trans.CreditDebitType,
                                       Amount = trans.Amount,
-                                      Description = trans.Description
+                                      Description = trans.Description,
+                                      DateOfEntry = trans.DateOfEntry
                                   };
 
-            var list = new List<FleetPartnerTransaction>
-            {
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            },
-                new FleetPartnerTransaction
-            {
-                CreditDebitType = CreditDebitType.Credit,
-                Amount = 2000.00M,
-                Description = $"Trip amount for XRT-001-GVC on {DateTime.Now.ToString()}"
-            }
-
-            };
-            //return Task.FromResult(listAssetTripssDemo.ToList());
             return Task.FromResult(transactionsDto.ToList());
         }
     }
