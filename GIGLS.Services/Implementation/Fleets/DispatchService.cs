@@ -298,107 +298,103 @@ namespace GIGLS.Services.Implementation.Fleets
                 //Scan movement manifest waybill
                 await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
 
-                //Get fleet Id
-                var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower()).FirstOrDefault();
-
-                if (fleetDto == null)
-                    throw new GenericException("Fleet details not found");
-
-                //Get movement manifest Id
-                var movementManifestNumber = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => x.MovementManifestCode == newDispatch.MovementManifestNumber).FirstOrDefault();
-
-                if (movementManifestNumber == null)
-                    throw new GenericException("Movement manifest details not found");
-
-                //Write to Fleet trip table
-                var fleetTrip = new FleetTrip
-                {
-                    MovementManifestId = movementManifestNumber.MovementManifestNumberId,
-                    DispatchAmount = newDispatch.Amount,
-                    DestinationStationId = newDispatch.DestinationId,
-                    DepartureStationId = newDispatch.DepartureId,
-                    FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                    CaptainId = newDispatch.DriverDetail,
-                    DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
-                    DestinationServiceCenterId = newDispatch.DestinationServiceCenterId,
-                    TripAmount = 0.00M,
-                    FleetId = fleetDto.FleetId,
-                    DepartureTime = DateTime.Now,
-                    ArrivalTime = DateTime.Now,
-                    DateCreated = DateTime.Now,
-                    DateModified = DateTime.Now,
-                };
-
-                
-
-                //Write to FleetTransaction table
-                //Check if fleet type (fix or variable)
-                var fleetType = await _uow.Fleet.ExistAsync(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower() && x.IsFixed == VehicleFixedStatus.Variable);
-
-                if (fleetType)
-                {
-                    var fleetTripDto = Mapper.Map<FleetTripDTO>(fleetTrip);
-
-                    //Get fleet trip amount
-                    var tripAmount = await _fleetPartnerService.GetVariableFleetTripAmount(fleetTripDto);
-
-                    //Set Fleet trip amount generated
-                    fleetTrip.TripAmount = tripAmount;
-
-
-                    //Add fleet trip amount to transaction table
-                    var tripTransaction = new FleetPartnerTransaction
-                    {
-                        MovementManifestNumber = newDispatch.MovementManifestNumber,
-                        CreditDebitType = CreditDebitType.Credit,
-                        Amount = tripAmount,
-                        PaymentType = PaymentType.Wallet,
-                        PaymentTypeReference = $"Trip-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
-                        Description = $"Trip amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
-                        FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        //DateOfEntry = DateTime.UtcNow,
-                        IsSettled = false,
-                        FleetId = fleetDto.FleetId,
-                        DateCreated = DateTime.Now,
-                        DateModified = DateTime.Now,
-                        DateOfEntry = DateTime.Now
-                    };
-
-                    //Add fleet trip amount to transaction table
-                    _uow.FleetPartnerTransaction.Add(tripTransaction);
-                   // await _uow.CompleteAsync();
-
-                    var dispatchTransaction = new FleetPartnerTransaction
-                    {
-                        MovementManifestNumber = newDispatch.MovementManifestNumber,
-                        CreditDebitType = CreditDebitType.Debit,
-                        Amount = newDispatch.Amount,
-                        PaymentType = PaymentType.Wallet,
-                        PaymentTypeReference = $"Dispatch-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
-                        Description = $"Dispatch amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
-                        FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        //DateOfEntry = DateTime.UtcNow,
-                        IsSettled = false,
-                        FleetId = fleetDto.FleetId,
-                        DateCreated = DateTime.Now,
-                        DateModified = DateTime.Now,
-                        DateOfEntry = DateTime.Now
-                    };
-
-                    //Add dispatch amount to fleet transaction 
-                    _uow.FleetPartnerTransaction.Add(dispatchTransaction);
-                   // await _uow.CompleteAsync();
-                }
-
-                //Add fleet trip
-                _uow.FleetTrip.Add(fleetTrip);
-                //await _uow.CompleteAsync();
+                await AddToFleetTripAndPartnerTransactions(newDispatch);
                 // commit transaction
                 await _uow.CompleteAsync();
                 return new { Id = dispatchId };
             }
         }
 
+        private async Task AddToFleetTripAndPartnerTransactions(MovementDispatch newDispatch)
+        {
+            //Get fleet Id
+            var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower()).FirstOrDefault();
+
+            if (fleetDto == null)
+                throw new GenericException("Fleet details not found");
+
+            //Get movement manifest Id
+            var movementManifestNumber = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => x.MovementManifestCode == newDispatch.MovementManifestNumber).FirstOrDefault();
+
+            if (movementManifestNumber == null)
+                throw new GenericException("Movement manifest details not found");
+
+            //Write to Fleet trip table
+            var fleetTrip = new FleetTrip
+            {
+                MovementManifestId = movementManifestNumber.MovementManifestNumberId,
+                DispatchAmount = newDispatch.Amount,
+                DestinationStationId = newDispatch.DestinationId,
+                DepartureStationId = newDispatch.DepartureId,
+                FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                CaptainId = newDispatch.DriverDetail,
+                DepartureServiceCenterId = newDispatch.DepartureServiceCenterId,
+                DestinationServiceCenterId = newDispatch.DestinationServiceCenterId,
+                TripAmount = 0.00M,
+                FleetId = fleetDto.FleetId,
+                DepartureTime = DateTime.Now,
+                ArrivalTime = DateTime.Now,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now,
+            };
+
+            //Write to FleetTransaction table
+            //Check if fleet type (fix or variable)
+            var fleetType = await _uow.Fleet.ExistAsync(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower() && x.IsFixed == VehicleFixedStatus.Variable);
+
+            if (fleetType)
+            {
+                var fleetTripDto = Mapper.Map<FleetTripDTO>(fleetTrip);
+
+                //Get fleet trip amount
+                var tripAmount = await _fleetPartnerService.GetVariableFleetTripAmount(fleetTripDto);
+
+                //Set Fleet trip amount generated
+                fleetTrip.TripAmount = tripAmount;
+
+                //Add fleet trip amount to transaction table
+                var tripTransaction = new FleetPartnerTransaction
+                {
+                    MovementManifestNumber = newDispatch.MovementManifestNumber,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Amount = tripAmount,
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = $"Trip-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
+                    Description = $"Trip amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
+                    FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                    IsSettled = false,
+                    FleetId = fleetDto.FleetId,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    DateOfEntry = DateTime.Now
+                };
+
+                //Add fleet trip amount to transaction table
+                _uow.FleetPartnerTransaction.Add(tripTransaction);
+
+                var dispatchTransaction = new FleetPartnerTransaction
+                {
+                    MovementManifestNumber = newDispatch.MovementManifestNumber,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Amount = newDispatch.Amount,
+                    PaymentType = PaymentType.Wallet,
+                    PaymentTypeReference = $"Dispatch-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
+                    Description = $"Dispatch amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
+                    FleetRegistrationNumber = newDispatch.RegistrationNumber,
+                    IsSettled = false,
+                    FleetId = fleetDto.FleetId,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    DateOfEntry = DateTime.Now
+                };
+
+                //Add dispatch amount to fleet transaction 
+                _uow.FleetPartnerTransaction.Add(dispatchTransaction);
+            }
+
+            //Add fleet trip
+            _uow.FleetTrip.Add(fleetTrip);
+        }
 
         /// <summary>
         /// This method ensures that all waybills attached to the manifestNumber 
