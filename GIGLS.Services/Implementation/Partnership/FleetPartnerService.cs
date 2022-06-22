@@ -498,9 +498,12 @@ namespace GIGLS.Services.Implementation.Partnership
                 if (fleet.IsFixed == VehicleFixedStatus.Variable)
                 {
                     //Get pricing for Variable fleet
+                    //Get capacity
+
+                    var fleetCapacity = FormatVehicleCapacity(fleet);
 
                     //Get Fleet haulage details
-                    var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleet.Capacity).FirstOrDefault();
+                    var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleetCapacity).FirstOrDefault();
 
                     if (haulage == null)
                         throw new GenericException("Fleet haulage details not found");
@@ -536,6 +539,36 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw;
             }
 
+        }
+
+        private int FormatVehicleCapacity(Fleet fleet)
+        {
+            var formattedCapacity = 0;
+            if (fleet.Capacity > 0 && fleet.Capacity <= 5 || fleet.Capacity < 10)
+            {
+                formattedCapacity = 5;
+            }
+            else if (fleet.Capacity >= 10 && fleet.Capacity < 15)
+            {
+                formattedCapacity = 10;
+            }
+            else if (fleet.Capacity >= 15 || fleet.Capacity < 20)
+            {
+                formattedCapacity = 15;
+            }
+            else if (fleet.Capacity >= 20 || fleet.Capacity < 25)
+            {
+                formattedCapacity = 20;
+            }
+            else if (fleet.Capacity >= 25 || fleet.Capacity < 30)
+            {
+                formattedCapacity = 25;
+            }
+            else
+            {
+                formattedCapacity = 30;
+            }
+            return formattedCapacity;
         }
 
         private async Task<decimal> CalculateFixFleetTripAmount(string registrationNumber)
