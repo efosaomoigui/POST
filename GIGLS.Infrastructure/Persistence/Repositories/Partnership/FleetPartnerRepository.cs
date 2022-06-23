@@ -163,6 +163,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                 join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
                                 join user in _context.Users on partnercode equals user.UserChannelCode
                                 join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
+                                where fleet.FleetId == fleetTrip.FleetId
                                 select new FleetTripDTO
                                 {
                                     DateCreated = fleetTrip.DateCreated,
