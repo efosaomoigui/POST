@@ -4802,42 +4802,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 return withdrawResponse;
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-            ////var withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
-            //if (withdrawResponse.status)
-            //{
-            //    await Task.Delay(15000);
-            //    transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-            //    var res = await _codWalletService.StellasWithdrawal(withrawObj);
-
-            //    //log to transferlog table
-            //    var transferLog = new CODTransferLog()
-            //    {
-            //        CustomerCode = codWallet.CustomerCode,
-            //        Amount = amount,
-            //        OriginatingBankAccount = codWallet.AccountNo,
-            //        OriginatingBankName = "Stellas",
-            //        DestinationBankAccount = transferDTO.ReceiverAccountNumber,
-            //        DestinationBankName = transferDTO.ReceiverBankName,
-            //        StatusCode = res.status.ToString(),
-            //        StatusDescription = res.message
-            //    };
-            //    _uow.CODTransferLog.Add(transferLog);
-            //    await _uow.CompleteAsync();
-            //    return res;
-            //}
-
             return res;
         }
 
