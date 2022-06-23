@@ -313,6 +313,9 @@ namespace GIGLS.Services.Implementation.Partnership
         public async Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
         {
             var asset = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartnerById(fleetId);
+            if (asset == null)
+                throw new GenericException("Fleet details not found.");
+            
             return asset;
         }
 
