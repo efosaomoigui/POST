@@ -112,7 +112,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
 
             var assetDto = from fleet in fleets
-                           join fleetTrips in _context.FleetTrip on fleet.RegistrationNumber equals fleetTrips.FleetRegistrationNumber
                            select new AssetDetailsDTO
                            {
                                Id = fleet.FleetId,
@@ -137,12 +136,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         public Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
         {
             //To be completed
-            var fleets = _context.Fleet.Where(x => x.FleetId == fleetId);
+            var fleetTrips = _context.FleetTrip;
 
-            var assetTripsDto = from fleet in fleets
-                                join fleetTrip in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrip.FleetRegistrationNumber.ToLower()
+            var assetTripsDto = from fleetTrip in fleetTrips
                                 join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
                                 join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
+                                where fleetTrip.FleetId == fleetId
                                 select new FleetTripDTO
                                 {
                                     DateCreated = fleetTrip.DateCreated,
@@ -159,13 +158,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         public Task<List<FleetTripDTO>> GetFleetTripsByPartner(string partnercode)
         {
             //To be completed
-            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
-
-            var assetTripsDto = from user in users
-                                join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
-                                join fleetTrip in _context.FleetTrip on fleet.RegistrationNumber.ToLower() equals fleetTrip.FleetRegistrationNumber.ToLower()
+            var assetTripsDto = from fleetTrip in _context.FleetTrip
                                 join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
                                 join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
+                                join user in _context.Users on partnercode equals user.UserChannelCode
+                                join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
                                 select new FleetTripDTO
                                 {
                                     DateCreated = fleetTrip.DateCreated,
