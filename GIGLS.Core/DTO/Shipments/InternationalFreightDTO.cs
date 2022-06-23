@@ -13,7 +13,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverAddress { get; set; }
         [Required]
         public string ReceiverCity { get; set; }
-        [Required]
         public string ReceiverState { get; set; }
         [Required]
         public string ReceiverCountry { get; set; }
@@ -59,7 +58,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverAddress { get; set; }
         [Required]
         public string ReceiverCity { get; set; }
-        [Required]
         public string ReceiverState { get; set; }
         [Required]
         public string ReceiverCountry { get; set; }
