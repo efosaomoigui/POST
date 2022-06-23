@@ -3138,5 +3138,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPut]
+        [Route("deleteaccount")]
+        public async Task<IServiceResponse<bool>> DeleteCustomerAccount(DeleteAccountDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+               await _portalService.DeleteCustomerAccount(payload);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

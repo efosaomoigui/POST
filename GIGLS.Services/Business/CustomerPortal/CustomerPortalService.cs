@@ -431,7 +431,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        
+
 
         public async Task<GatewayCodeResponse> GetGatewayCode()
         {
@@ -4632,7 +4632,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        public async Task<AllCODShipmentDTO>GetAllCODShipments(PaginationDTO dto)
+        public async Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
         {
             try
             {
@@ -4728,7 +4728,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             var userId = await _userService.GetCurrentUserId();
             var codWallet = await _uow.CODWallet.GetAsync(x => x.UserId == userId);
-            if(codWallet is null)
+            if (codWallet is null)
             {
                 throw new GenericException("user does not have a COD wallet");
             }
@@ -4760,12 +4760,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var withrawObj = new StellasWithdrawalDTO()
             {
-              Amount = transferDTO.Amount,
-              RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
-              Narration = transferDTO.Narration,
-              PayerAccountNumber = codWallet.AccountNo
+                Amount = transferDTO.Amount,
+                RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
+                Narration = transferDTO.Narration,
+                PayerAccountNumber = codWallet.AccountNo
             };
-            var  withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
+            var withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
             if (withdrawResponse.status)
             {
                 await Task.Delay(15000);
@@ -4957,10 +4957,22 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var codTransfer = Mapper.Map<GIGGOCODTransfer>(payload);
 
-             _uow.GIGGOCODTransferRepository.Add(codTransfer);
+            _uow.GIGGOCODTransferRepository.Add(codTransfer);
             await _uow.CompleteAsync();
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
+        }
+
+        public async Task DeleteCustomerAccount(DeleteAccountDTO payload)
+        {
+            if (payload == null)
+                throw new GenericException("Invalid user details.", $"{(int)HttpStatusCode.NotFound}");
+
+            if (!string.IsNullOrEmpty(payload.CustomerCode))
+            {
+                payload.CustomerCode = payload.CustomerCode.Trim();
+            }
+            await _companyService.DeleteCustomerAccount(payload.CustomerCode);
         }
     }
 }
