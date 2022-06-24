@@ -538,6 +538,8 @@ namespace GIGLS.Services.Implementation.Utility
         {
             //get all the manifest in movemanifest if movemanifest exist and group by destination centreid
             var userId = await _userService.GetCurrentUserId();
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            int deptCentreID = serviceCenters[0];
             var movemanifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movemanifestNo);
             if (movemanifest != null)
             {
@@ -568,11 +570,11 @@ namespace GIGLS.Services.Implementation.Utility
                             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
                             if (existingManifest is null)
                             {
-                                await NewMovementManifest(manifest, centre,userId, movemanifestNo);
+                                await NewMovementManifest(manifest, centre,userId, movemanifestNo,deptCentreID);
                             }
                             else
                             {
-                                await ExistingMovementManifest(existingManifest,manifest,centre,userId);
+                                await ExistingMovementManifest(existingManifest,manifest,centre,userId, deptCentreID);
                             }
                         }
                     }
@@ -582,7 +584,7 @@ namespace GIGLS.Services.Implementation.Utility
         }
 
 
-        private async Task NewMovementManifest(Manifest manifest, ServiceCentre destServiceCentre, string userId,string originalMovemanifestNo)
+        private async Task NewMovementManifest(Manifest manifest, ServiceCentre destServiceCentre, string userId,string originalMovemanifestNo,int deptCentreID)
         {
             var moveManifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MovementManifestNumber, destServiceCentre.Code);
             var driverCode = await GenerateDeliveryCode();
@@ -603,7 +605,7 @@ namespace GIGLS.Services.Implementation.Utility
                 MovementManifestCode = moveManifestCode,
                 MovementStatus = MovementStatus.InProgress,
                 UserId = userId,
-                DepartureServiceCentreId = manifest.DepartureServiceCentreId,
+                DepartureServiceCentreId = deptCentreID,
                 DestinationServiceCentreId = manifest.DestinationServiceCentreId,
                 DriverCode = driverCode,
                 DestinationServiceCentreCode = destServiceCentreCode,
@@ -613,7 +615,7 @@ namespace GIGLS.Services.Implementation.Utility
             _uow.MovementManifestNumber.Add(movemanifest);
         }
 
-        private async Task ExistingMovementManifest(MovementManifestNumber movementManifestNumber, Manifest manifest, ServiceCentre destServiceCentre, string userId)
+        private async Task ExistingMovementManifest(MovementManifestNumber movementManifestNumber, Manifest manifest, ServiceCentre destServiceCentre, string userId,int deptCentreID)
         {
             var moveManifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movementManifestNumber.MovementManifestCode);
             var driverCode = await GenerateDeliveryCode();
