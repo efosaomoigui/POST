@@ -30,9 +30,9 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<VehicleTypeDTO>> GetVerifiedPartners();
         Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner();
         Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId);
-        Task<List<FleetTripDTO>> GetFleetTrips(int fleetId);
+        Task<List<AssetTripDTO>> GetFleetTrips(int fleetId);
         Task<FleetPartnerWalletDTO> GetPartnerWalletBalance();
-        Task<List<FleetTripDTO>> GetFleetTripsByPartner();
+        Task<List<AssetTripDTO>> GetFleetTripsByPartner();
 
         Task<decimal> GetVariableFleetTripAmount(FleetTripDTO fleetTrip);
         Task<decimal> GetFixFleetTripAmount(string registrationNumber);

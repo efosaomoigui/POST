@@ -133,7 +133,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         }
 
         //Get fleet trips by fleet id
-        public Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        public Task<List<AssetTripDTO>> GetFleetTrips(int fleetId)
         {
             //To be completed
             var fleetTrips = _context.FleetTrip;
@@ -142,7 +142,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                 join departStation in _context.Station on fleetTrip.DepartureStationId equals departStation.StationId
                                 join destStation in _context.Station on fleetTrip.DestinationServiceCenterId equals destStation.StationId
                                 where fleetTrip.FleetId == fleetId
-                                select new FleetTripDTO
+                                select new AssetTripDTO
                                 {
                                     DateCreated = fleetTrip.DateCreated,
                                     TripAmount = fleetTrip.TripAmount,
@@ -155,7 +155,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         }
 
         //Get fleet trips by fleet id
-        public Task<List<FleetTripDTO>> GetFleetTripsByPartner(string partnercode)
+        public Task<List<AssetTripDTO>> GetFleetTripsByPartner(string partnercode)
         {
             //To be completed
             var assetTripsDto = from fleetTrip in _context.FleetTrip
@@ -164,7 +164,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                 join user in _context.Users on partnercode equals user.UserChannelCode
                                 join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
                                 where fleet.FleetId == fleetTrip.FleetId
-                                select new FleetTripDTO
+                                select new AssetTripDTO
                                 {
                                     DateCreated = fleetTrip.DateCreated,
                                     TripAmount = fleetTrip.TripAmount,

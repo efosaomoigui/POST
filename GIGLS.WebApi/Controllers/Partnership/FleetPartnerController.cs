@@ -266,12 +266,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [HttpGet]
         [Route("getpartnerfleettrips/{fleetid:int}")]
-        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetFleetTrips(int fleetid)
+        public async Task<IServiceResponse<IEnumerable<AssetTripDTO>>> GetFleetTrips(int fleetid)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var fleetTrips = await _fleetPartnerService.GetFleetTrips(fleetid);
-                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                return new ServiceResponse<IEnumerable<AssetTripDTO>>
                 {
                     Object = fleetTrips
                 };
@@ -294,12 +294,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [HttpGet]
         [Route("getpartnerfleettrips")]
-        public async Task<IServiceResponse<IEnumerable<FleetTripDTO>>> GetPartnersFleetTrips()
+        public async Task<IServiceResponse<IEnumerable<AssetTripDTO>>> GetPartnersFleetTrips()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var fleetTrips = await _fleetPartnerService.GetFleetTripsByPartner();
-                return new ServiceResponse<IEnumerable<FleetTripDTO>>
+                return new ServiceResponse<IEnumerable<AssetTripDTO>>
                 {
                     Object = fleetTrips
                 };

@@ -319,7 +319,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return asset;
         }
 
-        public async Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        public async Task<List<AssetTripDTO>> GetFleetTrips(int fleetId)
         {
             var fleetTrips = await _uow.FleetPartner.GetFleetTrips(fleetId);
             return fleetTrips;
@@ -463,7 +463,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return price;
         }
 
-        public async Task<List<FleetTripDTO>> GetFleetTripsByPartner()
+        public async Task<List<AssetTripDTO>> GetFleetTripsByPartner()
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
