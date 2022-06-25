@@ -31,5 +31,6 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<List<CompanyDTO>> GetAssignedCustomers(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetAssignedCustomersByCustomerRep(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompaniesByEmailOrCode(string searchParams);
+        Task<CompanyDTO> GetCompanyDetailsByEmail(string email);
     }
 }

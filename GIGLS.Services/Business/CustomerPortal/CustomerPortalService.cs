@@ -4765,13 +4765,26 @@ namespace GIGLS.Services.Business.CustomerPortal
               Narration = transferDTO.Narration,
               PayerAccountNumber = codWallet.AccountNo
             };
-            var  withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
-            if (withdrawResponse.status)
+
+            transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
+            var res = await _codWalletService.StellasWithdrawal(withrawObj);
+            var withdrwaLog = new CODTransferLog()
+            {
+                CustomerCode = codWallet.CustomerCode,
+                Amount = amount,
+                OriginatingBankAccount = codWallet.AccountNo,
+                OriginatingBankName = "Stellas",
+                DestinationBankAccount = transferDTO.ReceiverAccountNumber,
+                DestinationBankName = transferDTO.ReceiverBankName,
+                StatusCode = res.status.ToString(),
+                StatusDescription = res.message
+            };
+            _uow.CODTransferLog.Add(withdrwaLog);
+            await _uow.CompleteAsync();
+            if (res.status)
             {
                 await Task.Delay(15000);
-                transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                var res = await _codWalletService.StellasWithdrawal(withrawObj);
-
+                var withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
                 //log to transferlog table
                 var transferLog = new CODTransferLog()
                 {
@@ -4784,13 +4797,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                     StatusCode = res.status.ToString(),
                     StatusDescription = res.message
                 };
-                _uow.CODTransferLog.Add(transferLog);
+                _uow.CODTransferLog.Add(withdrwaLog);
                 await _uow.CompleteAsync();
-
-                return res;
+                return withdrawResponse;
             }
 
-            return withdrawResponse;
+            return res;
         }
 
         public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)

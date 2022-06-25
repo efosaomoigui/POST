@@ -1063,6 +1063,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("createshipment")]
         public async Task<IServiceResponse<object>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
+            if (String.IsNullOrEmpty(PreshipmentMobile.ReceiverState))
+            {
+                PreshipmentMobile.ReceiverState = PreshipmentMobile.ReceiverCountry;
+            }
             return await HandleApiOperationAsync(async () =>
             {
                 var PreshipMentMobile = await _portalService.AddPreShipmentMobile(PreshipmentMobile);
@@ -2362,6 +2366,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("internationalshipmentrate")]
         public async Task<IServiceResponse<List<TotalNetResult>>> InternationalshipmentRate(RateInternationalShipmentDTO rateDTO)
         {
+            if (String.IsNullOrEmpty(rateDTO.ReceiverState))
+            {
+                rateDTO.ReceiverState = rateDTO.ReceiverCountry;
+            }
             return await HandleApiOperationAsync(async () =>
             {
                 var shipment = await _portalService.GetInternationalshipmentRate(rateDTO);

@@ -18,7 +18,7 @@ namespace GIGL.GIGLS.Core.Domain
         public int FleetId { get; set; }
         public virtual Fleet Fleet { get; set; }
         
-        public int CaptainId { get; set; }
+        public string CaptainId { get; set; }
         public virtual User Captain { get; set; }
     }
 }

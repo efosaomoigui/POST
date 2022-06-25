@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.OnlinePayment;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
@@ -462,6 +463,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
                 }
                 return response;
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addmobilepickuprequest")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> AddPickupRequest(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentItem = await _portalService.AddMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = shipmentItem
+                };
             });
         }
 

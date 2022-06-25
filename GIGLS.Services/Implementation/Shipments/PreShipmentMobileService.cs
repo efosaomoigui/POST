@@ -576,6 +576,20 @@ namespace GIGLS.Services.Implementation.Shipments
                                 shipmentItems[i].InternationalShipmentItemCategory = InternationalShipmentItemCategory.NonDocument;
                             }
                         }
+                        if (shipment.CustomerDetails is null )
+                        {
+                            if (customer != null)
+                            {
+                                var custmerDetail = Mapper.Map<CustomerDTO>(customer);
+                                shipment.CustomerDetails = custmerDetail; 
+                            }
+                            else
+                            {
+                                var individualCust = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                                var custmerDetail = Mapper.Map<CustomerDTO>(individualCust);
+                                shipment.CustomerDetails = custmerDetail;
+                            }
+                        }
                         shipment.ShipmentItems = shipmentItems;
                         shipment.DeclarationOfValueCheck = shipment.ShipmentItems.Sum(x => x.Price);
                         shipment.ItemDetails = shipment.ShipmentItems[0].Description;
@@ -913,6 +927,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (newPreShipment.IsCashOnDelivery)
                     {
+
+                        //collect the cods and add to CashOnDeliveryRegisterAccount()
+                        var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                        {
+                            Amount = newPreShipment.CashOnDeliveryAmount ?? 0,
+                            CODStatusHistory = CODStatushistory.Created,
+                            Description = "Cod From Sales",
+                            ServiceCenterId = 0,
+                            Waybill = newPreShipment.Waybill,
+                            UserId = newPreShipment.UserId,
+                            DepartureServiceCenterId = preShipmentDTO.DepartureServiceCentreId,
+                            DestinationCountryId = newPreShipment.CountryId
+                        };
+                        _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+
+
                         newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
@@ -7944,7 +7974,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         mobileShipment.UserId = merchant.Id;
                         mobileShipment.ZoneMapping = preShipment.ZoneMapping;
-                        mobileShipment.CustomerCode = merchant.UserChannelCode;
+                        mobileShipment.CustomerCode = user.UserChannelCode;
                         mobileShipment.SenderLocation = preShipment.SenderLocation;
                     }
 
@@ -8054,6 +8084,30 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = item.Waybill,
                             SenderName = item.SenderName
                         };
+
+
+                        if (item.IsCashOnDelivery)
+                        {
+
+                            //collect the cods and add to CashOnDeliveryRegisterAccount()
+                            var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                            {
+                                Amount = item.CashOnDeliveryAmount ?? 0,
+                                CODStatusHistory = CODStatushistory.Created,
+                                Description = "Cod From Sales",
+                                ServiceCenterId = 0,
+                                Waybill = item.Waybill,
+                                UserId = item.UserId,
+                                DepartureServiceCenterId = 0,
+                                DestinationCountryId = item.CountryId
+                            };
+                            _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+
+
+                            item.CODDescription = "COD Initiated";
+                            item.CODStatus = CODMobileStatus.Initiated;
+                            item.CODStatusDate = DateTime.Now;
+                        }
 
 
                         //Pin Generation 

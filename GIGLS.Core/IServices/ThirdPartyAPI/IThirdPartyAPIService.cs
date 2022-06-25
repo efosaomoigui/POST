@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -59,5 +60,6 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<string> Decrypt();
         Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<object> CancelShipment(string Waybill);
+        Task<CompanyDTO> GetCompanyDetailsByEmail(string email);
     }
 }
