@@ -847,10 +847,10 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
-            if (movementCode != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
-            {
-              await  _autoManifestAndGroupingService.MapMoveManifest(movementCode.MovementManifestCode);
-            }
+            //if (movementCode != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+            //{
+            //  await  _autoManifestAndGroupingService.MapMoveManifest(movementCode.MovementManifestCode);
+            //}
         }
 
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
