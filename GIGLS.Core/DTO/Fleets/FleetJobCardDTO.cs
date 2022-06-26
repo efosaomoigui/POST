@@ -59,6 +59,7 @@ namespace GIGLS.Core.DTO.Fleets
         public string FleetManagerId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     public class NewJobCard

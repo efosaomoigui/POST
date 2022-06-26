@@ -273,5 +273,20 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        [HttpGet]
+        [Route("vehiclesanalytics/{vehiclenumber}")]
+        public async Task<IServiceResponse<object>> GetVehicleAnalytics(string vehiclenumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehicleAnalyticsAsync(vehiclenumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.DTO.Node;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
@@ -29,7 +31,7 @@ namespace GIGLS.Services.Implementation.Fleets
         private readonly ICaptainService _captainService;
         private readonly INodeService _nodeService;
 
-        public FleetDisputeMessageService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService, IPartnerService partnerService, IFleetPartnerService fleetPartnerService, IFleetService fleetService, ICaptainService captainService)
+        public FleetDisputeMessageService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService, IPartnerService partnerService, IFleetPartnerService fleetPartnerService, IFleetService fleetService, ICaptainService captainService, INodeService nodeService)
         {
             _uow = uow;
             _userService = userService;
@@ -37,6 +39,7 @@ namespace GIGLS.Services.Implementation.Fleets
             _fleetPartnerService = fleetPartnerService;
             _fleetService = fleetService;
             _captainService = captainService;
+            _nodeService = nodeService;
         }
 
         public async Task<bool> AddFleetDisputeMessageAsync(FleetDisputeMessageDto dto)
@@ -45,44 +48,47 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     if (!(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == dto.VehicleNumber.Trim().ToLower())))
                     {
                         throw new GenericException($"Fleet/Vehicle with Registration Number: {dto.VehicleNumber} does not exist!");
                     }
 
-                    var vehicleOwner = await _captainService.GetVehicleByRegistrationNumberAsync(dto.VehicleNumber);
+                    var fleet = _uow.Fleet.SingleOrDefault(x => x.RegistrationNumber.ToLower().Trim() == dto.VehicleNumber.ToLower().Trim());
+
+                    var vehicle = await _captainService.GetVehicleByRegistrationNumberAsync(dto.VehicleNumber);
                     var fleetDisputeMessage = new FleetDisputeMessage()
                     {
                         DateModified = DateTime.Now,
                         DateCreated = DateTime.Now,
                         DisputeMessage = dto.DisputeMessage,
                         VehicleNumber = dto.VehicleNumber,
-                        FleetOwnerId = vehicleOwner.VehicleOwnerId
+                        FleetOwnerId = vehicle.VehicleOwnerId
                     };
                     _uow.FleetDisputeMessage.Add(fleetDisputeMessage);
                     await _uow.CompleteAsync();
 
-                    var owner = await _userService.GetUserById(vehicleOwner.VehicleOwnerId);
+                    var vehicleOwner = await _userService.GetUserById(vehicle.VehicleOwnerId);
 
-                    // send mail
-                    var disputeMailDto = new FleetDisputeMessageMailDto()
+                    //send message for new open job card
+                    var messageDTO = new MessageDTO
                     {
-                        FleetOwnerEmail = owner.Email,
-                        DisputeMessage = dto.DisputeMessage,
-                        FleetManager = $"{currentUser.FirstName} {currentUser.LastName}",
-                        VehicleNumber = dto.VehicleNumber
+                        CustomerName = $"{vehicleOwner.FirstName} {vehicleOwner.LastName}",
+                        ToEmail = vehicleOwner.Email,
+                        To = vehicleOwner.Email,
+                        FleetEnterprisePartnerName = $"{vehicleOwner.FirstName} {vehicleOwner.LastName}",
+                        VehicleName = fleet.FleetName,
+                        VehicleNumber = dto.VehicleNumber,                        
+                        FleetOfficer = $"{currentUser.FirstName} {currentUser.LastName}",
+                        DateOfDispute = fleetDisputeMessage.DateCreated.ToShortDateString(),
+                        DisputeDetails = fleetDisputeMessage.DisputeMessage
                     };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.DMSGEMAIL, disputeMailDto);
+                    await _messageSenderService.SendEmailFleetDisputeMessageAsync(messageDTO);
 
                     // push notification
-                    var pushNotification = await _nodeService.PushNotificationsToEnterpriseAPI(new PushNotificationMessageDTO()
-                    {
-                        CustomerId = owner.Id,
-                        Title = "New Dispute Message",
-                        Message = $"Vehicle Number: {dto.VehicleNumber},\n Message: {dto.DisputeMessage},\n Created By: {currentUser.FirstName} {currentUser.LastName}"
-                    });
+                    var notificationResponse = await PushNewNotification(vehicleOwner.Id, "New Dispute Message Created", 
+                        $"Vehicle Number: {dto.VehicleNumber}, Dispute Details: {dto.DisputeMessage}, Created By: {currentUser.FirstName} {currentUser.LastName}");
 
                     return true;
                 }
@@ -100,7 +106,7 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 var currentUser = await GetCurrentUserRoleAsync();
 
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement")
+                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     var disputeMassages = _uow.FleetDisputeMessage.GetAll("FleetOwner").Select(x => new FleetDisputeMessageDto()
                     {
@@ -125,6 +131,24 @@ namespace GIGLS.Services.Implementation.Fleets
             var currentUser = await _userService.GetUserById(currentUserId);
 
             return currentUser;
+        }
+
+        private async Task<NewNodeResponse> PushNewNotification(string customerId, string title, string message)
+        {
+            NewNodeResponse notification = new NewNodeResponse();
+
+            if (!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(message))
+            {
+                //push notification 
+                var payload = new PushNotificationMessageDTO
+                {
+                    CustomerId = customerId,
+                    Title = title,
+                    Message = message
+                };
+                notification = await _nodeService.PushNotificationsToEnterpriseAPI(payload);
+            }
+            return notification;
         }
     }
 }

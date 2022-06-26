@@ -45,6 +45,7 @@ using GIGLS.Core.DTO.DHL;
 using GIGLS.Core.Domain.Archived;
 using GIGLS.Core.DTO.Stores;
 using Country = GIGLS.Core.Domain.Country;
+using GIGLS.Core.DTO.Captains;
 
 namespace GIGLS.Core
 {

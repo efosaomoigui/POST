@@ -136,6 +136,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var currentMonth = GetStartAndEndDayOfMonth();
 
                 var vehicle = await _context.Fleet.Where(x => x.IsDeleted == false && x.RegistrationNumber == regNum).FirstOrDefaultAsync();
+                if (vehicle == null)
+                {
+                    throw new GenericException($"Vehicle with registration number: {regNum} does not exist");
+                }
+
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == vehicle.EnterprisePartnerId);
                 var partner = await _context.Partners.FirstOrDefaultAsync(p => p.PartnerId == vehicle.PartnerId);
 
@@ -146,7 +151,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     AssignedCaptain = partner.PartnerName,
                     FleetName = vehicle.FleetName,
                     RegistrationNumber = vehicle.RegistrationNumber,
-                    VehicleOwner = $"{user.FirstName} {user.LastName}",
+                    VehicleOwner = user != null ? $"{user.FirstName} {user.LastName}" : "Null",
                     VehicleOwnerId = vehicle.EnterprisePartnerId,
                     VehicleAge = (int)( DateTime.Now - vehicle.DateCreated ).TotalDays,
                     Capacity = vehicle.Capacity,

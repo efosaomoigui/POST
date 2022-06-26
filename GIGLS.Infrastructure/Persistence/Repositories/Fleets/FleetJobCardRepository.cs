@@ -61,7 +61,28 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                 dto.EndDate = filter.Item2;
 
                 var query = _context.FleetJobCard.AsQueryable();
-                var fleetJobCards = await (from x in query 
+                var fleetJobCards = new List<FleetJobCardByDateDto>();
+
+                if (dto.IsAdmin)
+                {
+                    fleetJobCards = await (from x in query
+                                where x.IsDeleted == false
+                                        && x.VehicleNumber == dto.VehicleNumber
+                                        && x.DateCreated >= dto.StartDate
+                                        && x.DateCreated <= dto.EndDate
+                                select new FleetJobCardByDateDto()
+                                {
+                                    DateCreated = x.DateCreated,
+                                    Status = x.Status,
+                                    FleetJobCardId = x.FleetJobCardId,
+                                    VehicleNumber = x.VehicleNumber,
+                                    Amount = x.Amount,
+                                    VehiclePartToFix = x.VehiclePartToFix,
+                                }).OrderByDescending(x => x.DateCreated).ToListAsync();
+                    return fleetJobCards;
+                }
+
+                fleetJobCards = await (from x in query 
                     where x.IsDeleted == false 
                           && x.FleetManagerId == dto.FleetManagerId 
                           && x.VehicleNumber == dto.VehicleNumber 
@@ -92,7 +113,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                 var fleets = _context.FleetJobCard.Include("Fleet").Include("FleetOwner");
 
                 var fleetDto = from x in fleets
-                    where x.FleetManagerId == fleetManagerId && x.Status == FleetJobCardStatus.Open.ToString() && x.IsDeleted == false
+                    where x.Status == FleetJobCardStatus.Open.ToString() && x.IsDeleted == false
                     select new FleetJobCardDto()
                     {
                         FleetJobCardId = x.FleetJobCardId,
@@ -104,7 +125,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                         Amount = x.Amount,
                         VehicleNumber = x.VehicleNumber
                     };
-                return await Task.FromResult(fleetDto.OrderByDescending(x => x.DateCreated).ToList());
+                if(fleetManagerId == "Admin")
+                {
+                    return await Task.FromResult(fleetDto.OrderByDescending(x => x.DateCreated).ToList());
+                }
+                return await Task.FromResult(fleetDto.Where(x => x.FleetManagerId == fleetManagerId).OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
@@ -130,6 +155,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
         {
             try
             {
+                var fleetJobCards = new List<FleetJobCardByDateDto>();
+
                 //Get start date and end date for database query
                 var filterCriteria = new DashboardFilterCriteria { EndDate = dto.EndDate, StartDate = dto.StartDate };
                 var filter = filterCriteria.getStartDateAndEndDate();
@@ -137,7 +164,26 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                 dto.EndDate = filter.Item2;
 
                 var query = _context.FleetJobCard.AsQueryable();
-                var fleetJobCards = await (from x in query
+
+                if (dto.IsAdmin)
+                {
+                    fleetJobCards = await (from x in query
+                        where x.IsDeleted == false
+                                && x.DateCreated >= dto.StartDate
+                                && x.DateCreated <= dto.EndDate
+                        select new FleetJobCardByDateDto()
+                        {
+                            DateCreated = x.DateCreated,
+                            Status = x.Status,
+                            FleetJobCardId = x.FleetJobCardId,
+                            VehicleNumber = x.VehicleNumber,
+                            Amount = x.Amount,
+                            VehiclePartToFix = x.VehiclePartToFix,
+                        }).OrderByDescending(x => x.DateCreated).ToListAsync();
+                    return fleetJobCards;
+                }
+
+                fleetJobCards = await (from x in query
                     where x.IsDeleted == false
                           && x.FleetManagerId == dto.FleetManagerId
                           && x.DateCreated >= dto.StartDate
@@ -151,7 +197,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                         Amount = x.Amount,
                         VehiclePartToFix = x.VehiclePartToFix,
                     }).OrderByDescending(x => x.DateCreated).ToListAsync();
-
                 return fleetJobCards;
             }
             catch (Exception)
