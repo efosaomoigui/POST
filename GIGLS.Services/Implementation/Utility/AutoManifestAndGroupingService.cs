@@ -19,6 +19,9 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -36,6 +39,8 @@ namespace GIGLS.Services.Implementation.Utility
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
+
+        #region Automatic Manifesting and Grouping for Manifests Management
         public async Task MappingWaybillNumberToGroup(string waybill)
         {
             try
@@ -136,7 +141,6 @@ namespace GIGLS.Services.Implementation.Utility
             }
         }
 
-
         public async Task MappingWaybillNumberToGroupForBulk(string waybill)
         {
             try
@@ -235,8 +239,6 @@ namespace GIGLS.Services.Implementation.Utility
                 throw;
             }
         }
-
-
 
         private async Task NewGroupWaybillProcess(Shipment shipment, ServiceCentre deptServiceCentre, ServiceCentre destServiceCentre, string userId)
         {
@@ -527,6 +529,147 @@ namespace GIGLS.Services.Implementation.Utility
             _uow.GroupWaybillNumber.Add(newGroupWaybill);
             return newGroupWaybill;
         }
+
+        #endregion
+
+
+        #region Automatic Manifesting and Grouping for Move Manifests Management
+        public async Task MapMoveManifest(string movemanifestNo)
+        {
+            //get all the manifest in movemanifest if movemanifest exist and group by destination centreid
+            var userId = await _userService.GetCurrentUserId();
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            int deptCentreID = serviceCenters[0];
+            var movemanifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movemanifestNo);
+            if (movemanifest != null)
+            {
+                var manifestNoList = _uow.MovementManifestNumberMapping.GetAllAsQueryable().Where(x => x.MovementManifestCode == movemanifestNo).Select(x => x.ManifestNumber).ToList();
+                if (manifestNoList.Any())
+                {
+                    var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => manifestNoList.Contains(x.ManifestCode)).GroupBy(x => x.DestinationServiceCentreId).ToList();
+                    var destIDs = manifests.Select(x => x.Key);
+                    var alreadyExistingMoveManifests = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => destIDs.Contains(x.DestinationServiceCentreId) && x.IsAutomated && x.MovementStatus == MovementStatus.InProgress ).ToList();
+
+                    var destinationCentres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => destIDs.Contains(x.ServiceCentreId)).ToList();
+                    if (manifests.Any())
+                    {
+                        foreach (var item in manifests)
+                        {
+                            string manifestCode = item.FirstOrDefault().ManifestCode;
+                            int destID = item.Key;
+                            var manifestExist = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == movemanifestNo && x.ManifestNumber == manifestCode && x.IsAutomated);
+                            if (manifestExist != null)
+                            {
+                                continue;
+                            }
+
+                            //check if an automated movemanifest has already created if so
+                            //add current manifest to already create; else create a new one
+                            var existingManifest = alreadyExistingMoveManifests.Where(x => x.DestinationServiceCentreId == destID).FirstOrDefault();
+                            var centre = destinationCentres.Where(x => x.ServiceCentreId == destID).FirstOrDefault();
+                            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+                            if (existingManifest is null)
+                            {
+                                await NewMovementManifest(manifest, centre,userId, movemanifestNo,deptCentreID);
+                            }
+                            else
+                            {
+                                await ExistingMovementManifest(existingManifest,manifest,centre,userId, deptCentreID);
+                            }
+                        }
+                    }
+                }
+                await _uow.CompleteAsync();
+            }
+        }
+
+
+        private async Task NewMovementManifest(Manifest manifest, ServiceCentre destServiceCentre, string userId,string originalMovemanifestNo,int deptCentreID)
+        {
+            var moveManifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.MovementManifestNumber, destServiceCentre.Code);
+            var driverCode = await GenerateDeliveryCode();
+            var destServiceCentreCode = await GenerateDeliveryCode();
+
+
+            var movemanifestmapping = new MovementManifestNumberMapping()
+            {
+                MovementManifestCode = moveManifestCode,
+                ManifestNumber = manifest.ManifestCode,
+                UserId = userId,
+                IsAutomated = true
+            };
+            _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
+
+            var movemanifest = new MovementManifestNumber()
+            {
+                MovementManifestCode = moveManifestCode,
+                MovementStatus = MovementStatus.InProgress,
+                UserId = userId,
+                DepartureServiceCentreId = deptCentreID,
+                DestinationServiceCentreId = manifest.DestinationServiceCentreId,
+                DriverCode = driverCode,
+                DestinationServiceCentreCode = destServiceCentreCode,
+                IsAutomated = true,
+                DestinationServiceCentreUserId = originalMovemanifestNo
+            };
+            _uow.MovementManifestNumber.Add(movemanifest);
+        }
+
+        private async Task ExistingMovementManifest(MovementManifestNumber movementManifestNumber, Manifest manifest, ServiceCentre destServiceCentre, string userId,int deptCentreID)
+        {
+            var moveManifest = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movementManifestNumber.MovementManifestCode);
+            var driverCode = await GenerateDeliveryCode();
+            var destServiceCentreCode = await GenerateDeliveryCode();
+
+            var manifestAlreadyCreated = await _uow.MovementManifestNumberMapping.GetAsync(x => x.ManifestNumber == manifest.ManifestCode);
+            if (manifestAlreadyCreated is null)
+            {
+                var movemanifestmapping = new MovementManifestNumberMapping()
+                {
+                    MovementManifestCode = moveManifest.MovementManifestCode,
+                    ManifestNumber = manifest.ManifestCode,
+                    UserId = userId,
+                    IsAutomated = true
+                };
+                _uow.MovementManifestNumberMapping.Add(movemanifestmapping);
+            }
+           
+        }
+
+        private async Task<string> GenerateDeliveryCode()
+        {
+            try
+            {
+                int maxSize = 6;
+                char[] chars = new char[54];
+                string a;
+                a = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = "DN" + strippedText.ToUpper();
+                return number;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+
+
+
 
     }
 }
