@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using System;
@@ -35,6 +36,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IManifestWaybillMappingService _manifestWaybillService;
         private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
+        private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
         private readonly IUnitOfWork _uow;
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
@@ -42,7 +44,7 @@ namespace GIGLS.Services.Business.Scanning
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
             ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService,
-            IHUBManifestWaybillMappingService hubmanifestWaybillService, IWaybillPaymentLogService waybillPaymentLogService, IUnitOfWork uow)
+            IHUBManifestWaybillMappingService hubmanifestWaybillService, IWaybillPaymentLogService waybillPaymentLogService, IAutoManifestAndGroupingService autoManifestAndGroupingService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -57,6 +59,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
             _waybillPaymentLogService = waybillPaymentLogService;
+            _autoManifestAndGroupingService = autoManifestAndGroupingService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -844,10 +847,10 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
-
-
-
-
+            //if (movementCode != null && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+            //{
+            //  await  _autoManifestAndGroupingService.MapMoveManifest(movementCode.MovementManifestCode);
+            //}
         }
 
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
