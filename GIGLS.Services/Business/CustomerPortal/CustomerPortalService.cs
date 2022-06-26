@@ -5008,5 +5008,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
         }
+
+        public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
+        {
+           return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
+        }
     }
 }
