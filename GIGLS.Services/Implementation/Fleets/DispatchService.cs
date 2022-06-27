@@ -298,6 +298,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 //Scan movement manifest waybill
                 await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
 
+                //Add Fleet trip and transactions for GIGL vehicles only
                 await AddToFleetTripAndPartnerTransactions(newDispatch);
                 // commit transaction
                 await _uow.CompleteAsync();
