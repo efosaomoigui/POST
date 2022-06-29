@@ -899,7 +899,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (!paymentTransaction.FromApp)
             {
-                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+               int centerIds = await _userService.GetPriviledgeServiceCenter();
+                serviceCenterIds = new int[] { centerIds };
             }
             else
             {

@@ -1293,6 +1293,17 @@ namespace GIGLS.Services.Business.Pricing
             newPricingDTO.Vat = vatForItems;
             newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
+            if (newShipmentDTO.ExpressDelivery)
+            {
+                var faster = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GoFaster.ToString());
+                if (faster != null)
+                {
+                    var fasterValue = Convert.ToDecimal(faster.Value);
+                    var num = fasterValue / 100M;
+                    var numAmount = grandTotal * num;
+                    grandTotal = grandTotal + numAmount;
+                }
+            }
             if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
             {
                 var factor = Convert.ToDecimal(Math.Pow(10, 0));

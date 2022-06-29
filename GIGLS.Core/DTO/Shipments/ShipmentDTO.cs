@@ -516,6 +516,8 @@ namespace GIGLS.Core.DTO.Shipments
         public List<WaybillChargeDTO> WaybillCharges { get; set; }
         public string TempCode { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
+        public bool IsBulky { get; set; }
+        public bool ExpressDelivery { get; set; }
     }
     public class CargoMagayaShipmentDTO : BaseDomainDTO
     {

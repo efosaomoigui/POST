@@ -5576,6 +5576,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PackageOptionIds = detail.PackageOptionIds,
                                         IsClassShipment = isClassShipment,
                                         IsBulky = detail.IsBulky,
+                                        ExpressDelivery = detail.ExpressDelivery,
                                         CashOnDeliveryAmount = preshipmentmobile.CashOnDeliveryAmount,
                                         CODDescription = preshipmentmobile.CODDescription,
                                         CODStatus = preshipmentmobile.CODStatus,
@@ -7804,6 +7805,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
                 shipment.Courier = mobile.CompanyMap.ToString();
                 shipment.IsBulky = detail.IsBulky;
+                shipment.ExpressDelivery = detail.ExpressDelivery;
                 shipment.IsCashOnDelivery = mobile.IsCashOnDelivery;
                 shipment.CODStatusDate = mobile.CODStatusDate;
                 shipment.CODDescription = mobile.CODDescription;
