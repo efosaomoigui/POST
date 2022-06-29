@@ -628,6 +628,15 @@ namespace GIGLS.Services.Implementation.Partnership
             return await _uow.FleetPartnerTransaction.GetFleetPartnerTransaction(currentUser.UserChannelCode);
         }
 
+        public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransactionByDateRange(FleetFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerTransactionByDateRange(currentUser.UserChannelCode, filterCriteria);
+        }
+
         public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction()
         {
             //get the current login user 
