@@ -45,11 +45,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             var endDate = queryDate.Item2;
 
             //To be completed
-            var users = _context.Users.Where(x => x.UserChannelCode == partnercode && x.DateCreated >= startDate && x.DateCreated < endDate);
+            var users = _context.Users.Where(x => x.UserChannelCode == partnercode);
 
             var transactionsDto = from user in users
                                   join fleet in _context.Fleet on user.Id equals fleet.EnterprisePartnerId
                                   join trans in _context.FleetPartnerTransaction on fleet.RegistrationNumber.ToLower() equals trans.FleetRegistrationNumber.ToLower()
+                                  where trans.DateOfEntry >= startDate && trans.DateOfEntry < endDate
                                   select new FleetPartnerTransactionDTO
                                   {
                                       CreditDebitType = trans.CreditDebitType,
