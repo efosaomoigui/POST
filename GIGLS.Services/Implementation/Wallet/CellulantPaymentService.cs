@@ -123,6 +123,8 @@ namespace GIGLS.Services.Implementation.Wallet
             var isRegion = await CheckUserPrivilegeIsRegion();
             var isAccount = await CheckUserRoleIsAccount();
 
+            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual"); // 355 = CODManual's Service Center Id
+            List<string> crAccounts = new List<string>();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
@@ -139,9 +141,11 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
-                if (isRegion == true)
+                if (isRegion)
                 {
-                    var crAccounts = await GetRegionServiceCentresCrAccount();
+                    crAccounts.AddRange(await GetRegionServiceCentresCrAccount());
+                    crAccounts.Add(CODManualServiceCentreCodes.FirstOrDefault().CrAccount);
+
                     if (crAccounts.Count > 0)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccounts);
@@ -149,7 +153,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    if (isAdmin == true || isAccount == true)
+                    if (isAdmin || isAccount)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
                     }
