@@ -1574,7 +1574,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 if (claimValue == null)
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
+                    return 0;
                 }
 
                 if (claimValue[0] == "Global")
