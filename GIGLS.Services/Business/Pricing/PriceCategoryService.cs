@@ -102,6 +102,7 @@ namespace GIGLS.Services.Business.Pricing
                 cattoModify.SubminimumPrice = priceCategory.SubminimumPrice;
                 cattoModify.SubminimumWeight = priceCategory.SubminimumWeight;
                 cattoModify.IsHazardous = priceCategory.IsHazardous;
+                cattoModify.DeliveryType = priceCategory.DeliveryType;
                 _uow.Complete();
             }
             catch (Exception)

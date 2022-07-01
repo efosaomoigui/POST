@@ -24,5 +24,6 @@ namespace GIGLS.Core.IServices.Business
         Task<decimal> GetPriceForUK(UKPricingDTO pricingDto);
         Task<decimal> GetPriceByCategory(UKPricingDTO pricingDto);
         Task<decimal> GetCoporateDiscountedAmount(string customerCode, decimal price);
+        Task<decimal> GetPriceByCategoryForUSA(UKPricingDTO pricingDto);
     }
 }
