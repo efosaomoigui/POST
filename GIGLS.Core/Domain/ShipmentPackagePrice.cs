@@ -12,5 +12,9 @@ namespace GIGLS.Core.Domain
         
         public int InventoryOnHand { get; set; }
         public int MinimunRequired { get; set; }
+        public decimal Length { get; set; }
+        public decimal Height { get; set; }
+        public decimal Width { get; set; }
+        public decimal Weight { get; set; }
     }
 }

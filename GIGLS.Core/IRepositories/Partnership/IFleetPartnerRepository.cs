@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Partnership;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,5 +13,9 @@ namespace GIGLS.Core.IRepositories.Partnership
         Task<int> FleetCount(string fleetCode);
         Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner(string fleetPartnerCode);
         Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner();
+        Task<List<AssetDTO>> GetFleetAttachedToEnterprisePartner(string fleetPartnerCode);
+        Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId);
+        Task<List<AssetTripDTO>> GetFleetTrips(int fleetId);
+        Task<List<AssetTripDTO>> GetFleetTripsByPartner(string partnercode);
     }
 }

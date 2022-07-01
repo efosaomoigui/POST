@@ -3440,6 +3440,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Invoices = invoices,
                 SalesCount = invoices.Count,
                 TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
+                TotalOutstandingSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Pending).Sum(s => s.Amount),
+                TotalExpectedSales = invoices.Sum(s => s.Amount),
             };
 
             return dailySalesDTO;
@@ -3469,6 +3471,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Invoices = invoices,
                 SalesCount = invoices.Count,
                 TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
+                TotalOutstandingSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Pending).Sum(s => s.Amount),
+                TotalExpectedSales = invoices.Sum(s => s.Amount),
             };
 
             return dailySalesDTO;

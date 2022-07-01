@@ -12,7 +12,7 @@ using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
-    [Authorize(Roles = "Admin, ViewAdmin")]
+    [Authorize(Roles = "Admin, ViewAdmin, CaptainManagement")]
     [RoutePrefix("api/partner")]
     public class PartnerController : BaseWebApiController
     {

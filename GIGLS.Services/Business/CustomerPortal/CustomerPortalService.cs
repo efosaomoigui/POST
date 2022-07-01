@@ -4960,6 +4960,40 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
+        public async Task<bool> ForgotPasswordV3(ForgotPasswordDTO user)
+        {
+            if (string.IsNullOrEmpty(user.Email.Trim()))
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid email", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var userDto = await _uow.User.GetUserByEmail(user.Email);
+            if (userDto == null)
+            {
+                throw new GenericException("User does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            string password = await Generate(6);
+            var User = await _userService.ForgotPassword(user.Email, password);
+
+            if (User.Succeeded)
+            {
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = user.Email
+                };
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+            }
+            else
+            {
+                throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+            return true;
+        }
+
+
         public async Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId)
         {
             return await _shipmentCategory.GetInboundCategory(countryId);
@@ -4973,6 +5007,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _uow.CompleteAsync();
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
+        }
+
+        public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
+        {
+           return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
         }
     }
 }

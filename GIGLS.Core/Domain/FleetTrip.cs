@@ -1,5 +1,8 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -19,6 +22,27 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Fleet Fleet { get; set; }
         
         public string CaptainId { get; set; }
+
+        [ForeignKey("CaptainId")]
         public virtual User Captain { get; set; }
+
+        public int MovementManifestId { get; set; }
+        public string FleetRegistrationNumber { get; set; }
+
+        public decimal DispatchAmount { get; set; }
+
+        public int? DepartureStationId { get; set; }
+
+        [ForeignKey("DepartureStationId")]
+        public virtual Station DepartureStation { get; set; }
+
+        public int? DestinationStationId { get; set; }
+
+        [ForeignKey("DestinationStationId")]
+        public virtual Station DestinationStation { get; set; }
+        public int DepartureServiceCenterId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+        public decimal TripAmount { get; set; }
+        public FleetTripStatus Status { get; set; }
     }
 }

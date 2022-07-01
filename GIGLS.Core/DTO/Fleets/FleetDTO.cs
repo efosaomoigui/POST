@@ -20,5 +20,6 @@ namespace GIGLS.Core.DTO.Fleets
         public string Description { get; set; }
         public FleetType FleetType { get; set; }
         public int Capacity { get; set; }
+        public VehicleFixedStatus IsFixed { get; set; }
     }
 }
