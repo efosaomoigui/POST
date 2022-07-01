@@ -9,6 +9,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IRepositories;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
 {
@@ -124,7 +125,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
         {
             try
             {
-                var PriceCategorys = _context.PriceCategory.Where(s => s.CountryId == destCountryId && s.DepartureCountryId == deptCountryID);
+                var PriceCategorys = _context.PriceCategory.Where(s => s.CountryId == destCountryId && s.DepartureCountryId == deptCountryID && s.DeliveryType == DeliveryType.GOSTANDARDED);
 
                 var PriceCategorysDTO = from s in PriceCategorys
                                         select new PriceCategoryDTO
