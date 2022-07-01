@@ -925,13 +925,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         SenderName = newPreShipment.SenderName
                     };
 
-                    if (newPreShipment.IsCashOnDelivery)
+                    if (preShipmentDTO.IsCashOnDelivery)
                     {
 
                         //collect the cods and add to CashOnDeliveryRegisterAccount()
                         var cashondeliveryentity = new CashOnDeliveryRegisterAccount
                         {
-                            Amount = newPreShipment.CashOnDeliveryAmount ?? 0,
+                            Amount = preShipmentDTO.CashOnDeliveryAmount ?? 0,
                             CODStatusHistory = CODStatushistory.Created,
                             Description = "Cod From Sales",
                             ServiceCenterId = 0,
@@ -946,6 +946,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
+                        newPreShipment.IsCashOnDelivery = preShipmentDTO.IsCashOnDelivery;
+                        newPreShipment.CashOnDeliveryAmount = preShipmentDTO.CashOnDeliveryAmount;
                     }
 
                     newPreShipment.UserId = currentUserId;
