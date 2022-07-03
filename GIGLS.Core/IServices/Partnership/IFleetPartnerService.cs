@@ -40,5 +40,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransaction();
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction();
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerDebitTransaction();
+        Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransactionByDateRange(FleetFilterCriteria filterCriteria);
     }
 }

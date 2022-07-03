@@ -306,13 +306,27 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("getpartnertransactionhistory")]
-        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersTransactionHistory()
+        public async Task<IServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>> GetPartnersTransactionHistory(FleetFilterCriteria filterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var transactions = await _fleetPartnerService.GetFleetPartnerTransaction();
+                IEnumerable < FleetPartnerTransactionDTO > transactions = new List<FleetPartnerTransactionDTO>();
+                
+                if(filterCriteria == null)
+                {
+                    transactions = await _fleetPartnerService.GetFleetPartnerTransaction();
+                }
+                else if (filterCriteria.EndDate == null && filterCriteria.StartDate == null)
+                {
+                    transactions = await _fleetPartnerService.GetFleetPartnerTransaction();
+                }
+                else
+                {
+                    transactions = await _fleetPartnerService.GetFleetPartnerTransactionByDateRange(filterCriteria);
+                }
+                
                 return new ServiceResponse<IEnumerable<FleetPartnerTransactionDTO>>
                 {
                     Object = transactions
