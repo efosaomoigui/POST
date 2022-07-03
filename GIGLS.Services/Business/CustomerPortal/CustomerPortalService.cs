@@ -4774,8 +4774,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Amount = amount,
                 OriginatingBankAccount = codWallet.AccountNo,
                 OriginatingBankName = "Stellas",
-                DestinationBankAccount = transferDTO.ReceiverAccountNumber,
-                DestinationBankName = transferDTO.ReceiverBankName,
+                DestinationBankAccount = "GIG LOGISTICS",
+                DestinationBankName = "Stellas",
                 StatusCode = res.status.ToString(),
                 StatusDescription = res.message
             };

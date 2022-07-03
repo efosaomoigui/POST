@@ -51,6 +51,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string WaybillImageFormat { get; set; }
         public int DestinationServiceCenterId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public bool IsCashOnDelivery { get; set; }
+        public decimal CashOnDeliveryAmount { get; set; }
 
     }
 }
