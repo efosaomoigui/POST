@@ -26,7 +26,7 @@ namespace GIGLS.Services.Business.Pricing
         
         public async Task<object> AddPriceCategory(PriceCategoryDTO priceCategory)
         {
-            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId && c.DepartureCountryId == priceCategory.DepartureCountryId))
+            if (await _uow.PriceCategory.ExistAsync(c => c.PriceCategoryName.ToLower() == priceCategory.PriceCategoryName.Trim().ToLower() && c.CountryId == priceCategory.CountryId && c.DepartureCountryId == priceCategory.DepartureCountryId && c.DeliveryType == priceCategory.DeliveryType))
             {
                 throw new GenericException("Price category already exist");
             }
@@ -102,6 +102,7 @@ namespace GIGLS.Services.Business.Pricing
                 cattoModify.SubminimumPrice = priceCategory.SubminimumPrice;
                 cattoModify.SubminimumWeight = priceCategory.SubminimumWeight;
                 cattoModify.IsHazardous = priceCategory.IsHazardous;
+                cattoModify.DeliveryType = priceCategory.DeliveryType;
                 _uow.Complete();
             }
             catch (Exception)
