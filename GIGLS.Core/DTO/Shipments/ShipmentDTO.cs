@@ -180,6 +180,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
         public string blackBookSerialNumber { get; set; }
         public DeliveryType DeliveryType { get; set; }
+
+        public string ServiceCenterAccountNumber { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
