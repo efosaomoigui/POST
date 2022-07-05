@@ -276,8 +276,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //}
 
                 //Set sms template for Ghana or other coutry
-                var countryId = await _userService.GetUserActiveCountryId();
-                if (countryId == 1)
+                var currentInfo = await _userService.GetUserById(currentUserId);
+                if (currentInfo.UserActiveCountryId == 1)
                 {
                     if (shipmentObjDTO.ExpressDelivery)
                     {
