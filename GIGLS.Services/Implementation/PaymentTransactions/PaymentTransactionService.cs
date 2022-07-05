@@ -298,7 +298,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //grouping and manifesting shipment
             
-            if (!shipment.IsGIGGOExtension)
+            if (!shipment.IsGIGGOExtension && !paymentTransaction.IsNotOwner)
             {
                 if (shipment.IsBulky)
                 {
