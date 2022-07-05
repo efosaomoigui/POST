@@ -11,8 +11,7 @@ namespace GIGLS.Core.IRepositories.Fleets
     {
         Task<List<FleetJobCardDto>> GetFleetJobCardsAsync();
         Task<List<FleetJobCardByDateDto>> GetFleetJobCardByDateRangeAsync(GetFleetJobCardByDateRangeDto dto);
-        Task<List<FleetJobCardDto>> GetFleetJobCardsByFleetManagerAsync(string fleetManagerId);
         Task<FleetJobCard> GetFleetJobCardByIdAsync(int jobCardId);
-        Task<List<FleetJobCardByDateDto>> GetFleetJobCardsByFleetManagerInCurrentMonthAsync(GetFleetJobCardByDateRangeDto dto);
+        Task<List<FleetJobCardByDateDto>> GetFleetJobCardsInCurrentMonthAsync(GetFleetJobCardByDateRangeDto dto);
     }
 }

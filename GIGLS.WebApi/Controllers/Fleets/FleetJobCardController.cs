@@ -69,10 +69,10 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
         // GET: FleetJobCard/ByFleetManager
         [HttpGet]
         [Route("byfleetmanager")]
-        public async Task<IServiceResponse<IEnumerable<FleetJobCardDto>>> GetFleetJobCardsByFleetManager()
+        public async Task<IServiceResponse<IEnumerable<FleetJobCardDto>>> GetAllFleetJobCards()
         {
             return await HandleApiOperationAsync(async () => {
-                var jobCards = await _fleetJobCardService.GetFleetJobCardsByFleetManagerAsync();
+                var jobCards = await _fleetJobCardService.GetFleetJobCardsAsync();
                 return new ServiceResponse<IEnumerable<FleetJobCardDto>>
                 {
                     Object = jobCards.ToList()
@@ -96,11 +96,11 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
 
         // GET: FleetJobCard/ByFleetManager in current month
         [HttpGet]
-        [Route("byfleetmanager/currentmonth")]
+        [Route("alljobcards/incurrentmonth")]
         public async Task<IServiceResponse<IEnumerable<FleetJobCardByDateDto>>> GetFleetJobCardsByFleetManagerInCurrentMonth()
         {
             return await HandleApiOperationAsync(async () => {
-                var jobCards = await _fleetJobCardService.GetFleetJobCardsByFleetManagerInCurrentMonthAsync();
+                var jobCards = await _fleetJobCardService.GetAllFleetJobCardsByInCurrentMonthAsync();
                 return new ServiceResponse<IEnumerable<FleetJobCardByDateDto>>
                 {
                     Object = jobCards.ToList()

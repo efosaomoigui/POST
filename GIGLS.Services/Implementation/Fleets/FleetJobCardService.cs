@@ -158,10 +158,10 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     dto.FleetManagerId = currentUser.Id;
 
-                    if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "FleetCoordinator")
-                    {
-                        dto.IsAdmin = true;
-                    }
+                    //if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "FleetCoordinator")
+                    //{
+                    //    dto.IsAdmin = true;
+                    //}
                     var fleetJobCards = await _uow.FleetJobCard.GetFleetJobCardByDateRangeAsync(dto);
 
                     return fleetJobCards;
@@ -174,30 +174,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 throw;
             }
         }
-
-        public async Task<IEnumerable<FleetJobCardDto>> GetFleetJobCardsByFleetManagerAsync()
-        {
-            try
-            {
-                var currentUser = await GetCurrentUserRoleAsync();
-
-                if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
-                {
-                    if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "FleetCoordinator")
-                    {
-                        return await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerAsync("Admin");
-                    }
-
-                    return await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerAsync(currentUser.Id);
-                }
-                throw new GenericException("You are not authorized to perform this operation");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
+        
         public async Task<FleetJobCardDto> GetFleetJobCardByIdAsync(int jobCardId)
         {
             try
@@ -281,7 +258,7 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
-        public async Task<List<FleetJobCardByDateDto>> GetFleetJobCardsByFleetManagerInCurrentMonthAsync()
+        public async Task<List<FleetJobCardByDateDto>> GetAllFleetJobCardsByInCurrentMonthAsync()
         {
             try
             {
@@ -290,13 +267,9 @@ namespace GIGLS.Services.Implementation.Fleets
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     var dto = new GetFleetJobCardByDateRangeDto();
-                    if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "FleetCoordinator")
-                    {
-                        dto.IsAdmin = true;
-                    }
 
                     dto.FleetManagerId = currentUser.Id;
-                    var jobCards = await _uow.FleetJobCard.GetFleetJobCardsByFleetManagerInCurrentMonthAsync(dto);
+                    var jobCards = await _uow.FleetJobCard.GetFleetJobCardsInCurrentMonthAsync(dto);
                     
                     return await Task.FromResult(jobCards);
                 }
