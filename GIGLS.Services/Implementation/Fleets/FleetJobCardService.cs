@@ -184,18 +184,28 @@ namespace GIGLS.Services.Implementation.Fleets
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
-                    var jobCardDto = new FleetJobCardDto()
+                    
+                    if (jobCard != null)
                     {
-                        FleetJobCardId = jobCard.FleetJobCardId,
-                        DateCreated = jobCard.DateCreated,
-                        DateModified = jobCard.DateModified,
-                        Status = jobCard.Status,
-                        VehiclePartToFix = jobCard.VehiclePartToFix,
-                        FleetManagerId = jobCard.FleetManagerId,
-                        Amount = jobCard.Amount,
-                        VehicleNumber = jobCard.VehicleNumber
-                    };
-                    return await Task.FromResult(jobCardDto);
+                        var fleetManager = await _uow.User.GetUserById(jobCard.FleetManagerId);
+                        var jobCardDto = new FleetJobCardDto()
+                        {
+                            FleetJobCardId = jobCard.FleetJobCardId,
+                            DateCreated = jobCard.DateCreated,
+                            DateModified = jobCard.DateModified,
+                            Status = jobCard.Status,
+                            VehiclePartToFix = jobCard.VehiclePartToFix,
+                            FleetManagerId = jobCard.FleetManagerId,
+                            Amount = jobCard.Amount,
+                            VehicleNumber = jobCard.VehicleNumber,
+                            RevenueStatus = jobCard.Fleet != null ? jobCard.Fleet.IsFixed.ToString() : null,
+                            FleetOwnerId = jobCard.FleetOwnerId,
+                            FleetOwner = jobCard.FleetOwner != null ? $"{jobCard.FleetOwner.FirstName} {jobCard.FleetOwner.LastName}" : null,
+                            FleetManager = fleetManager != null ? $"{fleetManager.FirstName} {fleetManager.LastName}": null
+                        };
+                        return await Task.FromResult(jobCardDto);
+                    }
+                    throw new GenericException($"No jobcard with the id: {jobCardId} found!");
                 }
 
                 throw new GenericException("You are not authorized to perform this operation");

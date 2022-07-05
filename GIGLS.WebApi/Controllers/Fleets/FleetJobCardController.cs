@@ -107,5 +107,19 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
                 };
             });
         }
+        
+        // GET: FleetJobCard/ById
+        [HttpGet]
+        [Route("{jobcardid}")]
+        public async Task<IServiceResponse<FleetJobCardDto>> GetFleetJobCardById(int jobcardid)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var jobCard = await _fleetJobCardService.GetFleetJobCardByIdAsync(jobcardid);
+                return new ServiceResponse<FleetJobCardDto>
+                {
+                    Object = jobCard
+                };
+            });
+        }
     }
 }
