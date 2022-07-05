@@ -408,6 +408,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
 
             }
+            return result;
         }
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
