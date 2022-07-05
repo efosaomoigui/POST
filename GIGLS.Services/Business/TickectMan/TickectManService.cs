@@ -103,6 +103,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ShipmentDTO.ShipmentReroute = null;
             ShipmentDTO.DeliveryOption = null;
             ShipmentDTO.IsFromMobile = false;
+            ShipmentDTO.IsBulky = newShipmentDTO.IsBulky;
+            ShipmentDTO.ExpressDelivery = newShipmentDTO.ExpressDelivery;
 
             //Add Insurance value to shipment table
             var insuranceDTO = await _insuranceService.GetInsuranceByCountry();
@@ -206,6 +208,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 dropOffPrice.DiscountedValue = dropOffPrice.GrandTotal * discountResult;
                 dropOffPrice.GrandTotal = dropOffPrice.GrandTotal - dropOffPrice.DiscountedValue;
             }
+        
             decimal factor = 0;
             if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
             {
