@@ -168,6 +168,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
+            if(paymentTransaction.PaymentType == PaymentType.Transfer)
+            {
+                await ConfirmShipmentTransferDetails(paymentTransaction.PaymentType, paymentTransaction.TransactionCode, invoiceEntity.PaymentStatus, shipment.GrandTotal);
+            }
             // create payment
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
@@ -313,6 +317,38 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return result;
         }
 
+        private async Task ConfirmShipmentTransferDetails(PaymentType paymentType, string transactionCode, PaymentStatus shipmentStatus, decimal shipmentAmount)
+        {
+            if (paymentType == PaymentType.Transfer)
+            {
+                /* 
+                 1. The reference code exists and it is the same as what is entered
+                 2. We will check that the waybill that the reference code is being validated for, has not been validated before
+                 3. We will check that the amount cellulant says it has collected is the same amount for the cost of the waybill.
+                 */
+                var transferDetails = _uow.TransferDetails.GetAllAsQueryable()
+                                                            .Where(x => x.PaymentReference.ToLower() == transactionCode.ToLower()).FirstOrDefault();
+
+                if (transferDetails == null)
+                    throw new GenericException($"Transfer details does not exist for {transactionCode}");
+
+                if (!transferDetails.IsVerified)
+                {
+                    if (shipmentStatus == PaymentStatus.Paid)
+                        throw new GenericException($"Shipment with {transactionCode} cannot be processed again");
+
+                    //Block if amount transfered is less than shipment amount
+                    if (Convert.ToDecimal(transferDetails.Amount) < shipmentAmount)
+                        throw new GenericException($"Transferred amount is less than shipment amount");
+
+                    transferDetails.IsVerified = true;
+                }
+                else
+                {
+                    throw new GenericException($"Transfer with {transactionCode} cannot be verified again");
+                }
+            }
+        }
         private async Task ProcessWalletTransaction(PaymentTransactionDTO paymentTransaction, Shipment shipment, Invoice invoiceEntity, GeneralLedger generalLedgerEntity, string currentUserId)
         {
             //I used transaction code to represent wallet number when processing for wallet
