@@ -385,9 +385,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _userService.GetPriviledgeServiceCenters(userId);
         }
-        public Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)
+        public async Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)
         {
-            return _portalService.GetShipmentDetailsFromDeliveryNumber(DeliveryNumber);
+            var result = await _portalService.GetShipmentDetailsFromDeliveryNumber(DeliveryNumber);
+            if (result != null && result.shipmentdetails != null)
+            {
+                decimal factor = 0;
+
+                if (result.shipmentdetails.CompanyType == CompanyType.Corporate.ToString() || result.shipmentdetails.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, 0));
+                }
+                else
+                {
+                    factor = Convert.ToDecimal(Math.Pow(10, -2));
+                }
+                result.shipmentdetails.DiscountValue = Math.Round((decimal)result.shipmentdetails.DiscountValue * factor) / factor;
+                result.shipmentdetails.Value = Math.Round((decimal)result.shipmentdetails.Value * factor) / factor;
+                if (result.shipmentdetails.CashOnDeliveryAmount != null)
+                {
+                    result.shipmentdetails.CashOnDeliveryAmount = Math.Round((decimal)result.shipmentdetails.CashOnDeliveryAmount * factor) / factor; 
+                }
+
+            }
         }
         public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
