@@ -298,15 +298,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //grouping and manifesting shipment
             
-            if (!shipment.IsGIGGOExtension && !paymentTransaction.IsNotOwner)
+            if (!shipment.IsGIGGOExtension)
             {
-                if (shipment.IsBulky)
+                if (!paymentTransaction.IsNotOwner)
                 {
-                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
-                }
-                else
-                {
-                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    if (shipment.IsBulky)
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                    }
+                    else
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    } 
                 }
             }
             result = true;
