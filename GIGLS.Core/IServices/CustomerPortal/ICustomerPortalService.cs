@@ -279,5 +279,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> ForgotPasswordV3(ForgotPasswordDTO user);
         Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId);
         Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload);
+        Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill);
     }
 }

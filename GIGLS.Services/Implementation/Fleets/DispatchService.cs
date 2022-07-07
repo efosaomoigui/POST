@@ -298,12 +298,21 @@ namespace GIGLS.Services.Implementation.Fleets
                 //Scan movement manifest waybill
                 await UpdateMovementManifestWaybillScanStatus(dispatchDTO.MovementManifestNumber, currentUserId, userServiceCentreId);
 
-                //Get fleet Id
-                var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower()).FirstOrDefault();
+                //Add Fleet trip and transactions for GIGL vehicles only
+                await AddToFleetTripAndPartnerTransactions(newDispatch);
+                // commit transaction
+                await _uow.CompleteAsync();
+                return new { Id = dispatchId };
+            }
+        }
 
-                if (fleetDto == null)
-                    throw new GenericException("Fleet details not found");
+        private async Task AddToFleetTripAndPartnerTransactions(MovementDispatch newDispatch)
+        {
+            //Get fleet Id
+            var fleetDto = _uow.Fleet.GetAllAsQueryable().Where(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower()).FirstOrDefault();
 
+            if (fleetDto != null)
+            {
                 //Get movement manifest Id
                 var movementManifestNumber = _uow.MovementManifestNumber.GetAllAsQueryable().Where(x => x.MovementManifestCode == newDispatch.MovementManifestNumber).FirstOrDefault();
 
@@ -329,8 +338,6 @@ namespace GIGLS.Services.Implementation.Fleets
                     DateModified = DateTime.Now,
                 };
 
-                
-
                 //Write to FleetTransaction table
                 //Check if fleet type (fix or variable)
                 var fleetType = await _uow.Fleet.ExistAsync(x => x.RegistrationNumber.ToLower() == newDispatch.RegistrationNumber.ToLower() && x.IsFixed == VehicleFixedStatus.Variable);
@@ -345,7 +352,6 @@ namespace GIGLS.Services.Implementation.Fleets
                     //Set Fleet trip amount generated
                     fleetTrip.TripAmount = tripAmount;
 
-
                     //Add fleet trip amount to transaction table
                     var tripTransaction = new FleetPartnerTransaction
                     {
@@ -356,7 +362,6 @@ namespace GIGLS.Services.Implementation.Fleets
                         PaymentTypeReference = $"Trip-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
                         Description = $"Trip amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
                         FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        //DateOfEntry = DateTime.UtcNow,
                         IsSettled = false,
                         FleetId = fleetDto.FleetId,
                         DateCreated = DateTime.Now,
@@ -366,7 +371,6 @@ namespace GIGLS.Services.Implementation.Fleets
 
                     //Add fleet trip amount to transaction table
                     _uow.FleetPartnerTransaction.Add(tripTransaction);
-                   // await _uow.CompleteAsync();
 
                     var dispatchTransaction = new FleetPartnerTransaction
                     {
@@ -377,7 +381,6 @@ namespace GIGLS.Services.Implementation.Fleets
                         PaymentTypeReference = $"Dispatch-{newDispatch.RegistrationNumber}-{DateTime.Now.ToString()}",
                         Description = $"Dispatch amount for {newDispatch.RegistrationNumber} on {DateTime.Now.ToString()}",
                         FleetRegistrationNumber = newDispatch.RegistrationNumber,
-                        //DateOfEntry = DateTime.UtcNow,
                         IsSettled = false,
                         FleetId = fleetDto.FleetId,
                         DateCreated = DateTime.Now,
@@ -387,18 +390,12 @@ namespace GIGLS.Services.Implementation.Fleets
 
                     //Add dispatch amount to fleet transaction 
                     _uow.FleetPartnerTransaction.Add(dispatchTransaction);
-                   // await _uow.CompleteAsync();
                 }
 
                 //Add fleet trip
                 _uow.FleetTrip.Add(fleetTrip);
-                //await _uow.CompleteAsync();
-                // commit transaction
-                await _uow.CompleteAsync();
-                return new { Id = dispatchId };
             }
         }
-
 
         /// <summary>
         /// This method ensures that all waybills attached to the manifestNumber 

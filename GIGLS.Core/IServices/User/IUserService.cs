@@ -95,5 +95,6 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetEmployeeUserByEmail(string email);
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsersByEmail(string email);
         Task<bool> CheckCurrentUserSystemRole(string currentUserId);
+        Task<int> GetPriviledgeServiceCenter();
     }
 }

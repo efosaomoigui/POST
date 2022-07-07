@@ -7,5 +7,6 @@ namespace GIGLS.Core.IServices.Utility
     {
         Task MappingWaybillNumberToGroup(string waybill);
         Task MappingWaybillNumberToGroupForBulk(string waybill);
+        Task MapMoveManifest(string movemanifestNo);
     }
 }

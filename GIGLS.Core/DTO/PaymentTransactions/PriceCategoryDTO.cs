@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using GIGLS.Core.Enums;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.PaymentTransactions
 {
     public class PriceCategoryDTO
     {
+        public PriceCategoryDTO()
+        {
+            DeliveryType = DeliveryType.GOSTANDARDED;
+        }
         public int PriceCategoryId { get; set; }
         public int CountryId { get; set; }
         public string CountryName { get; set; }
@@ -17,6 +22,7 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public decimal SubminimumWeight { get; set; }
         public decimal SubminimumPrice { get; set; }
         public bool IsHazardous { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 
     public class QuickQuotePriceDTO

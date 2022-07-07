@@ -925,13 +925,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         SenderName = newPreShipment.SenderName
                     };
 
-                    if (newPreShipment.IsCashOnDelivery)
+                    if (preShipmentDTO.IsCashOnDelivery)
                     {
 
                         //collect the cods and add to CashOnDeliveryRegisterAccount()
                         var cashondeliveryentity = new CashOnDeliveryRegisterAccount
                         {
-                            Amount = newPreShipment.CashOnDeliveryAmount ?? 0,
+                            Amount = preShipmentDTO.CashOnDeliveryAmount ?? 0,
                             CODStatusHistory = CODStatushistory.Created,
                             Description = "Cod From Sales",
                             ServiceCenterId = 0,
@@ -946,6 +946,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.CODDescription = "COD Initiated";
                         newPreShipment.CODStatus = CODMobileStatus.Initiated;
                         newPreShipment.CODStatusDate = DateTime.Now;
+                        newPreShipment.IsCashOnDelivery = preShipmentDTO.IsCashOnDelivery;
+                        newPreShipment.CashOnDeliveryAmount = preShipmentDTO.CashOnDeliveryAmount;
                     }
 
                     newPreShipment.UserId = currentUserId;
@@ -5576,6 +5578,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                         PackageOptionIds = detail.PackageOptionIds,
                                         IsClassShipment = isClassShipment,
                                         IsBulky = detail.IsBulky,
+                                        ExpressDelivery = detail.ExpressDelivery,
                                         CashOnDeliveryAmount = preshipmentmobile.CashOnDeliveryAmount,
                                         CODDescription = preshipmentmobile.CODDescription,
                                         CODStatus = preshipmentmobile.CODStatus,
@@ -7804,6 +7807,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.InternationalShippingCost = totalNet.InternationalShippingCost;
                 shipment.Courier = mobile.CompanyMap.ToString();
                 shipment.IsBulky = detail.IsBulky;
+                shipment.ExpressDelivery = detail.ExpressDelivery;
                 shipment.IsCashOnDelivery = mobile.IsCashOnDelivery;
                 shipment.CODStatusDate = mobile.CODStatusDate;
                 shipment.CODDescription = mobile.CODDescription;

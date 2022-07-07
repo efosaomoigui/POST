@@ -276,8 +276,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //}
 
                 //Set sms template for Ghana or other coutry
-                var countryId = await _userService.GetUserActiveCountryId();
-                if (countryId == 1)
+                var currentInfo = await _userService.GetUserById(currentUserId);
+                if (currentInfo.UserActiveCountryId == 1)
                 {
                     if (shipmentObjDTO.ExpressDelivery)
                     {
@@ -300,13 +300,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             
             if (!shipment.IsGIGGOExtension)
             {
-                if (shipment.IsBulky)
+                if (!paymentTransaction.IsNotOwner)
                 {
-                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
-                }
-                else
-                {
-                    await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    if (shipment.IsBulky)
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroupForBulk(shipment.Waybill);
+                    }
+                    else
+                    {
+                        await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
+                    } 
                 }
             }
             result = true;
@@ -899,7 +902,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (!paymentTransaction.FromApp)
             {
-                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+               int centerIds = await _userService.GetPriviledgeServiceCenter();
+                serviceCenterIds = new int[] { centerIds };
             }
             else
             {

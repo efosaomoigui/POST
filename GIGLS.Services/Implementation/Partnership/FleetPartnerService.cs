@@ -313,10 +313,13 @@ namespace GIGLS.Services.Implementation.Partnership
         public async Task<AssetDetailsDTO> GetFleetAttachedToEnterprisePartnerById(int fleetId)
         {
             var asset = await _uow.FleetPartner.GetFleetAttachedToEnterprisePartnerById(fleetId);
+            if (asset == null)
+                throw new GenericException("Fleet details not found.");
+            
             return asset;
         }
 
-        public async Task<List<FleetTripDTO>> GetFleetTrips(int fleetId)
+        public async Task<List<AssetTripDTO>> GetFleetTrips(int fleetId)
         {
             var fleetTrips = await _uow.FleetPartner.GetFleetTrips(fleetId);
             return fleetTrips;
@@ -460,7 +463,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return price;
         }
 
-        public async Task<List<FleetTripDTO>> GetFleetTripsByPartner()
+        public async Task<List<AssetTripDTO>> GetFleetTripsByPartner()
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
@@ -498,9 +501,12 @@ namespace GIGLS.Services.Implementation.Partnership
                 if (fleet.IsFixed == VehicleFixedStatus.Variable)
                 {
                     //Get pricing for Variable fleet
+                    //Get capacity
+
+                    var fleetCapacity = FormatVehicleCapacity(fleet);
 
                     //Get Fleet haulage details
-                    var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleet.Capacity).FirstOrDefault();
+                    var haulage = _uow.Haulage.GetAllAsQueryable().Where(x => x.Tonne == fleetCapacity).FirstOrDefault();
 
                     if (haulage == null)
                         throw new GenericException("Fleet haulage details not found");
@@ -536,6 +542,36 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw;
             }
 
+        }
+
+        private int FormatVehicleCapacity(Fleet fleet)
+        {
+            var formattedCapacity = 0;
+            if (fleet.Capacity > 0 && fleet.Capacity <= 5 || fleet.Capacity < 10)
+            {
+                formattedCapacity = 5;
+            }
+            else if (fleet.Capacity >= 10 && fleet.Capacity < 15)
+            {
+                formattedCapacity = 10;
+            }
+            else if (fleet.Capacity >= 15 || fleet.Capacity < 20)
+            {
+                formattedCapacity = 15;
+            }
+            else if (fleet.Capacity >= 20 || fleet.Capacity < 25)
+            {
+                formattedCapacity = 20;
+            }
+            else if (fleet.Capacity >= 25 || fleet.Capacity < 30)
+            {
+                formattedCapacity = 25;
+            }
+            else
+            {
+                formattedCapacity = 30;
+            }
+            return formattedCapacity;
         }
 
         private async Task<decimal> CalculateFixFleetTripAmount(string registrationNumber)
@@ -590,6 +626,15 @@ namespace GIGLS.Services.Implementation.Partnership
             var currentUser = await _userService.GetUserById(currentUserId);
 
             return await _uow.FleetPartnerTransaction.GetFleetPartnerTransaction(currentUser.UserChannelCode);
+        }
+
+        public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransactionByDateRange(FleetFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            return await _uow.FleetPartnerTransaction.GetFleetPartnerTransactionByDateRange(currentUser.UserChannelCode, filterCriteria);
         }
 
         public async Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction()

@@ -391,10 +391,12 @@
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\AssetDetails.cs" />
     <Compile Include="DTO\Fleets\AssetDTO.cs" />
+    <Compile Include="DTO\Fleets\AssetTripDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDisputeMessageDto.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
+    <Compile Include="DTO\Fleets\FleetFilterCriteria.cs" />
     <Compile Include="DTO\Fleets\FleetJobCardDto.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
     <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />

@@ -4774,8 +4774,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Amount = amount,
                 OriginatingBankAccount = codWallet.AccountNo,
                 OriginatingBankName = "Stellas",
-                DestinationBankAccount = transferDTO.ReceiverAccountNumber,
-                DestinationBankName = transferDTO.ReceiverBankName,
+                DestinationBankAccount = "GIG LOGISTICS",
+                DestinationBankName = "Stellas",
                 StatusCode = res.status.ToString(),
                 StatusDescription = res.message
             };
@@ -5007,6 +5007,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _uow.CompleteAsync();
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
+        }
+
+        public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
+        {
+           return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
         }
     }
 }

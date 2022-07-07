@@ -553,6 +553,9 @@ namespace GIGLS.Core
                 config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferDTO>();
                 config.CreateMap<GIGGOCODTransferDTO, GIGGOCODTransfer>();
 
+                config.CreateMap<GIGGOCODTransferResponseDTO, GIGGOCODTransfer>();
+                config.CreateMap<GIGGOCODTransfer, GIGGOCODTransferResponseDTO>();
+
                 config.CreateMap<InboundShipmentCategoryDTO, InboundShipmentCategory>();
                 config.CreateMap<InboundShipmentCategory, InboundShipmentCategoryDTO>();
                 config.CreateMap<ShipmentCategory, InboundShipmentCategoryDTO>();
