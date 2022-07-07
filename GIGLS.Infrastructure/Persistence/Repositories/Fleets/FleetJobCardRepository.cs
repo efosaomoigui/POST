@@ -40,7 +40,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                         VehiclePartToFix = x.VehiclePartToFix,
                         FleetManagerId = x.FleetManagerId,
                         Amount = x.Amount,
-                        VehicleNumber = x.VehicleNumber
+                        VehicleNumber = x.VehicleNumber,
+                        PaymentReceiptUrl = x.PaymentReceiptUrl
                     };
                 return await Task.FromResult(fleetDto.OrderByDescending(x => x.DateCreated).ToList());
             }

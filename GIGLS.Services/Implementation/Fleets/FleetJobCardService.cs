@@ -201,7 +201,8 @@ namespace GIGLS.Services.Implementation.Fleets
                             RevenueStatus = jobCard.Fleet != null ? jobCard.Fleet.IsFixed.ToString() : null,
                             FleetOwnerId = jobCard.FleetOwnerId,
                             FleetOwner = jobCard.FleetOwner != null ? $"{jobCard.FleetOwner.FirstName} {jobCard.FleetOwner.LastName}" : null,
-                            FleetManager = fleetManager != null ? $"{fleetManager.FirstName} {fleetManager.LastName}": null
+                            FleetManager = fleetManager != null ? $"{fleetManager.FirstName} {fleetManager.LastName}": null,
+                            PaymentReceiptUrl = jobCard.PaymentReceiptUrl
                         };
                         return await Task.FromResult(jobCardDto);
                     }
@@ -227,6 +228,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardDto.FleetJobCardId);
 
                     jobCard.Status = FleetJobCardStatus.Closed.ToString();
+                    jobCard.PaymentReceiptUrl = jobCardDto.ReceiptUrl;
 
                     var jobcarddto = Mapper.Map<FleetJobCardDto> (jobCard);
 

@@ -95,6 +95,7 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
                 var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"JobCard-Receipt-For-{jobCardDto.VehicleNumber}-{DateTime.Now.Ticks}.png");
                 jobCardDto.ReceiptUrl = picUrl;
             }
+
             return await HandleApiOperationAsync(async () => {
                 var jobCard = await _fleetJobCardService.CloseJobCardAsync(jobCardDto);
                 return new ServiceResponse<bool>
@@ -102,15 +103,6 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
                     Object = true
                 };
             });
-
-
-            /*return await HandleApiOperationAsync(async () => {
-                var jobCard = await _fleetJobCardService.CloseJobCardByIdAsync(jobCardId);
-                return new ServiceResponse<bool>
-                {
-                    Object = jobCard
-                };
-            });*/
         }
 
         // GET: FleetJobCard/ByFleetManager in current month

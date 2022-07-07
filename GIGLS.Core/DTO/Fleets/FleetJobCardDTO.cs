@@ -20,6 +20,7 @@ namespace GIGLS.Core.DTO.Fleets
         public string FleetOwnerId { get; set; }
         public string FleetOwner { get; set; }
         public string RevenueStatus { get; set; }
+        public string PaymentReceiptUrl { get; set; }
     }
 
     public class FleetJobCardMailDto
