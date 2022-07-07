@@ -216,7 +216,7 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
-        public async Task<bool> CloseJobCardByIdAsync(int jobCardId)
+        public async Task<bool> CloseJobCardAsync(CloseJobCardDto jobCardDto)
         {
             try
             {
@@ -224,7 +224,7 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 if (currentUser.SystemUserRole == "Administrator" || currentUser.SystemUserRole == "Admin" || currentUser.SystemUserRole == "CaptainManagement" || currentUser.SystemUserRole == "FleetCoordinator")
                 {
-                    var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardId);
+                    var jobCard = await _uow.FleetJobCard.GetFleetJobCardByIdAsync(jobCardDto.FleetJobCardId);
 
                     jobCard.Status = FleetJobCardStatus.Closed.ToString();
 

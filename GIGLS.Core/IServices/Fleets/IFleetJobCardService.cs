@@ -13,7 +13,7 @@ namespace GIGLS.Core.IServices.Fleets
         Task<bool> OpenFleetJobCardsAsync(NewJobCard jobDto);
         Task<List<FleetJobCardByDateDto>> GetFleetJobCardByDateRangeAsync(GetFleetJobCardByDateRangeDto dto);
         Task<FleetJobCardDto> GetFleetJobCardByIdAsync(int jobCardId);
-        Task<bool> CloseJobCardByIdAsync(int jobCardId);
+        Task<bool> CloseJobCardAsync(CloseJobCardDto jobCard);
         Task<List<FleetJobCardByDateDto>> GetAllFleetJobCardsByInCurrentMonthAsync();
     }
 }

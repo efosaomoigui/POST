@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Services.Implementation;
+using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.WebApi.Controllers.FleetJobCards
 {
@@ -80,18 +81,36 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
             });
         }
         
-        // PATCH: FleetJobCard/ByFleetManager
-        [HttpPatch]
-        [Route("closejobcard/{jobCardId}")]
-        public async Task<IServiceResponse<bool>> CloseFleetJobCardsById(int jobCardId)
+        // POST: FleetJobCard/ByFleetManager
+        [HttpPost]
+        [Route("closejobcard")]
+        public async Task<IServiceResponse<bool>> CloseFleetJobCardsById(CloseJobCardDto jobCardDto)
         {
+            var fileCheck = jobCardDto.ReceiptUrl.Split(':')[0];
+            if (fileCheck.ToLower().Trim() != "https")
+            {
+                byte[] bytes = Convert.FromBase64String(jobCardDto.ReceiptUrl);
+
+                //Save to AzureBlobStorage
+                var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"JobCard-Receipt-For-{jobCardDto.VehicleNumber}-{DateTime.Now.Ticks}.png");
+                jobCardDto.ReceiptUrl = picUrl;
+            }
             return await HandleApiOperationAsync(async () => {
+                var jobCard = await _fleetJobCardService.CloseJobCardAsync(jobCardDto);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+
+            /*return await HandleApiOperationAsync(async () => {
                 var jobCard = await _fleetJobCardService.CloseJobCardByIdAsync(jobCardId);
                 return new ServiceResponse<bool>
                 {
                     Object = jobCard
                 };
-            });
+            });*/
         }
 
         // GET: FleetJobCard/ByFleetManager in current month

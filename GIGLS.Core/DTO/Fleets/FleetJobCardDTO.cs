@@ -70,4 +70,11 @@ namespace GIGLS.Core.DTO.Fleets
     {
         public List<OpenFleetJobCardDto> JobCardItems { get; set; }
     }
+
+    public class CloseJobCardDto
+    {
+        public int FleetJobCardId { get; set; }
+        public string ReceiptUrl { get; set; }
+        public string VehicleNumber { get; set; }
+    }
 }
