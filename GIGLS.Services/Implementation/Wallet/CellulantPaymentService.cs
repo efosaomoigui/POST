@@ -123,7 +123,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var isRegion = await CheckUserPrivilegeIsRegion();
             var isAccount = await CheckUserRoleIsAccount();
 
-            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual"); // 355 = CODManual's Service Center Id
+            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual");
             List<string> crAccounts = new List<string>();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
