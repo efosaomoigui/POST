@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,6 @@ namespace GIGLS.Core.Domain
         public decimal SubminimumWeight { get; set; }
         public decimal SubminimumPrice { get; set; }
         public bool IsHazardous { get; set; }
+        public DeliveryType DeliveryType { get; set; }
     }
 }

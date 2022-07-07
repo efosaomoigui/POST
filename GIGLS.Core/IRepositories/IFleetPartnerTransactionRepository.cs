@@ -14,5 +14,6 @@ namespace GIGLS.Core.IRepositories
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransaction(string partnercode);
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerCreditTransaction(string partnercode);
         Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerDebitTransaction(string partnercode);
+        Task<List<FleetPartnerTransactionDTO>> GetFleetPartnerTransactionByDateRange(string partnercode, FleetFilterCriteria filterCriteria);
     }
 }

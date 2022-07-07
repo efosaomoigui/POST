@@ -4768,18 +4768,18 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
             var res = await _codWalletService.StellasWithdrawal(withrawObj);
-            var withdrwaLog = new CODTransferLog()
+            var withdrawLog = new CODTransferLog()
             {
                 CustomerCode = codWallet.CustomerCode,
                 Amount = amount,
                 OriginatingBankAccount = codWallet.AccountNo,
                 OriginatingBankName = "Stellas",
-                DestinationBankAccount = transferDTO.ReceiverAccountNumber,
-                DestinationBankName = transferDTO.ReceiverBankName,
+                DestinationBankAccount = "GIG LOGISTICS-1100138907",
+                DestinationBankName = "Stellas",
                 StatusCode = res.status.ToString(),
                 StatusDescription = res.message
             };
-            _uow.CODTransferLog.Add(withdrwaLog);
+            _uow.CODTransferLog.Add(withdrawLog);
             await _uow.CompleteAsync();
             if (res.status)
             {
@@ -4797,7 +4797,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     StatusCode = res.status.ToString(),
                     StatusDescription = res.message
                 };
-                _uow.CODTransferLog.Add(withdrwaLog);
+                _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
                 return withdrawResponse;
             }

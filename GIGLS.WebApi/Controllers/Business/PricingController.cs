@@ -112,5 +112,22 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("getpriceusa")]
+        public async Task<IServiceResponse<decimal>> GetPriceForUSA(UKPricingDTO pricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //var userCountryId = await _pricing.GetUserCountryId();
+                //pricingDto.CountryId = userCountryId;
+                var price = await _pricing.GetPriceByCategoryForUSA(pricingDto);
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
     }
 }

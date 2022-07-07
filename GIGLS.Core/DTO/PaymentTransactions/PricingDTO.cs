@@ -60,6 +60,8 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public string Description { get; set; }
         public int Quantity { get; set; }
         public int DepartureCountryId { get; set; }
+        public DeliveryType DeliveryType { get; set; }
+        public string PriceCategoryName { get; set; }
     }
 
     public class NewPricingDTO
