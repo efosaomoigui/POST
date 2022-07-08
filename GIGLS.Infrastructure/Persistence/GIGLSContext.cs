@@ -132,6 +132,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<MovementDispatch> MovementDispatch { get; set; }
         public DbSet<DispatchActivity> DispatchActivity { get; set; }
         public DbSet<CaptainBonusByZoneMaping> CaptainBonusByZoneMaping { get; set; }
+        public DbSet<FleetJobCard> FleetJobCard { get; set; }
+        public DbSet<FleetDisputeMessage> FleetDisputeMessage { get; set; }
 
         //Partner
         public DbSet<Partner> Partners { get; set; }
@@ -329,6 +331,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<GIGGOCODTransfer> GIGGOCODTransfer { get; set; }
         public DbSet<InboundShipmentCategory> InboundShipmentCategory { get; set; }
         public DbSet<ShipmentCategory> ShipmentCategory { get; set; }
+        public DbSet<FleetPartnerTransaction> FleetPartnerTransaction { get; set; }
         #endregion
 
 

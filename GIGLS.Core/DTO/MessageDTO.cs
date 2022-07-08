@@ -62,6 +62,16 @@ namespace GIGLS.Core.DTO
         public string DamageDescription { get; set; }
         public StellaLoginDetails StellaLoginDetails { get; set; }
 
+
+        public string FleetEnterprisePartnerName { get; set; }
+        public string VehicleNumber { get; set; }
+        public string VehicleName { get; set; }
+        public string VehiclePartToFix { get; set; }
+        public string FleetOfficer { get; set; }
+
+        public string DisputeDetails { get; set; }
+        public string DateOfDispute { get; set; }
+
     }
 
     public class NewMessageDTO

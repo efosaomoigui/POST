@@ -35,16 +35,15 @@ namespace GIGLS.Infrastructure.Migrations
                 return;
 
             context.ShipmentCategory.AddOrUpdate(
-                    new ShipmentCategory() { ShipmentCategoryName = "Clothing & fabrics" },
+                    new ShipmentCategory() { ShipmentCategoryName = "Clothing & Fabrics" },
                     new ShipmentCategory() { ShipmentCategoryName = "Cosmetics & Makeup" },
                     new ShipmentCategory() { ShipmentCategoryName = "Shoes" },
                     new ShipmentCategory() { ShipmentCategoryName = "Documents" },
-                    new ShipmentCategory() { ShipmentCategoryName = "Fashion" },
-                    new ShipmentCategory() { ShipmentCategoryName = "Accessories" },
+                    new ShipmentCategory() { ShipmentCategoryName = "Fashion Accessories" },
                     new ShipmentCategory() { ShipmentCategoryName = "Health & Wellness" },
                     new ShipmentCategory() { ShipmentCategoryName = "Luggage & Bag" },
                     new ShipmentCategory() { ShipmentCategoryName = "Electronics" },
-                    new ShipmentCategory() { ShipmentCategoryName = "Babby & Toddler" },
+                    new ShipmentCategory() { ShipmentCategoryName = "Baby & Toddler" },
                     new ShipmentCategory() { ShipmentCategoryName = "Art & Craft" },
                     new ShipmentCategory() { ShipmentCategoryName = "Furniture & Decor" },
                     new ShipmentCategory() { ShipmentCategoryName = "Kitchen ware & Utensils" },
@@ -64,12 +63,12 @@ namespace GIGLS.Infrastructure.Migrations
                     new InboundShipmentCategory() { ShipmentCategoryId = 4, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 5, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 5, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
-                    new InboundShipmentCategory() { ShipmentCategoryId = 6, CountryId = 43, IsGoFaster = false, IsGoStandard = false },
-                    new InboundShipmentCategory() { ShipmentCategoryId = 6, CountryId = 207, IsGoFaster = true, IsGoStandard = false },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 6, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 6, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 7, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 7, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
-                    new InboundShipmentCategory() { ShipmentCategoryId = 8, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
-                    new InboundShipmentCategory() { ShipmentCategoryId = 8, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 8, CountryId = 43, IsGoFaster = false, IsGoStandard = false },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 8, CountryId = 207, IsGoFaster = true, IsGoStandard = false },
                     new InboundShipmentCategory() { ShipmentCategoryId = 9, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 9, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 10, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
@@ -84,9 +83,23 @@ namespace GIGLS.Infrastructure.Migrations
                     new InboundShipmentCategory() { ShipmentCategoryId = 14, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 15, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
                     new InboundShipmentCategory() { ShipmentCategoryId = 15, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
-                     new InboundShipmentCategory() { ShipmentCategoryId = 16, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
-                    new InboundShipmentCategory() { ShipmentCategoryId = 16, CountryId = 207, IsGoFaster = true, IsGoStandard = true }
-
+                    new InboundShipmentCategory() { ShipmentCategoryId = 16, CountryId = 43, IsGoFaster = true, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 16, CountryId = 207, IsGoFaster = true, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 1, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 2, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 3, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 4, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 5, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 6, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 7, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 8, CountryId = 62, IsGoFaster = false, IsGoStandard = false },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 9, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 10, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 11, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 12, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 13, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 14, CountryId = 62, IsGoFaster = false, IsGoStandard = true },
+                    new InboundShipmentCategory() { ShipmentCategoryId = 15, CountryId = 62, IsGoFaster = false, IsGoStandard = true }
                 );
            
         }

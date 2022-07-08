@@ -3139,6 +3139,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getcodtransfer/{waybill}")]
+        public async Task<IServiceResponse<GIGGOCODTransferResponseDTO>> GetCODTransfer(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetCodTransfer(waybill);
+                return new ServiceResponse<GIGGOCODTransferResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpPut]
         [Route("deleteaccount")]
         public async Task<IServiceResponse<bool>> DeleteCustomerAccount(DeleteAccountDTO payload)

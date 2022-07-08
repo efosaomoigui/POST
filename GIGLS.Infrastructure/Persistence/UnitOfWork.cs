@@ -552,7 +552,9 @@ namespace GIGLS.Infrastructure.Persistence
         public ICODWalletRepository CODWallet { get; set; }
 
         [Inject]
-        public ICODTransferRegisterRepository CODTransferRegister { get; set; }
+        public ICODTransferRegisterRepository CODTransferRegister { get; set; 
+        }[Inject]
+        public ICaptainRepository CaptainRepository { get; set; }
 
         [Inject]
         public ICODTransferLogRepository CODTransferLog { get; set; }
@@ -564,6 +566,15 @@ namespace GIGLS.Infrastructure.Persistence
         public IShipmentCategory ShipmentCategory { get; set; }
         [Inject]
         public IGIGGOCODTransferRepository GIGGOCODTransferRepository { get; set; }
+
+        [Inject]
+        public IFleetJobCardRepository FleetJobCard { get; set; }
+
+        [Inject]
+        public IFleetDisputeMessageRepository FleetDisputeMessage { get; set; }
+
+        [Inject]
+        public IFleetPartnerTransactionRepository FleetPartnerTransaction { get; set; }
 
         public int Complete()
         {

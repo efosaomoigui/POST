@@ -723,6 +723,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     int regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    regionServiceCentreMappingDTOList = regionServiceCentreMappingDTOList.Where(x => x.ServiceCentre != null).ToList();
                     serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
@@ -1552,5 +1553,63 @@ namespace GIGLS.Services.Implementation.User
                 return true;
             return false;
         }
+
+        public async Task<int> GetPriviledgeServiceCenter()
+        {
+            int serviceCenterId = 0;   //empty array
+            // get current user
+            try
+            {
+
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var userClaims = await GetClaimsAsync(currentUserId);
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    return 0;
+                }
+
+                if (claimValue[0] == "Global")
+                {
+                    serviceCenterId = 0;
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    int regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterId = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).FirstOrDefault();
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    int stationId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCentreService.GetServiceCentres();
+                    serviceCenterId = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).FirstOrDefault();
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    serviceCenterId = int.Parse(claimValue[1]);
+                }
+                else if (claimValue[0] == "Public")
+                {
+                    serviceCenterId = 0;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return serviceCenterId;
+        }
+
     }
 }

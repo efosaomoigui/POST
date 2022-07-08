@@ -4765,13 +4765,26 @@ namespace GIGLS.Services.Business.CustomerPortal
                 Narration = transferDTO.Narration,
                 PayerAccountNumber = codWallet.AccountNo
             };
-            var withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
-            if (withdrawResponse.status)
+
+            transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
+            var res = await _codWalletService.StellasWithdrawal(withrawObj);
+            var withdrawLog = new CODTransferLog()
+            {
+                CustomerCode = codWallet.CustomerCode,
+                Amount = amount,
+                OriginatingBankAccount = codWallet.AccountNo,
+                OriginatingBankName = "Stellas",
+                DestinationBankAccount = "GIG LOGISTICS-1100138907",
+                DestinationBankName = "Stellas",
+                StatusCode = res.status.ToString(),
+                StatusDescription = res.message
+            };
+            _uow.CODTransferLog.Add(withdrawLog);
+            await _uow.CompleteAsync();
+            if (res.status)
             {
                 await Task.Delay(15000);
-                transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
-                var res = await _codWalletService.StellasWithdrawal(withrawObj);
-
+                var withdrawResponse = await _codWalletService.StellasTransfer(transferDTO);
                 //log to transferlog table
                 var transferLog = new CODTransferLog()
                 {
@@ -4786,11 +4799,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 };
                 _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
-
-                return res;
+                return withdrawResponse;
             }
 
-            return withdrawResponse;
+            return res;
         }
 
         public async Task<StellasResponseDTO> StellasValidateBankName(ValidateBankNameDTO validateBankNameDTO)
@@ -4948,6 +4960,40 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
+        public async Task<bool> ForgotPasswordV3(ForgotPasswordDTO user)
+        {
+            if (string.IsNullOrEmpty(user.Email.Trim()))
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid email", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            var userDto = await _uow.User.GetUserByEmail(user.Email);
+            if (userDto == null)
+            {
+                throw new GenericException("User does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            string password = await Generate(6);
+            var User = await _userService.ForgotPassword(user.Email, password);
+
+            if (User.Succeeded)
+            {
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = user.Email
+                };
+
+                await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+            }
+            else
+            {
+                throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+            }
+            return true;
+        }
+
+
         public async Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId)
         {
             return await _shipmentCategory.GetInboundCategory(countryId);
@@ -4961,6 +5007,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _uow.CompleteAsync();
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
+        }
+
+        public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
+        {
+           return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
         }
 
         public async Task DeleteCustomerAccount(DeleteAccountDTO payload)

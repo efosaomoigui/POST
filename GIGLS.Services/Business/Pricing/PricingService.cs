@@ -19,6 +19,7 @@ using Newtonsoft.Json.Linq;
 using System.Configuration;
 using GIGLS.Core.Domain.Utility;
 using System.Collections.Generic;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -1293,6 +1294,17 @@ namespace GIGLS.Services.Business.Pricing
             newPricingDTO.Vat = vatForItems;
             newPricingDTO.Insurance = insurance;
             newPricingDTO.Total = totalPrice;
+            if (newShipmentDTO.ExpressDelivery)
+            {
+                var faster = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.GoFaster.ToString());
+                if (faster != null)
+                {
+                    var fasterValue = Convert.ToDecimal(faster.Value);
+                    var num = fasterValue / 100M;
+                    var numAmount = grandTotal * num;
+                    grandTotal = grandTotal + numAmount;
+                }
+            }
             if (newShipmentDTO.CompanyType == CompanyType.Corporate.ToString() || newShipmentDTO.CompanyType == CompanyType.Ecommerce.ToString())
             {
                 var factor = Convert.ToDecimal(Math.Pow(10, 0));
@@ -1643,6 +1655,105 @@ namespace GIGLS.Services.Business.Pricing
                 if (hazardousMatCharge != null)
                 {
                    var hazCharge = Convert.ToDecimal(hazardousMatCharge.Value);
+                    price = price + hazCharge;
+                }
+            }
+            return price;
+        }
+
+        public async Task<decimal> GetPriceByCategoryForUSA(UKPricingDTO pricingDto)
+        {
+            var price = 0.0m;
+            if (pricingDto.DepartureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];
+            }
+            if (pricingDto.DestinationServiceCentreId <= 0)
+            {
+                throw new GenericException("Please select destination ", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+            if(pricingDto.DeliveryType == DeliveryType.GOSTANDARDED)
+            {
+                price = await GetPricingByDeliveryType(pricingDto, destinationCountry);
+            }
+            else
+            {
+                price = await GetPricingByDeliveryType(pricingDto, destinationCountry);
+            }
+            return price;
+        }
+
+        private async Task<decimal> GetPricingByDeliveryType(UKPricingDTO pricingDto, CountryDTO destinationCountry)
+        {
+            decimal price = 0.00m;
+            var itemCategory = _uow.PriceCategory.GetAllAsQueryable().Where(x => x.PriceCategoryName.ToLower() == pricingDto.PriceCategoryName.ToLower() && x.DepartureCountryId == pricingDto.DepartureCountryId && x.CountryId == pricingDto.CountryId && x.DeliveryType == pricingDto.DeliveryType).FirstOrDefault();
+            if (itemCategory == null)
+            {
+                throw new GenericException($"No price definition for this category in {destinationCountry.CountryName.ToUpper()}", $"{(int)HttpStatusCode.BadRequest}");
+            }
+
+            if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight <= itemCategory.SubminimumWeight)
+            {
+                for (int i = 1; i <= pricingDto.Quantity; i++)
+                {
+                    price = price + Convert.ToDecimal(itemCategory.SubminimumPrice);
+                }
+            }
+
+            else
+            {
+                if (itemCategory.SubminimumWeight == 0)
+                {
+                    if (itemCategory.CategoryMinimumWeight <= pricingDto.Weight)
+                    {
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                            price = price + priceValue;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 1; i <= pricingDto.Quantity; i++)
+                        {
+                            price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                        }
+                    }
+                }
+
+                else if (itemCategory.SubminimumWeight > 0 && pricingDto.Weight > itemCategory.SubminimumWeight && pricingDto.Weight <= itemCategory.CategoryMinimumWeight)
+                {
+                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    {
+                        price = price + Convert.ToDecimal(itemCategory.CategoryMinimumPrice);
+                    }
+                }
+
+                else
+                {
+                    for (int i = 1; i <= pricingDto.Quantity; i++)
+                    {
+                        var priceValue = itemCategory.PricePerWeight * pricingDto.Weight;
+                        price = price + priceValue;
+                    }
+                }
+            }
+            if (itemCategory != null && itemCategory.IsHazardous)
+            {
+                //get hazardous extra charge from global property
+                var hazardousMatCharge = await _uow.GlobalProperty.GetAsync(x => x.Key == GlobalPropertyType.Hazardous.ToString() && x.CountryId == pricingDto.DepartureCountryId);
+                if (hazardousMatCharge != null)
+                {
+                    var hazCharge = Convert.ToDecimal(hazardousMatCharge.Value);
                     price = price + hazCharge;
                 }
             }

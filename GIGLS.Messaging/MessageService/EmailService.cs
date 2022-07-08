@@ -140,6 +140,155 @@ namespace GIGLS.Messaging.MessageService
             }
             return result;
         }
+
+        //This send mails when new jobcard is created for enterprise partner
+        public async Task<string> SendEmailOpenJobCardAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigOpenJobCardAsync(message);
+            }
+            return result;
+        }
+
+        //This send mails when new jobcard is created for enterprise partner
+        public async Task<string> SendEmailCloseJobCardAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigClosedJobCardAsync(message);
+            }
+            return result;
+        }
+
+        //This send mails when new Fleet Dispute Message is created for enterprise partner
+        public async Task<string> SendEmailFleetDisputeMessageAsync(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigFleetDisputeMessageAsync(message);
+            }
+            return result;
+        }
+
+        private async Task<string> ConfigOpenJobCardAsync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:OpenJobCard"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "New JobCard Maintenance Opened";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "S_Subject", message.Subject },
+                { "S_FleetEnterprisePartnerName", message.FleetEnterprisePartnerName },
+                { "S_VehicleNumber", message.VehicleNumber },
+                { "S_VehicleName", message.VehicleName },
+                { "S_VehiclePartToFix", message.VehiclePartToFix },
+                { "S_FleetOfficer", message.FleetOfficer },
+                { "S_Amount", message.Amount }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigClosedJobCardAsync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:OpenJobCard"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "JobCard Maintenance Closed";
+            }
+            myMessage.AddTo(message.ToEmail, message.CustomerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "S_Subject", message.Subject },
+                { "S_FleetEnterprisePartnerName", message.FleetEnterprisePartnerName },
+                { "S_VehicleNumber", message.VehicleNumber },
+                { "S_VehicleName", message.VehicleName },
+                { "S_VehiclePartToFix", message.VehiclePartToFix },
+                { "S_FleetOfficer", message.FleetOfficer },
+                { "S_Amount", message.Amount },
+                { "initiated", "<strong>closed</strong>" }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
+        private async Task<string> ConfigFleetDisputeMessageAsync(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage
+            {
+                TemplateId = ConfigurationManager.AppSettings["emailService:FleetDisputeMessage"]
+            };
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "New Dispute Message";
+            }
+            myMessage.AddTo(message.ToEmail, message.FleetEnterprisePartnerName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+            myMessage.Subject = message.Subject;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+            //set substitutions
+            myMessage.AddSubstitutions(new Dictionary<string, string>
+            {
+                { "S_Subject", message.Subject },
+                { "S_FleetEnterprisePartnerName", message.FleetEnterprisePartnerName },
+                { "S_VehicleNumber", message.VehicleNumber },
+                { "S_VehicleName", message.VehicleName },
+                { "S_DisputeDetails", message.DisputeDetails },
+                { "S_DateOfDispute", message.DateOfDispute },
+                { "S_FleetOfficer", message.FleetOfficer }
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
+
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();

@@ -9,6 +9,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IRepositories;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
 {
@@ -40,7 +41,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             CountryName = _context.Country.Where(x => x.CountryId == countryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
                                             SubminimumWeight = s.SubminimumWeight,
-                                            IsHazardous = s.IsHazardous
+                                            IsHazardous = s.IsHazardous,
+                                            DeliveryType = s.DeliveryType
                                         };
                 return Task.FromResult(PriceCategorysDTO.OrderBy(x => x.PriceCategoryName).ToList());
 
@@ -72,7 +74,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             DepartureCountryName = _context.Country.Where(x => x.CountryId == s.DepartureCountryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
                                             SubminimumWeight = s.SubminimumWeight,
-                                            IsHazardous = s.IsHazardous
+                                            IsHazardous = s.IsHazardous,
+                                            DeliveryType = s.DeliveryType
                                         };
                 return Task.FromResult(PriceCategorysDTO.FirstOrDefault());
 
@@ -105,7 +108,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                     DepartureCountryName = _context.Country.Where(x => x.CountryId == s.DepartureCountryId).FirstOrDefault().CountryName,
                                     SubminimumPrice = s.SubminimumPrice,
                                     SubminimumWeight = s.SubminimumWeight,
-                                    IsHazardous = s.IsHazardous
+                                    IsHazardous = s.IsHazardous,
+                                    DeliveryType = s.DeliveryType
                                 };
                 return Task.FromResult(categoriesDTO.OrderBy(x => x.PriceCategoryName).ToList());
 
@@ -121,7 +125,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
         {
             try
             {
-                var PriceCategorys = _context.PriceCategory.Where(s => s.CountryId == destCountryId && s.DepartureCountryId == deptCountryID);
+                var PriceCategorys = _context.PriceCategory.Where(s => s.CountryId == destCountryId && s.DepartureCountryId == deptCountryID && s.DeliveryType == DeliveryType.GOSTANDARDED);
 
                 var PriceCategorysDTO = from s in PriceCategorys
                                         select new PriceCategoryDTO
@@ -136,7 +140,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.PriceCategorys
                                             CountryName = _context.Country.Where(x => x.CountryId == destCountryId).FirstOrDefault().CountryName,
                                             SubminimumPrice = s.SubminimumPrice,
                                             SubminimumWeight = s.SubminimumWeight,
-                                            IsHazardous = s.IsHazardous
+                                            IsHazardous = s.IsHazardous,
+                                            DeliveryType = s.DeliveryType
                                         };
                 return Task.FromResult(PriceCategorysDTO.OrderBy(x => x.PriceCategoryName).ToList());
 

@@ -47,7 +47,8 @@ namespace GIGLS.Core.Domain
         [MaxLength(128)]
         public string UserId { get; set; }
         public string DriverUserId { get; set; }
-        public string DestinationServiceCentreUserId { get; set; } 
+        public string DestinationServiceCentreUserId { get; set; }
+        public bool IsAutomated { get; set; }
 
     }
 }
