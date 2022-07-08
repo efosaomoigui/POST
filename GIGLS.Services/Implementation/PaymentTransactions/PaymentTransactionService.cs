@@ -335,7 +335,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 if (!transferDetails.IsVerified)
                 {
                     if (shipmentStatus == PaymentStatus.Paid)
-                        throw new GenericException($"Shipment with {transactionCode} cannot be processed again");
+                        throw new GenericException($"Shipment with {transactionCode} has been paid for already");
 
                     //Block if amount transfered is less than shipment amount
                     if (Convert.ToDecimal(transferDetails.Amount) < shipmentAmount)
@@ -345,7 +345,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
                 else
                 {
-                    throw new GenericException($"Transfer with {transactionCode} cannot be verified again");
+                    throw new GenericException($"This transaction reference has been used already. Provide a valid transaction reference");
                 }
             }
         }
