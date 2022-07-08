@@ -34,5 +34,6 @@ namespace GIGLS.Core.Domain
         public string ResponseCode { get; set; }
         [MaxLength(25)]
         public string TransactionStatus { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

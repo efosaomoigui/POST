@@ -36,6 +36,7 @@ namespace GIGLS.Core.DTO
         public string ResponseCode { get; set; }
         public string TransactionStatus { get; set; }
         public string ServiceCenterName { get; set; }
+        public bool IsVerified { get; set; }
     }
 
     public class CODCallBackDTO : BaseDomainDTO
