@@ -352,6 +352,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     {
                         shipmentsTotal += shipment.GrandTotal;
                     }
+                    else
+                    {
+                        throw new GenericException($"Shipment with waybill {item.Waybill} does not exist");
+                    }
                 }
 
                 //Block if amount transfered is less than shipment amount
