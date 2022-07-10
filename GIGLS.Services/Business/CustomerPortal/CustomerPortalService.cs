@@ -4777,7 +4777,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 DestinationBankAccount = "GIG LOGISTICS-1100138907",
                 DestinationBankName = "Stellas",
                 StatusCode = res.status.ToString(),
-                StatusDescription = res.message
+                StatusDescription = res.message,
+                ReferenceNo = withrawObj.RetrievalReference
             };
             _uow.CODTransferLog.Add(withdrawLog);
             await _uow.CompleteAsync();
@@ -4795,7 +4796,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     DestinationBankAccount = transferDTO.ReceiverAccountNumber,
                     DestinationBankName = transferDTO.ReceiverBankName,
                     StatusCode = res.status.ToString(),
-                    StatusDescription = res.message
+                    StatusDescription = res.message,
+                    ReferenceNo = transferDTO.RetrievalReference
                 };
                 _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
