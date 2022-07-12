@@ -368,6 +368,7 @@
     <Compile Include="DTO\Dashboard\EarningsBreakdownDTO.cs" />
     <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
+    <Compile Include="DTO\DeleteAccountDTO.cs" />
     <Compile Include="DTO\DeliveryLocationDTO.cs" />
     <Compile Include="DTO\Devices\DeviceDTO.cs" />
     <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />

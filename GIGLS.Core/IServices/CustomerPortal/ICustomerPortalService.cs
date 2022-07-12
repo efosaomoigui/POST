@@ -280,5 +280,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<InboundShipmentCategoryDTO>> GetInboundCategory(int countryId);
         Task<GIGGOCODTransferResponseDTO> CODTransfer(GIGGOCODTransferDTO payload);
         Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill);
+        Task DeleteCustomerAccount(DeleteAccountDTO payload);
     }
 }

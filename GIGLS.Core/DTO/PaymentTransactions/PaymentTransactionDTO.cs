@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.PaymentTransactions
 {
@@ -15,5 +16,11 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public bool IsNotOwner { get; set; }
         public string CustomerCode { get; set; }
         public string CustomerUserId { get; set; }
+        public List<WaybillDTO> Waybills { get; set; }
+    }
+
+    public class WaybillDTO
+    {
+        public string Waybill { get; set; }
     }
 }

@@ -1654,6 +1654,49 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task DeleteCustomerAccount(string customercode)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(customercode))
+                    throw new GenericException("Customer code is invalid.", $"{(int)HttpStatusCode.NotFound}");
+
+                var user = await _uow.User.GetUserByEmailorCustomerCode(customercode);
+
+                if (user == null)
+                    throw new GenericException("User does not exist.", $"{(int)HttpStatusCode.NotFound}");
+
+                var individual = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode == customercode).FirstOrDefault();
+
+                if(individual == null)
+                {
+                    var company = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode == customercode).FirstOrDefault();
+
+                    if(company == null)
+                    {
+                        throw new GenericException("User details not exist.", $"{(int)HttpStatusCode.NotFound}");
+                    }
+                    else
+                    {
+                        company.IsDeleted = true;
+                    }
+                }
+                else
+                {
+                    individual.IsDeleted = true;
+                }
+
+                user.IsDeleted = true;
+
+                //Commit transaction
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 }

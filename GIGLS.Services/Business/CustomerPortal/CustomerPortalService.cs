@@ -431,7 +431,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        
+
 
         public async Task<GatewayCodeResponse> GetGatewayCode()
         {
@@ -4632,7 +4632,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
-        public async Task<AllCODShipmentDTO>GetAllCODShipments(PaginationDTO dto)
+        public async Task<AllCODShipmentDTO> GetAllCODShipments(PaginationDTO dto)
         {
             try
             {
@@ -4728,7 +4728,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             var userId = await _userService.GetCurrentUserId();
             var codWallet = await _uow.CODWallet.GetAsync(x => x.UserId == userId);
-            if(codWallet is null)
+            if (codWallet is null)
             {
                 throw new GenericException("user does not have a COD wallet");
             }
@@ -4760,10 +4760,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var withrawObj = new StellasWithdrawalDTO()
             {
-              Amount = transferDTO.Amount,
-              RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
-              Narration = transferDTO.Narration,
-              PayerAccountNumber = codWallet.AccountNo
+                Amount = transferDTO.Amount,
+                RetrievalReference = $"{transferDTO.RetrievalReference}-0WT",
+                Narration = transferDTO.Narration,
+                PayerAccountNumber = codWallet.AccountNo
             };
 
             transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-0TF";
@@ -4777,7 +4777,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 DestinationBankAccount = "GIG LOGISTICS-1100138907",
                 DestinationBankName = "Stellas",
                 StatusCode = res.status.ToString(),
-                StatusDescription = res.message
+                StatusDescription = res.message,
+                ReferenceNo = withrawObj.RetrievalReference
             };
             _uow.CODTransferLog.Add(withdrawLog);
             await _uow.CompleteAsync();
@@ -4795,7 +4796,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     DestinationBankAccount = transferDTO.ReceiverAccountNumber,
                     DestinationBankName = transferDTO.ReceiverBankName,
                     StatusCode = res.status.ToString(),
-                    StatusDescription = res.message
+                    StatusDescription = res.message,
+                    ReferenceNo = transferDTO.RetrievalReference
                 };
                 _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
@@ -5003,7 +5005,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var codTransfer = Mapper.Map<GIGGOCODTransfer>(payload);
 
-             _uow.GIGGOCODTransferRepository.Add(codTransfer);
+            _uow.GIGGOCODTransferRepository.Add(codTransfer);
             await _uow.CompleteAsync();
             var result = Mapper.Map<GIGGOCODTransferResponseDTO>(codTransfer);
             return result;
@@ -5012,6 +5014,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
         {
            return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
+        }
+
+        public async Task DeleteCustomerAccount(DeleteAccountDTO payload)
+        {
+            if (payload == null)
+                throw new GenericException("Invalid user details.", $"{(int)HttpStatusCode.NotFound}");
+
+            if (!string.IsNullOrEmpty(payload.CustomerCode))
+            {
+                payload.CustomerCode = payload.CustomerCode.Trim();
+            }
+            await _companyService.DeleteCustomerAccount(payload.CustomerCode);
         }
     }
 }

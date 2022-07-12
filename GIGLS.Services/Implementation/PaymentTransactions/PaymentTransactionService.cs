@@ -129,12 +129,24 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
             else
             {
-                result = await ProcessNewPaymentTransaction(paymentTransaction);
+                if (paymentTransaction.PaymentType == PaymentType.Transfer)
+                {
+                    result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
+                }
+                else
+                {
+                    result = await ProcessNewPaymentTransaction(paymentTransaction);
+                }
             }
 
             return result;
         }
 
+        public async Task<bool> ProcessNewPaymentTransactionForTransfer(PaymentTransactionDTO paymentTransaction)
+        {
+            await ConfirmShipmentTransferDetails(paymentTransaction);
+            return true;
+        }
         public async Task<bool> ProcessNewPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -160,7 +172,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 {
                     paymentTransaction.UserId = paymentTransaction.CustomerUserId;
                     paymentTransaction.TransactionCode = paymentTransaction.CustomerCode;
-                    await ProcessWalletPaymentForShipment(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, paymentTransaction.UserId); 
+                    await ProcessWalletPaymentForShipment(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, paymentTransaction.UserId);
                 }
                 else
                 {
@@ -196,7 +208,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 QRCode = deliveryNumber.SenderCode
             };
 
-            if(shipment.DepartureCountryId == 1)
+            if (shipment.DepartureCountryId == 1)
             {
                 //Add to Financial Reports
                 var financialReport = new FinancialReportDTO
@@ -287,7 +299,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     {
                         await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.SMS, smsData);
                     }
-                    
+
                 }
                 else
                 {
@@ -297,7 +309,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //grouping and manifesting shipment
-            
+
             if (!shipment.IsGIGGOExtension)
             {
                 if (!paymentTransaction.IsNotOwner)
@@ -309,11 +321,61 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     else
                     {
                         await _autoManifestAndGroupingService.MappingWaybillNumberToGroup(shipment.Waybill);
-                    } 
+                    }
                 }
             }
             result = true;
             return result;
+        }
+
+        private async Task ConfirmShipmentTransferDetails(PaymentTransactionDTO paymentTransaction)
+        {
+            /* 
+             1. The reference code exists and it is the same as what is entered
+             2. We will check that the waybill that the reference code is being validated for, has not been validated before
+             3. We will check that the amount cellulant says it has collected is the same amount for the cost of the waybill.
+             */
+            var transferDetails = _uow.TransferDetails.GetAllAsQueryable()
+                                                        .Where(x => x.PaymentReference.ToLower() == paymentTransaction.TransactionCode.ToLower()).FirstOrDefault();
+
+            if (transferDetails == null)
+                throw new GenericException($"Transfer details does not exist for {paymentTransaction.TransactionCode}");
+
+            if (!transferDetails.IsVerified)
+            {
+                //Get the sum of all waybill(s)
+                var shipmentsTotal = 0.00m;
+                foreach (var item in paymentTransaction.Waybills)
+                {
+                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == item.Waybill);
+                    if (shipment != null)
+                    {
+                        shipmentsTotal += shipment.GrandTotal;
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment with waybill {item.Waybill} does not exist");
+                    }
+                }
+
+                //Block if amount transfered is less than shipment amount
+                if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
+                    throw new GenericException($"Transferred amount is less than shipment amount");
+
+                //Process each waybill as paid
+                foreach (var item in paymentTransaction.Waybills)
+                {
+                    paymentTransaction.Waybill = item.Waybill;
+                    await ProcessNewPaymentTransaction(paymentTransaction);
+                }
+
+                transferDetails.IsVerified = true;
+                await _uow.CompleteAsync();
+            }
+            else
+            {
+                throw new GenericException($"This transaction reference has been used already. Provide a valid transaction reference");
+            }
         }
 
         private async Task ProcessWalletTransaction(PaymentTransactionDTO paymentTransaction, Shipment shipment, Invoice invoiceEntity, GeneralLedger generalLedgerEntity, string currentUserId)
@@ -622,7 +684,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //    .Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
 
                 var customer = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).FirstOrDefault();
-                if(customer != null)
+                if (customer != null)
                 {
                     customerCountryId = customer.UserActiveCountryId;
                     rank = customer.Rank;
@@ -635,9 +697,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //check if the customer country is same as the country in the user table
             var user = await _uow.User.GetUserByChannelCode(shipment.CustomerCode);
-            if(user != null)
+            if (user != null)
             {
-                if(user.UserActiveCountryId != customerCountryId)
+                if (user.UserActiveCountryId != customerCountryId)
                 {
                     throw new GenericException($"Payment Failed for waybill {shipment.Waybill}, Contact Customer Care", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -668,7 +730,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //    amountToDebit = amountToDebit * discount;
                 //}           
 
-                if(UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
+                if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType)
                 {
                     var discount = await GetDiscountForInternationalShipmentBasedOnRank(rank, customerCountryId);
                     amountToDebit = amountToDebit * discount;
@@ -683,10 +745,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (rank == Rank.Class)
             {
-               var  globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId);
-               if(globalProperty != null)
+                var globalProperty = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.InternationalRankClassDiscount.ToString() && s.CountryId == countryId);
+                if (globalProperty != null)
                 {
-                    percentage = Convert.ToDecimal(globalProperty.Value);                    
+                    percentage = Convert.ToDecimal(globalProperty.Value);
                 }
             }
             else
@@ -736,7 +798,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task<bool> ProcessPaymentTransactionGIGGO(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
-           
+
             //check if waybill is from BOT
             var preshipment = await _uow.PreShipmentMobile.GetPreshipmentMobileByWaybill(paymentTransaction.Waybill);
             if (preshipment != null)
@@ -832,7 +894,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                                     message.SenderName = indCust.FirstName + " " + indCust.LastName;
                                 }
                             }
-                            else 
+                            else
                             {
                                 var compCust = await _uow.Company.GetAsync(x => x.CustomerCode == user.CustomerCode);
                                 if (compCust != null)
@@ -902,7 +964,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (!paymentTransaction.FromApp)
             {
-               int centerIds = await _userService.GetPriviledgeServiceCenter();
+                int centerIds = await _userService.GetPriviledgeServiceCenter();
                 serviceCenterIds = new int[] { centerIds };
             }
             else
@@ -991,8 +1053,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return amountToDebit;
         }
 
-       
+
 
 
     }
-}                                                                                                      
+}
