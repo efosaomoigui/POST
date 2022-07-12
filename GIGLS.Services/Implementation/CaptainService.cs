@@ -345,8 +345,8 @@ namespace GIGLS.Services.Implementation
                 {
                     RegistrationNumber = vehicleDTO.RegistrationNumber,
                     Capacity = vehicleDTO.VehicleCapacity,
-                    DateCreated = vehicleDTO.DateOfCommission,
-                    DateModified = DateTime.Now,
+                    DateCreated = vehicleDTO.DateOfCommission.Date,
+                    DateModified = DateTime.Now.Date,
                     IsDeleted = false,
                     Status = vehicleDTO.Status == "Active" ? true : false,
                     Partner = partner[0],
@@ -365,6 +365,13 @@ namespace GIGLS.Services.Implementation
                 partner[0].VehicleLicenseNumber = newFleet.RegistrationNumber;
 
                 await _uow.CompleteAsync();
+
+                // Update Date created that is overriden in context upon creation 
+                var fleet = await _uow.Fleet.FindAsync(x => x.RegistrationNumber == vehicleDTO.RegistrationNumber);
+                var fleetToUpdate = fleet.FirstOrDefault();
+                fleetToUpdate.DateCreated = vehicleDTO.DateOfCommission;
+                await _uow.CompleteAsync();
+
                 return true;
             }
             else
@@ -620,6 +627,24 @@ namespace GIGLS.Services.Implementation
                     }
                     throw new GenericException($"Vehicle with registration number: {vehicleNumber} does not exist");
                     
+                }
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<VehicleDTO>> GetVehiclesByDateRangeAsync(DateFilterCriteria filter)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+                {
+                    return await _uow.CaptainRepository.GetAllVehiclesByDateRangeAsync(filter);
                 }
                 throw new GenericException("You are not authorized to use this feature");
             }

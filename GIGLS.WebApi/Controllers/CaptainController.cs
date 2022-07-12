@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Captains;
 using System;
 using System.Web;
 using System.Text;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.WebApi.Controllers
@@ -281,6 +282,21 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.GetVehicleAnalyticsAsync(vehiclenumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("getvehicles/bydaterange")]
+        public async Task<IServiceResponse<object>> GetVehiclesByDateRange(DateFilterCriteria dateRange)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehiclesByDateRangeAsync(dateRange);
 
                 return new ServiceResponse<object>
                 {

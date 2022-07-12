@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Core.IServices
 {
@@ -25,5 +26,6 @@ namespace GIGLS.Core.IServices
         Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync();
         Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
         Task<VehicleAnalyticsDto> GetVehicleAnalyticsAsync(string vehicleNumber);
+        Task<List<VehicleDTO>> GetVehiclesByDateRangeAsync(DateFilterCriteria filter);
     }
 }

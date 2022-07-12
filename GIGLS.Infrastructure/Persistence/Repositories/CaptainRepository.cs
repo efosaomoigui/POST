@@ -9,6 +9,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GIGLS.Core.DTO.Account;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
 {
@@ -167,6 +169,38 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
                 throw;
             }
+        }
+
+        public Task<List<VehicleDTO>> GetAllVehiclesByDateRangeAsync(DateFilterCriteria filter)
+        {
+            //get startDate and endDate
+            var startDate = new DateTime();
+            if (filter.StartDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            }
+            var queryDate = filter.getStartDateAndEndDate();
+            var endDate = queryDate.Item2;
+
+            // filter by cancelled shipments
+            var vehicles = _context.Fleet.AsQueryable().Where(x => x.IsDeleted == false);
+            vehicles = vehicles.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate)
+                .OrderByDescending(x => x.DateCreated);
+
+            var resultDto = vehicles.Select(x => new VehicleDTO()
+            {
+                FleetId = x.FleetId,
+                Status = x.Status == true ? "Active" : "Inactive",
+                AssignedCaptain = _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).FirstName.ToString() + " " + _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).LastName.ToString(),
+                FleetName = x.FleetName,
+                RegistrationNumber = x.RegistrationNumber,
+                VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString(),
+                VehicleOwnerId = x.EnterprisePartnerId,
+                VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
+                IsFixed = x.IsFixed.ToString()
+            }).ToList();
+
+            return Task.FromResult(resultDto);
         }
 
         private CurrentMonthDetailsDTO GetStartAndEndDayOfMonth()
