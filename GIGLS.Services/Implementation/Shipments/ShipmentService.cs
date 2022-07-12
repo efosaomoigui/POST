@@ -91,7 +91,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
             IPaymentService paymentService, IGIGGoPricingService gIGGoPricingService, INodeService nodeService, IDHLService dHLService,
             IWaybillPaymentLogService waybillPaymentLogService, IUPSService uPSService, IInternationalPriceService internationalPriceService,
-            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService, 
+            ICountryService countryService, IInternationalCargoManifestService intlCargoManifest, IPlaceLocationService locationService,
             ICODWalletService codWalletService, IAutoManifestAndGroupingService autoManifestAndGroupingService, ICellulantPaymentService cellulantService)
         {
             _uow = uow;
@@ -1076,7 +1076,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
-                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType)
+                //Exclude USA shipments to be settled through wallet immediately 12/07/2022
+                if ((shipmentDTO.DepartureCountryId != 207) && (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType || CompanyType.Ecommerce.ToString() == shipmentDTO.CompanyType))
                 {
                     var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
 
@@ -1090,6 +1091,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
                     }
                 }
+
                 //Send mail for shipment creation
                 //if (newShipment != null)
                 //{
@@ -1097,7 +1099,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
                 //also group and manifest shipment(grouping and manifesting should consider go standard and faster)
-               // await MappingWaybillNumberToGroup(newShipment.Waybill);
+                // await MappingWaybillNumberToGroup(newShipment.Waybill);
                 return newShipment;
             }
             catch (Exception ex)
@@ -1756,25 +1758,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
 
-               //confirm the weight for special shipment type
-                var specialPackageIDs = shipmentDTO.ShipmentItems.Select(x => x.SpecialPackageId).ToList();
-                if (specialPackageIDs.Any())
+            //confirm the weight for special shipment type
+            var specialPackageIDs = shipmentDTO.ShipmentItems.Select(x => x.SpecialPackageId).ToList();
+            if (specialPackageIDs.Any())
+            {
+                var specialPackages = _uow.SpecialDomesticPackage.GetAllAsQueryable().Where(x => specialPackageIDs.Contains(x.SpecialDomesticPackageId)).ToList();
+                //confirm the weight for special shipment type
+                foreach (var item in shipmentDTO.ShipmentItems)
                 {
-                   var specialPackages = _uow.SpecialDomesticPackage.GetAllAsQueryable().Where(x => specialPackageIDs.Contains(x.SpecialDomesticPackageId)).ToList();
-                   //confirm the weight for special shipment type
-                    foreach (var item in shipmentDTO.ShipmentItems)
+                    if (item.SpecialPackageId != null && item.SpecialPackageId > 0)
                     {
-                        if (item.SpecialPackageId != null && item.SpecialPackageId > 0)
+                        var specialItem = specialPackages.Where(x => x.SpecialDomesticPackageId == item.SpecialPackageId).FirstOrDefault();
+                        if (specialItem != null)
                         {
-                          var specialItem = specialPackages.Where(x => x.SpecialDomesticPackageId == item.SpecialPackageId).FirstOrDefault();
-                            if (specialItem != null)
-                            {
-                                item.Weight = Convert.ToDouble(specialItem.Weight);
-                            }
+                            item.Weight = Convert.ToDouble(specialItem.Weight);
                         }
                     }
                 }
-                
+            }
+
 
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
@@ -1883,12 +1885,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //Process Domestic Customer Week Discount
             var domesticCustomerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DomesticCustomerWeek, 1);
-            var domesticCustomerWeekValue = Convert.ToBoolean( domesticCustomerWeek.Value);
+            var domesticCustomerWeekValue = Convert.ToBoolean(domesticCustomerWeek.Value);
             if (domesticCustomerWeekValue)
             {
                 if (!shipmentDTO.IsInternational && domesticCustomerWeekValue)
                 {
-                   // await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
+                    // await ProcessDiscountPaymentForDomesticCustomerWeek(shipmentDTO);
 
                     newShipment.GrandTotal = shipmentDTO.GrandTotal;
                     newShipment.AppliedDiscount = shipmentDTO.AppliedDiscount;
@@ -1896,7 +1898,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            
+
             _uow.Shipment.Add(newShipment);
 
             //save into DeliveryOptionMapping table
@@ -5424,7 +5426,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.Customer[0].PhoneNumber = shipmentDTO.Customer[0].PhoneNumber.Trim();
             }
 
-           
+
             //set some data to null
             shipmentDTO.ShipmentCollection = null;
             shipmentDTO.Demurrage = null;
@@ -5813,7 +5815,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         discountedPrice = Math.Round(discountedPrice, 2);
                         var discountAmount = shipment.GrandTotal - discountedPrice;
                         shipment.DiscountValue = discountAmount;
-                        shipment.GrandTotal = Math.Ceiling( discountedPrice);
+                        shipment.GrandTotal = Math.Ceiling(discountedPrice);
                         shipment.AppliedDiscount = percentage;
                         processDiscount = true;
                         shipment.CustomerSelected = true;
@@ -5824,7 +5826,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
             }
-            
+
             return processDiscount;
         }
 
@@ -5836,8 +5838,8 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipment == null)
                 return processDiscount;
             int countryId = 1;
-            
-            if(shipment.IsInternational && shipment.Courier != null)
+
+            if (shipment.IsInternational && shipment.Courier != null)
             {
                 var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalCustomerWeekDate, countryId);
 
@@ -6159,7 +6161,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<InternationalCargoManifestDTO>> GetIntlCargoManifests(NewFilterOptionsDto filter)
         {
-           return await _intlCargoManifest.GetIntlCargoManifests(filter);
+            return await _intlCargoManifest.GetIntlCargoManifests(filter);
         }
 
         public async Task<InternationalCargoManifestDTO> GetIntlCargoManifestByID(int cargoId)
@@ -6298,7 +6300,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         PageSize = 100,
                         StartDate = firstDayOfMonth,
                         EndDate = lastDayOfMonth
-                    }; 
+                    };
                 }
 
                 int totalCount;
@@ -6333,7 +6335,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var result = (CustomerAccountDetailDTO)bal.data;
                         allCOD.AvailableBalance = result.availableBalance;
-                    } 
+                    }
                 }
                 allCOD.AccountNo = codWalletInfo.AccountNo;
                 if (String.IsNullOrEmpty(allCOD.AvailableBalance))
@@ -6356,7 +6358,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
-                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false &&  x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString()).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
                 }
 
                 if (codAgilityShipment.Any())
@@ -6592,7 +6594,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"COD payment has been made for this waybill {waybill}");
             }
 
-            
+
             var codAccShipment = await _uow.CashOnDeliveryRegisterAccount.GetAsync(x => x.Waybill == waybill);
             if (codAccShipment != null)
             {
@@ -6610,7 +6612,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 result = recentLog.StatusDescription;
             }
-           
+
             return result;
         }
 
@@ -6662,7 +6664,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var admin = await _userService.IsUserHasAdminRole(userId);
 
-                if(admin || User.SystemUserRole.ToLower().Contains("ecommerce"))
+                if (admin || User.SystemUserRole.ToLower().Contains("ecommerce"))
                 {
 
                     EcommerceReport = await _uow.Shipment.EcommerceSummaryReport(filter);
@@ -6851,7 +6853,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     dto.StartDate = dto.StartDate.Value.AddHours(12).AddMinutes(00);
                     dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
                 }
-               
+
                 dto.StartDate = dto.StartDate.Value.Date;
                 dto.EndDate = dto.EndDate.Value.Date;
                 dto.EndDate = dto.EndDate.Value.AddHours(23).AddMinutes(59);
