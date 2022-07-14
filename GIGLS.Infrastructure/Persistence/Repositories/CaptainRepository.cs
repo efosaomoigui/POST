@@ -30,7 +30,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             {
                 var currentMonth = GetStartAndEndDayOfMonth();
 
-                var captains = _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false).AsQueryable();
+                var captains = _context.Partners.Where(x => 
+                    x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                    && x.IsDeleted == false).AsQueryable();
                 var allCaptains = new List<ViewCaptainsDTO>();
 
                 if(date == null)
@@ -66,7 +69,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId && x.IsDeleted == false);
+                var captain = await _context.Partners.FirstOrDefaultAsync(x => 
+                    x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                    && x.PartnerId == partnerId 
+                    && x.IsDeleted == false);
                 return await Task.FromResult(captain);
             }
             catch (Exception)
@@ -79,7 +86,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var captain = await _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false)
+                var captain = await _context.Partners.Where(x => 
+                        x.PartnerType == PartnerType.Captain 
+                        || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                        && x.IsDeleted == false)
                     .OrderByDescending(x => x.DateCreated)
                     .ToListAsync();
                 return await Task.FromResult(captain);
