@@ -129,9 +129,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
             else
             {
+                //Check if payment type is trnafer
                 if (paymentTransaction.PaymentType == PaymentType.Transfer)
                 {
-                    result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
+                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+                    if(shipment == null)
+                        throw new GenericException($"Shipment with waybill {paymentTransaction.Waybill} does not exist");
+
+                    //Use new transfer payment method for nigeria else normal transfer payment method for others
+                    if(shipment.DepartureCountryId == 1)
+                    {
+                        result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
+                    }
+                    else
+                    {
+                        result = await ProcessNewPaymentTransaction(paymentTransaction);
+                    }
                 }
                 else
                 {
