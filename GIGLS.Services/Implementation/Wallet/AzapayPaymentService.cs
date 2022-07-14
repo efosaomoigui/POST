@@ -57,6 +57,15 @@ namespace GIGLS.Services.Implementation.Wallet
                     throw new GenericException($"This transfer details with RefId {transferDetailsDTO.RefId} already exist.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                if (transferDetailsDTO.Status == "CONFIRMED")
+                {
+                    transferDetailsDTO.TransactionStatus = "success";
+                }
+                else
+                {
+                    transferDetailsDTO.TransactionStatus = "pending";
+                }
+
                 transferDetailsDTO.ProcessingPartner = ProcessingPartnerType.Azapay;
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
                 _uow.TransferDetails.Add(transferDetails);

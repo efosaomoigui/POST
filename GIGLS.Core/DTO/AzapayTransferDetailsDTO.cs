@@ -70,6 +70,8 @@ namespace GIGLS.Core.DTO
 
         [JsonProperty("isPaymentGateway")]
         public bool IsPaymentGateway { get; set; }
+        public string TransactionStatus { get; set; }
+        public bool IsVerified { get; set; }
         public ProcessingPartnerType ProcessingPartner { get; set; }
     }
 }

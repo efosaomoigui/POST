@@ -107,6 +107,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     transferDetailsDTO.TransactionStatus = "pending";
                 }
 
+                transferDetailsDTO.ProcessingPartner = ProcessingPartnerType.Cellulant;
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
                 _uow.TransferDetails.Add(transferDetails);
                 await _uow.CompleteAsync();
@@ -123,6 +124,8 @@ namespace GIGLS.Services.Implementation.Wallet
             var isRegion = await CheckUserPrivilegeIsRegion();
             var isAccount = await CheckUserRoleIsAccount();
 
+            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual");
+            List<string> crAccounts = new List<string>();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();
 
@@ -139,9 +142,11 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
-                if (isRegion == true)
+                if (isRegion)
                 {
-                    var crAccounts = await GetRegionServiceCentresCrAccount();
+                    crAccounts.AddRange(await GetRegionServiceCentresCrAccount());
+                    crAccounts.Add(CODManualServiceCentreCodes.FirstOrDefault().CrAccount);
+
                     if (crAccounts.Count > 0)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccounts);
@@ -149,7 +154,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else
                 {
-                    if (isAdmin == true || isAccount == true)
+                    if (isAdmin || isAccount)
                     {
                         transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
                     }
@@ -822,13 +827,13 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
 
-
             //check if this is an alpha shipment
             var alpha = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill && x.IsAlpha);
             if (alpha != null)
             {
                 customerCode = alpha.CustomerCode;
             }
+
             if (accInfo is null)
             {
                 // throw new GenericException("user does not have a cod wallet");
@@ -1040,9 +1045,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
             }
             //test
-            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-            var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
+             //var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();
@@ -1272,17 +1277,24 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (!string.IsNullOrEmpty(codWaybill))
             {
+                decimal sum = 0;
                 var codAmount = _uow.Shipment.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
 
                 if (codAmount.HasValue)
                 {
-                    var transferedAmount = Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount);
-                    if (transferedAmount == codAmount.Value || transferedAmount > codAmount.Value)
+                    var transferedAmount = response.Transactions.Select(x => x.Amount);
+                    foreach (var item in transferedAmount)
+                    {
+                        var amount = Convert.ToDecimal(item);
+
+                        sum  =  sum + amount;
+                    }
+                    if (sum == codAmount.Value || sum > codAmount.Value)
                     {
                         result.Status = true;
                         result.Message = "Transfer Successfully Confirmed";
                     }
-                    else if (transferedAmount < codAmount.Value)
+                    else if (sum < codAmount.Value)
                     {
                         result.Status = false;
                         result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmount.Value}. This item can not be released at this time";
@@ -1293,13 +1305,19 @@ namespace GIGLS.Services.Implementation.Wallet
                     var codAmountFromMobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.Waybill == codWaybill).Select(x => x.CashOnDeliveryAmount).FirstOrDefault();
                     if (codAmountFromMobile.HasValue)
                     {
-                        var transferedAmount = Convert.ToDecimal(response.Transactions.FirstOrDefault().Amount);
-                        if (transferedAmount == codAmountFromMobile.Value || transferedAmount > codAmountFromMobile.Value)
+                        var transferedAmount = response.Transactions.Select(x => x.Amount);
+                        foreach (var item in transferedAmount)
+                        {
+                            var amount = Convert.ToDecimal(item);
+
+                            sum = sum + amount;
+                        }
+                        if (sum == codAmount.Value || sum > codAmount.Value)
                         {
                             result.Status = true;
                             result.Message = "Transfer Successfully Confirmed";
                         }
-                        else if (transferedAmount < codAmountFromMobile.Value)
+                        else if (sum < codAmountFromMobile.Value)
                         {
                             result.Status = false;
                             result.Message = $"Amount of {transferedAmount} transferred is less than the expected COD amount of {codAmountFromMobile.Value}. This item can not be released at this time";

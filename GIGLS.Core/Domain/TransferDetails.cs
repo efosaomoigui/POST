@@ -11,6 +11,7 @@ namespace GIGLS.Core.Domain
 {
     public class TransferDetails : BaseDomain, IAuditable
     {
+        [Key]
         public int TransferDetailsId { get; set; }
         [MaxLength(50)]
         public string OriginatorAccountNumber { get; set; }
