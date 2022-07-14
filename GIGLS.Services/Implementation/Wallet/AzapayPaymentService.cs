@@ -22,24 +22,9 @@ namespace GIGLS.Services.Implementation.Wallet
    public  class AzapayPaymentService : IAzapayPaymentService
     {
         private readonly IUnitOfWork _uow;
-        private IUserService _userService;
-        private IServiceCentreService _serviceCenterService;
-        private readonly IWalletService _walletService;
-        private readonly IPaymentTransactionService _paymentTransactionService;
-        private readonly INodeService _nodeService;
-        private readonly IMessageSenderService _messageSenderService;
-        private readonly IStellasService _stellasService;
-        public AzapayPaymentService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService,
-            IWalletService walletService, IPaymentTransactionService paymentTransactionService, INodeService nodeService, IMessageSenderService messageSenderService, IStellasService stellasService)
+        public AzapayPaymentService(IUnitOfWork uow)
         {
             _uow = uow;
-            _userService = userService;
-            _serviceCenterService = serviceCenterService;
-            _walletService = walletService;
-            _paymentTransactionService = paymentTransactionService;
-            _nodeService = nodeService;
-            _messageSenderService = messageSenderService;
-            _stellasService = stellasService;
             MapperConfig.Initialize();
         }
         public async Task<bool> AddAzaPayTransferDetails(AzapayTransferDetailsDTO transferDetailsDTO)
