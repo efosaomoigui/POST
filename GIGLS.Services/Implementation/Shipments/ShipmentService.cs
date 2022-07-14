@@ -6865,5 +6865,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<string> VerifyPayment(string waybill)
+        {
+            return await _uow.Invoice.VerifyPayment(waybill);
+        }
     }
 }
