@@ -51,15 +51,16 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<string> GetCellulantKey();
         Task<string> Decrypt(string encrytedKey);
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
+        Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
+        Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment);
+        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<ResponseDTO> UpdateUserRankForAlpha(string merchantEmail);
         Task<bool> CODCallBack(CODCallBackDTO cod);
         Task<CellulantPushPaymentStatusResponse> UpdateCODShipmentOnCallBack(PushPaymentStatusRequstPayload payload);
         Task<bool> UpdateCODShipmentOnCallBackStellas(CODCallBackDTO cod);
-        Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment);
-        Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment);
         Task<string> Decrypt();
-        Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO);
         Task<object> CancelShipment(string Waybill);
         Task<CompanyDTO> GetCompanyDetailsByEmail(string email);
+        Task<bool> AddAzaPayTransferDetails(AzapayTransferDetailsDTO transferDetailsDTO);
     }
 }

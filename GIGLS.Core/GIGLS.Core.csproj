@@ -343,6 +343,7 @@
     <Compile Include="DTO\Alpha\AlphaUserLoginDTO.cs" />
     <Compile Include="DTO\AppMessageDTO.cs" />
     <Compile Include="DTO\ApproveShipmentDTO.cs" />
+    <Compile Include="DTO\AzapayTransferDetailsDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
@@ -680,6 +681,7 @@
     <Compile Include="Enums\PreShipmentProcessingStatus.cs" />
     <Compile Include="Enums\PreShipmentStatus.cs" />
     <Compile Include="Enums\PricingType.cs" />
+    <Compile Include="Enums\ProcessingPartnerType.cs" />
     <Compile Include="Enums\Rank.cs" />
     <Compile Include="Enums\RateType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
@@ -1037,6 +1039,7 @@
     <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
+    <Compile Include="IServices\Wallet\IAzapayPaymentService.cs" />
     <Compile Include="IServices\Wallet\ICellulantPaymentService.cs" />
     <Compile Include="IServices\Wallet\ICODGeneratedAccountNoService.cs" />
     <Compile Include="IServices\Wallet\ICODTransferLogService.cs" />
