@@ -32,6 +32,7 @@ namespace GIGLS.Core.IRepositories.Account
         Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGroupedx(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceMonitorDTO>> GetShipmentWaitingForCollection(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaitingForCollection_NotGrouped(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<string> VerifyPayment(string waybill);
 
         //Admin Report 
         IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();
