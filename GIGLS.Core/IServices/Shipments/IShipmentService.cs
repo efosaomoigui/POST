@@ -114,6 +114,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> CheckTransferStatusForECA(string waybill);
         Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto);
         Task<AllCODShipmentDTO> CellulantShipmentCollectionReport(PaginationDTO dto);
+        Task<string> VerifyPayment(string waybill);
+
+
     }
 
     public interface IMagayaService : IServiceDependencyMarker
