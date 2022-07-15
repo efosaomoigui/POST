@@ -378,8 +378,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //Process each waybill as paid
                 foreach (var item in paymentTransaction.Waybills)
                 {
-                    paymentTransaction.Waybill = item.Waybill;
-                    await ProcessNewPaymentTransaction(paymentTransaction);
+                    var paymentStatus =  _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
+                    if(paymentStatus != PaymentStatus.Paid)
+                    {
+                        paymentTransaction.Waybill = item.Waybill;
+                        await ProcessNewPaymentTransaction(paymentTransaction);
+                    }
                 }
 
                 transferDetails.IsVerified = true;
