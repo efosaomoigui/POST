@@ -358,6 +358,7 @@
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
     <Compile Include="Implementation\Vendors\VendorService.cs" />
+    <Compile Include="Implementation\Wallet\AzapayPaymentService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
     <Compile Include="Implementation\Wallet\CellulantPaymentService.cs" />

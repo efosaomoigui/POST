@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GIGLS.Core.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,6 +11,7 @@ namespace GIGLS.Core.Domain
 {
     public class TransferDetails : BaseDomain, IAuditable
     {
+        [Key]
         public int TransferDetailsId { get; set; }
         [MaxLength(50)]
         public string OriginatorAccountNumber { get; set; }
@@ -35,5 +37,42 @@ namespace GIGLS.Core.Domain
         [MaxLength(25)]
         public string TransactionStatus { get; set; }
         public bool IsVerified { get; set; }
+
+        //Azapay 
+        [MaxLength(50)]
+        public string Id { get; set; }
+        //public DateTime CreatedAt { get; set; }
+        [MaxLength(50)]
+        public string ModifiedAt { get; set; }
+        [MaxLength(50)]
+        public string FromKey { get; set; }
+        [MaxLength(50)]
+        public string ToKey { get; set; }
+        [MaxLength(100)]
+        public string SenderName { get; set; }
+        [MaxLength(100)]
+        public string SenderBank { get; set; }
+        public decimal Charge { get; set; }
+        [MaxLength(150)]
+        public string Note { get; set; }
+        [MaxLength(50)]
+        public string Status { get; set; }
+        [MaxLength(100)]
+        public string RefId { get; set; }
+        [MaxLength(100)]
+        public string CustomerRef { get; set; }
+        [MaxLength(100)]
+        public string SetRefId { get; set; }
+        [MaxLength(50)]
+        public string Type { get; set; }
+        public bool Settled { get; set; }
+        [MaxLength(50)]
+        public string DeviceId { get; set; }
+        [MaxLength(50)]
+        public string TimedAccNo { get; set; }
+        [MaxLength(50)]
+        public string ManagerName { get; set; }
+        public bool IsPaymentGateway { get; set; }
+        public ProcessingPartnerType ProcessingPartner { get; set; }
     }
 }
