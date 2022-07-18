@@ -4780,6 +4780,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 StatusDescription = res.message,
                 ReferenceNo = withrawObj.RetrievalReference
             };
+            if (res.errors.Any())
+            {
+                withdrawLog.StatusDescription = JsonConvert.SerializeObject(res);
+            }
             _uow.CODTransferLog.Add(withdrawLog);
             await _uow.CompleteAsync();
             if (res.status)
@@ -4799,6 +4803,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     StatusDescription = res.message,
                     ReferenceNo = transferDTO.RetrievalReference
                 };
+                if (withdrawResponse.errors.Any())
+                {
+                    withdrawLog.StatusDescription = JsonConvert.SerializeObject(withdrawResponse);
+                }
                 _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
                 return withdrawResponse;
