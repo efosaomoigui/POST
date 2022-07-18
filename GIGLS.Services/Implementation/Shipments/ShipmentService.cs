@@ -4238,65 +4238,68 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                 }
 
-                var mobileShipment = new PreShipmentMobileDTO
+                var mobileShipment = new PreShipmentMobileDTO();
+                var senderLocation = new LocationDTO();
+                var receiverLocation = new LocationDTO();
+
+                var customer = preShipment.Customer[0];
+                mobileShipment.CalculatedTotal = (double)priceDTO.DeliveryPrice;
+                mobileShipment.IsHomeDelivery = preShipment.PickupOptions == PickupOptions.HOMEDELIVERY ? true : false;
+                mobileShipment.IsScheduled = false;
+                mobileShipment.Waybill = preShipment.Waybill;
+                mobileShipment.ReceiverName = preShipment.ReceiverName;
+                mobileShipment.ReceiverPhoneNumber = preShipment.ReceiverPhoneNumber;
+                mobileShipment.ReceiverEmail = preShipment.ReceiverEmail;
+                mobileShipment.ReceiverAddress = preShipment.ReceiverAddress;
+                mobileShipment.ReceiverStationId = preShipment.ReceiverStationId;
+                if (preShipment.ReceiverLocation != null)
                 {
-                    CalculatedTotal = (double)priceDTO.DeliveryPrice,
-                    IsHomeDelivery = preShipment.PickupOptions == PickupOptions.HOMEDELIVERY ? true : false,
-                    IsScheduled = false,
-                    Waybill = preShipment.Waybill,
-                    ReceiverName = preShipment.ReceiverName,
-                    ReceiverPhoneNumber = preShipment.ReceiverPhoneNumber,
-                    ReceiverEmail = preShipment.ReceiverEmail,
-                    ReceiverAddress = preShipment.ReceiverAddress,
-                    ReceiverStationId = preShipment.ReceiverStationId,
-                    ReceiverLocation = new LocationDTO
-                    {
-                        Latitude = preShipment.ReceiverLocation.Latitude,
-                        Longitude = preShipment.ReceiverLocation.Longitude
-                    },
-                    GrandTotal = preShipment.GrandTotal,
-                    SenderAddress = preShipment.SenderAddress,
-                    SenderStationId = preShipment.SenderStationId,
-                    SenderLocation = new LocationDTO
-                    {
-                        Latitude = preShipment.SenderLocation.Latitude,
-                        Longitude = preShipment.SenderLocation.Longitude
-                    },
-                    SenderName = preShipment.SenderName,
-                    SenderPhoneNumber = preShipment.Customer[0].PhoneNumber,
-                    CustomerCode = preShipment.Customer[0].CustomerCode,
-                    VehicleType = preShipment.VehicleType,
-                    UserId = preShipment.UserId,
-                    IsdeclaredVal = preShipment.IsdeclaredVal,
-                    DiscountValue = priceDTO.Discount,
-                    InsuranceValue = priceDTO.InsuranceValue,
-                    Vat = priceDTO.Vat,
-                    DeliveryPrice = priceDTO.DeliveryPrice,
-                    SenderLocality = preShipment.SenderLocality,
-                    ZoneMapping = preShipment.ZoneMapping,
+                    receiverLocation.Latitude = preShipment.ReceiverLocation.Latitude;
+                    receiverLocation.Longitude = preShipment.ReceiverLocation.Longitude;
+                }
+                mobileShipment.ReceiverLocation = receiverLocation;
+                mobileShipment.GrandTotal = preShipment.GrandTotal;
+                mobileShipment.SenderAddress = preShipment.SenderAddress;
+                mobileShipment.SenderStationId = preShipment.SenderStationId;
+                if (preShipment.SenderLocation != null)
+                {
+                    senderLocation.Latitude = preShipment.SenderLocation.Latitude;
+                    senderLocation.Longitude = preShipment.SenderLocation.Longitude;
+                }
+                mobileShipment.SenderName = preShipment.SenderName;
+                mobileShipment.SenderPhoneNumber = customer == null ? "NIL" : customer.PhoneNumber;
+                mobileShipment.CustomerCode = customer == null ? "NIL" : customer.CustomerCode;
+                mobileShipment.VehicleType = preShipment.VehicleType;
+                mobileShipment.UserId = preShipment.UserId;
+                mobileShipment.IsdeclaredVal = preShipment.IsdeclaredVal;
+                mobileShipment.DiscountValue = priceDTO.Discount;
+                mobileShipment.InsuranceValue = priceDTO.InsuranceValue;
+                mobileShipment.Vat = priceDTO.Vat;
+                mobileShipment.DeliveryPrice = priceDTO.DeliveryPrice;
+                mobileShipment.SenderLocality = preShipment.SenderLocality;
+                mobileShipment.ZoneMapping = preShipment.ZoneMapping;
 
-                    CountryId = preShipment.CountryId,
-                    CustomerType = preShipment.CustomerType,
-                    CompanyType = preShipment.CompanyType,
-                    Value = (decimal)preShipment.Value,
-                    ShipmentPickupPrice = (decimal)(priceDTO.PickUpCharge == null ? 0.0M : priceDTO.PickUpCharge),
-                    IsConfirmed = false,
-                    IsDelivered = false,
-                    shipmentstatus = "Shipment created",
-                    PreShipmentItems = preShipment.PreShipmentItems.Select(s => new PreShipmentItemMobileDTO
-                    {
-                        Description = s.Description,
-                        SpecialPackageId = s.SpecialPackageId,
-                        ShipmentType = s.ShipmentType,
-                        IsVolumetric = s.IsVolumetric,
-                        Weight = (decimal)s.Weight,
-                        Quantity = s.Quantity,
-                        CalculatedPrice = s.CalculatedPrice,
-                        ItemName = s.Description,
-                        Value = s.Value
+                mobileShipment.CountryId = preShipment.CountryId;
+                mobileShipment.CustomerType = preShipment.CustomerType;
+                mobileShipment.CompanyType = preShipment.CompanyType;
+                mobileShipment.Value = (decimal)preShipment.Value;
+                mobileShipment.ShipmentPickupPrice = (decimal)(priceDTO.PickUpCharge == null ? 0.0M : priceDTO.PickUpCharge);
+                mobileShipment.IsConfirmed = false;
+                mobileShipment.IsDelivered = false;
+                mobileShipment.shipmentstatus = "Shipment created";
+                mobileShipment.PreShipmentItems = preShipment.PreShipmentItems.Select(s => new PreShipmentItemMobileDTO
+                {
+                    Description = s.Description,
+                    SpecialPackageId = s.SpecialPackageId,
+                    ShipmentType = s.ShipmentType,
+                    IsVolumetric = s.IsVolumetric,
+                    Weight = (decimal)s.Weight,
+                    Quantity = s.Quantity,
+                    CalculatedPrice = s.CalculatedPrice,
+                    ItemName = s.Description,
+                    Value = s.Value
 
-                    }).ToList()
-                };
+                }).ToList();
 
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(mobileShipment);
 
