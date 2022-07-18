@@ -378,7 +378,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //Get sum of all shipment that have been processed with the transaction code
                 var sumOfVerifiedShipments = _uow.Invoice.GetAllAsQueryable()
-                                                 .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower())
+                                                 .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower() && s.PaymentStatus == PaymentStatus.Paid)
                                                  .Select(x => x.Amount).Sum();
 
                 shipmentsTotal += sumOfVerifiedShipments;
