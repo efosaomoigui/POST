@@ -31,8 +31,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var currentMonth = GetStartAndEndDayOfMonth();
 
                 var captains = _context.Partners.Where(x => 
-                    x.PartnerType == PartnerType.Captain 
-                    || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                    (x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner) 
                     && x.IsDeleted == false).AsQueryable();
                 var allCaptains = new List<ViewCaptainsDTO>();
 
@@ -70,8 +70,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             try
             {
                 var captain = await _context.Partners.FirstOrDefaultAsync(x => 
-                    x.PartnerType == PartnerType.Captain 
-                    || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                    (x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner)
                     && x.PartnerId == partnerId 
                     && x.IsDeleted == false);
                 return await Task.FromResult(captain);
@@ -87,8 +87,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             try
             {
                 var captain = await _context.Partners.Where(x => 
-                        x.PartnerType == PartnerType.Captain 
-                        || x.PartnerType == PartnerType.InternalDeliveryPartner 
+                        (x.PartnerType == PartnerType.Captain 
+                        || x.PartnerType == PartnerType.InternalDeliveryPartner)
                         && x.IsDeleted == false)
                     .OrderByDescending(x => x.DateCreated)
                     .ToListAsync();
