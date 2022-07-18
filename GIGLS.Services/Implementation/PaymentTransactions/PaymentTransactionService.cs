@@ -133,11 +133,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 if (paymentTransaction.PaymentType == PaymentType.Transfer)
                 {
                     var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
-                    if(shipment == null)
+                    if (shipment == null)
                         throw new GenericException($"Shipment with waybill {paymentTransaction.Waybill} does not exist");
 
                     //Use new transfer payment method for nigeria else normal transfer payment method for others
-                    if(shipment.DepartureCountryId == 1)
+                    if (shipment.DepartureCountryId == 1)
                     {
                         result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
                     }
@@ -379,7 +379,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //Get sum of all shipment that have been processed with the transaction code
                 var sumOfVerifiedShipments = _uow.Invoice.GetAllAsQueryable()
                                                  .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower() && s.PaymentStatus == PaymentStatus.Paid)
-                                                 .Select(x => x.Amount).Sum();
+                                                 .Select(x => x.Amount).DefaultIfEmpty(0).Sum();
 
                 shipmentsTotal += sumOfVerifiedShipments;
 
@@ -390,10 +390,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //Process each waybill as paid
                 foreach (var item in paymentTransaction.Waybills)
                 {
-                    var paymentStatus =  _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
-                    
+                    var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
+
                     //paymentStatuss.PaymentTypeReference
-                    if(paymentStatus != PaymentStatus.Paid)
+                    if (paymentStatus != PaymentStatus.Paid)
                     {
                         paymentTransaction.Waybill = item.Waybill;
                         await ProcessNewPaymentTransaction(paymentTransaction);
@@ -401,7 +401,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
 
                 //Change transfer details to true if total shipments equals transfer amount
-                if(shipmentsTotal == Convert.ToDecimal(transferDetails.Amount))
+                if (shipmentsTotal == Convert.ToDecimal(transferDetails.Amount))
                 {
                     transferDetails.IsVerified = true;
                     await _uow.CompleteAsync();
