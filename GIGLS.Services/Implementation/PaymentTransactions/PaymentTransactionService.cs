@@ -133,11 +133,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 if (paymentTransaction.PaymentType == PaymentType.Transfer)
                 {
                     var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
-                    if(shipment == null)
+                    if (shipment == null)
                         throw new GenericException($"Shipment with waybill {paymentTransaction.Waybill} does not exist");
 
                     //Use new transfer payment method for nigeria else normal transfer payment method for others
-                    if(shipment.DepartureCountryId == 1)
+                    if (shipment.DepartureCountryId == 1)
                     {
                         result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
                     }
@@ -205,6 +205,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //update invoice
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+
             await BreakdownPayments(invoiceEntity, paymentTransaction);
 
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
@@ -375,19 +376,36 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
                     throw new GenericException($"Transferred amount is less than shipment amount");
 
+                //Get sum of all shipment that have been processed with the transaction code
+                var sumOfVerifiedShipments = _uow.Invoice.GetAllAsQueryable()
+                                                 .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower() && s.PaymentStatus == PaymentStatus.Paid)
+                                                 .Select(x => x.Amount).DefaultIfEmpty(0).Sum();
+
+                shipmentsTotal += sumOfVerifiedShipments;
+
+                //Block if amount transfered is less than shipment amount
+                if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
+                    throw new GenericException($"Transferred amount is less than processed and new shipments amount");
+
                 //Process each waybill as paid
                 foreach (var item in paymentTransaction.Waybills)
                 {
-                    var paymentStatus =  _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
-                    if(paymentStatus != PaymentStatus.Paid)
+                    var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
+
+                    //paymentStatuss.PaymentTypeReference
+                    if (paymentStatus != PaymentStatus.Paid)
                     {
                         paymentTransaction.Waybill = item.Waybill;
                         await ProcessNewPaymentTransaction(paymentTransaction);
                     }
                 }
 
-                transferDetails.IsVerified = true;
-                await _uow.CompleteAsync();
+                //Change transfer details to true if total shipments equals transfer amount
+                if (shipmentsTotal == Convert.ToDecimal(transferDetails.Amount))
+                {
+                    transferDetails.IsVerified = true;
+                    await _uow.CompleteAsync();
+                }
             }
             else
             {
