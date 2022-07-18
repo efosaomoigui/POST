@@ -385,7 +385,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //Block if amount transfered is less than shipment amount
                 if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
-                    throw new GenericException($"Transferred amount is less than processed and new shipments amount");
+                    throw new GenericException($"Transaction amount in reference code is less than processed shipment amount");
 
                 //Process each waybill as paid
                 foreach (var item in paymentTransaction.Waybills)
