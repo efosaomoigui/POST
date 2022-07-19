@@ -8330,18 +8330,19 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
-                if (sender.UserChannelType == UserChannelType.Ecommerce)
-                {
-                    newPreShipment.CustomerType = CustomerType.Company.ToString();
-                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
-                }
+                //if (sender.UserChannelType == UserChannelType.Ecommerce)
+                //{
+                //    newPreShipment.CustomerType = CustomerType.Company.ToString();
+                //    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                //}
 
-                else
-                {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                }
-
+                //else
+                //{
+                //    newPreShipment.CustomerType = "Individual";
+                //    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                //}
+                newPreShipment.CustomerType = CustomerType.Company.ToString();
+                newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
                 newPreShipment.UserId = preShipmentDTO.UserId;
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;

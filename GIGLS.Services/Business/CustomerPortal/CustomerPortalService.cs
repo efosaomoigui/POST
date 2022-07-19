@@ -1991,7 +1991,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"Invalid waybill number, special characters not allowed", $"{(int)HttpStatusCode.Forbidden}");
             }
-            if (waybillNumber.Length > 12)
+            if (waybillNumber.Length > 20)
             {
                 throw new GenericException($"Invalid waybill number", $"{(int)HttpStatusCode.Forbidden}");
             }
