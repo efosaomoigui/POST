@@ -626,6 +626,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsConsignable == true);
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
+                                where s.IsHUB == false && s.IsGateway == false
                                 select new ServiceCentreDTO
                                 {
                                     Name = s.Name,
