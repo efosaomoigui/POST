@@ -812,7 +812,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var manifest = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == item.MovementManifestCode);
                     if (manifest != null)
                     {
-                        var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifest.ManifestNumber);
+                        var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifest.ManifestNumber && !String.IsNullOrEmpty(x.DriverDetail));
                         if (dispatch != null)
                         {
                             item.Dispatched = true;
