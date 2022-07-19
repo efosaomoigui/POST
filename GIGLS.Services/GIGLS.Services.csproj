@@ -29,12 +29,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Aftership-API, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -358,6 +359,7 @@
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
     <Compile Include="Implementation\Vendors\VendorService.cs" />
+    <Compile Include="Implementation\Wallet\AzapayPaymentService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
     <Compile Include="Implementation\Wallet\CellulantPaymentService.cs" />

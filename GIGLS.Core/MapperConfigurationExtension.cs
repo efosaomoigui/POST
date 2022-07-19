@@ -572,6 +572,8 @@ namespace GIGLS.Core
                 config.CreateMap<FleetPartnerTransactionDTO, FleetPartnerTransaction>();
                 config.CreateMap<FleetPartnerTransaction, FleetPartnerTransactionDTO>();
 
+                config.CreateMap<AzapayTransferDetailsDTO, TransferDetails>();
+                config.CreateMap<TransferDetails, AzapayTransferDetailsDTO>();
             });
 
             isInit = true;

@@ -432,6 +432,10 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to get user detail 
+        /// </summary>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("userdetail")]
@@ -483,6 +487,64 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+
+        /// <summary>
+        /// This api is used to create multiple shipments by one receiver 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("createmultipleshipment")]
+        public async Task<IServiceResponse<object>> CreateMultipleShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _thirdPartyAPIService.AddMultiplePreShipmentMobile(preshipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to get price for multiple shipment creation
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("getpriceformultiplemerchantshipment")]
+        public async Task<IServiceResponse<MultiMerchantMobilePriceDTO>> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _thirdPartyAPIService.GetPriceMultipleMobileShipment(preshipmentMobile);
+
+                return new ServiceResponse<MultiMerchantMobilePriceDTO>
+                {
+                    Object = shipments
+                };
+            });
+        }
+
+        /// <summary>
+        /// This api is used to charge a customer's wallet
+        /// </summary>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("chargewallet")]
+        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.ChargeWallet(responseDTO);
+                return new ServiceResponse<ResponseDTO>
+                {
+                    Object = result,
+                };
+            });
+        }
+
+      
         [HttpPut]
         [Route("updatemerchantsubscription/{merchantcode}")]
         public async Task<IServiceResponse<ResponseDTO>> UpdateMerchantClassSubscriptionForAlpha(string merchantcode)
@@ -565,64 +627,6 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             };
         }
 
-
-
-        /// <summary>
-        /// This api is used to create multiple shipments by one receiver 
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("createmultipleshipment")]
-        public async Task<IServiceResponse<object>> CreateMultipleShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = await _thirdPartyAPIService.AddMultiplePreShipmentMobile(preshipmentMobile);
-
-                return new ServiceResponse<object>
-                {
-                    Object = shipments
-                };
-            });
-        }
-
-        /// <summary>
-        /// This api is used to get price for multiple shipment creation
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("getpriceformultiplemerchantshipment")]
-        public async Task<IServiceResponse<MultiMerchantMobilePriceDTO>> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preshipmentMobile)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = await _thirdPartyAPIService.GetPriceMultipleMobileShipment(preshipmentMobile);
-
-                return new ServiceResponse<MultiMerchantMobilePriceDTO>
-                {
-                    Object = shipments
-                };
-            });
-        }
-
-        /// <summary>
-        /// This api is used to charge a customer's wallet
-        /// </summary>
-        /// <returns></returns>
-        [HttpPut]
-        [Route("chargewallet")]
-        public async Task<IServiceResponse<ResponseDTO>> ChargeWallet(ChargeWalletDTO responseDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.ChargeWallet(responseDTO);
-                return new ServiceResponse<ResponseDTO>
-                {
-                    Object = result,
-                };
-            });
-        }
-
         /// <summary>
         /// This api is used to cancel shipment
         /// </summary>
@@ -684,6 +688,41 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 {
                     Object = flag
                 };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addazapaytransferdetails")]
+        public async Task<IServiceResponse<object>> AddAzapayTransferDetails(AzapayTransferDetailsDTO TransferDetailsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _thirdPartyAPIService.GetCellulantKey();
+                    string apiKey = headers.GetValues("api_key").FirstOrDefault();
+                    string token = await _thirdPartyAPIService.Decrypt(apiKey);
+                    if (token == key)
+                    {
+                        result = await _thirdPartyAPIService.AddAzaPayTransferDetails(TransferDetailsDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
             });
         }
     }
