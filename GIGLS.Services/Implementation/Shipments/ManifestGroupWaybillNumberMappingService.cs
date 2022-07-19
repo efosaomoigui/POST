@@ -806,6 +806,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetManifestMovementNumberMappings(serviceCenters, dateFilterCriteria);
 
+                //set dispatched move manifest
+                foreach (var item in manifestManifests)
+                {
+                    var manifest = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == item.MovementManifestCode);
+                    if (manifest != null)
+                    {
+                        var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifest.ManifestNumber);
+                        if (dispatch != null)
+                        {
+                            item.Dispatched = true;
+                        }
+                    }
+                }
+
                 return manifestManifests;
             }
             catch (Exception)
