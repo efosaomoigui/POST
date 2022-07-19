@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
@@ -31,11 +32,12 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
         private readonly IShipmentTrackingService _trackingService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IDispatchService _dispatchService;
 
 
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
-            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService)
+            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService, IDispatchService dispatchService)
         {
             _uow = uow;
             _manifestService = manifestService;
@@ -44,6 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _manifestWaybillMappingService = manifestWaybillMappingService;
             _trackingService = trackingService;
             _messageSenderService = messageSenderService;
+            _dispatchService = dispatchService;
             MapperConfig.Initialize();
         }
 
@@ -809,14 +812,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //set dispatched move manifest
                 foreach (var item in manifestManifests)
                 {
-                    var manifest = await _uow.MovementManifestNumberMapping.GetAsync(x => x.MovementManifestCode == item.MovementManifestCode);
-                    if (manifest != null)
+                    var dispatched = await _dispatchService.GetMovementDispatchManifestCode(item.MovementManifestCode);
+                    if (dispatched != null)
                     {
-                        var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber == manifest.ManifestNumber && !String.IsNullOrEmpty(x.DriverDetail));
-                        if (dispatch != null)
-                        {
-                            item.Dispatched = true;
-                        }
+                        item.Dispatched = true;
                     }
                 }
 
