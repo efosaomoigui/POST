@@ -17,10 +17,16 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public string CustomerCode { get; set; }
         public string CustomerUserId { get; set; }
         public List<WaybillDTO> Waybills { get; set; }
+        public List<TransactionCodeDTO> TransactionCodes { get; set; }
     }
 
     public class WaybillDTO
     {
         public string Waybill { get; set; }
+    }
+
+    public class TransactionCodeDTO
+    {
+        public string TransactionCode { get; set; }
     }
 }
