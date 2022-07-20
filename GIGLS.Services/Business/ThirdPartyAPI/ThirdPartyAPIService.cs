@@ -11,13 +11,9 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
-using System;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO;
-using System.Configuration;
-using GIGLS.Core.DTO.Partnership;
-using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Infrastructure;
 using System.Net;
@@ -38,10 +34,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWaybillPaymentLogService _waybillPaymentLogService;
         private readonly ICellulantPaymentService _cellulantPaymentService;
         private readonly ICompanyService _companyService;
+        private readonly IAzapayPaymentService _azapayService;
 
         public ThirdPartyAPIService(ICustomerPortalService portalService,IQRAndBarcodeService qrandbarcodeService,  IUnitOfWork uow,
                             IManifestGroupWaybillNumberMappingService manifestGroupWaybillNumberMappingService, IScanService scanService, 
-                            IWaybillPaymentLogService waybillPaymentLogService, ICellulantPaymentService cellulantPaymentService, ICompanyService companyService)
+                            IWaybillPaymentLogService waybillPaymentLogService, ICellulantPaymentService cellulantPaymentService, ICompanyService companyService, IAzapayPaymentService azapayService)
         {
             _portalService = portalService;
             _qrandbarcodeService = qrandbarcodeService;
@@ -51,6 +48,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _waybillPaymentLogService = waybillPaymentLogService;
             _cellulantPaymentService = cellulantPaymentService;
             _companyService = companyService;
+            _azapayService = azapayService;
         }
 
         public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
@@ -166,7 +164,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<GoogleAddressDTO> GetGoogleAddressDetails(GoogleAddressDTO location)
         {
-            return await _portalService.GetGoogleAddressDetails(location);
+           return await _portalService.GetGoogleAddressDetails(location);
         }
 
         public async Task<string> GetCellulantKey()
@@ -183,6 +181,22 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _cellulantPaymentService.AddCellulantTransferDetails(transferDetailsDTO);
         }
+
+        public async Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment)
+        {
+            return await _portalService.AddMultiplePreShipmentMobile(preShipment);
+        }
+
+        public async Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment)
+        {
+            return await _portalService.GetPriceMultipleMobileShipment(preShipment);
+        }
+
+        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
+        {
+            return await _portalService.ChargeWallet(chargeWalletDTO);
+        }
+
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{
@@ -514,24 +528,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _cellulantPaymentService.UpdateCODShipmentOnCallBackStellas(cod);
         }
-        public async Task<object> AddMultiplePreShipmentMobile(PreShipmentMobileMultiMerchantDTO preShipment)
-        {
-            return await _portalService.AddMultiplePreShipmentMobile(preShipment);
-        }
-
-        public async Task<MultiMerchantMobilePriceDTO> GetPriceMultipleMobileShipment(PreShipmentMobileMultiMerchantDTO preShipment)
-        {
-            return await _portalService.GetPriceMultipleMobileShipment(preShipment);
-        }
 
         public async Task<string> Decrypt()
         {
             return await _portalService.Decrypt();
-        }
-
-        public async Task<ResponseDTO> ChargeWallet(ChargeWalletDTO chargeWalletDTO)
-        {
-            return await _portalService.ChargeWallet(chargeWalletDTO);
         }
 
         public async Task<object> CancelShipment(string Waybill)
@@ -542,6 +542,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<CompanyDTO> GetCompanyDetailsByEmail(string email)
         {
             return await _companyService.GetCompanyDetailsByEmail(email);
+        }
+
+        public async Task<bool> AddAzaPayTransferDetails(AzapayTransferDetailsDTO transferDetailsDTO)
+        {
+            return await _azapayService.AddAzaPayTransferDetails(transferDetailsDTO);
         }
     }
 }

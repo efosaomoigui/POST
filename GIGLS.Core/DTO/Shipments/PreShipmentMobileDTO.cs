@@ -194,6 +194,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string CouponCode { get; set; }
         public DeliveryType DeliveryType { get; set; }
         public PaymentType PaymentType { get; set; }
+        public string CustomerName { get; set; }
+        public bool IsAlpha { get; set; }
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {

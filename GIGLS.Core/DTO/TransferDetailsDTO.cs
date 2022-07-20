@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,7 @@ namespace GIGLS.Core.DTO
         public string TransactionStatus { get; set; }
         public string ServiceCenterName { get; set; }
         public bool IsVerified { get; set; }
+        public ProcessingPartnerType ProcessingPartner { get; set; }
     }
 
     public class CODCallBackDTO : BaseDomainDTO

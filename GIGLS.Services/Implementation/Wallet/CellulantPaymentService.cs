@@ -107,6 +107,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     transferDetailsDTO.TransactionStatus = "pending";
                 }
 
+                transferDetailsDTO.ProcessingPartner = ProcessingPartnerType.Cellulant;
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
                 _uow.TransferDetails.Add(transferDetails);
                 await _uow.CompleteAsync();
@@ -826,13 +827,13 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.CODTransferRegister.Add(codTransferReg);
             await _uow.CompleteAsync();
 
-
             //check if this is an alpha shipment
             var alpha = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == cod.Waybill && x.IsAlpha);
             if (alpha != null)
             {
                 customerCode = alpha.CustomerCode;
             }
+
             if (accInfo is null)
             {
                 // throw new GenericException("user does not have a cod wallet");
@@ -1044,9 +1045,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 phoneNo = user.PhoneNumber.Remove(phoneNoIndex, 1);
             }
             //test
-            //var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
+            var callback = "https://agilitysystemapidevm.azurewebsites.net/api/thirdparty/updateshipmentcallback";
             //live
-            var callback = "https://thirdparty.gigl-go.com/api/thirdparty/updateshipmentcallback";
+             //var callback = "https://giglthirdpartyapi.azurewebsites.net/api/thirdparty/updateshipmentcallback";
 
 
             var extraData = new ExtraData();

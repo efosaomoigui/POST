@@ -2425,6 +2425,37 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               IsCashOnDelivery = r.IsCashOnDelivery
                                                           }).ToList();
 
+                if (shipmentDto.Any())
+                {
+                    foreach (var item in shipmentDto)
+                    {
+                        if (item.CustomerType == CustomerType.IndividualCustomer.ToString())
+                        {
+                            var user = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                            if (user != null)
+                            {
+                                item.CustomerName = $"{user.FirstName} {user.LastName}";
+                            }
+                        }
+                        else if (item.CustomerType == CustomerType.Company.ToString())
+                        {
+                            var user = await _uow.Company.GetAsync(x => x.CustomerCode == item.CustomerCode);
+                            if (user != null)
+                            {
+                                item.CustomerName = $"{user.Name}";
+                            }
+                        }
+                        else if (item.CustomerType == CustomerType.Partner.ToString())
+                        {
+                            var user = await _uow.Partner.GetAsync(x => x.PartnerCode == item.CustomerCode);
+                            if (user != null)
+                            {
+                                item.CustomerName = $"{user.FirstName} {user.LastName}";
+                            }
+                        }
+                    }
+                }
+
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
 
             }
@@ -2445,6 +2476,33 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"No Waybill exists for this code: {waybill}");
                 }
                 var shipmentDTO = Mapper.Map<PreShipmentMobileDTO>(shipmentsResult);
+                if (!String.IsNullOrEmpty(shipmentDTO.CustomerCode))
+                {
+                    if (shipmentDTO.CustomerType == CustomerType.IndividualCustomer.ToString())
+                    {
+                        var user = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                        if (user != null)
+                        {
+                            shipmentDTO.CustomerName = $"{user.FirstName} {user.LastName}";
+                        }
+                    }
+                    else if (shipmentDTO.CustomerType == CustomerType.Company.ToString())
+                    {
+                        var user = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentDTO.CustomerCode);
+                        if (user != null)
+                        {
+                            shipmentDTO.CustomerName = $"{user.Name}";
+                        }
+                    }
+                    else if (shipmentDTO.CustomerType == CustomerType.Partner.ToString())
+                    {
+                        var user = await _uow.Partner.GetAsync(x => x.PartnerCode == shipmentDTO.CustomerCode);
+                        if (user != null)
+                        {
+                            shipmentDTO.CustomerName = $"{user.FirstName} {user.LastName}";
+                        }
+                    }
+                }
 
                 return shipmentDTO;
             }
@@ -8026,7 +8084,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         mobileShipment.ReceiverCode = receiverExist.UserChannelCode;
                         mobileShipment.ReceiverEmail = receiverExist.Email;
                     }
-
+                    mobileShipment.IsAlpha = true;
                     var newPreShipmentDTO = await CreateMultiplePreShipmentMobile(mobileShipment);
                     IsBalanceSufficient = newPreShipmentDTO.IsBalanceSufficient.Value;
                     IsEligible = false;
@@ -8268,21 +8326,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 //generate waybill
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
                 preShipmentDTO.Waybill = waybill;
+                preShipmentDTO.Waybill = $"APH-{preShipmentDTO.Waybill}";
 
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
-                if (sender.UserChannelType == UserChannelType.Ecommerce)
-                {
-                    newPreShipment.CustomerType = CustomerType.Company.ToString();
-                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
-                }
+                //if (sender.UserChannelType == UserChannelType.Ecommerce)
+                //{
+                //    newPreShipment.CustomerType = CustomerType.Company.ToString();
+                //    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                //}
 
-                else
-                {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                }
-
+                //else
+                //{
+                //    newPreShipment.CustomerType = "Individual";
+                //    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                //}
+                newPreShipment.CustomerType = CustomerType.Company.ToString();
+                newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
                 newPreShipment.UserId = preShipmentDTO.UserId;
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;

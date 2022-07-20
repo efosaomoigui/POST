@@ -21,7 +21,6 @@ namespace GIGLS.Core.Domain.Wallet
         public PaymentStatus PaymentStatus { get; set; }
         [MaxLength(10)]
         public string StatusCode { get; set; }
-        [MaxLength(500)]
         public string StatusDescription { get; set; }
         [MaxLength(300)]
         public string ReferenceNo { get; set; }
