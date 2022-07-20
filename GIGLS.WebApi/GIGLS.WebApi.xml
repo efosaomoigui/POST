@@ -216,6 +216,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetUserDetail(GIGLS.Core.DTO.User.UserValidationFor3rdParty)">
+            <summary>
+            This api is used to get user detail 
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateMultipleShipment(PreShipmentMobileMultiMerchantDTO)">
             <summary>
             This api is used to create multiple shipments by one receiver 

@@ -6,6 +6,7 @@ using GIGLS.WebApi.Filters;
 using System.Web.Http;
 using GIGLS.Core.DTO.Captains;
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Text;
 using GIGLS.CORE.DTO.Report;
@@ -146,6 +147,22 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.RegisterVehicleAsync(vehicleDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("register/vehicleinrange")]
+        public async Task<IServiceResponse<object>> RegisterVehicleInRange(List<RegisterVehicleDTO> vehicleDTO)
+        {
+            //vehicleDTO.PartnerEmail = vehicleDTO.AssignedCaptain;
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.RegisterVehicleInRangeAsync(vehicleDTO);
 
                 return new ServiceResponse<object>
                 {

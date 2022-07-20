@@ -397,6 +397,113 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task<bool> RegisterVehicleInRangeAsync(List<RegisterVehicleDTO> vehicleDtos)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                string ownerId = string.Empty;
+                if (vehicleDtos == null || (vehicleDtos.Count == 0 && vehicleDtos[0] == null))
+                {
+                    throw new GenericException($"Excel sheet is empty!");
+                }
+
+                foreach (var veh in vehicleDtos)
+                {
+                    if (veh == null)
+                    {
+                        continue;
+                    }
+
+                    if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == veh.RegistrationNumber.Trim().ToLower()))
+                    {
+                        throw new GenericException($"Fleet/Vehicle with Registration Number: {veh.RegistrationNumber} already exist!");
+                    }
+                }
+
+                List<Fleet> fleets = new List<Fleet>();
+
+                foreach (var vehicle in vehicleDtos)
+                {
+                    if (vehicle == null)
+                    {
+                        continue;
+                    }
+
+                    var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicle.VehicleType.ToUpper() || x.ModelName == vehicle.VehicleName.ToUpper());
+                    if (!fleetModel.Any())
+                    {
+                        throw new GenericException($"The chosen Vehicle Model for Vehicle type: {vehicle.VehicleType} for vehicle {vehicle.RegistrationNumber} does not exist!");
+                    }
+
+                    var partner = await _uow.Partner.GetPartnerByEmail(vehicle.PartnerEmail);
+                    if (!partner.Any() || partner.Count < 1)
+                    {
+                        throw new GenericException($"Partner with email: {vehicle.PartnerEmail} does not exist!");
+                    }
+
+                    FleetType outType;
+                    if (!(Enum.TryParse(vehicle.VehicleType.Replace(" ", ""), out outType)))
+                    {
+                        throw new GenericException($"The chosen vehicle type: {vehicle.VehicleType} not yet available!");
+                    }
+
+                    FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicle.VehicleType.Replace(" ", ""));
+                    if (fleetType == null)
+                    {
+                        throw new GenericException($"The chosen vehicle type: {vehicle.VehicleType} does not exist!");
+                    }
+
+                    VehicleFixedStatus isFixed = (VehicleFixedStatus)Enum.Parse(typeof(VehicleFixedStatus), vehicle.IsFixed);
+
+                    if (vehicle.VehicleOwner.Contains('@'))
+                    {
+                        ownerId = (await _uow.FleetPartner.FindAsync(x => x.Email == vehicle.VehicleOwner.Trim().ToLower())).FirstOrDefault().UserId;
+                    }
+                    else
+                    {
+                        var owner = vehicle.VehicleOwner.Split(' ');
+                        var ownerFirstName = owner.First();
+                        var ownerLastName = owner.Last();
+
+                        ownerId =
+                            (await _uow.FleetPartner.FindAsync(x => (x.FirstName.Trim().ToLower() == ownerFirstName.Trim().ToLower() && x.LastName.ToLower() == ownerLastName.Trim().ToLower())))
+                            .FirstOrDefault().UserId;
+                    }
+                    
+                    if (string.IsNullOrEmpty(ownerId))
+                    {
+                        throw new GenericException($"Vehicle owner: {vehicle.VehicleOwner} for vehicle: {vehicle.RegistrationNumber} does not exist!");
+                    }
+
+                    Fleet fleet = new Fleet()
+                    {
+                        RegistrationNumber = vehicle.RegistrationNumber,
+                        Capacity = vehicle.VehicleCapacity,
+                        DateCreated = vehicle.DateOfCommission.Date,
+                        DateModified = DateTime.Now.Date,
+                        IsDeleted = false,
+                        Status = vehicle.Status == "Active",
+                        Partner = partner[0],
+                        PartnerId = partner[0].PartnerId,
+                        FleetType = fleetType,
+                        FleetName = vehicle.VehicleName,
+                        ModelId = fleetModel.FirstOrDefault().MakeId,
+                        FleetModel = fleetModel.FirstOrDefault(),
+                        EnterprisePartnerId = ownerId,
+                        IsFixed = isFixed,
+                    };
+
+                    fleets.Add(fleet);
+                }
+                _uow.Fleet.AddRange(fleets);
+                await _uow.CompleteAsync();
+
+                return true;
+            }
+            throw new GenericException("You are not authorized to use this feature");
+        }
+
         public async Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync()
         {
             var currentUserRole = await GetCurrentUserRoleAsync();

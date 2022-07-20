@@ -27,5 +27,6 @@ namespace GIGLS.Core.IServices
         Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
         Task<VehicleAnalyticsDto> GetVehicleAnalyticsAsync(string vehicleNumber);
         Task<List<VehicleDTO>> GetVehiclesByDateRangeAsync(DateFilterCriteria filter);
+        Task<bool> RegisterVehicleInRangeAsync(List<RegisterVehicleDTO> vehicleDtos);
     }
 }
