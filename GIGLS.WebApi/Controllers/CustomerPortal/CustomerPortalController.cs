@@ -857,7 +857,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     logindetail.Password = logindetail.Password.Trim();
                 }
 
-                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                if (user.UserChannelType == UserChannelType.Employee)
                 {
                     throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
                 }
