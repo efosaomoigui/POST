@@ -983,6 +983,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     userLoginModel.Password = userLoginModel.Password.Trim();
                 }
 
+                if (user.UserChannelType == UserChannelType.Employee)
+                {
+                    throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
                 string getTokenResponse;
 
