@@ -174,7 +174,6 @@ namespace GIGLS.Services.Implementation
             }
 
             throw new GenericException("You are not authorized to use this feature");
-
         }
 
         public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date)
