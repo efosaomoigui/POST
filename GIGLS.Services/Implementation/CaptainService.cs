@@ -59,50 +59,9 @@ namespace GIGLS.Services.Implementation
 
             if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement" || currentUserRole == "FleetCoordinator")
             {
-                var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
-                var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
-
-                // confirm if captain exist in partner table
-                if (captain.Any())
-                {
-                    throw new GenericException($"Captain with email {captainDTO.Email} already exist");
-                }
-
-                var systemUsers = await _userService.GetSystemUsers();
-                var systemUser = systemUsers.FirstOrDefault(x => x.FirstName.Trim() == "Captain");
-                
-                if (systemUser == null)
-                {
-                    throw new GenericException("Unable to add to role at the moment, pls contact the admin");
-                }
-
                 string password = await _passwordGenerator.Generate();
-                
-                var user = new GIGL.GIGLS.Core.Domain.User
-                {
-                    Organisation = captainDTO.Organisation,
-                    Status = (int)UserStatus.Active,
-                    DateCreated = DateTime.Now.Date,
-                    DateModified = DateTime.Now.Date,
-                    Department = captainDTO.Department,
-                    Designation = captainDTO.Designation,
-                    Email = captainDTO.Email,
-                    FirstName = captainDTO.FirstName,
-                    LastName = captainDTO.LastName,
-                    Gender = captainDTO.Gender,
-                    UserName = captainDTO.Email,
-                    PhoneNumber = captainDTO.PhoneNumber,
-                    UserType = captainDTO.UserType,
-                    IsActive = true,
-                    PictureUrl = captainDTO.PictureUrl,
-                    SystemUserRole = systemUser.FirstName,
-                    SystemUserId = systemUser.Id,
-                    PasswordExpireDate = DateTime.Now
-                };
-                user.Id = Guid.NewGuid().ToString();                
-
-                // partner
                 var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
+
                 var partner = new Partner()
                 {
                     Address = captainDTO.Address,
@@ -117,18 +76,83 @@ namespace GIGLS.Services.Implementation
                     LastName = captainDTO.LastName,
                     PhoneNumber = captainDTO.PhoneNumber,
                     PartnerType = PartnerType.Captain,
-                    UserId = user.Id,
                     IsDeleted = false,
                     IsActivated = true,
-                    PartnerCode = partnerCode,
                     ActivityDate = DateTime.Now.Date,
                     Age = captainDTO.Age,
-                    PartnerName = captainDTO.FirstName + " " + captainDTO.LastName,
+                    PartnerName = $"{captainDTO.FirstName} {captainDTO.LastName}",
                 };
 
-                // confirm if user does not exist in user table
-                if (confirmUser == null)
+                var systemUsers = await _userService.GetSystemUsers();
+                var systemUser = systemUsers.FirstOrDefault(x => x.FirstName.Trim() == "Captain");
+                if (systemUser == null)
                 {
+                    throw new GenericException("Unable to add to role at the moment. Captain role does not exist, pls contact the admin");
+                }
+
+                var confirmUser = await _uow.User.GetUserByEmail(captainDTO.Email);
+                var captain = await _uow.Partner.GetPartnerByEmail(captainDTO.Email);
+
+                // if user info exist and captain not exist, add new captain only
+                if (confirmUser != null && (!captain.Any() || captain.Count == 0))
+                {
+                    confirmUser.UserChannelCode = confirmUser.UserChannelCode == null
+                        ? partnerCode
+                        : confirmUser.UserChannelCode.Contains("EM")
+                            ? partnerCode
+                            : confirmUser.UserChannelCode;
+                    confirmUser.UserChannelPassword = confirmUser.UserChannelPassword == null ? password : confirmUser.UserChannelPassword;
+
+                    partner.UserId = confirmUser.Id;
+                    partner.PartnerCode = confirmUser.UserChannelCode;
+                    partner.FirstName = confirmUser.FirstName;
+                    partner.LastName = confirmUser.LastName;
+
+                    _uow.Partner.Add(partner);
+                    await _uow.CompleteAsync();
+
+                    await SendCaptainEmail(partner.Email, confirmUser.UserChannelPassword, partner.PartnerCode);
+                    return new { id = confirmUser.Id, password = confirmUser.UserChannelPassword, email = confirmUser.Email };
+                }
+
+                // confirm if captain exist in partner table
+                if (captain.Any())
+                {
+                    throw new GenericException($"Captain with email {captainDTO.Email} already exist");
+                }
+
+                // add new user and captain if user info and captain not exist
+                if (confirmUser == null && !captain.Any())
+                {
+                    var user = new GIGL.GIGLS.Core.Domain.User
+                    {
+                        Organisation = captainDTO.Organisation,
+                        Status = (int)UserStatus.Active,
+                        DateCreated = DateTime.Now.Date,
+                        DateModified = DateTime.Now.Date,
+                        Department = captainDTO.Department,
+                        Designation = captainDTO.Designation,
+                        Email = captainDTO.Email,
+                        FirstName = captainDTO.FirstName,
+                        LastName = captainDTO.LastName,
+                        Gender = captainDTO.Gender,
+                        UserName = captainDTO.Email,
+                        PhoneNumber = captainDTO.PhoneNumber,
+                        UserType = captainDTO.UserType,
+                        IsActive = true,
+                        PictureUrl = captainDTO.PictureUrl,
+                        SystemUserRole = systemUser.FirstName,
+                        SystemUserId = systemUser.Id,
+                        PasswordExpireDate = DateTime.Now,
+                        UserChannelCode = partnerCode,
+                        UserChannelPassword = password
+                    };
+                    user.Id = Guid.NewGuid().ToString();
+
+                    // partner
+                    partner.UserId = user.Id;
+                    partner.PartnerCode = partnerCode;
+
                     var result = await _uow.User.RegisterUser(user, password);
                     if (!result.Succeeded)
                     {
@@ -137,26 +161,20 @@ namespace GIGLS.Services.Implementation
                         {
                             errors += error + "\n";
                         }
-                        throw new GenericException($"{errors}");
+                        throw new GenericException($"Unable to add user, see the following errors\n{errors}");
                     }
+
+                    _uow.Partner.Add(partner);
+                    await _uow.CompleteAsync();
+
+                    await SendCaptainEmail(partner.Email, password, partner.PartnerCode);
+
+                    return new { id = user.Id, password = password, email = user.Email };
                 }
+            }
 
-                _uow.Partner.Add(partner);
-                await _uow.CompleteAsync();
-
-                // send mail
-                var partnerDto = new PartnerDTO()
-                {
-                    Email = user.Email,
-                    Password = password,
-                    PartnerCode = partnerCode,
-                };
-                await _messageSenderService.SendGenericEmailMessage(MessageType.CAPTEMAIL, partnerDto);
-
-                return new { id = user.Id, password = password, email = user.Email };
-            } 
-            
             throw new GenericException("You are not authorized to use this feature");
+
         }
 
         public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date)
@@ -312,9 +330,9 @@ namespace GIGLS.Services.Implementation
         public async Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO)
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
-            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            if(currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
-                if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
+                if(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
                 {
                     throw new GenericException($"Fleet/Vehicle with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
                 }
@@ -326,14 +344,18 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var partner = await _uow.Partner.GetPartnerByEmail(vehicleDTO.PartnerEmail);
+                if (!partner.Any() || partner.Count == 0)
+                {
+                    throw new GenericException($"The selected partner with email: {vehicleDTO.PartnerEmail} not available!");
+                }
 
                 FleetType outType;
-                if(!(Enum.TryParse(vehicleDTO.VehicleType.Replace(" ",""), out outType)))
+                if(!(Enum.TryParse(vehicleDTO.VehicleType.Replace(" ", ""), out outType)))
                 {
                     throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} not yet available!");
                 }
-                
-                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType.Replace(" ",""));
+
+                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType.Replace(" ", ""));
                 if(fleetType == null)
                 {
                     throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} does not exist!");
@@ -345,8 +367,8 @@ namespace GIGLS.Services.Implementation
                 {
                     RegistrationNumber = vehicleDTO.RegistrationNumber,
                     Capacity = vehicleDTO.VehicleCapacity,
-                    DateCreated = vehicleDTO.DateOfCommission,
-                    DateModified = DateTime.Now,
+                    DateCreated = vehicleDTO.DateOfCommission.Date,
+                    DateModified = DateTime.Now.Date,
                     IsDeleted = false,
                     Status = vehicleDTO.Status == "Active" ? true : false,
                     Partner = partner[0],
@@ -365,12 +387,20 @@ namespace GIGLS.Services.Implementation
                 partner[0].VehicleLicenseNumber = newFleet.RegistrationNumber;
 
                 await _uow.CompleteAsync();
+
+                // Update Date created that is overriden in context upon creation 
+                var fleet = await _uow.Fleet.FindAsync(x => x.RegistrationNumber == vehicleDTO.RegistrationNumber);
+                var fleetToUpdate = fleet.FirstOrDefault();
+                fleetToUpdate.DateCreated = vehicleDTO.DateOfCommission;
+                await _uow.CompleteAsync();
+
                 return true;
             }
             else
             {
                 throw new GenericException("You are not authorized to use this feature");
             }
+
         }
 
         public async Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync()
@@ -637,5 +667,18 @@ namespace GIGLS.Services.Implementation
 
             return currentUser.SystemUserRole;
         }
+
+        private async Task SendCaptainEmail(string email, string password, string partnerCode)
+        {
+            // send mail
+            var partnerDto = new PartnerDTO()
+            {
+                Email = email,
+                Password = password,
+                PartnerCode = partnerCode,
+            };
+            await _messageSenderService.SendGenericEmailMessage(MessageType.CAPTEMAIL, partnerDto);
+        }
+
     }
 }
