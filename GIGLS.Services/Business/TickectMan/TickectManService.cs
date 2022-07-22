@@ -478,9 +478,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _cellulantService.GetTransferDetails(baseFilter);
         }
 
-        public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
+        public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(BaseFilterCriteria baseFilter)
         {
-            return await _cellulantService.GetTransferDetailsByAccountNumber(accountNumber);
+            return await _cellulantService.GetTransferDetailsByAccountNumber(baseFilter);
         }
 
         public async Task<IEnumerable<CountryDTO>> GetCountries()

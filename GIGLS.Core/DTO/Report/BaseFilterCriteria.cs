@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.CORE.DTO.Report
 {
@@ -16,6 +17,8 @@ namespace GIGLS.CORE.DTO.Report
         public bool ViewAll { get; set; }
         public string SenderAccountNumber { get; set; }
         public int AllServiceCentre { get; set; }
+        public ProcessingPartnerType ProcessingPartner { get; set; }
+        public string AccountNumber { get; set; }
         /// <summary>
         /// Get the Start Date and End Date for query to the database
         /// </summary>
