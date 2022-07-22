@@ -171,7 +171,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             var transferDto = from t in transferDetails
                               join s in Context.ServiceCentre on t.CrAccount equals s.CrAccount
-                              where t.CrAccount == s.CrAccount
                               orderby t.DateCreated descending
                               select new TransferDetailsDTO
                               {
