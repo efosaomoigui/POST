@@ -4799,8 +4799,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     OriginatingBankName = "Stellas",
                     DestinationBankAccount = transferDTO.ReceiverAccountNumber,
                     DestinationBankName = transferDTO.ReceiverBankName,
-                    StatusCode = res.status.ToString(),
-                    StatusDescription = res.message,
+                    StatusCode = withdrawResponse.status.ToString(),
+                    StatusDescription = withdrawResponse.message,
                     ReferenceNo = transferDTO.RetrievalReference
                 };
                 if (withdrawResponse.errors.Any())
