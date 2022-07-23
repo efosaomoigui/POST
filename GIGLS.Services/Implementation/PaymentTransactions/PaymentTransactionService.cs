@@ -357,54 +357,110 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (!transferDetails.IsVerified)
             {
-                //Get the sum of all waybill(s)
-                var shipmentsTotal = 0.00m;
-                foreach (var item in paymentTransaction.Waybills)
+                var transactionAmount = 0.00m;
+                transactionAmount = Convert.ToDecimal(transferDetails.Amount);
+                if (paymentTransaction.TransactionCodes != null && paymentTransaction.TransactionCodes.Count > 0)
                 {
-                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == item.Waybill);
-                    if (shipment != null)
+                    List<TransferDetails> detailsList = new List<TransferDetails>();
+                    foreach (var item in paymentTransaction.TransactionCodes)
                     {
-                        shipmentsTotal += shipment.GrandTotal;
+                        if(string.IsNullOrEmpty( item.TransactionCode))
+                            throw new GenericException($"Transaction code is required");
+
+                        var transactionDetails = await _uow.TransferDetails.GetAsync(s => s.PaymentReference == item.TransactionCode && s.IsVerified == false);
+                        if (transactionDetails != null)
+                        {
+                            detailsList.Add(transactionDetails);
+                            transactionAmount += Convert.ToDecimal(transactionDetails.Amount);
+                        }
+                        else
+                        {
+                            throw new GenericException($"Transfer details does not exist for {item.TransactionCode}");
+                        }
                     }
-                    else
-                    {
-                        throw new GenericException($"Shipment with waybill {item.Waybill} does not exist");
-                    }
-                }
 
-                //Block if amount transfered is less than shipment amount
-                if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
-                    throw new GenericException($"Transferred amount is less than shipment amount");
+                    //Get waybill
+                    //Get shipment amount
 
-                //Get sum of all shipment that have been processed with the transaction code
-                var sumOfVerifiedShipments = _uow.Invoice.GetAllAsQueryable()
-                                                 .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower() && s.PaymentStatus == PaymentStatus.Paid)
-                                                 .Select(x => x.Amount).DefaultIfEmpty(0).Sum();
+                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+                    if (shipment == null)
+                        throw new GenericException($"Shipment with waybill {paymentTransaction.Waybill} does not exist");
 
-                shipmentsTotal += sumOfVerifiedShipments;
+                    //Block if amount transfered is less than shipment amount
+                    if (transactionAmount < shipment.GrandTotal)
+                        throw new GenericException($"Transferred amount is less than shipment amount");
 
-                //Block if amount transfered is less than shipment amount
-                if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
-                    throw new GenericException($"Transaction amount in reference code is less than processed shipment amount");
+                    var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == paymentTransaction.Waybill).FirstOrDefault().PaymentStatus;
 
-                //Process each waybill as paid
-                foreach (var item in paymentTransaction.Waybills)
-                {
-                    var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
-
-                    //paymentStatuss.PaymentTypeReference
+                    //process shioments that have not been paid for
                     if (paymentStatus != PaymentStatus.Paid)
                     {
-                        paymentTransaction.Waybill = item.Waybill;
+                        paymentTransaction.Waybill = paymentTransaction.Waybill;
                         await ProcessNewPaymentTransaction(paymentTransaction);
+
+                        transferDetails.IsVerified = true;
+
+                        if(detailsList.Count > 0)
+                        {
+                            foreach(var item in detailsList)
+                            {
+                                item.IsVerified = true;
+                            }
+                        }
+                        await _uow.CompleteAsync();
                     }
                 }
-
-                //Change transfer details to true if total shipments equals transfer amount
-                if (shipmentsTotal == Convert.ToDecimal(transferDetails.Amount))
+                else
                 {
-                    transferDetails.IsVerified = true;
-                    await _uow.CompleteAsync();
+                    //Get the sum of all waybill(s)
+                    var shipmentsTotal = 0.00m;
+                    foreach (var item in paymentTransaction.Waybills)
+                    {
+                        var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == item.Waybill);
+                        if (shipment != null)
+                        {
+                            shipmentsTotal += shipment.GrandTotal;
+                        }
+                        else
+                        {
+                            throw new GenericException($"Shipment with waybill {item.Waybill} does not exist");
+                        }
+                    }
+
+                    //Block if amount transfered is less than shipment amount
+                    if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
+                        throw new GenericException($"Transferred amount is less than shipment amount");
+
+                    //Get sum of all shipment that have been processed with the transaction code
+                    var sumOfVerifiedShipments = _uow.Invoice.GetAllAsQueryable()
+                                                     .Where(s => s.PaymentTypeReference.ToLower() == paymentTransaction.TransactionCode.ToLower() && s.PaymentStatus == PaymentStatus.Paid)
+                                                     .Select(x => x.Amount).DefaultIfEmpty(0).Sum();
+
+                    shipmentsTotal += sumOfVerifiedShipments;
+
+                    //Block if amount transfered is less than shipment amount
+                    if (Convert.ToDecimal(transferDetails.Amount) < shipmentsTotal)
+                        throw new GenericException($"Transaction amount in reference code is less than processed shipment amount");
+
+                    //Process each waybill as paid
+                    foreach (var item in paymentTransaction.Waybills)
+                    {
+                        var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == item.Waybill).FirstOrDefault().PaymentStatus;
+
+                        //paymentStatuss.PaymentTypeReference
+                        if (paymentStatus != PaymentStatus.Paid)
+                        {
+                            paymentTransaction.Waybill = item.Waybill;
+                            await ProcessNewPaymentTransaction(paymentTransaction);
+                        }
+                    }
+
+                    //Change transfer details to true if total shipments equals transfer amount
+                    if (shipmentsTotal == Convert.ToDecimal(transferDetails.Amount))
+                    {
+                        transferDetails.IsVerified = true;
+                        await _uow.CompleteAsync();
+                    }
                 }
             }
             else
