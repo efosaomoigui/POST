@@ -4266,6 +4266,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     senderLocation.Latitude = preShipment.SenderLocation.Latitude;
                     senderLocation.Longitude = preShipment.SenderLocation.Longitude;
                 }
+                mobileShipment.SenderLocation = senderLocation;
                 mobileShipment.SenderName = preShipment.SenderName;
                 mobileShipment.SenderPhoneNumber = customer == null ? "NIL" : customer.PhoneNumber;
                 mobileShipment.CustomerCode = customer == null ? "NIL" : customer.CustomerCode;
