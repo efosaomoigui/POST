@@ -796,7 +796,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("verifypayment/{waybill}")]
         public async Task<IServiceResponse<string>> VerifyPayment(string waybill)
