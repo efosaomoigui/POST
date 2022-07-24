@@ -857,7 +857,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     logindetail.Password = logindetail.Password.Trim();
                 }
 
-                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                if (user.UserChannelType == UserChannelType.Employee)
                 {
                     throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -981,6 +981,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 if (userLoginModel.Password != null)
                 {
                     userLoginModel.Password = userLoginModel.Password.Trim();
+                }
+
+                if (user.UserChannelType == UserChannelType.Employee)
+                {
+                    throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];

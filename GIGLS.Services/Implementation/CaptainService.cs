@@ -498,9 +498,9 @@ namespace GIGLS.Services.Implementation
         public async Task<bool> RegisterVehicleAsync(RegisterVehicleDTO vehicleDTO)
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
-            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            if(currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
-                if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
+                if(await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == vehicleDTO.RegistrationNumber.Trim().ToLower()))
                 {
                     throw new GenericException($"Fleet/Vehicle with Registration Number: {vehicleDTO.RegistrationNumber} already exist!");
                 }
@@ -512,14 +512,18 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var partner = await _uow.Partner.GetPartnerByEmail(vehicleDTO.PartnerEmail);
+                if (!partner.Any() || partner.Count == 0)
+                {
+                    throw new GenericException($"The selected partner with email: {vehicleDTO.PartnerEmail} not available!");
+                }
 
                 FleetType outType;
-                if(!(Enum.TryParse(vehicleDTO.VehicleType.Replace(" ",""), out outType)))
+                if(!(Enum.TryParse(vehicleDTO.VehicleType.Replace(" ", ""), out outType)))
                 {
                     throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} not yet available!");
                 }
-                
-                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType.Replace(" ",""));
+
+                FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicleDTO.VehicleType.Replace(" ", ""));
                 if(fleetType == null)
                 {
                     throw new GenericException($"The chosen vehicle type: {vehicleDTO.VehicleType} does not exist!");
