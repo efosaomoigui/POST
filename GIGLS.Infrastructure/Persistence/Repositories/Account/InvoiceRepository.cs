@@ -885,9 +885,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             }
         }
 
-        public Task<string> VerifyPayment(string waybill)
+        public async Task<string> VerifyPayment(string waybill)
         {
-            return Task.FromResult(Context.Invoice.Where(x => x.Waybill == waybill).FirstOrDefault().PaymentStatus.ToString());
+            var result =  Context.Invoice.Where(x => x.Waybill == waybill).FirstOrDefault()?.PaymentStatus.ToString();
+            if (result == null)
+            {
+                return null;
+            }
+
+            return result;
 
         }
     }

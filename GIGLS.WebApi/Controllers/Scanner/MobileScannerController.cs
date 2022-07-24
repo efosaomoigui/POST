@@ -795,5 +795,20 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("verifypayment/{waybill}")]
+        public async Task<IServiceResponse<string>> VerifyPayment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var status = await _shipmentService.VerifyPayment(waybill);
+                return new ServiceResponse<string>
+                {
+                    Object = status
+                };
+            });
+        }
     }
 }
