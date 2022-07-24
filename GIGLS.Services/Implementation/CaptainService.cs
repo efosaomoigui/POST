@@ -176,6 +176,175 @@ namespace GIGLS.Services.Implementation
             throw new GenericException("You are not authorized to use this feature");
         }
 
+
+        public async Task<object> RegisterCaptainsInRangeAsync(List<RegCaptainDTO> captainDto)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            Dictionary<string, string> mailDict = new Dictionary<string, string>();
+
+            if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement" || currentUserRole == "FleetCoordinator")
+            {
+                if (captainDto == null || captainDto.Count == 0)
+                {
+                    throw new GenericException($"Excel sheet is empty!");
+                }
+
+                foreach (var dto in captainDto)
+                {
+                    if (dto == null)
+                    {
+                        continue;
+                    }
+
+                    var confirmEmail = dto.Email.Split('@')[1].Split('.')[1];
+                    if (!dto.Email.Contains('@') || confirmEmail.Length < 1 || confirmEmail.GetType() == typeof(int) || dto.Email == null)
+                    {
+                        throw new GenericException($"Email: {dto.Email} is not in right format");
+                    }
+
+                    if (await _uow.Partner.ExistAsync(c => c.Email.ToLower() == dto.Email.Trim().ToLower()))
+                    {
+                        throw new GenericException($"Captain with email: {dto.Email} already exist. Pls, remove it from the sheet and try again!");
+                    }
+                }
+                
+                List<Partner> partners = new List<Partner>();
+
+
+                var systemUsers = await _userService.GetSystemUsers();
+                var systemUser = systemUsers.FirstOrDefault(x => x.FirstName.Trim() == "Captain");
+                if (systemUser == null)
+                {
+                    throw new GenericException("Unable to add to role at the moment. Captain role does not exist, pls contact the admin");
+                }
+
+                foreach (var captainInfo in captainDto)
+                {
+                    string password = await _passwordGenerator.Generate();
+                    var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
+
+                    if (captainInfo == null)
+                    {
+                        continue;
+                    }
+
+                    var partner = new Partner()
+                    {
+                        Address = captainInfo.Address,
+                        CaptainAccountName = captainInfo.AccountName,
+                        CaptainAccountNumber = captainInfo.AccountNumber,
+                        CaptainBankName = captainInfo.BankName,
+                        DateCreated = DateTime.Now.Date,
+                        Email = captainInfo.Email,
+                        PictureUrl = captainInfo?.PictureUrl,
+                        DateModified = DateTime.Now.Date,
+                        FirstName = captainInfo.FirstName,
+                        LastName = captainInfo.LastName,
+                        PhoneNumber = captainInfo.PhoneNumber,
+                        PartnerType = PartnerType.Captain,
+                        IsDeleted = false,
+                        IsActivated = true,
+                        ActivityDate = DateTime.Now.Date,
+                        Age = captainInfo.Age,
+                        PartnerName = $"{captainInfo.FirstName} {captainInfo.LastName}",
+                    };
+
+                    var confirmUser = await _uow.User.GetUserByEmail(captainInfo.Email);
+                    var captain = await _uow.Partner.GetPartnerByEmail(captainInfo.Email);
+
+                    // if user info exist and captain not exist, add new captain only
+                    if (confirmUser != null && (!captain.Any() || captain.Count == 0))
+                    {
+                        confirmUser.UserChannelCode = confirmUser.UserChannelCode == null
+                            ? partnerCode
+                            : confirmUser.UserChannelCode.Contains("EM")
+                                ? partnerCode
+                                : confirmUser.UserChannelCode;
+                        confirmUser.UserChannelPassword = confirmUser.UserChannelPassword == null ? password : confirmUser.UserChannelPassword;
+
+                        partner.UserId = confirmUser.Id;
+                        partner.PartnerCode = confirmUser.UserChannelCode;
+                        partner.FirstName = confirmUser.FirstName;
+                        partner.LastName = confirmUser.LastName;
+
+                        partners.Add(partner); // add partner to table
+
+                        confirmUser.SystemUserId = systemUser.Id;
+                        confirmUser.SystemUserRole = systemUser.FirstName;
+
+                        mailDict.Add(partner.Email, confirmUser.UserChannelPassword);
+                        continue;
+                    }
+
+                    // confirm if captain exist in partner table
+                    if (captain.Any())
+                    {
+                        continue;
+                    }
+
+
+                    // add new user and captain if user info and captain not exist
+                    if (confirmUser == null && !captain.Any())
+                    {
+                        var user = new GIGL.GIGLS.Core.Domain.User
+                        {
+                            Organisation = captainInfo.Organisation,
+                            Status = (int)UserStatus.Active,
+                            DateCreated = DateTime.Now.Date,
+                            DateModified = DateTime.Now.Date,
+                            Department = captainInfo.Department,
+                            Designation = captainInfo.Designation,
+                            Email = captainInfo.Email,
+                            FirstName = captainInfo.FirstName,
+                            LastName = captainInfo.LastName,
+                            Gender = captainInfo.Gender,
+                            UserName = captainInfo.Email,
+                            PhoneNumber = captainInfo.PhoneNumber,
+                            UserType = captainInfo.UserType,
+                            IsActive = true,
+                            PictureUrl = captainInfo.PictureUrl,
+                            SystemUserRole = systemUser.FirstName,
+                            SystemUserId = systemUser.Id,
+                            PasswordExpireDate = DateTime.Now,
+                            UserChannelCode = partnerCode,
+                            UserChannelPassword = password
+                        };
+                        user.Id = Guid.NewGuid().ToString();
+
+                        // partner
+                        partner.UserId = user.Id;
+                        partner.PartnerCode = partnerCode;
+
+                        var result = await _uow.User.RegisterUser(user, password);
+                        if (!result.Succeeded)
+                        {
+                            var errors = "";
+                            foreach (var error in result.Errors)
+                            {
+                                errors += error + "\n";
+                            }
+                            throw new GenericException($"Unable to add user {user.Email}, see the following errors\n{errors}");
+                        }
+                        
+                        _uow.Partner.Add(partner);
+                        mailDict.Add(partner.Email, password);
+                    }
+                }
+                
+                await _uow.CompleteAsync();
+
+                // send mail to all new captains
+                foreach (var detail in mailDict)
+                {
+                    await SendCaptainEmail(detail.Key, detail.Value, "");
+                }
+
+                return new { id = "user Ids", password = "Users will get their password mails", email = "Users will get their mails" };
+            } 
+            
+            throw new GenericException("You are not authorized to use this feature");
+        }
+
         public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateAsync(DateTime? date)
         {
             DateFilterCriteria dateFilterCriteria = new DateFilterCriteria();

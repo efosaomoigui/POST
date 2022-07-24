@@ -49,6 +49,29 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("register/captains/inrange")]
+        public async Task<IServiceResponse<object>> RegisterCaptainsInRange(List<RegCaptainDTO> captainsDto)
+        {
+            //byte[] bytes = Convert.FromBase64String(captainDTO.PictureUrl);
+            
+            //Save to AzureBlobStorage
+            //var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainDTO.FirstName}-{captainDTO.LastName}.png");
+            //captainDTO.PictureUrl = picUrl;
+            
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.RegisterCaptainsInRangeAsync(captainsDto);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{date}")]
