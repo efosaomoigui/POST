@@ -16,7 +16,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<bool> AddCellulantTransferDetails(TransferDetailsDTO transferDetailsDTO);
         Task<TransferDetailsDTO> GetAllTransferDetails(string reference);
         Task<List<TransferDetailsDTO>> GetTransferDetails(BaseFilterCriteria baseFilter);
-        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber);
+        Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(BaseFilterCriteria baseFilter);
         Task<CellulantResponseDTO> CheckoutEncryption(CellulantPayloadDTO payload);
         Task<CellulantPaymentResponse> VerifyAndValidatePayment(CellulantWebhookDTO webhook);
         Task<CellulantPaymentResponse> VerifyAndValidatePaymentForWebhook(CellulantWebhookDTO webhook);
