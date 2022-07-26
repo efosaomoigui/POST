@@ -180,6 +180,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string CODDescription { get; set; }
         public string blackBookSerialNumber { get; set; }
         public DeliveryType DeliveryType { get; set; }
+        public virtual CountryDTO DepartureCountry { get; set; }
+        public virtual CountryDTO DestinationCountry { get; set; }
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO
