@@ -131,32 +131,56 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (!isAdmin && !isRegion && !isAccount)
             {
-                var crAccount = await GetServiceCentreCrAccount();
-
-                if (string.IsNullOrWhiteSpace(crAccount))
+                if(baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
                 {
-                    throw new GenericException($"Service centre does not have a CRAccount.");
-                }
+                    var crAccount = await GetServiceCentreCrAccount();
 
-                transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+                    if (string.IsNullOrWhiteSpace(crAccount))
+                    {
+                        throw new GenericException($"Service centre does not have a CRAccount.");
+                    }
+
+                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccount);
+                }
+                else
+                {
+                    transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetails(baseFilter);
+                }
+                
             }
             else
             {
                 if (isRegion)
                 {
-                    crAccounts.AddRange(await GetRegionServiceCentresCrAccount());
-                    crAccounts.Add(CODManualServiceCentreCodes.FirstOrDefault().CrAccount);
-
-                    if (crAccounts.Count > 0)
+                    if(baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
                     {
-                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccounts);
+                        crAccounts.AddRange(await GetRegionServiceCentresCrAccount());
+                        crAccounts.Add(CODManualServiceCentreCodes.FirstOrDefault().CrAccount);
+
+                        if (crAccounts.Count > 0)
+                        {
+                            transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter, crAccounts);
+                        }
                     }
+                    else
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetails(baseFilter);
+                    }
+                    
                 }
                 else
                 {
                     if (isAdmin || isAccount)
                     {
-                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                        if (baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
+                        {
+                            transferDetailsDto = await _uow.TransferDetails.GetTransferDetails(baseFilter);
+                        }
+                        else
+                        {
+                            transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetails(baseFilter);
+                        }
+                        
                     }
                 }
             }
@@ -164,7 +188,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return transferDetailsDto;
         }
 
-        public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(string accountNumber)
+        public async Task<List<TransferDetailsDTO>> GetTransferDetailsByAccountNumber(BaseFilterCriteria baseFilter)
         {
             var isAdmin = await CheckUserRoleIsAdmin();
             var isRegion = await CheckUserPrivilegeIsRegion();
@@ -174,30 +198,55 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (!isAdmin && !isRegion && !isAccount)
             {
-                var crAccount = await GetServiceCentreCrAccount();
-
-                if (string.IsNullOrWhiteSpace(crAccount))
+                if (baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
                 {
-                    throw new GenericException($"Service centre does not have a CRAccount.");
-                }
+                    var crAccount = await GetServiceCentreCrAccount();
 
-                transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccount);
+                    if (string.IsNullOrWhiteSpace(crAccount))
+                    {
+                        throw new GenericException($"Service centre does not have a CRAccount.");
+                    }
+
+                    transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber, crAccount);
+                }
+                else
+                {
+                    transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber);
+                }
+                
             }
             else
             {
                 if (isRegion == true)
                 {
-                    var crAccounts = await GetRegionServiceCentresCrAccount();
-                    if (crAccounts.Count > 0)
+                    if (baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
                     {
-                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber, crAccounts);
+                        var crAccounts = await GetRegionServiceCentresCrAccount();
+                        if (crAccounts.Count > 0)
+                        {
+                            transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber, crAccounts);
+                        }
                     }
+                    else
+                    {
+                        transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber);
+                    }
+                    
                 }
                 else
                 {
                     if (isAdmin == true || isAccount == true)
                     {
-                        transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(accountNumber);
+                        //Base on processing partner
+                        if (baseFilter.ProcessingPartner == ProcessingPartnerType.Cellulant)
+                        {
+                           
+                                transferDetailsDto = await _uow.TransferDetails.GetTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber);
+                        }
+                        else
+                        {
+                            transferDetailsDto = await _uow.TransferDetails.GetAzapayTransferDetailsByAccountNumber(baseFilter.SenderAccountNumber);
+                        }
                     }
                 }
             }

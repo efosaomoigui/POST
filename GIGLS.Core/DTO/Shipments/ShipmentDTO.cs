@@ -394,6 +394,9 @@ namespace GIGLS.Core.DTO.Shipments
         public List<ShipmentItemDTO> ShipmentItems { get; set; }
         public double ApproximateItemsWeight { get; set; }
         public decimal GrandTotal { get; set; }
+        public decimal Total { get; set; }
+        public decimal Insurance { get; set; }
+        public decimal Vat { get; set; }
 
         //General Details comes with role user
         //  public string UserId { get; set; }

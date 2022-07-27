@@ -94,6 +94,33 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await _uow.CompleteAsync();
         }
 
+        private async Task ConfirmSingleTransferDetails(string transactionCode, decimal amount)
+        {
+            /* 
+             1. The reference code exists and it is the same as what is entered
+             2. We will check that the amount that the reference code is being validated for, has not been validated before
+             3. We will check that the amount cellulant says it has collected is the same amount user claimed to have paid.
+             */
+            var transferDetails = _uow.TransferDetails.GetAllAsQueryable()
+                                                        .Where(x => x.PaymentReference.ToLower() == transactionCode.ToLower()).FirstOrDefault();
+
+            if (transferDetails == null)
+                throw new GenericException($"Transfer details does not exist for {transactionCode}");
+
+            if (!transferDetails.IsVerified)
+            {
+                //Block if amount transfered is less than shipment amount
+                if (Convert.ToDecimal(transferDetails.Amount) < Convert.ToDecimal(amount))
+                    throw new GenericException($"Transaction amount in reference code is less than processed amount");
+
+                transferDetails.IsVerified = true;
+                await _uow.CompleteAsync();
+            }
+            else
+            {
+                throw new GenericException($"This transaction reference has been used already. Provide a valid transaction reference");
+            }
+        }
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
             var result = false;
@@ -122,6 +149,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
                 else if (item.PaymentType == PaymentType.Transfer)
                 {
+                    await ConfirmSingleTransferDetails(item.TransactionCode, item.Amount);
                     transfer += item.Amount;
                     transferType = item.PaymentType.ToString();
                 }
