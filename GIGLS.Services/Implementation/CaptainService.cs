@@ -25,6 +25,7 @@ using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Fleets;
 using System.Data.Entity;
 using GIGLS.Core.IServices.Fleets;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation
 {
@@ -194,6 +195,16 @@ namespace GIGLS.Services.Implementation
                     if (dto == null)
                     {
                         continue;
+                    }
+
+                    if (!InputsValidator.ValidateEmail(dto.Email))
+                    {
+                        throw new GenericException($"Email: {dto.Email} is not in right format");
+                    }
+
+                    if (!InputsValidator.ValidatePhoneNumber(dto.PhoneNumber) || dto.PhoneNumber.Length != 11)
+                    {
+                        throw new GenericException($"PhoneNumber: {dto.PhoneNumber} is not in right format");
                     }
 
                     var confirmEmail = dto.Email.Split('@')[1].Split('.')[1];
