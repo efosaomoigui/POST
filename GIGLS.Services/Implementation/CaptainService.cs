@@ -207,12 +207,6 @@ namespace GIGLS.Services.Implementation
                         throw new GenericException($"PhoneNumber: {dto.PhoneNumber} is not in right format");
                     }
 
-                    var confirmEmail = dto.Email.Split('@')[1].Split('.')[1];
-                    if (!dto.Email.Contains('@') || confirmEmail.Length < 1 || confirmEmail.GetType() == typeof(int) || dto.Email == null)
-                    {
-                        throw new GenericException($"Email: {dto.Email} is not in right format");
-                    }
-
                     if (await _uow.Partner.ExistAsync(c => c.Email.ToLower() == dto.Email.Trim().ToLower()))
                     {
                         throw new GenericException($"Captain with email: {dto.Email} already exist. Pls, remove it from the sheet and try again!");
