@@ -187,7 +187,7 @@ namespace GIGLS.Services.Implementation
             {
                 if (captainDto == null || captainDto.Count == 0)
                 {
-                    throw new GenericException($"Excel sheet is empty!");
+                    throw new GenericException($"Excel sheet is empty or one of its require content is invalid!");
                 }
 
                 foreach (var dto in captainDto)
@@ -197,21 +197,14 @@ namespace GIGLS.Services.Implementation
                         continue;
                     }
 
-                    if (!InputsValidator.ValidateEmail(dto.Email))
-                    {
-                        throw new GenericException($"Email: {dto.Email} is not in right format");
-                    }
-
-                    if (!InputsValidator.ValidatePhoneNumber(dto.PhoneNumber) || dto.PhoneNumber.Length != 11)
-                    {
-                        throw new GenericException($"PhoneNumber: {dto.PhoneNumber} is not in right format");
-                    }
-
                     if (await _uow.Partner.ExistAsync(c => c.Email.ToLower() == dto.Email.Trim().ToLower()))
                     {
                         throw new GenericException($"Captain with email: {dto.Email} already exist. Pls, remove it from the sheet and try again!");
                     }
                 }
+
+                // validate inputs in the excel file
+                InputsValidator.ValidateRegisterCaptainExcelFile(captainDto);
                 
                 List<Partner> partners = new List<Partner>();
 
@@ -585,6 +578,9 @@ namespace GIGLS.Services.Implementation
                 {
                     throw new GenericException($"Excel sheet is empty!");
                 }
+
+                // validate inputs in the excel file
+                InputsValidator.ValidateRegisterVehicleExcelFile(vehicleDtos);
 
                 foreach (var veh in vehicleDtos)
                 {
