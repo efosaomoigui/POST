@@ -6880,5 +6880,102 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             return await _uow.Invoice.VerifyPayment(waybill);
         }
+
+        //UPDATE OR RE-CREATE DHL, UPS International shipment 
+        public async Task<ShipmentDTO> UpdateInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(shipmentDTO.ReceiverCompanyName))
+                {
+                    shipmentDTO.ReceiverCompanyName = shipmentDTO.ReceiverName;
+                }
+
+                if (shipmentDTO.CompanyMap == CompanyMap.UPS)
+                {
+                    return await AddUPSInternationalShipment(shipmentDTO);
+                }
+                else if (shipmentDTO.CompanyMap == CompanyMap.DHL)
+                {
+                    return await UpdateDHLInternationalShipment(shipmentDTO);
+                }
+                else
+                {
+                    throw new GenericException($"There was an issue processing your request, Courier Company is missing");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<ShipmentDTO> UpdateDHLInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            try
+            {
+                //Get waybill to modify
+                var shipmentToModify = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDTO.Waybill);
+                // Get the Price
+                var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
+
+                //update price to contain VAT, INSURANCE ETC
+                var priceUpdate = await GetTotalPriceBreakDown(price, shipmentDTO);
+
+                //Bind Agility Shipment Payload
+                var shipment = await BindShipmentPayload(shipmentDTO);
+                shipmentDTO.CustomerDetails = shipment.CustomerDetails;
+
+                //update price to contain VAT, INSURANCE ETC
+                shipment.Total = priceUpdate.Amount;
+                shipment.GrandTotal = priceUpdate.GrandTotal;
+                shipment.Insurance = priceUpdate.Insurance;
+                shipment.Vat = priceUpdate.VAT;
+                shipment.vatvalue_display = priceUpdate.VAT;
+
+                //Block account that has been suspended/pending from create shipment
+                if (shipment.CustomerDetails.CustomerType == CustomerType.Company)
+                {
+                    if (shipment.CustomerDetails.CompanyStatus != CompanyStatus.Active)
+                    {
+                        throw new GenericException($"{shipment.CustomerDetails.Name} account has been {shipment.CustomerDetails.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
+                //3. Create shipment on DHL
+                var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
+                shipment.InternationalShipmentType = InternationalShipmentType.DHL;
+                shipment.IsInternational = true;
+                shipmentToModify.Insurance = shipmentDTO.ins != null ? (shipmentDTO.Insurance * 100) / shipmentDTO.DeclarationOfValueCheck : 0;
+
+                //Update InternationalShipmentWaybill table with the new intl waybill number
+                UpdateDHLWaybill(dhlShipment);
+
+                // Saving to azure blob
+                byte[] sPDFDecoded = Convert.FromBase64String(dhlShipment.PdfFormat);
+                var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
+                var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
+
+
+                ////4. Add the Shipment to Agility
+                var createdShipment = await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
+                ////5. Send Mail to customer after shipment is created
+                //if (createdShipment != null)
+                //{
+                //    await SendEmailToCustomerForIntlShipmentCreation(createdShipment);
+                //}
+                return shipment;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private void UpdateDHLWaybill(InternationalShipmentWaybillDTO dhlWaybill)
+        {
+            var result = Mapper.Map<InternationalShipmentWaybill>(dhlWaybill);
+            _uow.InternationalShipmentWaybill.Add(result);
+        }
     }
 }
