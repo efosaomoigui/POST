@@ -46,7 +46,7 @@ namespace GIGLS.WebApi.Controllers.PaymentWebhook
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _cellulantService.GetTransferDetailsByAccountNumber(filterCriteria.SenderAccountNumber);
+                var result = await _cellulantService.GetTransferDetailsByAccountNumber(filterCriteria);
 
                 return new ServiceResponse<List<TransferDetailsDTO>>
                 {

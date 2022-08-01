@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -28,7 +29,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
@@ -38,7 +39,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
                 transferDetails = transferDetails.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.CrAccount == crAccount);
 
-                var transferDetailsDto = GetListOfTransferDetails(transferDetails);
+                var transferDetailsDto =  GetListOfTransferDetails(transferDetails);
                 return transferDetailsDto;
             }
             catch (Exception ex)
@@ -51,7 +52,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (!string.IsNullOrWhiteSpace(accountNumber))
                 {
@@ -77,7 +78,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
@@ -100,7 +101,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (!string.IsNullOrWhiteSpace(accountNumber))
                 {
@@ -126,7 +127,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
@@ -149,7 +150,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var transferDetails = _context.TransferDetails.AsQueryable();
+                var transferDetails = GetCellulantTransferDetailsAsQuerable();
 
                 if (!string.IsNullOrWhiteSpace(accountNumber))
                 {
@@ -190,5 +191,94 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                               };
             return Task.FromResult(transferDto.ToList());
         }
+
+        #region Azapay
+
+        public Task<List<TransferDetailsDTO>> GetAzapayTransferDetails(BaseFilterCriteria filterCriteria)
+        {
+            try
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                var transferDetails = GetAzapayTransferDetailsAsQuerable();
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                transferDetails = transferDetails.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.ProcessingPartner == ProcessingPartnerType.Azapay);
+
+                var transferDetailsDto = GetListOfAzapayTransferDetails(transferDetails);
+                return transferDetailsDto;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<TransferDetailsDTO>> GetAzapayTransferDetailsByAccountNumber(string accountNumber)
+        {
+            try
+            {
+                var transferDetails = GetAzapayTransferDetailsAsQuerable();
+
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                {
+                    accountNumber = accountNumber.Trim().ToLower();
+                    transferDetails = transferDetails.Where(x => x.TimedAccNo.ToLower().Equals(accountNumber));
+                }
+
+                var transferDetailsDto = GetListOfAzapayTransferDetails(transferDetails);
+                return transferDetailsDto;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private Task<List<TransferDetailsDTO>> GetListOfAzapayTransferDetails(IQueryable<TransferDetails> transferDetails)
+        {
+            var transferDto = from t in transferDetails
+                              orderby t.DateCreated descending
+                              select new TransferDetailsDTO
+                              {
+                                  SessionId = t.SessionId,
+                                  Amount = t.Amount,
+                                  CrAccount = t.CrAccount,
+                                  BankCode = t.BankCode,
+                                  BankName = t.SenderBank,
+                                  CrAccountName = t.CrAccountName,
+                                  OriginatorAccountNumber = t.TimedAccNo,
+                                  OriginatorName = t.SenderName,
+                                  PaymentReference = t.RefId,
+                                  CreatedAt = t.CreatedAt,
+                                  DateCreated = t.DateCreated,
+                                  ResponseCode = t.ResponseCode,
+                                  TransactionStatus = t.TransactionStatus,
+                                  ServiceCenterName = "GIGL"
+                              };
+            return Task.FromResult(transferDto.ToList());
+        }
+        #endregion
+
+
+        #region Private Methods
+        private IQueryable<TransferDetails> GetCellulantTransferDetailsAsQuerable()
+        {
+            return _context.TransferDetails.AsQueryable().Where(x => x.ProcessingPartner == ProcessingPartnerType.Cellulant);
+        }
+
+        private IQueryable<TransferDetails> GetAzapayTransferDetailsAsQuerable()
+        {
+            return _context.TransferDetails.AsQueryable().Where(x => x.ProcessingPartner == ProcessingPartnerType.Azapay);
+        }
+        #endregion
     }
 }

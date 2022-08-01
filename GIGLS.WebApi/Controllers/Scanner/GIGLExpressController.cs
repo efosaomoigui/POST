@@ -578,7 +578,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _tickectMan.GetTransferDetailsByAccountNumber(filterCriteria.SenderAccountNumber);
+                var result = await _tickectMan.GetTransferDetailsByAccountNumber(filterCriteria);
 
                 return new ServiceResponse<List<TransferDetailsDTO>>
                 {
