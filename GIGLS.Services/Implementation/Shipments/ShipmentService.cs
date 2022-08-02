@@ -6960,8 +6960,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentToModify.ExtraCost = shipmentDTO.GrandTotal - shipmentToModify.GrandTotal;
                     shipmentToModify.GrandTotal = shipmentToModify.GrandTotal + shipmentToModify.ExtraCost;
                 }
-
-
+                if (shipmentToModify.ShipmentItems.Any())
+                {
+                    foreach (var item in shipmentToModify.ShipmentItems)
+                    {
+                        var newItem = shipmentDTO.ShipmentItems.FirstOrDefault(x => x.ShipmentItemId == item.ShipmentItemId);
+                        if (newItem != null)
+                        {
+                            item.Weight = newItem.Weight;
+                            item.Height = newItem.Height;
+                            item.Length = newItem.Length;
+                            item.Description = newItem.Description;
+                            item.InternationalShipmentItemCategory = newItem.InternationalShipmentItemCategory;
+                            item.Price = newItem.Price;
+                        }
+                    }
+                }
+                await _uow.CompleteAsync();
                 return shipment;
             }
             catch (Exception ex)
