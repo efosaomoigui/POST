@@ -1249,7 +1249,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                ShipmentType = x.ShipmentType,
                                                Weight = x.Weight,
                                                Width = x.Width,
-                                               InternationalShipmentItemCategory = r.in
+                                               InternationalShipmentItemCategory = x.InternationalShipmentItemCategory
                                            }).ToList(),
                                            Invoice = Context.Invoice.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
                                            {
