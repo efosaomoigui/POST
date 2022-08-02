@@ -33,6 +33,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Foreign key information
         public int ShipmentId { get; set; }
+        public InternationalShipmentItemCategory InternationalShipmentItemCategory { get; set; }
         public virtual Shipment Shipment { get; set; }
     }
 
