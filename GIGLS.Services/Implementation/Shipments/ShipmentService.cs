@@ -6909,12 +6909,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
         private async Task<ShipmentDTO> UpdateDHLInternationalShipment(InternationalShipmentDTO shipmentDTO)
         {
             try
             {
                 //Get waybill to modify
-                var shipmentToModify = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDTO.Waybill);
+                var shipmentToModify = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDTO.Waybill, "ShipmentItems");
                 // Get the Price
                 var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
 

@@ -253,7 +253,7 @@ namespace GIGLS.Services.Business.DHL
                     Description = shipmentDTO.ItemDetails,
                     Price = shipmentDTO.DeclarationOfValueCheck.Value,
                     PriceCurrency = "NGN",
-                    ManufacturerCountry = shipmentDTO.ManufacturerCountry == null ? shipmentDTO.ManufacturerCountry.Trim() : shipmentDTO.ReceiverCountryCode.Trim(),
+                    ManufacturerCountry = shipmentDTO.ManufacturerCountry == null ? shipmentDTO.ReceiverCountryCode.Trim() : shipmentDTO.ManufacturerCountry.Trim(),
                     ExportReasonType = "permanent",
                     ExportControlClassificationNumber = "",
                     Quantity = new Quantity
