@@ -185,6 +185,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverPostalCode { get; set; }
         public string ReceiverStateOrProvinceCode { get; set; }
         public string ReceiverCompanyName { get; set; }
+        public decimal ExtraCost { get; set; }
+
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

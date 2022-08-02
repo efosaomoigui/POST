@@ -181,6 +181,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string ReceiverStateOrProvinceCode { get; set; }
         [MaxLength(128)]
         public string ReceiverCompanyName { get; set; }
+        public decimal ExtraCost { get; set; }
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable

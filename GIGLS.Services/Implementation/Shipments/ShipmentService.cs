@@ -6894,12 +6894,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     shipmentDTO.ReceiverCompanyName = shipmentDTO.ReceiverName;
                 }
-
-                if (shipmentDTO.CompanyMap == CompanyMap.UPS)
-                {
-                    return await AddUPSInternationalShipment(shipmentDTO);
-                }
-                else if (shipmentDTO.CompanyMap == CompanyMap.DHL)
+                if (shipmentDTO.CompanyMap == CompanyMap.DHL)
                 {
                     return await UpdateDHLInternationalShipment(shipmentDTO);
                 }
@@ -6950,24 +6945,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
                 shipment.InternationalShipmentType = InternationalShipmentType.DHL;
                 shipment.IsInternational = true;
-                shipmentToModify.Insurance = shipmentDTO.ins != null ? (shipmentDTO.Insurance * 100) / shipmentDTO.DeclarationOfValueCheck : 0;
+                shipmentToModify.Insurance = shipmentDTO.Insurance != null ? (shipmentDTO.Insurance * 100) / shipmentDTO.DeclarationOfValueCheck : 0;
 
                 //Update InternationalShipmentWaybill table with the new intl waybill number
-                UpdateDHLWaybill(dhlShipment);
+                UpdateDHLWaybill(shipmentToModify.Waybill, dhlShipment);
 
                 // Saving to azure blob
                 byte[] sPDFDecoded = Convert.FromBase64String(dhlShipment.PdfFormat);
                 var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
                 var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
+                shipmentToModify.FileNameUrl = blobname;
+                if (shipmentToModify.GrandTotal < shipmentDTO.GrandTotal)
+                {
+                    shipmentToModify.ExtraCost = shipmentDTO.GrandTotal - shipmentToModify.GrandTotal;
+                    shipmentToModify.GrandTotal = shipmentToModify.GrandTotal + shipmentToModify.ExtraCost;
+                }
 
 
-                ////4. Add the Shipment to Agility
-                var createdShipment = await AddDHLShipmentToAgility(shipment, dhlShipment, shipmentDTO.PaymentType);
-                ////5. Send Mail to customer after shipment is created
-                //if (createdShipment != null)
-                //{
-                //    await SendEmailToCustomerForIntlShipmentCreation(createdShipment);
-                //}
                 return shipment;
             }
             catch (Exception ex)
@@ -6976,10 +6970,14 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private void UpdateDHLWaybill(InternationalShipmentWaybillDTO dhlWaybill)
+        private async void UpdateDHLWaybill(string waybill, InternationalShipmentWaybillDTO dhlWaybill)
         {
-            var result = Mapper.Map<InternationalShipmentWaybill>(dhlWaybill);
-            _uow.InternationalShipmentWaybill.Add(result);
+            var result = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == waybill);
+            if (result != null)
+            {
+                result.ShipmentIdentificationNumber = dhlWaybill.ShipmentIdentificationNumber;
+            }
+           
         }
     }
 }

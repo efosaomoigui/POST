@@ -1312,7 +1312,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _service.AddInternationalShipment(shipmentDTO);
+                var shipment = await _service.UpdateInternationalShipment(shipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
