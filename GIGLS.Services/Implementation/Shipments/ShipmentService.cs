@@ -6956,6 +6956,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
                 var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
                 shipmentToModify.FileNameUrl = blobname;
+                shipmentToModify.Vat = shipment.Vat;
+                shipmentToModify.Insurance = shipment.Insurance;
+                shipmentToModify.InternationalShippingCost = shipment.InternationalShippingCost == null ? 0 : shipment.InternationalShippingCost.Value;
                 if (shipmentToModify.GrandTotal < shipmentDTO.GrandTotal)
                 {
                     shipmentToModify.ExtraCost = shipmentDTO.GrandTotal - shipmentToModify.GrandTotal;
