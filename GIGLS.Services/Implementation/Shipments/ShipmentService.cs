@@ -6956,6 +6956,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 var filename = $"{shipmentDTO.Waybill}-DHL.pdf";
                 var blobname = await AzureBlobServiceUtil.UploadAsync(sPDFDecoded, filename);
                 shipmentToModify.FileNameUrl = blobname;
+                shipmentToModify.ReceiverPhoneNumber = shipment.ReceiverPhoneNumber;
+                shipmentToModify.ReceiverPostalCode = shipment.ReceiverPostalCode;
+                shipmentToModify.ReceiverStateOrProvinceCode = shipment.ReceiverStateOrProvinceCode;
+                shipmentToModify.ReceiverState = shipment.ReceiverState;
+                shipmentToModify.ReceiverCity = shipment.ReceiverCity;
+                shipmentToModify.ReceiverCompanyName = shipment.ReceiverCompanyName;
+                shipmentToModify.ReceiverAddress = shipment.ReceiverAddress;
                 shipmentToModify.Vat = shipment.Vat;
                 shipmentToModify.Insurance = shipment.Insurance;
                 shipmentToModify.InternationalShippingCost = shipment.InternationalShippingCost == null ? 0 : shipment.InternationalShippingCost.Value;
