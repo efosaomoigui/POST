@@ -246,7 +246,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
         public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
         {
-            var result = new LoginDetailsDTO();
+            var result = new LoginDetailsDTO { UserName = "No login details", Password = "No login details" };
             if (String.IsNullOrEmpty(customerCode))
             {
                 throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
@@ -254,8 +254,8 @@ namespace GIGLS.Services.Implementation.Wallet
             var custmerAccountInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
             if (custmerAccountInfo != null)
             {
-                result.UserName = custmerAccountInfo.UserName;
-                result.Password = custmerAccountInfo.Password;
+                result.UserName = string.IsNullOrEmpty(custmerAccountInfo.UserName) ? result.UserName : custmerAccountInfo.UserName;
+                result.Password = string.IsNullOrEmpty(custmerAccountInfo.Password) ? result.Password : custmerAccountInfo.Password;
                 return result;
             }
             return result;
