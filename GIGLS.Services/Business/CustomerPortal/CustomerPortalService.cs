@@ -5035,5 +5035,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             await _companyService.DeleteCustomerAccount(payload.CustomerCode);
         }
+        public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
+        {
+            return await _codWalletService.GetStellasAccountLoginDetails(customerCode);
+        }
     }
 }
