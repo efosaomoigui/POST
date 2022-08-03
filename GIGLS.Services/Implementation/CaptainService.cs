@@ -952,6 +952,26 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateRangeAsync(DateFilterCriteria filter)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+                {
+                    var captains = await _uow.CaptainRepository.GetAllCaptainsByDateRangeAsync(filter);
+                    return captains;
+                }
+
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         private async Task<string> GetCurrentUserRoleAsync()
         {

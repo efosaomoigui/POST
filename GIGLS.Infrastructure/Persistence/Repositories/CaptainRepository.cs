@@ -213,6 +213,45 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             return Task.FromResult(resultDto);
         }
 
+        public Task<List<ViewCaptainsDTO>> GetAllCaptainsByDateRangeAsync(DateFilterCriteria filter)
+        {
+            //get startDate and endDate
+            var startDate = new DateTime();
+            DateTime endDate;
+            var queryDate = filter.getStartDateAndEndDate();
+            if (filter.StartDate == null && filter.EndDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                endDate = queryDate.Item2;
+            }
+            else
+            {
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
+            
+            
+            var allCaptains = new List<ViewCaptainsDTO>();
+
+            // filter by cancelled shipments
+            var captains = _context.Partners.AsQueryable().Where(x => x.IsDeleted == false);
+            captains = captains.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate)
+                .OrderByDescending(x => x.DateCreated);
+
+            allCaptains = captains.Select(x => new ViewCaptainsDTO()
+            {
+                PartnerId = x.PartnerId,
+                Status = x.ActivityStatus.ToString(),
+                EmploymentDate = x.DateCreated,
+                CaptainCode = x.PartnerCode,
+                Email = x.Email,
+                Name = x.FirstName + " " + x.LastName,
+                VehicleAssigned = string.IsNullOrEmpty(x.VehicleType + " " + x.VehicleLicenseNumber) ? "No vehicle assigned yet" : x.VehicleType + " " + x.VehicleLicenseNumber
+            }).ToList();
+
+            return Task.FromResult(allCaptains);
+        }
+
         private CurrentMonthDetailsDTO GetStartAndEndDayOfMonth()
         {
             DateTime today = DateTime.Now.Date;

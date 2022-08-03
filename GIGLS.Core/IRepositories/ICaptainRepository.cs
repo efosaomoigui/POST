@@ -18,5 +18,6 @@ namespace GIGLS.Core.IRepositories
         Task<Partner> GetCaptainByIdAsync(int partnerId);
         Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
         Task<List<VehicleDTO>> GetAllVehiclesByDateRangeAsync(DateFilterCriteria filter);
+        Task<List<ViewCaptainsDTO>> GetAllCaptainsByDateRangeAsync(DateFilterCriteria filter);
     }
 }

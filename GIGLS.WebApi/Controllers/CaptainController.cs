@@ -54,13 +54,6 @@ namespace GIGLS.WebApi.Controllers
         [Route("register/captains/inrange")]
         public async Task<IServiceResponse<object>> RegisterCaptainsInRange(List<RegCaptainDTO> captainsDto)
         {
-            //byte[] bytes = Convert.FromBase64String(captainDTO.PictureUrl);
-            
-            //Save to AzureBlobStorage
-            //var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainDTO.FirstName}-{captainDTO.LastName}.png");
-            //captainDTO.PictureUrl = picUrl;
-            
-
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.RegisterCaptainsInRangeAsync(captainsDto);
@@ -141,14 +134,17 @@ namespace GIGLS.WebApi.Controllers
         [Route("")]
         public async Task<IServiceResponse<bool>> EditCaptain(UpdateCaptainDTO captainInfo)
         {
-            var picsCheck = captainInfo.PictureUrl.Split(':')[0];
-            if (picsCheck.ToLower().Trim() != "https")
+            if (captainInfo.PictureUrl != "default.jpg" && !string.IsNullOrEmpty(captainInfo.PictureUrl) && !string.IsNullOrEmpty(captainInfo.PictureUrl))
             {
-                byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
+                var picsCheck = captainInfo.PictureUrl.Split(':')[0];
+                if (picsCheck.ToLower().Trim() != "https")
+                {
+                    byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
 
-                //Save to AzureBlobStorage
-                var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
-                captainInfo.PictureUrl = picUrl;
+                    //Save to AzureBlobStorage
+                    var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
+                    captainInfo.PictureUrl = picUrl;
+                }
             }
 
             return await HandleApiOperationAsync(async () =>
@@ -337,6 +333,21 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.GetVehiclesByDateRangeAsync(dateRange);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("getcaptains/bydaterange")]
+        public async Task<IServiceResponse<object>> GetCaptainsByDateRange(DateFilterCriteria dateRange)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetCaptainsByDateRangeAsync(dateRange);
 
                 return new ServiceResponse<object>
                 {
