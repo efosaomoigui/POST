@@ -109,6 +109,10 @@ namespace GIGLS.Services.Implementation.Wallet
                         {
                             if (loginDetails.Data?.LoginDetails != null)
                             {
+                                //Save username and password to codwallet table
+                                await AddCODWalletLoginDetails(user.CustomerCode, loginDetails.Data.LoginDetails.Username, loginDetails.Data.LoginDetails.Password);
+
+                                //Send Email to user
                                 var message = new MessageDTO
                                 {
                                     ToEmail = user.Email,
