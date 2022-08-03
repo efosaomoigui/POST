@@ -240,5 +240,38 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw ex;
             }
         }
+        public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
+        {
+            var result = new LoginDetailsDTO();
+            if (String.IsNullOrEmpty(customerCode))
+            {
+                throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var custmerAccountInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (custmerAccountInfo != null)
+            {
+                result.UserName = custmerAccountInfo.UserName;
+                result.Password = custmerAccountInfo.Password;
+                return result;
+            }
+            return result;
+        }
+        public async Task AddCODWalletLoginDetails(string customerCode, string userName, string password)
+        {
+            try
+            {
+                var codWallet = _uow.CODWallet.GetAllAsQueryable().Where(x => x.CustomerCode == customerCode).FirstOrDefault();
+                if (codWallet != null)
+                {
+                    codWallet.UserName = userName;
+                    codWallet.Password = password;
+                    _uow.CompleteAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
