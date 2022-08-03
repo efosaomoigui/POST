@@ -39,5 +39,9 @@ namespace GIGLS.Core.Domain.Wallet
         public string FirstName { get; set; }
         [MaxLength(300)]
         public string LastName { get; set; }
+        [MaxLength(300)]
+        public string UserName { get; set; }
+        [MaxLength(300)]
+        public string Password { get; set; }
     }
 }
