@@ -27,6 +27,7 @@
     {
         Initiated,
         Collected,
-        Paid
+        Paid,
+        All
     }
 }

@@ -2132,8 +2132,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(allCOD);
         }
 
-
-
     }
 }
 

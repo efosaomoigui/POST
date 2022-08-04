@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using System;
 
 namespace GIGLS.Core.DTO
@@ -20,6 +21,7 @@ namespace GIGLS.Core.DTO
         public DateTime? EndDate { get; set; }
         public string UserId { get; set; }
         public string FilterOption { get; set; }
+        public CODMobileStatus CODFilter { get; set; }
     }
 
 
