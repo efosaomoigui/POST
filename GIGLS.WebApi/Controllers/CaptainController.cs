@@ -206,6 +206,21 @@ namespace GIGLS.WebApi.Controllers
         }
 
         [HttpGet]
+        [Route("allcaptains/paginated/{currentPage}/{pageSize}")]
+        public async Task<IServiceResponse<object>> GetAllCaptainsPaginated(int currentPage, int pageSize)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllCaptainsPaginatedAsync(currentPage, pageSize);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
         [Route("vehicles/bydate")]
         public async Task<IServiceResponse<object>> GetAllVehiclesByDate()
         {

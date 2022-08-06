@@ -24,6 +24,7 @@ using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Fleets;
 using System.Data.Entity;
+using GIGLS.Core.DTO.Pagination;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Services.Implementation.Utility;
 
@@ -702,6 +703,39 @@ namespace GIGLS.Services.Implementation
                     PictureUrl = x.PictureUrl
                 }).ToList();
                 return captainsDto;
+            }
+            else
+            {
+                throw new GenericException("You are not authorized to use this feature");
+            }
+        }
+
+        public async Task<PagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                var captains = await _uow.CaptainRepository.GetAllCaptainsAsync();
+                //var captainUserInfo = await _userService.GetUserByEmail(ca)
+                var captainsDto = captains.Select(x => new CaptainDetailsDTO
+                {
+                    Status = "Active",
+                    CaptainAge = x.Age,
+                    CaptainCode = x.PartnerCode,
+                    CaptainName = $"{x.FirstName} {x.LastName}",
+                    CaptainLastName = x.LastName,
+                    CaptainFirstName = x.FirstName,
+                    CaptainPhoneNumber = x.PhoneNumber,
+                    AssignedVehicleName = null,
+                    AssignedVehicleNumber = x.VehicleLicenseNumber,
+                    Email = x.Email,
+                    EmploymentDate = x.DateCreated,
+                    PartnerId = x.PartnerId,
+                    PictureUrl = x.PictureUrl
+                }).ToList();
+
+                var result = new Paginate();
+                return result.PaginateData(captainsDto, currentPage, pageSize);
             }
             else
             {
