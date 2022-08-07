@@ -49,7 +49,8 @@ namespace GIGLS.Core.DTO.Shipments
         public List<object> ManifestNumbersWithDate { get; set; }
 
         public string DriverCode { get; set; }
-        public string DestinationServiceCentreCode { get; set; } 
+        public string DestinationServiceCentreCode { get; set; }
+        public bool Dispatched { get; set; }
     }
 
     public class ReleaseMovementManifestDto
