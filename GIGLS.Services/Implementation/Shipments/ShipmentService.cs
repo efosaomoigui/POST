@@ -6963,6 +6963,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
                     var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
                     centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
                     foreach (var item in codAgilityShipment)
                     {
                         var obj = new CODShipmentDetailDTO();
@@ -6974,6 +6975,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODStatus = status.ToString();
                         obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
                         obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
                         allCOD.CODShipmentDetail.Add(obj);
                     }
 
@@ -7062,6 +7065,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
                     var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
                     centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
                     foreach (var item in codAgilityShipment)
                     {
                         var obj = new CODShipmentDetailDTO();
@@ -7073,6 +7077,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODStatus = status.ToString();
                         obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
                         obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
                         allCOD.CODShipmentDetail.Add(obj);
                     }
 
@@ -7162,6 +7168,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
                     var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
                     centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
                     foreach (var item in codAgilityShipment)
                     {
                         var obj = new CODShipmentDetailDTO();
@@ -7173,6 +7180,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         obj.CODStatus = status.ToString();
                         obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
                         obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
                         allCOD.CODShipmentDetail.Add(obj);
                     }
 
@@ -7205,7 +7214,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> GetCODShipmentsByFilter(PaginationDTO dto)
+        public async Task<AllCODShipmentDTO> GetCODShipmentsByFilter(PaginationDTO dto)
         {
             try
             {
@@ -7255,19 +7264,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     cod = await GetAllCODShipments(dto);
                 }
 
-                var generateExcel = await GetCODListExcel(cod);
+               // var generateExcel = await GetCODListExcel(cod);
 
-                //send email to customer;
-                var messageDTO = new MessageDTO
-                {
-                    CustomerName = user.FirstName,
-                    ToEmail = "collechizzy@gmail.com",
-                    To = "collechizzy@gmail.com",
-                    MessageTemplate = "CreateShipment"
-                };
-                _messageSenderService.SendEmailForCODReport(messageDTO);
+                ////send email to customer;
+                //var messageDTO = new MessageDTO
+                //{
+                //    CustomerName = user.FirstName,
+                //    ToEmail = "collechizzy@gmail.com",
+                //    To = "collechizzy@gmail.com",
+                //    MessageTemplate = "CreateShipment"
+                //};
+                //_messageSenderService.SendEmailForCODReport(messageDTO);
 
-                return true;
+                return cod;
             }
             catch (Exception ex)
             {

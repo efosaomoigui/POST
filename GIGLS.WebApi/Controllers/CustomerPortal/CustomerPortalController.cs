@@ -3172,5 +3172,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("codmobilereport")]
+        public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipmentsAgilityReport(PaginationDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cods = await _portalService.GetAllCODShipmentsAgilityReport(payload);
+                return new ServiceResponse<AllCODShipmentDTO>
+                {
+                    Object = cods
+                };
+            });
+        }
     }
 }

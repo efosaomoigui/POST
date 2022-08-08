@@ -28,6 +28,6 @@
         Initiated,
         Collected,
         Paid,
-        All
+        All //this is just for reporting purpose 
     }
 }
