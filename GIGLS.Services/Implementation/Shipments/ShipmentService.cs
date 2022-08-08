@@ -7246,6 +7246,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         EndDate = lastDayOfMonth
                     };
                 }
+                else
+                {
+                    dto.Page = 1;
+                    dto.PageSize = 5000;
+                }
 
                 if (dto.CODFilter == CODMobileStatus.Paid)
                 {
