@@ -6886,11 +6886,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             if (invoice.PaymentMethod == PaymentType.Transfer.ToString())
             {
-                var transferDetails = _uow.TransferDetails.GetAllAsQueryable()
+                var transferDetail = _uow.TransferDetails.GetAllAsQueryable()
                                                     .Where(x => x.PaymentReference.ToLower() == invoice.PaymentTypeReference.ToLower()).FirstOrDefault();
-
-                transferDetails.IsVerified = false;
-                await _uow.CompleteAsync();
+                if(transferDetail != null)
+                {
+                    transferDetail.IsVerified = false;
+                    await _uow.CompleteAsync();
+                }
             }
         }
     }
