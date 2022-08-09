@@ -31,6 +31,6 @@ namespace GIGLS.Core.IServices
         Task<bool> RegisterVehicleInRangeAsync(List<RegisterVehicleDTO> vehicleDtos);
         Task<object> RegisterCaptainsInRangeAsync(List<RegCaptainDTO> captainDto);
         Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateRangeAsync(DateFilterCriteria filter);
-        Task<PagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize);
+        Task<ViewCaptainPagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize);
     }
 }

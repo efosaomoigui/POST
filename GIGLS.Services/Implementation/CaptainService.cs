@@ -710,37 +710,29 @@ namespace GIGLS.Services.Implementation
             }
         }
 
-        public async Task<PagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize)
+        public async Task<ViewCaptainPagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize)
         {
             var currentUserRole = await GetCurrentUserRoleAsync();
             if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
             {
                 var captains = await _uow.CaptainRepository.GetAllCaptainsAsync();
-                //var captainUserInfo = await _userService.GetUserByEmail(ca)
-                var captainsDto = captains.Select(x => new CaptainDetailsDTO
+
+                var captainsToPaginate = captains.Select(x => new ViewCaptainsDTO()
                 {
-                    Status = "Active",
-                    CaptainAge = x.Age,
-                    CaptainCode = x.PartnerCode,
-                    CaptainName = $"{x.FirstName} {x.LastName}",
-                    CaptainLastName = x.LastName,
-                    CaptainFirstName = x.FirstName,
-                    CaptainPhoneNumber = x.PhoneNumber,
-                    AssignedVehicleName = null,
-                    AssignedVehicleNumber = x.VehicleLicenseNumber,
-                    Email = x.Email,
-                    EmploymentDate = x.DateCreated,
                     PartnerId = x.PartnerId,
-                    PictureUrl = x.PictureUrl
+                    Status = x.ActivityStatus.ToString(),
+                    EmploymentDate = x.DateCreated,
+                    CaptainCode = x.PartnerCode,
+                    Email = x.Email,
+                    Name = x.FirstName + " " + x.LastName,
+                    VehicleAssigned = string.IsNullOrEmpty(x.VehicleType + x.VehicleLicenseNumber) ? "No vehicle assigned yet" : x.VehicleType + " " + x.VehicleLicenseNumber
                 }).ToList();
 
                 var result = new Paginate();
-                return result.PaginateData(captainsDto, currentPage, pageSize);
+                return result.PaginateData(captainsToPaginate, currentPage, pageSize);
             }
-            else
-            {
-                throw new GenericException("You are not authorized to use this feature");
-            }
+            throw new GenericException("You are not authorized to use this feature");
+            
         }
 
         public async Task<IReadOnlyList<VehicleDTO>> GetVehiclesByDateAsync(DateTime? date)

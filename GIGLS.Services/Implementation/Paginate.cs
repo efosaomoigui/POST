@@ -19,7 +19,7 @@ namespace GIGLS.Services.Implementation
         public bool HasPrev { get; private set; }
         public bool HasNext { get; private set; }
 
-        public PagingDto PaginateData(IReadOnlyList<CaptainDetailsDTO> captainDetails, int currentPage, int pageSize = 25)
+        public ViewCaptainPagingDto PaginateData(IReadOnlyList<ViewCaptainsDTO> captainDetails, int currentPage, int pageSize = 25)
         {
             TotalCount = captainDetails.Count;
             PageSize = pageSize;
@@ -28,12 +28,12 @@ namespace GIGLS.Services.Implementation
             HasPrev = CurrentPage > 1;
             HasNext = CurrentPage < TotalPages;
 
-        var result = captainDetails.OrderBy(x => x.PartnerId)
+        var result = captainDetails.OrderByDescending(x => x.EmploymentDate)
                 .Skip((CurrentPage - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            var captainsPaginated = new PagingDto
+            var captainsPaginated = new ViewCaptainPagingDto
             {
                 Captains = result,
                 TotalCount = TotalCount,
