@@ -3843,6 +3843,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
 
+                //2.7 Change TransferDetails status to false if payment method is transfer
+                await UpdateTransferStatus(invoice);
+
                 //send message
                 //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
                 boolRresult = true;
@@ -6877,6 +6880,18 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<string> VerifyPayment(string waybill)
         {
             return await _uow.Invoice.VerifyPayment(waybill);
+        }
+
+        private async Task UpdateTransferStatus(Invoice invoice)
+        {
+            if (invoice.PaymentMethod == PaymentType.Transfer.ToString())
+            {
+                var transferDetails = _uow.TransferDetails.GetAllAsQueryable()
+                                                    .Where(x => x.PaymentReference.ToLower() == invoice.PaymentTypeReference.ToLower()).FirstOrDefault();
+
+                transferDetails.IsVerified = false;
+                await _uow.CompleteAsync();
+            }
         }
     }
 }
