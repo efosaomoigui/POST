@@ -9,6 +9,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.CORE.DTO.Report;
 
@@ -93,6 +94,31 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     .OrderByDescending(x => x.DateCreated)
                     .ToListAsync();
                 return await Task.FromResult(captain);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IList<VehicleDTO>> GetAllVehiclesAsync()
+        {
+            try
+            {
+                var vehicles = _context.Fleet.Where(x => x.IsDeleted == false).Select(x => new VehicleDTO()
+                {
+                    FleetId = x.FleetId,
+                    Status = x.Status == true ? "Active" : "Inactive",
+                    AssignedCaptain = _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).FirstName.ToString() + " " + _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).LastName.ToString(),
+                    FleetName = x.FleetName,
+                    RegistrationNumber = x.RegistrationNumber,
+                    VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString(),
+                    VehicleOwnerId = x.EnterprisePartnerId,
+                    VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
+                    IsFixed = x.IsFixed.ToString()
+                }).OrderByDescending(x => x.FleetId).ToList();
+
+                return await Task.FromResult(vehicles);
             }
             catch (Exception)
             {

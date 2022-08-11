@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using GIGLS.Core.DTO.Captains;
 using GIGLS.Core.DTO.Pagination;
+using GIGLS.Infrastructure;
 using Newtonsoft.Json;
 
 namespace GIGLS.Services.Implementation
@@ -28,7 +29,12 @@ namespace GIGLS.Services.Implementation
             HasPrev = CurrentPage > 1;
             HasNext = CurrentPage < TotalPages;
 
-        var result = captainDetails.OrderByDescending(x => x.EmploymentDate)
+            if (currentPage > TotalPages)
+            {
+                throw new GenericException($"Required page {currentPage} is outside the available number of pages. Total pages available: {TotalPages}");
+            }
+
+            var result = captainDetails.OrderByDescending(x => x.EmploymentDate)
                 .Skip((CurrentPage - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -48,6 +54,42 @@ namespace GIGLS.Services.Implementation
             HttpContext.Current.Response.Headers.Add("Paging-Headers", JsonConvert.SerializeObject(captainsPaginated));
 
             return captainsPaginated;
+        }
+
+        public ViewVehiclePagingDto PaginateVehicles(IList<VehicleDTO> vehicleDetails, int currentPage, int pageSize = 25)
+        {
+            TotalCount = vehicleDetails.Count;
+            PageSize = pageSize;
+            CurrentPage = currentPage;
+            TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
+            HasPrev = CurrentPage > 1;
+            HasNext = CurrentPage < TotalPages;
+
+            if (currentPage > TotalPages)
+            {
+                throw new GenericException($"Required page {currentPage} is outside the available number of pages. Total pages available: {TotalPages}");
+            }
+
+            var result = vehicleDetails.OrderByDescending(x => x.FleetId)
+                .Skip((CurrentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var vehiclesPaginated = new ViewVehiclePagingDto
+            {
+                Vehicles = result,
+                TotalCount = TotalCount,
+                CurrentPage = currentPage,
+                TotalPages = TotalPages,
+                NextPage = HasNext,
+                PrevPage = HasPrev,
+                PageSize = TotalPages
+            };
+
+            // header settings
+            HttpContext.Current.Response.Headers.Add("Paging-Headers", JsonConvert.SerializeObject(vehiclesPaginated));
+
+            return vehiclesPaginated;
         }
     }
 }

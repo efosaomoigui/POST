@@ -312,6 +312,21 @@ namespace GIGLS.WebApi.Controllers
         }
 
         [HttpGet]
+        [Route("allvehicles/paginated/{currentPage}/{pageSize}")]
+        public async Task<IServiceResponse<object>> GetAllVehiclesPaginated(int currentPage, int pageSize)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllVehiclesPaginatedAsync(currentPage, pageSize);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
         [Route("vehicles/byregnum/{regnum}")]
         public async Task<IServiceResponse<object>> GetVehicleByRegistrationNumber(string regnum)
         {

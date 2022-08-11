@@ -17,4 +17,15 @@ namespace GIGLS.Core.DTO.Pagination
         public bool PrevPage { get; set; }
         public bool NextPage { get; set; }
     }
+
+    public class ViewVehiclePagingDto
+    {
+        public List<VehicleDTO> Vehicles { get; set; }
+        public int TotalCount { get; set; }
+        public int PageSize { get; set; } = 25;
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+        public bool PrevPage { get; set; }
+        public bool NextPage { get; set; }
+    }
 }

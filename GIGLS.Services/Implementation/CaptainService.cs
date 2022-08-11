@@ -904,6 +904,20 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+
+        public async Task<ViewVehiclePagingDto> GetAllVehiclesPaginatedAsync(int currentPage, int pageSize)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                var vehicles = await _uow.CaptainRepository.GetAllVehiclesAsync();
+
+                var result = new Paginate();
+                return result.PaginateVehicles(vehicles, currentPage, pageSize);
+            }
+            throw new GenericException("You are not authorized to use this feature");
+        }
+
         public async Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum)
         {
             try
