@@ -1267,7 +1267,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PaymentTypeReference = i.PaymentTypeReference,
                                                Pos = i.Pos,
                                                ServiceCentreId = i.ServiceCentreId,
-                                               Transfer = i.Transfer
+                                               Transfer = i.Transfer,
+                                               Note = i.Note
                                            }).FirstOrDefault(),
                                            WalletNumber = Context.Wallets.Where(w => w.CustomerCode == r.CustomerCode).Select(x => x.WalletNumber).FirstOrDefault()
                                        }).FirstOrDefault();
