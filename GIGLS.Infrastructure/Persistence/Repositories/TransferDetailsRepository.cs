@@ -174,6 +174,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                               orderby t.DateCreated descending
                               select new TransferDetailsDTO
                               {
+                                  TransferDetailsId = t.TransferDetailsId,
                                   SessionId = t.SessionId,
                                   Amount = t.Amount,
                                   CrAccount = t.CrAccount,

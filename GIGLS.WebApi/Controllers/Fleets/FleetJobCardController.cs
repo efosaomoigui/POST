@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Services.Implementation;
+using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.WebApi.Controllers.FleetJobCards
 {
@@ -69,10 +70,10 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
         // GET: FleetJobCard/ByFleetManager
         [HttpGet]
         [Route("byfleetmanager")]
-        public async Task<IServiceResponse<IEnumerable<FleetJobCardDto>>> GetFleetJobCardsByFleetManager()
+        public async Task<IServiceResponse<IEnumerable<FleetJobCardDto>>> GetAllFleetJobCards()
         {
             return await HandleApiOperationAsync(async () => {
-                var jobCards = await _fleetJobCardService.GetFleetJobCardsByFleetManagerAsync();
+                var jobCards = await _fleetJobCardService.GetFleetJobCardsAsync();
                 return new ServiceResponse<IEnumerable<FleetJobCardDto>>
                 {
                     Object = jobCards.ToList()
@@ -80,30 +81,54 @@ namespace GIGLS.WebApi.Controllers.FleetJobCards
             });
         }
         
-        // PATCH: FleetJobCard/ByFleetManager
-        [HttpPatch]
-        [Route("closejobcard/{jobCardId}")]
-        public async Task<IServiceResponse<bool>> CloseFleetJobCardsById(int jobCardId)
+        // POST: FleetJobCard/ByFleetManager
+        [HttpPost]
+        [Route("closejobcard")]
+        public async Task<IServiceResponse<bool>> CloseFleetJobCardsById(CloseJobCardDto jobCardDto)
         {
+            var fileCheck = jobCardDto.ReceiptUrl.Split(':')[0];
+            if (fileCheck.ToLower().Trim() != "https")
+            {
+                byte[] bytes = Convert.FromBase64String(jobCardDto.ReceiptUrl);
+
+                //Save to AzureBlobStorage
+                var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"JobCard-Receipt-For-{jobCardDto.VehicleNumber}-{DateTime.Now.Ticks}.png");
+                jobCardDto.ReceiptUrl = picUrl;
+            }
+
             return await HandleApiOperationAsync(async () => {
-                var jobCard = await _fleetJobCardService.CloseJobCardByIdAsync(jobCardId);
+                var jobCard = await _fleetJobCardService.CloseJobCardAsync(jobCardDto);
                 return new ServiceResponse<bool>
                 {
-                    Object = jobCard
+                    Object = true
                 };
             });
         }
 
         // GET: FleetJobCard/ByFleetManager in current month
         [HttpGet]
-        [Route("byfleetmanager/currentmonth")]
+        [Route("alljobcards/incurrentmonth")]
         public async Task<IServiceResponse<IEnumerable<FleetJobCardByDateDto>>> GetFleetJobCardsByFleetManagerInCurrentMonth()
         {
             return await HandleApiOperationAsync(async () => {
-                var jobCards = await _fleetJobCardService.GetFleetJobCardsByFleetManagerInCurrentMonthAsync();
+                var jobCards = await _fleetJobCardService.GetAllFleetJobCardsByInCurrentMonthAsync();
                 return new ServiceResponse<IEnumerable<FleetJobCardByDateDto>>
                 {
                     Object = jobCards.ToList()
+                };
+            });
+        }
+        
+        // GET: FleetJobCard/ById
+        [HttpGet]
+        [Route("{jobcardid}")]
+        public async Task<IServiceResponse<FleetJobCardDto>> GetFleetJobCardById(int jobcardid)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var jobCard = await _fleetJobCardService.GetFleetJobCardByIdAsync(jobcardid);
+                return new ServiceResponse<FleetJobCardDto>
+                {
+                    Object = jobCard
                 };
             });
         }

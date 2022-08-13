@@ -30,7 +30,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             {
                 var fleets = _context.FleetJobCard.Include("Fleet").Include("FleetOwner");
 
-                var fleetDto = from x in fleets where x.Status == FleetJobCardStatus.Open.ToString()
+                var fleetDto = from x in fleets
                     select new FleetJobCardDto()
                     {
                         FleetJobCardId = x.FleetJobCardId,
@@ -40,7 +40,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                         VehiclePartToFix = x.VehiclePartToFix,
                         FleetManagerId = x.FleetManagerId,
                         Amount = x.Amount,
-                        VehicleNumber = x.VehicleNumber
+                        VehicleNumber = x.VehicleNumber,
+                        PaymentReceiptUrl = x.PaymentReceiptUrl
                     };
                 return await Task.FromResult(fleetDto.OrderByDescending(x => x.DateCreated).ToList());
             }
@@ -63,28 +64,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                 var query = _context.FleetJobCard.AsQueryable();
                 var fleetJobCards = new List<FleetJobCardByDateDto>();
 
-                if (dto.IsAdmin)
-                {
-                    fleetJobCards = await (from x in query
-                                where x.IsDeleted == false
-                                        && x.VehicleNumber == dto.VehicleNumber
-                                        && x.DateCreated >= dto.StartDate
-                                        && x.DateCreated <= dto.EndDate
-                                select new FleetJobCardByDateDto()
-                                {
-                                    DateCreated = x.DateCreated,
-                                    Status = x.Status,
-                                    FleetJobCardId = x.FleetJobCardId,
-                                    VehicleNumber = x.VehicleNumber,
-                                    Amount = x.Amount,
-                                    VehiclePartToFix = x.VehiclePartToFix,
-                                }).OrderByDescending(x => x.DateCreated).ToListAsync();
-                    return fleetJobCards;
-                }
-
                 fleetJobCards = await (from x in query 
                     where x.IsDeleted == false 
-                          && x.FleetManagerId == dto.FleetManagerId 
                           && x.VehicleNumber == dto.VehicleNumber 
                           && x.DateCreated >= dto.StartDate 
                           && x.DateCreated <= dto.EndDate
@@ -106,37 +87,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             }
         }
 
-        public async Task<List<FleetJobCardDto>> GetFleetJobCardsByFleetManagerAsync(string fleetManagerId)
-        {
-            try
-            {
-                var fleets = _context.FleetJobCard.Include("Fleet").Include("FleetOwner");
-
-                var fleetDto = from x in fleets
-                    where x.Status == FleetJobCardStatus.Open.ToString() && x.IsDeleted == false
-                    select new FleetJobCardDto()
-                    {
-                        FleetJobCardId = x.FleetJobCardId,
-                        DateCreated = x.DateCreated,
-                        DateModified = x.DateModified,
-                        Status = x.Status,
-                        VehiclePartToFix = x.VehiclePartToFix,
-                        FleetManagerId = x.FleetManagerId,
-                        Amount = x.Amount,
-                        VehicleNumber = x.VehicleNumber
-                    };
-                if(fleetManagerId == "Admin")
-                {
-                    return await Task.FromResult(fleetDto.OrderByDescending(x => x.DateCreated).ToList());
-                }
-                return await Task.FromResult(fleetDto.Where(x => x.FleetManagerId == fleetManagerId).OrderByDescending(x => x.DateCreated).ToList());
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<FleetJobCard> GetFleetJobCardByIdAsync(int jobCardId)
         {
             try
@@ -151,7 +101,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             }
         }
 
-        public async Task<List<FleetJobCardByDateDto>> GetFleetJobCardsByFleetManagerInCurrentMonthAsync(GetFleetJobCardByDateRangeDto dto)
+        public async Task<List<FleetJobCardByDateDto>> GetFleetJobCardsInCurrentMonthAsync(GetFleetJobCardByDateRangeDto dto)
         {
             try
             {
@@ -165,27 +115,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
 
                 var query = _context.FleetJobCard.AsQueryable();
 
-                if (dto.IsAdmin)
-                {
-                    fleetJobCards = await (from x in query
-                        where x.IsDeleted == false
-                                && x.DateCreated >= dto.StartDate
-                                && x.DateCreated <= dto.EndDate
-                        select new FleetJobCardByDateDto()
-                        {
-                            DateCreated = x.DateCreated,
-                            Status = x.Status,
-                            FleetJobCardId = x.FleetJobCardId,
-                            VehicleNumber = x.VehicleNumber,
-                            Amount = x.Amount,
-                            VehiclePartToFix = x.VehiclePartToFix,
-                        }).OrderByDescending(x => x.DateCreated).ToListAsync();
-                    return fleetJobCards;
-                }
-
                 fleetJobCards = await (from x in query
                     where x.IsDeleted == false
-                          && x.FleetManagerId == dto.FleetManagerId
                           && x.DateCreated >= dto.StartDate
                           && x.DateCreated <= dto.EndDate
                     select new FleetJobCardByDateDto()

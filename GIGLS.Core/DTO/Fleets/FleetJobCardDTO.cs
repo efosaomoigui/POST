@@ -16,8 +16,13 @@ namespace GIGLS.Core.DTO.Fleets
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
         public string FleetManagerId { get; set; }
+        public string FleetManager { get; set; }
+        public string FleetOwnerId { get; set; }
+        public string FleetOwner { get; set; }
+        public string RevenueStatus { get; set; }
+        public string PaymentReceiptUrl { get; set; }
     }
-    
+
     public class FleetJobCardMailDto
     {
         public int FleetJobCardId { get; set; }
@@ -65,5 +70,12 @@ namespace GIGLS.Core.DTO.Fleets
     public class NewJobCard
     {
         public List<OpenFleetJobCardDto> JobCardItems { get; set; }
+    }
+
+    public class CloseJobCardDto
+    {
+        public int FleetJobCardId { get; set; }
+        public string ReceiptUrl { get; set; }
+        public string VehicleNumber { get; set; }
     }
 }

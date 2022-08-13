@@ -422,6 +422,7 @@
     <Compile Include="DTO\InvoiceNoteDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
     <Compile Include="DTO\MessagingLog\ResponseData.cs" />
+    <Compile Include="DTO\Pagination\PagingDto.cs" />
     <Compile Include="DTO\ShipmentExportDTO.cs" />
     <Compile Include="DTO\GIGXUserDetailsDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />

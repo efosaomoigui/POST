@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GIGLS.Core.DTO.Pagination;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Core.IServices
 {
@@ -25,5 +27,11 @@ namespace GIGLS.Core.IServices
         Task<IReadOnlyList<VehicleDetailsDTO>> GetAllVehiclesAsync();
         Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum);
         Task<VehicleAnalyticsDto> GetVehicleAnalyticsAsync(string vehicleNumber);
+        Task<List<VehicleDTO>> GetVehiclesByDateRangeAsync(DateFilterCriteria filter);
+        Task<bool> RegisterVehicleInRangeAsync(List<RegisterVehicleDTO> vehicleDtos);
+        Task<object> RegisterCaptainsInRangeAsync(List<RegCaptainDTO> captainDto);
+        Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateRangeAsync(DateFilterCriteria filter);
+        Task<ViewCaptainPagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize);
+        Task<ViewVehiclePagingDto> GetAllVehiclesPaginatedAsync(int currentPage, int pageSize);
     }
 }

@@ -25,5 +25,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ScanDescription { get; set;}
 
         public string DispatchRider { get; set; }
+
+        public string CODManualAccount { get; set; }
     }
 }

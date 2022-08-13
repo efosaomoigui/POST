@@ -6,8 +6,10 @@ using GIGLS.WebApi.Filters;
 using System.Web.Http;
 using GIGLS.Core.DTO.Captains;
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Text;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation.Shipments;
 
 namespace GIGLS.WebApi.Controllers
@@ -39,6 +41,22 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.RegisterCaptainAsync(captainDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("register/captains/inrange")]
+        public async Task<IServiceResponse<object>> RegisterCaptainsInRange(List<RegCaptainDTO> captainsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.RegisterCaptainsInRangeAsync(captainsDto);
 
                 return new ServiceResponse<object>
                 {
@@ -116,14 +134,17 @@ namespace GIGLS.WebApi.Controllers
         [Route("")]
         public async Task<IServiceResponse<bool>> EditCaptain(UpdateCaptainDTO captainInfo)
         {
-            var picsCheck = captainInfo.PictureUrl.Split(':')[0];
-            if (picsCheck.ToLower().Trim() != "https")
+            if (captainInfo.PictureUrl != "default.jpg" && !string.IsNullOrEmpty(captainInfo.PictureUrl) && !string.IsNullOrEmpty(captainInfo.PictureUrl))
             {
-                byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
+                var picsCheck = captainInfo.PictureUrl.Split(':')[0];
+                if (picsCheck.ToLower().Trim() != "https")
+                {
+                    byte[] bytes = Convert.FromBase64String(captainInfo.PictureUrl);
 
-                //Save to AzureBlobStorage
-                var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
-                captainInfo.PictureUrl = picUrl;
+                    //Save to AzureBlobStorage
+                    var picUrl = await AzureBlobServiceUtil.UploadAsync(bytes, $"{captainInfo.FirstName}-{captainInfo.LastName}-updated.png");
+                    captainInfo.PictureUrl = picUrl;
+                }
             }
 
             return await HandleApiOperationAsync(async () =>
@@ -153,6 +174,22 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        [HttpPost]
+        [Route("register/vehicleinrange")]
+        public async Task<IServiceResponse<object>> RegisterVehicleInRange(List<RegisterVehicleDTO> vehicleDTO)
+        {
+            //vehicleDTO.PartnerEmail = vehicleDTO.AssignedCaptain;
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.RegisterVehicleInRangeAsync(vehicleDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpGet]
         [Route("allcaptains")]
         public async Task<IServiceResponse<object>> GetAllCaptains()
@@ -160,6 +197,21 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.GetAllCaptainsAsync();
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("allcaptains/paginated/{currentPage}/{pageSize}")]
+        public async Task<IServiceResponse<object>> GetAllCaptainsPaginated(int currentPage, int pageSize)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllCaptainsPaginatedAsync(currentPage, pageSize);
 
                 return new ServiceResponse<object>
                 {
@@ -260,6 +312,21 @@ namespace GIGLS.WebApi.Controllers
         }
 
         [HttpGet]
+        [Route("allvehicles/paginated/{currentPage}/{pageSize}")]
+        public async Task<IServiceResponse<object>> GetAllVehiclesPaginated(int currentPage, int pageSize)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetAllVehiclesPaginatedAsync(currentPage, pageSize);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
         [Route("vehicles/byregnum/{regnum}")]
         public async Task<IServiceResponse<object>> GetVehicleByRegistrationNumber(string regnum)
         {
@@ -281,6 +348,36 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _captainService.GetVehicleAnalyticsAsync(vehiclenumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("getvehicles/bydaterange")]
+        public async Task<IServiceResponse<object>> GetVehiclesByDateRange(DateFilterCriteria dateRange)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetVehiclesByDateRangeAsync(dateRange);
+
+                return new ServiceResponse<object>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("getcaptains/bydaterange")]
+        public async Task<IServiceResponse<object>> GetCaptainsByDateRange(DateFilterCriteria dateRange)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _captainService.GetCaptainsByDateRangeAsync(dateRange);
 
                 return new ServiceResponse<object>
                 {

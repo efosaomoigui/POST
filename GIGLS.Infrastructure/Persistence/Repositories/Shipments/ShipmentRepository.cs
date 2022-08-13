@@ -116,6 +116,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
+                                                 
                                              }).ToList();
 
 
@@ -538,6 +539,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DepartureCountryId = r.DepartureCountryId,
                                                      DestinationCountryId = r.DestinationCountryId,
                                                      CurrencyRatio = r.CurrencyRatio,
+
+                                                     ServiceCenterAccountNumber = r.IsCashOnDelivery ? Context.ServiceCentre.FirstOrDefault(x => x.ServiceCentreId == r.DestinationServiceCentreId).CrAccount : null
                                                  }).ToList();
 
                 //filter
@@ -929,7 +932,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            {
                                                CancelReason = x.CancelReason
                                            }).FirstOrDefault(),
-
+                                           ServiceCenterAccountNumber = r.IsCashOnDelivery ? Context.ServiceCentre.FirstOrDefault(x => x.ServiceCentreId == r.DestinationServiceCentreId).CrAccount : null
                                        }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);
@@ -1270,7 +1273,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                Transfer = i.Transfer,
                                                Note = i.Note
                                            }).FirstOrDefault(),
-                                           WalletNumber = Context.Wallets.Where(w => w.CustomerCode == r.CustomerCode).Select(x => x.WalletNumber).FirstOrDefault()
+                                           WalletNumber = Context.Wallets.Where(w => w.CustomerCode == r.CustomerCode).Select(x => x.WalletNumber).FirstOrDefault(),
+                                           ServiceCenterAccountNumber = r.IsCashOnDelivery ? Context.ServiceCentre.FirstOrDefault(x => x.ServiceCentreId == r.DestinationServiceCentreId).CrAccount : null
                                        }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);

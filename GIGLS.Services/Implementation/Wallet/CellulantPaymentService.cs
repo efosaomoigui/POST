@@ -124,7 +124,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var isRegion = await CheckUserPrivilegeIsRegion();
             var isAccount = await CheckUserRoleIsAccount();
 
-            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual");
+            var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code.Trim().ToLower() == "codmanual");
             List<string> crAccounts = new List<string>();
 
             List<TransferDetailsDTO> transferDetailsDto = new List<TransferDetailsDTO>();

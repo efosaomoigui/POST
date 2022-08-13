@@ -24,7 +24,9 @@ using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Fleets;
 using System.Data.Entity;
+using GIGLS.Core.DTO.Pagination;
 using GIGLS.Core.IServices.Fleets;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation
 {
@@ -96,10 +98,10 @@ namespace GIGLS.Services.Implementation
                 // if user info exist and captain not exist, add new captain only
                 if (confirmUser != null && (!captain.Any() || captain.Count == 0))
                 {
-                    confirmUser.UserChannelCode = confirmUser.UserChannelCode == null
-                        ? partnerCode
-                        : confirmUser.UserChannelCode.Contains("EM")
-                            ? partnerCode
+                    confirmUser.UserChannelCode = confirmUser.UserChannelCode == null 
+                        ? partnerCode 
+                        : confirmUser.UserChannelCode.Contains("EM") 
+                            ? partnerCode 
                             : confirmUser.UserChannelCode;
                     confirmUser.UserChannelPassword = confirmUser.UserChannelPassword == null ? password : confirmUser.UserChannelPassword;
 
@@ -171,8 +173,174 @@ namespace GIGLS.Services.Implementation
 
                     return new { id = user.Id, password = password, email = user.Email };
                 }
-            }
+            } 
+            
+            throw new GenericException("You are not authorized to use this feature");
+        }
 
+
+        public async Task<object> RegisterCaptainsInRangeAsync(List<RegCaptainDTO> captainDto)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            Dictionary<string, string> mailDict = new Dictionary<string, string>();
+
+            if (currentUserRole == "Administrator" || currentUserRole == "Admin" || currentUserRole == "CaptainManagement" || currentUserRole == "FleetCoordinator")
+            {
+                if (captainDto == null || captainDto.Count == 0)
+                {
+                    throw new GenericException($"Excel sheet is empty or one of its require content is invalid!");
+                }
+
+                foreach (var dto in captainDto)
+                {
+                    if (dto == null)
+                    {
+                        continue;
+                    }
+
+                    if (await _uow.Partner.ExistAsync(c => c.Email.ToLower() == dto.Email.Trim().ToLower()))
+                    {
+                        throw new GenericException($"Captain with email: {dto.Email} already exist. Pls, remove it from the sheet and try again!");
+                    }
+                }
+
+                // validate inputs in the excel file
+                InputsValidator.ValidateRegisterCaptainExcelFile(captainDto);
+                
+                List<Partner> partners = new List<Partner>();
+
+
+                var systemUsers = await _userService.GetSystemUsers();
+                var systemUser = systemUsers.FirstOrDefault(x => x.FirstName.Trim() == "Captain");
+                if (systemUser == null)
+                {
+                    throw new GenericException("Unable to add to role at the moment. Captain role does not exist, pls contact the admin");
+                }
+
+                foreach (var captainInfo in captainDto)
+                {
+                    string password = await _passwordGenerator.Generate();
+                    var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
+
+                    if (captainInfo == null)
+                    {
+                        continue;
+                    }
+
+                    var partner = new Partner()
+                    {
+                        Address = captainInfo.Address,
+                        CaptainAccountName = captainInfo.AccountName,
+                        CaptainAccountNumber = captainInfo.AccountNumber,
+                        CaptainBankName = captainInfo.BankName,
+                        DateCreated = DateTime.Now.Date,
+                        Email = captainInfo.Email,
+                        PictureUrl = captainInfo?.PictureUrl,
+                        DateModified = DateTime.Now.Date,
+                        FirstName = captainInfo.FirstName,
+                        LastName = captainInfo.LastName,
+                        PhoneNumber = captainInfo.PhoneNumber,
+                        PartnerType = PartnerType.Captain,
+                        IsDeleted = false,
+                        IsActivated = true,
+                        ActivityDate = DateTime.Now.Date,
+                        Age = captainInfo.Age,
+                        PartnerName = $"{captainInfo.FirstName} {captainInfo.LastName}",
+                    };
+
+                    var confirmUser = await _uow.User.GetUserByEmail(captainInfo.Email);
+                    var captain = await _uow.Partner.GetPartnerByEmail(captainInfo.Email);
+
+                    // if user info exist and captain not exist, add new captain only
+                    if (confirmUser != null && (!captain.Any() || captain.Count == 0))
+                    {
+                        confirmUser.UserChannelCode = confirmUser.UserChannelCode == null
+                            ? partnerCode
+                            : confirmUser.UserChannelCode.Contains("EM")
+                                ? partnerCode
+                                : confirmUser.UserChannelCode;
+                        confirmUser.UserChannelPassword = confirmUser.UserChannelPassword == null ? password : confirmUser.UserChannelPassword;
+
+                        partner.UserId = confirmUser.Id;
+                        partner.PartnerCode = confirmUser.UserChannelCode;
+                        partner.FirstName = confirmUser.FirstName;
+                        partner.LastName = confirmUser.LastName;
+
+                        partners.Add(partner); // add partner to table
+
+                        confirmUser.SystemUserId = systemUser.Id;
+                        confirmUser.SystemUserRole = systemUser.FirstName;
+
+                        mailDict.Add(partner.Email, confirmUser.UserChannelPassword);
+                        continue;
+                    }
+
+                    // confirm if captain exist in partner table
+                    if (captain.Any())
+                    {
+                        continue;
+                    }
+
+
+                    // add new user and captain if user info and captain not exist
+                    if (confirmUser == null && !captain.Any())
+                    {
+                        var user = new GIGL.GIGLS.Core.Domain.User
+                        {
+                            Organisation = captainInfo.Organisation,
+                            Status = (int)UserStatus.Active,
+                            DateCreated = DateTime.Now.Date,
+                            DateModified = DateTime.Now.Date,
+                            Department = captainInfo.Department,
+                            Designation = captainInfo.Designation,
+                            Email = captainInfo.Email,
+                            FirstName = captainInfo.FirstName,
+                            LastName = captainInfo.LastName,
+                            Gender = captainInfo.Gender,
+                            UserName = captainInfo.Email,
+                            PhoneNumber = captainInfo.PhoneNumber,
+                            UserType = captainInfo.UserType,
+                            IsActive = true,
+                            PictureUrl = captainInfo.PictureUrl,
+                            SystemUserRole = systemUser.FirstName,
+                            SystemUserId = systemUser.Id,
+                            PasswordExpireDate = DateTime.Now,
+                            UserChannelCode = partnerCode,
+                            UserChannelPassword = password
+                        };
+                        user.Id = Guid.NewGuid().ToString();
+
+                        // partner
+                        partner.UserId = user.Id;
+                        partner.PartnerCode = partnerCode;
+
+                        var result = await _uow.User.RegisterUser(user, password);
+                        if (!result.Succeeded)
+                        {
+                            var errors = "";
+                            foreach (var error in result.Errors)
+                            {
+                                errors += error + "\n";
+                            }
+                            throw new GenericException($"Unable to add user {user.Email}, see the following errors\n{errors}");
+                        }
+                        
+                        _uow.Partner.Add(partner);
+                        mailDict.Add(partner.Email, password);
+                    }
+                }
+                
+                await _uow.CompleteAsync();
+
+                // send mail to all new captains
+                foreach (var detail in mailDict)
+                {
+                    await SendCaptainEmail(detail.Key, detail.Value, "");
+                }
+
+                return new { id = "user Ids", password = "Users will get their password mails", email = "Users will get their mails" };
+            } 
+            
             throw new GenericException("You are not authorized to use this feature");
         }
 
@@ -399,7 +567,116 @@ namespace GIGLS.Services.Implementation
             {
                 throw new GenericException("You are not authorized to use this feature");
             }
+        }
 
+        public async Task<bool> RegisterVehicleInRangeAsync(List<RegisterVehicleDTO> vehicleDtos)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                string ownerId = string.Empty;
+                if (vehicleDtos == null || (vehicleDtos.Count == 0 && vehicleDtos[0] == null))
+                {
+                    throw new GenericException($"Excel sheet is empty!");
+                }
+
+                // validate inputs in the excel file
+                InputsValidator.ValidateRegisterVehicleExcelFile(vehicleDtos);
+
+                foreach (var veh in vehicleDtos)
+                {
+                    if (veh == null)
+                    {
+                        continue;
+                    }
+
+                    if (await _uow.Fleet.ExistAsync(c => c.RegistrationNumber.ToLower() == veh.RegistrationNumber.Trim().ToLower()))
+                    {
+                        throw new GenericException($"Fleet/Vehicle with Registration Number: {veh.RegistrationNumber} already exist!");
+                    }
+                }
+
+                List<Fleet> fleets = new List<Fleet>();
+
+                foreach (var vehicle in vehicleDtos)
+                {
+                    if (vehicle == null)
+                    {
+                        continue;
+                    }
+
+                    var fleetModel = await _uow.FleetModel.FindAsync(x => x.ModelName == vehicle.VehicleType.ToUpper() || x.ModelName == vehicle.VehicleName.ToUpper());
+                    if (!fleetModel.Any())
+                    {
+                        throw new GenericException($"The chosen Vehicle Model for Vehicle type: {vehicle.VehicleType} for vehicle {vehicle.RegistrationNumber} does not exist!");
+                    }
+
+                    var partner = await _uow.Partner.GetPartnerByEmail(vehicle.PartnerEmail);
+                    if (!partner.Any() || partner.Count < 1)
+                    {
+                        throw new GenericException($"Partner with email: {vehicle.PartnerEmail} does not exist!");
+                    }
+
+                    FleetType outType;
+                    if (!(Enum.TryParse(vehicle.VehicleType.Replace(" ", ""), out outType)))
+                    {
+                        throw new GenericException($"The chosen vehicle type: {vehicle.VehicleType} not yet available!");
+                    }
+
+                    FleetType fleetType = (FleetType)Enum.Parse(typeof(FleetType), vehicle.VehicleType.Replace(" ", ""));
+                    if (fleetType == null)
+                    {
+                        throw new GenericException($"The chosen vehicle type: {vehicle.VehicleType} does not exist!");
+                    }
+
+                    VehicleFixedStatus isFixed = (VehicleFixedStatus)Enum.Parse(typeof(VehicleFixedStatus), vehicle.IsFixed);
+
+                    if (vehicle.VehicleOwner.Contains('@'))
+                    {
+                        ownerId = (await _uow.FleetPartner.FindAsync(x => x.Email == vehicle.VehicleOwner.Trim().ToLower())).FirstOrDefault().UserId;
+                    }
+                    else
+                    {
+                        var owner = vehicle.VehicleOwner.Split(' ');
+                        var ownerFirstName = owner.First();
+                        var ownerLastName = owner.Last();
+
+                        ownerId =
+                            (await _uow.FleetPartner.FindAsync(x => (x.FirstName.Trim().ToLower() == ownerFirstName.Trim().ToLower() && x.LastName.ToLower() == ownerLastName.Trim().ToLower())))
+                            .FirstOrDefault().UserId;
+                    }
+                    
+                    if (string.IsNullOrEmpty(ownerId))
+                    {
+                        throw new GenericException($"Vehicle owner: {vehicle.VehicleOwner} for vehicle: {vehicle.RegistrationNumber} does not exist!");
+                    }
+
+                    Fleet fleet = new Fleet()
+                    {
+                        RegistrationNumber = vehicle.RegistrationNumber,
+                        Capacity = vehicle.VehicleCapacity,
+                        DateCreated = vehicle.DateOfCommission.Date,
+                        DateModified = DateTime.Now.Date,
+                        IsDeleted = false,
+                        Status = vehicle.Status == "Active",
+                        Partner = partner[0],
+                        PartnerId = partner[0].PartnerId,
+                        FleetType = fleetType,
+                        FleetName = vehicle.VehicleName,
+                        ModelId = fleetModel.FirstOrDefault().MakeId,
+                        FleetModel = fleetModel.FirstOrDefault(),
+                        EnterprisePartnerId = ownerId,
+                        IsFixed = isFixed,
+                    };
+
+                    fleets.Add(fleet);
+                }
+                _uow.Fleet.AddRange(fleets);
+                await _uow.CompleteAsync();
+
+                return true;
+            }
+            throw new GenericException("You are not authorized to use this feature");
         }
 
         public async Task<IReadOnlyList<CaptainDetailsDTO>> GetAllCaptainsAsync()
@@ -431,6 +708,31 @@ namespace GIGLS.Services.Implementation
             {
                 throw new GenericException("You are not authorized to use this feature");
             }
+        }
+
+        public async Task<ViewCaptainPagingDto> GetAllCaptainsPaginatedAsync(int currentPage, int pageSize)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                var captains = await _uow.CaptainRepository.GetAllCaptainsAsync();
+
+                var captainsToPaginate = captains.Select(x => new ViewCaptainsDTO()
+                {
+                    PartnerId = x.PartnerId,
+                    Status = x.ActivityStatus.ToString(),
+                    EmploymentDate = x.DateCreated,
+                    CaptainCode = x.PartnerCode,
+                    Email = x.Email,
+                    Name = x.FirstName + " " + x.LastName,
+                    VehicleAssigned = string.IsNullOrEmpty(x.VehicleType + x.VehicleLicenseNumber) ? "No vehicle assigned yet" : x.VehicleType + " " + x.VehicleLicenseNumber
+                }).ToList();
+
+                var result = new Paginate();
+                return result.PaginateData(captainsToPaginate, currentPage, pageSize);
+            }
+            throw new GenericException("You are not authorized to use this feature");
+            
         }
 
         public async Task<IReadOnlyList<VehicleDTO>> GetVehiclesByDateAsync(DateTime? date)
@@ -602,6 +904,20 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+
+        public async Task<ViewVehiclePagingDto> GetAllVehiclesPaginatedAsync(int currentPage, int pageSize)
+        {
+            var currentUserRole = await GetCurrentUserRoleAsync();
+            if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+            {
+                var vehicles = await _uow.CaptainRepository.GetAllVehiclesAsync();
+
+                var result = new Paginate();
+                return result.PaginateVehicles(vehicles, currentPage, pageSize);
+            }
+            throw new GenericException("You are not authorized to use this feature");
+        }
+
         public async Task<VehicleDetailsDTO> GetVehicleByRegistrationNumberAsync(string regNum)
         {
             try
@@ -658,6 +974,44 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task<List<VehicleDTO>> GetVehiclesByDateRangeAsync(DateFilterCriteria filter)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+                {
+                    return await _uow.CaptainRepository.GetAllVehiclesByDateRangeAsync(filter);
+                }
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IReadOnlyList<ViewCaptainsDTO>> GetCaptainsByDateRangeAsync(DateFilterCriteria filter)
+        {
+            try
+            {
+                var currentUserRole = await GetCurrentUserRoleAsync();
+
+                if (currentUserRole == "CaptainManagement" || currentUserRole == "Admin" || currentUserRole == "Administrator" || currentUserRole == "FleetCoordinator")
+                {
+                    var captains = await _uow.CaptainRepository.GetAllCaptainsByDateRangeAsync(filter);
+                    return captains;
+                }
+
+                throw new GenericException("You are not authorized to use this feature");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         private async Task<string> GetCurrentUserRoleAsync()
         {
@@ -678,6 +1032,5 @@ namespace GIGLS.Services.Implementation
             };
             await _messageSenderService.SendGenericEmailMessage(MessageType.CAPTEMAIL, partnerDto);
         }
-
     }
 }

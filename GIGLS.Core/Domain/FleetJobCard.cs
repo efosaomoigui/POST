@@ -17,6 +17,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Amount { get; set; }
         public string VehiclePartToFix { get; set; }
         public string Status { get; set; }
+        public string PaymentReceiptUrl { get; set; }
 
         public int FleetId { get; set; }
         [ForeignKey("FleetId")]
