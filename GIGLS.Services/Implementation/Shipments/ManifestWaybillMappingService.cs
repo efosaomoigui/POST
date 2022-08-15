@@ -878,15 +878,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     var manifestMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
 
                     //add manifest details to the dto
-                    foreach (var waybill in manifestMappingDto)
-                    {
-                        waybill.ManifestDetails = manifestDTO;
-
-                        if (waybill.Shipment.IsCashOnDelivery)
-                        {
-                            waybill.CODManualAccount = CODManualServiceCentreCodes.FirstOrDefault().CrAccount ?? "N/A";
-                        }
-                    }
+                    //foreach (var waybill in manifestMappingDto)
+                    //{
+                    //    waybill.ManifestDetails = manifestDTO;
+                    //    //var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill.Waybill);
+                    //    //if (shipment != null)
+                    //    //{
+                    //    //    if (shipment.IsCashOnDelivery)
+                    //    //    {
+                    //    //        waybill.CODManualAccount = CODManualServiceCentreCodes.FirstOrDefault().CrAccount ?? "N/A";
+                    //    //    } 
+                    //    //}
+                    //}
 
                     //add it to range of array
                     manifestWaybillNumberMappingDto.AddRange(manifestMappingDto);
