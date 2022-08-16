@@ -6941,7 +6941,19 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"{shipment.CustomerDetails.Name} account has been {shipment.CustomerDetails.CompanyStatus}, contact support for assistance", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
+                //set some values
+                if (shipmentToModify.CustomerType == CustomerType.IndividualCustomer.ToString())
+                {
+                    var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == shipmentToModify.CustomerCode);
 
+                    shipmentDTO.CustomerDetails = JObject.FromObject(customer).ToObject<CustomerDTO>();
+                }
+                else
+                {
+                    var customer = await _uow.Company.GetAsync(x => x.CustomerCode == shipmentToModify.CustomerCode);
+
+                    shipmentDTO.CustomerDetails = JObject.FromObject(customer).ToObject<CustomerDTO>();
+                }
                 //3. Create shipment on DHL
                 var dhlShipment = await _DhlService.CreateInternationalShipment(shipmentDTO);
                 shipment.InternationalShipmentType = InternationalShipmentType.DHL;
