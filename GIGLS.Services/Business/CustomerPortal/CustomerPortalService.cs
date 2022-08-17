@@ -5035,5 +5035,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             await _companyService.DeleteCustomerAccount(payload.CustomerCode);
         }
+        public async Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto)
+        {
+            try
+            {
+                return await _shipmentService.GetCODShipmentsByFilter(dto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
