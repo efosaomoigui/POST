@@ -43,11 +43,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly INodeService _nodeService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IAutoManifestAndGroupingService _autoManifestAndGroupingService;
+        private readonly IAzapayPaymentService _azapayService;
 
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INodeService nodeService, INumberGeneratorMonitorService numberGeneratorMonitorService, IAutoManifestAndGroupingService autoManifestAndGroupingService)
+            IMessageSenderService messageSenderService, IFinancialReportService financialReportService, INodeService nodeService, 
+            INumberGeneratorMonitorService numberGeneratorMonitorService, IAutoManifestAndGroupingService autoManifestAndGroupingService,
+            IAzapayPaymentService azapayService)
         {
             _uow = uow;
             _userService = userService;
@@ -59,6 +62,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             _nodeService = nodeService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _autoManifestAndGroupingService = autoManifestAndGroupingService;
+            _azapayService = azapayService;
 
             MapperConfig.Initialize();
         }
@@ -139,7 +143,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     //Use new transfer payment method for nigeria else normal transfer payment method for others
                     if (shipment.DepartureCountryId == 1)
                     {
-                        result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
+                        //Check transfer processing partner used
+                        if(paymentTransaction.ProcessingPartner == ProcessingPartnerType.Cellulant)
+                        {
+                            result = await ProcessNewPaymentTransactionForTransfer(paymentTransaction);
+                        }
+                        else
+                        {
+                            result = await ProcessNewPaymentTransactionForAzapayTransfer(paymentTransaction);
+                        }
                     }
                     else
                     {
@@ -160,6 +172,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             await ConfirmShipmentTransferDetails(paymentTransaction);
             return true;
         }
+
+        public async Task<bool> ProcessNewPaymentTransactionForAzapayTransfer(PaymentTransactionDTO paymentTransaction)
+        {
+            await ConfirmShipmentTransferDetailsForAzapay(paymentTransaction);
+            return true;
+        }
+
         public async Task<bool> ProcessNewPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -466,6 +485,38 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             else
             {
                 throw new GenericException($"This transaction reference has been used already. Provide a valid transaction reference");
+            }
+        }
+
+        private async Task ConfirmShipmentTransferDetailsForAzapay(PaymentTransactionDTO paymentTransaction)
+        {
+            /* 
+             1. Validate the transfer with azapay
+             2. We will check that the waybill that the reference code is being validated for, has not been validated before
+             3. We will check that the amount azapay says it has collected is the same amount for the cost of the waybill.
+             */
+            var transferDetails = await _azapayService.ValidateTimedAccountRequest(paymentTransaction.AccountNumber);
+
+            if (transferDetails == null)
+                throw new GenericException($"Transfer details does not exist for {paymentTransaction.AccountNumber}");
+
+            if(transferDetails.Data.Status.ToLower() != "confirmed")
+                throw new GenericException($"Unable to confirm transfer made to {paymentTransaction.AccountNumber}");
+
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+            if (shipment == null)
+                throw new GenericException($"Shipment with waybill {paymentTransaction.Waybill} does not exist");
+
+            //Block if amount transfered is less than shipment amount
+            if (Convert.ToDecimal( transferDetails.Data.Amount) < shipment.GrandTotal)
+                throw new GenericException($"Transferred amount is less than shipment amount");
+
+            var paymentStatus = _uow.Invoice.GetAllAsQueryable().Where(s => s.Waybill == paymentTransaction.Waybill).FirstOrDefault().PaymentStatus;
+
+            //process shioments that have not been paid for
+            if (paymentStatus != PaymentStatus.Paid)
+            {
+                await ProcessNewPaymentTransaction(paymentTransaction);
             }
         }
 
