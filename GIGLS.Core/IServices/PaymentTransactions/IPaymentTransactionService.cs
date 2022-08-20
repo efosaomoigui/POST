@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.PaymentTransactions
         Task<bool> ProcessNewPaymentTransaction(PaymentTransactionDTO paymentTransaction);
         Task<bool> ProcessPaymentTransactionGIGGO(PaymentTransactionDTO paymentTransaction);
         Task<bool> ProcessNewPaymentTransactionForTransfer(PaymentTransactionDTO paymentTransaction);
+        Task<bool> ProcessNewPaymentTransactionForAzapayTransfer(PaymentTransactionDTO paymentTransaction);
     }
 }
