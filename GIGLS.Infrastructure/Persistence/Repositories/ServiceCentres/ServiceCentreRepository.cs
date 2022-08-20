@@ -187,7 +187,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     join st in _context.State on sc.StateId equals st.StateId
                                     join c in _context.Country on st.CountryId equals c.CountryId
                                     join t in _context.LGA on s.LGAId equals t.LGAId
-                                    where countryIds.Contains(c.CountryId)
+                                    where countryIds.Contains(c.CountryId) && s.IsHUB == false && s.IsGateway == false
                                     select new ServiceCentreDTO
                                     {
                                         Name = s.Name,
@@ -224,6 +224,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     join st in _context.State on sc.StateId equals st.StateId
                                     join c in _context.Country on st.CountryId equals c.CountryId
                                     join t in _context.LGA on s.LGAId equals t.LGAId
+                                    where  s.IsHUB == false && s.IsGateway == false
                                     select new ServiceCentreDTO
                                     {
                                         Name = s.Name,
@@ -498,7 +499,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                      join st in _context.State on sc.StateId equals st.StateId
                                      join c in _context.Country on st.CountryId equals c.CountryId
                                      join t in _context.LGA on s.LGAId equals t.LGAId
-                                     where c.CountryId == countryId
+                                     where c.CountryId == countryId && s.IsHUB == false && s.IsGateway == false
                                      select new ServiceCentreDTO
                                      {
                                          Name = s.Name,
@@ -532,7 +533,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                      join sc in _context.Station on s.StationId equals sc.StationId
                                      join st in _context.State on sc.StateId equals st.StateId
                                      join c in _context.Country on st.CountryId equals c.CountryId
-                                     where c.CountryId == countryId
+                                     where c.CountryId == countryId && s.IsHUB == false && s.IsGateway == false
                                      select new ServiceCentreDTO
                                      {
                                          Name = s.Name,
@@ -571,7 +572,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true  && s.IsConsignable == true);
 
                 if (stationId > 0)
                 {
@@ -583,7 +584,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 join st in _context.State on sc.StateId equals st.StateId
                                 join c in _context.Country on st.CountryId equals c.CountryId
                                 join t in _context.LGA on s.LGAId equals t.LGAId
-                                where c.CountryId == countryId
+                                where c.CountryId == countryId && s.IsGateway == false
                                 select new ServiceCentreDTO
                                 {
                                     Name = s.Name,
@@ -622,9 +623,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsConsignable == true);
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true && s.IsConsignable == true && s.IsPublic == true);
                 var centreDto = from s in centres
                                 join sc in _context.Station on s.StationId equals sc.StationId
+                                where s.IsHUB == false && s.IsGateway == false
                                 select new ServiceCentreDTO
                                 {
                                     Name = s.Name,

@@ -1191,5 +1191,49 @@ namespace GIGLS.Messaging.MessageService
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
         }
+
+
+        public async Task<string> SendEmailForCODReport(MessageDTO message)
+        {
+            string result = "";
+            if (!string.IsNullOrWhiteSpace(message.ToEmail))
+            {
+                result = await ConfigSendEmailForStellaLoginDetails(message);
+            }
+            return result;
+        }
+
+        private async Task<string> ConfigSendEmailForCODReport(MessageDTO message)
+        {
+            var myMessage = new SendGridMessage();
+            myMessage.TemplateId = ConfigurationManager.AppSettings[$"emailService:{message.MessageTemplate}"];
+            var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
+            var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
+            if (string.IsNullOrWhiteSpace(message.Subject))
+            {
+                message.Subject = "COD Transaction Report";
+            }
+            myMessage.AddTo(message.To);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
+            myMessage.Subject = message.Subject;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
+
+            var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
+            var client = new SendGridClient(apiKey);
+
+
+            //set substitutions 
+            myMessage.AddAttachment(new Attachment
+            {
+               Content = message.PDF,
+               Type = "application/excel",
+               Filename = message.PDF,
+               Disposition = "attachment"
+            });
+
+            var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
+        }
     }
 }

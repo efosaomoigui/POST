@@ -9,6 +9,9 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
 {
@@ -28,7 +31,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             {
                 var currentMonth = GetStartAndEndDayOfMonth();
 
-                var captains = _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false).AsQueryable();
+                var captains = _context.Partners.Where(x => 
+                    (x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner) 
+                    && x.IsDeleted == false).AsQueryable();
                 var allCaptains = new List<ViewCaptainsDTO>();
 
                 if(date == null)
@@ -64,7 +70,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var captain = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerType == PartnerType.Captain && x.PartnerId == partnerId && x.IsDeleted == false);
+                var captain = await _context.Partners.FirstOrDefaultAsync(x => 
+                    (x.PartnerType == PartnerType.Captain 
+                    || x.PartnerType == PartnerType.InternalDeliveryPartner)
+                    && x.PartnerId == partnerId 
+                    && x.IsDeleted == false);
                 return await Task.FromResult(captain);
             }
             catch (Exception)
@@ -77,10 +87,38 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var captain = await _context.Partners.Where(x => x.PartnerType == PartnerType.Captain && x.IsDeleted == false)
+                var captain = await _context.Partners.Where(x => 
+                        (x.PartnerType == PartnerType.Captain 
+                        || x.PartnerType == PartnerType.InternalDeliveryPartner)
+                        && x.IsDeleted == false)
                     .OrderByDescending(x => x.DateCreated)
                     .ToListAsync();
                 return await Task.FromResult(captain);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IList<VehicleDTO>> GetAllVehiclesAsync()
+        {
+            try
+            {
+                var vehicles = _context.Fleet.Where(x => x.IsDeleted == false).Select(x => new VehicleDTO()
+                {
+                    FleetId = x.FleetId,
+                    Status = x.Status == true ? "Active" : "Inactive",
+                    AssignedCaptain = _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).FirstName.ToString() + " " + _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).LastName.ToString(),
+                    FleetName = x.FleetName,
+                    RegistrationNumber = x.RegistrationNumber,
+                    VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString(),
+                    VehicleOwnerId = x.EnterprisePartnerId,
+                    VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
+                    IsFixed = x.IsFixed.ToString()
+                }).OrderByDescending(x => x.FleetId).ToList();
+
+                return await Task.FromResult(vehicles);
             }
             catch (Exception)
             {
@@ -167,6 +205,77 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
 
                 throw;
             }
+        }
+
+        public Task<List<VehicleDTO>> GetAllVehiclesByDateRangeAsync(DateFilterCriteria filter)
+        {
+            //get startDate and endDate
+            var startDate = new DateTime();
+            if (filter.StartDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            }
+            var queryDate = filter.getStartDateAndEndDate();
+            var endDate = queryDate.Item2;
+
+            // filter by cancelled shipments
+            var vehicles = _context.Fleet.AsQueryable().Where(x => x.IsDeleted == false);
+            vehicles = vehicles.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate)
+                .OrderByDescending(x => x.DateCreated);
+
+            var resultDto = vehicles.Select(x => new VehicleDTO()
+            {
+                FleetId = x.FleetId,
+                Status = x.Status == true ? "Active" : "Inactive",
+                AssignedCaptain = _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).FirstName.ToString() + " " + _context.Partners.FirstOrDefault(p => p.PartnerId == x.PartnerId).LastName.ToString(),
+                FleetName = x.FleetName,
+                RegistrationNumber = x.RegistrationNumber,
+                VehicleOwner = _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).FirstName.ToString() + " " + _context.Users.FirstOrDefault(user => user.Id == x.EnterprisePartnerId).LastName.ToString(),
+                VehicleOwnerId = x.EnterprisePartnerId,
+                VehicleAge = (int)DbFunctions.DiffDays(x.DateCreated, DateTime.Now),
+                IsFixed = x.IsFixed.ToString()
+            }).ToList();
+
+            return Task.FromResult(resultDto);
+        }
+
+        public Task<List<ViewCaptainsDTO>> GetAllCaptainsByDateRangeAsync(DateFilterCriteria filter)
+        {
+            //get startDate and endDate
+            var startDate = new DateTime();
+            DateTime endDate;
+            var queryDate = filter.getStartDateAndEndDate();
+            if (filter.StartDate == null && filter.EndDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                endDate = queryDate.Item2;
+            }
+            else
+            {
+                startDate = queryDate.Item1;
+                endDate = queryDate.Item2;
+            }
+            
+            
+            var allCaptains = new List<ViewCaptainsDTO>();
+
+            // filter by cancelled shipments
+            var captains = _context.Partners.AsQueryable().Where(x => x.IsDeleted == false);
+            captains = captains.Where(x => x.DateCreated >= startDate && x.DateCreated <= endDate)
+                .OrderByDescending(x => x.DateCreated);
+
+            allCaptains = captains.Select(x => new ViewCaptainsDTO()
+            {
+                PartnerId = x.PartnerId,
+                Status = x.ActivityStatus.ToString(),
+                EmploymentDate = x.DateCreated,
+                CaptainCode = x.PartnerCode,
+                Email = x.Email,
+                Name = x.FirstName + " " + x.LastName,
+                VehicleAssigned = string.IsNullOrEmpty(x.VehicleType + " " + x.VehicleLicenseNumber) ? "No vehicle assigned yet" : x.VehicleType + " " + x.VehicleLicenseNumber
+            }).ToList();
+
+            return Task.FromResult(allCaptains);
         }
 
         private CurrentMonthDetailsDTO GetStartAndEndDayOfMonth()

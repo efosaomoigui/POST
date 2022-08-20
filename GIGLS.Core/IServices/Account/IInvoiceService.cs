@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -20,5 +21,6 @@ namespace GIGLS.Core.IServices.Account
         Task<string> SendEmailForWalletBalanceCheck(decimal daystoduedate);
         Task<List<InvoiceViewDTO>> GetInvoiceByServiceCentre(int serviceCentreId);
         Task<bool> ProcessBulkPaymentforWaybills(BulkWaybillPaymentDTO bulkWaybillPaymentDTO);
+        Task AddInvoiceNote(InvoiceNoteDTO invoiceDto);
     }
 }

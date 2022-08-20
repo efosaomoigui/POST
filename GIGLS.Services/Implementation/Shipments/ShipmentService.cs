@@ -47,6 +47,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web.Hosting;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -3843,6 +3844,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
 
+                //2.7 Change TransferDetails status to false if payment method is transfer
+                await UpdateTransferStatus(invoice);
+
                 //send message
                 //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
                 boolRresult = true;
@@ -6877,6 +6881,429 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<string> VerifyPayment(string waybill)
         {
             return await _uow.Invoice.VerifyPayment(waybill);
+        }
+
+        private async Task UpdateTransferStatus(Invoice invoice)
+        {
+            if (invoice.PaymentMethod == PaymentType.Transfer.ToString())
+            {
+                var transferDetail = _uow.TransferDetails.GetAllAsQueryable()
+                                                    .Where(x => x.PaymentReference.ToLower() == invoice.PaymentTypeReference.ToLower()).FirstOrDefault();
+                if(transferDetail != null)
+                {
+                    transferDetail.IsVerified = false;
+                    await _uow.CompleteAsync();
+                }
+            }
+        }
+
+
+
+        private async Task<string> GetCODListExcel(AllCODShipmentDTO cods)
+        {
+            StringWriter sw = new StringWriter();
+            string _folderPath = HostingEnvironment.MapPath("~/Images/");
+
+            sw.WriteLine("\"Waybill\",\"COD Amount\",\"Contracting Centre\",\"Destination Centre\",\"COD Status\",\"COD Status Date\"");
+            foreach (var item in cods.CODShipmentDetail)
+            {
+                sw.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",",
+                   item.Waybill,
+                   item.CODAmount,
+                   "",
+                   "",
+                   item.CODStatus,
+                   item.DateCreated
+                 ));
+            }
+
+            string newFileName = "CODList_" + "_" + DateTime.Now.ToString("ddMMyyyss") + ".csv";
+            string path = System.IO.Path.Combine(_folderPath, newFileName);
+            File.WriteAllText(path, sw.ToString());
+            return newFileName;
+        }
+
+
+        private async Task<AllCODShipmentDTO> GetCODShipmentsPaid(PaginationDTO dto)
+        {
+            try
+            {
+                int totalCount;
+                if (String.IsNullOrEmpty(dto.UserId))
+                {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    dto.UserId = currentUser;
+                }
+                var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
+                var codWalletInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (codWalletInfo is null)
+                {
+                    throw new GenericException("user does not have a COD wallet");
+                }
+                var allCOD = new AllCODShipmentDTO();
+                var codMobileShipment = new List<PreShipmentMobile>();
+                var codAgilityShipment = new List<Shipment>();
+
+                if (dto.PageSize < 1)
+                {
+                    dto.PageSize = 5000;
+                }
+                if (dto.Page < 1)
+                {
+                    dto.Page = 1;
+                }
+                if (dto.StartDate != null && dto.EndDate != null)
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Paid && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.CODStatus == CODMobileStatus.Paid && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Paid).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.CODStatus == CODMobileStatus.Paid).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+
+                if (codAgilityShipment.Any())
+                {
+                    var waybills = codAgilityShipment.Select(x => x.Waybill);
+                    var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
+                    var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
+                    centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
+                    foreach (var item in codAgilityShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+
+                }
+                if (codMobileShipment.Any())
+                {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
+                    foreach (var item in codMobileShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+                }
+
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<AllCODShipmentDTO> GetCODShipmentsCollected(PaginationDTO dto)
+        {
+            try
+            {
+                int totalCount;
+                if (String.IsNullOrEmpty(dto.UserId))
+                {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    dto.UserId = currentUser;
+                }
+                var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
+                var codWalletInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (codWalletInfo is null)
+                {
+                    throw new GenericException("user does not have a COD wallet");
+                }
+                var allCOD = new AllCODShipmentDTO();
+                var codMobileShipment = new List<PreShipmentMobile>();
+                var codAgilityShipment = new List<Shipment>();
+
+                if (dto.PageSize < 1)
+                {
+                    dto.PageSize = 100;
+                }
+                if (dto.Page < 1)
+                {
+                    dto.Page = 1;
+                }
+                if (dto.StartDate != null && dto.EndDate != null)
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Collected && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.CODStatus == CODMobileStatus.Collected && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Collected).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.CODStatus == CODMobileStatus.Collected).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+
+                if (codAgilityShipment.Any())
+                {
+                    var waybills = codAgilityShipment.Select(x => x.Waybill);
+                    var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
+                    var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
+                    centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
+                    foreach (var item in codAgilityShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+
+                }
+                if (codMobileShipment.Any())
+                {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
+                    foreach (var item in codMobileShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+                }
+
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<AllCODShipmentDTO> GetCODShipmentsInitiated(PaginationDTO dto)
+
+        {
+            try
+            {
+                int totalCount;
+                if (String.IsNullOrEmpty(dto.UserId))
+                {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    dto.UserId = currentUser;
+                }
+                var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
+                var codWalletInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                if (codWalletInfo is null)
+                {
+                    throw new GenericException("user does not have a COD wallet");
+                }
+                var allCOD = new AllCODShipmentDTO();
+                var codMobileShipment = new List<PreShipmentMobile>();
+                var codAgilityShipment = new List<Shipment>();
+
+                if (dto.PageSize < 1)
+                {
+                    dto.PageSize = 5000;
+                }
+                if (dto.Page < 1)
+                {
+                    dto.Page = 1;
+                }
+                if (dto.StartDate != null && dto.EndDate != null)
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Initiated && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.CODStatus == CODMobileStatus.Initiated && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.DateCreated >= dto.StartDate && x.DateCreated <= dto.EndDate).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+                else
+                {
+                    codAgilityShipment = _uow.Shipment.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsCancelled == false && x.IsFromMobile == false && x.CODStatus == CODMobileStatus.Initiated).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                    codMobileShipment = _uow.PreShipmentMobile.Query(x => x.CustomerCode == user.UserChannelCode && x.IsCashOnDelivery && x.IsFromAgility == false && x.shipmentstatus != MobilePickUpRequestStatus.Cancelled.ToString() && x.CODStatus == CODMobileStatus.Initiated).SelectPage(dto.Page, dto.PageSize, out totalCount).ToList();
+                }
+
+                if (codAgilityShipment.Any())
+                {
+                    var waybills = codAgilityShipment.Select(x => x.Waybill);
+                    var collection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+                    var Agilitytotal = codAgilityShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Agilitytotal.Value;
+                    var centreIds = codAgilityShipment.Select(x => x.DepartureServiceCentreId).ToList();
+                    centreIds.AddRange(codAgilityShipment.Select(x => x.DestinationServiceCentreId).ToList());
+                    var centres = _uow.ServiceCentre.GetAllAsQueryable().Where(x => centreIds.Contains(x.ServiceCentreId)).ToList();
+                    foreach (var item in codAgilityShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        obj.DepartureServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DepartureServiceCentreId).Name;
+                        obj.DestinationServiceCentreName = centres.FirstOrDefault(x => x.ServiceCentreId == item.DestinationServiceCentreId).Name;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+
+                }
+                if (codMobileShipment.Any())
+                {
+                    var Mobiletotal = codMobileShipment.Sum(x => x.CashOnDeliveryAmount);
+                    allCOD.TotalCODAmount = allCOD.TotalCODAmount + Mobiletotal.Value;
+                    foreach (var item in codMobileShipment)
+                    {
+                        var obj = new CODShipmentDetailDTO();
+                        obj.Waybill = item.Waybill;
+                        obj.CODAmount = item.CashOnDeliveryAmount;
+                        obj.DateCreated = item.DateModified;
+                        obj.ReceiverName = item.ReceiverName;
+                        obj.ReceiverStationName = item.ReceiverCity == null ? "" : item.ReceiverCity;
+                        var status = (CODMobileStatus)Enum.Parse(typeof(CODMobileStatus), item.CODStatus.ToString());
+                        obj.CODStatus = status.ToString();
+                        obj.DateCreated = item.CODStatusDate == null ? item.DateModified : item.CODStatusDate.Value;
+                        obj.CODDescription = (item.CODDescription == null) ? "COD Initiated" : item.CODDescription;
+                        allCOD.CODShipmentDetail.Add(obj);
+                    }
+                }
+
+                return allCOD;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AllCODShipmentDTO> GetCODShipmentsByFilter(PaginationDTO dto)
+        {
+            try
+            {
+                var currentUser = await _userService.GetCurrentUserId();
+                dto.UserId = currentUser;
+
+                var user = await _uow.User.GetUserById(dto.UserId);
+                if (user is null)
+                {
+                    //get by code
+                    user = await _uow.User.GetUserByChannelCode(dto.UserId);
+                    if (user is null)
+                    {
+                        throw new GenericException("user does not exist");
+                    }
+                }
+
+                var cod = new AllCODShipmentDTO();
+                var date = DateTime.UtcNow;
+                var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                if (dto.StartDate == null && dto.EndDate == null)
+                {
+                    dto = new PaginationDTO
+                    {
+                        Page = 1,
+                        PageSize = 5000,
+                        StartDate = firstDayOfMonth,
+                        EndDate = lastDayOfMonth
+                    };
+                }
+                else
+                {
+                    dto.Page = 1;
+                    dto.PageSize = 5000;
+                }
+
+                if (dto.CODFilter == CODMobileStatus.Paid)
+                {
+                    cod = await GetCODShipmentsPaid(dto);
+                }
+                else if (dto.CODFilter == CODMobileStatus.Collected)
+                {
+                    cod = await GetCODShipmentsCollected(dto);
+                }
+                else if (dto.CODFilter == CODMobileStatus.Initiated)
+                {
+                    cod = await GetCODShipmentsInitiated(dto);
+                }
+                else
+                {
+                    cod = await GetAllCODShipments(dto);
+                }
+
+               // var generateExcel = await GetCODListExcel(cod);
+
+                ////send email to customer;
+                //var messageDTO = new MessageDTO
+                //{
+                //    CustomerName = user.FirstName,
+                //    ToEmail = "collechizzy@gmail.com",
+                //    To = "collechizzy@gmail.com",
+                //    MessageTemplate = "CreateShipment"
+                //};
+                //_messageSenderService.SendEmailForCODReport(messageDTO);
+
+                return cod;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

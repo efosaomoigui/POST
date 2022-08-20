@@ -53,6 +53,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 transferDetailsDTO.ProcessingPartner = ProcessingPartnerType.Azapay;
                 var transferDetails = Mapper.Map<TransferDetails>(transferDetailsDTO);
+                transferDetails.PaymentReference = transferDetailsDTO.RefId;
                 _uow.TransferDetails.Add(transferDetails);
                 await _uow.CompleteAsync();
                 return true;

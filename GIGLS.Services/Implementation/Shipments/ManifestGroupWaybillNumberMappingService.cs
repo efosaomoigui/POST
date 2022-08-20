@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
@@ -31,11 +32,12 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
         private readonly IShipmentTrackingService _trackingService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IDispatchService _dispatchService;
 
 
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
-            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService)
+            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService, IMessageSenderService messageSenderService, IDispatchService dispatchService)
         {
             _uow = uow;
             _manifestService = manifestService;
@@ -44,6 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _manifestWaybillMappingService = manifestWaybillMappingService;
             _trackingService = trackingService;
             _messageSenderService = messageSenderService;
+            _dispatchService = dispatchService;
             MapperConfig.Initialize();
         }
 
@@ -484,7 +487,82 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //map Manifest to Super Manifest
+        //public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId)
+        //{
+        //    try
+        //    {
+        //        var userId = await _userService.GetCurrentUserId();
+        //        var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+        //        var currentServiceCentre = await _userService.GetCurrentServiceCenter();
+
+        //        var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
+        //        //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
+
+        //        var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
+        //        //int manifestByScListCount = manifestByScList.Count;
+
+        //        //convert the list to HashSet to remove duplicate
+        //        var newManifestList = new HashSet<string>(manifestList);
+        //        var today = DateTime.Now;
+
+        //        foreach (var manifestCode in newManifestList)
+        //        {
+        //            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
+
+        //            if (manifest == null)
+        //            {
+        //                throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+        //            }
+
+        //            //Update The Manifest 
+        //            manifest.MovementStatus = MovementStatus.InProgress;
+
+        //            //insert into movement manifest mapping table
+        //            var resultMap = new MovementManifestNumberMapping()
+        //            {
+        //                MovementManifestCode = movementmanifestCode,
+        //                ManifestNumber = manifestCode,
+        //                UserId = userId
+        //            };
+        //            _uow.MovementManifestNumberMapping.Add(resultMap);
+        //        }
+
+        //        //create Code for validation and release code for shipment
+        //        var driverCode = await GenerateDeliveryCode();
+        //        var destServiceCentreCode = await GenerateDeliveryCode();
+
+        //        var message = new MovementManifestMessageDTO
+        //        {
+        //            MovementManifestCode = movementmanifestCode,
+        //            DepartureServiceCentre = currentServiceCentre[0]
+        //            //DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
+        //        };
+
+        //        //message.QRCode = deliveryNumber.SenderCode;
+        //        await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
+
+        //        var MovementManifestNumberResult = new MovementManifestNumber()
+        //        {
+        //            DepartureServiceCentreId = serviceCenters[0],
+        //            DestinationServiceCentreId = destinationScId,
+        //            MovementManifestCode = movementmanifestCode,
+        //            UserId = userId,
+        //            MovementStatus = MovementStatus.InProgress,
+        //            DriverCode = driverCode,
+        //            DestinationServiceCentreCode = destServiceCentreCode
+        //        };
+
+        //        _uow.MovementManifestNumber.Add(MovementManifestNumberResult);
+        //        await _uow.CompleteAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        ////map Manifest to Super Manifest
         public async Task MappingMovementManifestToManifest(string movementmanifestCode, List<string> manifestList, int destinationScId)
         {
             try
@@ -493,72 +571,108 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var currentServiceCentre = await _userService.GetCurrentServiceCenter();
 
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode));
-                //&&x.MovementStatus == MovementStatus.NoMovement && serviceCenters.Contains(x.DepartureServiceCentreId)
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.IsDispatched == true && manifestList.Contains(x.ManifestCode)).ToList();
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
 
-                //int manifestByScListCount = manifestByScList.Count;
-
-                //convert the list to HashSet to remove duplicate
-                var newManifestList = new HashSet<string>(manifestList);
-                var today = DateTime.Now;
-
-                foreach (var manifestCode in newManifestList)
+                var alreadyExist = await _uow.MovementManifestNumber.GetAsync(x => x.MovementManifestCode == movementmanifestCode);
+                if (alreadyExist != null)
                 {
-                    var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
-
-                    if (manifest == null)
+                    foreach (var manifestCode in manifestByScList)
                     {
-                        throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                        var manifest = manifestBySc.Where(x => x.ManifestCode == manifestCode);
+                        if (manifest == null)
+                        {
+                            throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                        }
+
+                        var item = await _uow.MovementManifestNumberMapping.GetAsync(x => x.ManifestNumber == manifestCode);
+                        if (item is null)
+                        {
+                            var resultMap = new MovementManifestNumberMapping()
+                            {
+                                MovementManifestCode = movementmanifestCode,
+                                ManifestNumber = manifestCode,
+                                UserId = userId
+                            };
+                            _uow.MovementManifestNumberMapping.Add(resultMap);
+                        }
+
                     }
-
-                    //Update The Manifest 
-                    manifest.MovementStatus = MovementStatus.InProgress;
-
-                    //insert into movement manifest mapping table
-                    var resultMap = new MovementManifestNumberMapping()
+                    var allMoveManifest = _uow.MovementManifestNumberMapping.GetAllAsQueryable().Where(x => x.MovementManifestCode == movementmanifestCode && !manifestList.Contains(x.ManifestNumber)).ToList();
+                    if (allMoveManifest.Any())
                     {
-                        MovementManifestCode = movementmanifestCode,
-                        ManifestNumber = manifestCode,
-                        UserId = userId
-                    };
-                    _uow.MovementManifestNumberMapping.Add(resultMap);
+                        foreach (var item in allMoveManifest)
+                        {
+                            item.IsDeleted = true;
+                        }
+                    }
+                    await _uow.CompleteAsync();
                 }
 
-                //create Code for validation and release code for shipment
-                var driverCode = await GenerateDeliveryCode();
-                var destServiceCentreCode = await GenerateDeliveryCode();
-
-                var message = new MovementManifestMessageDTO
+                else
                 {
-                    MovementManifestCode = movementmanifestCode,
-                    DepartureServiceCentre = currentServiceCentre[0]
-                    //DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
-                };
+                    //convert the list to HashSet to remove duplicate
+                    var newManifestList = new HashSet<string>(manifestList);
+                    var today = DateTime.Now;
 
-                //message.QRCode = deliveryNumber.SenderCode;
-                await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
+                    foreach (var manifestCode in newManifestList)
+                    {
+                        var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode);
 
-                var MovementManifestNumberResult = new MovementManifestNumber()
-                {
-                    DepartureServiceCentreId = serviceCenters[0],
-                    DestinationServiceCentreId = destinationScId,
-                    MovementManifestCode = movementmanifestCode,
-                    UserId = userId,
-                    MovementStatus = MovementStatus.InProgress,
-                    DriverCode = driverCode,
-                    DestinationServiceCentreCode = destServiceCentreCode
-                };
+                        if (manifest == null)
+                        {
+                            throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                        }
 
-                _uow.MovementManifestNumber.Add(MovementManifestNumberResult);
-                await _uow.CompleteAsync();
+                        //Update The Manifest 
+                        manifest.MovementStatus = MovementStatus.InProgress;
+
+                        //insert into movement manifest mapping table
+                        var resultMap = new MovementManifestNumberMapping()
+                        {
+                            MovementManifestCode = movementmanifestCode,
+                            ManifestNumber = manifestCode,
+                            UserId = userId
+                        };
+                        _uow.MovementManifestNumberMapping.Add(resultMap);
+                    }
+
+                    //create Code for validation and release code for shipment
+                    var driverCode = await GenerateDeliveryCode();
+                    var destServiceCentreCode = await GenerateDeliveryCode();
+
+                    var message = new MovementManifestMessageDTO
+                    {
+                        MovementManifestCode = movementmanifestCode,
+                        DepartureServiceCentre = currentServiceCentre[0]
+                        //DestinationServiceCentre = await _userService.getServiceCenterById(destinationScId)
+                    };
+
+                    //message.QRCode = deliveryNumber.SenderCode;
+                    await SendSMSForMobileShipmentCreation(message, MessageType.MCS);
+
+                    var MovementManifestNumberResult = new MovementManifestNumber()
+                    {
+                        DepartureServiceCentreId = serviceCenters[0],
+                        DestinationServiceCentreId = destinationScId,
+                        MovementManifestCode = movementmanifestCode,
+                        UserId = userId,
+                        MovementStatus = MovementStatus.InProgress,
+                        DriverCode = driverCode,
+                        DestinationServiceCentreCode = destServiceCentreCode
+                    };
+
+                    _uow.MovementManifestNumber.Add(MovementManifestNumberResult);
+                    await _uow.CompleteAsync();
+                }
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         private async Task SendSMSForMobileShipmentCreation(MovementManifestMessageDTO smsMessageExtensionDTO, MessageType messageType)
         {
@@ -805,6 +919,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestManifests = await _uow.ManifestGroupWaybillNumberMapping.GetManifestMovementNumberMappings(serviceCenters, dateFilterCriteria);
+
+                //set dispatched move manifest
+                foreach (var item in manifestManifests)
+                {
+                    var dispatched = await _dispatchService.GetMovementDispatchManifestCode(item.MovementManifestCode);
+                    if (dispatched != null)
+                    {
+                        item.Dispatched = true;
+                    }
+                }
 
                 return manifestManifests;
             }

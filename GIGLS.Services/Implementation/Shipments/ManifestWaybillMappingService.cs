@@ -837,6 +837,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get the current user
                 string userId = await _userService.GetCurrentUserId();
 
+                // get COD Manual service centre
+                var CODManualServiceCentreCodes = await _uow.ServiceCentre.FindAsync(x => x.Code == "CODManual");
+
                 //get the dispatch for the user
                 // var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
                 var userDispatchs = await _uow.Dispatch.GetDeliveryDispatchForPartner(userId);
@@ -875,10 +878,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     var manifestMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
 
                     //add manifest details to the dto
-                    foreach (var waybill in manifestMappingDto)
-                    {
-                        waybill.ManifestDetails = manifestDTO;
-                    }
+                    //foreach (var waybill in manifestMappingDto)
+                    //{
+                    //    waybill.ManifestDetails = manifestDTO;
+                    //    //var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill.Waybill);
+                    //    //if (shipment != null)
+                    //    //{
+                    //    //    if (shipment.IsCashOnDelivery)
+                    //    //    {
+                    //    //        waybill.CODManualAccount = CODManualServiceCentreCodes.FirstOrDefault().CrAccount ?? "N/A";
+                    //    //    } 
+                    //    //}
+                    //}
 
                     //add it to range of array
                     manifestWaybillNumberMappingDto.AddRange(manifestMappingDto);

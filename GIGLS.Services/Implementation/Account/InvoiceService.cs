@@ -505,5 +505,19 @@ namespace GIGLS.Services.Implementation.Account
             }
             return true;
         }
+
+        public async Task AddInvoiceNote(InvoiceNoteDTO invoiceDto)
+        {
+            var invoice = await _uow.Invoice.GetAsync(invoiceDto.InvoiceId);
+
+            if (invoice == null)
+            {
+                throw new GenericException("Invoice does not exists");
+            }
+
+            invoice.Note = invoiceDto.Note;
+
+            await _uow.CompleteAsync();
+        }
     }
 }

@@ -11,6 +11,9 @@ namespace GIGLS.Core.DTO
 {
     public class TransferDetailsDTO : BaseDomainDTO
     {
+        [JsonProperty("transferdetailsid")]
+        public int TransferDetailsId { get; set; }
+        
         [JsonProperty("originatoraccountnumber")]
         public string OriginatorAccountNumber { get; set; }
         [JsonProperty("amount")]
