@@ -46,5 +46,6 @@ namespace GIGLS.Core.IMessageService
         Task SendEmailFleetDisputeMessageAsync(MessageDTO messageDTO);
         Task SendEmailOpenJobCardAsync(MessageDTO messageDTO);
         Task SendEmailCloseJobCardAsync(MessageDTO messageDTO);
+        Task SendEmailForCODReport(MessageDTO messageDTO);
     }
 }
