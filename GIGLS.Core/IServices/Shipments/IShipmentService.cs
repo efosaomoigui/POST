@@ -116,6 +116,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<AllCODShipmentDTO> CellulantShipmentCollectionReport(PaginationDTO dto);
         Task<string> VerifyPayment(string waybill);
         Task<AllCODShipmentDTO> GetCODShipmentsByFilter(PaginationDTO dto);
+        Task<ShipmentDTO> UpdateInternationalShipment(InternationalShipmentDTO shipmentDTO);
+
+
     }
 
     public interface IMagayaService : IServiceDependencyMarker

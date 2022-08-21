@@ -938,6 +938,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     codtransferlog.StatusCode = stellasWithdraw.status.ToString();
                     codtransferlog.StatusDescription = stellasWithdraw.message;
+                    codtransferlog.ReceiverNarration = transferDTOStellas.Narration;
                 }
                 var res = await UpdateCODShipmentOnCallBackStellas(cod);
                 result = res;
@@ -950,6 +951,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     codtransferlog.StatusCode = stellasWithdraw.status.ToString();
                     codtransferlog.StatusDescription = stellasWithdraw.message;
+                    codtransferlog.ReceiverNarration = transferDTOStellas.Narration;
+
                 }
             }
 

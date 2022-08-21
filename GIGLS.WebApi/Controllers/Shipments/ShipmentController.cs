@@ -1304,5 +1304,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("updateinternationalshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> UpdateInternationalShipment(InternationalShipmentDTO shipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.UpdateInternationalShipment(shipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }
