@@ -350,4 +350,10 @@ namespace GIGLS.Core.DTO.Wallet
         [JsonProperty("loginDetails")]
         public LoginDetails LoginDetails { get; set; }
     }
+    public class LoginDetailsDTO
+    {
+        public string UserName { get; set; }
+
+        public string Password { get; set; }
+    }
 }

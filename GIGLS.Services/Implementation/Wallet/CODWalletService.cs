@@ -109,6 +109,10 @@ namespace GIGLS.Services.Implementation.Wallet
                         {
                             if (loginDetails.Data?.LoginDetails != null)
                             {
+                                //Save username and password to codwallet table
+                                await AddCODWalletLoginDetails(user.CustomerCode, loginDetails.Data.LoginDetails.Username, loginDetails.Data.LoginDetails.Password);
+
+                                //Send Email to user
                                 var message = new MessageDTO
                                 {
                                     ToEmail = user.Email,
@@ -234,6 +238,39 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 var payload = new CreateAccountCoreBankingDTO { CustomerId = customerId };
                 return await _stellasService.CreateAccountOnCoreBanking(payload);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
+        {
+            var result = new LoginDetailsDTO { UserName = "No login details", Password = "No login details" };
+            if (String.IsNullOrEmpty(customerCode))
+            {
+                throw new GenericException("Invalid code", $"{(int)HttpStatusCode.BadRequest}");
+            }
+            var custmerAccountInfo = await _uow.CODWallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (custmerAccountInfo != null)
+            {
+                result.UserName = string.IsNullOrEmpty(custmerAccountInfo.UserName) ? result.UserName : custmerAccountInfo.UserName;
+                result.Password = string.IsNullOrEmpty(custmerAccountInfo.Password) ? result.Password : custmerAccountInfo.Password;
+                return result;
+            }
+            return result;
+        }
+        public async Task AddCODWalletLoginDetails(string customerCode, string userName, string password)
+        {
+            try
+            {
+                var codWallet = _uow.CODWallet.GetAllAsQueryable().Where(x => x.CustomerCode == customerCode).FirstOrDefault();
+                if (codWallet != null)
+                {
+                    codWallet.UserName = userName;
+                    codWallet.Password = password;
+                    _uow.CompleteAsync();
+                }
             }
             catch (Exception ex)
             {

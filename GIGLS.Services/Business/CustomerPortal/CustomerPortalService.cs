@@ -5046,5 +5046,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+        public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
+        {
+            return await _codWalletService.GetStellasAccountLoginDetails(customerCode);
+        }
     }
 }
