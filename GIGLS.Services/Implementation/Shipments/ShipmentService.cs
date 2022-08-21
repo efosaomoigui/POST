@@ -7343,14 +7343,18 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //Get waybill to modify
                 var shipmentToModify = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentDTO.Waybill, "ShipmentItems");
+                if (shipmentToModify == null)
+                {
+                    throw new GenericException($"kindly confirm that this is a valid waybill", $"{(int)HttpStatusCode.BadRequest}");
+                }
                 if (shipmentToModify.IsInternational == false)
                 {
-                    throw new GenericException($"kindly confirm that this is an International waybill", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException($"kindly confirm that this is an International waybill", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
                 if (shipmentToModify.InternationalShipmentType != InternationalShipmentType.DHL)
                 {
-                    throw new GenericException($"kindly confirm that this is a DHL shipment", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException($"kindly confirm that this is a DHL shipment", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 // Get the Price
                 var price = await _DhlService.GetInternationalShipmentPrice(shipmentDTO);
