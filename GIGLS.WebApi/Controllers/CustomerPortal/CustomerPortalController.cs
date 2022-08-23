@@ -3186,5 +3186,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getstellalogindetails/{customercode}")]
+        public async Task<IServiceResponse<LoginDetailsDTO>> GetStellasLoginDetails(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasAccountLoginDetails(customercode);
+                return new ServiceResponse<LoginDetailsDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -282,5 +282,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill);
         Task DeleteCustomerAccount(DeleteAccountDTO payload);
         Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto);
+        Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode);
     }
 }

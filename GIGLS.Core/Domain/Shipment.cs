@@ -175,6 +175,13 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(300)]
         public string CODDescription { get; set; }
         public string blackBookSerialNumber { get; set; }
+        [MaxLength(128)]
+        public string ReceiverPostalCode { get; set; }
+        [MaxLength(128)]
+        public string ReceiverStateOrProvinceCode { get; set; }
+        [MaxLength(128)]
+        public string ReceiverCompanyName { get; set; }
+        public decimal ExtraCost { get; set; }
     }
 
     public class IntlShipmentRequest : BaseDomain, IAuditable
