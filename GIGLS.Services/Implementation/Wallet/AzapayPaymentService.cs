@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -128,6 +129,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 string resultJson = await response.Content.ReadAsStringAsync();
+                var status = JObject.Parse(resultJson)["status"].ToString();
+
+                if(status != "200")
+                {
+                    var message = JObject.Parse(resultJson)["message"].ToString();
+                    throw new GenericException(message);
+                }
+
                 result = JsonConvert.DeserializeObject<ValidateTimedAccountResponseDTO>(resultJson);
 
                 return result;
@@ -161,6 +170,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 string resultJson = await response.Content.ReadAsStringAsync();
+
+                var status = JObject.Parse(resultJson)["status"].ToString();
+
+                if (status != "200")
+                {
+                    var message = JObject.Parse(resultJson)["message"].ToString();
+                    throw new GenericException(message);
+                }
+
                 result = JsonConvert.DeserializeObject<GetTransactionHistoryResponseDTO>(resultJson);
 
                 return result;
@@ -198,6 +216,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 string resultJson = await response.Content.ReadAsStringAsync();
+
+                var status = JObject.Parse(resultJson)["status"].ToString();
+
+                if (status != "200")
+                {
+                    var message = JObject.Parse(resultJson)["message"].ToString();
+                    throw new GenericException(message);
+                }
+
                 result = JsonConvert.DeserializeObject<InitiateTimedAccountResponseDTO>(resultJson);
 
                 return result;
@@ -235,6 +262,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 string resultJson = await response.Content.ReadAsStringAsync();
+
+                var status = JObject.Parse(resultJson)["status"].ToString();
+
+                if (status != "200")
+                {
+                    var message = JObject.Parse(resultJson)["message"].ToString();
+                    throw new GenericException(message);
+                }
+
                 result = JsonConvert.DeserializeObject<AzapayTransferResponseDTO>(resultJson);
 
                 return result;
