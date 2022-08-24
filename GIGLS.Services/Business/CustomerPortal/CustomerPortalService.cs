@@ -4805,7 +4805,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 };
                 if (withdrawResponse.errors.Any())
                 {
-                    withdrawLog.StatusDescription = JsonConvert.SerializeObject(withdrawResponse);
+                    transferLog.StatusDescription = JsonConvert.SerializeObject(withdrawResponse);
                 }
                 _uow.CODTransferLog.Add(transferLog);
                 await _uow.CompleteAsync();
@@ -5021,7 +5021,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<GIGGOCODTransferResponseDTO> GetCodTransfer(string waybill)
         {
-           return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
+            return await _uow.GIGGOCODTransferRepository.GetCODTransfer(waybill);
         }
 
         public async Task DeleteCustomerAccount(DeleteAccountDTO payload)
@@ -5049,6 +5049,65 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode)
         {
             return await _codWalletService.GetStellasAccountLoginDetails(customerCode);
+        }
+
+        public async Task<StellasResponseDTO> StellasTransferReversal(StellasTransferDTO transferDTO)
+        {
+            if (transferDTO is null)
+            {
+                throw new GenericException("invalid payload");
+            }
+            var codWallet = await _uow.CODWallet.GetAsync(x => x.CustomerCode == transferDTO.Narration);
+            if (codWallet is null)
+            {
+                throw new GenericException("user does not have a COD wallet");
+            }
+            bool isNumeric = int.TryParse(transferDTO.Amount, out int n);
+            if (!isNumeric)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var amount = Convert.ToDecimal(transferDTO.Amount);
+            var koboValue = amount * 100;
+            transferDTO.Amount = Convert.ToString(koboValue);
+            if (amount <= 0)
+            {
+                throw new GenericException("invalid amount");
+            }
+            var no = Guid.NewGuid().ToString();
+            no = no.Substring(0, 4);
+
+            transferDTO.ReceiverAccountNumber = codWallet.AccountNo;
+            transferDTO.ReceiverBankCode = "200002";
+            transferDTO.ReceiverBankName = "Stellas";
+
+            transferDTO.RetrievalReference = $"{transferDTO.RetrievalReference}-{no}-REVERSAL-0TF";
+             var transferResponse = await _codWalletService.StellasTransfer(transferDTO);
+           // var transferResponse = new StellasResponseDTO();
+            //log to transferlog table
+            var transferLog = new CODTransferLog()
+            {
+                CustomerCode = codWallet.CustomerCode,
+                Amount = amount,
+                OriginatingBankAccount = "1100138907",
+                OriginatingBankName = "GIG LOGISTICS-1100138907",
+                DestinationBankAccount = codWallet.AccountNo,
+                DestinationBankName = "Stellas",
+                StatusCode = transferResponse.status.ToString(),
+                StatusDescription = transferResponse.message,
+                ReferenceNo = transferDTO.RetrievalReference
+            };
+            if (transferResponse.status)
+            {
+                transferLog.PaymentStatus = PaymentStatus.Paid;
+            }
+            if (transferResponse.errors.Any())
+            {
+                transferLog.StatusDescription = JsonConvert.SerializeObject(transferResponse);
+            }
+            _uow.CODTransferLog.Add(transferLog);
+            await _uow.CompleteAsync();
+            return transferResponse;
         }
     }
 }
