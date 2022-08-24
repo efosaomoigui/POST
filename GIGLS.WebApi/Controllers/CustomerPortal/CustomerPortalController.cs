@@ -3200,5 +3200,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("transferreversal")]
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasTransferReversal(StellasTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasTransferReversal(payload);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
