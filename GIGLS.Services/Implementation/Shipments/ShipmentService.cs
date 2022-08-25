@@ -7447,7 +7447,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
+        ***********
+        +
         private async void UpdateDHLWaybill(string waybill, InternationalShipmentWaybillDTO dhlWaybill)
         {
             var result = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == waybill);
@@ -7457,5 +7458,138 @@ namespace GIGLS.Services.Implementation.Shipments
             }
            
         }
+
+
+        #region
+
+        public async Task<bool> UtilitiesForSupport(SupportDTO request)
+        {
+            bool result = false;
+            try
+            {
+                if (request == null)
+                {
+                    throw new GenericException("invalid request");
+                }
+
+                if (request.SupportType == SupportType.CompleteShipment)
+                {
+                    result = await CompleteWaybill(request);
+                }
+                else if (request.SupportType == SupportType.UpdateShipmentDestination)
+                {
+                    result = await UpdateShipmentDestination(request);
+                }
+                else if (request.SupportType == SupportType.UpgradeUser)
+                {
+                    result = await UpgradeUser(request);
+                }
+                else if (request.SupportType == SupportType.ChangePassword)
+                {
+                    result = await ChangePassword(request);
+                }
+                else
+                {
+                    throw new GenericException("Contact admin for support");
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task<bool> CompleteWaybill(SupportDTO request)
+        {
+            bool response = false;
+            try
+            {
+                var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == request.SearchOption);
+                if (invoice == null)
+                {
+                    throw new GenericException("waybill not found");
+                }
+                invoice.PaymentTypeReference = request.Reference;
+                invoice.PaymentStatus = PaymentStatus.Paid;
+                invoice.PaymentMethod = PaymentType.Transfer.ToString();
+                await _uow.CompleteAsync();
+                response = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> UpdateShipmentDestination(SupportDTO request)
+        {
+            bool response = false;
+            try
+            {
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == request.SearchOption);
+                if (shipment == null)
+                {
+                    throw new GenericException("waybill not found");
+                }
+                shipment.DestinationServiceCentreId = request.DestinationServiceCentreId;
+                await _uow.CompleteAsync();
+                response = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<bool> UpgradeUser(SupportDTO request)
+        {
+            bool response = false;
+            try
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == request.SearchOption);
+                if (customer == null)
+                {
+                    throw new GenericException("user not found");
+                }
+                customer.Rank = Rank.Class;
+                customer.isCodNeeded = true;
+                customer.RankModificationDate = DateTime.Now;
+                await _uow.CompleteAsync();
+                response = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> ChangePassword(SupportDTO request)
+        {
+            bool response = false;
+            try
+            {
+                var customer = await _uow.User.GetUserByChannelCode(request.CustomerCode);
+                if (customer == null)
+                {
+                    throw new GenericException("user not found");
+                }
+                var reset = await _userService.ResetPassword(customer.Id, request.NewPassword);
+                response = reset.Succeeded;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+
+        #endregion
     }
 }

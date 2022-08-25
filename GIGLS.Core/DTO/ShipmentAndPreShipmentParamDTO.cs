@@ -30,4 +30,14 @@ namespace GIGLS.Core.DTO
         public bool IsAgility { get; set; }
         public object ShipmentInvoice { get; set; } 
     }
+
+    public class SupportDTO
+    {
+        public string SearchOption { get; set; }
+        public string CustomerCode  { get; set; }
+        public string Reference  { get; set; }
+        public string NewPassword  { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public SupportType SupportType  { get; set; }
+    }
 }
