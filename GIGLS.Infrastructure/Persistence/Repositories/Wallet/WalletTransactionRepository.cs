@@ -298,6 +298,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                     Paystack = 0,
                     TheTeller = 0,
                     Flutterwave = 0,
+                    Cellulant = 0,
+                    Sterling = 0,
+                    Korapay = 0,
                     USSD = 0
                 };
 
@@ -332,6 +335,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                     result.TheTeller = summary.TheTeller;
                     result.USSD = summary.USSD;
                     result.Flutterwave = summary.Flutterwave;
+                    result.Sterling = summary.Sterling;
+                    result.Korapay = summary.Korapay;
+                    result.Cellulant = summary.Cellulant;
                 }
 
                 return await Task.FromResult(result);
