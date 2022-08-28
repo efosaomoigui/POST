@@ -67,6 +67,9 @@ namespace GIGLS.Core.DTO.Wallet
         public decimal TheTeller { get; set; }
         public decimal Flutterwave { get; set; }
         public decimal USSD { get; set; }
+        public decimal Cellulant { get; set; }
+        public decimal Sterling { get; set; }
+        public decimal Korapay { get; set; }
     }
 
     public class WalletBreakdown
