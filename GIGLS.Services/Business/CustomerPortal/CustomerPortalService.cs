@@ -5109,5 +5109,53 @@ namespace GIGLS.Services.Business.CustomerPortal
             await _uow.CompleteAsync();
             return transferResponse;
         }
+
+        public async Task<List<CODCustomerAccountStatementDto>> GetCODCustomerAccountStatement(GetCODCustomerAccountStatementDto accountStatementDto)
+        {
+            var codTransferLog = _uow.CODTransferLog.GetAll().Where(x => x.CustomerCode == accountStatementDto.CustomerCode && x.StatusCode.ToLower() == "true");
+            var codTransferRegister = _uow.CODTransferRegister.GetAll().Where(x => x.CustomerCode == accountStatementDto.CustomerCode && x.StatusCode.ToLower() == "true");
+
+            if (accountStatementDto.StartDate == null && accountStatementDto.EndDate == null)
+            {
+                codTransferLog = codTransferLog.OrderByDescending(x => x.DateCreated).Take(50);
+                codTransferRegister = codTransferRegister.OrderByDescending(x => x.TransferDate).Take(50);
+            }
+            else
+            {
+                codTransferRegister = codTransferRegister.Where(x => x.TransferDate >= accountStatementDto.StartDate && x.TransferDate <= accountStatementDto.EndDate).OrderByDescending(x => x.TransferDate);
+                codTransferLog = codTransferLog.Where(x => x.DateCreated >= accountStatementDto.StartDate && x.DateCreated <= accountStatementDto.EndDate).OrderByDescending(x => x.DateCreated);
+            }
+
+            List<CODCustomerAccountStatementDto> customerStatementOfAccount = new List<CODCustomerAccountStatementDto>();
+
+            var transferLogs = codTransferLog.Select(x => new CODCustomerAccountStatementDto()
+            {
+                AmountPaid = x.Amount,
+                DestinationBankName = x.DestinationBankName,
+                DestinationAccountNumber = x.DestinationBankAccount,
+                SourceBankName = x.OriginatingBankName,
+                SourceAccountNumber = x.OriginatingBankAccount,
+                DatePaid = x.DateCreated,
+                TransactionType = "Debit",
+                Narration = "Payout to " + x.DestinationBankAccount + " (" + x.DestinationBankName + ")"
+            }).ToList();
+
+            var transferRegisters = codTransferRegister.Select(x => new CODCustomerAccountStatementDto()
+            {
+                AmountPaid = x.Amount,
+                DestinationBankName = "Stellas",
+                DestinationAccountNumber = x.AccountNo,
+                SourceBankName = "GIGL-Live",
+                SourceAccountNumber = "1100138907",
+                DatePaid = x.DateCreated,
+                TransactionType = "Credit",
+                Narration = "COD Payment for waybill " + x.Waybill
+            }).ToList();
+
+            customerStatementOfAccount.AddRange(transferLogs);
+            customerStatementOfAccount.AddRange(transferRegisters);
+
+            return customerStatementOfAccount;
+        }
     }
 }
