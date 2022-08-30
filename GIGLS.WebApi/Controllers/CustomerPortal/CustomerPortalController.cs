@@ -3172,5 +3172,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("getcodcustomeraccountstatement")]
+        public async Task<IServiceResponse<List<CODCustomerAccountStatementDto>>> GetCODCustomerAccountStatement(GetCODCustomerAccountStatementDto accountStatementDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetCODCustomerAccountStatement(accountStatementDto);
+
+                return new ServiceResponse<List<CODCustomerAccountStatementDto>>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
