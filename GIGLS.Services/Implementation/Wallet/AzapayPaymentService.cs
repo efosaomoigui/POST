@@ -187,6 +187,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private async Task<InitiateTimedAccountResponseDTO> InitiateTimedAccount(InitiateTimedAccountRequestDTO payload)
         {
+            var officialEmail = ConfigurationManager.AppSettings["AzapayEmail"];
+            payload.CustomerEmail = string.IsNullOrEmpty(payload.CustomerEmail) ? officialEmail : payload.CustomerEmail;
+
             InitiateTimedAccountResponseDTO result = new InitiateTimedAccountResponseDTO();
             string token = GetAccessKey();
             using (var client = new HttpClient())
