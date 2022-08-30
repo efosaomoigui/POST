@@ -7488,7 +7488,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else if (request.SupportType == SupportType.UpdateUser)
                 {
-                    result = await ChangePassword(request);
+                    result = await UpdateUser(request);
                 }
                 else
                 {
