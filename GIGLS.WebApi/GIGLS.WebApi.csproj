@@ -396,6 +396,7 @@
     <Compile Include="Controllers\PaymentMethodController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
+    <Compile Include="Controllers\PaymentWebhook\AzapayController.cs" />
     <Compile Include="Controllers\PaymentWebhook\CellulantController.cs" />
     <Compile Include="Controllers\PaymentWebhook\KorapayController.cs" />
     <Compile Include="Controllers\PaymentWebhook\SterlingController.cs" />

@@ -182,6 +182,13 @@ namespace GIGLS.Core.DTO.Shipments
         public DeliveryType DeliveryType { get; set; }
 
         public string ServiceCenterAccountNumber { get; set; }
+        public virtual CountryDTO DepartureCountry { get; set; }
+        public virtual CountryDTO DestinationCountry { get; set; }
+        public string ReceiverPostalCode { get; set; }
+        public string ReceiverStateOrProvinceCode { get; set; }
+        public string ReceiverCompanyName { get; set; }
+        public decimal ExtraCost { get; set; }
+
     }
 
     public class IntlShipmentRequestDTO : BaseDomainDTO

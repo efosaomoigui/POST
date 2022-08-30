@@ -27,6 +27,7 @@
     {
         Initiated,
         Collected,
-        Paid
+        Paid,
+        All //this is just for reporting purpose 
     }
 }

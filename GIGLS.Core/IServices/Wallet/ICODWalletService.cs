@@ -17,6 +17,8 @@ namespace GIGLS.Core.IServices.Wallet
         Task<StellasResponseDTO> StellasTransfer(StellasTransferDTO transferDTO);
         Task<bool> CheckIfUserHasCODWallet(string customerCode);
         Task<StellasResponseDTO> ValidateBVNNumber(ValidateCustomerBVN payload);
+        Task AddCODWalletLoginDetails(string customerCode, string userName, string password);
+        Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode);
     }
 
 }

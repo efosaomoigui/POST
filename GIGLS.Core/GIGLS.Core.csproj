@@ -421,6 +421,7 @@
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\InboundCategoryDTO.cs" />
     <Compile Include="DTO\InboundShipmentCategoryDTO.cs" />
+    <Compile Include="DTO\InvoiceNoteDTO.cs" />
     <Compile Include="DTO\LogEntryDTO.cs" />
     <Compile Include="DTO\MessagingLog\ResponseData.cs" />
     <Compile Include="DTO\Pagination\PagingDto.cs" />

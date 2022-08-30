@@ -3174,6 +3174,48 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
+        [Route("codmobilereport")]
+        public async Task<IServiceResponse<AllCODShipmentDTO>> GetAllCODShipmentsAgilityReport(PaginationDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cods = await _portalService.GetAllCODShipmentsAgilityReport(payload);
+                return new ServiceResponse<AllCODShipmentDTO>
+                {
+                    Object = cods
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getstellalogindetails/{customercode}")]
+        public async Task<IServiceResponse<LoginDetailsDTO>> GetStellasLoginDetails(string customercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetStellasAccountLoginDetails(customercode);
+                return new ServiceResponse<LoginDetailsDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("transferreversal")]
+        public async Task<IServiceResponse<StellasResponseDTO>> StellasTransferReversal(StellasTransferDTO payload)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.StellasTransferReversal(payload);
+                return new ServiceResponse<StellasResponseDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
         [Route("getcodcustomeraccountstatement")]
         public async Task<IServiceResponse<List<CODCustomerAccountStatementDto>>> GetCODCustomerAccountStatement(GetCODCustomerAccountStatementDto accountStatementDto)
         {

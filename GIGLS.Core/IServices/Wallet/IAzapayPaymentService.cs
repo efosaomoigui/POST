@@ -10,5 +10,9 @@ namespace GIGLS.Core.IServices.Wallet
     public interface IAzapayPaymentService :  IServiceDependencyMarker
     {
         Task<bool> AddAzaPayTransferDetails(AzapayTransferDetailsDTO transferDetailsDTO);
+        Task<ValidateTimedAccountResponseDTO> ValidateTimedAccountRequest(string accountnumber);
+        Task<GetTransactionHistoryResponseDTO> GetTransactionHistoryRequest();
+        Task<InitiateTimedAccountResponseDTO> InitiateTimedAccountRequest(InitiateTimedAccountRequestDTO payload);
+        Task<AzapayTransferResponseDTO> AzapayTransferRequest(AzapayTransferRequestDTO payload);
     }
 }

@@ -8,6 +8,7 @@ using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.View;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
@@ -118,12 +119,12 @@ namespace GIGLS.WebApi.Controllers.Account
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{invoiceId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateInvoice(int invoiceId, InvoiceDTO invoiceDto)
+        [Route("addnote")]
+        public async Task<IServiceResponse<bool>> AddInvoiceNote(InvoiceNoteDTO invoiceDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _invoiceService.UpdateInvoice(invoiceId, invoiceDto);
+                await _invoiceService.AddInvoiceNote(invoiceDto);
 
                 return new ServiceResponse<bool>
                 {

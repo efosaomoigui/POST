@@ -1230,6 +1230,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            RequestNumber = r.RequestNumber,
                                            ExpressCharge = r.ExpressCharge,
                                            IsExpressDropoff = r.IsExpressDropoff,
+                                           ReceiverStateOrProvinceCode = r.ReceiverStateOrProvinceCode,
+                                           ReceiverPostalCode = r.ReceiverPostalCode,
+                                           ReceiverCompanyName = r.ReceiverCompanyName,
                                            ShipmentItems = Context.ShipmentItem.Where(i => i.ShipmentId == r.ShipmentId).Select(x => new ShipmentItemDTO
                                            {
                                                ShipmentId = x.ShipmentId,
@@ -1249,7 +1252,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                ShipmentPackagePriceId = x.ShipmentPackagePriceId,
                                                ShipmentType = x.ShipmentType,
                                                Weight = x.Weight,
-                                               Width = x.Width
+                                               Width = x.Width,
+                                               InternationalShipmentItemCategory = x.InternationalShipmentItemCategory
                                            }).ToList(),
                                            Invoice = Context.Invoice.Where(x => x.Waybill == r.Waybill).Select(i => new InvoiceDTO
                                            {
@@ -1270,7 +1274,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PaymentTypeReference = i.PaymentTypeReference,
                                                Pos = i.Pos,
                                                ServiceCentreId = i.ServiceCentreId,
-                                               Transfer = i.Transfer
+                                               Transfer = i.Transfer,
+                                               Note = i.Note
                                            }).FirstOrDefault(),
                                            WalletNumber = Context.Wallets.Where(w => w.CustomerCode == r.CustomerCode).Select(x => x.WalletNumber).FirstOrDefault(),
                                            ServiceCenterAccountNumber = r.IsCashOnDelivery ? Context.ServiceCentre.FirstOrDefault(x => x.ServiceCentreId == r.DestinationServiceCentreId).CrAccount : null
@@ -2136,8 +2141,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return Task.FromResult(allCOD);
         }
-
-
 
     }
 }

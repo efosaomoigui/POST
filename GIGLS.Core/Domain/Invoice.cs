@@ -33,5 +33,7 @@ namespace GIGLS.Core.Domain
         public decimal Cash { get; set; }
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
+        [MaxLength(450)]
+        public string Note { get; set; }
     }
 }
