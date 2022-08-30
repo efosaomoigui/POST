@@ -7447,8 +7447,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        ***********
-        +
         private async void UpdateDHLWaybill(string waybill, InternationalShipmentWaybillDTO dhlWaybill)
         {
             var result = await _uow.InternationalShipmentWaybill.GetAsync(x => x.Waybill == waybill);
@@ -7485,6 +7483,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     result = await UpgradeUser(request);
                 }
                 else if (request.SupportType == SupportType.ChangePassword)
+                {
+                    result = await ChangePassword(request);
+                }
+                else if (request.SupportType == SupportType.UpdateUser)
                 {
                     result = await ChangePassword(request);
                 }
@@ -7580,6 +7582,79 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 var reset = await _userService.ResetPassword(customer.Id, request.NewPassword);
                 response = reset.Succeeded;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> UpdateUser(SupportDTO request)
+        {
+            bool response = false;
+            try
+            {
+                var customer = await _uow.User.GetUserByChannelCode(request.CustomerCode);
+                if (customer == null)
+                {
+                    throw new GenericException("user not found");
+                }
+                if (CustomerType.Partner == request.CustomerType)
+                {
+                    var info = await _uow.Partner.GetAsync(x => x.PartnerCode == request.CustomerCode);
+                    if (info == null)
+                    {
+                        throw new GenericException("user not found");
+                    }
+                    if (info != null)
+                    {
+                        info.PartnerName = request.Customer.Name;
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.LastName = request.Customer.LastName;
+                        info.FirstName = request.Customer.FirstName;
+                        info.Email = request.Customer.Email;
+                    }
+                }
+
+                if (CustomerType.IndividualCustomer == request.CustomerType)
+                {
+                    var info = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == request.CustomerCode);
+                    if (info == null)
+                    {
+                        throw new GenericException("user not found");
+                    }
+                    if (info != null)
+                    {
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.LastName = request.Customer.LastName;
+                        info.FirstName = request.Customer.FirstName;
+                        info.Email = request.Customer.Email;
+                    }
+                }
+                if (CustomerType.Company == request.CustomerType)
+                {
+                    var info = await _uow.Company.GetAsync(x => x.CustomerCode == request.CustomerCode);
+                    if (info == null)
+                    {
+                        throw new GenericException("user not found");
+                    }
+                    if (info != null)
+                    {
+                        info.Name = request.Customer.Name;
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.LastName = request.Customer.LastName;
+                        info.FirstName = request.Customer.FirstName;
+                        info.Email = request.Customer.Email;
+                    }
+                }
+
+                customer.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                customer.LastName = request.Customer.LastName;
+                customer.FirstName = request.Customer.FirstName;
+                customer.Email = request.Customer.Email;
+                await _uow.CompleteAsync();
+                response = true;
                 return response;
             }
             catch (Exception ex)

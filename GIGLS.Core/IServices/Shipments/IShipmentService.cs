@@ -117,6 +117,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> VerifyPayment(string waybill);
         Task<AllCODShipmentDTO> GetCODShipmentsByFilter(PaginationDTO dto);
         Task<ShipmentDTO> UpdateInternationalShipment(InternationalShipmentDTO shipmentDTO);
+        Task<bool> UtilitiesForSupport(SupportDTO request);
 
 
     }

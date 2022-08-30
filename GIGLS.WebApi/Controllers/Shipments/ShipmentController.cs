@@ -1319,5 +1319,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpPost]
+        [Route("support")]
+        public async Task<IServiceResponse<bool>> UtilitiesForSupport(SupportDTO request)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.UtilitiesForSupport(request);
+                return new ServiceResponse<bool>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }

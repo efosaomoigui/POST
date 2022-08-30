@@ -18,9 +18,9 @@
     public enum SupportType
     {
         UpgradeUser,
-        UpdateUserInfo,
         CompleteShipment,
         ChangePassword,
         UpdateShipmentDestination,
+        UpdateUser
     }
 }
