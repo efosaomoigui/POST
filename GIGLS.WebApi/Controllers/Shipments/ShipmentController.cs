@@ -1321,7 +1321,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [HttpPost]
-        [Route("support")]
+        [Route("supportutility")]
         public async Task<IServiceResponse<bool>> UtilitiesForSupport(SupportDTO request)
         {
             return await HandleApiOperationAsync(async () =>
