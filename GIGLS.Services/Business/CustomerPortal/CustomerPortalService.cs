@@ -5123,7 +5123,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             else
             {
                 codTransferRegister = codTransferRegister.Where(x => x.TransferDate >= accountStatementDto.StartDate && x.TransferDate <= accountStatementDto.EndDate).OrderByDescending(x => x.TransferDate);
-                codTransferLog = codTransferLog.Where(x => x.DateCreated >= accountStatementDto.StartDate && x.DateCreated <= accountStatementDto.EndDate).OrderByDescending(x => x.DateCreated);
+                codTransferLog = codTransferLog.Where(x => x.DestinationBankName.ToLower().Trim() != "stellas" || !x.DestinationBankAccount.ToLower().Trim().Contains("gig")).Where(x => x.DateCreated >= accountStatementDto.StartDate && x.DateCreated <= accountStatementDto.EndDate).OrderByDescending(x => x.DateCreated);
             }
 
             List<CODCustomerAccountStatementDto> customerStatementOfAccount = new List<CODCustomerAccountStatementDto>();
