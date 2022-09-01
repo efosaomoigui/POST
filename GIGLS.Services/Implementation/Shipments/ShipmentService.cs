@@ -7575,7 +7575,7 @@ namespace GIGLS.Services.Implementation.Shipments
             bool response = false;
             try
             {
-                var customer = await _uow.User.GetUserByChannelCode(request.CustomerCode);
+                var customer = await _uow.User.GetUserByChannelCode(request.SearchOption);
                 if (customer == null)
                 {
                     throw new GenericException("user not found");
@@ -7595,14 +7595,14 @@ namespace GIGLS.Services.Implementation.Shipments
             bool response = false;
             try
             {
-                var customer = await _uow.User.GetUserByChannelCode(request.CustomerCode);
+                var customer = await _uow.User.GetUserByChannelCode(request.SearchOption);
                 if (customer == null)
                 {
                     throw new GenericException("user not found");
                 }
                 if (CustomerType.Partner == request.CustomerType)
                 {
-                    var info = await _uow.Partner.GetAsync(x => x.PartnerCode == request.CustomerCode);
+                    var info = await _uow.Partner.GetAsync(x => x.PartnerCode == request.SearchOption);
                     if (info == null)
                     {
                         throw new GenericException("user not found");
@@ -7610,7 +7610,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (info != null)
                     {
                         info.PartnerName = request.Customer.Name;
-                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId == 0 ? info.UserActiveCountryId : request.Customer.UserActiveCountryId;
                         info.LastName = request.Customer.LastName;
                         info.FirstName = request.Customer.FirstName;
                         info.Email = request.Customer.Email;
@@ -7619,14 +7619,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (CustomerType.IndividualCustomer == request.CustomerType)
                 {
-                    var info = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == request.CustomerCode);
+                    var info = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == request.SearchOption);
                     if (info == null)
                     {
                         throw new GenericException("user not found");
                     }
                     if (info != null)
                     {
-                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId == 0 ? info.UserActiveCountryId : request.Customer.UserActiveCountryId;
                         info.LastName = request.Customer.LastName;
                         info.FirstName = request.Customer.FirstName;
                         info.Email = request.Customer.Email;
@@ -7634,15 +7634,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (CustomerType.Company == request.CustomerType)
                 {
-                    var info = await _uow.Company.GetAsync(x => x.CustomerCode == request.CustomerCode);
+                    var info = await _uow.Company.GetAsync(x => x.CustomerCode == request.SearchOption);
                     if (info == null)
                     {
                         throw new GenericException("user not found");
                     }
                     if (info != null)
                     {
-                        info.Name = request.Customer.Name;
-                        info.UserActiveCountryId = request.Customer.UserActiveCountryId;
+                        info.Name = request.Customer.Name == null ? info.Name : request.Customer.Name;
+                        info.UserActiveCountryId = request.Customer.UserActiveCountryId == 0 ? info.UserActiveCountryId : request.Customer.UserActiveCountryId;
                         info.LastName = request.Customer.LastName;
                         info.FirstName = request.Customer.FirstName;
                         info.Email = request.Customer.Email;
