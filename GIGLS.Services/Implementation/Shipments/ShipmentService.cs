@@ -5916,7 +5916,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var now = DateTime.Now;
                     DateTime firstDay = new DateTime(now.Year, now.Month, 1);
-                    DateTime lastDay = firstDay.AddMonths(1).AddDays(-1);
+                    DateTime lastDay = firstDay.AddMonths(1).AddDays(1);
                     filter.StartDate = firstDay;
                     filter.EndDate = lastDay;
                 }
