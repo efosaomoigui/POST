@@ -284,5 +284,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<AllCODShipmentDTO> GetAllCODShipmentsAgilityReport(PaginationDTO dto);
         Task<LoginDetailsDTO> GetStellasAccountLoginDetails(string customerCode);
         Task<StellasResponseDTO> StellasTransferReversal(StellasTransferDTO transferDTO);
+        Task<List<CODCustomerAccountStatementDto>> GetCODCustomerAccountStatement(GetCODCustomerAccountStatementDto accountStatementDto);
     }
 }

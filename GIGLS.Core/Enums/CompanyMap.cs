@@ -13,4 +13,14 @@
         Rates,
         CaptureShipment
     }
+
+
+    public enum SupportType
+    {
+        UpgradeUser,
+        CompleteShipment,
+        ChangePassword,
+        UpdateShipmentDestination,
+        UpdateUser
+    }
 }

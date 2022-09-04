@@ -356,6 +356,7 @@
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
+    <Compile Include="DTO\CODCustomerAccountStatementDto.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
     <Compile Include="DTO\CouponManagementDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
@@ -413,6 +414,7 @@
     <Compile Include="DTO\Fleets\VehicleAnalyticsDto.cs" />
     <Compile Include="DTO\GatewatActivityDTO.cs" />
     <Compile Include="DTO\GatewayActivityFilterCriteria.cs" />
+    <Compile Include="DTO\GetCODCustomerAccountStatementDto.cs" />
     <Compile Include="DTO\GIGGOCODTransferDTO.cs" />
     <Compile Include="DTO\GIGGOCODTransferResponseDTO.cs" />
     <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
