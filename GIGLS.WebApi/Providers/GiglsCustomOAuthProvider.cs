@@ -57,7 +57,9 @@ namespace GIGLS.WebApi.Providers
 
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
-                User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
+                //User user = await _repo._userManager.FindByEmailAsync(context.UserName);
+                var user = await _repo._userManager.FindByNameAsync(context.UserName) ?? await _repo._userManager.FindByEmailAsync(context.UserName);
+                var result = await _repo._userManager.CheckPasswordAsync(user, context.Password);
 
                 if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
