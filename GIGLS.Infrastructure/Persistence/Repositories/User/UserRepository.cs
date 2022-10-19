@@ -99,6 +99,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.System).AsEnumerable();
+            var result = user.ToList();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
